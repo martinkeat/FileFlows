@@ -103,27 +103,11 @@ public abstract class LibraryFileTest
         var dict = new Dictionary<Guid, LibraryFile>();
         foreach (var lib in Libraries)
         {
-            for (int i = 0; i < 10; i++)
+            for (int i = 0; i < 1000; i++)
             {
                 foreach (var status in new[] { FileStatus.Unprocessed, FileStatus.Duplicate, FileStatus.Processed })
                 {
-                    var file = new LibraryFile();
-                    file.Uid = Guid.NewGuid();
-                    file.Status = status;
-                    file.Name = file.Uid.ToString() + ".mkv";
-                    file.LibraryName = lib.Name;
-                    file.LibraryUid = lib.Uid;
-                    file.Library = new()
-                    {
-                        Uid = lib.Uid,
-                        Name = lib.Name,
-                        Type = lib.GetType().FullName
-                    };
-                    file.OriginalSize = rand.NextInt64(1_000_0000, 10_000_000_000);
-                    file.DateCreated = DateTime.Now.AddSeconds(-rand.Next(0, 1000 * 60));
-                    file.DateModified = DateTime.Now.AddSeconds(-rand.Next(0, 1000 * 60));
-                    file.CreationTime = DateTime.Now.AddSeconds(-rand.Next(0, 1000 * 60));
-                    file.LastWriteTime = DateTime.Now.AddSeconds(-rand.Next(0, 1000 * 60));
+                    var file = NewFile(lib, status);
                     dict.Add(file.Uid, file);
                 }
             }
@@ -132,5 +116,33 @@ public abstract class LibraryFileTest
         Files = dict;
         
         new FileFlows.Server.Services.LibraryFileService().SetData(dict);
+    }
+
+    /// <summary>
+    /// Create a new test file
+    /// </summary>
+    /// <param name="library">The library this file will belong to</param>
+    /// <param name="status">the status of this file</param>
+    /// <returns>the new test file</returns>
+    protected LibraryFile NewFile(Library library, FileStatus status = FileStatus.Unprocessed)
+    {   
+        var file = new LibraryFile();
+        file.Uid = Guid.NewGuid();
+        file.Status = status;
+        file.Name = file.Uid.ToString() + ".mkv";
+        file.LibraryName = library.Name;
+        file.LibraryUid = library.Uid;
+        file.Library = new()
+        {
+            Uid = library.Uid,
+            Name = library.Name,
+            Type = library.GetType().FullName
+        };
+        file.OriginalSize = rand.NextInt64(1_000_0000, 10_000_000_000);
+        file.DateCreated = DateTime.Now.AddSeconds(-rand.Next(0, 1000 * 60));
+        file.DateModified = DateTime.Now.AddSeconds(-rand.Next(0, 1000 * 60));
+        file.CreationTime = DateTime.Now.AddSeconds(-rand.Next(0, 1000 * 60));
+        file.LastWriteTime = DateTime.Now.AddSeconds(-rand.Next(0, 1000 * 60));
+        return file;
     }
 }

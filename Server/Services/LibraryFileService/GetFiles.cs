@@ -129,6 +129,9 @@ public partial class LibraryFileService
     {
         try
         {
+            if (allowedLibraries is { Count: 0 })
+                return new LibraryFile[] { }; // no libraries allowed 
+            
             IEnumerable<LibraryFile>? query = null;
             if(status == null)
                 return Data.Select(x => x.Value);
@@ -202,7 +205,7 @@ public partial class LibraryFileService
                 .Select(x => x.Value);
             if (exclusionUids?.Any() == true)
                 query = query.Where(x => exclusionUids.Contains(x.Uid) == false);
-            if (allowedLibraries?.Any() == true)
+            if (allowedLibraries != null)
                 query = query.Where(x => allowedLibraries.Contains(x.LibraryUid.Value));
             
             if (status == FileStatus.Disabled || status == FileStatus.OutOfSchedule)
@@ -225,7 +228,7 @@ public partial class LibraryFileService
             {
                 var library = libraries[x.LibraryUid!.Value]; // cant be null due to previous checks
                 return library.Priority;
-            }).ThenByDescending(x =>
+            }).ThenBy(x =>
             {
                 var library = libraries[x.LibraryUid!.Value]; // cant be null due to previous checks
                 if (library.ProcessingOrder == ProcessingOrder.Random)
@@ -238,10 +241,10 @@ public partial class LibraryFileService
                     return x.OriginalSize;
 
                 if (library.ProcessingOrder == ProcessingOrder.OldestFirst)
-                    return x.CreationTime.Ticks * -1;
+                    return x.CreationTime.Ticks;
                 
                 if (library.ProcessingOrder == ProcessingOrder.NewestFirst)
-                    return x.CreationTime.Ticks;
+                    return x.CreationTime.Ticks * -1;
 
                 // as found
                 return x.DateCreated.Ticks;
