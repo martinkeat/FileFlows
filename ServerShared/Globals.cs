@@ -51,7 +51,16 @@ public class Globals
     /// </summary>
     public static bool IsSystemd { get; set; }
     
-    
+    /// <summary>
+    /// Gets or sets if unit testing
+    /// </summary>
+    #if(DEBUG)
+    public static bool IsUnitTesting { get; set; }
+    #else
+    public static bool IsUnitTesting => false;
+    #endif
+
+
 
     /// <summary>
     /// The name of the internal processing node

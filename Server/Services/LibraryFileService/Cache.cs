@@ -1,9 +1,3 @@
-using System.ComponentModel;
-using FileFlows.Server.Helpers;
-using FileFlows.ServerShared.Models;
-using FileFlows.Server.Controllers;
-using FileFlows.Server.Database;
-using FileFlows.ServerShared.Workers;
 using FileFlows.Shared.Models;
 
 namespace FileFlows.Server.Services;
@@ -17,8 +11,18 @@ public partial class LibraryFileService
 
     static LibraryFileService()
     {
-        Refresh().Wait();
+        if(Globals.IsUnitTesting == false)
+            Refresh().Wait();
     }
+
+    #if(DEBUG)
+    /// <summary>
+    /// Sets the cached data, only intended for unit tests
+    /// </summary>
+    /// <param name="data">the data</param>
+    public void SetData(Dictionary<Guid, LibraryFile> data)
+        => Data = data;
+    #endif
 
     /// <summary>
     /// Refreshes the data
