@@ -11,6 +11,13 @@ using System.Runtime.InteropServices;
 public interface INodeService
 {
     /// <summary>
+    /// Gets a processing node by its UID
+    /// </summary>
+    /// <param name="uid">The UID of the node</param>
+    /// <returns>An instance of the processing node</returns>
+    Task<ProcessingNode> GetByUid(Guid uid);
+    
+    /// <summary>
     /// Gets a processing node by its physical address
     /// </summary>
     /// <param name="address">The address (hostname or IP address) of the node</param>
@@ -76,6 +83,25 @@ public class NodeService : Service, INodeService
         catch (Exception)
         {
             return;
+        }
+    }
+    
+    /// <summary>
+    /// Gets a processing node by its UID
+    /// </summary>
+    /// <param name="uid">The UID of the node</param>
+    /// <returns>An instance of the processing node</returns>
+    public async Task<ProcessingNode> GetByUid(Guid uid)
+    {
+        try
+        {
+            var result = await HttpHelper.Get<ProcessingNode>(ServiceBaseUrl + "/api/node/" + uid);
+            return result.Data;
+        }
+        catch (Exception ex)
+        {
+            Logger.Instance?.ELog("Failed to locate server node: " + ex.Message);
+            return null;
         }
     }
 

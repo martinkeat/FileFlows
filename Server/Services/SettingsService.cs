@@ -15,6 +15,22 @@ using System.Threading.Tasks;
 public class SettingsService : ISettingsService
 {
     /// <summary>
+    /// A loader to load an instance of the Settings
+    /// </summary>
+    public static Func<ISettingsService> Loader { get; set; }
+
+    /// <summary>
+    /// Loads an instance of the settings service
+    /// </summary>
+    /// <returns>an instance of the settings service</returns>
+    public static ISettingsService Load()
+    {
+        if (Loader == null)
+            return new SettingsService();
+        return Loader.Invoke();
+    }
+    
+    /// <summary>
     /// Gets the system settings
     /// </summary>
     /// <returns>the system settings</returns>

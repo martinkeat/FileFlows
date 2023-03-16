@@ -12,12 +12,36 @@ using System.Threading.Tasks;
 public class NodeService : INodeService
 {
     /// <summary>
+    /// A loader to load an instance of the Node service
+    /// </summary>
+    public static Func<INodeService> Loader { get; set; }
+
+    /// <summary>
+    /// Loads an instance of the node service
+    /// </summary>
+    /// <returns>an instance of the node service</returns>
+    public static INodeService Load()
+    {
+        if (Loader == null)
+            return new NodeService();
+        return Loader.Invoke();
+    }
+    /// <summary>
     /// Clears all workers on the node.
     /// This is called when a node first starts up, if a node crashed when workers were running this will reset them
     /// </summary>
     /// <param name="nodeUid">The UID of the node</param>
     /// <returns>a completed task</returns>
     public Task ClearWorkers(Guid nodeUid) => new WorkerController(null).Clear(nodeUid);
+    
+    
+    /// <summary>
+    /// Gets a processing node by its UID
+    /// </summary>
+    /// <param name="uid">The UID of the node</param>
+    /// <returns>An instance of the processing node</returns>
+    public Task<ProcessingNode> GetByUid(Guid uid)
+        => new NodeController().Get(uid);
 
     /// <summary>
     /// Gets an instance of the internal processing node

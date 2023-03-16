@@ -1,6 +1,8 @@
 using System;
+using System.Threading.Tasks;
 using FileFlows.ServerShared;
 using FileFlows.ServerShared.Services;
+using Moq;
 
 namespace FileFlowTests.Tests.LibraryFiles;
 
@@ -9,11 +11,49 @@ namespace FileFlowTests.Tests.LibraryFiles;
 /// </summary>
 public abstract class LibraryFileTest
 {
+    protected Settings Settings { get; set; }
+    protected ProcessingNode Node { get; set; }
+    protected ProcessingNode InternalNode { get; set; }
+    
     [TestInitialize]
     public void TestInitialize()
     {
         Globals.IsUnitTesting = true;
+        MoqSettingsService();
+        MoqNodeService();
         SetTestData();
+    }
+
+    private void MoqSettingsService()
+    {
+        var moq = new Moq.Mock<ISettingsService>();
+        FileFlows.Server.Services.SettingsService.Loader = () => moq.Object;
+        Settings = new();
+        moq.Setup(x => x.Get())
+            .Returns(() => Task.FromResult(Settings));
+    }
+    private void MoqNodeService()
+    {
+        var moq = new Moq.Mock<INodeService>();
+        FileFlows.Server.Services.NodeService.Loader = () => moq.Object;
+        Node = new()
+        {
+            Uid = Guid.NewGuid(),
+            Name = "UnitTestNode",
+            Enabled = true,
+            Version = Globals.Version.ToString()
+        };
+        InternalNode = new()
+        {
+            Uid = Globals.InternalNodeUid,
+            Name = Globals.InternalNodeName,
+            Enabled = true,
+            Version = Globals.Version.ToString()
+        };
+        moq.Setup(x => x.GetByUid(It.Is<Guid>(y => y == Node.Uid)))
+            .Returns(() => Task.FromResult(Node));
+        moq.Setup(x => x.GetByUid(It.Is<Guid>(y => y == Globals.InternalNodeUid)))
+            .Returns(() => Task.FromResult(InternalNode));
     }
 
     private void SetTestData()

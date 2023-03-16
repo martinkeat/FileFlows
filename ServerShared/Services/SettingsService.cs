@@ -40,7 +40,6 @@ public interface ISettingsService
 /// </summary>
 public class SettingsService : Service, ISettingsService
 {
-
     /// <summary>
     /// A loader to load an instance of the Settings
     /// </summary>

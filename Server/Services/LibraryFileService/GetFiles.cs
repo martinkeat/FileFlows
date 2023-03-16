@@ -2,6 +2,7 @@ using FileFlows.Server.Helpers;
 using FileFlows.ServerShared.Models;
 using FileFlows.Server.Controllers;
 using FileFlows.Server.Database;
+using FileFlows.ServerShared.Services;
 using FileFlows.ServerShared.Workers;
 using FileFlows.Shared.Models;
 
@@ -27,7 +28,7 @@ public partial class LibraryFileService
         if (UpdaterWorker.UpdatePending)
             return NextFileResult (NextLibraryFileStatus.UpdatePending); // if an update is pending, stop providing new files to process
 
-        var settings = await new SettingsController().Get();
+        var settings = await SettingsService.Load().Get();
         if (settings.IsPaused)
             return NextFileResult(NextLibraryFileStatus.SystemPaused);
 
@@ -40,7 +41,7 @@ public partial class LibraryFileService
             return NextFileResult(NextLibraryFileStatus.VersionMismatch);
         }
 
-        var node = (await new NodeController().Get(nodeUid));
+        var node = (await NodeService.Load().GetByUid(nodeUid));
         if (node != null && node.Version != nodeVersion)
         {
             node.Version = nodeVersion;
@@ -58,6 +59,10 @@ public partial class LibraryFileService
     
     private async Task<bool> NodeEnabled(ProcessingNode node)
     {
+        #if(DEBUG)
+        if (Globals.IsUnitTesting)
+            return await Task.FromResult(true);
+        #endif
         var licensedNodes = LicenseHelper.GetLicensedProcessingNodes();
         var allNodes = await new NodeController().GetAll();
         var enabledNodes = allNodes.Where(x => x.Enabled).OrderBy(x => x.Name).Take(licensedNodes).ToArray();
@@ -263,7 +268,7 @@ public partial class LibraryFileService
     /// <returns>If found, the next library file to process, otherwise null</returns>
     public async Task<LibraryFile?> GetNextLibraryFile(string nodeName, Guid nodeUid, Guid workerUid)
     {
-        var node = await new NodeController().Get(nodeUid);
+        var node = await NodeService.Load().GetByUid(nodeUid);
         var nodeLibraries = node.Libraries?.Select(x => x.Uid)?.ToList() ?? new List<Guid>();
         var libraries = (await new LibraryController().GetAll()).ToArray();
         int quarter = TimeHelper.GetCurrentQuarter();

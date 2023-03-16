@@ -6,7 +6,7 @@ namespace FileFlowTests.Tests.LibraryFiles;
 [TestClass]
 public class ListTests:LibraryFileTest
 {
-    // [TestMethod]
+    [TestMethod]
     public void GetNextFile()
     {
         var service = new FileFlows.Server.Services.LibraryFileService();
