@@ -13,9 +13,9 @@ namespace FileFlows.Server.Services;
 /// </summary>
 public partial class LibraryFileService 
 {
-    private Dictionary<Guid, LibraryFile> Data = new Dictionary<Guid, LibraryFile>();
+    private static Dictionary<Guid, LibraryFile> Data = new Dictionary<Guid, LibraryFile>();
 
-    public LibraryFileService()
+    static LibraryFileService()
     {
         Refresh().Wait();
     }
@@ -23,7 +23,7 @@ public partial class LibraryFileService
     /// <summary>
     /// Refreshes the data
     /// </summary>
-    public async Task Refresh()
+    public static async Task Refresh()
     {
         using var db = await GetDbWithMappings();
         var data = await db.Db.FetchAsync<LibraryFile>("select * from LibraryFile");

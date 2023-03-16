@@ -42,7 +42,7 @@ public partial class LibraryFileService
             Logger.Instance.DLog($"Took '{time}' to " + message);
     }
 
-    private async Task<FlowDbConnection> GetDbWithMappings()
+    private static async Task<FlowDbConnection> GetDbWithMappings()
     {
         var db = await DbHelper.GetDbManager().GetDb();
         db.Db.Mappers.Add(new CustomDbMapper());

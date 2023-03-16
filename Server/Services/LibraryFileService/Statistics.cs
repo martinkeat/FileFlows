@@ -63,8 +63,6 @@ where Status = 1 and ProcessingEnded > ProcessingStarted;";
         return days;
     }
 
-    
-
     /// <summary>
     /// Gets the library status overview
     /// </summary>
@@ -72,48 +70,48 @@ where Status = 1 and ProcessingEnded > ProcessingStarted;";
     public async Task<IEnumerable<LibraryStatus>> GetStatus()
     {
         var libraries = await new LibraryController().GetAll();
-        var disabled = string.Join(", ",
-            libraries.Where(x => x.Enabled == false).Select(x => "'" + x.Uid + "'"));
+        var disabled = libraries.Where(x => x.Enabled == false).Select(x => x.Uid);
         int quarter = TimeHelper.GetCurrentQuarter();
-        var outOfSchedule = string.Join(", ",
-            libraries.Where(x => x.Schedule?.Length != 672 || x.Schedule[quarter] == '0').Select(x => "'" + x.Uid + "'"));
+        var outOfSchedule = libraries.Where(x => x.Schedule?.Length != 672 || x.Schedule[quarter] == '0').Select(x => x.Uid);
 
-        string sql = @"
-        select 
-        case 
-            when LibraryFile.Status > 0 then LibraryFile.Status " + "\n";
-        if (string.IsNullOrEmpty(disabled) == false)
+        return Data.Select(x =>
         {
-            sql += $" when LibraryFile.Status = 0 and LibraryUid IN ({disabled}) then -2 " + "\n";
-        }
-
-        if (string.IsNullOrEmpty(outOfSchedule) == false)
+            if ((int)x.Value.Status > 0 || x.Value.LibraryUid == null)
+                return x.Value.Status;
+            if ((x.Value.Flags & LibraryFileFlags.ForceProcessing) == LibraryFileFlags.ForceProcessing)
+                return FileStatus.Unprocessed;
+            if (disabled.Contains(x.Value.LibraryUid.Value))
+                return FileStatus.Disabled;
+            if (outOfSchedule.Contains(x.Value.LibraryUid.Value))
+                return FileStatus.OutOfSchedule;
+            if (x.Value.HoldUntil > DateTime.Now)
+                return FileStatus.OnHold;
+            return FileStatus.Unprocessed;
+        }).GroupBy(x => x).Select(x => new LibraryStatus()
         {
-            string flags = $"(Flags & {(int)LibraryFileFlags.ForceProcessing}) <> {(int)LibraryFileFlags.ForceProcessing}";
-            sql += $" when LibraryFile.Status = 0 and LibraryUid IN ({outOfSchedule}) and ({flags}) then -1 " + "\n";
-        }
-
-        sql += $@"when HoldUntil > {SqlHelper.Now()} then -3
-        else LibraryFile.Status
-        end as FileStatus,
-        count(Uid) as Count
-        from LibraryFile 
-        group by FileStatus
-";
-        var statuses = await Database_Fetch<LibraryStatus>(sql);
-        foreach (var status in statuses)
-            status.Name = Regex.Replace(status.Status.ToString(), "([A-Z])", " $1").Trim();
-        return statuses;
+            Count = x.Count(),
+            Name = Regex.Replace(x.Key.ToString(), "([A-Z])", " $1").Trim(),
+            Status = x.Key
+        }).ToList();
     }
 
     /// <summary>
     /// Gets the shrinkage groups for the files
     /// </summary>
     /// <returns>the shrinkage groups</returns>
-    public async Task<List<ShrinkageData>> GetShrinkageGroups()
-        => (await Database_Fetch<ShrinkageData>(
-            $"select LibraryName as Library, sum(OriginalSize) as OriginalSize, sum(FinalSize) as FinalSize, Count(Uid) as Items " +
-            $" from LibraryFile where Status = {(int)FileStatus.Processed}" +
-            $" group by LibraryName;")).OrderByDescending(x => x.Items).ToList();
+    public List<ShrinkageData> GetShrinkageGroups()
+    {
+        var libraries = Data.Where(x => x.Value.Status == FileStatus.Processed)
+            .Select(x => x.Value)
+            .GroupBy(x => x.LibraryName)
+            .Select(x => new ShrinkageData()
+            {
+                Library = x.Key,
+                Items = x.Count(),
+                FinalSize = x.Sum(y => y.FinalSize),
+                OriginalSize = x.Sum(y=> y.OriginalSize)
+            }).ToList();
+        return libraries;
+    }
 
 }

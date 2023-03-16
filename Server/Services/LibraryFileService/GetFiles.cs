@@ -98,7 +98,7 @@ public partial class LibraryFileService
         List<Guid> exclusionUids = null)
     {
         var query = await ConstructQuery(status, allowedLibraries, maxSizeMBs, exclusionUids);
-        if (string.IsNullOrWhiteSpace(filter))
+        if (string.IsNullOrWhiteSpace(filter) == false)
         {
             filter = filter.ToLowerInvariant();
             query = query.Where(x => x.Name.ToLowerInvariant().Contains(filter));

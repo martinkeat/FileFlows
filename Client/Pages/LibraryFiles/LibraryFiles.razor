@@ -33,7 +33,7 @@
     <ToolBar>
         <FlowTableButton Clicked=Edit SelectedOne="true" Icon="fas fa-file" Label="Labels.View" />
         <FlowTableButton Visible="@(Skybox?.SelectedItem?.Value == FileStatus.Duplicate)" Clicked=Reprocess SelectedOneOrMore="true" Icon="fas fa-redo" Label="Pages.LibraryFiles.Buttons.Process" />
-        <FlowTableButton Visible="@(SelectedStatus == FileStatus.OutOfSchedule)" Clicked=ForceProcessing SelectedOneOrMore="true" Icon="fas fa-redo" Label="Pages.LibraryFiles.Buttons.Process" />
+        <FlowTableButton Visible="@(SelectedStatus == FileStatus.OutOfSchedule || SelectedStatus == FileStatus.Disabled)" Clicked=ForceProcessing SelectedOneOrMore="true" Icon="fas fa-redo" Label="Pages.LibraryFiles.Buttons.Process" />
         <FlowTableButton Visible="@(SelectedStatus == FileStatus.Processing)" Clicked=Cancel SelectedOneOrMore="true" Icon="fas fa-window-close" Label="Labels.Cancel" />
         <FlowTableButton Visible="@(SelectedStatus != FileStatus.Processing)" Clicked=Delete SelectedOneOrMore="true" Icon="fas fa-trash" Label="Labels.Remove" />
         <FlowTableButton Visible="@(SelectedStatus != FileStatus.Processing)" Area="ButtonArea.ContextMenu" Clicked=DeleteFile SelectedOneOrMore="true" Icon="fas fa-trash" Label="Labels.Delete" />
