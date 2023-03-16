@@ -149,7 +149,7 @@ public partial class LibraryFileService
                 return query;
             }
 
-            var libraries = (await new LibraryController().GetAll()).ToDictionary(x => x.Uid, x => x);
+            var libraries = (await LibraryService.Load().GetAll()).ToDictionary(x => x.Uid, x => x);
 
             var disabled = libraries.Values.Where(x => x.Enabled == false).Select(x => x.Uid).ToList();
             if (status == FileStatus.Disabled && disabled?.Any() == false)
@@ -231,21 +231,20 @@ public partial class LibraryFileService
                 if (library.ProcessingOrder == ProcessingOrder.Random)
                     return random.Next();
 
-                var milliseconds = now.Subtract(x.DateCreated).TotalMilliseconds;
-
-                if (library.ProcessingOrder == ProcessingOrder.AsFound)
-                    return milliseconds;
-
                 if (library.ProcessingOrder == ProcessingOrder.LargestFirst)
                     return x.OriginalSize * -1;
 
                 if (library.ProcessingOrder == ProcessingOrder.SmallestFirst)
                     return x.OriginalSize;
 
-
                 if (library.ProcessingOrder == ProcessingOrder.OldestFirst)
-                    return milliseconds * -1;
-                return milliseconds;
+                    return x.CreationTime.Ticks * -1;
+                
+                if (library.ProcessingOrder == ProcessingOrder.NewestFirst)
+                    return x.CreationTime.Ticks;
+
+                // as found
+                return x.DateCreated.Ticks;
             });
 
             return query;
@@ -270,7 +269,7 @@ public partial class LibraryFileService
     {
         var node = await NodeService.Load().GetByUid(nodeUid);
         var nodeLibraries = node.Libraries?.Select(x => x.Uid)?.ToList() ?? new List<Guid>();
-        var libraries = (await new LibraryController().GetAll()).ToArray();
+        var libraries = (await LibraryService.Load().GetAll()).ToArray();
         int quarter = TimeHelper.GetCurrentQuarter();
 
         var canProcess = libraries.Where(x =>
@@ -297,6 +296,11 @@ public partial class LibraryFileService
             nextFile.ProcessingStarted = DateTime.Now;
             nextFile.NodeUid = nodeUid;
             nextFile.NodeName = nodeName;
+            
+            #if(DEBUG)
+            if (Globals.IsUnitTesting)
+                return nextFile;
+            #endif
             
             await DbHelper.Execute("update LibraryFile set NodeUid = @0 , NodeName = @1 , WorkerUid = @2 " +
                                    $" , Status = @3 , ProcessingStarted = @4, OriginalMetadata = '', FinalMetadata = '', " +

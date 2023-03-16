@@ -14,6 +14,12 @@ public interface ILibraryService
     /// <param name="uid">The UID of the library</param>
     /// <returns>An instance of the library if found</returns>
     Task<Library> Get(Guid uid);
+
+    /// <summary>
+    /// Gets all libraries in the system
+    /// </summary>
+    /// <returns>a list of all libraries</returns>
+    Task<IEnumerable<Library>> GetAll();
 }
 
 /// <summary>
@@ -57,5 +63,26 @@ public class LibraryService : Service, ILibraryService
             Logger.Instance?.WLog("Failed to get library: " + uid + " => " + ex.Message);
             return null;
         }
+    }
+
+    /// <summary>
+    /// Gets all libraries in the system
+    /// </summary>
+    /// <returns>a list of all libraries</returns>
+    public async Task<IEnumerable<Library>> GetAll()
+    {
+        try
+        {
+            var result = await HttpHelper.Get<Library[]>($"{ServiceBaseUrl}/api/library");
+            if (result.Success == false)
+                throw new Exception("Failed to load libraries: " + result.Body);
+            return result.Data;
+        }
+        catch (Exception ex)
+        {
+            Logger.Instance?.WLog("Failed to get libraries => " + ex.Message);
+            return null;
+        }
+        
     }
 }
