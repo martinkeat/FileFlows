@@ -283,7 +283,7 @@ public class WatchedLibrary:IDisposable
     private (bool known, string? fingerprint, ObjectReference? duplicate) IsKnownFile(string fullpath, FileSystemInfo fsInfo)
     {
         var service = new Server.Services.LibraryFileService();
-        var knownFile = service.GetFileIfKnown(fullpath).Result;
+        var knownFile = service.GetFileIfKnown(fullpath);
         string? fingerprint = null;
         if (knownFile != null)
         {
@@ -340,7 +340,7 @@ public class WatchedLibrary:IDisposable
             fingerprint = ServerShared.Helpers.FileHelper.CalculateFingerprint(fullpath);
             if (string.IsNullOrEmpty(fingerprint) == false)
             {
-                knownFile = service.GetFileByFingerprint(fingerprint).Result;
+                knownFile = service.GetFileByFingerprint(fingerprint);
                 if (knownFile != null)
                 {
                     if (knownFile.Name != fullpath && Library.UpdateMovedFiles && knownFile.LibraryUid == Library.Uid)

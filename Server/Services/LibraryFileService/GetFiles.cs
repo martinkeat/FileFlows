@@ -1,70 +1,86 @@
-using FileFlows.Server.Controllers;
-using FileFlows.Server.Database.Managers;
 using FileFlows.Server.Helpers;
+using FileFlows.ServerShared.Models;
+using FileFlows.Server.Controllers;
+using FileFlows.Server.Database;
+using FileFlows.ServerShared.Workers;
 using FileFlows.Shared.Models;
 
-namespace FileFlows.Server.Database;
+namespace FileFlows.Server.Services;
 
 /// <summary>
-/// Caches the stores all information about files in memory for quicker access
+/// Service for communicating with FileFlows server for library files
 /// </summary>
-public static class LibraryFileCache
+public partial class LibraryFileService 
 {
-    private static Dictionary<Guid, LibraryFile> Data = new Dictionary<Guid, LibraryFile>();
-
     /// <summary>
-    /// Adds a file to the data
+    /// Gets the next library file queued for processing
     /// </summary>
-    /// <param name="file">the file being added</param>
-    public static void AddFile(LibraryFile file)
-        => Data.TryAdd(file.Uid, file);
-
-    /// <summary>
-    /// Updates a file 
-    /// </summary>
-    /// <param name="file">the file being updated</param>
-    public static void UpdateFile(LibraryFile file)
+    /// <param name="nodeName">The name of the node requesting a library file</param>
+    /// <param name="nodeUid">The UID of the node</param>
+    /// <param name="nodeVersion">the version of the node</param>
+    /// <param name="workerUid">The UID of the worker on the node</param>
+    /// <returns>If found, the next library file to process, otherwise null</returns>
+    public async Task<NextLibraryFileResult> GetNext(string nodeName, Guid nodeUid, string nodeVersion, Guid workerUid)
     {
-        lock (Data)
-        {
-            if (Data.ContainsKey(file.Uid))
-                Data[file.Uid] = file;
-            else
-                Data.Add(file.Uid, file);
-        };
-    }
+        _ = new NodeController().UpdateLastSeen(nodeUid);
+        
+        if (UpdaterWorker.UpdatePending)
+            return NextFileResult (NextLibraryFileStatus.UpdatePending); // if an update is pending, stop providing new files to process
 
+        var settings = await new SettingsController().Get();
+        if (settings.IsPaused)
+            return NextFileResult(NextLibraryFileStatus.SystemPaused);
 
-    /// <summary>
-    /// Deletes a file to the data
-    /// </summary>
-    /// <param name="file">the file being deleted</param>
-    public static void DeleteFile(LibraryFile file)
-    {
-        lock (Data)
+        if (Version.TryParse(nodeVersion, out var nVersion) == false)
+            return NextFileResult(NextLibraryFileStatus.InvalidVersion);
+
+        if (nVersion < Globals.MinimumNodeVersion)
         {
-            if (Data.ContainsKey(file.Uid))
-                Data.Remove(file.Uid);
+            Logger.Instance.ILog($"Node '{nodeName}' version '{nVersion}' is less than minimum supported version '{Globals.MinimumNodeVersion}'");
+            return NextFileResult(NextLibraryFileStatus.VersionMismatch);
         }
-    }
 
-    private static async Task<FlowDbConnection> GetDbWithMappings()
+        var node = (await new NodeController().Get(nodeUid));
+        if (node != null && node.Version != nodeVersion)
+        {
+            node.Version = nodeVersion;
+            await new NodeController().Update(node);
+        }
+
+        if (await NodeEnabled(node) == false)
+            return NextFileResult(NextLibraryFileStatus.NodeNotEnabled);
+
+        var file = await GetNextLibraryFile(nodeName, nodeUid, workerUid);
+        if(file == null)
+            return NextFileResult(NextLibraryFileStatus.NoFile, file);
+        return NextFileResult(NextLibraryFileStatus.Success, file);
+    }
+    
+    private async Task<bool> NodeEnabled(ProcessingNode node)
     {
-        var db = await DbHelper.GetDbManager().GetDb();
-        db.Db.Mappers.Add(new CustomDbMapper());
-        return db;
+        var licensedNodes = LicenseHelper.GetLicensedProcessingNodes();
+        var allNodes = await new NodeController().GetAll();
+        var enabledNodes = allNodes.Where(x => x.Enabled).OrderBy(x => x.Name).Take(licensedNodes).ToArray();
+        var enabledNodeUids = enabledNodes.Select(x => x.Uid).ToArray();
+        return enabledNodeUids.Contains(node.Uid);
     }
     
     /// <summary>
-    /// Refreshes the data
+    /// Constructs a next library file result
     /// </summary>
-    public static async Task Refresh()
+    /// <param name="status">the status of the call</param>
+    /// <param name="file">the library file to process</param>
+    /// <returns>the next library file result</returns>
+    private NextLibraryFileResult NextFileResult(NextLibraryFileStatus? status = null, LibraryFile file = null)
     {
-        using var db = await GetDbWithMappings();
-        var data = await db.Db.FetchAsync<LibraryFile>("select * from LibraryFile");
-        var dict = data.ToDictionary(x => x.Uid, x => x);
-        Data = dict;
+        NextLibraryFileResult result = new();
+        if (status != null)
+            result.Status = status.Value;
+        result.File = file;
+        return result;
     }
+    
+    
 
     /// <summary>
     /// Gets all matching library files
@@ -77,7 +93,7 @@ public static class LibraryFileCache
     /// <param name="maxSizeMBs">[Optional] maximum file size to include</param>
     /// <param name="exclusionUids">[Optional] list of UIDs to exclude</param>
     /// <returns>a list of matching library files</returns>
-    public static async Task<IEnumerable<LibraryFile>> GetAll(FileStatus? status, int skip = 0, int rows = 0,
+    public async Task<IEnumerable<LibraryFile>> GetAll(FileStatus? status, int skip = 0, int rows = 0,
         string filter = null, List<Guid> allowedLibraries = null, long? maxSizeMBs = null,
         List<Guid> exclusionUids = null)
     {
@@ -103,8 +119,8 @@ public static class LibraryFileCache
     /// <param name="maxSizeMBs"></param>
     /// <param name="exclusionUids"></param>
     /// <returns></returns>
-    private async static Task<IEnumerable<LibraryFile>> ConstructQuery(FileStatus? status, List<Guid> allowedLibraries = null, long? maxSizeMBs = null,
-            List<Guid> exclusionUids = null)
+    private async Task<IEnumerable<LibraryFile>> ConstructQuery(FileStatus? status, List<Guid> allowedLibraries = null,
+        long? maxSizeMBs = null, List<Guid> exclusionUids = null)
     {
         try
         {
@@ -235,6 +251,8 @@ public static class LibraryFileCache
             return new LibraryFile[] { };
         }
     }
+
+    private static SemaphoreSlim NextFileSemaphore = new SemaphoreSlim(1);
     
     /// <summary>
     /// Gets the next library file queued for processing
@@ -243,124 +261,49 @@ public static class LibraryFileCache
     /// <param name="nodeUid">The UID of the node</param>
     /// <param name="workerUid">The UID of the worker on the node</param>
     /// <returns>If found, the next library file to process, otherwise null</returns>
-    private async Task<LibraryFile> GetNextLibraryFile(string nodeName, Guid nodeUid, Guid workerUid)
+    public async Task<LibraryFile?> GetNextLibraryFile(string nodeName, Guid nodeUid, Guid workerUid)
     {
         var node = await new NodeController().Get(nodeUid);
         var nodeLibraries = node.Libraries?.Select(x => x.Uid)?.ToList() ?? new List<Guid>();
         var libraries = (await new LibraryController().GetAll()).ToArray();
         int quarter = TimeHelper.GetCurrentQuarter();
+
         var canProcess = libraries.Where(x =>
         {
-            if (x.Enabled == false)
-                return false;
-            if (x.Schedule?.Length == 672 && x.Schedule[quarter] == '0')
-                return false;
             if (node.AllLibraries == ProcessingLibraries.All)
                 return true;
             if (node.AllLibraries == ProcessingLibraries.Only)
                 return nodeLibraries.Contains(x.Uid);
             return nodeLibraries.Contains(x.Uid) == false;
-        }).ToArray();
-        
-        var canForceProcess = libraries.Where(x =>
-        {
-            if (node.AllLibraries == ProcessingLibraries.All)
-                return true;
-            if (node.AllLibraries == ProcessingLibraries.Only)
-                return nodeLibraries.Contains(x.Uid);
-            return nodeLibraries.Contains(x.Uid) == false;
-        }).ToArray();
-        
-        if (canProcess.Any() != true && canForceProcess.Any() != true)
-            return null;
+        }).Select(x => x.Uid).ToList();
+        var executing = WorkerController.ExecutingLibraryFiles()?.ToList() ?? new List<Guid>();
 
-        // string libraryUids = string.Join(",", canProcess.Select(x => "'" + x.Uid + "'"));
-        // string forceLibraryUids  = string.Join(",", canForceProcess.Select(x => "'" + x.Uid + "'"));
-        
-        await GetNextSemaphore.WaitAsync();
+        await NextFileSemaphore.WaitAsync();
         try
         {
-            // var next = GetAll(FileStatus.Unprocessed,
-            //     0, 1,
-            //     allowedLibraries: canProcess.Select(x => x.Uid).ToList(),
-            //     maxSizeMBs: node.MaxFileSizeMb).Result;
-            //     
-            var executing = WorkerController.ExecutingLibraryFiles()?.ToList() ?? new List<Guid>();
+            var nextFile = (await GetAll(FileStatus.Unprocessed, skip: 0, rows: 1, allowedLibraries: canProcess,
+                maxSizeMBs: node.MaxFileSizeMb, exclusionUids: executing)).FirstOrDefault();
+
+            if (nextFile == null)
+                return nextFile;
+
+            nextFile.Status = FileStatus.Processing;
+            nextFile.WorkerUid = workerUid;
+            nextFile.ProcessingStarted = DateTime.Now;
+            nextFile.NodeUid = nodeUid;
+            nextFile.NodeName = nodeName;
             
-            var libFile = Data.Where(x => x.Value.FileStatus.Unprocessed, 0, 1,
-                allowedLibraries: libraries.Select(x => x.Uid).ToList(),
-                exclusionUids: executing,
-                maxSizeMBs: node.MaxFileSizeMb).Result?.FirstOrDefault();
-            
-            // var execAndWhere = executing?.Any() != true
-            //     ? string.Empty
-            //     : (" and LibraryFile.Uid not in (" + string.Join(",", executing.Select(x => "'" + x + "'")) + ") ");
-            //
-            // if (node.MaxFileSizeMb > 0)
-            //     execAndWhere += $" and OriginalSize <= {node.MaxFileSizeMb * (1_000_000)} ";
-            //
-            // string sql = $"select * from LibraryFile {LIBRARY_JOIN} where Status = 0 and HoldUntil <= " +
-            //              SqlHelper.Now() + " and (";
-            //
-            // if (canProcess.Any())
-            //     sql += $" LibraryUId in ({libraryUids}) or ";
-            //
-            // sql += $" ( LibraryUid in ({forceLibraryUids}) and (Flags & 1) = 1 )";
-            //
-            // sql += ") " + execAndWhere + " order by " + UNPROCESSED_ORDER_BY;
-            //
-            // var libFile = await Database_Get<LibraryFile>(SqlHelper.Limit(sql, 1));
-            // if (libFile == null)
-            //     return null;
-            //
-            // // check the library this file belongs, we may have to grab a different file from this library
-            // var library = libraries.FirstOrDefault(x => x.Uid == libFile.LibraryUid);
-            // if (libFile.Order < 1 && library != null && library.ProcessingOrder != ProcessingOrder.AsFound)
-            // {
-            //     // need to change the order up
-            //     bool orderGood = true;
-            //     sql = $"select * from LibraryFile where Status = 0 and HoldUntil <= " + SqlHelper.Now() +
-            //           execAndWhere +
-            //           $" and LibraryUid = '{library.Uid}' order by ";
-            //     if (library.ProcessingOrder == ProcessingOrder.Random)
-            //         sql += " " + SqlHelper.Random() + " ";
-            //     else if (library.ProcessingOrder == ProcessingOrder.LargestFirst)
-            //         sql += " OriginalSize desc ";
-            //     else if (library.ProcessingOrder == ProcessingOrder.SmallestFirst)
-            //         sql += " OriginalSize ";
-            //     else if (library.ProcessingOrder == ProcessingOrder.NewestFirst)
-            //         sql += " LibraryFile.DateCreated desc ";
-            //     else if (library.ProcessingOrder == ProcessingOrder.OldestFirst)
-            //         sql += " LibraryFile.DateCreated asc ";
-            //     else
-            //         orderGood = false;
-            //
-            //     if (orderGood)
-            //     {
-            //         libFile = await Database_Get<LibraryFile>(SqlHelper.Limit(sql, 1));
-            //         if (libFile == null)
-            //             return null;
-            //     }
-            // }
-
-            if (libFile == null)
-                return null;
-
-            await Database_Execute("update LibraryFile set NodeUid = @0 , NodeName = @1 , WorkerUid = @2 " +
-                                   $" , Status = @3 , ProcessingStarted = @4, OriginalMetadata = '', FinalMetadata = '', ExecutedNodes = '' where Uid = @5",
-                nodeUid, nodeName, workerUid, (int)FileStatus.Processing, DateTime.Now, libFile.Uid);
-
-            return libFile;
-        }
-        catch (Exception ex)
-        {
-            Logger.Instance.ELog("Failed getting next file for processing: " + ex.Message);
-            throw;
+            await DbHelper.Execute("update LibraryFile set NodeUid = @0 , NodeName = @1 , WorkerUid = @2 " +
+                                   $" , Status = @3 , ProcessingStarted = @4, OriginalMetadata = '', FinalMetadata = '', " +
+                                   $" ExecutedNodes = '' where Uid = @5",
+                nextFile.NodeUid, nextFile.NodeName, nextFile.WorkerUid, (int)FileStatus.Processing, 
+                nextFile.ProcessingStarted, nextFile.Uid);
+            return nextFile;
         }
         finally
         {
-            GetNextSemaphore.Release();
+            NextFileSemaphore.Release();
         }
     }
-    
+
 }
