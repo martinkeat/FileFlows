@@ -30,10 +30,18 @@ public partial class LibraryFileService
     public static async Task Refresh()
     {
         Logger.Instance.ILog("Refreshing LibraryFileService Cache");
-        using var db = await GetDbWithMappings();
-        var data = await db.Db.FetchAsync<LibraryFile>("select * from LibraryFile");
-        var dict = data.ToDictionary(x => x.Uid, x => x);
-        Data = dict;
+        try
+        {
+            using var db = await GetDbWithMappings();
+            var data = await db.Db.FetchAsync<LibraryFile>("select * from LibraryFile");
+            var dict = data.ToDictionary(x => x.Uid, x => x);
+            Data = dict;
+            Logger.Instance.ILog("Refreshed LibraryFileService Cache");
+        }
+        catch (Exception ex)
+        {
+            Logger.Instance.ELog("Error refreshing LibraryFileService Cache: " + ex.Message + Environment.NewLine + ex.StackTrace);
+        }
     }
     
     /// <summary>
