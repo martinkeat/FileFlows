@@ -158,6 +158,8 @@ public class MainWindow : Window
         
         if (Globals.IsWindows)
             Process.Start(new ProcessStartInfo("cmd", $"/c start {url}") { CreateNoWindow = true });
+        else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            Process.Start("open", url);
         else
             Process.Start(new ProcessStartInfo("xdg-open", url));
     }

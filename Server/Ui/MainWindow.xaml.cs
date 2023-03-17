@@ -121,10 +121,10 @@ public class MainWindow : Window
         string url = $"http://{Environment.MachineName}:{WebServer.Port}/";
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             Process.Start(new ProcessStartInfo("cmd", $"/c start {url}") { CreateNoWindow = true });
+        else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            Process.Start("open", url);
         else
-        {
             Process.Start(new ProcessStartInfo("xdg-open", url));
-        }
     }
 
     protected override void HandleWindowStateChanged(WindowState state)
