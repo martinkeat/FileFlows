@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using FileFlows.Server.Helpers;
 using FileFlows.Shared.Models;
 using System.Text.RegularExpressions;
-using FileFlows.ServerShared.Services;
 
 namespace FileFlows.Server.Controllers;
 
@@ -89,7 +88,7 @@ public class LibraryController : ControllerStore<Library>
             _ = new ObjectReferenceUpdater().RunAsync();
         
         if (newLib && result != null)
-            await Rescan(new() { Uids = new[] { result.Uid } });
+            _ = Rescan(new() { Uids = new[] { result.Uid } });
         
         LibraryWorker.UpdateLibraries();
         
@@ -152,7 +151,7 @@ public class LibraryController : ControllerStore<Library>
             if (item == null)
                 continue;
             item.LastScanned = DateTime.MinValue;
-            await Update(item);
+            _ = Update(item);
         }
 
         _ = Task.Run(async () =>

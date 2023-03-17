@@ -25,7 +25,7 @@ public class WatchedLibrary:IDisposable
     private Queue<string> QueuedFiles = new Queue<string>();
 
     //private BackgroundWorker worker;
-    private System.Timers.Timer QueueTimer;
+    //private System.Timers.Timer QueueTimer;
 
     /// <summary>
     /// Constructs a instance of a Watched Library
@@ -48,11 +48,11 @@ public class WatchedLibrary:IDisposable
         // worker = new BackgroundWorker();
         // worker.DoWork += Worker_DoWork;
         // worker.RunWorkerAsync();
-        QueueTimer = new();
-        QueueTimer.Elapsed += QueueTimerOnElapsed;
-        QueueTimer.AutoReset = false;
-        QueueTimer.Interval = 1;
-        QueueTimer.Start();
+        // QueueTimer = new();
+        // QueueTimer.Elapsed += QueueTimerOnElapsed;
+        // QueueTimer.AutoReset = false;
+        // QueueTimer.Interval = 1;
+        // QueueTimer.Start();
     }
 
 
@@ -80,9 +80,34 @@ public class WatchedLibrary:IDisposable
         {
             if (Disposed == false && QueuedHasItems())
             {
-                QueueTimer.Start();
+                Thread.Sleep(1000);
+                // QueueTimer.Start();
             }
         }
+    }
+
+    private SemaphoreSlim processorLock= new (1);
+    private void ProcessQueue()
+    {
+        if (processorLock.Wait(1000) == false)
+            return;
+
+        Task.Run(async () =>
+        {
+            await Task.Delay(100);
+            try
+            {
+                if (QueuedFiles.Any())
+                    ProcessQueuedItem();
+            }
+            catch (Exception)
+            {
+            }
+            finally
+            {
+                processorLock.Release();
+            }
+        });
     }
 
     private void Worker_DoWork(object? sender, DoWorkEventArgs e)
@@ -420,7 +445,7 @@ public class WatchedLibrary:IDisposable
         Disposed = true;            
         DisposeWatcher();
         //worker.Dispose();
-        QueueTimer?.Dispose();
+        //QueueTimer?.Dispose();
     }
 
     void SetupWatcher()
@@ -777,7 +802,8 @@ public class WatchedLibrary:IDisposable
         {
             QueuedFiles.Enqueue(fullPath);
         }
-        QueueTimer.Start();
+
+        ProcessQueue();
     }
 
     /// <summary>
