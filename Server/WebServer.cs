@@ -204,7 +204,8 @@ public class WebServer
             new FlowRunnerMonitor(),
             new ObjectReferenceUpdater(),
             new FileFlowsTasksWorker(),
-            new RepositoryUpdaterWorker()
+            new RepositoryUpdaterWorker(),
+            new LibraryFileServiceUpdater()
         );
 
         app.MapHub<Hubs.FlowHub>("/flow");
