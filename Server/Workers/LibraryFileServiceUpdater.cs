@@ -18,5 +18,5 @@ public class LibraryFileServiceUpdater:Worker
     /// Executes the worker
     /// </summary>
     protected override void Execute()
-        => _ = Services.LibraryFileService.Refresh();
+        =>  Services.LibraryFileService.Refresh();
 }

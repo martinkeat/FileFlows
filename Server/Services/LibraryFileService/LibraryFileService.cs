@@ -323,7 +323,7 @@ public partial class LibraryFileService : ILibraryFileService
         }
 
         await Database_Execute(string.Join("\n", commands));
-        await Refresh();
+        Refresh();
     }
 
 

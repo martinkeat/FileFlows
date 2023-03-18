@@ -8,11 +8,12 @@ namespace FileFlows.Server.Services;
 public partial class LibraryFileService 
 {
     private static Dictionary<Guid, LibraryFile> Data = new Dictionary<Guid, LibraryFile>();
+    private static Dictionary<Guid, LibraryFile> Data2 = new Dictionary<Guid, LibraryFile>();
 
     static LibraryFileService()
     {
         if(Globals.IsUnitTesting == false)
-            Refresh().Wait();
+            Refresh();
     }
 
     #if(DEBUG)
@@ -27,15 +28,16 @@ public partial class LibraryFileService
     /// <summary>
     /// Refreshes the data
     /// </summary>
-    public static async Task Refresh()
+    public static void Refresh()
     {
         Logger.Instance.ILog("Refreshing LibraryFileService Cache");
         try
         {
-            using var db = await GetDbWithMappings();
-            var data = await db.Db.FetchAsync<LibraryFile>("select * from LibraryFile");
+            using var db = GetDbWithMappings().Result;
+            var data = db.Db.Fetch<LibraryFile>("select * from LibraryFile");
             var dict = data.ToDictionary(x => x.Uid, x => x);
             Data = dict;
+
             Logger.Instance.ILog("Refreshed LibraryFileService Cache");
         }
         catch (Exception ex)
