@@ -255,8 +255,8 @@ public class LibraryFileController : Controller //ControllerStore<LibraryFile>
     internal Task<LibraryFile> Add(LibraryFile libraryFile) =>
         new LibraryFileService().Add(libraryFile);
 
-    internal Task AddMany(LibraryFile[] libraryFiles)
-        => new LibraryFileService().AddMany(libraryFiles);
+    // internal Task AddMany(LibraryFile[] libraryFiles)
+    //     => new LibraryFileService().AddMany(libraryFiles);
 
     /// <summary>
     /// Checks if a library file exists on the server

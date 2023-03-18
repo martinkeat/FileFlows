@@ -51,7 +51,6 @@ public partial class Libraries : ListPage<Guid, Library>
 
     public override async Task<bool> Edit(Library library)
     {
-
         this.EditingItem = library;
 
         return await OpenEditor(library);

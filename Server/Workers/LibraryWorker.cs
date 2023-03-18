@@ -141,7 +141,11 @@ public class LibraryWorker : Worker
                                  $"(last scanned: {library.LastScannedAgo}) " +
                                  $"(Full Scan interval: {library.FullScanIntervalMinutes})");
 
-            libwatcher.Scan();
+            Task.Run(async () =>
+            {
+                await Task.Delay(1);
+                libwatcher.Scan();
+            });
         }
     }
 

@@ -5,6 +5,8 @@ using System.ComponentModel;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Timers;
+using FileFlows.Server.Helpers;
+using FileHelper = FileFlows.ServerShared.Helpers.FileHelper;
 
 namespace FileFlows.Server.Workers;
 
@@ -56,7 +58,7 @@ public class WatchedLibrary:IDisposable
     }
 
 
-    private void LogQueueMessage(string message, Settings settings = null)
+    private void LogQueueMessage(string message, Settings? settings = null)
     {
         if (settings == null)
             settings = new SettingsController().Get().Result;
@@ -631,7 +633,7 @@ public class WatchedLibrary:IDisposable
             else
             {
                 var service = new Server.Services.LibraryFileService();
-                var knownFiles = service.GetKnownLibraryFilesWithCreationTimes().Result;
+                var knownFiles = service.GetKnownLibraryFilesWithCreationTimes();
 
                 var files = GetFiles(new DirectoryInfo(Library.Path));
                 var settings = new SettingsController().Get().Result;
@@ -645,16 +647,8 @@ public class WatchedLibrary:IDisposable
                 
                     if (knownFiles.ContainsKey(file.FullName.ToLowerInvariant()))
                     {
-                        var knownFile = knownFiles[file.FullName.ToLower()];
-                        
-                        var creationDiff = Math.Abs(file.CreationTime.Subtract(knownFile.CreationTime).TotalSeconds);
-                        var writeDiff = Math.Abs(file.LastWriteTime.Subtract(knownFile.LastWriteTime).TotalSeconds);
-                        //if (Library.ReprocessRecreatedFiles == false ||
-                        //    Math.Abs((file.CreationTime - knownFile).TotalSeconds) < 2)
-                        if(creationDiff < 5 && writeDiff < 5)
-                        {
-                            continue; // known file that hasn't changed, skip it
-                        }
+                        if (DatesAreSame(file, knownFiles[file.FullName.ToLowerInvariant()]))
+                            continue;
                     }
 
 
@@ -684,6 +678,33 @@ public class WatchedLibrary:IDisposable
         finally
         {
             ScanMutex.ReleaseMutex();
+        }
+    }
+
+    private bool DatesAreSame(FileInfo file, (DateTime CreationTime, DateTime LastWriteTime) knownFile)
+    {
+        if (datesSame(
+                file.CreationTime, knownFile.CreationTime,
+                file.LastWriteTime, knownFile.LastWriteTime
+            ))
+            return true;
+        
+        if (datesSame(
+                file.CreationTimeUtc, knownFile.CreationTime,
+                file.LastWriteTimeUtc, knownFile.LastWriteTime
+            ))
+            return true;
+        
+        return false;
+
+        bool datesSame(DateTime create1, DateTime create2, DateTime write1, DateTime write2)
+        {
+            var createDiff = (int) Math.Abs(create1.Subtract(create2).TotalSeconds);
+            var writeDiff = (int)Math.Abs(write1.Subtract(write2).TotalSeconds);
+            
+            bool create = createDiff < 5;
+            bool write = writeDiff < 5;
+            return create && write;
         }
     }
 

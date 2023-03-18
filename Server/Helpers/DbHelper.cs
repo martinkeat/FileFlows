@@ -13,6 +13,11 @@ namespace FileFlows.Server.Helpers;
 public class DbHelper
 {
     private static Server.Database.Managers.DbManager Manager;
+    
+    /// <summary>
+    /// Gets or sets if the server is using a SQLite database
+    /// </summary>
+    public static bool IsSqlLite { get; set; }
 
     /// <summary>
     /// Initializes the DbHelper with an instance of a DbManager

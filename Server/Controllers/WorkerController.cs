@@ -183,7 +183,7 @@ public class WorkerController : Controller
         if (info.LibraryFile != null)
         {
             var libfileService = new LibraryFileService();
-            var dbStatus = libfileService.GetFileStatus(info.Library.Uid).Result;
+            var dbStatus = libfileService.GetFileStatus(info.Library.Uid);
 
             
             if (info.LibraryFile.Status != FileStatus.Processing)
@@ -242,7 +242,7 @@ public class WorkerController : Controller
         });
         if (cached == null)
             return true;
-        var dbStatus = await new LibraryFileService().GetFileStatus(file.Uid);
+        var dbStatus = new LibraryFileService().GetFileStatus(file.Uid);
         if (dbStatus != file.Status)
             return true;
         if (file.Status != cached.Status)
@@ -518,7 +518,7 @@ public class WorkerController : Controller
             if (info.LibraryFile != null)
             {
                 var service = new LibraryFileService();
-                var current = service.GetFileStatus(info.LibraryFile.Uid).Result;
+                var current = service.GetFileStatus(info.LibraryFile.Uid);
                 if (current == FileStatus.Unprocessed)
                 {
                     // can happen if server was restarted

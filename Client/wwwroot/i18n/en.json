@@ -386,6 +386,9 @@
         "MoveToTop": "Move To Top",
         "Reprocess": "Reprocess",
         "Unhold": "Release"
+      },
+      "Labels": {
+        "ScanTriggered": "Scanned triggered for all enabled libraries"
       }
     },
     "Log": {

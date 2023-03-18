@@ -84,13 +84,19 @@ public class LibraryController : ControllerStore<Library>
         
         bool newLib = library.Uid == Guid.Empty; 
         var result = await base.Update(library, checkDuplicateName: true);
-        if(nameUpdated)
-            _ = new ObjectReferenceUpdater().RunAsync();
+
+        _ = Task.Run(async () =>
+        {
+            await Task.Delay(1);
+            if (nameUpdated)
+                await new ObjectReferenceUpdater().RunAsync();
+
+            LibraryWorker.UpdateLibraries();
+
+            if (newLib && result != null)
+                await Rescan(new() { Uids = new[] { result.Uid } });
+        });
         
-        if (newLib && result != null)
-            _ = Rescan(new() { Uids = new[] { result.Uid } });
-        
-        LibraryWorker.UpdateLibraries();
         
         return result;
     }
@@ -248,29 +254,7 @@ public class LibraryController : ControllerStore<Library>
     [HttpPost("rescan-enabled")]
     public async Task RescanEnabled()
     {
-        var libs = (await GetAll()).Where(x => x.Enabled).ToList();
-        foreach (var lib in libs)
-        {
-            lib.LastScanned = DateTime.MinValue;
-            await Update(lib);
-        }
-        LibraryWorker.ScanNow();
-
-        var uids = libs.Select(x => x.Uid).ToList();
-
-        int count = 0;
-        do
-        {
-            await Task.Delay(1000);
-            for (int i = uids.Count() - 1; i >= 0; i--)
-            {
-                var lib = await GetByUid(uids[i]);
-                if (lib.LastScanned != DateTime.MinValue)
-                {
-                    uids.RemoveAt(i);
-                }
-            }
-            ++count;
-        } while (uids.Count() > 0 && count < 30);
+        var libs = (await GetAll()).Where(x => x.Enabled).Select(x => x.Uid).ToArray();
+        _ = Rescan(new ReferenceModel<Guid> { Uids = libs });
     }
 }

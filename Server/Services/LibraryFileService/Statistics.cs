@@ -71,12 +71,19 @@ where Status = 1 and ProcessingEnded > ProcessingStarted;";
     {
         var libraries = await new LibraryController().GetAll();
         var disabled = libraries.Where(x => x.Enabled == false).Select(x => x.Uid);
+        List<Guid> libraryUids = libraries.Select(x => x.Uid).ToList();
         int quarter = TimeHelper.GetCurrentQuarter();
         var outOfSchedule = libraries.Where(x => x.Schedule?.Length != 672 || x.Schedule[quarter] == '0').Select(x => x.Uid);
 
+        FileStatus unknown = (FileStatus)999;
         return Data.Select(x =>
         {
-            if ((int)x.Value.Status > 0 || x.Value.LibraryUid == null)
+            if (x.Value.LibraryUid == null)
+                return unknown;
+            if (libraryUids.Contains(x.Value.LibraryUid.Value) == false)
+                return unknown;
+            
+            if ((int)x.Value.Status > 0)
                 return x.Value.Status;
             if ((x.Value.Flags & LibraryFileFlags.ForceProcessing) == LibraryFileFlags.ForceProcessing)
                 return FileStatus.Unprocessed;
@@ -87,7 +94,7 @@ where Status = 1 and ProcessingEnded > ProcessingStarted;";
             if (x.Value.HoldUntil > DateTime.Now)
                 return FileStatus.OnHold;
             return FileStatus.Unprocessed;
-        }).GroupBy(x => x).Select(x => new LibraryStatus()
+        }).Where(x => x != unknown).GroupBy(x => x).Select(x => new LibraryStatus()
         {
             Count = x.Count(),
             Name = Regex.Replace(x.Key.ToString(), "([A-Z])", " $1").Trim(),

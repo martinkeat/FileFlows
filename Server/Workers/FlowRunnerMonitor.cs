@@ -41,7 +41,7 @@ public class FlowRunnerMonitor:Worker
                     // no update in 2minutes, kill it
                     try
                     {
-                        var status = service.GetFileStatus(lf).Result;
+                        var status = service.GetFileStatus(lf);
                         if (status != FileStatus.Processing)
                         {
                             StartUpRunningFiles.Remove(lf);

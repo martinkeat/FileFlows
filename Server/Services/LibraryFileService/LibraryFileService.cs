@@ -1,6 +1,5 @@
 ﻿using FileFlows.Server.Helpers;
 using FileFlows.Server.Controllers;
-using FileFlows.Server.Database;
 using FileFlows.ServerShared.Services;
 using FileFlows.Shared.Models;
 
@@ -43,34 +42,35 @@ public partial class LibraryFileService : ILibraryFileService
         AddFile(file);
         return await Get(file.Uid);
     }
-    /// <summary>
-    /// Adds a many library file
-    /// </summary>
-    /// <param name="files">the library files to add</param>
-    /// <returns>an awaited task</returns>
-    public async Task AddMany(params LibraryFile[] files)
-    {
-        if (files?.Any() != true)
-            return;
-
-        foreach (var file in files)
-        {
-            if (file == null)
-                continue;
-            if(file.Uid == Guid.Empty)
-                file.Uid = Guid.NewGuid();
-            if(file.DateCreated < new DateTime(2000, 1,1))
-                file.DateCreated = DateTime.Now;
-            if (file.DateModified < new DateTime(2000, 1, 1))
-                file.DateModified = DateTime.Now;
-            file.ExecutedNodes ??= new ();
-            file.OriginalMetadata ??= new ();
-            file.FinalMetadata ??= new ();
-            AddFile(file);
-        }
-
-        await Database_AddMany(files);
-    }
+    
+    // /// <summary>
+    // /// Adds a many library file
+    // /// </summary>
+    // /// <param name="files">the library files to add</param>
+    // /// <returns>an awaited task</returns>
+    // public async Task AddMany(params LibraryFile[] files)
+    // {
+    //     if (files?.Any() != true)
+    //         return;
+    //
+    //     foreach (var file in files)
+    //     {
+    //         if (file == null)
+    //             continue;
+    //         if(file.Uid == Guid.Empty)
+    //             file.Uid = Guid.NewGuid();
+    //         if(file.DateCreated < new DateTime(2000, 1,1))
+    //             file.DateCreated = DateTime.Now;
+    //         if (file.DateModified < new DateTime(2000, 1, 1))
+    //             file.DateModified = DateTime.Now;
+    //         file.ExecutedNodes ??= new ();
+    //         file.OriginalMetadata ??= new ();
+    //         file.FinalMetadata ??= new ();
+    //         AddFile(file);
+    //     }
+    //
+    //     await Database_AddMany(files);
+    // }
     
     /// <summary>
     /// Updates a library file
@@ -269,14 +269,20 @@ public partial class LibraryFileService : ILibraryFileService
     /// </summary>
     /// <param name="includeOutput">if output names should be included</param>
     /// <returns>a list of all filenames</returns>
-    public async Task<Dictionary<string, (DateTime CreationTime, DateTime LastWriteTime)>> GetKnownLibraryFilesWithCreationTimes(bool includeOutput = false)
+    public Dictionary<string, (DateTime CreationTime, DateTime LastWriteTime)> GetKnownLibraryFilesWithCreationTimes(bool includeOutput = false)
     {
-        var list = await Database_Fetch<(string, DateTime, DateTime)>("select Name, CreationTime, LastWriteTime from LibraryFile");
         if (includeOutput == false)
-            return list.DistinctBy(x => x.Item1.ToLowerInvariant()).ToDictionary(x => x.Item1.ToLowerInvariant(), x => (x.Item2, x.Item3));
-        var outputs = await Database_Fetch<(string, DateTime, DateTime)>("select OutputPath, CreationTime, LastWriteTime from LibraryFile");
-        return list.Union(outputs).Where(x => string.IsNullOrEmpty(x.Item1) == false).DistinctBy(x => x.Item1.ToLowerInvariant())
-            .ToDictionary(x => x.Item1.ToLowerInvariant(), x => (x.Item2, x.Item3));
+        {
+            return Data.DistinctBy(x => x.Value.Name.ToLowerInvariant())
+                .ToDictionary(x => x.Value.Name.ToLowerInvariant(), x => (x.Value.CreationTime, x.Value.LastWriteTime));
+        }
+
+        var query = Data.Select(x => (x.Value.Name, x.Value.CreationTime, x.Value.LastWriteTime))
+            .Union(Data.Where(x => string.IsNullOrEmpty(x.Value.OutputPath) == false)
+                .Select(x => (x.Value.Name, x.Value.CreationTime, x.Value.LastWriteTime)));
+        
+        return query.DistinctBy(x => x.Name.ToLowerInvariant())
+            .ToDictionary(x => x.Name.ToLowerInvariant(), x => (x.CreationTime, x.LastWriteTime));
     }
 
     /// <summary>
@@ -284,8 +290,8 @@ public partial class LibraryFileService : ILibraryFileService
     /// </summary>
     /// <param name="uid">The UID of the file</param>
     /// <returns>the current status of the rfile</returns>
-    public async Task<FileStatus> GetFileStatus(Guid uid)
-        => (FileStatus)await Database_ExecuteScalar<int>($"select Status from LibraryFile where Uid = '{uid}'");
+    public FileStatus GetFileStatus(Guid uid)
+        => GetByUid(uid)?.Status ?? FileStatus.Unprocessed;
 
     /// <summary>
     /// Moves the passed in UIDs to the top of the processing order
@@ -317,6 +323,7 @@ public partial class LibraryFileService : ILibraryFileService
         }
 
         await Database_Execute(string.Join("\n", commands));
+        await Refresh();
     }
 
 

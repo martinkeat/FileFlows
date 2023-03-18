@@ -327,6 +327,7 @@ public partial class LibraryFiles : ListPage<Guid, LibaryFileListModel>
         {
             await HttpHelper.Post("/api/library/rescan-enabled");
             await Refresh();
+            Toast.ShowSuccess(Translater.Instant("Pages.LibraryFiles.Labels.ScanTriggered"));
         }
         finally
         {

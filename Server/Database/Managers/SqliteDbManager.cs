@@ -1,6 +1,7 @@
 using System.Data.Common;
 using System.Text.RegularExpressions;
 using FileFlows.Server.Controllers;
+using FileFlows.Server.Helpers;
 using FileFlows.Shared.Models;
 using NPoco;
 
@@ -23,6 +24,7 @@ public class SqliteDbManager : DbManager
         // Data Source={DbFilename};Version=3;
         ConnectionString = connectionString;
         DbFilename = GetFilenameFromConnectionString(connectionString);
+        DbHelper.IsSqlLite = true;
     }
 
     /// <summary>
