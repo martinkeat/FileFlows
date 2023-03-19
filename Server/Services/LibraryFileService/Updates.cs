@@ -85,8 +85,12 @@ public partial class LibraryFileService
     /// <param name="size">the size of the file in bytes</param>
     public async Task UpdateOriginalSize(Guid uid, long size)
     {
+        var existing = GetByUid(uid);
+        if (uid == null)
+            return; // unknown file
+        if (existing.OriginalSize == size)
+            return; // nothing to do
+        existing.OriginalSize = size;
         await DbHelper.Execute($"update LibraryFile set OriginalSize = {size} where Uid = '{uid}'");
-        if (Data.TryGetValue(uid, out LibraryFile? file))
-            file.OriginalSize = size;
     }
 }

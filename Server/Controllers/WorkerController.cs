@@ -117,11 +117,11 @@ public class WorkerController : Controller
 
         if (info.LibraryFile != null)
         {
-            var libfileController = new LibraryFileController();
-            var libfile = await libfileController.Get(info.LibraryFile.Uid);
+            var lfService= new LibraryFileService();
+            var libfile = lfService.GetByUid(info.LibraryFile.Uid);
             if (libfile != null)
             {
-                info.LibraryFile.OutputPath = info.LibraryFile.OutputPath?.EmptyAsNull() ?? libfile.OutputPath;
+                libfile.OutputPath = info.LibraryFile.OutputPath?.EmptyAsNull() ?? libfile.OutputPath;
                 Logger.Instance.ILog($"Recording final size for '{info.LibraryFile.FinalSize}' for '{info.LibraryFile.Name}' status: {info.LibraryFile.Status}");
                 if(info.LibraryFile.FinalSize > 0)
                     libfile.FinalSize = info.LibraryFile.FinalSize;
@@ -158,9 +158,9 @@ public class WorkerController : Controller
                     libfile.ProcessingEnded = info.LibraryFile.ProcessingEnded;
                 if (libfile.ProcessingEnded < new DateTime(2020, 1, 1))
                     libfile.ProcessingEnded = DateTime.Now; // this avoid a "2022 years ago" issue
-                var updated = await libfileController.Update(libfile);
-                var library = await new LibraryController().Get(updated.Library.Uid);
-                if (updated.Status == FileStatus.ProcessingFailed)
+                await lfService.Update(libfile);
+                var library = await new LibraryController().Get(libfile.Library.Uid);
+                if (libfile.Status == FileStatus.ProcessingFailed)
                     SystemEvents.TriggerLibraryFileProcessedFailed(libfile, library);
                 else
                     SystemEvents.TriggerLibraryFileProcessedSuccess(libfile, library);
@@ -183,26 +183,27 @@ public class WorkerController : Controller
         if (info.LibraryFile != null)
         {
             var libfileService = new LibraryFileService();
-            var dbStatus = libfileService.GetFileStatus(info.Library.Uid);
-
+            var libFile = libfileService.GetByUid(info.LibraryFile.Uid);
             
-            if (info.LibraryFile.Status != FileStatus.Processing)
+            if (libFile.Status != FileStatus.Processing)
             {
                 Logger.Instance.DLog(
                     $"Updating non-processing library file [{info.LibraryFile.Status}]: {info.LibraryFile.Name}");
             }
 
-            if (dbStatus == FileStatus.Unprocessed)
+            if (libFile.Status == FileStatus.Unprocessed)
             {
+                libFile.Status = info.LibraryFile.Status;
                 // this can happen if the server is restarted but the node is still processing, update the status
-                await libfileService.Update(info.LibraryFile);
+                await libfileService.Update(libFile);
             }
-            else if (await LibraryFileHasChanged(info.LibraryFile))
-            {
-                await libfileService.UpdateWork(info.LibraryFile);
-            }
+            // now using memory cache, we dont need to save this info constantly, can save it for the end
+            // else if (await LibraryFileHasChanged(libFile))
+            // {
+            //     await libfileService.UpdateWork(libFile);
+            // }
 
-            if (info.LibraryFile.Status == FileStatus.ProcessingFailed || info.LibraryFile.Status == FileStatus.Processed)
+            if (libFile.Status == FileStatus.ProcessingFailed || info.LibraryFile.Status == FileStatus.Processed)
             {
                 lock (Executors)
                 {

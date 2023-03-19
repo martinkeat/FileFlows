@@ -8,7 +8,6 @@ namespace FileFlows.Server.Services;
 public partial class LibraryFileService 
 {
     private static Dictionary<Guid, LibraryFile> Data = new Dictionary<Guid, LibraryFile>();
-    private static Dictionary<Guid, LibraryFile> Data2 = new Dictionary<Guid, LibraryFile>();
 
     static LibraryFileService()
     {
