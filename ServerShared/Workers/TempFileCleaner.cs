@@ -26,8 +26,8 @@ public class TempFileCleaner:Worker
     {
         var service = NodeService.Load();
         var node = string.IsNullOrWhiteSpace(nodeAddress)
-            ? service.GetServerNode().Result
-            : service.GetByAddress(nodeAddress).Result;
+            ? service.GetServerNodeAsync().Result
+            : service.GetByAddressAsync(nodeAddress).Result;
         if (string.IsNullOrWhiteSpace(node?.TempPath))
             return;
         var tempDir = new DirectoryInfo(node.TempPath);

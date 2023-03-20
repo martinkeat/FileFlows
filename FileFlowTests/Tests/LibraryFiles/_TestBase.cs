@@ -60,9 +60,9 @@ public abstract class LibraryFileTest
             Version = Globals.Version.ToString(),
             AllLibraries = ProcessingLibraries.All
         };
-        moq.Setup(x => x.GetByUid(It.Is<Guid>(y => y == Node.Uid)))
+        moq.Setup(x => x.GetByUidAsync(It.Is<Guid>(y => y == Node.Uid)))
             .Returns(() => Task.FromResult(Node));
-        moq.Setup(x => x.GetByUid(It.Is<Guid>(y => y == Globals.InternalNodeUid)))
+        moq.Setup(x => x.GetByUidAsync(It.Is<Guid>(y => y == Globals.InternalNodeUid)))
             .Returns(() => Task.FromResult(InternalNode));
     }
 

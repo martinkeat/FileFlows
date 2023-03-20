@@ -28,7 +28,7 @@ public class SystemStatisticsWorker:Worker
         {
             var nodeService = NodeService.Load();
             processingNode =
-                nodeService.GetByAddress(AppSettings.ForcedHostName?.EmptyAsNull() ?? Environment.MachineName).Result;
+                nodeService.GetByAddressAsync(AppSettings.ForcedHostName?.EmptyAsNull() ?? Environment.MachineName).Result;
             if (processingNode == null)
                 return;
         }

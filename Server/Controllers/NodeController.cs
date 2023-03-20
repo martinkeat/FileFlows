@@ -1,13 +1,12 @@
-using System.Diagnostics;
-using FileFlows.Server.Database.Managers;
-
-namespace FileFlows.Server.Controllers;
-
+using LibraryFileService = FileFlows.Server.Services.LibraryFileService;
 using Microsoft.AspNetCore.Mvc;
 using FileFlows.Shared.Models;
 using FileFlows.Server.Helpers;
 using System.Runtime.InteropServices;
+using FileFlows.Server.Services;
 using FileFlows.ServerShared.Models;
+
+namespace FileFlows.Server.Controllers;
 
 /// <summary>
 /// Processing node controller
@@ -24,8 +23,10 @@ public class NodeController : ControllerStore<ProcessingNode>
     [HttpGet]
     public async Task<IEnumerable<ProcessingNode>> GetAll()
     {
-        var nodes = (await GetDataList(useCache:true)).OrderBy(x => x.Address == Globals.InternalNodeName ? 0 : 1).ThenBy(x => x.Name);
-        var internalNode = nodes.Where(x => x.Uid == Globals.InternalNodeUid).FirstOrDefault();
+        var nodes = new NodeService().GetAll()
+            .OrderBy(x => x.Address == Globals.InternalNodeName ? 0 : 1)
+            .ThenBy(x => x.Name);
+        var internalNode = nodes.FirstOrDefault(x => x.Uid == Globals.InternalNodeUid);
         if(internalNode != null)
         {
             bool update = false;
@@ -66,7 +67,8 @@ public class NodeController : ControllerStore<ProcessingNode>
     /// <param name="uid">The UID of the processing node</param>
     /// <returns>The processing node instance</returns>
     [HttpGet("{uid}")]
-    public Task<ProcessingNode> Get(Guid uid) => GetByUid(uid, useCache:true);
+    public ProcessingNode Get(Guid uid) => 
+        new NodeService().GetByUid(uid);
 
     /// <summary>
     /// Saves a processing node
@@ -80,6 +82,7 @@ public class NodeController : ControllerStore<ProcessingNode>
         if(node.Libraries?.Any() == true)
         {
             // remove any removed libraries and update any names
+            // TODO: update LibraryController to use LibraryService
             var libraries = (await new LibraryController().GetAll()).ToDictionary(x => x.Uid, x => x.Name);
             node.Libraries = node.Libraries.Where(x => libraries.ContainsKey(x.Uid)).Select(x => new Plugin.ObjectReference
             {
@@ -110,7 +113,10 @@ public class NodeController : ControllerStore<ProcessingNode>
                 
                 internalNode.Libraries = node.Libraries;
                 await CheckLicensedNodes(internalNode.Uid, internalNode.Enabled);
-                return await Update(internalNode, checkDuplicateName: true, useCache:true);
+                //var processingNode = await Update(internalNode, checkDuplicateName: true, useCache:true);
+                
+                new NodeService().Update(internalNode);
+                return internalNode;
             }
             else
             {
@@ -121,9 +127,11 @@ public class NodeController : ControllerStore<ProcessingNode>
                 node.Mappings = null; // no mappings for internal
             }
         }
-        var result = await Update(node, checkDuplicateName: true, useCache:true);
-        await CheckLicensedNodes(result.Uid, result.Enabled);
-        return await GetByUid(result.Uid, useCache:true);
+        //var result = await Update(node, checkDuplicateName: true, useCache:true);
+        new NodeService().Update(node);
+        await CheckLicensedNodes(node.Uid, node.Enabled);
+        // LibraryFileService.RefreshProcessingNodes();
+        return node;
     }
 
     /// <summary>
@@ -134,10 +142,11 @@ public class NodeController : ControllerStore<ProcessingNode>
     [HttpDelete]
     public async Task Delete([FromBody] ReferenceModel<Guid> model)
     {
-        var internalNode = (await this.GetAll()).Where(x => x.Address == Globals.InternalNodeName).FirstOrDefault()?.Uid ?? Guid.Empty;
+        var internalNode = (await this.GetAll())
+            .FirstOrDefault(x => x.Address == Globals.InternalNodeName)?.Uid ?? Guid.Empty;
         if (model.Uids.Contains(internalNode))
             throw new Exception("ErrorMessages.CannotDeleteInternalNode");
-        await DeleteAll(model);
+        await new NodeService().DeleteAll(model.Uids);
     }
 
     /// <summary>
@@ -155,10 +164,10 @@ public class NodeController : ControllerStore<ProcessingNode>
         if (enable != null)
         {
             node.Enabled = enable.Value;
-            await DbHelper.Update(node);
+            new NodeService().Update(node);
         }
         await CheckLicensedNodes(uid, enable == true);
-        return await GetByUid(uid, useCache:true);;
+        return node;
     }
 
     /// <summary>
@@ -170,15 +179,10 @@ public class NodeController : ControllerStore<ProcessingNode>
     [HttpGet("by-address/{address}")]
     public async Task<ProcessingNode> GetByAddress([FromRoute] string address, [FromQuery] string version)
     {
-        if (address == "INTERNAL_NODE")
-            return await GetServerNode();
-
         if (string.IsNullOrWhiteSpace(address))
             throw new ArgumentNullException(nameof(address));
-
-        address = address.Trim();
-        var data = await GetData(useCache:true);
-        var node = data.Where(x => x.Value.Address.ToLower() == address.ToLower()).Select(x => x.Value).FirstOrDefault();
+        
+        var node = await new Services.NodeService().GetByAddressAsync(address);
         if (node == null)
             return node;
 
@@ -281,9 +285,9 @@ public class NodeController : ControllerStore<ProcessingNode>
         if (string.IsNullOrWhiteSpace(model?.TempPath))
             throw new ArgumentNullException(nameof(model.TempPath));
 
-        var address = model.Address.Trim();
-        var data = await GetData(useCache: true);
-        var existing = data.Where(x => x.Value.Address.ToLower() == address.ToLower()).Select(x => x.Value).FirstOrDefault();
+        var address = model.Address.ToLowerInvariant().Trim();
+        var data = new NodeService().GetAll();
+        var existing = data.FirstOrDefault(x => x.Address.ToLowerInvariant() == address);
         if (existing != null)
         {
             if(existing.FlowRunners != model.FlowRunners || existing.TempPath != model.TempPath || existing.Enabled != model.Enabled)
@@ -294,6 +298,7 @@ public class NodeController : ControllerStore<ProcessingNode>
                 existing.OperatingSystem = model.OperatingSystem;
                 existing.Version = model.Version;
                 await Update(existing);
+                LibraryFileService.RefreshProcessingNodes();
             }
             existing.SignalrUrl = "flow";
             return existing;
@@ -304,11 +309,11 @@ public class NodeController : ControllerStore<ProcessingNode>
 
         if(model.Mappings?.Any() == true)
         {
-            var ffmpegTool = variables.Where(x => x.Name.ToLower() == "ffmpeg").FirstOrDefault();
+            var ffmpegTool = variables.FirstOrDefault(x => x.Name.ToLower() == "ffmpeg");
             if (ffmpegTool != null)
             {
                 // update ffmpeg with actual location
-                var mapping = model.Mappings.Where(x => x.Server.ToLower() == "ffmpeg").FirstOrDefault();
+                var mapping = model.Mappings.FirstOrDefault(x => x.Server.ToLower() == "ffmpeg");
                 if(mapping != null)
                 {
                     mapping.Server = ffmpegTool.Value;
@@ -334,56 +339,16 @@ public class NodeController : ControllerStore<ProcessingNode>
         return result;
     }
 
-    internal async Task<ProcessingNode> GetServerNode()
-    {
-        var data = await GetData(useCache:true);
-        var node = data.Where(x => x.Value.Uid == Globals.InternalNodeUid)
-            .Select(x => x.Value)
-            .FirstOrDefault();
-
-        if (node == null)
-        {
-            Logger.Instance.ILog("Adding Internal Processing Node");
-            bool windows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);                
-            node = await Update(new ProcessingNode
-            {
-            
-                Uid = Globals.InternalNodeUid,
-                Name = Globals.InternalNodeName,
-                Address = Globals.InternalNodeName,
-                Schedule = new string('1', 672),
-                Enabled = true,
-                FlowRunners = 1,
-                Version = Globals.Version.ToString(),
-                AllLibraries = ProcessingLibraries.All,
-#if (DEBUG)
-                TempPath = windows ? @"d:\videos\temp" : Path.Combine(DirectoryHelper.BaseDirectory, "Temp"),
-#else
-                TempPath = DirectoryHelper.IsDocker ? "/temp" : Path.Combine(DirectoryHelper.BaseDirectory, "Temp"),
-#endif
-            }, useCache:true);
-        }
-        node.SignalrUrl = "flow";
-        return node;
-    }
-
     /// <summary>
     /// Updates the last seen to now for a node
     /// </summary>
     /// <param name="uid">The node to update</param>
     internal async Task UpdateLastSeen(Guid uid)
     {
-        var node = await Get(uid);
+        var service = new NodeService();
+        var node = service.GetByUid(uid);
         node.LastSeen = DateTime.Now;
-        if (DbHelper.UseMemoryCache)
-        {
-            await DbHelper.Update(node);
-        }
-        else
-        {
-            await DbHelper.UpdateNodeLastSeen(uid);
-            
-        }
+        await DbHelper.UpdateNodeLastSeen(uid);
     }
 }
 

@@ -11,31 +11,37 @@ using System.Runtime.InteropServices;
 public interface INodeService
 {
     /// <summary>
+    /// Gets all processing nodes
+    /// </summary>
+    /// <returns>all processing nodes</returns>
+    Task<List<ProcessingNode>> GetAllAsync();
+    
+    /// <summary>
     /// Gets a processing node by its UID
     /// </summary>
     /// <param name="uid">The UID of the node</param>
     /// <returns>An instance of the processing node</returns>
-    Task<ProcessingNode> GetByUid(Guid uid);
+    Task<ProcessingNode> GetByUidAsync(Guid uid);
     
     /// <summary>
     /// Gets a processing node by its physical address
     /// </summary>
     /// <param name="address">The address (hostname or IP address) of the node</param>
     /// <returns>An instance of the processing node</returns>
-    Task<ProcessingNode> GetByAddress(string address);
+    Task<ProcessingNode> GetByAddressAsync(string address);
 
     /// <summary>
     /// Gets an instance of the internal processing node
     /// </summary>
     /// <returns>an instance of the internal processing node</returns>
-    Task<ProcessingNode> GetServerNode();
+    Task<ProcessingNode> GetServerNodeAsync();
 
     /// <summary>
     /// Gets a variable value
     /// </summary>
     /// <param name="name">The name of the variable</param>
     /// <returns>a variable value</returns>
-    Task<string> GetVariable(string name);
+    Task<string> GetVariableAsync(string name);
 
     /// <summary>
     /// Clears all workers on the node.
@@ -43,7 +49,7 @@ public interface INodeService
     /// </summary>
     /// <param name="nodeUid">The UID of the node</param>
     /// <returns>a completed task</returns>
-    Task ClearWorkers(Guid nodeUid);
+    Task ClearWorkersAsync(Guid nodeUid);
 }
 
 
@@ -51,7 +57,7 @@ public interface INodeService
 /// An Service for communicating with the server for all Processing Node related actions
 /// </summary>
 public class NodeService : Service, INodeService
-{
+{   
     /// <summary>
     /// Gets or sets a function used to load new instances of the service
     /// </summary>
@@ -74,7 +80,7 @@ public class NodeService : Service, INodeService
     /// </summary>
     /// <param name="nodeUid">The UID of the node</param>
     /// <returns>a completed task</returns>
-    public async Task ClearWorkers(Guid nodeUid)
+    public async Task ClearWorkersAsync(Guid nodeUid)
     {
         try
         {
@@ -85,13 +91,31 @@ public class NodeService : Service, INodeService
             return;
         }
     }
+
+    /// <summary>
+    /// Gets all processing nodes
+    /// </summary>
+    /// <returns>all processing nodes</returns>
+    public async Task<List<ProcessingNode>> GetAllAsync()
+    {
+        try
+        {
+            var result = await HttpHelper.Get<List<ProcessingNode>>(ServiceBaseUrl + "/api/node");
+            return result.Data;
+        }
+        catch (Exception ex)
+        {
+            Logger.Instance?.ELog("Failed to locate server node: " + ex.Message);
+            return null;
+        }
+    }
     
     /// <summary>
     /// Gets a processing node by its UID
     /// </summary>
     /// <param name="uid">The UID of the node</param>
     /// <returns>An instance of the processing node</returns>
-    public async Task<ProcessingNode> GetByUid(Guid uid)
+    public async Task<ProcessingNode> GetByUidAsync(Guid uid)
     {
         try
         {
@@ -109,7 +133,7 @@ public class NodeService : Service, INodeService
     /// Gets an instance of the internal processing node
     /// </summary>
     /// <returns>an instance of the internal processing node</returns>
-    public async Task<ProcessingNode> GetServerNode()
+    public async Task<ProcessingNode> GetServerNodeAsync()
     {
         try
         {
@@ -128,7 +152,7 @@ public class NodeService : Service, INodeService
     /// </summary>
     /// <param name="name">The name of the variable</param>
     /// <returns>a variable value</returns>
-    public async Task<string> GetVariable(string name)
+    public async Task<string> GetVariableAsync(string name)
     {
         try
         {
@@ -147,7 +171,7 @@ public class NodeService : Service, INodeService
     /// </summary>
     /// <param name="address">The address (hostname or IP address) of the node</param>
     /// <returns>An instance of the processing node</returns>
-    public async Task<ProcessingNode> GetByAddress(string address)
+    public async Task<ProcessingNode> GetByAddressAsync(string address)
     {
         try
         {

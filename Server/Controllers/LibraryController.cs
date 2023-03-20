@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using FileFlows.Server.Helpers;
 using FileFlows.Shared.Models;
 using System.Text.RegularExpressions;
+using FileFlows.Server.Services;
 
 namespace FileFlows.Server.Controllers;
 
@@ -91,14 +92,22 @@ public class LibraryController : ControllerStore<Library>
             if (nameUpdated)
                 await new ObjectReferenceUpdater().RunAsync();
 
-            LibraryWorker.UpdateLibraries();
+            RefreshCaches();
 
             if (newLib && result != null)
                 await Rescan(new() { Uids = new[] { result.Uid } });
         });
         
-        
         return result;
+    }
+
+    /// <summary>
+    /// Refresh the caches where libraries are stored in memory
+    /// </summary>
+    private void RefreshCaches()
+    {
+        LibraryWorker.UpdateLibraries();
+        LibraryFileService.RefreshLibraries();
     }
 
     /// <summary>
@@ -118,7 +127,7 @@ public class LibraryController : ControllerStore<Library>
             library.Enabled = enable;
             return await Update(library);
         }
-            LibraryWorker.UpdateLibraries();
+        RefreshCaches();
         return library;
     }
 
@@ -140,7 +149,7 @@ public class LibraryController : ControllerStore<Library>
         }
 
         await UpdateHasLibraries();
-        LibraryWorker.UpdateLibraries();
+        RefreshCaches();
     }
 
     /// <summary>
@@ -163,7 +172,7 @@ public class LibraryController : ControllerStore<Library>
         _ = Task.Run(async () =>
         {
             await Task.Delay(1);
-            LibraryWorker.UpdateLibraries();
+            RefreshCaches();
             LibraryWorker.ScanNow();
         });
     }

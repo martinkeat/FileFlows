@@ -1,8 +1,6 @@
 using FileFlows.Server.Helpers;
 using FileFlows.ServerShared.Models;
 using FileFlows.Server.Controllers;
-using FileFlows.Server.Database;
-using FileFlows.ServerShared.Services;
 using FileFlows.ServerShared.Workers;
 using FileFlows.Shared.Models;
 
@@ -41,7 +39,7 @@ public partial class LibraryFileService
             return NextFileResult(NextLibraryFileStatus.VersionMismatch);
         }
 
-        var node = (await NodeService.Load().GetByUid(nodeUid));
+        var node = (await NodeService.Load().GetByUidAsync(nodeUid));
         if (node != null && node.Version != nodeVersion)
         {
             node.Version = nodeVersion;
@@ -270,12 +268,10 @@ public partial class LibraryFileService
     /// <returns>If found, the next library file to process, otherwise null</returns>
     public async Task<LibraryFile?> GetNextLibraryFile(string nodeName, Guid nodeUid, Guid workerUid)
     {
-        var node = await NodeService.Load().GetByUid(nodeUid);
-        var nodeLibraries = node.Libraries?.Select(x => x.Uid)?.ToList() ?? new List<Guid>();
-        var libraries = (await LibraryService.Load().GetAll()).ToArray();
-        int quarter = TimeHelper.GetCurrentQuarter();
+        var node = ProcessingNodes.FirstOrDefault(x => x.Uid == nodeUid);
+        var nodeLibraries = node?.Libraries?.Select(x => x.Uid)?.ToList() ?? new List<Guid>();
 
-        var canProcess = libraries.Where(x =>
+        var canProcess = Libraries.Where(x =>
         {
             if (node.AllLibraries == ProcessingLibraries.All)
                 return true;

@@ -1012,9 +1012,15 @@ public abstract class DbManager
     /// Updates the last seen of a node
     /// </summary>
     /// <param name="uid">the UID of the node</param>
-    /// <exception cref="NotImplementedException">not implemented yet</exception>
-    public virtual Task UpdateNodeLastSeen(Guid uid)
-        => throw new NotImplementedException();
+    public virtual async Task UpdateNodeLastSeen(Guid uid)
+    {
+        string dt = DateTime.Now.ToString("o"); // same format as json
+        using var db = await GetDb();
+        string sql =
+            $"update DbObject set Data = json_set(Data, '$.LastSeen', '{dt}') " +
+            $"where Type = 'FileFlows.Shared.Models.ProcessingNode' and Uid = '{uid}'";
+        await db.Db.ExecuteAsync(sql);
+    }
 
 
     /// <summary>

@@ -136,7 +136,7 @@ public class Program
         {
             string address = args.IsServer ? "INTERNAL_NODE" : args.Hostname;
             LogInfo("Address: "+ address);
-            var nodeTask = nodeService.GetByAddress(address);
+            var nodeTask = nodeService.GetByAddressAsync(address);
             LogInfo("Waiting on node task");
             nodeTask.Wait();
             LogInfo("Completed node task");

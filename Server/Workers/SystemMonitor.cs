@@ -121,7 +121,7 @@ public class SystemMonitor:Worker
     }
     private async Task<long> GetTempStorageSize()
     {
-        var node = await new NodeService().GetServerNode();
+        var node = await new NodeService().GetServerNodeAsync();
         var tempPath = node?.TempPath;
         return GetDirectorySize(tempPath);
     }

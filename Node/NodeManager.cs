@@ -75,7 +75,7 @@ public class NodeManager
                 var nodeService = new NodeService();
                 try
                 {
-                    var settings = nodeService.GetByAddress(AppSettings.Instance.HostName).Result;
+                    var settings = nodeService.GetByAddressAsync(AppSettings.Instance.HostName).Result;
                     if (settings == null)
                     {
                         Logger.Instance.ELog("Failed getting settings for node: " + AppSettings.Instance.HostName);

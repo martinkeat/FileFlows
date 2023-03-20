@@ -1,4 +1,7 @@
-﻿namespace FileFlows.Server.Services;
+﻿using System.Runtime.InteropServices;
+using FileFlows.Server.Helpers;
+
+namespace FileFlows.Server.Services;
 
 using FileFlows.Server.Controllers;
 using FileFlows.ServerShared.Services;
@@ -9,7 +12,7 @@ using System.Threading.Tasks;
 /// <summary>
 /// An Service for communicating with the server for all Processing Node related actions
 /// </summary>
-public class NodeService : INodeService
+public class NodeService : CachedService<ProcessingNode>, INodeService
 {
     /// <summary>
     /// A loader to load an instance of the Node service
@@ -32,29 +35,47 @@ public class NodeService : INodeService
     /// </summary>
     /// <param name="nodeUid">The UID of the node</param>
     /// <returns>a completed task</returns>
-    public Task ClearWorkers(Guid nodeUid) => new WorkerController(null).Clear(nodeUid);
-    
-    
-    /// <summary>
-    /// Gets a processing node by its UID
-    /// </summary>
-    /// <param name="uid">The UID of the node</param>
-    /// <returns>An instance of the processing node</returns>
-    public Task<ProcessingNode> GetByUid(Guid uid)
-        => new NodeController().Get(uid);
+    public Task ClearWorkersAsync(Guid nodeUid) => new WorkerController(null).Clear(nodeUid);
 
     /// <summary>
     /// Gets an instance of the internal processing node
     /// </summary>
     /// <returns>an instance of the internal processing node</returns>
-    public Task<ProcessingNode> GetServerNode() => new NodeController().GetServerNode();
+    public async Task<ProcessingNode> GetServerNodeAsync()
+    {
+        var node = Data.FirstOrDefault(x => x.Uid == Globals.InternalNodeUid);
+        if (node != null)
+            return node;
+        
+        Logger.Instance.ILog("Adding Internal Processing Node");
+        bool windows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);                
+        node = await DbHelper.Update(new ProcessingNode
+        {
+        
+            Uid = Globals.InternalNodeUid,
+            Name = Globals.InternalNodeName,
+            Address = Globals.InternalNodeName,
+            Schedule = new string('1', 672),
+            Enabled = true,
+            FlowRunners = 1,
+            Version = Globals.Version.ToString(),
+            AllLibraries = ProcessingLibraries.All,
+#if (DEBUG)
+            TempPath = windows ? @"d:\videos\temp" : Path.Combine(DirectoryHelper.BaseDirectory, "Temp"),
+#else
+            TempPath = DirectoryHelper.IsDocker ? "/temp" : Path.Combine(DirectoryHelper.BaseDirectory, "Temp"),
+#endif
+        });
+        node.SignalrUrl = "flow";
+        return node;
+    } 
 
     /// <summary>
     /// Gets a tool path by name
     /// </summary>
     /// <param name="name">The name of the tool</param>
     /// <returns>a tool path</returns>
-    public async Task<string> GetVariable(string name)
+    public async Task<string> GetVariableAsync(string name)
     {
         var result = await new VariableController().GetByName(name);
         return result?.Value ?? string.Empty;
@@ -65,10 +86,18 @@ public class NodeService : INodeService
     /// </summary>
     /// <param name="address">The address (hostname or IP address) of the node</param>
     /// <returns>An instance of the processing node</returns>
-    public async Task<ProcessingNode> GetByAddress(string address)
+    public async Task<ProcessingNode> GetByAddressAsync(string address)
     {
-        var result = await new NodeController().GetByAddress(address, Globals.Version.ToString());
-        result.SignalrUrl = $"http://localhost:{WebServer.Port}/flow";
-        return result;
+        if (address == "INTERNAL_NODE")
+            return await GetServerNodeAsync();
+        address = address.Trim().ToLowerInvariant();
+        var node = Data.FirstOrDefault(x => x.Address.ToLowerInvariant() == address);
+        return node!;
     }
+    
+    public Task<List<ProcessingNode>> GetAllAsync()
+        => Task.FromResult(GetAll());
+
+    public Task<ProcessingNode> GetByUidAsync(Guid uid)
+        => Task.FromResult(GetByUid(uid)!);
 }

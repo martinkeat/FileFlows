@@ -103,7 +103,7 @@ public class FlowWorker : Worker
         ProcessingNode node;
         try
         {
-            node = isServer ? nodeService.GetServerNode().Result : nodeService.GetByAddress(this.Hostname).Result;
+            node = isServer ? nodeService.GetServerNodeAsync().Result : nodeService.GetByAddressAsync(this.Hostname).Result;
         }
         catch(Exception ex)
         {
@@ -115,7 +115,7 @@ public class FlowWorker : Worker
         {
             FirstExecute = false;
             // tell the server to kill any flow executors from this node, in case this node was restarted
-            nodeService.ClearWorkers(node.Uid);
+            nodeService.ClearWorkersAsync(node.Uid);
         }
 
         if (node == null)
