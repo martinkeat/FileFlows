@@ -40,7 +40,7 @@ public class SettingsController : Controller
         if (DbHelper.UseMemoryCache)
         {
             libs = new LibraryController().GetData().Result?.Any() == true;
-            flows = new FlowService().GetAll().Any() == true;
+            flows = new FlowService().GetAll().Any();
         }
         else
         {
@@ -64,11 +64,11 @@ public class SettingsController : Controller
     public async Task<string> CheckLatestVersion()
     {
         var settings = await new SettingsController().Get();
-        if (settings.DisableTelemetry != false)
+        if (settings.DisableTelemetry)
             return string.Empty; 
         try
         {
-            var result = Workers.ServerUpdater.GetLatestOnlineVersion();
+            var result = ServerUpdater.GetLatestOnlineVersion();
             if (result.updateAvailable == false)
                 return string.Empty;
             return result.onlineVersion.ToString();
