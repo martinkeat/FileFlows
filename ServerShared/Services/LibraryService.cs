@@ -13,13 +13,13 @@ public interface ILibraryService
     /// </summary>
     /// <param name="uid">The UID of the library</param>
     /// <returns>An instance of the library if found</returns>
-    Task<Library> Get(Guid uid);
+    Task<Library> GetByUidAsync(Guid uid);
 
     /// <summary>
     /// Gets all libraries in the system
     /// </summary>
     /// <returns>a list of all libraries</returns>
-    Task<IEnumerable<Library>> GetAll();
+    Task<List<Library>> GetAllAsync();
 }
 
 /// <summary>
@@ -49,7 +49,7 @@ public class LibraryService : Service, ILibraryService
     /// </summary>
     /// <param name="uid">The UID of the library</param>
     /// <returns>An instance of the library if found</returns>
-    public async Task<Library> Get(Guid uid)
+    public async Task<Library> GetByUidAsync(Guid uid)
     {
         try
         {
@@ -69,11 +69,11 @@ public class LibraryService : Service, ILibraryService
     /// Gets all libraries in the system
     /// </summary>
     /// <returns>a list of all libraries</returns>
-    public async Task<IEnumerable<Library>> GetAll()
+    public async Task<List<Library>> GetAllAsync()
     {
         try
         {
-            var result = await HttpHelper.Get<Library[]>($"{ServiceBaseUrl}/api/library");
+            var result = await HttpHelper.Get<List<Library>>($"{ServiceBaseUrl}/api/library");
             if (result.Success == false)
                 throw new Exception("Failed to load libraries: " + result.Body);
             return result.Data;

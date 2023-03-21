@@ -1,3 +1,5 @@
+using FileFlows.ServerShared.Services;
+
 namespace FileFlows.Server.Controllers;
 
 using System.ComponentModel;
@@ -62,7 +64,7 @@ public class PluginController : ControllerStore<PluginInfo>
         }
 
         string flowTypeName = typeof(Flow).FullName ?? string.Empty;
-        var flows = await new FlowController().GetAll();
+        var flows = new Services.FlowService().GetAll();
         foreach (var flow in flows)
         {
             foreach (var p in flow.Parts)

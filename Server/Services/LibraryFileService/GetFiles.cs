@@ -150,7 +150,7 @@ public partial class LibraryFileService
                 return query;
             }
 
-            var libraries = (await LibraryService.Load().GetAll()).ToDictionary(x => x.Uid, x => x);
+            var libraries = (await LibraryService.Load().GetAllAsync()).ToDictionary(x => x.Uid, x => x);
 
             var disabled = libraries.Values.Where(x => x.Enabled == false).Select(x => x.Uid).ToList();
             if (status == FileStatus.Disabled && disabled?.Any() == false)

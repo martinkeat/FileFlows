@@ -1,4 +1,5 @@
 using FileFlows.Server.Controllers;
+using FileFlows.ServerShared.Services;
 using FileFlows.ServerShared.Workers;
 
 namespace FileFlows.Server.Workers;
@@ -40,12 +41,12 @@ public class ObjectReferenceUpdater:Worker
         IsRunning = true;
         try
         {
-            var libFileController = new LibraryFileController();
-            var libraryController = new LibraryController();
             DateTime start = DateTime.Now;
-            var libFiles = libFileController.GetAll(null).Result;
-            var libraries = libraryController.GetAll().Result;
-            var flows = new FlowController().GetAll().Result;
+            var lfService = new Services.LibraryFileService();
+            var libService = new Services.LibraryService();
+            var libFiles = lfService.GetAll(null).Result;
+            var libraries = libService.GetAll();
+            var flows = new Services.FlowService().GetAll();
 
             var dictLibraries = libraries.ToDictionary(x => x.Uid, x => x.Name);
             var dictFlows = flows.ToDictionary(x => x.Uid, x => x.Name);
@@ -73,7 +74,7 @@ public class ObjectReferenceUpdater:Worker
                 }
 
                 if (changed)
-                    libFileController.Update(lf).Wait();
+                    lfService.Update(lf).Wait();
             }
 
             foreach (var lib in libraries)
@@ -83,7 +84,7 @@ public class ObjectReferenceUpdater:Worker
                     string oldname = lib.Flow.Name;
                     lib.Flow.Name = dictFlows[lib.Flow.Uid];
                     Logger.Instance.ILog($"Updating Flow name reference '{oldname}' to '{lib.Flow.Name}' in library: {lib.Name}");
-                    libraryController.Update(lib).Wait();
+                    libService.Update(lib);
                 }
             }
             Logger.Instance.ILog("Time Taken to complete for ObjectReference rename: "+ DateTime.Now.Subtract(start));

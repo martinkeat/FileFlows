@@ -5,6 +5,7 @@ using FileFlows.Shared.Models;
 using FileFlows.Server.Workers;
 using FileFlows.Server.Helpers;
 using FileFlows.Server.Database.Managers;
+using FileFlows.Server.Services;
 
 
 namespace FileFlows.Server.Controllers;
@@ -39,7 +40,7 @@ public class SettingsController : Controller
         if (DbHelper.UseMemoryCache)
         {
             libs = new LibraryController().GetData().Result?.Any() == true;
-            flows = new FlowController().GetData().Result?.Any() == true;
+            flows = new FlowService().GetAll().Any() == true;
         }
         else
         {
@@ -296,8 +297,8 @@ public class SettingsController : Controller
         cfg.SystemScripts = (await scriptController.GetAllByType(ScriptType.System)).ToList();
         cfg.SharedScripts = (await scriptController.GetAllByType(ScriptType.Shared)).ToList();
         cfg.Variables = (await new VariableController().GetAll()).ToDictionary(x => x.Name, x => x.Value);
-        cfg.Flows = (await new FlowController().GetAll()).ToList();
-        cfg.Libraries = (await new LibraryController().GetAll()).ToList();
+        cfg.Flows = new FlowService().GetAll();
+        cfg.Libraries = new LibraryService().GetAll();
         cfg.PluginSettings = await new PluginController().GetAllPluginSettings();
         cfg.MaxNodes = LicenseHelper.IsLicensed() ? 250 : 30;
         var pluginInfos = (await new PluginController().GetAll())

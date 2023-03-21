@@ -88,11 +88,11 @@ public abstract class LibraryFileTest
             lib.Schedule = new string('1', 672);
             Libraries.Add(lib);
         }
-        moq.Setup(x => x.Get(It.IsAny<Guid>()))
+        moq.Setup(x => x.GetByUidAsync(It.IsAny<Guid>()))
             .Returns((Guid uid) =>
                 Task.FromResult(Libraries.FirstOrDefault(x => x.Uid == uid))!
             );
-        moq.Setup(x => x.GetAll())
+        moq.Setup(x => x.GetAllAsync())
             .Returns(() => Task.FromResult((IEnumerable<Library>)Libraries));
     }
 

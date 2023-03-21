@@ -1,4 +1,5 @@
 using FileFlows.Server.Helpers;
+using FileFlows.Server.Services;
 using FileFlows.Shared.Models;
 using Microsoft.AspNetCore.Mvc;
 using NPoco;
@@ -96,7 +97,7 @@ public class RevisionController:Controller
             if (dbo.Type == typeof(Library).FullName)
                 await new LibraryController().Refresh(dbo);
             else if (dbo.Type == typeof(Flow).FullName)
-                await new FlowController().Refresh(dbo);
+                new FlowService().Refresh();
             else if (dbo.Type == typeof(Dashboard).FullName)
                 await new DashboardController().Refresh(dbo);
         }

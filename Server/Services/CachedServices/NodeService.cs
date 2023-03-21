@@ -14,6 +14,8 @@ using System.Threading.Tasks;
 /// </summary>
 public class NodeService : CachedService<ProcessingNode>, INodeService
 {
+    public override bool IncrementsConfiguration => false;
+
     /// <summary>
     /// A loader to load an instance of the Node service
     /// </summary>

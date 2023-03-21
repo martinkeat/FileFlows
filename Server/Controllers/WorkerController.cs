@@ -60,11 +60,15 @@ public class WorkerController : Controller
             var lf = info.LibraryFile;
             if (lf.OriginalSize > 0)
                 _ = new LibraryFileService().UpdateOriginalSize(lf.Uid, lf.OriginalSize);
-            _ = Task.Run(async () =>
+            if (lf.LibraryUid != null)
             {
-                var library = await new LibraryController().Get(lf.Uid);
-                SystemEvents.TriggerLibraryFileProcessingStarted(lf, library);
-            });
+                _ = Task.Run(async () =>
+                {
+                    var library = new LibraryService().GetByUid(lf.LibraryUid.Value);
+                    if(library != null)
+                        SystemEvents.TriggerLibraryFileProcessingStarted(lf, library);
+                });
+            }
         }
         return info;
     }
@@ -159,7 +163,7 @@ public class WorkerController : Controller
                 if (libfile.ProcessingEnded < new DateTime(2020, 1, 1))
                     libfile.ProcessingEnded = DateTime.Now; // this avoid a "2022 years ago" issue
                 await lfService.Update(libfile);
-                var library = await new LibraryController().Get(libfile.Library.Uid);
+                var library = new LibraryService().GetByUid(libfile.Library.Uid);
                 if (libfile.Status == FileStatus.ProcessingFailed)
                     SystemEvents.TriggerLibraryFileProcessedFailed(libfile, library);
                 else

@@ -83,7 +83,7 @@ public class NodeController : ControllerStore<ProcessingNode>
         {
             // remove any removed libraries and update any names
             // TODO: update LibraryController to use LibraryService
-            var libraries = (await new LibraryController().GetAll()).ToDictionary(x => x.Uid, x => x.Name);
+            var libraries = new LibraryService().GetAll().ToDictionary(x => x.Uid, x => x.Name);
             node.Libraries = node.Libraries.Where(x => libraries.ContainsKey(x.Uid)).Select(x => new Plugin.ObjectReference
             {
                 Uid = x.Uid,

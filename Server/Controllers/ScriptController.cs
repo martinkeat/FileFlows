@@ -31,7 +31,6 @@ public class ScriptController : Controller
         var taskScriptsFlow = GetAll(ScriptType.Flow);
         var taskScriptsSystem = GetAll(ScriptType.System);
         var taskScriptsShared = GetAll(ScriptType.Shared);
-        var taskFlows = new FlowController().GetAll();
         var taskTasks = new TaskController().GetAll();
 
         FileFlowsRepository repo = new FileFlowsRepository();
@@ -68,7 +67,7 @@ public class ScriptController : Controller
         
         scripts = scripts.DistinctBy(x => x.Name).ToList();
         var dictScripts = scripts.ToDictionary(x => x.Name.ToLower(), x => x);
-        var flows = taskFlows.Result;
+        var flows = new FlowController().GetAll();
         string flowTypeName = typeof(Flow).FullName ?? string.Empty;
         foreach (var flow in flows ?? new Flow[] {})
         {
@@ -339,8 +338,8 @@ public class ScriptController : Controller
     }
     private async Task UpdateScriptReferences(string oldName, string newName)
     {
-        var controller = new FlowController();
-        var flows = await controller.GetAll();
+        var service = new FlowService();
+        var flows = service.GetAll();
         foreach (var flow in flows)
         {
             if (flow.Parts?.Any() != true)
@@ -356,7 +355,7 @@ public class ScriptController : Controller
             }
             if(changed)
             {
-                await controller.Update(flow);
+                service.Update(flow);
             }
         }
 

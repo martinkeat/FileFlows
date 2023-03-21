@@ -44,7 +44,7 @@ public class LibraryFileController : Controller //ControllerStore<LibraryFile>
     public async Task<LibraryFileDatalistModel> ListAll([FromQuery] FileStatus status, [FromQuery] int page = 0, [FromQuery] int pageSize = 0, [FromQuery] string filter = null)
     {
         var service = new LibraryFileService();
-        var taskStatus = service.GetStatus();
+        var lfStatus = service.GetStatus();
         var taskLibraries = DbHelper.Select<Library>();
         var taskFiles = service.GetAll(status, page * pageSize, pageSize, filter);
         if (string.IsNullOrWhiteSpace(filter) == false)
@@ -53,10 +53,10 @@ public class LibraryFileController : Controller //ControllerStore<LibraryFile>
             int total = await service.GetTotalMatchingItems(status, filter);
             HttpContext?.Response?.Headers?.TryAdd("x-total-items", total.ToString());
         }
-        await Task.WhenAll(taskStatus, taskLibraries, taskFiles);
+        await Task.WhenAll(taskLibraries, taskFiles);
         return new()
         {
-            Status = taskStatus.Result,
+            Status = lfStatus,
             LibraryFiles = LibaryFileListModelHelper.ConvertToListModel(taskFiles.Result, status, taskLibraries.Result)
         };
     }
@@ -98,7 +98,7 @@ public class LibraryFileController : Controller //ControllerStore<LibraryFile>
     /// </summary>
     /// <returns>the library status overview</returns>
     [HttpGet("status")]
-    public Task<IEnumerable<LibraryStatus>> GetStatus()
+    public IEnumerable<LibraryStatus> GetStatus()
         => new LibraryFileService().GetStatus();
 
 

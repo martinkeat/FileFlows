@@ -156,7 +156,7 @@ public abstract class ControllerStore<T>:Controller where T : FileFlowObject, ne
             IncrementConfigurationRevision();
     }
 
-    internal async Task<T> Update(T model, bool checkDuplicateName = false, bool? useCache = null, bool? dontIncremetnConfigRevision = null)
+    internal async Task<T> Update(T model, bool checkDuplicateName = false, bool? useCache = null, bool? dontIncrementConfigRevision = null)
     {
         if (checkDuplicateName)
         {
@@ -185,7 +185,7 @@ public abstract class ControllerStore<T>:Controller where T : FileFlowObject, ne
                 _mutex.Release();
             }
         }
-        if(AutoIncrementRevision && dontIncremetnConfigRevision != true)
+        if(AutoIncrementRevision && dontIncrementConfigRevision != true)
             IncrementConfigurationRevision();
         return updated;
     }

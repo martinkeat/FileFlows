@@ -169,7 +169,7 @@ public partial class LibraryFileService : ILibraryFileService
     /// <param name="status">the status</param>
     /// <param name="filter">the filter</param>
     /// <returns>the total number of items matching</returns>
-    public async Task<int> GetTotalMatchingItems(FileStatus status, string filter)
+    public async Task<int> GetTotalMatchingItems(FileStatus? status, string filter)
     {
         try
         {
@@ -182,8 +182,8 @@ public partial class LibraryFileService : ILibraryFileService
             {
                 return await Database_ExecuteScalar<int>($"select count(Uid) from LibraryFile where Status = {(int)status} and {filterWhere}");
             }
-            
-            var libraries = await new LibraryController().GetAll();
+
+            var libraries = new LibraryService().GetAll();
             var disabled = string.Join(", ",
                 libraries.Where(x => x.Enabled == false).Select(x => "'" + x.Uid + "'"));
             int quarter = TimeHelper.GetCurrentQuarter();

@@ -67,9 +67,9 @@ where Status = 1 and ProcessingEnded > ProcessingStarted;";
     /// Gets the library status overview
     /// </summary>
     /// <returns>the library status overview</returns>
-    public async Task<IEnumerable<LibraryStatus>> GetStatus()
+    public IEnumerable<LibraryStatus> GetStatus()
     {
-        var libraries = await new LibraryController().GetAll();
+        var libraries = new LibraryService().GetAll();
         var disabled = libraries.Where(x => x.Enabled == false).Select(x => x.Uid);
         List<Guid> libraryUids = libraries.Select(x => x.Uid).ToList();
         int quarter = TimeHelper.GetCurrentQuarter();

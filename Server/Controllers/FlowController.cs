@@ -1,5 +1,4 @@
 using FileFlows.Server.Workers;
-using FileFlows.Plugin.Models;
 using Microsoft.AspNetCore.Mvc;
 using FileFlows.Shared.Models;
 using FileFlows.Server.Helpers;
@@ -17,13 +16,11 @@ namespace FileFlows.Server.Controllers;
 /// Controller for Flows
 /// </summary>
 [Route("/api/flow")]
-public class FlowController : ControllerStore<Flow>
+public class FlowController : Controller
 {
     const int DEFAULT_XPOS = 450;
     const int DEFAULT_YPOS = 50;
     
-    protected override bool AutoIncrementRevision => true; 
-
     private static bool? _HasFlows;
     /// <summary>
     /// Gets if there are any flows
@@ -33,7 +30,7 @@ public class FlowController : ControllerStore<Flow>
         get
         {
             if (_HasFlows == null)
-                UpdateHasFlows().Wait();
+                UpdateHasFlows();
             return _HasFlows == true;
         }
         private set => _HasFlows = value;
@@ -44,15 +41,15 @@ public class FlowController : ControllerStore<Flow>
     /// </summary>
     /// <returns>all flows in the system</returns>
     [HttpGet]
-    public async Task<IEnumerable<Flow>> GetAll() => (await GetDataList()).OrderBy(x => x.Name.ToLower());
+    public IEnumerable<Flow> GetAll() => 
+        new FlowService().GetAll().OrderBy(x => x.Name.ToLower());
 
     [HttpGet("list-all")]
     public async Task<IEnumerable<FlowListModel>> ListAll()
     {
-        var flows = await GetAll();
+        var flows = new FlowService().GetAll();
         List<FlowListModel> list = new List<FlowListModel>();
 
-        var libraries = await new LibraryController().GetAll();
         foreach(var item in flows)
         {
             list.Add(new FlowListModel
@@ -101,6 +98,7 @@ public class FlowController : ControllerStore<Flow>
         }
 
         string libTypeName = typeof(Library).FullName ?? string.Empty;
+        var libraries = new LibraryService().GetAll();
         foreach (var lib in libraries)
         {
             if (lib.Flow == null)
@@ -133,19 +131,8 @@ public class FlowController : ControllerStore<Flow>
     /// <param name="libraryUid">the UID of the library</param>
     /// <returns>the failure flow</returns>
     [HttpGet("failure-flow/by-library/{libraryUid}")]
-    public async Task<Flow> GetFailureFlow([FromRoute] Guid libraryUid)
-    {
-        if (DbHelper.UseMemoryCache)
-        {
-            var flow = (await GetDataList())?.Where(x => x.Type == FlowType.Failure && x.Enabled && x.Default)?.FirstOrDefault();
-            return flow;
-        }
-        else
-        {
-            var flow = await DbHelper.GetFailureFlow(libraryUid);
-            return flow;
-        }
-    }
+    public Task<Flow?> GetFailureFlow([FromRoute] Guid libraryUid)
+        => new FlowService().GetFailureFlow(libraryUid);
 
     /// <summary>
     /// Exports a flows
@@ -155,8 +142,8 @@ public class FlowController : ControllerStore<Flow>
     [HttpGet("export")]
     public async Task<IActionResult> Export([FromQuery(Name = "uid")] Guid[] uids)
     {
-        var flows = uids.Select(async x => await GetByUid(x))
-                                    .Select(x => x.Result)
+        var service = new FlowService();
+        var flows = uids.Select(x => service.GetByUid(x))
                                     .Where(x => x != null).ToList();
         if (flows.Any() == false)
             return NotFound();
@@ -214,13 +201,15 @@ public class FlowController : ControllerStore<Flow>
         }
 
         // reparse with new UIDs
+        var service = new FlowService();
         flow = JsonSerializer.Deserialize<Flow>(json);
         flow.Uid = Guid.Empty;
         flow.Default = false;
         flow.DateModified = DateTime.Now;
         flow.DateCreated = DateTime.Now;
-        flow.Name = await GetNewUniqueName(flow.Name);
-        return await Update(flow);
+        flow.Name = service.GetNewUniqueName(flow.Name);
+        service.Update(flow);
+        return flow;
     }
 
 
@@ -232,7 +221,7 @@ public class FlowController : ControllerStore<Flow>
     [HttpGet("duplicate/{uid}")]
     public async Task<Flow> Duplicate([FromRoute] Guid uid)
     { 
-        var flow = await GetByUid(uid);
+        var flow = new FlowService().GetByUid(uid);
         if (flow == null)
             return null;
         
@@ -251,7 +240,7 @@ public class FlowController : ControllerStore<Flow>
     [HttpGet("template/{uid}")]
     public async Task<IActionResult> Template([FromRoute] Guid uid)
     {
-        var flow = await GetByUid(uid);
+        var flow = new FlowService().GetByUid(uid);
         if (flow == null)
             return NotFound();
 
@@ -285,13 +274,14 @@ public class FlowController : ControllerStore<Flow>
     [HttpPut("state/{uid}")]
     public async Task<Flow> SetState([FromRoute] Guid uid, [FromQuery] bool? enable)
     {
-        var flow = await GetByUid(uid);
+        var service = new FlowService();
+        var flow = service.GetByUid(uid);
         if (flow == null)
             throw new Exception("Flow not found.");
         if (enable != null)
         {
             flow.Enabled = enable.Value;
-            await DbHelper.Update(flow);
+            service.Update(flow);
         }
 
         return flow;
@@ -305,7 +295,8 @@ public class FlowController : ControllerStore<Flow>
     [HttpPut("set-default/{uid}")]
     public async Task SetDefault([FromRoute] Guid uid, [FromQuery(Name = "default")] bool isDefault = true)
     {
-        var flow = await GetByUid(uid);
+        var service = new FlowService();
+        var flow = service.GetByUid(uid);
         if (flow == null)
             throw new Exception("Flow not found.");
         if(flow.Type != FlowType.Failure)
@@ -314,11 +305,11 @@ public class FlowController : ControllerStore<Flow>
         if (isDefault)
         {
             // make sure no others are defaults
-            var others = (await GetAll()).Where(x => x.Type == FlowType.Failure && x.Default && x.Uid != uid).ToList();
+            var others = service.GetAll().Where(x => x.Type == FlowType.Failure && x.Default && x.Uid != uid).ToList();
             foreach (var other in others)
             {
                 other.Default = false;
-                await Update(other);
+                service.Update(other);
             }
         }
 
@@ -326,7 +317,7 @@ public class FlowController : ControllerStore<Flow>
             return;
 
         flow.Default = isDefault;
-        await Update(flow);
+        service.Update(flow);
     }
     /// <summary>
     /// Delete flows from the system
@@ -336,16 +327,14 @@ public class FlowController : ControllerStore<Flow>
     [HttpDelete]
     public async Task Delete([FromBody] ReferenceModel<Guid> model)
     {
-        if (model == null || model.Uids?.Any() != true)
+        if (model?.Uids?.Any() != true)
             return; // nothing to delete
-        await DeleteAll(model);
-        await UpdateHasFlows();
+        await new FlowService().DeleteAll(model.Uids);
+        UpdateHasFlows();
     }
 
-    private static async Task UpdateHasFlows()
-    {
-        _HasFlows = await DbHelper.HasAny<Flow>("JSON_EXTRACT(Data, '$.Type') = 0");
-    }
+    private static void UpdateHasFlows()
+        => _HasFlows = new FlowService().GetAll().Any();
 
 
     /// <summary>
@@ -359,7 +348,7 @@ public class FlowController : ControllerStore<Flow>
         if (uid != Guid.Empty)
         {
 
-            var flow = await GetByUid(uid);
+            var flow = new FlowService().GetByUid(uid);
             if (flow == null)
                 return flow;
 
@@ -395,7 +384,7 @@ public class FlowController : ControllerStore<Flow>
         else
         {
             // create default flow
-            IEnumerable<string> flowNames = await GetNames();
+            var flowNames = new FlowService().GetAll().Select(x => x.Name).ToList();
             Flow flow = new Flow();
             flow.Parts = new();
             flow.Name = "New Flow";
@@ -533,16 +522,19 @@ public class FlowController : ControllerStore<Flow>
 
         if (string.IsNullOrWhiteSpace(model.Name))
             throw new Exception("ErrorMessages.NameRequired");
+
+        
+        var service = new FlowService();
         model.Name = model.Name.Trim();
         if (uniqueName == false)
         {
-            bool inUse = await NameInUse(model.Uid, model.Name);
+            bool inUse = service.NameInUse(model.Uid, model.Name);
             if (inUse)
                 throw new Exception("ErrorMessages.NameInUse");
         }
         else
         {
-            model.Name = await GetNewUniqueName(model.Name);
+            model.Name = service.GetNewUniqueName(model.Name);
         }
 
         if (model.Parts?.Any() != true)
@@ -568,7 +560,7 @@ public class FlowController : ControllerStore<Flow>
         if (model.Uid == Guid.Empty && model.Type == FlowType.Failure)
         {
             // if first failure flow make it default
-            var others = (await GetAll()).Where(x => x.Type == FlowType.Failure).Count();
+            var others = service.GetAll().Where(x => x.Type == FlowType.Failure).Count();
             if (others == 0)
                 model.Default = true;
         }
@@ -577,16 +569,15 @@ public class FlowController : ControllerStore<Flow>
         if (model.Uid != Guid.Empty)
         {
             // existing, check for name change
-            var existing = await GetByUid(model.Uid);
+            var existing = service.GetByUid(model.Uid);
             nameChanged = existing != null && existing.Name != model.Name;
         }
 
-        var result = await Update(model);
+        service.Update(model);
         if(nameChanged)
             _ = new ObjectReferenceUpdater().RunAsync();
 
-        IncrementConfigurationRevision();
-        return result;
+        return model;
     }
 
     /// <summary>
@@ -598,23 +589,22 @@ public class FlowController : ControllerStore<Flow>
     [HttpPut("{uid}/rename")]
     public async Task Rename([FromRoute] Guid uid, [FromQuery] string name)
     {
-
         if (uid == Guid.Empty)
             return; // renaming a new flow
 
-
-        var flow = await Get(uid);
+        var service = new FlowService();
+        var flow = service.GetByUid(uid);
         if (flow == null)
             throw new Exception("Flow not found");
         if (flow.Name == name)
             return; // name already is the requested name
 
         flow.Name = name;
-        await base.Update(flow);
+        service.Update(flow);
 
         // update any object references
         await new LibraryFileService().UpdateFlowName(flow.Uid, flow.Name);
-        var libraries = new LibraryController().UpdateFlowName(flow.Uid, flow.Name);
+        new LibraryController().UpdateFlowName(flow.Uid, flow.Name);
     }
 
     /// <summary>
@@ -763,7 +753,8 @@ public class FlowController : ControllerStore<Flow>
     /// Gets all the flow template files
     /// </summary>
     /// <returns>a array of all flow template files</returns>
-    private FileInfo[] GetTemplateFiles() => new DirectoryInfo(DirectoryHelper.TemplateDirectoryFlow).GetFiles("*.json", SearchOption.AllDirectories);
+    private FileInfo[] GetTemplateFiles() 
+        => new DirectoryInfo(DirectoryHelper.TemplateDirectoryFlow).GetFiles("*.json", SearchOption.AllDirectories);
 
     /// <summary>
     /// Get flow templates

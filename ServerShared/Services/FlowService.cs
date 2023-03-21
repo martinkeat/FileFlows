@@ -13,7 +13,7 @@ public interface IFlowService
     /// </summary>
     /// <param name="uid">The UID of the flow</param>
     /// <returns>An instance of the flow if found, otherwise null</returns>
-    Task<Flow> Get(Guid uid);
+    Task<Flow> GetByUidAsync(Guid uid);
     
     /// <summary>
     /// Gets the Failure Flow for a specific library
@@ -21,7 +21,7 @@ public interface IFlowService
     /// </summary>
     /// <param name="libraryUid">The UID of the library</param>
     /// <returns>An instance of the Failure Flow if found</returns>
-    Task<Flow> GetFailureFlow(Guid libraryUid);
+    Task<Flow?> GetFailureFlow(Guid libraryUid);
 }
 
 /// <summary>
@@ -52,7 +52,7 @@ public class FlowService : Service, IFlowService
     /// </summary>
     /// <param name="uid">The UID of the flow</param>
     /// <returns>An instance of the flow if found, otherwise null</returns>
-    public async Task<Flow> Get(Guid uid)
+    public async Task<Flow> GetByUidAsync(Guid uid)
     {
         try
         {
@@ -74,7 +74,7 @@ public class FlowService : Service, IFlowService
     /// </summary>
     /// <param name="libraryUid">The UID of the library</param>
     /// <returns>An instance of the Failure Flow if found</returns>
-    public async Task<Flow> GetFailureFlow(Guid libraryUid)
+    public async Task<Flow?> GetFailureFlow(Guid libraryUid)
     {
         try
         {

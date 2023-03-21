@@ -115,7 +115,7 @@ public partial class LibraryFileService
     /// Refreshes the cached libraries
     /// </summary>
     public static void RefreshLibraries()
-        => Libraries = LibraryService.Load().GetAll().Result.ToList();
+        => Libraries = LibraryService.Load().GetAllAsync().Result.ToList();
 
     /// <summary>
     /// Refreshes the cached processing nodes
