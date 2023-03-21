@@ -376,9 +376,9 @@ public class LibraryFileController : Controller //ControllerStore<LibraryFile>
     /// </summary>
     /// <returns>the bar chart data</returns>
     [HttpGet("shrinkage-bar-chart")]
-    public async Task<object> ShrinkageBarChart()
+    public object ShrinkageBarChart()
     {
-        var groups = await ShrinkageGroups();
+        var groups = ShrinkageGroups();
         // #if(DEBUG)
         // groups = new Dictionary<string, ShrinkageData>()
         // {
@@ -421,7 +421,7 @@ public class LibraryFileController : Controller //ControllerStore<LibraryFile>
     /// </summary>
     /// <returns>the library file shrinkage data</returns>
     [HttpGet("shrinkage-groups")]
-    public async Task<Dictionary<string, ShrinkageData>> ShrinkageGroups()
+    public Dictionary<string, ShrinkageData> ShrinkageGroups()
     {
         var data = new LibraryFileService().GetShrinkageGroups();
         var libraries = data.ToDictionary(x => x.Library, x => x);

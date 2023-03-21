@@ -51,7 +51,7 @@ public class LogController : Controller
         if(settings.LogEveryRequest)
             sources.Add(new() { Value = "HTTP", Label = "HTTP Requests" });
 
-        var nodes = await new NodeController().GetAll();
+        var nodes = new NodeController().GetAll();
         foreach (var node in nodes)
         {
             if(node.Uid != Globals.InternalNodeUid) // internal logs to system log
@@ -146,7 +146,8 @@ public class LogController : Controller
 
         if(ClientUids.TryGetValue(message.NodeAddress.ToLower(), out Guid clientUid) == false)
         {
-            foreach (var node in new NodeController().GetAll().Result)
+            var nodes = new Services.NodeService().GetAll();
+            foreach (var node in nodes)
             {
                 if (node.Address.ToLower() == message.NodeAddress.ToLower())
                     clientUid = node.Uid;

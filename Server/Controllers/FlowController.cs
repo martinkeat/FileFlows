@@ -45,7 +45,7 @@ public class FlowController : Controller
         new FlowService().GetAll().OrderBy(x => x.Name.ToLower());
 
     [HttpGet("list-all")]
-    public async Task<IEnumerable<FlowListModel>> ListAll()
+    public IEnumerable<FlowListModel> ListAll()
     {
         var flows = new FlowService().GetAll();
         List<FlowListModel> list = new List<FlowListModel>();
@@ -185,7 +185,7 @@ public class FlowController : Controller
     /// <param name="json">The json data to import</param>
     /// <returns>The newly import flow</returns>
     [HttpPost("import")]
-    public async Task<Flow> Import([FromBody] string json)
+    public Flow Import([FromBody] string json)
     {
         Flow? flow = JsonSerializer.Deserialize<Flow>(json);
         if (flow == null)
@@ -219,7 +219,7 @@ public class FlowController : Controller
     /// <param name="uid">The UID of the flow</param>
     /// <returns>The duplicated flow</returns>
     [HttpGet("duplicate/{uid}")]
-    public async Task<Flow> Duplicate([FromRoute] Guid uid)
+    public Flow Duplicate([FromRoute] Guid uid)
     { 
         var flow = new FlowService().GetByUid(uid);
         if (flow == null)
@@ -229,7 +229,7 @@ public class FlowController : Controller
         {
             WriteIndented = true
         });
-        return await Import(json);
+        return Import(json);
     }
 
     /// <summary>
@@ -238,7 +238,7 @@ public class FlowController : Controller
     /// <param name="uid">The Flow UID</param>
     /// <returns>A download response of the flow template</returns>
     [HttpGet("template/{uid}")]
-    public async Task<IActionResult> Template([FromRoute] Guid uid)
+    public IActionResult Template([FromRoute] Guid uid)
     {
         var flow = new FlowService().GetByUid(uid);
         if (flow == null)
@@ -272,7 +272,7 @@ public class FlowController : Controller
     /// <param name="enable">Whether or not the flow should be enabled</param>
     /// <returns>The updated flow</returns>
     [HttpPut("state/{uid}")]
-    public async Task<Flow> SetState([FromRoute] Guid uid, [FromQuery] bool? enable)
+    public Flow SetState([FromRoute] Guid uid, [FromQuery] bool? enable)
     {
         var service = new FlowService();
         var flow = service.GetByUid(uid);
@@ -293,7 +293,7 @@ public class FlowController : Controller
     /// <param name="uid">The flow UID</param>
     /// <param name="isDefault">Whether or not the flow should be the default</param>
     [HttpPut("set-default/{uid}")]
-    public async Task SetDefault([FromRoute] Guid uid, [FromQuery(Name = "default")] bool isDefault = true)
+    public void SetDefault([FromRoute] Guid uid, [FromQuery(Name = "default")] bool isDefault = true)
     {
         var service = new FlowService();
         var flow = service.GetByUid(uid);
@@ -515,7 +515,7 @@ public class FlowController : Controller
     /// <param name="uniqueName">Whether or not a new unique name should be generated if the name already exists</param>
     /// <returns>The saved flow</returns>
     [HttpPut]
-    public async Task<Flow> Save([FromBody] Flow model, [FromQuery] bool uniqueName = false)
+    public Flow Save([FromBody] Flow model, [FromQuery] bool uniqueName = false)
     {
         if (model == null)
             throw new Exception("No model");

@@ -317,7 +317,7 @@ public class ScriptController : Controller
         {
             if (DeleteScript(script.Uid, script.Type))
             {
-                _ = UpdateScriptReferences(script.Uid, script.Name);
+                UpdateScriptReferences(script.Uid, script.Name);
             }
             script.Uid = script.Name;
         }
@@ -335,7 +335,7 @@ public class ScriptController : Controller
         var service = new SettingsService();
         _ = service.RevisionIncrement();
     }
-    private async Task UpdateScriptReferences(string oldName, string newName)
+    private void UpdateScriptReferences(string oldName, string newName)
     {
         var service = new FlowService();
         var flows = service.GetAll();

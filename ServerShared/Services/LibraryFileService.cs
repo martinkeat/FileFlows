@@ -25,7 +25,7 @@ public interface ILibraryFileService
     /// </summary>
     /// <param name="uid">The UID of the library file</param>
     /// <returns>The library file if found, otherwise null</returns>
-    Task<LibraryFile> Get(Guid uid);
+    Task<LibraryFile?> Get(Guid uid);
 
     /// <summary>
     /// Deletes library files
@@ -123,7 +123,7 @@ public class LibraryFileService : Service, ILibraryFileService
     /// </summary>
     /// <param name="uid">The UID of the library file</param>
     /// <returns>The library file if found, otherwise null</returns>
-    public async Task<LibraryFile> Get(Guid uid)
+    public async Task<LibraryFile?> Get(Guid uid)
     {
         try
         {

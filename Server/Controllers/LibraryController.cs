@@ -178,7 +178,7 @@ public class LibraryController : Controller
         }
     }
 
-    internal async Task UpdateLastScanned(Guid uid)
+    internal void UpdateLastScanned(Guid uid)
     {
         var service = new LibraryService();
         var lib = service.GetByUid(uid);

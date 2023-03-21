@@ -86,10 +86,10 @@ public class NodeService : CachedService<ProcessingNode>, INodeService
     /// </summary>
     /// <param name="name">The name of the tool</param>
     /// <returns>a tool path</returns>
-    public async Task<string> GetVariableAsync(string name)
+    public Task<string> GetVariableAsync(string name)
     {
-        var result = await new VariableController().GetByName(name);
-        return result?.Value ?? string.Empty;
+        var result = new VariableController().GetByName(name);
+        return Task.FromResult(result?.Value ?? string.Empty);
     }
 
     /// <summary>
@@ -105,10 +105,4 @@ public class NodeService : CachedService<ProcessingNode>, INodeService
         var node = Data.FirstOrDefault(x => x.Address.ToLowerInvariant() == address);
         return node!;
     }
-    
-    public Task<List<ProcessingNode>> GetAllAsync()
-        => Task.FromResult(GetAll());
-
-    public Task<ProcessingNode> GetByUidAsync(Guid uid)
-        => Task.FromResult(GetByUid(uid)!);
 }

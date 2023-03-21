@@ -665,7 +665,7 @@ public class WatchedLibrary:IDisposable
             ScanComplete = true;
             
             Library.LastScanned = DateTime.Now;
-            new LibraryController().UpdateLastScanned(Library.Uid).Wait();
+            new LibraryController().UpdateLastScanned(Library.Uid);
         }
         catch(Exception ex)
         {

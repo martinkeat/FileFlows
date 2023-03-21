@@ -29,7 +29,7 @@ public partial class LibraryFileService
     /// </summary>
     /// <param name="uid">The UID of the library file</param>
     /// <returns>The library file if found, otherwise null</returns>
-    public Task<LibraryFile> Get(Guid uid)
+    public Task<LibraryFile?> Get(Guid uid)
         => Task.FromResult(GetByUid(uid));
 
     /// <summary>

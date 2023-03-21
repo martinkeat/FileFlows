@@ -34,7 +34,7 @@ public class DashboardController : Controller
     /// </summary>
     /// <returns>all dashboards in the system</returns>
     [HttpGet("list")]
-    public async Task<IEnumerable<ListOption>> ListAll()
+    public IEnumerable<ListOption> ListAll()
     {
         var dashboards = new DashboardService().GetAll()
             .OrderBy(x => x.Name.ToLower()).Select(x => new ListOption
@@ -57,7 +57,7 @@ public class DashboardController : Controller
     /// <param name="uid">The UID of the dashboard</param>
     /// <returns>The dashboard instance</returns>
     [HttpGet("{uid}/Widgets")]
-    public async Task<IEnumerable<WidgetUiModel>> Get(Guid uid)
+    public IEnumerable<WidgetUiModel> Get(Guid uid)
     {
         var db = new DashboardService().GetByUid(uid);;
         if ((db == null || db.Uid == Guid.Empty) && uid == Dashboard.DefaultDashboardUid)

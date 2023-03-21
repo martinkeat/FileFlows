@@ -34,7 +34,7 @@ public class VariableController : Controller
     /// <param name="name">The name of the variable</param>
     /// <returns>The variable instance if found</returns>
     [HttpGet("name/{name}")]
-    public async Task<Variable?> GetByName(string name)
+    public Variable? GetByName(string name)
         => new VariableService().GetByName(name);
 
     /// <summary>
@@ -43,7 +43,7 @@ public class VariableController : Controller
     /// <param name="variable">The variable to save</param>
     /// <returns>The saved instance</returns>
     [HttpPost]
-    public async Task<Variable> Save([FromBody] Variable variable)
+    public Variable Save([FromBody] Variable variable)
     {
         new VariableService().Update(variable);
         return variable;

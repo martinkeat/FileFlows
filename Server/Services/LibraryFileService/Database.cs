@@ -110,8 +110,8 @@ public partial class LibraryFileService
         return x.GetCustomAttribute<IgnoreAttribute>() == null;
     }).Select(x => x.Name).ToArray();
 
-    private async Task Database_Update(LibraryFile o)
-        => AddOrUpdate(true, o);
+    private void Database_Update(LibraryFile o)
+        => AddOrUpdate(true, o).Wait();
 
     private async Task Database_Insert(LibraryFile o)
     {

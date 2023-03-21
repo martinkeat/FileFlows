@@ -64,7 +64,7 @@ public class ScriptNode:Node
                 var value = dictModel?.ContainsKey(p.Name) == true ? dictModel[p.Name] : null;
                 if (value is JsonElement je && je.ValueKind == JsonValueKind.String)
                 {
-                    string str = je.GetString();
+                    var str = je.GetString();
                     if (string.IsNullOrWhiteSpace(str) == false)
                     {
                         Logger.Instance.ILog("Parameter is string replacing variables: " + str);

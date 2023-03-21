@@ -87,9 +87,9 @@ public partial class LibraryFileService
     /// Remove files from where the libraries match a given library
     /// </summary>
     /// <param name="uids">UIDs of the libraries</param>
-    private void RemoveLibraries(params Guid[] libraryUids)
+    private void RemoveLibraries(params Guid[] uids)
         => Data = Data.Where(x =>
-            x.Value.LibraryUid == null || libraryUids.Contains(x.Value.LibraryUid.Value) == false
+            x.Value.LibraryUid == null || uids.Contains(x.Value.LibraryUid.Value) == false
         ).ToDictionary(x => x.Key, x => x.Value);
 
     /// <summary>

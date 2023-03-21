@@ -77,7 +77,7 @@ public partial class LibraryFileService : ILibraryFileService
     /// </summary>
     /// <param name="file">The library file to update</param>
     /// <returns>The newly updated library file</returns>
-    public async Task<LibraryFile> Update(LibraryFile file)
+    public Task<LibraryFile> Update(LibraryFile file)
     {
         file.DateModified = DateTime.Now;
         file.ExecutedNodes ??= new ();
@@ -85,9 +85,9 @@ public partial class LibraryFileService : ILibraryFileService
         file.FinalMetadata ??= new ();
         if (file.Status == FileStatus.Processed || file.Status == FileStatus.ProcessingFailed)
             file.Flags = LibraryFileFlags.None;
-        await Database_Update(file);
+        Database_Update(file);
         UpdateFile(file);
-        return file;
+        return Task.FromResult(file);
     }
 
     /// <summary>
@@ -342,7 +342,7 @@ public partial class LibraryFileService : ILibraryFileService
     /// Updates a moved file in the database
     /// </summary>
     /// <param name="file">the file to update</param>
-    public async Task UpdateMovedFile(LibraryFile file)
+    public Task UpdateMovedFile(LibraryFile file)
         => Database_Execute(
             $"update LibraryFile set Name = @0, RelativePath = @1, OutputPath = @2, CreationTime = @3, LastWriteTime = @4 where Uid = @5",
             file.Name, file.RelativePath, file.OutputPath, 

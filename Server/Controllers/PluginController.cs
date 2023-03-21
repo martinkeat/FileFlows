@@ -239,7 +239,6 @@ public class PluginController : Controller
             return; // nothing to delete
 
         var pluginDownloader = new PluginDownloader(GetRepositories());
-        bool downloaded = false;
         foreach(var package in model.Packages)
         {
             try
@@ -248,7 +247,6 @@ public class PluginController : Controller
                 if (dlResult.Success)
                 {
                     PluginScanner.UpdatePlugin(package, dlResult.Data);
-                    downloaded = true;
                 }
             }
             catch (Exception ex)

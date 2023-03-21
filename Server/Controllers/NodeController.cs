@@ -19,7 +19,7 @@ public class NodeController : Controller
     /// </summary>
     /// <returns>a list of processing node</returns>
     [HttpGet]
-    public async Task<IEnumerable<ProcessingNode>> GetAll()
+    public IEnumerable<ProcessingNode> GetAll()
     {
         var nodes = new NodeService().GetAll()
             .OrderBy(x => x.Address == Globals.InternalNodeName ? 0 : 1)
@@ -74,7 +74,7 @@ public class NodeController : Controller
     /// <param name="node">The node to save</param>
     /// <returns>The saved instance</returns>
     [HttpPost]
-    public async Task<ProcessingNode> Save([FromBody] ProcessingNode node)
+    public ProcessingNode Save([FromBody] ProcessingNode node)
     {
         // see if we are updating the internal node
         if(node.Libraries?.Any() == true)
@@ -92,7 +92,7 @@ public class NodeController : Controller
 
         if(node.Uid == Globals.InternalNodeUid)
         {
-            var internalNode = (await GetAll()).Where(x => x.Uid == Globals.InternalNodeUid).FirstOrDefault();
+            var internalNode = GetAll().FirstOrDefault(x => x.Uid == Globals.InternalNodeUid);
             if(internalNode != null)
             {
                 internalNode.Schedule = node.Schedule;
@@ -110,7 +110,7 @@ public class NodeController : Controller
                     internalNode.PreExecuteScript = node.PreExecuteScript;
                 
                 internalNode.Libraries = node.Libraries;
-                await CheckLicensedNodes(internalNode.Uid, internalNode.Enabled);
+                CheckLicensedNodes(internalNode.Uid, internalNode.Enabled);
                 //var processingNode = await Update(internalNode, checkDuplicateName: true, useCache:true);
                 
                 new NodeService().Update(internalNode);
@@ -127,7 +127,7 @@ public class NodeController : Controller
         }
         //var result = await Update(node, checkDuplicateName: true, useCache:true);
         new NodeService().Update(node);
-        await CheckLicensedNodes(node.Uid, node.Enabled);
+        CheckLicensedNodes(node.Uid, node.Enabled);
         // LibraryFileService.RefreshProcessingNodes();
         return node;
     }
@@ -140,7 +140,7 @@ public class NodeController : Controller
     [HttpDelete]
     public async Task Delete([FromBody] ReferenceModel<Guid> model)
     {
-        var internalNode = (await this.GetAll())
+        var internalNode =  this.GetAll()
             .FirstOrDefault(x => x.Address == Globals.InternalNodeName)?.Uid ?? Guid.Empty;
         if (model.Uids.Contains(internalNode))
             throw new Exception("ErrorMessages.CannotDeleteInternalNode");
@@ -154,7 +154,7 @@ public class NodeController : Controller
     /// <param name="enable">Whether or not this node is enabled and will process files</param>
     /// <returns>an awaited task</returns>
     [HttpPut("state/{uid}")]
-    public async Task<ProcessingNode> SetState([FromRoute] Guid uid, [FromQuery] bool? enable)
+    public ProcessingNode SetState([FromRoute] Guid uid, [FromQuery] bool? enable)
     {
         var service = new NodeService();
         var node = service.GetByUid(uid);
@@ -165,7 +165,7 @@ public class NodeController : Controller
             node.Enabled = enable.Value;
             service.Update(node);
         }
-        await CheckLicensedNodes(uid, enable == true);
+        CheckLicensedNodes(uid, enable == true);
         return node;
     }
 
@@ -241,7 +241,7 @@ public class NodeController : Controller
         };
         service.Update(node);
         node.SignalrUrl = "flow";
-        await CheckLicensedNodes(Guid.Empty, false);
+        CheckLicensedNodes(Guid.Empty, false);
         return node;
     }
 
@@ -250,10 +250,10 @@ public class NodeController : Controller
     /// </summary>
     /// <param name="nodeUid">optional UID of a node that should be checked first</param>
     /// <param name="enabled">optional status of the node state</param>
-    private async Task CheckLicensedNodes(Guid nodeUid, bool enabled)
+    private void CheckLicensedNodes(Guid nodeUid, bool enabled)
     {
         var licensedNodes = LicenseHelper.GetLicensedProcessingNodes();
-        var nodes = await GetAll();
+        var nodes = GetAll();
         int current = 0;
         var service = new NodeService();
         foreach (var node in nodes.OrderBy(x => x.Uid == nodeUid ? 1 : 2).ThenBy(x => x.Name))
@@ -283,7 +283,7 @@ public class NodeController : Controller
     /// <param name="model">The register model containing information about the processing node being registered</param>
     /// <returns>The processing node instance</returns>
     [HttpPost("register")]
-    public async Task<ProcessingNode> RegisterPost([FromBody] RegisterModel model)
+    public ProcessingNode RegisterPost([FromBody] RegisterModel model)
     {
         if (string.IsNullOrWhiteSpace(model?.Address))
             throw new ArgumentNullException(nameof(model.Address));

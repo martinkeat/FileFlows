@@ -24,15 +24,19 @@ public class NvidiaSmi
             if (string.IsNullOrEmpty(output))
                 return new NvidiaGpu[] { };
 
-            MethodInfo method = typeof(XmlSerializer).GetMethod("set_Mode",
+            var method = typeof(XmlSerializer).GetMethod("set_Mode",
                 BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
+            if(method == null)
+                return new NvidiaGpu[] { };
             method.Invoke(null, new object[] { 1 });
 
             XmlReader reader = new XmlTextReader(new StringReader(output));
             XmlSerializer serializer = new XmlSerializer(typeof(nvidia_smi_log));
             if (serializer.CanDeserialize(reader))
             {
-                var info = (nvidia_smi_log)serializer.Deserialize(reader);
+                var info = serializer.Deserialize(reader) as nvidia_smi_log;
+                if (info == null)
+                    return new NvidiaGpu[] { };
                 List<NvidiaGpu> gpus = new List<NvidiaGpu>();
                 foreach (var agpu in info.gpu)
                 {
@@ -113,7 +117,7 @@ public class NvidiaSmi
     {
         #if(DEBUG)
         return sample;
-        #endif
+        #else
         try
         {
             using var p = new Process();
@@ -134,6 +138,7 @@ public class NvidiaSmi
             Logger.Instance.WLog("Failed getting nvidia-smi information: " + ex.Message);
             return string.Empty;
         }
+        #endif
     }
 
     private const string sample = @"<?xml version=""1.0"" ?>
@@ -319,11 +324,11 @@ public class NvidiaGpu
 {
     /// <summary>
     /// Gets or sets the GPUs name
-    /// </summary
+    /// </summary>
     public string Name { get; set; }
     /// <summary>
     /// Gets or sets the GPUs brand
-    /// </summary
+    /// </summary>B
     public string Brand { get; set; }
     /// <summary>
     /// Gets or sets the GPUs architecture

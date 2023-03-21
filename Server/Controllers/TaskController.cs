@@ -33,7 +33,7 @@ public class TaskController : Controller
     /// <param name="name">The name of the scheduled task</param>
     /// <returns>The scheduled task instance if found</returns>
     [HttpGet("name/{name}")]
-    public async Task<FileFlowsTask?> GetByName(string name)
+    public FileFlowsTask? GetByName(string name)
         => new TaskService().GetByName(name);
 
     /// <summary>

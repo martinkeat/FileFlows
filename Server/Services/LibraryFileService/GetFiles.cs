@@ -62,7 +62,7 @@ public partial class LibraryFileService
             return await Task.FromResult(true);
         #endif
         var licensedNodes = LicenseHelper.GetLicensedProcessingNodes();
-        var allNodes = await new NodeController().GetAll();
+        var allNodes = new NodeService().GetAll();
         var enabledNodes = allNodes.Where(x => x.Enabled).OrderBy(x => x.Name).Take(licensedNodes).ToArray();
         var enabledNodeUids = enabledNodes.Select(x => x.Uid).ToArray();
         return enabledNodeUids.Contains(node.Uid);
@@ -204,7 +204,7 @@ public partial class LibraryFileService
             if (exclusionUids?.Any() == true)
                 query = query.Where(x => exclusionUids.Contains(x.Uid) == false);
             if (allowedLibraries != null)
-                query = query.Where(x => allowedLibraries.Contains(x.LibraryUid.Value));
+                query = query.Where(x => x.LibraryUid != null && allowedLibraries.Contains(x.LibraryUid.Value));
             
             if (status == FileStatus.Disabled || status == FileStatus.OutOfSchedule)
                 return query.OrderBy(x => x.DateModified);

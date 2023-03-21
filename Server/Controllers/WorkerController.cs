@@ -62,12 +62,9 @@ public class WorkerController : Controller
                 _ = new LibraryFileService().UpdateOriginalSize(lf.Uid, lf.OriginalSize);
             if (lf.LibraryUid != null)
             {
-                _ = Task.Run(async () =>
-                {
-                    var library = new LibraryService().GetByUid(lf.LibraryUid.Value);
-                    if(library != null)
-                        SystemEvents.TriggerLibraryFileProcessingStarted(lf, library);
-                });
+                var library = new LibraryService().GetByUid(lf.LibraryUid.Value);
+                if (library != null)
+                    SystemEvents.TriggerLibraryFileProcessingStarted(lf, library);
             }
         }
         return info;
@@ -232,7 +229,7 @@ public class WorkerController : Controller
         }
     }
 
-    private async Task<bool> LibraryFileHasChanged(LibraryFile file)
+    private bool LibraryFileHasChanged(LibraryFile file)
     {
         var cached = LibraryFileCacheStore.Get<LibraryFileRecord>(file.Uid);
         LibraryFileCacheStore.Store(file.Uid, new LibraryFileRecord
@@ -568,6 +565,7 @@ public class WorkerController : Controller
     /// </summary>
     /// <returns>UIDs of executing library files</returns>
     internal static Guid[] ExecutingLibraryFiles()
-        => Executors?.Select(x => x.Value?.LibraryFile?.Uid)?.Where(x => x != null)?.Select(x => x.Value)?.ToArray() ??
+        => Executors?.Select(x => x.Value?.LibraryFile?.Uid)?
+               .Where(x => x != null)?.Select(x => x.Value)?.ToArray() ??
            new Guid[] { };
 }

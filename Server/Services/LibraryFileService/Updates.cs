@@ -86,7 +86,7 @@ public partial class LibraryFileService
     public async Task UpdateOriginalSize(Guid uid, long size)
     {
         var existing = GetByUid(uid);
-        if (uid == null)
+        if (uid == Guid.Empty)
             return; // unknown file
         if (existing.OriginalSize == size)
             return; // nothing to do
