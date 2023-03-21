@@ -95,7 +95,7 @@ public class RevisionController:Controller
         {
             // sqlite.. have to update any in memory objects...
             if (dbo.Type == typeof(Library).FullName)
-                await new LibraryController().Refresh(dbo);
+                new LibraryService().Refresh();
             else if (dbo.Type == typeof(Flow).FullName)
                 new FlowService().Refresh();
             else if (dbo.Type == typeof(Dashboard).FullName)

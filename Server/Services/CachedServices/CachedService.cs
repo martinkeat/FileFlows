@@ -12,11 +12,21 @@ public abstract class CachedService<T> where T : FileFlowObject, new()
     /// Gets if this service increments the system configuration revision number when changes to the data happens
     /// </summary>
     public virtual bool IncrementsConfiguration => true;
-    
+
+    private List<T> _Data;
     /// <summary>
     /// Gets or sets the data
     /// </summary>
-    protected List<T> Data { get; set; }
+    protected List<T> Data
+    {
+        get
+        {
+            if(_Data == null)
+                Refresh();
+            return _Data;
+        }
+        set => _Data = value;
+    }
 
     /// <summary>
     /// Gets the data
@@ -49,10 +59,12 @@ public abstract class CachedService<T> where T : FileFlowObject, new()
     /// Updates an item
     /// </summary>
     /// <param name="item">the item being updated</param>
-    /// <param name="dontIncremetnConfigRevision">if this is a revision object, if the revision should be updated</param>
-    public void Update(T item, bool dontIncremetnConfigRevision = false)
+    /// <param name="dontIncrementConfigRevision">if this is a revision object, if the revision should be updated</param>
+    public void Update(T item, bool dontIncrementConfigRevision = false)
     {
-        UpdateActual(item, dontIncremetnConfigRevision);
+        UpdateActual(item, dontIncrementConfigRevision);
+        if (dontIncrementConfigRevision == false)
+            IncrementConfigurationRevision();
         Refresh();
     }
 
@@ -60,21 +72,16 @@ public abstract class CachedService<T> where T : FileFlowObject, new()
     /// Actual update method
     /// </summary>
     /// <param name="item">the item being updated</param>
-    /// <param name="dontIncremetnConfigRevision">if this is a revision object, if the revision should be updated</param>
-    protected virtual void UpdateActual(T item, bool dontIncremetnConfigRevision = false)
-    {
-        DbHelper.Update(item);
-        if (dontIncremetnConfigRevision == false)
-            IncrementConfigurationRevision();
-    }
+    /// <param name="dontIncrementConfigRevision">if this is a revision object, if the revision should be updated</param>
+    protected virtual void UpdateActual(T item, bool dontIncrementConfigRevision = false)
+        => DbHelper.Update(item);
         
 
     /// <summary>
     /// Refreshes the data
     /// </summary>
     public void Refresh()
-        => this.Data = DbHelper.Select<T>().Result.ToList();
-    
+        => Data = DbHelper.Select<T>().Result.ToList();
     
     /// <summary>
     /// Deletes all items matching the UIDs

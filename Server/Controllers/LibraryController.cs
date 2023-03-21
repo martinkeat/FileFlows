@@ -11,20 +11,8 @@ namespace FileFlows.Server.Controllers;
 /// Library controller
 /// </summary>
 [Route("/api/library")]
-public class LibraryController : ControllerStore<Library>
+public class LibraryController : Controller
 {
-    protected override bool AutoIncrementRevision => true;
-        
-    internal override async Task<IEnumerable<Library>> GetDataList(bool? useCache = null)
-    {
-        return (await GetData()).Values.Select(x =>
-        {
-            if (string.IsNullOrEmpty(x.Schedule))
-                x.Schedule = new string('1', 672);
-            return x;
-        }).ToList();
-    }
-    
     private static bool? _HasLibraries;
     /// <summary>
     /// Gets if there are any libraries
@@ -66,7 +54,7 @@ public class LibraryController : ControllerStore<Library>
     /// <param name="library">The library to save</param>
     /// <returns>the saved library instance</returns>
     [HttpPost]
-    public async Task<Library> Save([FromBody] Library library)
+    public Library Save([FromBody] Library library)
     {
         if (library?.Flow == null)
             throw new Exception("ErrorMessages.NoFlowSpecified");
@@ -75,16 +63,17 @@ public class LibraryController : ControllerStore<Library>
         if (Regex.IsMatch(library.Schedule, "^[01]{672}$") == false)
             library.Schedule = new string('1', 672);
 
+        var service = new LibraryService();
         bool nameUpdated = false;
         if (library.Uid != Guid.Empty)
         {
             // existing, check for name change
-            var existing = await GetByUid(library.Uid);
+            var existing = service.GetByUid(library.Uid);
             nameUpdated = existing != null && existing.Name != library.Name;
         }
         
         bool newLib = library.Uid == Guid.Empty;
-        new LibraryService().Update(library);
+        service.Update(library);
 
         _ = Task.Run(async () =>
         {
@@ -107,7 +96,6 @@ public class LibraryController : ControllerStore<Library>
     private void RefreshCaches()
     {
         LibraryWorker.UpdateLibraries();
-        LibraryFileService.RefreshLibraries();
     }
 
     /// <summary>
@@ -168,7 +156,7 @@ public class LibraryController : ControllerStore<Library>
             if (item == null)
                 continue;
             item.LastScanned = DateTime.MinValue;
-            _ = Update(item);
+            service.Update(item);
         }
 
         _ = Task.Run(async () =>
@@ -197,7 +185,7 @@ public class LibraryController : ControllerStore<Library>
         if (lib == null)
             return;
         lib.LastScanned = DateTime.Now;
-        service.Update(lib, dontIncremetnConfigRevision: true);
+        service.Update(lib, dontIncrementConfigRevision: true);
     }
 
 

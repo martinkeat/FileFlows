@@ -43,7 +43,7 @@ public partial class LibraryFileService
         if (node != null && node.Version != nodeVersion)
         {
             node.Version = nodeVersion;
-            await new NodeController().Update(node);
+            new NodeService().Update(node);
         }
 
         if (await NodeEnabled(node) == false)
@@ -268,10 +268,13 @@ public partial class LibraryFileService
     /// <returns>If found, the next library file to process, otherwise null</returns>
     public async Task<LibraryFile?> GetNextLibraryFile(string nodeName, Guid nodeUid, Guid workerUid)
     {
-        var node = ProcessingNodes.FirstOrDefault(x => x.Uid == nodeUid);
+        var node = new NodeService().GetByUid(nodeUid);
+        if (node == null)
+            return null;
+        
         var nodeLibraries = node?.Libraries?.Select(x => x.Uid)?.ToList() ?? new List<Guid>();
 
-        var canProcess = Libraries.Where(x =>
+        var canProcess = new LibraryService().GetAll().Where(x =>
         {
             if (node.AllLibraries == ProcessingLibraries.All)
                 return true;

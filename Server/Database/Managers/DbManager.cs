@@ -588,7 +588,7 @@ public abstract class DbManager
             ))
         {
             // can't await this, this would lock the database on Sqlite since we only allow a single connection
-            // to Sqlite at a time, and that connection is already being used
+            // to SQLite at a time, and that connection is already being used
             _ = RevisionController.SaveRevision(dbObject);
         }
 

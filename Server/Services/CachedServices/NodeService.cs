@@ -1,4 +1,6 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.ComponentModel;
+using System.Runtime.InteropServices;
+using Esprima.Ast;
 using FileFlows.Server.Helpers;
 
 namespace FileFlows.Server.Services;
@@ -15,6 +17,9 @@ using System.Threading.Tasks;
 public class NodeService : CachedService<ProcessingNode>, INodeService
 {
     public override bool IncrementsConfiguration => false;
+
+    static NodeService()
+        => new NodeService().Refresh();
 
     /// <summary>
     /// A loader to load an instance of the Node service

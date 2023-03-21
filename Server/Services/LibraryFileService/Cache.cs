@@ -9,16 +9,10 @@ public partial class LibraryFileService
 {
     private static Dictionary<Guid, LibraryFile> Data = new Dictionary<Guid, LibraryFile>();
 
-    private static List<Library> Libraries { get; set; }
-    private static List<ProcessingNode> ProcessingNodes { get; set; }
-
     static LibraryFileService()
     {
         if (Globals.IsUnitTesting == false)
-        {
             Refresh();
-            RefreshLibraries();
-        }
     }
 
     #if(DEBUG)
@@ -110,16 +104,4 @@ public partial class LibraryFileService
                 Data.Remove(file.Uid);
         }
     }
-
-    /// <summary>
-    /// Refreshes the cached libraries
-    /// </summary>
-    public static void RefreshLibraries()
-        => Libraries = LibraryService.Load().GetAllAsync().Result.ToList();
-
-    /// <summary>
-    /// Refreshes the cached processing nodes
-    /// </summary>
-    public static void RefreshProcessingNodes()
-        => ProcessingNodes = NodeService.Load().GetAllAsync().Result.ToList();
 }

@@ -39,7 +39,7 @@ public class SettingsController : Controller
 
         if (DbHelper.UseMemoryCache)
         {
-            libs = new LibraryController().GetData().Result?.Any() == true;
+            libs = new LibraryService().GetAll().Any();
             flows = new FlowService().GetAll().Any();
         }
         else

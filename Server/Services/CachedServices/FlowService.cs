@@ -11,6 +11,9 @@ using System.Threading.Tasks;
 /// </summary>
 public class FlowService : CachedService<Flow>, IFlowService
 {
+    static FlowService()
+        => new FlowService().Refresh();
+    
     /// <summary>
     /// Gets the Failure Flow for a specific library
     /// This is the flow that is called if the flow fails 

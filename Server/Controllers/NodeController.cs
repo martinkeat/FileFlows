@@ -12,10 +12,8 @@ namespace FileFlows.Server.Controllers;
 /// Processing node controller
 /// </summary>
 [Route("/api/node")]
-public class NodeController : ControllerStore<ProcessingNode>
+public class NodeController : Controller
 {
-    protected override bool AutoIncrementRevision => true;
-    
     /// <summary>
     /// Gets a list of all processing nodes in the system
     /// </summary>
@@ -51,7 +49,7 @@ public class NodeController : ControllerStore<ProcessingNode>
                     update = true;
             }
             if(update)
-                await Update(internalNode);
+                new NodeService().Update(internalNode);
         }
 #if (DEBUG)
         // set this to linux so we can test the full UI
@@ -158,13 +156,14 @@ public class NodeController : ControllerStore<ProcessingNode>
     [HttpPut("state/{uid}")]
     public async Task<ProcessingNode> SetState([FromRoute] Guid uid, [FromQuery] bool? enable)
     {
-        var node = await GetByUid(uid, useCache:true);
+        var service = new NodeService();
+        var node = service.GetByUid(uid);
         if (node == null)
             throw new Exception("Node not found.");
-        if (enable != null)
+        if (enable != null && node.Enabled != enable.Value)
         {
             node.Enabled = enable.Value;
-            new NodeService().Update(node);
+            service.Update(node);
         }
         await CheckLicensedNodes(uid, enable == true);
         return node;
@@ -181,15 +180,16 @@ public class NodeController : ControllerStore<ProcessingNode>
     {
         if (string.IsNullOrWhiteSpace(address))
             throw new ArgumentNullException(nameof(address));
-        
-        var node = await new Services.NodeService().GetByAddressAsync(address);
+
+        var service = new NodeService();
+        var node = await service.GetByAddressAsync(address);
         if (node == null)
             return node;
 
         if (string.IsNullOrEmpty(version) == false && node.Version != version)
         {
             node.Version = version;
-            await Update(node);
+            service.Update(node);
         }
         else
         {
@@ -213,8 +213,9 @@ public class NodeController : ControllerStore<ProcessingNode>
             throw new ArgumentNullException(nameof(address));
 
         address = address.Trim();
-        var data = await GetData();
-        var existing = data.Where(x => x.Value.Address.ToLower() == address.ToLower()).Select(x => x.Value).FirstOrDefault();
+        var service = new NodeService();
+        var data = service.GetAll();
+        var existing = data.FirstOrDefault(x => x.Address.ToLowerInvariant() == address.ToLowerInvariant());
         if (existing != null)
         {
             existing.SignalrUrl = "flow";
@@ -224,7 +225,7 @@ public class NodeController : ControllerStore<ProcessingNode>
         // doesnt exist, register a new node.
         var variables = await new VariableController().GetAll();
         bool isSystem = address == Globals.InternalNodeName;
-        var result = await Update(new ProcessingNode
+        var node = new ProcessingNode
         {
             Name = address,
             Address = address,
@@ -232,13 +233,16 @@ public class NodeController : ControllerStore<ProcessingNode>
             FlowRunners = 1,
             AllLibraries = ProcessingLibraries.All,
             Schedule = new string('1', 672),
-            Mappings = isSystem  ? null : variables.Select(x => new
-                KeyValuePair<string, string>(x.Value, "")
-            ).ToList()
-        });
-        result.SignalrUrl = "flow";
+            Mappings = isSystem
+                ? null
+                : variables.Select(x => new
+                    KeyValuePair<string, string>(x.Value, "")
+                ).ToList()
+        };
+        service.Update(node);
+        node.SignalrUrl = "flow";
         await CheckLicensedNodes(Guid.Empty, false);
-        return await GetByUid(result.Uid);
+        return node;
     }
 
     /// <summary>
@@ -251,6 +255,7 @@ public class NodeController : ControllerStore<ProcessingNode>
         var licensedNodes = LicenseHelper.GetLicensedProcessingNodes();
         var nodes = await GetAll();
         int current = 0;
+        var service = new NodeService();
         foreach (var node in nodes.OrderBy(x => x.Uid == nodeUid ? 1 : 2).ThenBy(x => x.Name))
         {
             if (node.Uid == nodeUid)
@@ -261,7 +266,7 @@ public class NodeController : ControllerStore<ProcessingNode>
                 if (current >= licensedNodes)
                 {
                     node.Enabled = false;
-                    await Update(node);
+                    service.Update(node);
                 }
                 else
                 {
@@ -286,7 +291,8 @@ public class NodeController : ControllerStore<ProcessingNode>
             throw new ArgumentNullException(nameof(model.TempPath));
 
         var address = model.Address.ToLowerInvariant().Trim();
-        var data = new NodeService().GetAll();
+        var service = new NodeService();
+        var data = service.GetAll();
         var existing = data.FirstOrDefault(x => x.Address.ToLowerInvariant() == address);
         if (existing != null)
         {
@@ -297,13 +303,11 @@ public class NodeController : ControllerStore<ProcessingNode>
                 existing.Enabled = model.Enabled;
                 existing.OperatingSystem = model.OperatingSystem;
                 existing.Version = model.Version;
-                await Update(existing);
-                LibraryFileService.RefreshProcessingNodes();
+                service.Update(existing);
             }
             existing.SignalrUrl = "flow";
             return existing;
         }
-        var settings = await new SettingsController().Get();
         // doesnt exist, register a new node.
         var variables = await new VariableController().GetAll();
 
@@ -321,7 +325,7 @@ public class NodeController : ControllerStore<ProcessingNode>
             }
         }
 
-        var result = await Update(new ProcessingNode
+        var node = new ProcessingNode
         {
             Name = address,
             Address = address,
@@ -331,12 +335,14 @@ public class NodeController : ControllerStore<ProcessingNode>
             OperatingSystem = model.OperatingSystem,
             Version = model.Version,
             Schedule = new string('1', 672),
-            Mappings = model.Mappings?.Select(x => new KeyValuePair<string, string>(x.Server, x.Local))?.ToList() ?? variables?.Select(x => new
-               KeyValuePair<string, string>(x.Value, "")
-            )?.ToList() ?? new()
-        }, useCache: true);
-        result.SignalrUrl = "flow";
-        return result;
+            Mappings = model.Mappings?.Select(x => new KeyValuePair<string, string>(x.Server, x.Local))?.ToList() ??
+                       variables?.Select(x => new
+                           KeyValuePair<string, string>(x.Value, "")
+                       )?.ToList() ?? new()
+        };
+        service.Update(node);
+        node.SignalrUrl = "flow";
+        return node;
     }
 
     /// <summary>
