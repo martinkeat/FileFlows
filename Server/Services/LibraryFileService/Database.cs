@@ -165,7 +165,7 @@ public partial class LibraryFileService
                   "CreationTime=@13,LastWriteTime=@14,HoldUntil=@15,ProcessingStarted=@16,ProcessingEnded=@17,LibraryUid=@18," +
                   "LibraryName=@19,FlowUid=@20,FlowName=@21,DuplicateUid=@22,DuplicateName=@23,NodeUid=@24,NodeName=@25,WorkerUid=@26," +
                   "OutputPath=@27,NoLongerExistsAfterProcessing=@28,OriginalMetadata=@29,FinalMetadata=@30,ExecutedNodes=@31 " +
-                  "where Uid = @0)";
+                  "where Uid = @0";
         }
         else
         {
@@ -187,25 +187,37 @@ public partial class LibraryFileService
                   "@27,@28,@29,@30,@31)";
         }
 
-        await db.Db.ExecuteAsync(sql,
-            file.Uid.ToString(), file.Name, file.DateCreated.ToString("yyyy-MM-dd HH:mm:ss.fff"),
-            file.DateModified.ToString("yyyy-MM-dd HH:mm:ss.fff"), file.RelativePath, (int)file.Status,
-            file.Order, file.Fingerprint, file.FinalFingerprint, file.IsDirectory ? 1 : 0, (int)file.Flags, file.OriginalSize,
-            file.FinalSize,
+        try
+        {
+            await db.Db.ExecuteAsync(sql,
+                file.Uid.ToString(), file.Name, file.DateCreated.ToString("yyyy-MM-dd HH:mm:ss.fff"),
+                file.DateModified.ToString("yyyy-MM-dd HH:mm:ss.fff"), file.RelativePath, (int)file.Status,
+                file.Order, file.Fingerprint, file.FinalFingerprint, file.IsDirectory ? 1 : 0, (int)file.Flags,
+                file.OriginalSize,
+                file.FinalSize,
 
-            file.CreationTime.ToString("yyyy-MM-dd HH:mm:ss.fff"),
-            file.LastWriteTime.ToString("yyyy-MM-dd HH:mm:ss.fff"),
-            file.HoldUntil.ToString("yyyy-MM-dd HH:mm:ss.fff"),
-            file.ProcessingStarted.ToString("yyyy-MM-dd HH:mm:ss.fff"),
-            file.ProcessingEnded.ToString("yyyy-MM-dd HH:mm:ss.fff"),
-            file.LibraryUid?.ToString() ?? string.Empty,
+                file.CreationTime.ToString("yyyy-MM-dd HH:mm:ss.fff"),
+                file.LastWriteTime.ToString("yyyy-MM-dd HH:mm:ss.fff"),
+                file.HoldUntil.ToString("yyyy-MM-dd HH:mm:ss.fff"),
+                file.ProcessingStarted.ToString("yyyy-MM-dd HH:mm:ss.fff"),
+                file.ProcessingEnded.ToString("yyyy-MM-dd HH:mm:ss.fff"),
+                file.LibraryUid?.ToString() ?? string.Empty,
 
-            file.LibraryName, file.FlowUid?.ToString() ?? string.Empty, file.FlowName,
-            file.DuplicateUid?.ToString() ?? string.Empty, file.DuplicateName, file.NodeUid?.ToString() ?? string.Empty,
-            file.NodeName, file.WorkerUid?.ToString() ?? string.Empty,
+                file.LibraryName, file.FlowUid?.ToString() ?? string.Empty, file.FlowName,
+                file.DuplicateUid?.ToString() ?? string.Empty, file.DuplicateName,
+                file.NodeUid?.ToString() ?? string.Empty,
+                file.NodeName, file.WorkerUid?.ToString() ?? string.Empty,
 
-            file.OutputPath, file.NoLongerExistsAfterProcessing ? 1 : 0, strOriginalMetadata, strFinalMetadata, strExecutedNodes
-        );
+                file.OutputPath, file.NoLongerExistsAfterProcessing ? 1 : 0, strOriginalMetadata, strFinalMetadata,
+                strExecutedNodes
+            );
+        }
+        catch (Exception ex)
+        {
+            Logger.Instance.ELog($"Error {(update ? "updating" :"adding")} library file: {ex.Message}");
+            throw;
+        }
+
         Database_Log(dt2,(update ? "update": "insert") + " object (actual)");
         Database_Log(dt, update ? "updated object" : "insert object");
     }

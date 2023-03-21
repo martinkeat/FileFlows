@@ -49,7 +49,7 @@ public partial class LibraryFileService
         if (await NodeEnabled(node) == false)
             return NextFileResult(NextLibraryFileStatus.NodeNotEnabled);
 
-        var file = await GetNextLibraryFile(nodeName, nodeUid, workerUid);
+        var file = await GetNextLibraryFile(node, workerUid);
         if(file == null)
             return NextFileResult(NextLibraryFileStatus.NoFile, file);
         return NextFileResult(NextLibraryFileStatus.Success, file);
@@ -137,8 +137,6 @@ public partial class LibraryFileService
             if ((int)status > 0)
             {
                 // the status in the db is correct and not a computed status
-                string orderBy = "";
-                    orderBy = "ProcessingEnded desc,";
 
                 query = Data.Where(x =>  x.Value.Status == status.Value).Select(x => x.Value);
 
@@ -262,16 +260,11 @@ public partial class LibraryFileService
     /// <summary>
     /// Gets the next library file queued for processing
     /// </summary>
-    /// <param name="nodeName">The name of the node requesting a library file</param>
-    /// <param name="nodeUid">The UID of the node</param>
+    /// <param name="node">The node doing the processing</param>
     /// <param name="workerUid">The UID of the worker on the node</param>
     /// <returns>If found, the next library file to process, otherwise null</returns>
-    public async Task<LibraryFile?> GetNextLibraryFile(string nodeName, Guid nodeUid, Guid workerUid)
+    public async Task<LibraryFile?> GetNextLibraryFile(ProcessingNode node, Guid workerUid)
     {
-        var node = new NodeService().GetByUid(nodeUid);
-        if (node == null)
-            return null;
-        
         var nodeLibraries = node?.Libraries?.Select(x => x.Uid)?.ToList() ?? new List<Guid>();
 
         var canProcess = new LibraryService().GetAll().Where(x =>
@@ -296,8 +289,8 @@ public partial class LibraryFileService
             nextFile.Status = FileStatus.Processing;
             nextFile.WorkerUid = workerUid;
             nextFile.ProcessingStarted = DateTime.Now;
-            nextFile.NodeUid = nodeUid;
-            nextFile.NodeName = nodeName;
+            nextFile.NodeUid = node.Uid;
+            nextFile.NodeName = node.Name;
             
             #if(DEBUG)
             if (Globals.IsUnitTesting)

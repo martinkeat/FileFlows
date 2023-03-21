@@ -45,19 +45,19 @@ public class LibraryFileController : Controller //ControllerStore<LibraryFile>
     {
         var service = new LibraryFileService();
         var lfStatus = service.GetStatus();
-        var taskLibraries = DbHelper.Select<Library>();
-        var taskFiles = service.GetAll(status, page * pageSize, pageSize, filter);
+        var files = await service.GetAll(status, page * pageSize, pageSize, filter);
         if (string.IsNullOrWhiteSpace(filter) == false)
         {
             // need to get total number of items matching filter aswell
             int total = await service.GetTotalMatchingItems(status, filter);
             HttpContext?.Response?.Headers?.TryAdd("x-total-items", total.ToString());
         }
-        await Task.WhenAll(taskLibraries, taskFiles);
+
+        var libraries = new LibraryService().GetAll();
         return new()
         {
             Status = lfStatus,
-            LibraryFiles = LibaryFileListModelHelper.ConvertToListModel(taskFiles.Result, status, taskLibraries.Result)
+            LibraryFiles = LibaryFileListModelHelper.ConvertToListModel(files, status, libraries)
         };
     }
 
@@ -69,13 +69,8 @@ public class LibraryFileController : Controller //ControllerStore<LibraryFile>
     /// <param name="top">The amount of items to grab, 0 to grab all</param>
     /// <returns>A list of library files</returns>
     [HttpGet]
-    public async Task<IEnumerable<LibraryFile>> GetAll([FromQuery] FileStatus? status, [FromQuery] int skip = 0,
-        [FromQuery] int top = 0)
-    {
-        //var result = await GetAllComplete(status, skip, top);
-        //return result.results;
-        return await new LibraryFileService().GetAll(status, skip, top);
-    }
+    public Task<IEnumerable<LibraryFile>> GetAll([FromQuery] FileStatus? status, [FromQuery] int skip = 0, [FromQuery] int top = 0)
+        => new LibraryFileService().GetAll(status, skip, top);
     
     /// <summary>
     /// Get next 10 upcoming files to process
@@ -178,9 +173,6 @@ public class LibraryFileController : Controller //ControllerStore<LibraryFile>
         
         var updated = await new LibraryFileService().Update(existing);
         
-        // if(DbHelper.UseMemoryCache == false)
-        //     CacheStore.Store(updated.Uid, updated);
-        
         return updated;
     }
 
@@ -252,11 +244,14 @@ public class LibraryFileController : Controller //ControllerStore<LibraryFile>
         await new LibraryFileService().MoveToTop(list);
     }
 
+    /// <summary>
+    /// Adds a library file into the system
+    /// </summary>
+    /// <param name="libraryFile">the file to add</param>
+    /// <returns>the newly added file</returns>
     internal Task<LibraryFile> Add(LibraryFile libraryFile) =>
         new LibraryFileService().Add(libraryFile);
 
-    // internal Task AddMany(LibraryFile[] libraryFiles)
-    //     => new LibraryFileService().AddMany(libraryFiles);
 
     /// <summary>
     /// Checks if a library file exists on the server

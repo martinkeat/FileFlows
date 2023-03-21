@@ -52,9 +52,9 @@ public class Program
             string cfgKey = GetArgument(args, "--cfgKey");
             if (string.IsNullOrEmpty(cfgKey))
                 throw new Exception("Configuration Key not set");
-            bool noEnrypt = cfgKey == "NO_ENCRYPT";
+            bool noEncrypt = cfgKey == "NO_ENCRYPT";
             string cfgJson;
-            if (noEnrypt)
+            if (noEncrypt)
             {
                 LogInfo("No Encryption for Node configuration");
                 cfgJson = File.ReadAllText(cfgFile);
@@ -136,11 +136,7 @@ public class Program
         {
             string address = args.IsServer ? "INTERNAL_NODE" : args.Hostname;
             LogInfo("Address: "+ address);
-            var nodeTask = nodeService.GetByAddressAsync(address);
-            LogInfo("Waiting on node task");
-            nodeTask.Wait();
-            LogInfo("Completed node task");
-            node = nodeTask.Result;
+            node = nodeService.GetByAddressAsync(address).Result;
             if (node == null)
                 throw new Exception("Failed to load node!!!!");
             LogInfo("Node SignalrUrl: " + node.SignalrUrl);
@@ -151,7 +147,12 @@ public class Program
             throw;
         }
 
-        FlowRunnerCommunicator.SignalrUrl = node.SignalrUrl;
+        if (node.SignalrUrl == "flow" && string.IsNullOrEmpty(Service.ServiceBaseUrl) == false)
+            FlowRunnerCommunicator.SignalrUrl = Service.ServiceBaseUrl.EndsWith("/")
+                ? Service.ServiceBaseUrl + "flow"
+                : Service.ServiceBaseUrl + "/flow";
+        else
+            FlowRunnerCommunicator.SignalrUrl = node.SignalrUrl;
 
         var libFileService = LibraryFileService.Load();
         var libFile = libFileService.Get(args.LibraryFileUid).Result;
