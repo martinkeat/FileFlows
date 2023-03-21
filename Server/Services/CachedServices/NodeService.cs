@@ -19,9 +19,13 @@ public class NodeService : CachedService<ProcessingNode>, INodeService
     public override bool IncrementsConfiguration => false;
 
     static NodeService()
-        => new NodeService().Refresh();
+    {
+        if(Globals.IsUnitTesting == false)
+            new NodeService().Refresh();
+    }
 
-    /// <summary>
+
+/// <summary>
     /// A loader to load an instance of the Node service
     /// </summary>
     public static Func<INodeService> Loader { get; set; }

@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using FileFlows.Server.Helpers;
 using FileFlows.Shared.Models;
 
@@ -13,7 +14,7 @@ public abstract class CachedService<T> where T : FileFlowObject, new()
     /// </summary>
     public virtual bool IncrementsConfiguration => true;
 
-    private List<T> _Data;
+    private static List<T> _Data;
     /// <summary>
     /// Gets or sets the data
     /// </summary>
@@ -26,6 +27,15 @@ public abstract class CachedService<T> where T : FileFlowObject, new()
             return _Data;
         }
         set => _Data = value;
+    }
+
+    /// <summary>
+    /// Sets the data
+    /// </summary>
+    /// <param name="data">the data to set</param>
+    internal static void SetData(List<T> data)
+    {
+        _Data = data ?? new List<T>();
     }
 
     /// <summary>

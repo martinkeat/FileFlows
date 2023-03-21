@@ -42,8 +42,8 @@ public abstract class LibraryFileTest
     
     private void MoqNodeService()
     {
-        var moq = new Moq.Mock<INodeService>();
-        FileFlows.Server.Services.NodeService.Loader = () => moq.Object;
+        // var moq = new Moq.Mock<INodeService>();
+        // FileFlows.Server.Services.NodeService.Loader = () => moq.Object;
         Node = new()
         {
             Uid = Guid.NewGuid(),
@@ -60,16 +60,21 @@ public abstract class LibraryFileTest
             Version = Globals.Version.ToString(),
             AllLibraries = ProcessingLibraries.All
         };
-        moq.Setup(x => x.GetByUidAsync(It.Is<Guid>(y => y == Node.Uid)))
-            .Returns(() => Task.FromResult(Node));
-        moq.Setup(x => x.GetByUidAsync(It.Is<Guid>(y => y == Globals.InternalNodeUid)))
-            .Returns(() => Task.FromResult(InternalNode));
+
+        FileFlows.Server.Services.NodeService.SetData(new List<ProcessingNode>()
+        {
+            InternalNode, Node
+        });
+        // moq.Setup(x => x.GetByUidAsync(It.Is<Guid>(y => y == Node.Uid)))
+        //     .Returns(() => Task.FromResult(Node));
+        // moq.Setup(x => x.GetByUidAsync(It.Is<Guid>(y => y == Globals.InternalNodeUid)))
+        //     .Returns(() => Task.FromResult(InternalNode));
     }
 
     private void MoqLibraryService()
     {
-        var moq = new Moq.Mock<ILibraryService>();
-        FileFlows.Server.Services.LibraryService.Loader = () => moq.Object;
+        // var moq = new Moq.Mock<ILibraryService>();
+        // FileFlows.Server.Services.LibraryService.Loader = () => moq.Object;
 
         Libraries = new List<Library>();
         var orders = new[]
@@ -88,12 +93,14 @@ public abstract class LibraryFileTest
             lib.Schedule = new string('1', 672);
             Libraries.Add(lib);
         }
-        moq.Setup(x => x.GetByUidAsync(It.IsAny<Guid>()))
-            .Returns((Guid uid) =>
-                Task.FromResult(Libraries.FirstOrDefault(x => x.Uid == uid))!
-            );
-        moq.Setup(x => x.GetAllAsync())
-            .Returns(() => Task.FromResult((IEnumerable<Library>)Libraries));
+
+        FileFlows.Server.Services.LibraryService.SetData(Libraries);
+        // moq.Setup(x => x.GetByUidAsync(It.IsAny<Guid>()))
+        //     .Returns((Guid uid) =>
+        //         Task.FromResult(Libraries.FirstOrDefault(x => x.Uid == uid))!
+        //     );
+        // moq.Setup(x => x.GetAllAsync())
+        //     .Returns(() => Task.FromResult((List<Library>)Libraries));
     }
 
     private void SetTestData()

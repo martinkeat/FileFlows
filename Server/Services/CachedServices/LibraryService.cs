@@ -10,7 +10,10 @@ using System;
 public class LibraryService : CachedService<Library>, ILibraryService
 {
     static LibraryService()
-        => new LibraryService().Refresh();
+    {
+        if(Globals.IsUnitTesting == false)
+            new LibraryService().Refresh();
+    }
     
     /// <summary>
     /// Gets or sets a function to load an instance of a ILibraryService
