@@ -470,6 +470,6 @@ public class LibraryFileController : Controller //ControllerStore<LibraryFile>
     /// </summary>
     /// <param name="uid">The UID of the library file</param>
     /// <returns>the library file instance</returns>
-    internal Task<LibraryFile> GetCached(Guid uid)
+    internal Task<LibraryFile?> GetCached(Guid uid)
         => new LibraryFileService().Get(uid);
 }

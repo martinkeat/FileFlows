@@ -1,4 +1,9 @@
-﻿using FileFlows.ServerShared.Workers;
+﻿using System.Runtime.InteropServices;
+using FileFlows.Server.Controllers;
+using FileFlows.Server.Services;
+using FileFlows.ServerShared.Workers;
+using FileFlows.Shared.Helpers;
+using FileFlows.Shared.Models;
 #if(!DEBUG)
 using System.Runtime.InteropServices;
 using FileFlows.Server.Controllers;
@@ -36,7 +41,7 @@ public class TelemetryReporter: Worker
         TelemetryData data = new TelemetryData();
         data.ClientUid = settings.Uid;
         data.Version = Globals.Version.ToString();
-        data.ProcessingNodes = new NodeController().GetAll().Result.Count();
+        data.ProcessingNodes = new NodeService().GetAll().Count();
         data.Architecture = System.Runtime.InteropServices.RuntimeInformation.ProcessArchitecture.ToString();
         data.OS = isDocker ? "Docker" :
                   isMacOs ? "MacOS" :
@@ -45,7 +50,7 @@ public class TelemetryReporter: Worker
         var libFiles = new LibraryFileController().GetAll(null).Result;
         data.FilesFailed = libFiles.Where(x => x.Status == FileStatus.ProcessingFailed).Count();
         data.FilesProcessed = libFiles.Where(x => x.Status == FileStatus.Processed).Count();
-        var flows = new FlowController().GetAll().Result;
+        var flows = new FlowService().GetAll();
         var dictNodes = new Dictionary<string, int>();
         foreach(var fp in flows?.SelectMany(x => x.Parts)?.ToArray() ?? new FlowPart[] { })
         {
@@ -62,7 +67,7 @@ public class TelemetryReporter: Worker
             Count = x.Value
         }).ToList();
 
-        var libraries = new LibraryController().GetAll().Result;
+        var libraries = new LibraryService().GetAll();
         dictNodes.Clear();
         foreach(var lib in libraries?.Where(x => string.IsNullOrEmpty(x.Template) == false) ?? new List<Library>())
         {
