@@ -144,7 +144,7 @@ public class NodeController : Controller
             .FirstOrDefault(x => x.Address == Globals.InternalNodeName)?.Uid ?? Guid.Empty;
         if (model.Uids.Contains(internalNode))
             throw new Exception("ErrorMessages.CannotDeleteInternalNode");
-        await new NodeService().DeleteAll(model.Uids);
+        await new NodeService().Delete(model.Uids);
     }
 
     /// <summary>
@@ -223,7 +223,7 @@ public class NodeController : Controller
         }
         var settings = await new SettingsController().Get();
         // doesnt exist, register a new node.
-        var variables = await new VariableController().GetAll();
+        var variables = new VariableService().GetAll();
         bool isSystem = address == Globals.InternalNodeName;
         var node = new ProcessingNode
         {
@@ -236,7 +236,7 @@ public class NodeController : Controller
             Mappings = isSystem
                 ? null
                 : variables.Select(x => new
-                    KeyValuePair<string, string>(x.Value, "")
+                    KeyValuePair<string, string>(x.Value, string.Empty)
                 ).ToList()
         };
         service.Update(node);
@@ -309,7 +309,7 @@ public class NodeController : Controller
             return existing;
         }
         // doesnt exist, register a new node.
-        var variables = await new VariableController().GetAll();
+        var variables = new VariableService().GetAll();
 
         if(model.Mappings?.Any() == true)
         {

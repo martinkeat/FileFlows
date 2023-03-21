@@ -3,6 +3,7 @@ using FileFlows.Plugin;
 using FileFlows.ScriptExecution;
 using FileFlows.Server.Controllers;
 using FileFlows.Server.Helpers;
+using FileFlows.Server.Services;
 using FileFlows.ServerShared.Workers;
 using FileFlows.Shared.Helpers;
 using FileFlows.Shared.Models;
@@ -20,8 +21,6 @@ public class FileFlowsTasksWorker: Worker
     /// Gets the instance of the tasks worker
     /// </summary>
     internal static FileFlowsTasksWorker Instance { get;private set; }
-    private readonly List<FileFlowsTask> Tasks = new ();
-    private readonly Dictionary<string, object> Variables = new ();
     /// <summary>
     /// A list of tasks and the quarter they last ran in
     /// </summary>
@@ -34,8 +33,6 @@ public class FileFlowsTasksWorker: Worker
     public FileFlowsTasksWorker() : base(ScheduleType.Minute, 1)
     {
         Instance = this;
-        ReloadTasks();
-        ReloadVariables();
         
         SystemEvents.OnLibraryFileAdd += SystemEventsOnOnLibraryFileAdd;
         SystemEvents.OnLibraryFileProcessed += SystemEventsOnOnLibraryFileProcessed;
@@ -45,32 +42,23 @@ public class FileFlowsTasksWorker: Worker
         SystemEvents.OnServerUpdating += SystemEventsOnOnServerUpdating;
         SystemEvents.OnServerUpdateAvailable += SystemEventsOnOnServerUpdateAvailable;
     }
-
-    /// <summary>
-    /// Reloads the stored list of tasks
-    /// </summary>
-    public static void ReloadTasks()
-    {
-        var list = new TaskController().GetAll().Result?.ToList();
-        Instance.Tasks.Clear();
-        if(list?.Any() == true)
-            Instance.Tasks.AddRange(list);
-    }
     
     /// <summary>
-    /// Reloads the stored list of variables
+    /// Gets the variables in a dictionary
     /// </summary>
-    public static void ReloadVariables()
+    /// <returns>a dictionary of variables</returns>
+    public static Dictionary<string, object> GetVariables()
     {
-        var list = new VariableController().GetAll().Result?.ToList();
-        Instance.Variables.Clear();
-        foreach (var var in list ?? new ())
+        var list = new Services.VariableService().GetAll();
+        var dict = new Dictionary<string, object>();
+        foreach (var var in list)
         {
-            Instance.Variables.Add(var.Name, var.Value);
+            dict.Add(var.Name, var.Value);
         }
         
-        if(Instance.Variables.ContainsKey("FileFlows.Url") == false)
-            Instance.Variables.Add("FileFlows.Url", ServerShared.Services.Service.ServiceBaseUrl);
+        if(dict.ContainsKey("FileFlows.Url") == false)
+            dict.Add("FileFlows.Url", ServerShared.Services.Service.ServiceBaseUrl);
+        return dict;
     }
 
     /// <summary>
@@ -82,8 +70,9 @@ public class FileFlowsTasksWorker: Worker
             return;
         
         int quarter = TimeHelper.GetCurrentQuarter();
+        var tasks = new TaskService().GetAll();
         // 0, 1, 2, 3, 4
-        foreach (var task in this.Tasks)
+        foreach (var task in tasks)
         {
             if (task.Type != TaskType.Schedule)
                 continue;
@@ -106,7 +95,7 @@ public class FileFlowsTasksWorker: Worker
     /// <returns>the result of the executed task</returns>
     internal async Task<FileFlowsTaskRun> RunByUid(Guid uid)
     {
-        var task = Tasks.FirstOrDefault(x => x.Uid == uid);
+        var task = new TaskService().GetByUid(uid);
         if (task == null)
             return new() { Success = false, Log = "Task not found" };
         return await RunTask(task);
@@ -129,7 +118,7 @@ public class FileFlowsTasksWorker: Worker
         Logger.Instance.ILog("Executing task: " + task.Name);
         DateTime dtStart = DateTime.Now;
 
-        var variables = Variables.ToDictionary(x => x.Key, x => x.Value);
+        var variables = GetVariables();
         if (additionalVariables?.Any() == true)
         {
             foreach (var variable in additionalVariables)
@@ -153,13 +142,14 @@ public class FileFlowsTasksWorker: Worker
             task.RunHistory.Enqueue(result);
             while (task.RunHistory.Count > 10 && task.RunHistory.TryDequeue(out _));
         }
-        await new TaskController().Update(task);
+
+        new TaskService().Update(task);
         return result;
     }
     
     private void TriggerTaskType(TaskType type, Dictionary<string, object> variables)
     {
-        var tasks = this.Tasks.Where(x => x.Type == type).ToArray();
+        var tasks = new TaskService().GetAll().Where(x => x.Type == type).ToArray();
         foreach (var task in tasks)
         {
             _ = RunTask(task, variables);

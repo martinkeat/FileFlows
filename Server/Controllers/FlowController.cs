@@ -329,7 +329,7 @@ public class FlowController : Controller
     {
         if (model?.Uids?.Any() != true)
             return; // nothing to delete
-        await new FlowService().DeleteAll(model.Uids);
+        await new FlowService().Delete(model.Uids);
         UpdateHasFlows();
     }
 

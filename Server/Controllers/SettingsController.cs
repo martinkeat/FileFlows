@@ -296,10 +296,10 @@ public class SettingsController : Controller
         cfg.FlowScripts = (await scriptController.GetAllByType(ScriptType.Flow)).ToList();
         cfg.SystemScripts = (await scriptController.GetAllByType(ScriptType.System)).ToList();
         cfg.SharedScripts = (await scriptController.GetAllByType(ScriptType.Shared)).ToList();
-        cfg.Variables = (await new VariableController().GetAll()).ToDictionary(x => x.Name, x => x.Value);
+        cfg.Variables = new VariableService().GetAll().ToDictionary(x => x.Name, x => x.Value);
         cfg.Flows = new FlowService().GetAll();
         cfg.Libraries = new LibraryService().GetAll();
-        cfg.PluginSettings = await new PluginController().GetAllPluginSettings();
+        cfg.PluginSettings = new PluginService().GetAllPluginSettings().Result;
         cfg.MaxNodes = LicenseHelper.IsLicensed() ? 250 : 30;
         var pluginInfos = (await new PluginController().GetAll())
             .Where(x => x.Enabled)

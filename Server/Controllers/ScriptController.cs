@@ -31,7 +31,6 @@ public class ScriptController : Controller
         var taskScriptsFlow = GetAll(ScriptType.Flow);
         var taskScriptsSystem = GetAll(ScriptType.System);
         var taskScriptsShared = GetAll(ScriptType.Shared);
-        var taskTasks = new TaskController().GetAll();
 
         FileFlowsRepository repo = new FileFlowsRepository();
         try
@@ -93,9 +92,9 @@ public class ScriptController : Controller
             }
         }
 
-        var tasks = taskTasks.Result;
+        var tasks = new TaskController().GetAll();
         string taskTypeName = typeof(FileFlowsTask).FullName ?? string.Empty;
-        foreach (var task in tasks ?? new FileFlowsTask[] { })
+        foreach (var task in tasks)
         {
             if (dictScripts.ContainsKey(task.Script.ToLower()) == false)
                 continue;
@@ -359,14 +358,14 @@ public class ScriptController : Controller
             }
         }
 
-        var taskController = new TaskController();
-        var tasks = await taskController.GetAll();
+        var taskService = new TaskService();
+        var tasks = taskService.GetAll();
         foreach (var task in tasks)
         {
             if (task.Script != oldName)
                 continue;
             task.Script = newName;
-            await taskController.Update(task);
+            taskService.Update(task);
         }
     }
 

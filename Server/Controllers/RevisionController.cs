@@ -91,16 +91,13 @@ public class RevisionController:Controller
         var manager = DbHelper.GetDbManager();
         await manager.AddOrUpdateDbo(dbo);
 
-        if (DbHelper.UseMemoryCache)
-        {
-            // sqlite.. have to update any in memory objects...
-            if (dbo.Type == typeof(Library).FullName)
-                new LibraryService().Refresh();
-            else if (dbo.Type == typeof(Flow).FullName)
-                new FlowService().Refresh();
-            else if (dbo.Type == typeof(Dashboard).FullName)
-                await new DashboardController().Refresh(dbo);
-        }
+        // sqlite.. have to update any in memory objects...
+        if (dbo.Type == typeof(Library).FullName)
+            new LibraryService().Refresh();
+        else if (dbo.Type == typeof(Flow).FullName)
+            new FlowService().Refresh();
+        else if (dbo.Type == typeof(Dashboard).FullName)
+            new DashboardService().Refresh();
     }
     
     

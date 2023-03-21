@@ -131,7 +131,7 @@ public class LibraryController : Controller
     {
         if (model?.Uids?.Any() != true)
             return;
-        await new LibraryService().DeleteAll(model.Uids);
+        await new LibraryService().Delete(model.Uids);
         if (deleteLibraryFiles)
         {
             await new LibraryFileService().DeleteFromLibraries(model.Uids);

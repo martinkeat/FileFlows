@@ -1,4 +1,5 @@
 ﻿using FileFlows.Server.Controllers;
+using FileFlows.Server.Services;
 using FileFlows.Shared.Models;
 
 namespace FileFlows.Server.Helpers;
@@ -26,8 +27,8 @@ public class PluginScanner
         if (Program.Docker)
             EnsureDefaultsExist(pluginDir);
 
-        var controller = new PluginController();
-        var dbPluginInfos = controller.GetDataList().Result.OrderBy(x => x.Name).ToList();
+        var service = new PluginService();
+        var dbPluginInfos = service.GetAll().OrderBy(x => x.Name).ToList();
 
         List<string> installed = new List<string>();
         var options = new JsonSerializerOptions
@@ -125,7 +126,7 @@ public class PluginScanner
                 if (isNew == false)
                 {
                     Logger.Instance.ILog("Updating plugin: " + pi.Name);
-                    controller.Update(plugin).Wait();
+                    service.Update(plugin).Wait();
                 }
                 else
                 {
@@ -135,7 +136,7 @@ public class PluginScanner
                     plugin.DateCreated = DateTime.Now;
                     plugin.DateModified = DateTime.Now;
                     plugin.Enabled = true;
-                    controller.Update(plugin).Wait();
+                    service.Update(plugin).Wait();
                 }
             }
             catch (Exception ex)
@@ -150,7 +151,7 @@ public class PluginScanner
             {
                 Logger.Instance.DLog("Delete old plugin: " + plugin.Name);
                 // its an old style plugin, perm delete it
-                controller.Delete(new ReferenceModel<Guid> { Uids = new[] { plugin.Uid } }).Wait();
+                service.Delete(plugin.Uid).Wait();
             }
             else
             {
@@ -158,7 +159,7 @@ public class PluginScanner
                 // mark as deleted.
                 plugin.Deleted = true;
                 plugin.DateModified = DateTime.Now;
-                controller.Update(plugin).Wait();
+                service.Update(plugin).Wait();
             }
         }
 

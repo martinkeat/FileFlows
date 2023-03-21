@@ -1,4 +1,4 @@
-using FileFlows.Server.Helpers;
+using FileFlows.Server.Services;
 using FileFlows.Shared.Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,14 +8,15 @@ namespace FileFlows.Server.Controllers;
 /// Controller for scheduled tasks
 /// </summary>
 [Route("/api/task")]
-public class TaskController  : ControllerStore<FileFlowsTask>
+public class TaskController : Controller
 {
     /// <summary>
     /// Get all scheduled tasks configured in the system
     /// </summary>
     /// <returns>A list of all configured scheduled tasks</returns>
     [HttpGet]
-    public async Task<IEnumerable<FileFlowsTask>> GetAll() => (await GetDataList()).OrderBy(x => x.Name);
+    public IEnumerable<FileFlowsTask> GetAll()
+        => new TaskService().GetAll().OrderBy(x => x.Name);
 
     /// <summary>
     /// Get scheduled task
@@ -23,7 +24,8 @@ public class TaskController  : ControllerStore<FileFlowsTask>
     /// <param name="uid">The UID of the scheduled task to get</param>
     /// <returns>The scheduled task instance</returns>
     [HttpGet("{uid}")]
-    public Task<FileFlowsTask> Get(Guid uid) => GetByUid(uid);
+    public FileFlowsTask Get(Guid uid) 
+        => new TaskService().GetByUid(uid);
 
     /// <summary>
     /// Get a scheduled task by its name, case insensitive
@@ -32,14 +34,7 @@ public class TaskController  : ControllerStore<FileFlowsTask>
     /// <returns>The scheduled task instance if found</returns>
     [HttpGet("name/{name}")]
     public async Task<FileFlowsTask?> GetByName(string name)
-    {
-        if (DbHelper.UseMemoryCache == false)
-            return await DbHelper.GetByName<FileFlowsTask>(name);
-        
-        var list = await GetData();
-        name = name.ToLower().Trim();
-        return list.Values.FirstOrDefault(x => x.Name.ToLower() == name);
-    }
+        => new TaskService().GetByName(name);
 
     /// <summary>
     /// Saves a scheduled task
@@ -47,11 +42,10 @@ public class TaskController  : ControllerStore<FileFlowsTask>
     /// <param name="fileFlowsTask">The scheduled task to save</param>
     /// <returns>The saved instance</returns>
     [HttpPost]
-    public async Task<FileFlowsTask> Save([FromBody] FileFlowsTask fileFlowsTask)
+    public FileFlowsTask Save([FromBody] FileFlowsTask fileFlowsTask)
     {
-        var result = await Update(fileFlowsTask, checkDuplicateName: true);
-        Workers.FileFlowsTasksWorker.ReloadTasks();
-        return result;
+        new TaskService().Update(fileFlowsTask);
+        return fileFlowsTask;
     }
 
     /// <summary>
@@ -60,11 +54,8 @@ public class TaskController  : ControllerStore<FileFlowsTask>
     /// <param name="model">A reference model containing UIDs to delete</param>
     /// <returns>an awaited task</returns>
     [HttpDelete]
-    public async Task Delete([FromBody] ReferenceModel<Guid> model)
-    {
-        await DeleteAll(model);
-        Workers.FileFlowsTasksWorker.ReloadTasks();
-    }
+    public Task Delete([FromBody] ReferenceModel<Guid> model)
+        => new TaskService().Delete(model.Uids);
 
 
     /// <summary>

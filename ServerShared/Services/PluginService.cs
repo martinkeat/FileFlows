@@ -13,7 +13,7 @@ public interface IPluginService
     /// Get all plugin infos
     /// </summary>
     /// <returns>all plugin infos</returns>
-    Task<IEnumerable<PluginInfo>> GetAll();
+    Task<List<PluginInfo>> GetAllAsync();
 
     /// <summary>
     /// Updates plugin info
@@ -83,7 +83,7 @@ public class PluginService : Service, IPluginService
     /// Get all plugin infos
     /// </summary>
     /// <returns>all plugin infos</returns>
-    public async Task<IEnumerable<PluginInfo>> GetAll()
+    public async Task<List<PluginInfo>> GetAllAsync()
     {
         try
         {

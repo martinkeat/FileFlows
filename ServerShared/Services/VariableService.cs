@@ -12,7 +12,7 @@ public interface IVariableService
     /// Gets all variables in the system
     /// </summary>
     /// <returns>all variables in the system</returns>
-    Task<IEnumerable<Variable>> GetAll();
+    Task<List<Variable>> GetAllAsync();
 }
 
 /// <summary>
@@ -40,11 +40,11 @@ public class VariableService: Service, IVariableService
     /// Gets all variables in the system
     /// </summary>
     /// <returns>all variables in the system</returns>
-    public async Task<IEnumerable<Variable>> GetAll()
+    public async Task<List<Variable>> GetAllAsync()
     {
         try
         {
-            var result = await HttpHelper.Get<IEnumerable<Variable>>($"{ServiceBaseUrl}/api/variable");
+            var result = await HttpHelper.Get<List<Variable>>($"{ServiceBaseUrl}/api/variable");
             if (result.Success == false)
                 throw new Exception("Failed to load variables: " + result.Body);
             return result.Data;

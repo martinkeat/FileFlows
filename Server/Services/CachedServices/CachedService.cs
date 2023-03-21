@@ -56,12 +56,38 @@ public abstract class CachedService<T> where T : FileFlowObject, new()
     public Task<T> GetByUidAsync(Guid uid) => Task.FromResult(GetByUid(uid)!);
 
     /// <summary>
+    /// Gets a item by it's name
+    /// </summary>
+    /// <param name="name">the name of the item</param>
+    /// <param name="ignoreCase">if case should be ignored</param>
+    /// <returns>the item</returns>
+    public T? GetByName(string name, bool ignoreCase = true)
+    {
+        if (ignoreCase)
+        {
+            name = name.ToLowerInvariant();
+            return Data.FirstOrDefault(x => x.Name.ToLowerInvariant() == name);
+        }
+        return Data.FirstOrDefault(x => x.Name == name);
+    }
+
+    /// <summary>
     /// Updates an item
     /// </summary>
     /// <param name="item">the item being updated</param>
     /// <param name="dontIncrementConfigRevision">if this is a revision object, if the revision should be updated</param>
     public void Update(T item, bool dontIncrementConfigRevision = false)
     {
+        if (item == null)
+            throw new Exception("No model");
+        
+        if (string.IsNullOrWhiteSpace(item.Name))
+            throw new Exception("ErrorMessages.NameRequired");
+        
+        var existingName = GetByName(item.Name);
+        if (existingName != null && existingName.Uid != item.Uid)
+            throw new Exception("ErrorMessages.NameInUse");
+        
         UpdateActual(item, dontIncrementConfigRevision);
         if (dontIncrementConfigRevision == false)
             IncrementConfigurationRevision();
@@ -84,10 +110,10 @@ public abstract class CachedService<T> where T : FileFlowObject, new()
         => Data = DbHelper.Select<T>().Result.ToList();
     
     /// <summary>
-    /// Deletes all items matching the UIDs
+    /// Deletes items matching the UIDs
     /// </summary>
     /// <param name="uids">the UIDs of the items to delete</param>
-    public async Task DeleteAll(params Guid[] uids)
+    public virtual async Task Delete(params Guid[] uids)
     {
         if (uids?.Any() != true)
             return;

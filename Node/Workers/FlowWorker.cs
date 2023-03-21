@@ -343,7 +343,7 @@ public class FlowWorker : Worker
         }
 
         var variableService = new VariableService();
-        var variables = variableService.GetAll().Result?.ToDictionary(x => x.Name, x => (object)x.Value) ?? new ();
+        var variables = variableService.GetAllAsync().Result?.ToDictionary(x => x.Name, x => (object)x.Value) ?? new ();
         if (variables.ContainsKey("FileFlows.Url"))
             variables["FileFlows.Url"] = Service.ServiceBaseUrl;
         else

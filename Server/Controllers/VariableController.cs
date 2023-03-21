@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using FileFlows.Server.Helpers;
+using FileFlows.Server.Services;
 using FileFlows.Shared.Models;
 
 namespace FileFlows.Server.Controllers;
@@ -8,16 +9,15 @@ namespace FileFlows.Server.Controllers;
 /// Variable Controller
 /// </summary>
 [Route("/api/variable")]
-public class VariableController : ControllerStore<Variable>
-{
-    protected override bool AutoIncrementRevision => true;
-    
+public class VariableController : Controller
+{   
     /// <summary>
     /// Get all variables configured in the system
     /// </summary>
     /// <returns>A list of all configured variables</returns>
     [HttpGet]
-    public async Task<IEnumerable<Variable>> GetAll() => (await GetDataList()).OrderBy(x => x.Name.ToLowerInvariant());
+    public IEnumerable<Variable> GetAll() 
+        => new VariableService().GetAll().OrderBy(x => x.Name.ToLowerInvariant());
 
     /// <summary>
     /// Get variable
@@ -25,7 +25,8 @@ public class VariableController : ControllerStore<Variable>
     /// <param name="uid">The UID of the variable to get</param>
     /// <returns>The variable instance</returns>
     [HttpGet("{uid}")]
-    public Task<Variable> Get(Guid uid) => GetByUid(uid);
+    public Variable Get(Guid uid)
+        => new VariableService().GetByUid(uid);
 
     /// <summary>
     /// Get a variable by its name, case insensitive
@@ -34,14 +35,7 @@ public class VariableController : ControllerStore<Variable>
     /// <returns>The variable instance if found</returns>
     [HttpGet("name/{name}")]
     public async Task<Variable?> GetByName(string name)
-    {
-        if (DbHelper.UseMemoryCache == false)
-            return await DbHelper.GetByName<Variable>(name);
-        
-        var list = await GetData();
-        name = name.ToLower().Trim();
-        return list.Values.FirstOrDefault(x => x.Name.ToLower() == name);
-    }
+        => new VariableService().GetByName(name);
 
     /// <summary>
     /// Saves a variable
@@ -51,9 +45,8 @@ public class VariableController : ControllerStore<Variable>
     [HttpPost]
     public async Task<Variable> Save([FromBody] Variable variable)
     {
-        var result = await Update(variable, checkDuplicateName: true);
-        Workers.FileFlowsTasksWorker.ReloadVariables();
-        return result;
+        new VariableService().Update(variable);
+        return variable;
     }
 
     /// <summary>
@@ -62,9 +55,6 @@ public class VariableController : ControllerStore<Variable>
     /// <param name="model">A reference model containing UIDs to delete</param>
     /// <returns>an awaited task</returns>
     [HttpDelete]
-    public async Task Delete([FromBody] ReferenceModel<Guid> model)
-    {
-        await DeleteAll(model);
-        Workers.FileFlowsTasksWorker.ReloadVariables();
-    }
+    public Task Delete([FromBody] ReferenceModel<Guid> model)
+        => new VariableService().Delete(model.Uids);
 }

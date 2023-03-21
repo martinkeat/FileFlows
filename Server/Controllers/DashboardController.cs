@@ -1,5 +1,6 @@
 using FileFlows.Plugin;
 using FileFlows.Server.Helpers;
+using FileFlows.Server.Services;
 using FileFlows.Shared.Models;
 using FileFlows.Shared.Widgets;
 using Microsoft.AspNetCore.Mvc;
@@ -10,16 +11,17 @@ namespace FileFlows.Server.Controllers;
 /// Controller for the dashboard
 /// </summary>
 [Route("/api/dashboard")]
-public class DashboardController:ControllerStore<Dashboard>
+public class DashboardController : Controller
 {
     /// <summary>
     /// Get all dashboards in the system
     /// </summary>
     /// <returns>all dashboards in the system</returns>
     [HttpGet]
-    public async Task<IEnumerable<Dashboard>> GetAll()
+    public IEnumerable<Dashboard> GetAll()
     {
-        var dashboards = (await GetDataList()).OrderBy(x => x.Name.ToLower()).ToList();
+        var dashboards = new DashboardService().GetAll()
+            .OrderBy(x => x.Name.ToLower()).ToList();
         if (dashboards.Any() == false)
         {
             // add default
@@ -34,7 +36,8 @@ public class DashboardController:ControllerStore<Dashboard>
     [HttpGet("list")]
     public async Task<IEnumerable<ListOption>> ListAll()
     {
-        var dashboards = (await GetDataList()).OrderBy(x => x.Name.ToLower()).Select(x => new ListOption
+        var dashboards = new DashboardService().GetAll()
+            .OrderBy(x => x.Name.ToLower()).Select(x => new ListOption
         {
             Label = x.Name,
             Value = x.Uid
@@ -56,7 +59,7 @@ public class DashboardController:ControllerStore<Dashboard>
     [HttpGet("{uid}/Widgets")]
     public async Task<IEnumerable<WidgetUiModel>> Get(Guid uid)
     {
-        var db = await GetByUid(uid);
+        var db = new DashboardService().GetByUid(uid);;
         if ((db == null || db.Uid == Guid.Empty) && uid == Dashboard.DefaultDashboardUid)
             db = Dashboard.GetDefaultDashboard(DbHelper.UseMemoryCache == false);
         else if (db == null)
@@ -102,8 +105,8 @@ public class DashboardController:ControllerStore<Dashboard>
     /// <param name="uid">The UID of the dashboard to delete</param>
     /// <returns>an awaited task</returns>
     [HttpDelete("{uid}")]
-    public Task Delete([FromRoute] Guid uid) => base.DeleteAll(new[] { uid });
-    
+    public Task Delete([FromRoute] Guid uid)
+        => new DashboardService().Delete(uid);
     
     /// <summary>
     /// Saves a dashboard
@@ -111,34 +114,27 @@ public class DashboardController:ControllerStore<Dashboard>
     /// <param name="model">The dashboard being saved</param>
     /// <returns>The saved dashboard</returns>
     [HttpPut]
-    public async Task<Dashboard> Save([FromBody] Dashboard model)
+    public Dashboard Save([FromBody] Dashboard model)
     {
-        if (model == null)
-            throw new Exception("No model");
-
-        if (string.IsNullOrWhiteSpace(model.Name))
-            throw new Exception("ErrorMessages.NameRequired");
-        model.Name = model.Name.Trim();
-        bool inUse = await NameInUse(model.Uid, model.Name);
-        if (inUse)
-            throw new Exception("ErrorMessages.NameInUse");
-
-        return await Update(model);
+        new DashboardService().Update(model);
+        return model;
     }
 
     /// <summary>
     /// Saves a dashboard
     /// </summary>
     /// <param name="uid">The UID of the dashboard</param>
-    /// <param name="Widgets">The Widgets to save</param>
+    /// <param name="widgets">The Widgets to save</param>
     /// <returns>The saved dashboard</returns>
     [HttpPut("{uid}")]
-    public async Task<Dashboard> Save([FromRoute] Guid uid, [FromBody] List<Widget> Widgets)
+    public Dashboard Save([FromRoute] Guid uid, [FromBody] List<Widget> widgets)
     {
-        var dashboard = await GetByUid(uid);
+        var service = new DashboardService();
+        var dashboard = service.GetByUid(uid);
         if (dashboard == null)
             throw new Exception("Dashboard not found");
-        dashboard.Widgets = Widgets ?? new List<Widget>();
-        return await Save(dashboard);
+        dashboard.Widgets = widgets ?? new List<Widget>();
+        service.Update(dashboard);
+        return dashboard;
     }
 }
