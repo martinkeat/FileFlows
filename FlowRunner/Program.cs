@@ -39,6 +39,7 @@ public class Program
             string tempPath = GetArgument(args, "--tempPath");
             if (string.IsNullOrEmpty(tempPath) || Directory.Exists(tempPath) == false)
                 throw new Exception("Temp path doesnt exist: " + tempPath);
+            LogInfo("Temp Path: " + tempPath);
             
             string cfgPath = GetArgument(args, "--cfgPath");
             if (string.IsNullOrEmpty(cfgPath) || Directory.Exists(cfgPath) == false)
@@ -82,7 +83,17 @@ public class Program
 
             string workingDir = Path.Combine(tempPath, "Runner-" + uid);
             LogInfo("Working Directory: " + workingDir);
-            Directory.CreateDirectory(workingDir);
+            try
+            {
+                Directory.CreateDirectory(workingDir);
+            }
+            catch (Exception ex) when (Globals.IsDocker)
+            {
+                // this can throw if mapping inside a docker container is not valid, or the mapped location has become unavailable
+                LogError("Failed to create working directory, this is likely caused by the mapped '/temp' directory is missing or has become unavailable from the host machine");
+                LogError(ex.Message);
+            }
+
             LogInfo("Created Directory: " + workingDir);
 
             var libfileUid = Guid.Parse(GetArgument(args, "--libfile"));

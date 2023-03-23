@@ -221,10 +221,64 @@ public class FlowWorker : Worker
                 }.Where(x => x != null).ToArray();
 #pragma warning restore CS8601 // Possible null reference assignment.
 
-#if (DEBUG)
                 try
                 {
+#if (DEBUG)
                     FileFlows.FlowRunner.Program.Main(parameters);
+#else   
+                    using Process process = new Process();
+                
+                    process.StartInfo = new ProcessStartInfo();
+                    process.StartInfo.FileName = GetDotnetLocation();
+                    process.StartInfo.WorkingDirectory = DirectoryHelper.FlowRunnerDirectory;
+                    process.StartInfo.ArgumentList.Add("FileFlows.FlowRunner.dll");
+                    foreach (var str in parameters)
+                        process.StartInfo.ArgumentList.Add(str);
+
+                    Logger.Instance?.ILog("Executing: " + process.StartInfo.FileName + " " + String.Join(" ", process.StartInfo.ArgumentList.Select(x => "\"" + x + "\"")));
+                    Logger.Instance?.ILog("Working Directory: " + process.StartInfo.WorkingDirectory);
+
+                    process.StartInfo.UseShellExecute = false;
+                    process.StartInfo.RedirectStandardOutput = true;
+                    process.StartInfo.RedirectStandardError = true;
+                    process.StartInfo.CreateNoWindow = true;
+                    process.Start();
+                    string output = process.StandardOutput.ReadToEnd();
+                    StringBuilder completeLog = new StringBuilder();
+                    if (string.IsNullOrEmpty(output) == false)
+                    {
+                        completeLog.AppendLine(
+                            "==============================================================================" + Environment.NewLine +
+                            "===                      PROCESSING NODE OUTPUT START                      ===" + Environment.NewLine +
+                            "==============================================================================" + Environment.NewLine +
+                            output + Environment.NewLine +
+                            "==============================================================================" + Environment.NewLine +
+                            "===                       PROCESSING NODE OUTPUT END                       ===" + Environment.NewLine +
+                            "==============================================================================");
+                    }
+                    string error = process.StandardError.ReadToEnd();
+                    process.WaitForExit();
+                    if (string.IsNullOrEmpty(error) == false)
+                    {
+                        completeLog.AppendLine(
+                            "==============================================================================" + Environment.NewLine +
+                            "===                   PROCESSING NODE ERROR OUTPUT START                   ===" + Environment.NewLine +
+                            "==============================================================================" + Environment.NewLine +
+                            error  + Environment.NewLine +
+                            "==============================================================================" + Environment.NewLine +
+                            "===                    PROCESSING NODE ERROR OUTPUT END                    ===" + Environment.NewLine +
+                            "==============================================================================");
+                    }
+
+                    SaveLog(libFile, completeLog.ToString());
+
+                    if (process.ExitCode != 0)
+                    {
+                        Logger.Instance?.ELog("Error executing runner: Invalid exit code: " + process.ExitCode);
+                        libFile.Status = FileStatus.ProcessingFailed;
+                        libFileService.Update(libFile);
+                    }
+                #endif
                 }
                 catch (Exception ex)
                 {
@@ -232,67 +286,6 @@ public class FlowWorker : Worker
                     libFile.Status = FileStatus.ProcessingFailed;
                     libFileService.Update(libFile);
                 }
-#else
-                using (Process process = new Process())
-                {
-                    try
-                    {
-                        process.StartInfo = new ProcessStartInfo();
-                        process.StartInfo.FileName = GetDotnetLocation();
-                        process.StartInfo.WorkingDirectory = DirectoryHelper.FlowRunnerDirectory;
-                        process.StartInfo.ArgumentList.Add("FileFlows.FlowRunner.dll");
-                        foreach (var str in parameters)
-                            process.StartInfo.ArgumentList.Add(str);
-
-                        Logger.Instance?.ILog("Executing: " + process.StartInfo.FileName + " " + String.Join(" ", process.StartInfo.ArgumentList.Select(x => "\"" + x + "\"")));
-                        Logger.Instance?.ILog("Working Directory: " + process.StartInfo.WorkingDirectory);
-
-                        process.StartInfo.UseShellExecute = false;
-                        process.StartInfo.RedirectStandardOutput = true;
-                        process.StartInfo.RedirectStandardError = true;
-                        process.StartInfo.CreateNoWindow = true;
-                        process.Start();
-                        string output = process.StandardOutput.ReadToEnd();
-                        StringBuilder completeLog = new StringBuilder();
-                        if (string.IsNullOrEmpty(output) == false)
-                        {
-                            completeLog.AppendLine(
-                                "==============================================================================" + Environment.NewLine +
-                                "===                      PROCESSING NODE OUTPUT START                      ===" + Environment.NewLine +
-                                "==============================================================================" + Environment.NewLine +
-                                output + Environment.NewLine +
-                                "==============================================================================" + Environment.NewLine +
-                                "===                       PROCESSING NODE OUTPUT END                       ===" + Environment.NewLine +
-                                "==============================================================================");
-                        }
-                        string error = process.StandardError.ReadToEnd();
-                        process.WaitForExit();
-                        if (string.IsNullOrEmpty(error) == false)
-                        {
-                            completeLog.AppendLine(
-                                "==============================================================================" + Environment.NewLine +
-                                "===                   PROCESSING NODE ERROR OUTPUT START                   ===" + Environment.NewLine +
-                                "==============================================================================" + Environment.NewLine +
-                                error  + Environment.NewLine +
-                                "==============================================================================" + Environment.NewLine +
-                                "===                    PROCESSING NODE ERROR OUTPUT END                    ===" + Environment.NewLine +
-                                "==============================================================================");
-                        }
-
-                        SaveLog(libFile, completeLog.ToString());
-
-                        if (process.ExitCode != 0)
-                            throw new Exception("Invalid exit code: " + process.ExitCode);
-
-                    }
-                    catch (Exception ex)
-                    {
-                        Logger.Instance?.ELog("Error executing runner: " + ex.Message + Environment.NewLine + ex.StackTrace);
-                        libFile.Status = FileStatus.ProcessingFailed;
-                        libFileService.Update(libFile);
-                    }
-                }
-                #endif
             }
             finally
             {
