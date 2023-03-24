@@ -42,7 +42,7 @@ public class FlowController : Controller
     /// <returns>all flows in the system</returns>
     [HttpGet]
     public IEnumerable<Flow> GetAll() => 
-        new FlowService().GetAll().OrderBy(x => x.Name.ToLower());
+        new FlowService().GetAll().OrderBy(x => x.Name.ToLowerInvariant());
 
     [HttpGet("list-all")]
     public IEnumerable<FlowListModel> ListAll()
@@ -117,7 +117,7 @@ public class FlowController : Controller
             });
         }
         
-        return list;
+        return list.OrderBy(x => x.Name.ToLowerInvariant());
     }
 
     private class GotoFlowModel

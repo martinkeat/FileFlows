@@ -56,7 +56,7 @@ public class NodeController : Controller
         if (internalNode != null)
             internalNode.OperatingSystem = Shared.OperatingSystemType.Linux;
 #endif
-        return nodes;
+        return nodes.OrderBy(x => x.Name.ToLowerInvariant());
     }
 
     /// <summary>

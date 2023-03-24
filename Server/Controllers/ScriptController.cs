@@ -108,7 +108,7 @@ public class ScriptController : Controller
             });
         }
 
-        return scripts.OrderBy(x => x.Name);
+        return scripts.OrderBy(x => x.Name.ToLowerInvariant());
     }
 
     /// <summary>

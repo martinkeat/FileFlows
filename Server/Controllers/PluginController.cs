@@ -85,7 +85,7 @@ public class PluginController : Controller
                 });
             }
         }
-        return pims.OrderBy(x => x.Name);
+        return pims.OrderBy(x => x.Name.ToLowerInvariant());
     }
 
     /// <summary>

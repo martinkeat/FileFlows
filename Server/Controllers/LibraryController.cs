@@ -36,7 +36,7 @@ public class LibraryController : Controller
     /// <returns>a list of all libraries</returns>
     [HttpGet]
     public IEnumerable<Library> GetAll() 
-        => new LibraryService().GetAll().OrderBy(x => x.Name);
+        => new LibraryService().GetAll().OrderBy(x => x.Name.ToLowerInvariant());
 
 
     /// <summary>

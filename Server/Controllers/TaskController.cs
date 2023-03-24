@@ -16,7 +16,7 @@ public class TaskController : Controller
     /// <returns>A list of all configured scheduled tasks</returns>
     [HttpGet]
     public IEnumerable<FileFlowsTask> GetAll()
-        => new TaskService().GetAll().OrderBy(x => x.Name);
+        => new TaskService().GetAll().OrderBy(x => x.Name.ToLowerInvariant());
 
     /// <summary>
     /// Get scheduled task
