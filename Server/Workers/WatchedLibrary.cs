@@ -281,20 +281,33 @@ public class WatchedLibrary:IDisposable
     {
         FileSystemInfo info = this.Library.Folders ? new DirectoryInfo(fullpath) : new FileInfo(fullpath);
         long size = this.Library.Folders ? Helpers.FileHelper.GetDirectorySize(fullpath) : ((FileInfo)info).Length;
-        
-        if(MatchesValue((int)DateTime.Now.Subtract(info.CreationTime).TotalMinutes, Library.DetectFileCreation, Library.DetectFileCreationLower, Library.DetectFileCreationUpper) == false)
+
+        return MatchesDetection(Library, info, size);
+    }
+
+    /// <summary>
+    /// Tests if a file in a library matches the detection settings for hte library
+    /// </summary>
+    /// <param name="library">the library to test</param>
+    /// <param name="info">the info for the file or folder to test</param>
+    /// <param name="size">the size of the file or folder in bytes</param>
+    /// <returns>true if matches detection, otherwise false</returns>
+    public static bool MatchesDetection(Library library, FileSystemInfo info, long size)
+    {
+        if(MatchesValue((int)DateTime.Now.Subtract(info.CreationTime).TotalMinutes, library.DetectFileCreation, library.DetectFileCreationLower, library.DetectFileCreationUpper) == false)
             return false;
 
-        if(MatchesValue((int)DateTime.Now.Subtract(info.LastWriteTime).TotalMinutes, Library.DetectFileLastWritten, Library.DetectFileLastWrittenLower, Library.DetectFileLastWrittenUpper) == false)
+        if(MatchesValue((int)DateTime.Now.Subtract(info.LastWriteTime).TotalMinutes, library.DetectFileLastWritten, library.DetectFileLastWrittenLower, library.DetectFileLastWrittenUpper) == false)
             return false;
         
-        if(MatchesValue(size, Library.DetectFileSize, Library.DetectFileSizeLower, Library.DetectFileSizeUpper) == false)
+        if(MatchesValue(size, library.DetectFileSize, library.DetectFileSizeLower, library.DetectFileSizeUpper) == false)
             return false;
         
         return true;
+        
     }
     
-    private bool MatchesValue(long value, MatchRange range, long low, long high)
+    private static bool MatchesValue(long value, MatchRange range, long low, long high)
     {
         if (range == MatchRange.Any)
             return true;

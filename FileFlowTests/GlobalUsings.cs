@@ -2,3 +2,12 @@
 global using System.Linq;
 global using FileFlows.Shared.Models;
 global using Microsoft.VisualStudio.TestTools.UnitTesting;
+global using System;
+global using System.Text;
+global using FileFlows.Plugin;
+global using FileFlows.ServerShared;
+global using FileFlows.ServerShared.Helpers;
+global using FileFlows.ServerShared.Models;
+global using FileFlows.Shared;
+global using System.Threading.Tasks;
+global using FileFlows.ServerShared.Services;

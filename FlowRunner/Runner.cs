@@ -1,20 +1,13 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using System.Text.RegularExpressions;
-using FileFlows.Server;
+﻿using FileFlows.Server;
 using FileFlows.ServerShared;
 using FileFlows.ServerShared.Helpers;
-using Microsoft.Extensions.Logging;
-using NPoco;
-
-namespace FileFlows.FlowRunner;
-
 using FileFlows.Plugin;
-using FileFlows.Plugin.Helpers;
 using FileFlows.ServerShared.Services;
 using FileFlows.Shared;
 using FileFlows.Shared.Models;
 using System.Reflection;
-using System.Runtime.InteropServices;
+
+namespace FileFlows.FlowRunner;
 
 /// <summary>
 /// A runner instance, this is called as a standalone application that is fired up when FileFlows needs to process a file
@@ -348,9 +341,9 @@ public class Runner
                 nodeParameters.Variables.Add(variable.Key, variable.Value);
         }
 
-        FileHelper.DontChangeOwner = Node.DontChangeOwner;
-        FileHelper.DontSetPermissions = Node.DontSetPermissions;
-        FileHelper.Permissions = Node.Permissions;
+        FileFlows.Plugin.Helpers.FileHelper.DontChangeOwner = Node.DontChangeOwner;
+        FileFlows.Plugin.Helpers.FileHelper.DontSetPermissions = Node.DontSetPermissions;
+        FileFlows.Plugin.Helpers.FileHelper.Permissions = Node.Permissions;
 
         List<Guid> runFlows = new List<Guid>();
         runFlows.Add(Flow.Uid);

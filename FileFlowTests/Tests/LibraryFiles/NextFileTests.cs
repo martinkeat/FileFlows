@@ -1,9 +1,3 @@
-using System;
-using FileFlows.Plugin;
-using FileFlows.ServerShared;
-using FileFlows.ServerShared.Models;
-using FileFlows.Shared;
-
 namespace FileFlowTests.Tests.LibraryFiles;
 
 [TestClass]
@@ -150,6 +144,24 @@ public class NextFileTests:LibraryFileTest
             .OrderBy(x => rand.Next()).First();
         expected.Flags = LibraryFileFlags.ForceProcessing;
         ExpectFile(expected);
+    }
+    
+    [TestMethod]
+    public void InSchedule()
+    {
+        var lib = Libraries[3];
+        StringBuilder schedule = new StringBuilder(new string('0', 672));
+
+        int quarter = TimeHelper.GetCurrentQuarter();
+        schedule[ quarter] = '1';
+        // do next quarter as well just in case this test run rolls into next quarter
+        schedule[quarter == 671 ? 0 : quarter + 1] = '1';
+        lib.Schedule = schedule.ToString();
+        
+        AllowLibrary(lib);
+        var next = GetNextFile();
+        Assert.AreEqual(NextLibraryFileStatus.Success, next.Status);
+        Assert.IsNotNull(next.File);
     }
     
     [TestMethod]
