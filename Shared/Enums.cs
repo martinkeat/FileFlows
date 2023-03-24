@@ -45,13 +45,13 @@ public enum FlowType
 public enum ProcessingLibraries
 {
     /// <summary>
-    /// Only process the libraries specified
-    /// </summary>
-    Only = 0,
-    /// <summary>
     /// Process all libraries
     /// </summary>
-    All = 1,
+    All = 0,
+    /// <summary>
+    /// Only process the libraries specified
+    /// </summary>
+    Only = 1,
     /// <summary>
     /// Process all libraries except those specified
     /// </summary>
