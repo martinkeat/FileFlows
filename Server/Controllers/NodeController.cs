@@ -335,6 +335,7 @@ public class NodeController : Controller
             OperatingSystem = model.OperatingSystem,
             Version = model.Version,
             Schedule = new string('1', 672),
+            AllLibraries = ProcessingLibraries.All,
             Mappings = model.Mappings?.Select(x => new KeyValuePair<string, string>(x.Server, x.Local))?.ToList() ??
                        variables?.Select(x => new
                            KeyValuePair<string, string>(x.Value, "")
