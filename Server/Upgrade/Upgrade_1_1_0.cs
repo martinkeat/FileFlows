@@ -25,7 +25,7 @@ public class Upgrade_1_1_0
         string sql =
             "update DbObject set Data = json_set(Data, '$.AllLibraries', @1) where Type = 'FileFlows.Shared.Models.ProcessingNode' and ";
         if(manager is SqliteDbManager)
-            sql  += " json_extract([Data], '$.AllLibraries') = @0";
+            sql  += " json_extract(Data, '$.AllLibraries') = @0";
         else
             sql  += " json_value(Data, '$.AllLibraries') = @0";
             
