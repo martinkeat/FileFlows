@@ -362,8 +362,14 @@ public class PluginController : Controller
         var obj = await DbHelper.SingleByName<Models.PluginSettingsModel>("PluginSettings_" + packageName);
         obj ??= new Models.PluginSettingsModel();
         obj.Name = "PluginSettings_" + packageName;
-        obj.Json = json ?? String.Empty;
-        await DbHelper.Update(obj);
+        var newJson = json ?? string.Empty;
+        if (newJson != obj.Json)
+        {
+            obj.Json = json ?? String.Empty;
+            await DbHelper.Update(obj);
+            // need to increment the revision increment so these plugin settings are pushed to the nodes
+            await new Services.SettingsService().RevisionIncrement();
+        }
     }
 
     
