@@ -90,8 +90,12 @@ public class Program
             catch (Exception ex) when (Globals.IsDocker)
             {
                 // this can throw if mapping inside a docker container is not valid, or the mapped location has become unavailable
+                LogError("==========================================================================================");
                 LogError("Failed to create working directory, this is likely caused by the mapped '/temp' directory is missing or has become unavailable from the host machine");
                 LogError(ex.Message);
+                LogError("==========================================================================================");
+                exitCode = 1;
+                return;
             }
 
             LogInfo("Created Directory: " + workingDir);
