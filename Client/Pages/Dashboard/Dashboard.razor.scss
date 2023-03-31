@@ -55,3 +55,15 @@
         }
     }
 }
+
+.mobile-dashboard-selector {
+    width: calc(100% - 1rem);
+    margin-bottom: 1rem;
+    border-color: var(--border-color);
+    button {
+        display:none;
+    }
+    select {
+        width:100%;
+    }
+}

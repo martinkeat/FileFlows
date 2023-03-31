@@ -11,6 +11,22 @@
     <div class="mobile-pause-resume">
         <PauseResume />   
     </div>
+    @if (App.Instance.FileFlowsSystem.Licensed)
+    {
+        <div class="mobile-dashboard-selector dashboard-selector">
+            <select @bind="ActiveDashboardUid">
+                @if (Dashboards?.Any() == true)
+                {
+                    @foreach (var dashboard in Dashboards.OrderBy(x => x.Label))
+                    {
+                        <option value=@dashboard.Value>@dashboard.Label</option>
+                    }
+                }
+            </select>
+            <button @onclick=@AddDashboard><i class="fas fa-plus"></i></button>
+            <button disabled=@(DashboardDeletable == false) @onclick=@DeleteDashboard><i class="fas fa-trash"></i></button>
+        </div>
+    }
 }
 <CascadingValue Value="this" IsFixed="true">
     <PageView ClassName="fix-width">
@@ -49,7 +65,7 @@
             {
                 <InitialConfigWelcome />
             }
-            else if (App.Instance.IsMobile == false && App.Instance.FileFlowsSystem.Licensed && ActiveDashboardUid != Guid.Empty)
+            else if (App.Instance.FileFlowsSystem.Licensed && ActiveDashboardUid != Guid.Empty)
             {
                 <CustomDashboard ActiveDashboardUid=@ActiveDashboardUid />
             }

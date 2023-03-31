@@ -1366,7 +1366,7 @@ hr {
   .page .vi-container {
     z-index: 1;
   }
-  .page .vi-container .content {
+  .page .vi-container > .content {
     height: calc(100vh - 4rem);
   }
   .pager {
