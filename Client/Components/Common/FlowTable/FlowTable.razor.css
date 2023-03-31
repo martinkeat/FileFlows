@@ -98,6 +98,9 @@
   user-select: none;
   width: 100%;
 }
+.flowtable-row:hover {
+  background: rgba(var(--accent-rgb), 0.3);
+}
 .flowtable-row:not(.flowtable-header-row) {
   border-top: none;
   border-right: none;

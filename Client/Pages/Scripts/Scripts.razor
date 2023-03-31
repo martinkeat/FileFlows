@@ -47,7 +47,7 @@
                     <span>@item.Name</span>
                 </Cell>
             </FlowTableColumn>
-            <FlowTableColumn TItem="Script" Width="6rem">
+            <FlowTableColumn TItem="Script" Width="10rem" LargeWidth="18rem" Align="FlowTableAlignment.Center">
                 <Header>
                     Revision
                 </Header>
@@ -58,7 +58,7 @@
                     }
                 </Cell>
             </FlowTableColumn>
-            <FlowTableColumn TItem="Script" Width="9rem">
+            <FlowTableColumn TItem="Script" Width="10rem" LargeWidth="18rem" Align="FlowTableAlignment.Center">
                 <Header>
                     Latest Revision
                 </Header>
@@ -69,7 +69,7 @@
                     }
                 </Cell>
             </FlowTableColumn>
-            <FlowTableColumn TItem="Script" Width="10rem" Hidden=@(SelectedType == ScriptType.Shared)>
+            <FlowTableColumn TItem="Script" Width="10rem" LargeWidth="18rem" Align="FlowTableAlignment.Center" Hidden=@(SelectedType == ScriptType.Shared)>
                 <Header>
                     Read Only
                 </Header>
@@ -80,7 +80,7 @@
                     }
                 </Cell>
             </FlowTableColumn>
-            <FlowTableColumn TItem="Script" Width="10rem" Hidden=@(SelectedType == ScriptType.Shared)>
+            <FlowTableColumn TItem="Script" Width="10rem" LargeWidth="18rem" Align="FlowTableAlignment.Center" Hidden=@(SelectedType == ScriptType.Shared)>
                 <Header>
                     In Use
                 </Header>

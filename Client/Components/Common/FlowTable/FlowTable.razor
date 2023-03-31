@@ -27,6 +27,14 @@
         {
             string hashcode = ".col-" + col.GetHashCode();
             <text>
+                .flowtable-header @hashcode { 
+                    text-align:@col.HeaderAlign.ToString().ToLower();
+                }
+                .flowtable-body @hashcode { 
+                    text-align:@col.ColumnAlign.ToString().ToLower();
+                }
+            </text>
+            <text>
             @hashcode { 
                 @if (App.Instance.IsMobile && string.IsNullOrEmpty(col.MobileWidth) == false)
                 {
@@ -55,6 +63,20 @@
                 }
             }
             </text>
+            @if(string.IsNullOrEmpty(col.LargeWidth) == false)
+            {
+                <text>
+                @@media screen and (min-width:2100px)
+                {
+                    @hashcode
+                    {
+                        min-width:@col.LargeWidth;
+                        max-width:@col.LargeWidth;
+                        width:@col.LargeWidth;
+                    }
+                }
+                </text>
+            }
             @if(string.IsNullOrEmpty(col.MobileWidth) == false)
             {
                 <text>

@@ -37,10 +37,50 @@
             }
         }
 
+        /// <summary>
+        /// Gets or sets the width for mobile devices
+        /// </summary>
         [Parameter]
         public string MobileWidth { get; set; }
 
+
+        /// <summary>
+        /// Gets or sets the width for very large displays
+        /// </summary>
+        [Parameter]
+        public string LargeWidth { get; set; }
+
+        private FlowTableAlignment _HeaderAlign, _ColumnAlign;
+        /// <summary>
+        /// Gets or sets if the header alignment
+        /// </summary>
+        [Parameter]
+        public FlowTableAlignment HeaderAlign { get => _HeaderAlign; set => _HeaderAlign = value; }
+        
+        /// <summary>
+        /// Gets or sets if the column alignment
+        /// </summary>
+        [Parameter]
+        public FlowTableAlignment ColumnAlign { get => _ColumnAlign; set => _ColumnAlign = value; }
+
+
+        /// <summary>
+        /// Shortcut for setting both header and column alignment
+        /// </summary>
+        [Parameter]
+        public FlowTableAlignment Align
+        {
+            set
+            {
+                _ColumnAlign = value;
+                _HeaderAlign = value;
+            }
+        }
+        
         private string _MinWidth = string.Empty;    
+        /// <summary>
+        /// Gets or sets the minimum width of the column
+        /// </summary>
         [Parameter]
         public string MinWidth
         {
@@ -69,4 +109,23 @@
         }
 
     }
+}
+
+/// <summary>
+/// Alignment options for a flow table
+/// </summary>
+public enum FlowTableAlignment 
+{
+    /// <summary>
+    /// Left align
+    /// </summary>
+    Left,
+    /// <summary>
+    /// Center align
+    /// </summary>
+    Center,
+    /// <summary>
+    /// Right align
+    /// </summary>
+    Right
 }

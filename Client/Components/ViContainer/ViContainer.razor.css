@@ -6,9 +6,6 @@
   max-height: 100vh;
   position: relative;
 }
-.vi-container:not(.fullwidth) {
-  max-width: 1400px;
-}
 .vi-container.flex .content {
   display: flex;
   flex-direction: column;

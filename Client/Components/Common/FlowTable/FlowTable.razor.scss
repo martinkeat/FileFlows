@@ -112,6 +112,9 @@
     flex-direction: row;
     user-select: none;
     width: 100%;
+    &:hover {
+        background: rgba(var(--accent-rgb), 0.3);
+    }
     &:not(.flowtable-header-row) {
         border-top: none;
         border-right: none;

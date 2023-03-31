@@ -5,9 +5,10 @@
     overflow: hidden;
     max-height: 100vh;
     position: relative;
-    &:not(.fullwidth){        
-        max-width:1400px;
-    }
+
+    //&:not(.fullwidth){        
+    //    max-width:1400px;
+    //}
 
     &.flex .content {
         display:flex;

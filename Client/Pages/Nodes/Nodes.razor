@@ -45,6 +45,16 @@
                         <span>@item.Name</span>
                     </Cell>
                 </FlowTableColumn>
+                <FlowTableColumn TItem="ProcessingNode" Width="9rem" LargeWidth="18rem" Align="FlowTableAlignment.Center" MobileWidth="0">
+                    <Header>
+                    </Header>
+                    <Cell Context="item">
+                        @if (item.Address != FileFlowsServer && Globals.Version != item.Version)
+                        {
+                            <span style="font-style: italic;color: var(--warning);" title="@lblUpgradeRequiredHint">@lblUpgradeRequired</span>
+                        }
+                    </Cell>
+                </FlowTableColumn>
                 <FlowTableColumn TItem="ProcessingNode" MobileWidth="0" Width="14rem">
                     <Header>
                         @lblAddress
@@ -59,7 +69,7 @@
                         }
                     </Cell>
                 </FlowTableColumn>
-                <FlowTableColumn TItem="ProcessingNode" Width="8rem" MobileWidth="0">
+                <FlowTableColumn TItem="ProcessingNode" Width="9rem" LargeWidth="18rem" Align="FlowTableAlignment.Center" MobileWidth="0">
                     <Header>
                         @lblVersion
                     </Header>
@@ -67,17 +77,7 @@
                         <span>@item.Version</span>
                     </Cell>
                 </FlowTableColumn>
-                <FlowTableColumn TItem="ProcessingNode" Width="12rem" MobileWidth="0">
-                    <Header>
-                    </Header>
-                    <Cell Context="item">
-                        @if (item.Address != FileFlowsServer && Globals.Version != item.Version)
-                        {
-                            <span style="font-style: italic;color: var(--warning);" title="@lblUpgradeRequiredHint">@lblUpgradeRequired</span>
-                        }
-                    </Cell>
-                </FlowTableColumn>
-                <FlowTableColumn TItem="ProcessingNode" Width="7rem" MobileWidth="0">
+                <FlowTableColumn TItem="ProcessingNode" Width="9rem" LargeWidth="18rem" Align="FlowTableAlignment.Center" MobileWidth="0">
                     <Header>
                         @lblRunners
                     </Header>
@@ -85,7 +85,7 @@
                         <span>@item.FlowRunners</span>
                     </Cell>
                 </FlowTableColumn>
-                <FlowTableColumn TItem="ProcessingNode" Width="6rem">
+                <FlowTableColumn TItem="ProcessingNode" Width="9rem" LargeWidth="18rem" Align="FlowTableAlignment.Center">
                     <Header>
                         @Globals.lblEnabled
                     </Header>
