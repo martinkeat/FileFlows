@@ -30,4 +30,18 @@ public class LibraryService : CachedService<Library>, ILibraryService
             return new LibraryService();
         return Loader.Invoke();
     }
+    
+    
+    /// <summary>
+    /// Updates the last scanned of a library to now
+    /// </summary>
+    /// <param name="uid">the UID of the library</param>
+    public void UpdateLastScanned(Guid uid)
+    {
+        var lib = GetByUid(uid);
+        if (lib == null)
+            return;
+        lib.LastScanned = DateTime.Now;
+        Update(lib, dontIncrementConfigRevision: true);
+    }
 }

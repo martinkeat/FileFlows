@@ -1,11 +1,10 @@
 ﻿using FileFlows.Plugin;
-using FileFlows.Server.Controllers;
 using FileFlows.Shared.Models;
 using System.ComponentModel;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Timers;
-using FileFlows.Server.Helpers;
+using FileFlows.Server.Services;
 using FileHelper = FileFlows.ServerShared.Helpers.FileHelper;
 
 namespace FileFlows.Server.Workers;
@@ -61,7 +60,7 @@ public class WatchedLibrary:IDisposable
     private void LogQueueMessage(string message, Settings? settings = null)
     {
         if (settings == null)
-            settings = new SettingsController().Get().Result;
+            settings = new SettingsService().Get().Result;
 
         if (settings?.LogQueueMessages != true)
             return;
@@ -243,11 +242,11 @@ public class WatchedLibrary:IDisposable
             if (knownFile)
             {
                 // update the known file, we can't add it again
-                result = new LibraryFileController().Update(lf).Result;
+                result = new LibraryFileService().Update(lf).Result;
             }
             else
             {
-                result = new LibraryFileController().Add(lf).Result;
+                result = new LibraryFileService().Add(lf).Result;
             }
 
             if (result != null && result.Uid != Guid.Empty)
@@ -322,7 +321,7 @@ public class WatchedLibrary:IDisposable
 
     private (bool known, string? fingerprint, ObjectReference? duplicate) IsKnownFile(string fullpath, FileSystemInfo fsInfo)
     {
-        var service = new Server.Services.LibraryFileService();
+        var service = new LibraryFileService();
         var knownFile = service.GetFileIfKnown(fullpath);
         string? fingerprint = null;
         if (knownFile != null)
@@ -369,15 +368,16 @@ public class WatchedLibrary:IDisposable
             knownFile.CreationTime = fsInfo.CreationTime;
             knownFile.LastWriteTime = fsInfo.LastWriteTime;
             knownFile.Status = FileStatus.Unprocessed;
-            knownFile.Fingerprint = fingerprint?.EmptyAsNull() ?? ServerShared.Helpers.FileHelper.CalculateFingerprint(fullpath);
-            new LibraryFileController().Update(knownFile).Wait();
+            knownFile.Fingerprint = fingerprint?.EmptyAsNull() ?? FileHelper.CalculateFingerprint(fullpath);
+            //new LibraryFileController().Update(knownFile).Wait();
+            service.Update(knownFile).Wait();
             // we dont return the duplicate here, or the hash since this could trigger a insertion, its already in the db, so we want to skip it
             return (true, null, null);
         }
 
         if (Library.UseFingerprinting && Library.Folders == false)
         {
-            fingerprint = ServerShared.Helpers.FileHelper.CalculateFingerprint(fullpath);
+            fingerprint = FileHelper.CalculateFingerprint(fullpath);
             if (string.IsNullOrEmpty(fingerprint) == false)
             {
                 knownFile = service.GetFileByFingerprint(fingerprint);
@@ -395,7 +395,7 @@ public class WatchedLibrary:IDisposable
                                 knownFile.OutputPath = fullpath;
                             knownFile.Name = fullpath;
                             knownFile.RelativePath = GetRelativePath(fullpath);
-                            new FileFlows.Server.Services.LibraryFileService().UpdateMovedFile(knownFile).Wait();
+                            new LibraryFileService().UpdateMovedFile(knownFile).Wait();
                             // new LibraryFileController().Update(knownFile).Wait();
                             // file has been updated, we return this is known and tell the scanner to just continue
                             return (true, null, null);
@@ -649,7 +649,7 @@ public class WatchedLibrary:IDisposable
                 var knownFiles = service.GetKnownLibraryFilesWithCreationTimes();
 
                 var files = GetFiles(new DirectoryInfo(Library.Path));
-                var settings = new SettingsController().Get().Result;
+                var settings = new SettingsService().Get().Result;
                 foreach (var file in files)
                 {
                     if (IsMatch(file.FullName) == false || file.FullName.EndsWith("_"))
@@ -678,7 +678,7 @@ public class WatchedLibrary:IDisposable
             ScanComplete = true;
             
             Library.LastScanned = DateTime.Now;
-            new LibraryController().UpdateLastScanned(Library.Uid);
+            new LibraryService().UpdateLastScanned(Library.Uid);
         }
         catch(Exception ex)
         {

@@ -178,17 +178,6 @@ public class LibraryController : Controller
         }
     }
 
-    internal void UpdateLastScanned(Guid uid)
-    {
-        var service = new LibraryService();
-        var lib = service.GetByUid(uid);
-        if (lib == null)
-            return;
-        lib.LastScanned = DateTime.Now;
-        service.Update(lib, dontIncrementConfigRevision: true);
-    }
-
-
     private FileInfo[] GetTemplateFiles() 
         => new DirectoryInfo(DirectoryHelper.TemplateDirectoryLibrary).GetFiles("*.json", SearchOption.AllDirectories);
 
