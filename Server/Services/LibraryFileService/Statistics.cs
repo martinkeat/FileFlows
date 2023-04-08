@@ -76,30 +76,33 @@ where Status = 1 and ProcessingEnded > ProcessingStarted;";
         var outOfSchedule = libraries.Where(x => x.Schedule?.Length != 672 || x.Schedule[quarter] == '0').Select(x => x.Uid);
 
         FileStatus unknown = (FileStatus)999;
-        return Data.Select(x =>
+        lock (Data)
         {
-            if (x.Value.LibraryUid == null)
-                return unknown;
-            if (libraryUids.Contains(x.Value.LibraryUid.Value) == false)
-                return unknown;
-            
-            if ((int)x.Value.Status > 0)
-                return x.Value.Status;
-            if ((x.Value.Flags & LibraryFileFlags.ForceProcessing) == LibraryFileFlags.ForceProcessing)
+            return Data.Select(x =>
+            {
+                if (x.Value.LibraryUid == null)
+                    return unknown;
+                if (libraryUids.Contains(x.Value.LibraryUid.Value) == false)
+                    return unknown;
+
+                if ((int)x.Value.Status > 0)
+                    return x.Value.Status;
+                if ((x.Value.Flags & LibraryFileFlags.ForceProcessing) == LibraryFileFlags.ForceProcessing)
+                    return FileStatus.Unprocessed;
+                if (disabled.Contains(x.Value.LibraryUid.Value))
+                    return FileStatus.Disabled;
+                if (outOfSchedule.Contains(x.Value.LibraryUid.Value))
+                    return FileStatus.OutOfSchedule;
+                if (x.Value.HoldUntil > DateTime.Now)
+                    return FileStatus.OnHold;
                 return FileStatus.Unprocessed;
-            if (disabled.Contains(x.Value.LibraryUid.Value))
-                return FileStatus.Disabled;
-            if (outOfSchedule.Contains(x.Value.LibraryUid.Value))
-                return FileStatus.OutOfSchedule;
-            if (x.Value.HoldUntil > DateTime.Now)
-                return FileStatus.OnHold;
-            return FileStatus.Unprocessed;
-        }).Where(x => x != unknown).GroupBy(x => x).Select(x => new LibraryStatus()
-        {
-            Count = x.Count(),
-            Name = Regex.Replace(x.Key.ToString(), "([A-Z])", " $1").Trim(),
-            Status = x.Key
-        }).ToList();
+            }).Where(x => x != unknown).GroupBy(x => x).Select(x => new LibraryStatus()
+            {
+                Count = x.Count(),
+                Name = Regex.Replace(x.Key.ToString(), "([A-Z])", " $1").Trim(),
+                Status = x.Key
+            }).ToList();
+        }
     }
 
     /// <summary>

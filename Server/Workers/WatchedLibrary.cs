@@ -686,7 +686,6 @@ public class WatchedLibrary:IDisposable
                 ex = ex.InnerException;
 
             Logger.Instance.ELog("WatchedLibrary: Failed scanning for files: " + ex.Message + Environment.NewLine + ex.StackTrace);
-            return;
         }
         finally
         {
@@ -780,19 +779,16 @@ public class WatchedLibrary:IDisposable
         }
     }
 
-    public List<FileInfo> GetFiles(DirectoryInfo dir)
+    public IEnumerable<FileInfo> GetFiles(DirectoryInfo dir)
     {
-        var files = new List<FileInfo>();
-        try
-        {
             foreach (var subdir in dir.GetDirectories())
             {
-                files.AddRange(GetFiles(subdir));
+                foreach(var file in GetFiles(subdir))
+                    yield return file;
             }
-            files.AddRange(dir.GetFiles());
-        }
-        catch (Exception) { }
-        return files;
+
+            foreach (var file in dir.GetFiles())
+                yield return file;
     }
     
 

@@ -281,7 +281,7 @@
       "Title": "Libraries",      
       "Messages":{
         "DeleteConfirm": "Are you sure you want to delete the selected {count, plural, one {library} other {libraries}}?\n\nIf you wish to keep the records for the files in {count, plural, one {this library} other {these libraries}}, then check the option below.",
-        "KeepLibraryFiles":"Keep Files"
+        "KeepLibraryFiles":"Retain files in database for statistics"
       },
       "ErrorMessages": {
         "NoFlows": "There are no flows configured.\nCreate a flow before adding or updating a library."
