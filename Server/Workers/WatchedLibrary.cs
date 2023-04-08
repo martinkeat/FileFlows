@@ -486,9 +486,9 @@ public class WatchedLibrary:IDisposable
 
     void DisposeWatcher()
     {
-        if (Watcher != null)
+        try
         {
-            try
+            if (Watcher != null)
             {
                 Watcher.Changed -= Watcher_Changed;
                 Watcher.Created -= Watcher_Changed;
@@ -496,10 +496,10 @@ public class WatchedLibrary:IDisposable
                 Watcher.EnableRaisingEvents = false;
                 Watcher.Dispose();
             }
-            catch (Exception)
-            {
-            }
             Watcher = null;
+        }
+        catch (Exception)
+        {
         }
     }
 
