@@ -779,18 +779,44 @@ public class WatchedLibrary:IDisposable
         }
     }
 
+    /// <summary>
+    /// Gets the files in recursively for a given folder
+    /// </summary>
+    /// <param name="dir">the folder</param>
+    /// <returns>all the files in the folder</returns>
     public IEnumerable<FileInfo> GetFiles(DirectoryInfo dir)
     {
-            foreach (var subdir in dir.GetDirectories())
-            {
-                foreach(var file in GetFiles(subdir))
-                    yield return file;
-            }
+        DirectoryInfo[] subDirs;
+        try
+        {
+            subDirs = dir.GetDirectories();
+        }
+        catch (Exception)
+        {
+            subDirs = new DirectoryInfo[] { };
+        }
 
-            foreach (var file in dir.GetFiles())
+
+        foreach (var subdir in subDirs)
+        {
+            foreach (var file in GetFiles(subdir))
                 yield return file;
+        }
+
+        FileInfo[] files;
+        try
+        {
+            files = dir.GetFiles();
+        }
+        catch (Exception)
+        {
+            files = new FileInfo[] { };
+        }
+
+        foreach (var file in files)
+            yield return file;
     }
-    
+
 
     /// <summary>
     /// Safely gets the number of queued items
