@@ -110,11 +110,15 @@ public class LibraryWorker : Worker
             var library = libwatcher.Library;
             if (library.FullScanIntervalMinutes == 0)
                 library.FullScanIntervalMinutes = 60;
+            bool scan = library.Scan;
+            if (!scan && library.Uid == libwatcher.Library?.Uid && libwatcher.UseScanner)
+                scan = true;
+            
             if (libwatcher.ScanComplete == false)
             {
                 // hasn't been scanned yet, we scan when the app starts or library is first added
             }
-            else if (library.Scan == false)
+            else if (scan == false)
             {
                 if (library.FullScanDisabled)
                 {
@@ -137,7 +141,7 @@ public class LibraryWorker : Worker
 
             Logger.Instance.DLog($"LibraryWorker: Library '{library.Name}' calling scan " +
                                  $"(Scan complete: {libwatcher.ScanComplete}) " +
-                                 $"(Library Scan: {library.Scan} " +
+                                 $"(Library Scan: {scan} " +
                                  $"(last scanned: {library.LastScannedAgo}) " +
                                  $"(Full Scan interval: {library.FullScanIntervalMinutes})");
 

@@ -18,7 +18,10 @@ public class WatchedLibrary:IDisposable
     public Library Library { get;private set; } 
 
     public bool ScanComplete { get;private set; } = false;
-    private bool UseScanner = false;
+    /// <summary>
+    /// Gets if the scanner should be used instead of file watched for this library
+    /// </summary>
+    public bool UseScanner { get; private set; }
     private bool Disposed = false;
 
     private Mutex ScanMutex = new Mutex();
@@ -45,15 +48,6 @@ public class WatchedLibrary:IDisposable
 
         if(UseScanner == false)
             SetupWatcher();
-
-        // worker = new BackgroundWorker();
-        // worker.DoWork += Worker_DoWork;
-        // worker.RunWorkerAsync();
-        // QueueTimer = new();
-        // QueueTimer.Elapsed += QueueTimerOnElapsed;
-        // QueueTimer.AutoReset = false;
-        // QueueTimer.Interval = 1;
-        // QueueTimer.Start();
     }
 
 
@@ -465,35 +459,46 @@ public class WatchedLibrary:IDisposable
 
     void SetupWatcher()
     {
-        DisposeWatcher();
+        try
+        {
+            DisposeWatcher();
 
-        Watcher = new FileSystemWatcher(Library.Path);
-        Watcher.NotifyFilter =
-                         //NotifyFilters.Attributes |
-                         NotifyFilters.CreationTime |
-                         NotifyFilters.DirectoryName |
-                         NotifyFilters.FileName |
-                         // NotifyFilters.LastAccess |
-                         NotifyFilters.LastWrite |
-                         //| NotifyFilters.Security
-                         NotifyFilters.Size;
-        Watcher.IncludeSubdirectories = true;
-        Watcher.Changed += Watcher_Changed;
-        Watcher.Created += Watcher_Changed;
-        Watcher.Renamed += Watcher_Changed;
-        Watcher.EnableRaisingEvents = true;
-
+            Watcher = new FileSystemWatcher(Library.Path);
+            Watcher.NotifyFilter =
+                             NotifyFilters.CreationTime |
+                             NotifyFilters.DirectoryName |
+                             NotifyFilters.FileName |
+                             NotifyFilters.LastWrite |
+                             NotifyFilters.Size;
+            Watcher.IncludeSubdirectories = true;
+            Watcher.Changed += Watcher_Changed;
+            Watcher.Created += Watcher_Changed;
+            Watcher.Renamed += Watcher_Changed;
+            Watcher.EnableRaisingEvents = true;
+        }
+        catch (Exception ex)
+        {
+            Logger.Instance.ELog($"Failed to create file system watcher for '{Library.Path}': {ex.Message}");
+            DisposeWatcher();
+            this.UseScanner = true;
+        }
     }
 
     void DisposeWatcher()
     {
         if (Watcher != null)
         {
-            Watcher.Changed -= Watcher_Changed;
-            Watcher.Created -= Watcher_Changed;
-            Watcher.Renamed -= Watcher_Changed;
-            Watcher.EnableRaisingEvents = false;
-            Watcher.Dispose();
+            try
+            {
+                Watcher.Changed -= Watcher_Changed;
+                Watcher.Created -= Watcher_Changed;
+                Watcher.Renamed -= Watcher_Changed;
+                Watcher.EnableRaisingEvents = false;
+                Watcher.Dispose();
+            }
+            catch (Exception)
+            {
+            }
             Watcher = null;
         }
     }
