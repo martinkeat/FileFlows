@@ -448,7 +448,7 @@ public class WatchedLibrary:IDisposable
         }
         return false;
     }
-
+    
     public void Dispose()
     {
         Disposed = true;            
@@ -457,6 +457,9 @@ public class WatchedLibrary:IDisposable
         //QueueTimer?.Dispose();
     }
 
+    /// <summary>
+    /// Sets up the file system watcher
+    /// </summary>
     void SetupWatcher()
     {
         try
