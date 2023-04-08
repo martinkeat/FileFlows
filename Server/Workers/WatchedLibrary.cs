@@ -449,6 +449,9 @@ public class WatchedLibrary:IDisposable
         return false;
     }
     
+    /// <summary>
+    /// Disposes of the watched library
+    /// </summary>
     public void Dispose()
     {
         Disposed = true;            
