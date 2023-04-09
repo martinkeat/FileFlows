@@ -592,13 +592,13 @@ public class WatchedLibrary:IDisposable
         else if (UseScanner && library.Scan == false)
         {
             Logger.Instance.ILog($"WatchedLibrary: Library '{library.Name}' switched to watched mode, starting watcher");
-            UseScanner = false;
+            UseScanner = true;
             SetupWatcher();
         }
         else if(UseScanner == false && library.Scan == true)
         {
             Logger.Instance.ILog($"WatchedLibrary: Library '{library.Name}' switched to scan mode, disposing watcher");
-            UseScanner = true;
+            UseScanner = false;
             DisposeWatcher();
         }
         else if(UseScanner == false && Watcher != null && Watcher.Path != library.Path)
@@ -619,6 +619,7 @@ public class WatchedLibrary:IDisposable
     {
         if (ScanMutex.WaitOne(1) == false)
             return;
+        DateTime start = DateTime.Now;
         try
         {
             if (Library.ScanInterval < 10)
@@ -639,7 +640,7 @@ public class WatchedLibrary:IDisposable
                 return;
             }
             
-            Logger.Instance.DLog($"WatchedLibrary: Scan started on '{Library.Name}': {Library.Path}");
+            Logger.Instance.ILog($"WatchedLibrary: Scan started on '{Library.Name}': {Library.Path}");
             
             int count = 0;
             if (Library.Folders)
@@ -685,7 +686,7 @@ public class WatchedLibrary:IDisposable
                 }
             }
 
-            LogQueueMessage($"WatchedLibrary: Files queued for '{Library.Name}': {count} / {QueueCount()}");
+            Logger.Instance.ILog($"WatchedLibrary: Files queued for '{Library.Name}': {count} / {QueueCount()}");
             ScanComplete = true;
             
             Library.LastScanned = DateTime.Now;
@@ -700,6 +701,7 @@ public class WatchedLibrary:IDisposable
         }
         finally
         {
+            Logger.Instance.ILog($"WatchedLibrary: Scan finished on '{Library.Name}': {Library.Path} ({DateTime.Now.Subtract(start)}");
             ScanMutex.ReleaseMutex();
         }
     }
