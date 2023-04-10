@@ -36,6 +36,11 @@ internal class AppSettings
     /// Gets or sets the license code
     /// </summary>
     public string LicenseCode { get; set; }
+    
+    /// <summary>
+    /// Gets or sets the server port to use 
+    /// </summary>
+    public int? ServerPort { get; set; }
 
 
     /// <summary>
@@ -44,10 +49,6 @@ internal class AppSettings
     /// setting will be reset
     /// </summary>
     public string DatabaseMigrateConnection { get; set; }
-
-
-
-
 
 
     private static AppSettings? _Instance;
@@ -67,8 +68,11 @@ internal class AppSettings
     /// <summary>
     /// Saves the app settings
     /// </summary>
-    public void Save() 
+    public void Save()
     {
+        if (ServerPort != null && (ServerPort < 1 || ServerPort > 65535))
+            ServerPort = null;
+        
         var serializerOptions = new JsonSerializerOptions
         {
             WriteIndented = true,

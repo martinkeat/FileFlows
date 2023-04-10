@@ -44,7 +44,7 @@ public class WebServer
 
         bool isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
         string protocol = "http";
-        Port = 5000;
+        Port = AppSettings.Instance.ServerPort ?? 5000;
 #if (DEBUG)
         Port = 6868;
 #endif
