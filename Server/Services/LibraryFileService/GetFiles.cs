@@ -138,7 +138,8 @@ public partial class LibraryFileService
             {
                 // the status in the db is correct and not a computed status
 
-                query = Data.Where(x =>  x.Value.Status == status.Value).Select(x => x.Value);
+                query = Data.Where(x =>  x.Value.Status == status.Value)
+                    .Select(x => x.Value);
 
                 if (status is FileStatus.Processed or FileStatus.ProcessingFailed)
                     query = query.OrderByDescending(x => x.ProcessingEnded)
@@ -150,7 +151,8 @@ public partial class LibraryFileService
 
             var libraries = (await LibraryService.Load().GetAllAsync()).ToDictionary(x => x.Uid, x => x);
 
-            var disabled = libraries.Values.Where(x => x.Enabled == false).Select(x => x.Uid).ToList();
+            var disabled = libraries.Values.Where(x => x.Enabled == false)
+                .Select(x => x.Uid).ToList();
             if (status == FileStatus.Disabled && disabled?.Any() == false)
                 return new List<LibraryFile>(); // no disabled libraries, therefore no disabled files
 
@@ -179,22 +181,22 @@ public partial class LibraryFileService
                                   LibraryFileFlags.ForceProcessing;
                     
                     bool inDisabledLibrary = disabled.Contains(x.Value.LibraryUid.Value) && forced == false;
-                    if (status == FileStatus.Disabled && inDisabledLibrary == false)
-                        return false; // we only want disabled files
-                    if (status != FileStatus.Disabled && inDisabledLibrary)
-                        return false; // we dont want disabled files
+                    if (status == FileStatus.Disabled)
+                        return inDisabledLibrary; // we only want disabled files
+                    if (inDisabledLibrary)
+                        return false; // this is a disabled library, they dont want disabled, so we dont return this file
                     
                     bool isOutOfScheduleLibrary = outOfSchedule.Contains(x.Value.LibraryUid.Value) && forced == false;
-                    if (status == FileStatus.OutOfSchedule && isOutOfScheduleLibrary == false)
-                        return false; // we only want out of schedule files
-                    if (status != FileStatus.OutOfSchedule && isOutOfScheduleLibrary)
-                        return false; // we dont want out of schedule files
+                    if (status == FileStatus.OutOfSchedule)
+                        return isOutOfScheduleLibrary; // we only want out of schedule files
+                    if (isOutOfScheduleLibrary)
+                        return false; // this file is out of schedule, and they dont want out of schedule so dont return it
 
                     bool onHold = x.Value.HoldUntil > DateTime.Now;
-                    if (status == FileStatus.OnHold && onHold == false)
-                        return false; // we only want on hold files
-                    if (status != FileStatus.OnHold && onHold)
-                        return false; // we dont want on hold files
+                    if (status == FileStatus.OnHold)
+                        return onHold; // we only want on hold files
+                    if (onHold)
+                        return false; // this file is on hold, they dont want on hold files, so don't return it
                     
                     return true;
                 })
