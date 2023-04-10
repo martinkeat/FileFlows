@@ -29,7 +29,7 @@ public class WatchedLibrary:IDisposable
     private Queue<string> QueuedFiles = new Queue<string>();
 
     //private BackgroundWorker worker;
-    //private System.Timers.Timer QueueTimer;
+    private System.Timers.Timer QueueTimer;
 
     /// <summary>
     /// Constructs a instance of a Watched Library
@@ -48,6 +48,15 @@ public class WatchedLibrary:IDisposable
 
         if(UseScanner == false)
             SetupWatcher();
+        
+        
+        QueueTimer = new();
+        QueueTimer.Elapsed += QueueTimerOnElapsed;
+        //QueueTimer.AutoReset = false;
+        //QueueTimer.Interval = 1;
+        QueueTimer.AutoReset = true;
+        QueueTimer.Interval = 5 * 60 * 1000;
+        QueueTimer.Start();
     }
 
 
@@ -64,21 +73,22 @@ public class WatchedLibrary:IDisposable
 
     private void QueueTimerOnElapsed(object? sender, ElapsedEventArgs e)
     {
-        try
-        {
-            ProcessQueuedItem();
-        }
-        catch (Exception)
-        {
-        }
-        finally
-        {
-            if (Disposed == false && QueuedHasItems())
-            {
-                Thread.Sleep(1000);
-                // QueueTimer.Start();
-            }
-        }
+        ProcessQueue();
+        // try
+        // {
+        //     ProcessQueuedItem();
+        // }
+        // catch (Exception)
+        // {
+        // }
+        // finally
+        // {
+        //     if (Disposed == false && QueuedHasItems())
+        //     {
+        //         Thread.Sleep(1000);
+        //         // QueueTimer.Start();
+        //     }
+        // }
     }
 
     private SemaphoreSlim processorLock= new (1);
@@ -89,11 +99,12 @@ public class WatchedLibrary:IDisposable
 
         Task.Run(async () =>
         {
-            await Task.Delay(100);
             try
             {
-                if (QueuedFiles.Any())
+                while (QueuedFiles.Any())
+                {
                     ProcessQueuedItem();
+                }
             }
             catch (Exception)
             {
