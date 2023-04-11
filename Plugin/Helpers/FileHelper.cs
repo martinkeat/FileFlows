@@ -31,6 +31,7 @@ namespace FileFlows.Plugin.Helpers
         }
 
         private static bool IsWindows => RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+        private static bool IsLinux => RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
 
         public static bool CreateLinuxDir(ILogger logger, DirectoryInfo di)
         {

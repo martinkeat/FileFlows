@@ -144,6 +144,7 @@ public class AppSettings
         if (File.Exists(file) == false)
         {
             AppSettings settings = new();
+            settings.Runners = 1;
             settings.TempPath = Globals.IsDocker ? "/temp" :  Path.Combine(DirectoryHelper.BaseDirectory, "Temp");
             settings.Save();
             return settings;
