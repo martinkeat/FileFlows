@@ -625,7 +625,11 @@ public class Runner
         
         var nt = GetNodeType(part.FlowElementUid);
         if (nt == null)
-            return new Node();
+        {
+            throw new Exception("Failed to load Node: " + part.FlowElementUid);
+            //return new Node();
+        }
+
         var node = Activator.CreateInstance(nt);
         if (part.Model is IDictionary<string, object> dict)
         {
