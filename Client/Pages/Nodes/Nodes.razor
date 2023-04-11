@@ -49,7 +49,7 @@
                     <Header>
                     </Header>
                     <Cell Context="item">
-                        @if (item.Address != FileFlowsServer && Globals.Version != item.Version)
+                        @if (item.Address != FileFlowsServer && string.Equals(Globals.Version, item.Version, StringComparison.InvariantCulture) == false)
                         {
                             <span style="font-style: italic;color: var(--warning);" title="@lblUpgradeRequiredHint">@lblUpgradeRequired</span>
                         }
