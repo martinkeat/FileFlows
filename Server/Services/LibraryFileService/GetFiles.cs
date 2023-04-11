@@ -30,20 +30,24 @@ public partial class LibraryFileService
         if (settings.IsPaused)
             return NextFileResult(NextLibraryFileStatus.SystemPaused);
 
-        if (Version.TryParse(nodeVersion, out var nVersion) == false)
-            return NextFileResult(NextLibraryFileStatus.InvalidVersion);
-
-        if (nVersion < Globals.MinimumNodeVersion)
-        {
-            Logger.Instance.ILog($"Node '{nodeName}' version '{nVersion}' is less than minimum supported version '{Globals.MinimumNodeVersion}'");
-            return NextFileResult(NextLibraryFileStatus.VersionMismatch);
-        }
-
-        var node = (await NodeService.Load().GetByUidAsync(nodeUid));
+        var node = await NodeService.Load().GetByUidAsync(nodeUid);
         if (node != null && node.Version != nodeVersion)
         {
             node.Version = nodeVersion;
             new NodeService().Update(node);
+        }
+        
+        if (nodeUid != Globals.InternalNodeUid) // dont test version number for internal processing node
+        {
+            if (Version.TryParse(nodeVersion, out var nVersion) == false)
+                return NextFileResult(NextLibraryFileStatus.InvalidVersion);
+
+            if (nVersion < Globals.MinimumNodeVersion)
+            {
+                Logger.Instance.ILog(
+                    $"Node '{nodeName}' version '{nVersion}' is less than minimum supported version '{Globals.MinimumNodeVersion}'");
+                return NextFileResult(NextLibraryFileStatus.VersionMismatch);
+            }
         }
 
         if (await NodeEnabled(node) == false)
