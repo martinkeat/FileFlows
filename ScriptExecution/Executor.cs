@@ -54,6 +54,11 @@ public class Executor
     public IProcessExecutor ProcessExecutor { get; set; } = null!;
     
     /// <summary>
+    /// Gets or sets if the code should be included in the failed logged
+    /// </summary>
+    public bool DontLogCode { get; set; }
+    
+    /// <summary>
     /// Static constructor for the executor
     /// </summary>
     static Executor()
@@ -205,12 +210,15 @@ public class Executor
                 return true;
             if (int.TryParse(ex.Message, out int code))
                 return code;
-            // print out the code block for debugging
-            int lineNumber = 0;
-            var lines = Code.Split('\n');
-            string pad = "D" + (lines.ToString()!.Length);
-            Logger.DLog("Code: " + Environment.NewLine +
-                string.Join("\n", lines.Select(x => (++lineNumber).ToString("D3") + ": " + x)));
+            if (DontLogCode == false)
+            {
+                // print out the code block for debugging
+                int lineNumber = 0;
+                var lines = Code.Split('\n');
+                string pad = "D" + (lines.ToString()!.Length);
+                Logger.DLog("Code: " + Environment.NewLine +
+                            string.Join("\n", lines.Select(x => (++lineNumber).ToString("D3") + ": " + x)));
+            }
 
             Logger.ELog($"Failed executing script: {ex.Message}");
             return false;

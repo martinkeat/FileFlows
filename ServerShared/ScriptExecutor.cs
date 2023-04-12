@@ -110,14 +110,16 @@ public class ScriptExecutor:IScriptExecutor
     /// <param name="code">the code to execute</param>
     /// <param name="variables">any variables to be passed to the executor</param>
     /// <param name="sharedDirectory">[Optional] the shared script directory to look in</param>
+    /// <param name="dontLogCode">If the code should be included in the log if the execution fails</param>
     /// <returns>the result of the execution</returns>
-    public static FileFlowsTaskRun Execute(string code, Dictionary<string, object> variables, string sharedDirectory = null)
+    public static FileFlowsTaskRun Execute(string code, Dictionary<string, object> variables, string sharedDirectory = null, bool dontLogCode = false)
     {
         Executor executor = new Executor();
         executor.Code = code;
         executor.SharedDirectory = sharedDirectory?.EmptyAsNull() ?? DirectoryHelper.ScriptsDirectoryShared;
         executor.HttpClient = HttpHelper.Client;
         executor.Logger = new ScriptExecution.Logger();
+        executor.DontLogCode = dontLogCode;
         StringBuilder sbLog = new();
         executor.Logger.DLogAction = (args) => StringBuilderLog(sbLog, LogType.Debug, args);
         executor.Logger.ILogAction = (args) => StringBuilderLog(sbLog, LogType.Info, args);

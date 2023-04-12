@@ -1037,3 +1037,10 @@ input[type=file]{
 .flex {
     display:flex;
 }
+
+.icon-visible-hover {
+    i { display:none; }
+    &:hover i {
+        display:unset;
+    }
+}

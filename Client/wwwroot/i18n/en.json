@@ -677,7 +677,22 @@
     },
     "Variable": {
       "Title": "Variable"
-    }
+    },
+    "Webhook": {
+      "Title": "Webhook",
+      "Fields": {
+        "Route": "Route",
+        "Method": "Method",
+        "Code": "Code"
+      }
+    },
+    "Webhooks": {
+      "Title": "Webhooks",
+      "Columns": {
+        "Method": "Method",
+        "Route": "Route"
+      }
+    }    
   },
   "Validators":{
     "Required" :"Required",

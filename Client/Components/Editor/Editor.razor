@@ -6,7 +6,7 @@
 
 @if (Visible)
 {
-    <div class="editor-wrapper">
+    <div class="editor-wrapper @(HideFieldsScroller ? "hide-fields-scrollbar" : string.Empty)">
         <div class="background-overlay"></div>
         <div id=@Uid class="editor @(Maximised ? "maximised" : "") @(Large ? "large" : "") @(FullWidth ? "full-width" : "") @(TypeName?.Dehumanize()) @(ReadOnly ? "readonly" : "") buttons-@NumberOfButtons">
 

@@ -1410,4 +1410,11 @@ hr {
   display: flex;
 }
 
+.icon-visible-hover i {
+  display: none;
+}
+.icon-visible-hover:hover i {
+  display: unset;
+}
+
 /*# sourceMappingURL=app.css.map */

@@ -63,7 +63,12 @@ public partial class Editor : InputRegister, IDisposable
 
     public delegate Task<bool> SaveDelegate(ExpandoObject model);
     protected SaveDelegate SaveCallback;
-    
+
+    /// <summary>
+    /// Gets or sets if the fields scrollbar should be hidden
+    /// </summary>
+    private bool HideFieldsScroller { get; set; }
+
     /// <summary>
     /// Gets if the editor has loaded and past the initial render
     /// </summary>
@@ -169,6 +174,7 @@ public partial class Editor : InputRegister, IDisposable
         var expandoModel = ConvertToExando(args.Model);
         this.Model = expandoModel;
         this.SaveCallback = args.SaveCallback;
+        this.HideFieldsScroller = args.HideFieldsScroller;
         this.PromptUnsavedChanges = args.PromptUnsavedChanges;
         if (args.PromptUnsavedChanges && args.ReadOnly == false) 
             this.CleanModelJson = ModelToJsonForCompare(expandoModel);
@@ -712,4 +718,9 @@ public class EditorOpenArgs
     /// Gets or sets 
     /// </summary>
     public IEnumerable<ActionButton> AdditionalButtons { get; set; }
+
+    /// <summary>
+    /// Gets or sets if the fields scrollbar should be hidden
+    /// </summary>
+    public bool HideFieldsScroller { get; set; }
 }

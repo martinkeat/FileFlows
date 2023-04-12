@@ -112,6 +112,7 @@ public partial class NavMenu : IDisposable
             {
                 App.Instance.FileFlowsSystem.Licensed ? new ("Pages.Revisions.Title", "fas fa-history", "revisions") : null,
                 App.Instance.FileFlowsSystem.Licensed ? new ("Pages.Tasks.Title", "fas fa-clock", "tasks") : null,
+                App.Instance.FileFlowsSystem.Licensed ? new ("Pages.Webhooks.Title", "fas fa-handshake", "webhooks") : null,
                 new ("Pages.Settings.Title", "fas fa-cogs", "settings"),
             }
         });

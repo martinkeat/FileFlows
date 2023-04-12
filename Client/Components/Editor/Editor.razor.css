@@ -9,4 +9,8 @@
   max-width: unset;
 }
 
+.hide-fields-scrollbar ::deep .content > .fields {
+  overflow: hidden;
+}
+
 /*# sourceMappingURL=Editor.razor.css.map */

@@ -4,6 +4,7 @@ using FileFlows.Server.Helpers;
 using FileFlows.Shared.Models;
 using FileFlows.Server.Helpers.ModelHelpers;
 using FileFlows.Server.Services;
+using FileFlows.Server.Workers;
 using FileFlows.ServerShared.Models;
 using FileFlows.Shared.Helpers;
 
@@ -467,4 +468,45 @@ public class LibraryFileController : Controller //ControllerStore<LibraryFile>
     /// <returns>the library file instance</returns>
     internal Task<LibraryFile?> GetCached(Guid uid)
         => new LibraryFileService().Get(uid);
+
+    /// <summary>
+    /// Processes a file or adds it to the queue to add to the system
+    /// </summary>
+    /// <param name="filename">the filename of the file to process</param>
+    /// <returns></returns>
+    [HttpPost("process-file")]
+    public async Task<IActionResult> ProcessFile([FromQuery] string filename)
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(filename))
+                return BadRequest("Filename not set");
+
+            var service = new LibraryFileService();
+            var file = service.GetFileIfKnown(filename);
+            if (file != null)
+            {
+                if ((int)file.Status < 2)
+                    return Ok(); // already in the queue or processing
+                await service.Reprocess(file.Uid);
+                return Ok();
+            }
+
+            // file not known, add to the queue
+            var library = new LibraryService().GetAll().Where(x => x.Enabled)
+                .FirstOrDefault(x => filename.StartsWith(x.Path));
+            if (library == null)
+                return BadRequest("No library found for file: " + filename);
+            var watchedLibraray = LibraryWorker.GetWatchedLibrary(library);
+            if (watchedLibraray == null)
+                return BadRequest("Library is not currently watched");
+
+            watchedLibraray.QueueItem(filename);
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
 }

@@ -865,12 +865,12 @@ public class WatchedLibrary:IDisposable
             return QueuedFiles.Any();
         }   
     }
-
+    
     /// <summary>
     /// Safely adds an item to the queue
     /// </summary>
     /// <param name="fullPath">the item to add</param>
-    private void QueueItem(string fullPath)
+    public void QueueItem(string fullPath)
     {
         if (MatchesDetection(fullPath) == false)
         {
@@ -880,7 +880,8 @@ public class WatchedLibrary:IDisposable
         
         lock (QueuedFiles)
         {
-            QueuedFiles.Enqueue(fullPath);
+            if(QueuedFiles.Contains(fullPath) == false)
+                QueuedFiles.Enqueue(fullPath);
         }
 
         ProcessQueue();

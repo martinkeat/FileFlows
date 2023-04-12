@@ -48,6 +48,19 @@ public class LibraryWorker : Worker
     /// Updates the libraries being watched
     /// </summary>
     public static void UpdateLibraries() => Instance?.UpdateLibrariesInstance();
+
+    /// <summary>
+    /// Gets a watched library instance for a library if one exists
+    /// </summary>
+    /// <param name="library">the library</param>
+    /// <returns>the watched library instance</returns>
+    public static WatchedLibrary? GetWatchedLibrary(Library library)
+    {
+        string key =  library.Uid + ":" + library.Path;
+        if (Instance.WatchedLibraries.ContainsKey(key))
+            return Instance.WatchedLibraries[key];
+        return null;
+    }
     
 
     private void Watch(params Library[] libraries)

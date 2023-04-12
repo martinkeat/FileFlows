@@ -189,3 +189,27 @@ public enum ProcessingOrder
     /// </summary>
     OldestFirst = 5
 }
+
+
+/// <summary>
+/// Methods for an HTTP request
+/// </summary>
+public enum HttpMethod
+{
+    /// <summary>
+    /// Get request
+    /// </summary>
+    Get = 0,
+    /// <summary>
+    /// Post request
+    /// </summary>
+    Post = 1,
+    /// <summary>
+    /// Put request
+    /// </summary>
+    Put = 2,
+    /// <summary>
+    /// Delete request
+    /// </summary>
+    Delete = 3
+}
