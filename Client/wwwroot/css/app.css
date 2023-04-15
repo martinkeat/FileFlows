@@ -635,6 +635,11 @@ button .fas, button .far {
   color: var(--accent);
 }
 
+@media screen and (max-width: 850px) {
+  .update-available {
+    display: none !important;
+  }
+}
 .update-available {
   color: var(--color);
   z-index: 1000000;
