@@ -51,6 +51,11 @@ public abstract class Worker
         Initialize(schedule, interval);
     }
 
+    /// <summary>
+    /// Initialises the worker
+    /// </summary>
+    /// <param name="schedule">the schedule</param>
+    /// <param name="interval">the interval</param>
     protected virtual void Initialize(ScheduleType schedule, int interval)
     {
         this.Schedule = schedule;
@@ -100,6 +105,11 @@ public abstract class Worker
 
     private bool Executing = false;
 
+    /// <summary>
+    /// Timer elapsed
+    /// </summary>
+    /// <param name="sender">the sender</param>
+    /// <param name="e">the event</param>
     private void TimerElapsed(object? sender, System.Timers.ElapsedEventArgs e)
     {
         try
@@ -119,7 +129,10 @@ public abstract class Worker
             }
         }
     }
-
+    
+    /// <summary>
+    /// Trigger the worker
+    /// </summary>
     public void Trigger()
     {
         try
@@ -153,10 +166,17 @@ public abstract class Worker
         }
     }
 
+    /// <summary>
+    /// Execute the worker
+    /// </summary>
     protected virtual void Execute()
     {
     }
 
+    /// <summary>
+    /// Get seconds until next interval
+    /// </summary>
+    /// <returns>seconds until next interval</returns>
     private int ScheduleNext()
     {
         switch (this.Schedule)

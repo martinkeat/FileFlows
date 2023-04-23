@@ -10,7 +10,7 @@ public class Globals
     /// <summary>
     /// Gets the version of FileFlows
     /// </summary>
-    public static Version Version = new Version("1.1.0.2247");
+    public static Version Version = new Version("1.1.1.2247");
 
     /// <summary>
     /// The minimum supported node version

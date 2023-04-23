@@ -46,6 +46,11 @@ public class Script:IUniqueObject<string>, IInUse
     /// Gets or sets the remote path of the script
     /// </summary>
     public string Path { get; set; }
+    
+    /// <summary>
+    /// Gets or sets the comment block for this script
+    /// </summary>
+    public string CommentBlock { get; set; }
 
     /// <summary>
     /// Gets or sets what is using this object

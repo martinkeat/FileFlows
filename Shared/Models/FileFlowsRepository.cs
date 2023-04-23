@@ -14,6 +14,10 @@ public class FileFlowsRepository
     /// </summary>
     public List<RepositoryObject> SystemScripts { get; set; } = new ();
     /// <summary>
+    /// Gets or sets the webhook scripts
+    /// </summary>
+    public List<RepositoryObject> WebhookScripts { get; set; } = new ();
+    /// <summary>
     /// Gets or sets the flow scripts
     /// </summary>
     public List<RepositoryObject> FlowScripts { get; set; } = new ();

@@ -7,12 +7,16 @@ namespace FileFlows.Client.Pages;
 /// <summary>
 /// A page for user to manage their webhooks
 /// </summary>
-public partial class Webhooks : ListPage<Guid, Webhook>
+public partial class Webhooks : ListPage<string, Webhook>
 {
     /// <summary>
     /// Gets the API URL endpoint for the webhooks
     /// </summary>
-    public override string ApiUrl => "/api/Webhook";
+    public override string ApiUrl => "/api/webhook";
+    /// <summary>
+    /// Gets or sets the script browser component instance
+    /// </summary>
+    private ScriptBrowser ScriptBrowser { get; set; }
 
     private Webhook EditingItem = null;
     private string lblRoute, lblMethod;
@@ -151,4 +155,13 @@ public partial class Webhooks : ListPage<Guid, Webhook>
         }
     }
 
+    /// <summary>
+    /// Opens the scripts browser
+    /// </summary>
+    async Task Browser()
+    {
+        bool result = await ScriptBrowser.Open(ScriptType.Webhook);
+        if (result)
+            await this.Refresh();
+    }
 }

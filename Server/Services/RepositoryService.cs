@@ -43,7 +43,8 @@ class RepositoryService
                 FunctionScripts = new(),
                 LibraryTemplates = new(),
                 SharedScripts = new(),
-                SystemScripts = new()
+                SystemScripts = new(),
+                WebhookScripts = new ()
             };
         }
     }

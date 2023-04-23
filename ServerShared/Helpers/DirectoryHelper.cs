@@ -58,7 +58,7 @@ public class DirectoryHelper
 #if(DEBUG && false)
         return;
 #else
-        foreach (var dir in new[] { ScriptsDirectory, ScriptsDirectoryFlow, ScriptsDirectorySystem, ScriptsDirectoryShared, ScriptsDirectoryFunction })
+        foreach (var dir in new[] { ScriptsDirectory, ScriptsDirectoryFlow, ScriptsDirectorySystem, ScriptsDirectoryShared, ScriptsDirectoryFunction, ScriptsDirectoryWebhook })
         {
             if (Directory.Exists(dir) == false)
                 Directory.CreateDirectory(dir);
@@ -276,6 +276,11 @@ public class DirectoryHelper
     /// Gets the scripts directory for scripts from the repository
     /// </summary>
     public static string ScriptsDirectoryShared => Path.Combine(ScriptsDirectory, "Shared");
+    
+    /// <summary>
+    /// Gets the scripts directory for webhook scripts
+    /// </summary>
+    public static string ScriptsDirectoryWebhook => Path.Combine(ScriptsDirectory, "Webhook");
     
     /// <summary>
     /// Gets the scripts directory for template scripts

@@ -66,5 +66,9 @@ public enum ScriptType
     /// <summary>
     /// Template scripts used in the Function editor
     /// </summary>
-    Template = 3
+    Template = 3,
+    /// <summary>
+    /// A scripts used by webhooks
+    /// </summary>
+    Webhook = 4
 }

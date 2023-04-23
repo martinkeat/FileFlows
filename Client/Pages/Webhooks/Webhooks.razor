@@ -1,6 +1,6 @@
 @namespace FileFlows.Client.Pages
 @using FileFlows.Shared.Models
-@inherits ListPage<Guid, Webhook>
+@inherits ListPage<string, Webhook>
 
 @page "/webhooks"
 
@@ -16,8 +16,10 @@
             <FlowTableButton Clicked=Add Icon="fas fa-plus" Label="Labels.Add" />
             <FlowTableButton Clicked=Edit SelectedOne="true" Icon="fas fa-edit" Label="Labels.Edit" />
             <FlowTableButton Clicked=Delete SelectedOneOrMore="true" Icon="fas fa-trash" Label="Labels.Delete" />       
-            <FlowTableButtonSeparator />             
-            <FlowTableHelpButton  HelpUrl="variables" />
+            <FlowTableButtonSeparator />           
+            <FlowTableButton Clicked=Browser Icon="fas fa-code-branch" Label="Pages.Scripts.Buttons.ScriptBrowser"/>
+            <FlowTableButtonSeparator />
+            <FlowTableHelpButton  HelpUrl="webhooks" />
         </ToolBar>
 
         <Columns>
@@ -34,7 +36,7 @@
                     @lblMethod
                 </Header>
                 <Cell Context="item">
-                    <span>@item.Method</span>
+                    <span>@item.Method.ToString().ToUpper()</span>
                 </Cell>
             </FlowTableColumn>
             <FlowTableColumn TItem="Webhook">
@@ -54,3 +56,5 @@
     </Body>
 
 </PageView>
+
+<ScriptBrowser @ref="ScriptBrowser" />

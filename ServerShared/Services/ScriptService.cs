@@ -14,22 +14,24 @@ public interface IScriptService
     /// Get all scripts
     /// </summary>
     /// <returns>a collection of scripts</returns>
-    Task<IEnumerable<Script>> GetScripts();
+    Task<IEnumerable<Script>> GetAll();
     
     
     /// <summary>
     /// Get a script
     /// </summary>
     /// <param name="name">The name of the script</param>
+    /// <param name="type">the type of script to get</param>
     /// <returns>the script</returns>
-    Task<Script> Get(string name);
+    Task<Script> Get(string name, ScriptType type);
     
     /// <summary>
     /// Gets or sets a function used to load new instances of the service
     /// </summary>
     /// <param name="name">The name of the script</param>
+    /// <param name="type">the type of script</param>
     /// <returns>the script code</returns>
-    Task<string> GetCode(string name);
+    Task<string> GetCode(string name, ScriptType type);
 }
 
 /// <summary>
@@ -58,7 +60,7 @@ public class ScriptService:Service, IScriptService
     /// Get all scripts
     /// </summary>
     /// <returns>a collection of scripts</returns>
-    public async Task<IEnumerable<Script>> GetScripts()
+    public async Task<IEnumerable<Script>> GetAll()
     {
         try
         {
@@ -79,13 +81,14 @@ public class ScriptService:Service, IScriptService
     /// Get a script
     /// </summary>
     /// <param name="name">The name of the script</param>
+    /// <param name="type">the type of script to get</param>
     /// <returns>the script</returns>
-    public async Task<Script> Get(string name)
+    public async Task<Script> Get(string name, ScriptType type)
     {
         try
         {
             string encoded = UrlEncoder.Create().Encode(name);
-            string url = $"{ServiceBaseUrl}/api/script/{encoded}";
+            string url = $"{ServiceBaseUrl}/api/script/{encoded}?type=" + type;
             Logger.Instance.ILog("Request script from: " + url);
             var result = await HttpHelper.Get<Script>(url);
             if (result.Success == false)
@@ -103,13 +106,14 @@ public class ScriptService:Service, IScriptService
     /// Gets or sets a function used to load new instances of the service
     /// </summary>
     /// <param name="name">The name of the script</param>
+    /// <param name="type">the type of script</param>
     /// <returns>the script code</returns>
-    public async Task<string> GetCode(string name)
+    public async Task<string> GetCode(string name, ScriptType type)
     {
         try
         {
             string encoded = UrlEncoder.Create().Encode(name);
-            string url = $"{ServiceBaseUrl}/api/script/{encoded}/code";
+            string url = $"{ServiceBaseUrl}/api/script/{encoded}/code?type=" + type;
             Logger.Instance.ILog("Request script code from: " + url);
             var result = await HttpHelper.Get<string>(url);
             if (result.Success == false)
