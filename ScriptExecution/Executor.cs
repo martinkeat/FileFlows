@@ -127,10 +127,13 @@ public class Executor
             tcode = tcode.Replace("Flow.Execute(", "Execute(");
 
 
-            string sharedDir = SharedDirectory.Replace("\\", "/");
-            if (sharedDir.EndsWith("/") == false)
-                sharedDir += "/";
-            tcode = Regex.Replace(tcode, @"(?<=(from[\s](['""])))(\.\.\/)*Shared\/", sharedDir);
+            if (SharedDirectory != null) // can be null in unit tests
+            {
+                string sharedDir = SharedDirectory.Replace("\\", "/");
+                if (sharedDir.EndsWith("/") == false)
+                    sharedDir += "/";
+                tcode = Regex.Replace(tcode, @"(?<=(from[\s](['""])))(\.\.\/)*Shared\/", sharedDir);
+            }
 
             foreach(Match match in Regex.Matches(tcode, @"import[\s]+{[^}]+}[\s]+from[\s]+['""]([^'""]+)['""]"))
             {
@@ -144,7 +147,8 @@ public class Executor
             var engine = new Engine(options =>
             {
                 options.AllowClr();
-                options.EnableModules(SharedDirectory);
+                if(string.IsNullOrEmpty(SharedDirectory) == false)
+                    options.EnableModules(SharedDirectory);
             })
             .SetValue("Logger", Logger)
             .SetValue("Variables", Variables)
@@ -181,10 +185,10 @@ public class Executor
             
             engine.AddModule("Script", tcode);
             var ns = engine.ImportModule("Script");
-            var result = ns.Get("result");            
+            var result = ns.Get("result");
             try
             {
-                if(result != null)
+                if (result != null)
                 {
                     try
                     {
@@ -200,7 +204,9 @@ public class Executor
                     }
                 }
             }
-            catch(Exception) { }
+            catch (Exception)
+            {
+            }
 
             return true;
         }

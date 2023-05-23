@@ -62,19 +62,30 @@ public class ScriptNode:Node
             foreach (var p in script.Parameters) 
             {
                 var value = dictModel?.ContainsKey(p.Name) == true ? dictModel[p.Name] : null;
-                if (value is JsonElement je && je.ValueKind == JsonValueKind.String)
+                if (value is JsonElement je)
                 {
-                    var str = je.GetString();
-                    if (string.IsNullOrWhiteSpace(str) == false)
+                    if (je.ValueKind == JsonValueKind.String)
                     {
-                        Logger.Instance.ILog("Parameter is string replacing variables: " + str);
-                        string replaced = args.ReplaceVariables(str);
-                        if (replaced != str)
+                        var str = je.GetString();
+                        if (string.IsNullOrWhiteSpace(str) == false)
                         {
-                            Logger.Instance.ILog("Variables replaced: " + replaced);
-                            value = replaced;
+                            Logger.Instance.ILog("Parameter is string replacing variables: " + str);
+                            string replaced = args.ReplaceVariables(str);
+                            if (replaced != str)
+                            {
+                                Logger.Instance.ILog("Variables replaced: " + replaced);
+                                value = replaced;
+                            }
                         }
                     }
+                    else if(je.ValueKind == JsonValueKind.True)
+                        value = true;
+                    else if(je.ValueKind == JsonValueKind.False)
+                        value = false;
+                    else if (je.ValueKind == JsonValueKind.Number)
+                        value = double.Parse(je.GetString());
+                    else if (je.ValueKind == JsonValueKind.Null)
+                        value = null;
                 }
                 execArgs.AdditionalArguments.Add(p.Name, value);
             }
