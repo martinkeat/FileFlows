@@ -92,6 +92,19 @@ public partial class Nodes : ListPage<Guid, ProcessingNode>
         });
         fields.Add(new ElementField
         {
+            InputType = FormInputType.Int,
+            Name = nameof(node.Priority),
+            Validators = new List<FileFlows.Shared.Validators.Validator> {
+                new FileFlows.Shared.Validators.Range() { Minimum = 0, Maximum = 100 }
+            },
+            Parameters = new()
+            {
+                { "Min", 0 },
+                { "Max", 100 }
+            }
+        });
+        fields.Add(new ElementField
+        {
             InputType = isServerProcessingNode ? FormInputType.Folder : FormInputType.Text,
             Name = nameof(node.TempPath),
             Validators = new List<FileFlows.Shared.Validators.Validator> {

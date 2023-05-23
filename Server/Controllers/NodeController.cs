@@ -98,6 +98,7 @@ public class NodeController : Controller
                 internalNode.Schedule = node.Schedule;
                 internalNode.FlowRunners = node.FlowRunners;
                 internalNode.Enabled = node.Enabled;
+                internalNode.Priority = node.Priority;
                 internalNode.TempPath = node.TempPath;
                 internalNode.DontChangeOwner = node.DontChangeOwner;
                 internalNode.DontSetPermissions = node.DontSetPermissions;

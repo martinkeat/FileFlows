@@ -1,6 +1,7 @@
 using FileFlows.Server.Helpers;
 using FileFlows.ServerShared.Models;
 using FileFlows.Server.Controllers;
+using FileFlows.ServerShared.Services;
 using FileFlows.ServerShared.Workers;
 using FileFlows.Shared.Models;
 
@@ -59,6 +60,11 @@ public partial class LibraryFileService
         return NextFileResult(NextLibraryFileStatus.Success, file);
     }
     
+    /// <summary>
+    /// Checks if the node is enabled
+    /// </summary>
+    /// <param name="node">the processing node</param>
+    /// <returns>true if enabled, otherwise false</returns>
     private async Task<bool> NodeEnabled(ProcessingNode node)
     {
         #if(DEBUG)
@@ -70,6 +76,49 @@ public partial class LibraryFileService
         var enabledNodes = allNodes.Where(x => x.Enabled).OrderBy(x => x.Name).Take(licensedNodes).ToArray();
         var enabledNodeUids = enabledNodes.Select(x => x.Uid).ToArray();
         return enabledNodeUids.Contains(node.Uid);
+    }
+
+    /// <summary>
+    /// Checks if another enabled processing node is enabled, in-schedule and not all runners are in use.
+    /// If so, then will return false, so another higher priority node can processing a file
+    /// </summary>
+    /// <param name="node">the node to check</param>
+    /// <param name="file">the next file that should be processed</param>
+    /// <returns>true if another higher priority node should be used instead</returns>
+    private bool HigherPriorityWaiting(ProcessingNode node, LibraryFile file)
+    {
+        var allNodes = new NodeService().GetAll().Where(x => 
+            x.Uid != node.Uid && node.Priority > node.Priority && node.Enabled);
+        var allLibraries = new LibraryService().GetAll().Select(x => x.Uid).ToList();
+        var executors = WorkerController.Executors.Values.GroupBy(x => x.NodeUid)
+            .ToDictionary(x => x.Key, x => x.Count());
+        foreach (var other in allNodes)
+        {
+            // first check if its in schedule
+            if (TimeHelper.InSchedule(other.Schedule) == false)
+                continue;
+            
+            // check if this node is maxed out
+            if (executors.ContainsKey(other.Uid) && executors[other.Uid] >= other.FlowRunners)
+                continue; // its maxed out
+            
+            // check if other can process this library
+            var nodeLibraries = node.Libraries?.Select(x => x.Uid)?.ToList() ?? new();
+            List<Guid> allowedLibraries = node.AllLibraries switch
+            {
+                ProcessingLibraries.Only => nodeLibraries,
+                ProcessingLibraries.AllExcept => allLibraries.Where(x => nodeLibraries.Contains(x) == false).ToList(),
+                _ => allLibraries,
+            };
+            if (allowedLibraries.Contains(file.LibraryUid!.Value) == false)
+                continue;
+            
+            // the "other" node is higher priority, its not maxed out, its in-schedule, so we dont want the "node"
+            // processing this file
+            return true;
+        }
+        // no other node is higher priority, this node can process this file
+        return false;
     }
     
     /// <summary>
@@ -291,6 +340,9 @@ public partial class LibraryFileService
 
             if (nextFile == null)
                 return nextFile;
+
+            if (HigherPriorityWaiting(node, nextFile))
+                return null; // a higher priority node should process this file
 
             nextFile.Status = FileStatus.Processing;
             nextFile.WorkerUid = workerUid;

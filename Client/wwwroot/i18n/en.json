@@ -454,6 +454,8 @@
         "Mappings": "Mappings",
         "MappingsKey": "Server",
         "MappingsValue": "Node",
+        "Priority": "Priority",
+        "Priority-Help": "The higher the number the higher the priority.  Nodes with a higher priority will be favoured and given files to process first, unless those nodes are out of schedule, disabled, at their maximum runners.",
         "Schedule": "Schedule",
         "Schedule-Help": "This schedule runs in the Time Zone of the node",
         "ScheduleDescription": "This allows you to configure when this node will be active.\n\nThe node will not process any files outside of this configured schedule.\n",

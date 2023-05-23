@@ -17,12 +17,15 @@ namespace FileFlows.Server.Controllers;
 [Route("/api/worker")]
 public class WorkerController : Controller
 {
-    private readonly static Dictionary<Guid, FlowExecutorInfo> Executors = new();
+    /// <summary>
+    /// The running executors
+    /// </summary>
+    internal readonly static Dictionary<Guid, FlowExecutorInfo> Executors = new();
     private readonly Queue<Guid> CompletedExecutors = new Queue<Guid>(50);
 
     private static CacheStore LibraryFileCacheStore = new();
     private IHubContext<FlowHub> Context;
-
+    
     public WorkerController(IHubContext<FlowHub> context)
     {
         this.Context = context;

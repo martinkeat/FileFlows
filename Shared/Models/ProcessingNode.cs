@@ -27,6 +27,12 @@ public class ProcessingNode: FileFlowObject
     /// Gets or sets if this node is enabled
     /// </summary>
     public bool Enabled { get; set; }
+    
+    /// <summary>
+    /// Gets or sets the priority of the processing node
+    /// Higher the value, the higher the priority 
+    /// </summary>
+    public int Priority { get; set; }
 
     /// <summary>
     /// Gets or sets the type of operating system this node is running on
