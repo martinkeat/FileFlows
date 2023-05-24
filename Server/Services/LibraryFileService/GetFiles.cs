@@ -4,6 +4,7 @@ using FileFlows.Server.Controllers;
 using FileFlows.ServerShared.Services;
 using FileFlows.ServerShared.Workers;
 using FileFlows.Shared.Models;
+using Humanizer;
 
 namespace FileFlows.Server.Services;
 
@@ -112,6 +113,13 @@ public partial class LibraryFileService
             };
             if (allowedLibraries.Contains(file.LibraryUid!.Value) == false)
                 continue;
+            
+            // check the last time this node was seen to make sure its not disconnected
+            if (other.LastSeen < DateTime.Now.AddMinutes(10))
+            {
+                Logger.Instance.ILog("Higher priority node is offline: " + other.Name + ", last seen: " + other.LastSeen.Humanize() + " ago");
+                continue; // 10 minute cut off, give it some grace period
+            }
             
             // the "other" node is higher priority, its not maxed out, its in-schedule, so we dont want the "node"
             // processing this file
