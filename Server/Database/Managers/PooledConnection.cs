@@ -80,6 +80,7 @@ public class PooledConnection: IDatabase, IDisposable, IDisposablePooledObject
     public DbConnection Connection => Db.Connection;
     public DbTransaction Transaction => Db.Transaction;
     public IDictionary<string, object> Data => Db.Data;
+    public int CommandTimeout { get; set; }
     public Task<T> SingleAsync<T>(string sql, params object[] args) => Db.SingleAsync<T>(sql, args);
 
     public Task<T> SingleAsync<T>(Sql sql) => Db.SingleAsync<T>(sql);
