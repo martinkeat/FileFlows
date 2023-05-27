@@ -7,6 +7,7 @@
     <RootNamespace>FileFlows.$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
     <AssemblyName>FileFlows.$(MSBuildProjectName)</AssemblyName>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

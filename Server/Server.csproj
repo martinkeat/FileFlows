@@ -1,125 +1,126 @@
-<?xml version="1.0" encoding="utf-16"?>
+﻿<?xml version="1.0" encoding="utf-16"?>
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
-  <PropertyGroup>
-    <TargetFramework>net7.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ProductName>FileFlows Server</ProductName>
-    <Version>0.2.1.366</Version>
-    <ProductVersion>0.2.1.366</ProductVersion>    
-    <Copyright></Copyright>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <InvariantGlobalization>true</InvariantGlobalization>
-    <RootNamespace>FileFlows.$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
-    <AssemblyName>FileFlows.Server</AssemblyName>
-    <GenerateDocumentationFile>True</GenerateDocumentationFile>
-    <UseAppHost>True</UseAppHost>
-	<ApplicationIcon>Ui\icon.ico</ApplicationIcon>
-	<ServerGarbageCollection>false</ServerGarbageCollection>
-  </PropertyGroup>
+    <PropertyGroup>
+        <TargetFramework>net7.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ProductName>FileFlows Server</ProductName>
+        <Version>0.2.1.366</Version>
+        <ProductVersion>0.2.1.366</ProductVersion>
+        <Copyright></Copyright>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <InvariantGlobalization>true</InvariantGlobalization>
+        <RootNamespace>FileFlows.$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
+        <AssemblyName>FileFlows.Server</AssemblyName>
+        <GenerateDocumentationFile>True</GenerateDocumentationFile>
+        <UseAppHost>True</UseAppHost>
+        <ApplicationIcon>Ui\icon.ico</ApplicationIcon>
+        <ServerGarbageCollection>false</ServerGarbageCollection>
+        <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <Content Remove="compilerconfig.json" />
-    <Content Include="run-server.bat" />
-    <Content Include="run-server.sh" />
-    <None Remove="Database\Scripts\MySql\GetNextLibraryFile.sql" />
-    <None Remove="FileFlows.bat" />
-    <None Remove="FileFlows.sh" />
-    <Content Remove="appsettings.Development.json" />
-  </ItemGroup>
+    <ItemGroup>
+        <Content Remove="compilerconfig.json" />
+        <Content Include="run-server.bat" />
+        <Content Include="run-server.sh" />
+        <None Remove="Database\Scripts\MySql\GetNextLibraryFile.sql" />
+        <None Remove="FileFlows.bat" />
+        <None Remove="FileFlows.sh" />
+        <Content Remove="appsettings.Development.json" />
+    </ItemGroup>
 
-  <ItemGroup>
-    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
-      <_Parameter1>FileFlowTests</_Parameter1>
-    </AssemblyAttribute>
-  </ItemGroup>
+    <ItemGroup>
+        <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+            <_Parameter1>FileFlowTests</_Parameter1>
+        </AssemblyAttribute>
+    </ItemGroup>
 
-  <ItemGroup>
-    <None Remove="Resources\SwaggerIndex.html" />
-  </ItemGroup>
+    <ItemGroup>
+        <None Remove="Resources\SwaggerIndex.html" />
+    </ItemGroup>
 
-  <ItemGroup>
-    <EmbeddedResource Include="Database\Scripts\MySql\DeleteOldLogs.sql" />
-    <EmbeddedResource Include="Database\Scripts\Sqlite\Tables.sql" />
-    <EmbeddedResource Include="Database\Scripts\SqlServer\GetNextLibraryFile.sql" />
-    <EmbeddedResource Include="Database\Scripts\SqlServer\GetRecentlyFinished.sql" />
-    <EmbeddedResource Include="Database\Scripts\SqlServer\GetUpcoming.sql" />
-    <EmbeddedResource Include="Resources\SwaggerIndex.html" />
-    <EmbeddedResource Update="Ui\MessageApp.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </EmbeddedResource>
-    <None Remove="Database\Scripts\SqlServer\GetLibraryFileOverview.sql" />
-    <None Remove="Database\Scripts\SqlServer\GetLibraryFiles.sql" />
-    <None Remove="Database\Scripts\MySql\Tables.sql" />
-    <EmbeddedResource Include="Database\Scripts\MySql\Tables.sql" />
-  </ItemGroup>
+    <ItemGroup>
+        <EmbeddedResource Include="Database\Scripts\MySql\DeleteOldLogs.sql" />
+        <EmbeddedResource Include="Database\Scripts\Sqlite\Tables.sql" />
+        <EmbeddedResource Include="Database\Scripts\SqlServer\GetNextLibraryFile.sql" />
+        <EmbeddedResource Include="Database\Scripts\SqlServer\GetRecentlyFinished.sql" />
+        <EmbeddedResource Include="Database\Scripts\SqlServer\GetUpcoming.sql" />
+        <EmbeddedResource Include="Resources\SwaggerIndex.html" />
+        <EmbeddedResource Update="Ui\MessageApp.xaml">
+            <Generator>MSBuild:Compile</Generator>
+        </EmbeddedResource>
+        <None Remove="Database\Scripts\SqlServer\GetLibraryFileOverview.sql" />
+        <None Remove="Database\Scripts\SqlServer\GetLibraryFiles.sql" />
+        <None Remove="Database\Scripts\MySql\Tables.sql" />
+        <EmbeddedResource Include="Database\Scripts\MySql\Tables.sql" />
+    </ItemGroup>
 
-  <ItemGroup>
-    <EmbeddedResource Include="Ui\*.xaml" />
-    <AvaloniaResource Include="Ui\icon.*" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="DefaultScripts\*.js" />
-  </ItemGroup>
+    <ItemGroup>
+        <EmbeddedResource Include="Ui\*.xaml" />
+        <AvaloniaResource Include="Ui\icon.*" />
+    </ItemGroup>
+    <ItemGroup>
+        <EmbeddedResource Include="DefaultScripts\*.js" />
+    </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Node\Node.csproj" />
-    <ProjectReference Include="..\ServerShared\ServerShared.csproj" />
-    <ProjectReference Include="..\Shared\Shared.csproj" />
-    <ProjectReference Include="..\Plugin\Plugin.csproj" />
-  </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\Node\Node.csproj" />
+        <ProjectReference Include="..\ServerShared\ServerShared.csproj" />
+        <ProjectReference Include="..\Shared\Shared.csproj" />
+        <ProjectReference Include="..\Plugin\Plugin.csproj" />
+    </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Avalonia" Version="0.10.21" />
-    <PackageReference Include="Avalonia.Desktop" Version="0.10.21" />
-    <PackageReference Include="Humanizer" Version="2.14.1" />
-    <PackageReference Include="Microsoft.AspNetCore.ResponseCompression" Version="2.2.0" />
-    <PackageReference Include="Microsoft.Data.Sqlite" Version="7.0.5" />
-    <PackageReference Include="NPoco" Version="5.7.1" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
-    <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.5.0" />
-    <PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="6.5.0" />
-    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="6.5.0" />
-    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="6.5.0" />
-    <PackageReference Include="Jint" Version="3.0.0-beta-2038" /> 
-    <PackageReference Include="Instances" Version="3.0.0" />
-    <PackageReference Include="MySqlConnector" Version="2.2.6" />
-    <PackageReference Include="System.Data.SQLite.Core" Version="1.0.117" />
-  </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Avalonia" Version="0.10.21" />
+        <PackageReference Include="Avalonia.Desktop" Version="0.10.21" />
+        <PackageReference Include="Humanizer" Version="2.14.1" />
+        <PackageReference Include="Microsoft.AspNetCore.ResponseCompression" Version="2.2.0" />
+        <PackageReference Include="Microsoft.Data.Sqlite" Version="7.0.5" />
+        <PackageReference Include="NPoco" Version="5.7.1" />
+        <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+        <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.5.0" />
+        <PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="6.5.0" />
+        <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="6.5.0" />
+        <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="6.5.0" />
+        <PackageReference Include="Jint" Version="3.0.0-beta-2038" />
+        <PackageReference Include="Instances" Version="3.0.0" />
+        <PackageReference Include="MySqlConnector" Version="2.2.6" />
+        <PackageReference Include="System.Data.SQLite.Core" Version="1.0.117" />
+    </ItemGroup>
 
-  <ItemGroup>
-    <Content Update="Templates\**\*">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
+    <ItemGroup>
+        <Content Update="Templates\**\*">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </Content>
+    </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Plugins" />
-    <Folder Include="Plugins\" />
-  </ItemGroup>
+    <ItemGroup>
+        <Folder Include="Plugins" />
+        <Folder Include="Plugins\" />
+    </ItemGroup>
 
-  <ItemGroup>
-    <None Include="compilerconfig.json" />
-  </ItemGroup>
+    <ItemGroup>
+        <None Include="compilerconfig.json" />
+    </ItemGroup>
 
-  <ItemGroup>
-    <Compile Update="Ui\Confirm.axaml.cs">
-      <DependentUpon>Confirm.axaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Remove="Upgrade\Upgrade0_6_3.cs" />
-  </ItemGroup>
+    <ItemGroup>
+        <Compile Update="Ui\Confirm.axaml.cs">
+            <DependentUpon>Confirm.axaml</DependentUpon>
+            <SubType>Code</SubType>
+        </Compile>
+        <Compile Remove="Upgrade\Upgrade0_6_3.cs" />
+    </ItemGroup>
 
-  <ItemGroup>
-    <_ContentIncludedByDefault Remove="Plugins\Emby\en.json" />
-  </ItemGroup>
+    <ItemGroup>
+        <_ContentIncludedByDefault Remove="Plugins\Emby\en.json" />
+    </ItemGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <NoWarn>1701;1702;CS8618;CS8601;CS8602;CS8603;CS8604;CS8618;CS8625;CS1591;</NoWarn>
-  </PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+        <NoWarn>1701;1702;CS8618;CS8601;CS8602;CS8603;CS8604;CS8618;CS8625;CS1591;</NoWarn>
+    </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <NoWarn>1701;1702;CS8618;CS8601;CS8602;CS8603;CS8604;CS8618;CS8625;CS1591;</NoWarn>
-  </PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+        <NoWarn>1701;1702;CS8618;CS8601;CS8602;CS8603;CS8604;CS8618;CS8625;CS1591;</NoWarn>
+    </PropertyGroup>
 
 </Project>

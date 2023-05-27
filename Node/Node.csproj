@@ -14,7 +14,8 @@
     <RootNamespace>FileFlows.$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
     <AssemblyName>FileFlows.Node</AssemblyName>
     <UseAppHost>True</UseAppHost>
-    <ApplicationIcon>Ui\icon.ico</ApplicationIcon>	  
+    <ApplicationIcon>Ui\icon.ico</ApplicationIcon>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
   </PropertyGroup>
 
   <ItemGroup>
