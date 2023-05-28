@@ -51,7 +51,7 @@ public class SystemController:Controller
             return new ContentResult();
         if (string.IsNullOrWhiteSpace(version))
             return new ContentResult();
-        var current = Globals.Version;
+        var current = new Version(Globals.Version);
         var node =  new Version(version);
         if (node >= current)
             return new ContentResult();

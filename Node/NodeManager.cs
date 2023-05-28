@@ -54,7 +54,8 @@ public class NodeManager
         if (updater.RunCheck())
             return;
 
-        Version nodeVersion = Globals.Version;
+        var nodeVersion = Globals.Version;
+        var nodeVersionVersion = new Version(nodeVersion);
 
         var flowWorker = new FlowWorker(AppSettings.Instance.HostName)
         {
@@ -88,7 +89,7 @@ public class NodeManager
                     AppSettings.Instance.Save();
 
                     var serverVersion = new SystemService().GetVersion().Result;
-                    if (serverVersion != nodeVersion)
+                    if (serverVersion != nodeVersionVersion)
                     {
                         Logger.Instance?.ILog($"Node version '{nodeVersion}' does not match server version '{serverVersion}'");
                         NodeUpdater.CheckForUpdate();

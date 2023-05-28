@@ -123,7 +123,7 @@ public class PluginController : Controller
     [HttpGet("plugin-packages")]
     public async Task<IEnumerable<PluginPackageInfo>> GetPluginPackages([FromQuery] bool missing = false)
     {
-        Version ffVersion = Globals.Version;
+        Version ffVersion = new Version(Globals.Version);
         List<PluginPackageInfo> data = new List<PluginPackageInfo>();
         var repos = GetRepositories();
         foreach (string repo in repos)

@@ -93,7 +93,7 @@ class RepositoryService
     {
         foreach (var obj in objects)
         {
-            if (obj.MinimumVersion > Globals.Version)
+            if (obj.MinimumVersion > new Version(Globals.Version))
                 continue;
             string output = obj.Path;
             output = Regex.Replace(output, @"^Scripts\/[^\/]+\/", string.Empty);
@@ -174,7 +174,7 @@ class RepositoryService
     {
         var files = Directory.GetFiles(DirectoryHelper.ScriptsDirectory, "*.js", SearchOption.AllDirectories);
         List<string> knownPaths = repo.FlowScripts.Union(repo.FunctionScripts).Union(repo.SharedScripts)
-            .Union(repo.SystemScripts).Where(x => Globals.Version >= x.MinimumVersion).Select(x => x.Path).ToList();
+            .Union(repo.SystemScripts).Where(x => new Version(Globals.Version) >= x.MinimumVersion).Select(x => x.Path).ToList();
         await UpdateObjects(files, knownPaths);
     }
     
@@ -186,7 +186,7 @@ class RepositoryService
     internal async Task UpdateTemplates()
     {
         var files = Directory.GetFiles(DirectoryHelper.TemplateDirectory, "*.json", SearchOption.AllDirectories);
-        List<string> knownPaths = repo.LibraryTemplates.Union(repo.FlowTemplates).Where(x => Globals.Version >= x.MinimumVersion).Select(x => x.Path).ToList();
+        List<string> knownPaths = repo.LibraryTemplates.Union(repo.FlowTemplates).Where(x => new Version(Globals.Version) >= x.MinimumVersion).Select(x => x.Path).ToList();
         await UpdateObjects(files, knownPaths);
     }
 

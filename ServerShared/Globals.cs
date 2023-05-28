@@ -10,12 +10,13 @@ public class Globals
     /// <summary>
     /// Gets the version of FileFlows
     /// </summary>
-    public static Version Version = new Version("1.1.1.2247");
+    public static string Version = "23.5.3.2247";
+    //public static Version Version = new Version("1.1.1.2247");
 
     /// <summary>
     /// The minimum supported node version
     /// </summary>
-    public static readonly Version MinimumNodeVersion = Version;
+    public static readonly Version MinimumNodeVersion = new Version(Version);
     
     public static bool IsDevelopment { get; set; }
 

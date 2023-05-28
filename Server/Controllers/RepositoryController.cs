@@ -25,7 +25,7 @@ public class RepositoryController : Controller
                 type == ScriptType.System ? repo.SystemScripts : 
                 type == ScriptType.Webhook ? repo.WebhookScripts : 
                 repo.FlowScripts)
-            .Where(x => Globals.Version >= x.MinimumVersion);
+            .Where(x => new Version(Globals.Version) >= x.MinimumVersion);
         if (missing)
         {
             List<string> known = new();
@@ -99,7 +99,7 @@ public class RepositoryController : Controller
         var service = new RepositoryService();
         await service.Init();
         var repo = await service.GetRepository();
-        var objects = repo.FlowScripts.Union(repo.SystemScripts).Where(x => x.MinimumVersion <= Globals.Version)
+        var objects = repo.FlowScripts.Union(repo.SystemScripts).Where(x => x.MinimumVersion <= new Version(Globals.Version))
             .Where(x => model.Uids.Contains(x.Path)).ToList();
         if (objects.Any() == false)
             return false; // nothing to update

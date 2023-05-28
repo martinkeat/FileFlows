@@ -186,7 +186,7 @@ public class ServerUpdater : UpdaterWorker
                 return (false, new Version(0, 0, 0, 0));
             }
 
-            Version current = Globals.Version;
+            Version current = new Version(Globals.Version);
             Version? onlineVersion;
             if (Version.TryParse(result.Data, out onlineVersion) == false)
             {
@@ -197,7 +197,7 @@ public class ServerUpdater : UpdaterWorker
             if (current >= onlineVersion)
             {
                 Logger.Instance.ILog(
-                    $"{nameof(ServerUpdater)}: Current version '{current}' newer or same as online version '{onlineVersion}'");
+                    $"{nameof(ServerUpdater)}: Current version '{Globals.Version}' newer or same as online version '{onlineVersion}'");
                 return (false, onlineVersion);
             }
 
