@@ -85,7 +85,7 @@ public class ScriptNode:Node
                         else if (je.ValueKind == JsonValueKind.False)
                             value = false;
                         else if (je.ValueKind == JsonValueKind.Number)
-                            value = double.Parse(je.GetString());
+                            value = double.Parse(je.ToString());
                         else if (je.ValueKind == JsonValueKind.Null)
                             value = null;
                     }
