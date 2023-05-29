@@ -20,7 +20,10 @@ using System.Text.Json;
 [Route("/api/plugin")]
 public class PluginController : Controller
 {
-    internal const string PLUGIN_BASE_URL = "https://fileflows.com/api/plugin";
+    /// <summary>
+    /// The base URL for the plugins
+    /// </summary>
+    internal static readonly string PluginBaseUrl = Globals.FileFlowsDotComUrl + "/api/plugin";
 
     /// <summary>
     /// Get a list of all plugins in the system
@@ -409,8 +412,8 @@ public class PluginController : Controller
     internal List<string> GetRepositories()
     {
         var repos = new SettingsController().Get().Result.PluginRepositoryUrls?.Select(x => x)?.ToList() ?? new List<string>();
-        if (repos.Contains(PLUGIN_BASE_URL) == false)
-            repos.Add(PLUGIN_BASE_URL);
+        if (repos.Contains(PluginBaseUrl) == false)
+            repos.Add(PluginBaseUrl);
         return repos;
     }
 }

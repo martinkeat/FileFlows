@@ -11,7 +11,7 @@ namespace FileFlows.Server.Workers;
 /// </summary>
 public class ServerUpdater : UpdaterWorker
 {
-    private static string UpdateUrl = "https://fileflows.com/auto-update";
+    private static string UpdateUrl = Globals.FileFlowsDotComUrl + "/auto-update";
 
     internal static ServerUpdater Instance;
     private Version? NotifiedUpdateVersion;

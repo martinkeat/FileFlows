@@ -104,9 +104,8 @@ class LicenseHelper
             });
 
             string requestCode = Encrypt(LicenseRequest_EncryptionKey, json);
-
-            const string licenseUrl = "https://fileflows.com/licensing/validate";
-            //const string licenseUrl = "https://localhost:7197/licensing/validate";
+            
+            string licenseUrl = Globals.FileFlowsDotComUrl + "/licensing/validate";
             var result = await HttpHelper.Post(licenseUrl, new { Code = requestCode });
             if (result.Success == false)
                 return;

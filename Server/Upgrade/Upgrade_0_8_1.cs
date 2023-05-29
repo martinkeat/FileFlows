@@ -29,8 +29,8 @@ public class Upgrade_0_8_1
             return;
         
         var repos = settings.PluginRepositoryUrls?.Select(x => x)?.ToList() ?? new List<string>();
-        if (repos.Contains(PluginController.PLUGIN_BASE_URL) == false)
-            repos.Add(PluginController.PLUGIN_BASE_URL);
+        if (repos.Contains(PluginController.PluginBaseUrl) == false)
+            repos.Add(PluginController.PluginBaseUrl);
         
         foreach(var repo in repos)
             Logger.Instance.ILog("Plugin repository: " + repo);

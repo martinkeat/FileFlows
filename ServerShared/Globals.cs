@@ -80,4 +80,11 @@ public class Globals
     public const string FailFlowDescription = "A system flow that will execute when another flow reports a failure, -1 from a node.";
 
     public const string FlowFailureInputUid = "FileFlows.BasicNodes.FlowFailure";
+
+    /// <summary>
+    /// The URL for fileflows.com
+    /// </summary>
+    public static readonly string FileFlowsDotComUrl =
+        (Environment.GetEnvironmentVariable("FFURL")?.EmptyAsNull() ?? "https://fileflows.com")
+        .TrimEnd('/');
 }
