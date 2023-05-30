@@ -87,7 +87,7 @@ public partial class PluginBrowser : ComponentBase
     {
 #if (!DEMO)
         var selected = Table.GetSelected().ToArray();
-        var items = selected.Select(x => x.Package).ToList();
+        var items = selected;
         if (items.Any() == false)
             return;
         this.Blocker.Show();

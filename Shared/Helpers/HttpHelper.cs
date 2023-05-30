@@ -20,11 +20,20 @@ public class HttpHelper
     //public delegate void RemainingFilesHeader(int count);
 
     //public static event RemainingFilesHeader OnRemainingFilesHeader;
-    
+
+    private static HttpClient _Client;
+
     /// <summary>
     /// Gets or sets the HTTP Client used
     /// </summary>
-    public static HttpClient Client { get; set; }
+    public static HttpClient Client
+    {
+        get => _Client;
+        set
+        {
+            _Client = value;
+        }
+    }
 
     /// <summary>
     /// Gets or sets the logger used
@@ -256,7 +265,7 @@ public class HttpHelper
                 return new RequestResult<T> { Success = false, Body = body, Data = default(T), Headers = GetHeaders(response) };
             }
         }
-        catch (Exception)
+        catch (Exception ex)
         {
             throw;
         }
@@ -312,8 +321,10 @@ public class HttpHelper
 
     public static HttpClient GetDefaultHttpHelper(string serviceBaseUrl)
     {
+        #if(!DEBUG)
         if (Environment.GetEnvironmentVariable("HTTPS") != "1")
             return new HttpClient();
+        #endif
         var handler = new HttpClientHandler();
         handler.ClientCertificateOptions = ClientCertificateOption.Manual;
         handler.ServerCertificateCustomValidationCallback = 
@@ -323,6 +334,8 @@ public class HttpHelper
                     return true;
                 if (httpRequestMessage.RequestUri.ToString()
                     .StartsWith(serviceBaseUrl))
+                    return true;
+                if (httpRequestMessage.RequestUri.ToString().StartsWith("https://localhost"))
                     return true;
                 return cert.Verify();
             };

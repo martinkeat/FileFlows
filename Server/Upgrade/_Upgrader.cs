@@ -31,10 +31,6 @@ public class Upgrader
                 }
             }
             
-            if (currentVersion < new Version(0, 8, 0))
-                new Upgrade_0_8_0().Run(settings);
-            if (currentVersion < new Version(0, 8, 1))
-                new Upgrade_0_8_1().Run(settings);
             if (currentVersion < new Version(0, 8, 3))
                 new Upgrade_0_8_3().Run(settings);
             if (currentVersion < new Version(0, 8, 4))

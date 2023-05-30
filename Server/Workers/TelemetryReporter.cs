@@ -26,7 +26,7 @@ public class TelemetryReporter: Worker
             return;
         try
         {
-#if (DEBUG)
+#if (DEBUG && false)
             return;
 #else
         var settings = new SettingsController().Get().Result;
@@ -97,7 +97,8 @@ public class TelemetryReporter: Worker
             Count = x.Value
         }).ToList();
 
-        var task = HttpHelper.Post(Globals.FileFlowsDotComUrl + "/api/telemetry", data);
+        string url = Globals.FileFlowsDotComUrl + "/api/telemetry";
+        var task = HttpHelper.Post(url, data);
         task.Wait();
 
 #endif

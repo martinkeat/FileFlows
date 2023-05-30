@@ -23,9 +23,10 @@ public class PluginDownloader
     /// <summary>
     /// Downloads a plugin binary from the repository
     /// </summary>
+    /// <param name="version">the version of the plugin to download</param>
     /// <param name="packageName">the package name of the plugin to download</param>
     /// <returns>the download result</returns>
-    internal (bool Success, byte[] Data) Download(string packageName)
+    internal (bool Success, byte[] Data) Download(Version version, string packageName)
     {
         Logger.Instance.ILog("Downloading Plugin Package: " + packageName);
         Version ffVersion = new Version(Globals.Version);
@@ -33,30 +34,7 @@ public class PluginDownloader
         {
             try
             {
-                var plugins = HttpHelper.Get<IEnumerable<PluginPackageInfo>>(repo + "?rand=" + DateTime.Now.ToFileTime()).Result;
-                if (plugins.Success == false)
-                {
-                    Logger.Instance.ILog("Plugin repository failed to download.");
-                    continue;
-                }
-
-                var plugin = plugins?.Data?.Where(x => x.Package.Replace(".ffplugin", string.Empty).ToLower() == packageName.Replace(".ffplugin", string.Empty).ToLower())?.FirstOrDefault();
-                if (plugin == null)
-                {
-                    Logger.Instance.ILog("Plugin not found in repository: " + packageName);
-                    continue;
-                }
-
-                if(string.IsNullOrWhiteSpace(plugin.MinimumVersion) == false)
-                {
-                    if (ffVersion < Version.Parse(plugin.MinimumVersion))
-                        continue;
-                }
-
-                string url = repo + "/download/" + packageName;
-                if (url.EndsWith(".ffplugin") == false)
-                    url += ".ffplugin";
-                Logger.Instance.ILog("Downloading plugin from: " + url);
+                string url = repo + "/download/" + packageName + $"?version={version}&rand=" + DateTime.Now.ToFileTime();
                 var dlResult = HttpHelper.Get<byte[]>(url).Result;
                 if (dlResult.Success)
                     return (true, dlResult.Data);

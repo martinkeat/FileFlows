@@ -50,7 +50,7 @@ public class PluginUpdaterWorker : Worker
                     continue;
                 }
 
-                var dlResult = pluginDownloader.Download(package.Package);
+                var dlResult = pluginDownloader.Download(Version.Parse(package.Version), package.Package);
 
                 if (dlResult.Success == false)
                 {

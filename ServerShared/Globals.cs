@@ -84,7 +84,13 @@ public class Globals
     /// <summary>
     /// The URL for fileflows.com
     /// </summary>
+    #if(DEBUG)
+    public static readonly string FileFlowsDotComUrl =
+        (Environment.GetEnvironmentVariable("FFURL")?.EmptyAsNull() ?? "https://localhost:7197")
+        .TrimEnd('/');
+    #else 
     public static readonly string FileFlowsDotComUrl =
         (Environment.GetEnvironmentVariable("FFURL")?.EmptyAsNull() ?? "https://fileflows.com")
         .TrimEnd('/');
+    #endif
 }

@@ -133,7 +133,7 @@ public class PluginController : Controller
         {
             try
             {
-                var plugins = await HttpHelper.Get<IEnumerable<PluginPackageInfo>>(repo + "?rand=" + System.DateTime.Now.ToFileTime());
+                var plugins = await HttpHelper.Get<IEnumerable<PluginPackageInfo>>(repo + $"?version={Globals.Version}&rand={DateTime.Now.ToFileTime()}");
                 if (plugins.Success == false)
                     continue;
                 foreach(var plugin in plugins.Data)
@@ -201,7 +201,7 @@ public class PluginController : Controller
                 continue;
             }
 
-            var dlResult = pluginDownloader.Download(ppi.Package);
+            var dlResult = pluginDownloader.Download(Version.Parse(ppi.Version), ppi.Package);
             if (dlResult.Success == false)
             {
                 Logger.Instance.WLog("PluginUpdate: Failed to download plugin");
@@ -246,10 +246,10 @@ public class PluginController : Controller
         {
             try
             {
-                var dlResult = pluginDownloader.Download(package);
+                var dlResult = pluginDownloader.Download(Version.Parse(package.Version), package.Name);
                 if (dlResult.Success)
                 {
-                    PluginScanner.UpdatePlugin(package, dlResult.Data);
+                    PluginScanner.UpdatePlugin(package.Name, dlResult.Data);
                 }
             }
             catch (Exception ex)
@@ -406,7 +406,7 @@ public class PluginController : Controller
         /// <summary>
         /// A list of plugin packages to download
         /// </summary>
-        public List<string> Packages { get; set; }
+        public List<PluginPackageInfo> Packages { get; set; }
     }
 
     internal List<string> GetRepositories()
