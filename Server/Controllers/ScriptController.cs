@@ -1,14 +1,8 @@
-using System.Dynamic;
-using System.Text;
 using System.Text.RegularExpressions;
 using FileFlows.Plugin;
-using FileFlows.ScriptExecution;
-using FileFlows.Server.Helpers;
 using FileFlows.Server.Services;
-using FileFlows.Shared.Helpers;
 using FileFlows.Shared.Models;
 using Microsoft.AspNetCore.Mvc;
-using Logger = FileFlows.Shared.Logger;
 
 namespace FileFlows.Server.Controllers;
 

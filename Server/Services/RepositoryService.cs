@@ -135,7 +135,7 @@ class RepositoryService
             var dir = new FileInfo(outputFile).Directory;
             if(dir.Exists == false)
                 dir.Create();
-            await System.IO.File.WriteAllTextAsync(outputFile, content);
+            await File.WriteAllTextAsync(outputFile, content);
         }
         catch (Exception ex)
         { 
@@ -160,6 +160,7 @@ class RepositoryService
     /// <summary>
     /// Update all the repository objects
     /// </summary>
+    /// <returns>an awaited task</returns>
     internal async Task Update()
     {
         await UpdateScripts();
@@ -169,7 +170,7 @@ class RepositoryService
     /// <summary>
     /// Updates all the downloaded scripts from the repo
     /// </summary>
-    /// <returns>a task to await</returns>
+    /// <returns>an awaited task</returns>
     internal async Task UpdateScripts()
     {
         var files = Directory.GetFiles(DirectoryHelper.ScriptsDirectory, "*.js", SearchOption.AllDirectories);
@@ -182,7 +183,7 @@ class RepositoryService
     /// <summary>
     /// Updates all the downloaded templates from the repo
     /// </summary>
-    /// <returns>a task to await</returns>
+    /// <returns>an awaited task</returns>
     internal async Task UpdateTemplates()
     {
         var files = Directory.GetFiles(DirectoryHelper.TemplateDirectory, "*.json", SearchOption.AllDirectories);
@@ -190,6 +191,12 @@ class RepositoryService
         await UpdateObjects(files, knownPaths);
     }
 
+    /// <summary>
+    /// Updates objects
+    /// </summary>
+    /// <param name="files">the files to update</param>
+    /// <param name="knownPaths">the known paths</param>
+    /// <returns>an awaited task</returns>
     private async Task UpdateObjects(IEnumerable<string> files, List<string> knownPaths)
     {
         List<Task> tasks = new();
@@ -197,7 +204,7 @@ class RepositoryService
         {
             try
             {
-                string line = (await System.IO.File.ReadAllLinesAsync(file)).First();
+                string line = (await File.ReadAllLinesAsync(file)).First();
                 if (line?.StartsWith("// path:") == false)
                     continue;
                 string path = line.Substring("// path:".Length).Trim();

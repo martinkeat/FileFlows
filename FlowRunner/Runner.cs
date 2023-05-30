@@ -50,6 +50,14 @@ public class Runner
 
     private Node CurrentNode;
 
+    /// <summary>
+    /// Records the execution of a flow node
+    /// </summary>
+    /// <param name="nodeName">the name of the flow node</param>
+    /// <param name="nodeUid">the UID of the flow node</param>
+    /// <param name="output">the output after executing the flow node</param>
+    /// <param name="duration">how long it took to execution</param>
+    /// <param name="part">the flow node part</param>
     private void RecordNodeExecution(string nodeName, string nodeUid, int output, TimeSpan duration, FlowPart part)
     {
         if (Info.LibraryFile == null)
@@ -146,6 +154,9 @@ public class Runner
         }
     }
 
+    /// <summary>
+    /// Called when the communicator receives a cancel request
+    /// </summary>
     private void Communicator_OnCancel()
     {
         nodeParameters?.Logger?.ILog("##### CANCELING FLOW!");
@@ -156,6 +167,9 @@ public class Runner
             CurrentNode.Cancel().Wait();
     }
 
+    /// <summary>
+    /// Finish executing of a file
+    /// </summary>
     public async Task Finish()
     {
         if (nodeParameters?.Logger is FlowLogger fl)
@@ -176,6 +190,9 @@ public class Runner
         OnFlowCompleted?.Invoke(this, Info.LibraryFile.Status == FileStatus.Processed);
     }
 
+    /// <summary>
+    /// Calculates the final size of the file
+    /// </summary>
     private void CalculateFinalSize()
     {
         if (nodeParameters.IsDirectory)
@@ -209,6 +226,9 @@ public class Runner
 
     }
 
+    /// <summary>
+    /// Called when the flow execution completes
+    /// </summary>
     private async Task Complete()
     {
         DateTime start = DateTime.Now;
@@ -228,6 +248,11 @@ public class Runner
         Logger.Instance?.ELog("Failed to inform server of flow completion");
     }
 
+    /// <summary>
+    /// Called when the current flow step changes, ie it moves to a different node to execute
+    /// </summary>
+    /// <param name="step">the step index</param>
+    /// <param name="partName">the step part name</param>
     private void StepChanged(int step, string partName)
     {
         Info.CurrentPartName = partName;
@@ -243,6 +268,10 @@ public class Runner
         }
     }
 
+    /// <summary>
+    /// Updates the currently steps completed percentage
+    /// </summary>
+    /// <param name="percentage">the percentage</param>
     private void UpdatePartPercentage(float percentage)
     {
         float diff = Math.Abs(Info.CurrentPartPercent - percentage);
@@ -263,9 +292,20 @@ public class Runner
         }
     }
 
+    /// <summary>
+    /// When an update was last sent to the server to say this is still alive
+    /// </summary>
     private DateTime LastUpdate;
+    /// <summary>
+    /// A semaphore to ensure only one update is set at a time
+    /// </summary>
     private SemaphoreSlim UpdateSemaphore = new SemaphoreSlim(1);
     
+    /// <summary>
+    /// Sends an update to the server
+    /// </summary>
+    /// <param name="info">the information to send to the server</param>
+    /// <param name="waitMilliseconds">how long to wait to send, if takes longer than this, it wont be sent</param>
     private void SendUpdate(FlowExecutorInfo info, int waitMilliseconds = 50)
     {
         if (UpdateSemaphore.Wait(waitMilliseconds) == false)
@@ -289,6 +329,10 @@ public class Runner
         }
     }
 
+    /// <summary>
+    /// Sets the status of file
+    /// </summary>
+    /// <param name="status">the status</param>
     private void SetStatus(FileStatus status)
     {
         DateTime start = DateTime.Now;
@@ -319,6 +363,10 @@ public class Runner
         } while (DateTime.Now.Subtract(start) < new TimeSpan(0, 3, 0));
     }
 
+    /// <summary>
+    /// Starts processing a file
+    /// </summary>
+    /// <param name="communicator">the communicator to use to communicate with the server</param>
     private void RunActual(IFlowRunnerCommunicator communicator)
     {
         nodeParameters = new NodeParameters(Node.Map(Info.LibraryFile.Name), new FlowLogger(communicator), Info.IsDirectory, Info.LibraryPath);
@@ -341,9 +389,9 @@ public class Runner
                 nodeParameters.Variables.Add(variable.Key, variable.Value);
         }
 
-        FileFlows.Plugin.Helpers.FileHelper.DontChangeOwner = Node.DontChangeOwner;
-        FileFlows.Plugin.Helpers.FileHelper.DontSetPermissions = Node.DontSetPermissions;
-        FileFlows.Plugin.Helpers.FileHelper.Permissions = Node.Permissions;
+        Plugin.Helpers.FileHelper.DontChangeOwner = Node.DontChangeOwner;
+        Plugin.Helpers.FileHelper.DontSetPermissions = Node.DontSetPermissions;
+        Plugin.Helpers.FileHelper.Permissions = Node.Permissions;
 
         List<Guid> runFlows = new List<Guid>();
         runFlows.Add(Flow.Uid);

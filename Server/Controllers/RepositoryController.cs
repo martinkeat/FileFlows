@@ -49,6 +49,13 @@ public class RepositoryController : Controller
         }
         return scripts;
     }
+    
+    /// <summary>
+    /// Increments the configuration revision
+    /// </summary>
+    /// <returns>an awaited task</returns>
+    private Task RevisionIncrement()
+        => new SettingsService().RevisionIncrement();
 
     /// <summary>
     /// Gets the code of a script
@@ -67,13 +74,26 @@ public class RepositoryController : Controller
     public async Task Download([FromBody] RepositoryDownloadModel model)
     {
         if (model == null || model.Scripts?.Any() != true)
-            return; // nothing to delete
+            return; // nothing to download
 
+        // always re-download all the shared scripts to ensure they are up to date
+        await DownloadActual(model.Scripts);
+        await RevisionIncrement();
+
+    }
+
+    /// <summary>
+    /// Perform the actual downloading of scripts
+    /// </summary>
+    /// <param name="scripts">the scripts to download</param>
+    private async Task DownloadActual(List<string> scripts)
+    {
         // always re-download all the shared scripts to ensure they are up to date
         var service = new RepositoryService();
         await service.Init();
         await service.DownloadSharedScripts();
-        await service.DownloadObjects(model.Scripts);
+        await service.DownloadObjects(scripts);
+        
     }
 
 
@@ -84,8 +104,32 @@ public class RepositoryController : Controller
     public async Task UpdateScripts()
     {
         var service = new RepositoryService();
+        var original = (await GetScripts(ScriptType.Flow, missing: false)).ToDictionary(x => x.Path, x => x.Revision);
         await service.Init();
         await service.Update();
+        var updated = (await GetScripts(ScriptType.Flow, missing: false)).ToDictionary(x => x.Path, x => x.Revision);
+        bool changes = false;
+        foreach (var key in original.Keys)
+        {
+            if (updated.ContainsKey(key) == false)
+            {
+                // shouldn't happen, but if it does
+                changes = true;
+                break;
+            }
+
+            if (updated[key] != original[key])
+            {
+                // revision changed, this means the config must update
+                changes = true;
+                break;
+            }
+        }
+        if(changes)
+        {
+            // scripts were update, increment the revision
+            await RevisionIncrement();
+        }
     }
 
     /// <summary>
@@ -103,10 +147,9 @@ public class RepositoryController : Controller
             .Where(x => model.Uids.Contains(x.Path)).ToList();
         if (objects.Any() == false)
             return false; // nothing to update
-        await Download(new()
-        {
-            Scripts = objects.Select(x => x.Path).ToList()
-        });
+        await DownloadActual(objects.Select(x => x.Path).ToList());
+        // we always do an update here, its a user forcing an update
+        await RevisionIncrement();
         return true;
     }
     
