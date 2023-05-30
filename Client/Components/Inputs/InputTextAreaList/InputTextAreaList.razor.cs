@@ -19,6 +19,12 @@ namespace FileFlows.Client.Components.Inputs
             ClearError();
         }
 
+        protected override void OnInitialized()
+        {
+            base.OnInitialized();
+            TextValue = String.Join("\n", this.Value ?? new List<string>());
+        }
+
         public override Task<bool> Validate()
         {
             this.UpdateValue();
