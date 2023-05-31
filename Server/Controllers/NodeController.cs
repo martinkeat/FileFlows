@@ -1,4 +1,3 @@
-using LibraryFileService = FileFlows.Server.Services.LibraryFileService;
 using Microsoft.AspNetCore.Mvc;
 using FileFlows.Shared.Models;
 using FileFlows.Server.Helpers;
@@ -277,6 +276,9 @@ public class NodeController : Controller
     /// <param name="enabled">optional status of the node state</param>
     private void CheckLicensedNodes(Guid nodeUid, bool enabled)
     {
+        return; // testing
+        if (enabled == false)
+            return; // not enabling it, we dont care then
         var licensedNodes = LicenseHelper.GetLicensedProcessingNodes();
         var service = new NodeService();
         var nodes = service.GetAll();
