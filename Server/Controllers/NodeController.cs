@@ -297,14 +297,13 @@ public class NodeController : Controller
         var existing = data.FirstOrDefault(x => x.Address.ToLowerInvariant() == address);
         if (existing != null)
         {
-            if(existing.FlowRunners != model.FlowRunners || existing.TempPath != model.TempPath || existing.Enabled != model.Enabled)
+            if(existing.Version != model.Version) // existing.TempPath != model.TempPath)
             {
-                existing.FlowRunners = model.FlowRunners;
-                existing.TempPath = model.TempPath;
-                existing.Enabled = model.Enabled;
-                existing.OperatingSystem = model.OperatingSystem;
-                existing.Version = model.Version;
-                service.Update(existing);
+                //existing.FlowRunners = model.FlowRunners;
+                //existing.Enabled = model.Enabled;
+                //existing.TempPath = model.TempPath;
+                //existing.OperatingSystem = model.OperatingSystem;
+                service.UpdateVersion(existing.Uid, model.Version);
             }
             existing.SignalrUrl = "flow";
             return existing;
@@ -330,8 +329,10 @@ public class NodeController : Controller
         {
             Name = address,
             Address = address,
-            Enabled = model.Enabled,
-            FlowRunners = model.FlowRunners,
+            //Enabled = model.Enabled,
+            //FlowRunners = model.FlowRunners,
+            Enabled = false,
+            FlowRunners = 1,
             TempPath = model.TempPath,
             OperatingSystem = model.OperatingSystem,
             Version = model.Version,
@@ -346,6 +347,17 @@ public class NodeController : Controller
         node.SignalrUrl = "flow";
         return node;
     }
+
+    
+    /// <summary>
+    /// Changes the temp path of a node
+    /// </summary>
+    /// <param name="address">the nodes address</param>
+    /// <param name="path">the new temp path</param>
+    /// <returns>the result</returns>
+    [HttpPost("{address}/temp-path")]
+    public Task ChangeTempPath([FromRoute] string address, [FromQuery] string path)
+         => new NodeService().ChangeTempPath(address, path);
 
     /// <summary>
     /// Updates the last seen to now for a node

@@ -15,14 +15,14 @@ public class RegisterModel
     /// Gets or sets the temporary path used by this node
     /// </summary>
     public string TempPath { get; set; }
-    /// <summary>
-    /// Gets or sets the number of flow runners this node can run
-    /// </summary>
-    public int FlowRunners { get; set; }
-    /// <summary>
-    /// Gets or sets if this node is enabled
-    /// </summary>
-    public bool Enabled { get; set; }
+    // /// <summary>
+    // /// Gets or sets the number of flow runners this node can run
+    // /// </summary>
+    // public int FlowRunners { get; set; }
+    // /// <summary>
+    // /// Gets or sets if this node is enabled
+    // /// </summary>
+    // public bool Enabled { get; set; }
     /// <summary>
     /// Gets or sets any mappings this node uses
     /// Mappings allow a file or folder local to the Server to be mapped to a location local to the Node

@@ -205,7 +205,7 @@ public class NodeService : Service, INodeService
     /// <param name="mappings">Any mappings for the node</param>
     /// <returns>An instance of the registered node</returns>
     /// <exception cref="Exception">If fails to register, an exception will be thrown</exception>
-    public async Task<ProcessingNode> Register(string serverUrl, string address, string tempPath, int runners, bool enabled, List<RegisterModelMapping> mappings)
+    public async Task<ProcessingNode> Register(string serverUrl, string address, string tempPath, List<RegisterModelMapping> mappings)// int runners, bool enabled, List<RegisterModelMapping> mappings)
     {
         if(serverUrl.EndsWith("/"))
             serverUrl = serverUrl.Substring(0, serverUrl.Length - 1);
@@ -220,8 +220,8 @@ public class NodeService : Service, INodeService
         {
             Address = address,
             TempPath = tempPath,
-            FlowRunners = runners,
-            Enabled = enabled,
+            // FlowRunners = runners,
+            // Enabled = enabled,
             Mappings = mappings,
             Version = Globals.Version.ToString(),
             OperatingSystem = isWindows ? Shared.OperatingSystemType.Windows : 

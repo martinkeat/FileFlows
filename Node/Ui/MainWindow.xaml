@@ -29,7 +29,7 @@
 
 			<TextBlock Margin="6" Text="{Binding Version}" TextAlignment="Center" />
 			
-			<Grid ColumnDefinitions="140,4*" RowDefinitions="Auto,Auto,Auto,Auto,Auto"  Margin="4">
+			<Grid ColumnDefinitions="140,4*" RowDefinitions="Auto,Auto,40,40,Auto"  Margin="4">
 				<TextBlock Text="Server:" Grid.Row="0" Grid.Column="0" Margin="5 13 5 5" TextAlignment="Right" />
 				
 				<DockPanel Grid.Row="0" Grid.Column="1"  Margin="5" HorizontalAlignment="Stretch">
@@ -43,6 +43,7 @@
 					/>
 				</DockPanel>
 				
+				<!--
 				<TextBlock Text="Temp Path:" Grid.Row="1" Grid.Column="0"  Margin="5 13 5 5" TextAlignment="Right"/>
 				<DockPanel Grid.Row="1" Grid.Column="1"  Margin="5" HorizontalAlignment="Stretch">
 					<TextBox Text="{Binding TempPath}" Watermark="Temp Path" Foreground="white" 
@@ -63,7 +64,8 @@
 				<ToggleSwitch IsChecked="{Binding Enabled}" 
 				              Grid.Row="3" Grid.Column="1" Margin="5 5 5 5" 
 				              OffContent="" OnContent=""  />
-
+				-->
+				
 				<StackPanel Grid.Row="4" Grid.Column="1" Orientation="Horizontal">
 					<Button Margin="6" Content="SAVE / REGISTER" Command="{Binding SaveRegister}"
 					        Foreground="#ff0090" Background="#111214" Width="180"

@@ -83,9 +83,9 @@ public class NodeManager
                         return false;
                     }
 
-                    AppSettings.Instance.Enabled = settings.Enabled;
-                    AppSettings.Instance.Runners = settings.FlowRunners;
-                    AppSettings.Instance.TempPath = settings.TempPath;
+                    //AppSettings.Instance.Enabled = settings.Enabled;
+                    //AppSettings.Instance.Runners = settings.FlowRunners;
+                    // AppSettings.Instance.TempPath = settings.TempPath;
                     AppSettings.Instance.Save();
 
                     var serverVersion = new SystemService().GetVersion().Result;
@@ -96,7 +96,8 @@ public class NodeManager
                         return false;
                     }
 
-                    return AppSettings.Instance.Enabled;
+                    //return AppSettings.Instance.Enabled;
+                    return settings.Enabled;
                 }
                 catch (Exception ex)
                 {
@@ -148,21 +149,20 @@ public class NodeManager
             mappings.AddRange(AppSettings.EnvironmentalMappings);
         }
 
-        if (AppSettings.EnvironmentalRunnerCount != null)
-            AppSettings.Instance.Runners = AppSettings.EnvironmentalRunnerCount.Value;
+        // if (AppSettings.EnvironmentalRunnerCount != null)
+        //     AppSettings.Instance.Runners = AppSettings.EnvironmentalRunnerCount.Value;
+        //
+        // if (AppSettings.EnvironmentalEnabled != null)
+        //     AppSettings.Instance.Enabled = AppSettings.EnvironmentalEnabled.Value;
 
-        if (AppSettings.EnvironmentalEnabled != null)
-            AppSettings.Instance.Enabled = AppSettings.EnvironmentalEnabled.Value;
-
-        if (string.IsNullOrEmpty(AppSettings.Instance.TempPath))
-            AppSettings.Instance.TempPath = Globals.IsDocker ? "/temp" : Path.Combine(DirectoryHelper.BaseDirectory, "Temp");
+        string tempPath =  Globals.IsDocker ? "/temp" : Path.Combine(DirectoryHelper.BaseDirectory, "Temp");
 
         var settings = AppSettings.Instance;
         var nodeService = new NodeService();
         Shared.Models.ProcessingNode result;
         try
         {
-            result = await nodeService.Register(settings.ServerUrl, settings.HostName, settings.TempPath, settings.Runners, settings.Enabled, mappings);
+            result = await nodeService.Register(settings.ServerUrl, settings.HostName, tempPath, mappings);
             if (result == null)
             {
                 this.Registered = false;
@@ -181,8 +181,8 @@ public class NodeManager
             Service.ServiceBaseUrl = Service.ServiceBaseUrl.Substring(0, Service.ServiceBaseUrl.Length - 1);
 
         Shared.Logger.Instance?.ILog("Successfully registered node");
-        settings.Enabled = result.Enabled;
-        settings.Runners = result.FlowRunners;
+        //settings.Enabled = result.Enabled;
+        //settings.Runners = result.FlowRunners;
         settings.Save();
         this.Registered = true;
         return true;

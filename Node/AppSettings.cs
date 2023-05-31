@@ -39,7 +39,7 @@ public class AppSettings
     public static bool? EnvironmentalEnabled { get; set; }
 
     private string _ServerUrl = string.Empty;
-    private string _TempPath = string.Empty;
+    //private string _TempPath = string.Empty;
     /// <summary>
     /// Gets or sets the URL to the server
     /// </summary>
@@ -57,22 +57,22 @@ public class AppSettings
         }
     }
 
-    /// <summary>
-    /// Gets or sets the temporary path
-    /// </summary>
-    public string TempPath
-    {
-        get
-        {
-            if (string.IsNullOrEmpty(ForcedTempPath) == false)
-                return ForcedTempPath;
-            return _TempPath;
-        }
-        set
-        {
-            _TempPath = value ?? String.Empty;
-        }
-    }
+    // /// <summary>
+    // /// Gets or sets the temporary path
+    // /// </summary>
+    // public string TempPath
+    // {
+    //     get
+    //     {
+    //         if (string.IsNullOrEmpty(ForcedTempPath) == false)
+    //             return ForcedTempPath;
+    //         return _TempPath;
+    //     }
+    //     set
+    //     {
+    //         _TempPath = value ?? String.Empty;
+    //     }
+    // }
 
     /// <summary>
     /// Gets the hostname of this node
@@ -86,16 +86,16 @@ public class AppSettings
             return Environment.MachineName;
         }
     }
-
-    /// <summary>
-    /// Gets or sets the number of runners this node can execute
-    /// </summary>
-    public int Runners { get; set; }
-    
-    /// <summary>
-    /// Gets or sets if this node is enabled
-    /// </summary>
-    public bool Enabled { get; set; }
+    //
+    // /// <summary>
+    // /// Gets or sets the number of runners this node can execute
+    // /// </summary>
+    // public int Runners { get; set; }
+    //
+    // /// <summary>
+    // /// Gets or sets if this node is enabled
+    // /// </summary>
+    // public bool Enabled { get; set; }
 
     /// <summary>
     /// Saves the configuration
@@ -144,8 +144,8 @@ public class AppSettings
         if (File.Exists(file) == false)
         {
             AppSettings settings = new();
-            settings.Runners = 1;
-            settings.TempPath = Globals.IsDocker ? "/temp" :  Path.Combine(DirectoryHelper.BaseDirectory, "Temp");
+            //settings.Runners = 1;
+            //settings.TempPath = Globals.IsDocker ? "/temp" :  Path.Combine(DirectoryHelper.BaseDirectory, "Temp");
             settings.Save();
             return settings;
         }

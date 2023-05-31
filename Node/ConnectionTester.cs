@@ -35,7 +35,7 @@ public class ConnectionTester
                 {
                     var nodeService = new NodeService();
                     string actualUrl = protocol + "://" + address + ":" + port + "/";
-                    var result = nodeService.Register(actualUrl, Environment.MachineName, tempPath, runners, enabled, mappings).Result;
+                    var result = nodeService.Register(actualUrl, Environment.MachineName, tempPath, mappings).Result;
                     if (result == null)
                         return (false, "Failed to register");
                     return (true, actualUrl);

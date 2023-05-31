@@ -105,4 +105,43 @@ public class NodeService : CachedService<ProcessingNode>, INodeService
         var node = Data.FirstOrDefault(x => x.Address.ToLowerInvariant() == address);
         return node!;
     }
+
+    /// <summary>
+    /// Updates the version of a Node
+    /// </summary>
+    /// <param name="uid">the unique identifier for the node</param>
+    /// <param name="version">the new version</param>
+    public void UpdateVersion(Guid uid, string version)
+    {
+        var item = GetByUid(uid);
+        if (item == null)
+            return;
+        if(Version.TryParse(item.Version ?? "0.0.0.0", out Version? vOld) == false)
+            vOld = new Version();
+        if(Version.TryParse(version ?? "0.0.0.0", out Version? vNew) == false)
+            vNew = new Version();
+        if (vOld == vNew)
+            return; // nothing to do
+        item.Version = version;
+        UpdateActual(item);
+    }
+
+    /// <summary>
+    /// Changes the temp path of a node
+    /// </summary>
+    /// <param name="address">the nodes address</param>
+    /// <param name="path">the new temp path</param>
+    /// <returns>the result</returns>
+    public async Task ChangeTempPath(string address, string path)
+    {
+        if (string.IsNullOrEmpty(address) || string.IsNullOrEmpty(path))
+            return;
+        var node = await GetByAddressAsync(address);
+        if (node == null)
+            return;
+        if (node.TempPath == path)
+            return;
+        node.TempPath = path;
+        UpdateActual(node);
+    }
 }
