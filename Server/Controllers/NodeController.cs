@@ -125,6 +125,7 @@ public class NodeController : Controller
             node.AllLibraries = ProcessingLibraries.All;
             node.Mappings = null; // no mappings for internal
             service.Update(node);
+            service.Refresh();
             CheckLicensedNodes(node.Uid, node.Enabled);
             return Ok(node);
         }
@@ -151,6 +152,7 @@ public class NodeController : Controller
             existing.DontSetPermissions = node.DontSetPermissions;
             existing.Permissions = node.Permissions;
             service.Update(existing);
+            service.Refresh();
             CheckLicensedNodes(existing.Uid, existing.Enabled);
             return Ok(existing);
         }
