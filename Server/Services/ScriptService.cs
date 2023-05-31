@@ -123,13 +123,23 @@ public class ScriptService:IScriptService
             type == ScriptType.Template ? DirectoryHelper.ScriptsDirectoryFunction :
             type == ScriptType.Webhook ? DirectoryHelper.ScriptsDirectoryWebhook : 
             DirectoryHelper.ScriptsDirectorySystem;
-        foreach (var file in new DirectoryInfo(dir).GetFiles("*.js", SearchOption.AllDirectories))
+        if(Directory.Exists(dir))
+           return scripts;
+        try
         {
-            var script = await GetScript(type, file, loadCode);
-            scripts.Add(script);
-        }
+            foreach (var file in new DirectoryInfo(dir).GetFiles("*.js", SearchOption.AllDirectories))
+            {
+                var script = await GetScript(type, file, loadCode);
+                scripts.Add(script);
+            }
 
-        return scripts.OrderBy(x => x.Name);
+            return scripts.OrderBy(x => x.Name);
+        }
+        catch (Exception ex)
+        {
+            Logger.Instance.WLog($"Error getting scripts by type ['{type}']: {ex.Message}");
+            return scripts;
+        }
     }
     
     /// <summary>
