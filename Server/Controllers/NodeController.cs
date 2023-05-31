@@ -21,9 +21,11 @@ public class NodeController : Controller
     [HttpGet]
     public IEnumerable<ProcessingNode> GetAll()
     {
-        var nodes = new NodeService().GetAll()
+        var service = new NodeService();
+        var nodes = service.GetAll()
             .OrderBy(x => x.Address == Globals.InternalNodeName ? 0 : 1)
-            .ThenBy(x => x.Name);
+            .ThenBy(x => x.Name)
+            .ToList();
         var internalNode = nodes.FirstOrDefault(x => x.Uid == Globals.InternalNodeUid);
         if(internalNode != null)
         {
@@ -49,7 +51,7 @@ public class NodeController : Controller
                     update = true;
             }
             if(update)
-                new NodeService().Update(internalNode);
+                service.Update(internalNode);
         }
 #if (DEBUG)
         // set this to linux so we can test the full UI

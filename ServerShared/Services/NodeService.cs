@@ -1,9 +1,9 @@
-﻿namespace FileFlows.ServerShared.Services;
-
-using FileFlows.ServerShared.Models;
+﻿using FileFlows.ServerShared.Models;
 using FileFlows.Shared.Helpers;
 using FileFlows.Shared.Models;
 using System.Runtime.InteropServices;
+
+namespace FileFlows.ServerShared.Services;
 
 /// <summary>
 /// An interface for communicating with the server for all Processing Node related actions

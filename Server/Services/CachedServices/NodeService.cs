@@ -172,5 +172,9 @@ public class NodeService : CachedService<ProcessingNode>, INodeService
     {
         Logger.Instance.ILog($"Updating Processing Node '{item.Name}', runners: {item.FlowRunners}");
         base.Update(item, dontIncrementConfigRevision: dontIncrementConfigRevision);
+        Refresh();
+        foreach(var node in GetAll())
+            Logger.Instance.ILog($"After Update Processing Node '{node.Name}', runners: {node.FlowRunners}");
+            
     }
 }
