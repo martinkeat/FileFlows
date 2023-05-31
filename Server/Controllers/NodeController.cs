@@ -212,7 +212,7 @@ public class NodeController : Controller
         if (string.IsNullOrEmpty(version) == false && node.Version != version)
         {
             node.Version = version;
-            service.Update(node);
+            await service.UpdateVersion(node.Uid, version);
         }
         else
         {
@@ -289,7 +289,7 @@ public class NodeController : Controller
                 if (current >= licensedNodes)
                 {
                     node.Enabled = false;
-                    service.Update(node);
+                    _ = service.SetState(node.Uid, false);
                 }
                 else
                 {
@@ -389,6 +389,8 @@ public class NodeController : Controller
     {
         var service = new NodeService();
         var node = service.GetByUid(uid);
+        if (node == null)
+            return;
         node.LastSeen = DateTime.Now;
         await DbHelper.UpdateNodeLastSeen(uid);
     }

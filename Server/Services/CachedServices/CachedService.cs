@@ -42,20 +42,20 @@ public abstract class CachedService<T> where T : FileFlowObject, new()
     /// Gets the data
     /// </summary>
     /// <returns>the data</returns>
-    public List<T> GetAll() => Data;
+    public virtual List<T> GetAll() => Data;
 
     /// <summary>
     /// Gets all the data async
     /// </summary>
     /// <returns>the data</returns>
-    public Task<List<T>> GetAllAsync() => Task.FromResult(GetAll());
+    public virtual Task<List<T>> GetAllAsync() => Task.FromResult(GetAll());
 
     /// <summary>
     /// Gets an item by its UID
     /// </summary>
     /// <param name="uid">the UID of the item</param>
     /// <returns>the item</returns>
-    public T? GetByUid(Guid uid)
+    public virtual T? GetByUid(Guid uid)
         => Data.FirstOrDefault(x => x.Uid == uid);
 
     /// <summary>
@@ -63,7 +63,7 @@ public abstract class CachedService<T> where T : FileFlowObject, new()
     /// </summary>
     /// <param name="uid">the UID of the item</param>
     /// <returns>the item</returns>
-    public Task<T> GetByUidAsync(Guid uid) => Task.FromResult(GetByUid(uid)!);
+    public virtual Task<T> GetByUidAsync(Guid uid) => Task.FromResult(GetByUid(uid)!);
 
     /// <summary>
     /// Gets a item by it's name
@@ -71,7 +71,7 @@ public abstract class CachedService<T> where T : FileFlowObject, new()
     /// <param name="name">the name of the item</param>
     /// <param name="ignoreCase">if case should be ignored</param>
     /// <returns>the item</returns>
-    public T? GetByName(string name, bool ignoreCase = true)
+    public virtual T? GetByName(string name, bool ignoreCase = true)
     {
         if (ignoreCase)
         {
@@ -86,7 +86,7 @@ public abstract class CachedService<T> where T : FileFlowObject, new()
     /// </summary>
     /// <param name="item">the item being updated</param>
     /// <param name="dontIncrementConfigRevision">if this is a revision object, if the revision should be updated</param>
-    public void Update(T item, bool dontIncrementConfigRevision = false)
+    public virtual void Update(T item, bool dontIncrementConfigRevision = false)
     {
         if (item == null)
             throw new Exception("No model");
@@ -116,7 +116,7 @@ public abstract class CachedService<T> where T : FileFlowObject, new()
     /// <summary>
     /// Refreshes the data
     /// </summary>
-    public void Refresh()
+    public virtual void Refresh()
         => Data = DbHelper.Select<T>().Result.ToList();
     
     /// <summary>
@@ -152,7 +152,7 @@ public abstract class CachedService<T> where T : FileFlowObject, new()
     /// </summary>
     /// <param name="name">the name to make unique</param>
     /// <returns>the unique name</returns>
-    public string GetNewUniqueName(string name)
+    public virtual string GetNewUniqueName(string name)
     {
         List<string> names = Data.Select(x => x.Name.ToLowerInvariant()).ToList();
         return UniqueNameHelper.GetUnique(name, names);
@@ -164,7 +164,7 @@ public abstract class CachedService<T> where T : FileFlowObject, new()
     /// <param name="uid">the Uid of the item</param>
     /// <param name="name">the name of the item</param>
     /// <returns>true if name is in use</returns>
-    public bool NameInUse(Guid uid, string name)
+    public virtual bool NameInUse(Guid uid, string name)
     {
         name = name.ToLowerInvariant().Trim();
         return Data.Any(x => uid != x.Uid && x.Name.ToLowerInvariant() == name);
