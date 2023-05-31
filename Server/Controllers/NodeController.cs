@@ -139,6 +139,7 @@ public class NodeController : Controller
             existing.TempPath = node.TempPath?.EmptyAsNull() ?? existing.TempPath;
             existing.Enabled = node.Enabled;
             existing.FlowRunners = node.FlowRunners;
+            Logger.Instance.ILog($"Updating Flow Runners for '{node.Name}': {node.FlowRunners}");
             existing.Priority = node.Priority;
             existing.PreExecuteScript = node.PreExecuteScript;
             existing.Schedule = node.Schedule?.EmptyAsNull()  ?? existing.Schedule;
@@ -276,9 +277,9 @@ public class NodeController : Controller
     private void CheckLicensedNodes(Guid nodeUid, bool enabled)
     {
         var licensedNodes = LicenseHelper.GetLicensedProcessingNodes();
-        var nodes = GetAll();
-        int current = 0;
         var service = new NodeService();
+        var nodes = service.GetAll();
+        int current = 0;
         foreach (var node in nodes.OrderBy(x => x.Uid == nodeUid ? 1 : 2).ThenBy(x => x.Name))
         {
             if (node.Uid == nodeUid)
