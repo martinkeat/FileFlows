@@ -34,18 +34,18 @@ public class NodeController : Controller
                 update = true;
             }
 
-            if (internalNode.OperatingSystem == Shared.OperatingSystemType.Unknown)
+            if (internalNode.OperatingSystem == OperatingSystemType.Unknown)
             {
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                    internalNode.OperatingSystem = Shared.OperatingSystemType.Windows;
+                    internalNode.OperatingSystem = OperatingSystemType.Windows;
                 else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-                    internalNode.OperatingSystem = Shared.OperatingSystemType.Mac;
+                    internalNode.OperatingSystem = OperatingSystemType.Mac;
                 else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-                    internalNode.OperatingSystem = Shared.OperatingSystemType.Linux;
+                    internalNode.OperatingSystem = OperatingSystemType.Linux;
                 else if (RuntimeInformation.IsOSPlatform(OSPlatform.FreeBSD))
-                    internalNode.OperatingSystem = Shared.OperatingSystemType.Linux;
+                    internalNode.OperatingSystem = OperatingSystemType.Linux;
 
-                if (internalNode.OperatingSystem != Shared.OperatingSystemType.Unknown)
+                if (internalNode.OperatingSystem != OperatingSystemType.Unknown)
                     update = true;
             }
             if(update)
@@ -74,9 +74,10 @@ public class NodeController : Controller
     /// <param name="node">The node to save</param>
     /// <returns>The saved instance</returns>
     [HttpPost]
-    public ProcessingNode Save([FromBody] ProcessingNode node)
+    public IActionResult Save([FromBody] ProcessingNode node)
     {
         // see if we are updating the internal node
+        var service = new NodeService();
         if(node.Libraries?.Any() == true)
         {
             // remove any removed libraries and update any names
@@ -114,23 +115,44 @@ public class NodeController : Controller
                 CheckLicensedNodes(internalNode.Uid, internalNode.Enabled);
                 //var processingNode = await Update(internalNode, checkDuplicateName: true, useCache:true);
                 
-                new NodeService().Update(internalNode);
-                return internalNode;
+                service.Update(internalNode);
+                return Ok(internalNode);
             }
-            else
-            {
-                // internal but doesnt exist
-                node.Address = Globals.InternalNodeName;
-                node.Name = Globals.InternalNodeName;
-                node.AllLibraries = ProcessingLibraries.All;
-                node.Mappings = null; // no mappings for internal
-            }
+            
+            // internal but doesnt exist
+            node.Address = Globals.InternalNodeName;
+            node.Name = Globals.InternalNodeName;
+            node.AllLibraries = ProcessingLibraries.All;
+            node.Mappings = null; // no mappings for internal
+            service.Update(node);
+            CheckLicensedNodes(node.Uid, node.Enabled);
+            return Ok(node);
         }
-        //var result = await Update(node, checkDuplicateName: true, useCache:true);
-        new NodeService().Update(node);
-        CheckLicensedNodes(node.Uid, node.Enabled);
-        // LibraryFileService.RefreshProcessingNodes();
-        return node;
+        else
+        {
+
+            var existing = service.GetByUid(node.Uid);
+            if (existing == null)
+                return BadRequest("Node not found");
+            existing.Name = node.Name?.EmptyAsNull() ?? existing.Name;
+            existing.Address = node.Address?.EmptyAsNull() ?? existing.Address;
+            existing.TempPath = node.TempPath?.EmptyAsNull() ?? existing.TempPath;
+            existing.Enabled = node.Enabled;
+            existing.FlowRunners = node.FlowRunners;
+            existing.Priority = node.Priority;
+            existing.PreExecuteScript = node.PreExecuteScript;
+            existing.Schedule = node.Schedule?.EmptyAsNull()  ?? existing.Schedule;
+            existing.Mappings = node.Mappings ?? new();
+            existing.AllLibraries = node.AllLibraries;
+            existing.Libraries = node.Libraries;
+            existing.MaxFileSizeMb = node.MaxFileSizeMb;
+            existing.DontChangeOwner = node.DontChangeOwner;
+            existing.DontSetPermissions = node.DontSetPermissions;
+            existing.Permissions = node.Permissions;
+            service.Update(existing);
+            CheckLicensedNodes(existing.Uid, existing.Enabled);
+            return Ok(existing);
+        }
     }
 
     /// <summary>
