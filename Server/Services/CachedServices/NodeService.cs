@@ -172,11 +172,27 @@ public class NodeService : CachedService<ProcessingNode>, INodeService
     {
         Logger.Instance.ILog($"Updating Processing Node '{item.Name}', runners: {item.FlowRunners}");
         base.Update(item, dontIncrementConfigRevision: dontIncrementConfigRevision);
-        Refresh();
-        var updated = GetAll().FirstOrDefault(x => x.Uid == item.Uid);
-        Logger.Instance.ILog($"Updated from getaqll Processing Node '{updated.Name}', runners: {updated.FlowRunners}");
-        updated = GetByUid(item.Uid);
-        Logger.Instance.ILog($"Updated from getone  Processing Node '{updated.Name}', runners: {updated.FlowRunners}");
-            
+        var cached = GetByUid(item.Uid);
+        if(item != cached)
+            CopyInto(source: item, destination: cached);
+    }
+
+    private void CopyInto(ProcessingNode source, ProcessingNode destination)
+    {
+        destination.Name = source.Name?.EmptyAsNull() ?? destination.Name;
+        destination.Address = source.Address?.EmptyAsNull() ?? destination.Address;
+        destination.TempPath = source.TempPath?.EmptyAsNull() ?? destination.TempPath;
+        destination.Enabled = source.Enabled;
+        destination.FlowRunners = source.FlowRunners;
+        destination.Priority = source.Priority;
+        destination.PreExecuteScript = source.PreExecuteScript;
+        destination.Schedule = source.Schedule?.EmptyAsNull()  ?? destination.Schedule;
+        destination.Mappings = source.Mappings ?? new();
+        destination.AllLibraries = source.AllLibraries;
+        destination.Libraries = source.Libraries;
+        destination.MaxFileSizeMb = source.MaxFileSizeMb;
+        destination.DontChangeOwner = source.DontChangeOwner;
+        destination.DontSetPermissions = source.DontSetPermissions;
+        destination.Permissions = source.Permissions;
     }
 }
