@@ -173,8 +173,10 @@ public class NodeService : CachedService<ProcessingNode>, INodeService
         Logger.Instance.ILog($"Updating Processing Node '{item.Name}', runners: {item.FlowRunners}");
         base.Update(item, dontIncrementConfigRevision: dontIncrementConfigRevision);
         Refresh();
-        foreach(var node in GetAll())
-            Logger.Instance.ILog($"After Update Processing Node '{node.Name}', runners: {node.FlowRunners}");
+        var updated = GetAll().FirstOrDefault(x => x.Uid == item.Uid);
+        Logger.Instance.ILog($"Updated from getaqll Processing Node '{updated.Name}', runners: {updated.FlowRunners}");
+        updated = GetByUid(item.Uid);
+        Logger.Instance.ILog($"Updated from getone  Processing Node '{updated.Name}', runners: {updated.FlowRunners}");
             
     }
 }
