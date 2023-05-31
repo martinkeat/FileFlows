@@ -54,7 +54,7 @@ public class NodeController : Controller
 #if (DEBUG)
         // set this to linux so we can test the full UI
         if (internalNode != null)
-            internalNode.OperatingSystem = Shared.OperatingSystemType.Linux;
+            internalNode.OperatingSystem = OperatingSystemType.Linux;
 #endif
         return nodes.OrderBy(x => x.Name.ToLowerInvariant());
     }
@@ -115,7 +115,6 @@ public class NodeController : Controller
                 CheckLicensedNodes(internalNode.Uid, internalNode.Enabled);
                 //var processingNode = await Update(internalNode, checkDuplicateName: true, useCache:true);
                 
-                service.Update(internalNode);
                 return Ok(internalNode);
             }
             
@@ -125,7 +124,6 @@ public class NodeController : Controller
             node.AllLibraries = ProcessingLibraries.All;
             node.Mappings = null; // no mappings for internal
             service.Update(node);
-            service.Refresh();
             CheckLicensedNodes(node.Uid, node.Enabled);
             return Ok(node);
         }
@@ -152,7 +150,6 @@ public class NodeController : Controller
             existing.DontSetPermissions = node.DontSetPermissions;
             existing.Permissions = node.Permissions;
             service.Update(existing);
-            service.Refresh();
             CheckLicensedNodes(existing.Uid, existing.Enabled);
             return Ok(existing);
         }
@@ -180,19 +177,19 @@ public class NodeController : Controller
     /// <param name="enable">Whether or not this node is enabled and will process files</param>
     /// <returns>an awaited task</returns>
     [HttpPut("state/{uid}")]
-    public ProcessingNode SetState([FromRoute] Guid uid, [FromQuery] bool? enable)
+    public async Task<IActionResult> SetState([FromRoute] Guid uid, [FromQuery] bool? enable)
     {
         var service = new NodeService();
         var node = service.GetByUid(uid);
         if (node == null)
-            throw new Exception("Node not found.");
+            return BadRequest("Node not found.");
         if (enable != null && node.Enabled != enable.Value)
         {
             node.Enabled = enable.Value;
-            service.Update(node);
+            await service.SetState(uid, enable.Value);
         }
         CheckLicensedNodes(uid, enable == true);
-        return node;
+        return Ok(node);
     }
 
     /// <summary>

@@ -111,7 +111,7 @@ public class NodeService : CachedService<ProcessingNode>, INodeService
     /// </summary>
     /// <param name="uid">the unique identifier for the node</param>
     /// <param name="version">the new version</param>
-    public void UpdateVersion(Guid uid, string version)
+    public async Task UpdateVersion(Guid uid, string version)
     {
         var item = GetByUid(uid);
         if (item == null)
@@ -123,7 +123,7 @@ public class NodeService : CachedService<ProcessingNode>, INodeService
         if (vOld == vNew)
             return; // nothing to do
         item.Version = version;
-        UpdateActual(item);
+        await DbHelper.UpdateJsonProperty(uid, nameof(ProcessingNode.Version), version);
     }
 
     /// <summary>
@@ -142,6 +142,20 @@ public class NodeService : CachedService<ProcessingNode>, INodeService
         if (node.TempPath == path)
             return;
         node.TempPath = path;
-        UpdateActual(node);
+        await DbHelper.UpdateJsonProperty(node.Uid, nameof(node.TempPath), path);
+    }
+
+    /// <summary>
+    /// Set state of a processing node
+    /// </summary>
+    /// <param name="uid">The UID of the processing node</param>
+    /// <param name="enable">Whether or not this node is enabled and will process files</param>
+    /// <returns>an awaited task</returns>
+    public async Task SetState(Guid uid, bool enable)
+    {
+        var node = await GetByUidAsync(uid);
+        if (node == null)
+            return;
+        await DbHelper.UpdateJsonProperty(node.Uid, nameof(node.Enabled), enable);
     }
 }

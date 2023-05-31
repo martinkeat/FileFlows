@@ -32,11 +32,12 @@ public partial class LibraryFileService
         if (settings.IsPaused)
             return NextFileResult(NextLibraryFileStatus.SystemPaused);
 
-        var node = await NodeService.Load().GetByUidAsync(nodeUid);
+        var nodeService = new NodeService();
+        var node = await nodeService.GetByUidAsync(nodeUid);
         if (node != null && node.Version != nodeVersion)
         {
             node.Version = nodeVersion;
-            new NodeService().Update(node);
+            await nodeService.UpdateVersion(node.Uid, nodeVersion);
         }
         
         if (nodeUid != Globals.InternalNodeUid) // dont test version number for internal processing node
