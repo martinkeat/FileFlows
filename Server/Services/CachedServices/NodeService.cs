@@ -20,7 +20,7 @@ public class NodeService : CachedService<ProcessingNode>, INodeService
     }
 
 
-/// <summary>
+    /// <summary>
     /// A loader to load an instance of the Node service
     /// </summary>
     public static Func<INodeService> Loader { get; set; }
@@ -106,19 +106,23 @@ public class NodeService : CachedService<ProcessingNode>, INodeService
     /// </summary>
     /// <param name="uid">the unique identifier for the node</param>
     /// <param name="version">the new version</param>
-    public async Task UpdateVersion(Guid uid, string version)
+    public void UpdateVersion(Guid uid, string version)
     {
-        var item = GetByUid(uid);
-        if (item == null)
-            return;
-        if(Version.TryParse(item.Version ?? "0.0.0.0", out Version? vOld) == false)
-            vOld = new Version();
-        if(Version.TryParse(version ?? "0.0.0.0", out Version? vNew) == false)
-            vNew = new Version();
-        if (vOld == vNew)
-            return; // nothing to do
-        item.Version = version;
-        await DbHelper.UpdateJsonProperty(uid, nameof(ProcessingNode.Version), version);
+        lock (Data)
+        {
+            var node = Data.FirstOrDefault(x => x.Uid== uid && x.Version != version);
+            if (node == null)
+                return;
+            
+            if(Version.TryParse(node.Version ?? "0.0.0.0", out Version? vOld) == false)
+                vOld = new Version();
+            if(Version.TryParse(version ?? "0.0.0.0", out Version? vNew) == false)
+                vNew = new Version();
+            if (vOld == vNew)
+                return; // nothing to do
+            node.Version = version;
+            DbHelper.UpdateJsonProperty(node.Uid, nameof(node.Version), version).Wait();
+        }
     }
 
     /// <summary>
@@ -126,18 +130,20 @@ public class NodeService : CachedService<ProcessingNode>, INodeService
     /// </summary>
     /// <param name="address">the nodes address</param>
     /// <param name="path">the new temp path</param>
-    /// <returns>the result</returns>
-    public async Task ChangeTempPath(string address, string path)
+    public void ChangeTempPath(string address, string path)
     {
         if (string.IsNullOrEmpty(address) || string.IsNullOrEmpty(path))
             return;
-        var node = await GetByAddressAsync(address);
-        if (node == null)
-            return;
-        if (node.TempPath == path)
-            return;
-        node.TempPath = path;
-        await DbHelper.UpdateJsonProperty(node.Uid, nameof(node.TempPath), path);
+        lock (Data)
+        {
+            var node = Data.FirstOrDefault(x => string.Equals(x.Address, address, StringComparison.InvariantCultureIgnoreCase));
+            if (node == null)
+                return;
+            if (node.TempPath == path)
+                return;
+            node.TempPath = path;
+            DbHelper.UpdateJsonProperty(node.Uid, nameof(node.TempPath), path).Wait();
+        }
     }
 
     /// <summary>
@@ -145,12 +151,26 @@ public class NodeService : CachedService<ProcessingNode>, INodeService
     /// </summary>
     /// <param name="uid">The UID of the processing node</param>
     /// <param name="enable">Whether or not this node is enabled and will process files</param>
-    /// <returns>an awaited task</returns>
-    public async Task SetState(Guid uid, bool enable)
+    public void SetState(Guid uid, bool enable)
     {
-        var node = await GetByUidAsync(uid);
-        if (node == null)
-            return;
-        await DbHelper.UpdateJsonProperty(node.Uid, nameof(node.Enabled), enable);
+        lock (Data)
+        {
+            var node = Data.FirstOrDefault(x => x.Uid== uid && x.Enabled != enable);
+            if (node == null)
+                return;
+            node.Enabled = enable;
+            DbHelper.UpdateJsonProperty(node.Uid, nameof(node.Enabled), enable).Wait();
+        }
+    }
+
+    /// <summary>
+    /// Updates an item
+    /// </summary>
+    /// <param name="item">the item being updated</param>
+    /// <param name="dontIncrementConfigRevision">if this is a revision object, if the revision should be updated</param>
+    public override void Update(ProcessingNode item, bool dontIncrementConfigRevision = false)
+    {
+        Logger.Instance.ILog($"Updating Processing Node '{item.Name}', runners: {item.FlowRunners}");
+        base.Update(item, dontIncrementConfigRevision: dontIncrementConfigRevision);
     }
 }

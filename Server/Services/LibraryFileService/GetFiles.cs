@@ -37,7 +37,7 @@ public partial class LibraryFileService
         if (node != null && node.Version != nodeVersion)
         {
             node.Version = nodeVersion;
-            await nodeService.UpdateVersion(node.Uid, nodeVersion);
+            nodeService.UpdateVersion(node.Uid, nodeVersion);
         }
         
         if (nodeUid != Globals.InternalNodeUid) // dont test version number for internal processing node

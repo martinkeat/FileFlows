@@ -186,7 +186,7 @@ public class NodeController : Controller
         if (enable != null && node.Enabled != enable.Value)
         {
             node.Enabled = enable.Value;
-            await service.SetState(uid, enable.Value);
+            service.SetState(uid, enable.Value);
         }
         CheckLicensedNodes(uid, enable == true);
         return Ok(node);
@@ -212,7 +212,7 @@ public class NodeController : Controller
         if (string.IsNullOrEmpty(version) == false && node.Version != version)
         {
             node.Version = version;
-            await service.UpdateVersion(node.Uid, version);
+            service.UpdateVersion(node.Uid, version);
         }
         else
         {
@@ -289,7 +289,7 @@ public class NodeController : Controller
                 if (current >= licensedNodes)
                 {
                     node.Enabled = false;
-                    _ = service.SetState(node.Uid, false);
+                    service.SetState(node.Uid, false);
                 }
                 else
                 {
@@ -378,7 +378,7 @@ public class NodeController : Controller
     /// <param name="path">the new temp path</param>
     /// <returns>the result</returns>
     [HttpPost("{address}/temp-path")]
-    public Task ChangeTempPath([FromRoute] string address, [FromQuery] string path)
+    public void ChangeTempPath([FromRoute] string address, [FromQuery] string path)
          => new NodeService().ChangeTempPath(address, path);
 
     /// <summary>
