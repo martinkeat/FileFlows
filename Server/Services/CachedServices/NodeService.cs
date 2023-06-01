@@ -170,7 +170,6 @@ public class NodeService : CachedService<ProcessingNode>, INodeService
     /// <param name="dontIncrementConfigRevision">if this is a revision object, if the revision should be updated</param>
     public override void Update(ProcessingNode item, bool dontIncrementConfigRevision = false)
     {
-        Logger.Instance.ILog($"Updating Processing Node '{item.Name}', runners: {item.FlowRunners}");
         base.Update(item, dontIncrementConfigRevision: dontIncrementConfigRevision);
         var cached = GetByUid(item.Uid);
         if(item != cached)

@@ -130,27 +130,10 @@ public class NodeController : Controller
         }
         else
         {
-
             var existing = service.GetByUid(node.Uid);
             if (existing == null)
                 return BadRequest("Node not found");
-            existing.Name = node.Name?.EmptyAsNull() ?? existing.Name;
-            existing.Address = node.Address?.EmptyAsNull() ?? existing.Address;
-            existing.TempPath = node.TempPath?.EmptyAsNull() ?? existing.TempPath;
-            existing.Enabled = node.Enabled;
-            existing.FlowRunners = node.FlowRunners;
-            Logger.Instance.ILog($"Updating Flow Runners for '{node.Name}': {node.FlowRunners}");
-            existing.Priority = node.Priority;
-            existing.PreExecuteScript = node.PreExecuteScript;
-            existing.Schedule = node.Schedule?.EmptyAsNull()  ?? existing.Schedule;
-            existing.Mappings = node.Mappings ?? new();
-            existing.AllLibraries = node.AllLibraries;
-            existing.Libraries = node.Libraries;
-            existing.MaxFileSizeMb = node.MaxFileSizeMb;
-            existing.DontChangeOwner = node.DontChangeOwner;
-            existing.DontSetPermissions = node.DontSetPermissions;
-            existing.Permissions = node.Permissions;
-            service.Update(existing);
+            service.Update(node);
             CheckLicensedNodes(existing.Uid, existing.Enabled);
             return Ok(existing);
         }
