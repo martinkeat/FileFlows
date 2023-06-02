@@ -27,6 +27,12 @@
 
         [Parameter]
         public Expression<Func<bool>> ValueExpression { get; set; }
+        
+        /// <summary>
+        /// Gets or sets if this control is read-only
+        /// </summary>
+        [Parameter]
+        public bool ReadOnly { get;set; }
 
         private void OnChange(ChangeEventArgs args)
         {
