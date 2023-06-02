@@ -15,8 +15,38 @@ public class NodeService : CachedService<ProcessingNode>, INodeService
 
     static NodeService()
     {
-        if(Globals.IsUnitTesting == false)
-            new NodeService().Refresh();
+        if (Globals.IsUnitTesting)
+            return;
+        _Data = DbHelper.Select<ProcessingNode>().Result.ToList();
+        
+        var internalNode = _Data.FirstOrDefault(x => x.Uid == Globals.InternalNodeUid);
+        if (internalNode != null)
+        {
+            bool update = false;
+            if (internalNode.Version != Globals.Version.ToString())
+            {
+                internalNode.Version = Globals.Version.ToString();
+                update = true;
+            }
+
+            if (internalNode.OperatingSystem == OperatingSystemType.Unknown)
+            {
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                    internalNode.OperatingSystem = OperatingSystemType.Windows;
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                    internalNode.OperatingSystem = OperatingSystemType.Mac;
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                    internalNode.OperatingSystem = OperatingSystemType.Linux;
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.FreeBSD))
+                    internalNode.OperatingSystem = OperatingSystemType.Linux;
+
+                if (internalNode.OperatingSystem != OperatingSystemType.Unknown)
+                    update = true;
+            }
+
+            if (update)
+                DbHelper.Update(internalNode);
+        }
     }
 
 
@@ -134,16 +164,15 @@ public class NodeService : CachedService<ProcessingNode>, INodeService
     {
         if (string.IsNullOrEmpty(address) || string.IsNullOrEmpty(path))
             return;
-        lock (Data)
-        {
-            var node = Data.FirstOrDefault(x => string.Equals(x.Address, address, StringComparison.InvariantCultureIgnoreCase));
-            if (node == null)
-                return;
-            if (node.TempPath == path)
-                return;
-            node.TempPath = path;
-            DbHelper.UpdateJsonProperty(node.Uid, nameof(node.TempPath), path).Wait();
-        }
+        var node = Data.FirstOrDefault(x =>
+            string.Equals(x.Address, address, StringComparison.InvariantCultureIgnoreCase));
+        if (node == null)
+            return;
+        if (node.TempPath == path)
+            return;
+        node.TempPath = path;
+        Update(node);
+        // DbHelper.UpdateJsonProperty(node.Uid, nameof(node.TempPath), path).Wait();
     }
 
     /// <summary>
@@ -153,14 +182,12 @@ public class NodeService : CachedService<ProcessingNode>, INodeService
     /// <param name="enable">Whether or not this node is enabled and will process files</param>
     public void SetState(Guid uid, bool enable)
     {
-        lock (Data)
-        {
-            var node = Data.FirstOrDefault(x => x.Uid== uid && x.Enabled != enable);
-            if (node == null)
-                return;
-            node.Enabled = enable;
-            DbHelper.UpdateJsonProperty(node.Uid, nameof(node.Enabled), enable).Wait();
-        }
+        var node = Data.FirstOrDefault(x => x.Uid == uid && x.Enabled != enable);
+        if (node == null)
+            return;
+        node.Enabled = enable;
+        //DbHelper.UpdateJsonProperty(node.Uid, nameof(node.Enabled), enable).Wait();
+        Update(node);
     }
 
     /// <summary>

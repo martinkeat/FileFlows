@@ -13,7 +13,8 @@ public abstract class CachedService<T> where T : FileFlowObject, new()
     /// </summary>
     public virtual bool IncrementsConfiguration => true;
 
-    private static List<T> _Data;
+    private SemaphoreSlim GetDataSemaphore = new(1);
+    protected static List<T> _Data;
     /// <summary>
     /// Gets or sets the data
     /// </summary>
@@ -21,9 +22,17 @@ public abstract class CachedService<T> where T : FileFlowObject, new()
     {
         get
         {
-            if(_Data == null)
-                Refresh();
-            return _Data;
+            GetDataSemaphore.Wait();
+            try
+            {
+                if (_Data == null)
+                    Refresh();
+                return _Data;
+            }
+            finally
+            {
+                GetDataSemaphore.Release();
+            }
         }
         set => _Data = value;
     }

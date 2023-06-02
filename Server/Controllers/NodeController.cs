@@ -25,38 +25,14 @@ public class NodeController : Controller
             .OrderBy(x => x.Address == Globals.InternalNodeName ? 0 : 1)
             .ThenBy(x => x.Name)
             .ToList();
-        var internalNode = nodes.FirstOrDefault(x => x.Uid == Globals.InternalNodeUid);
-        if(internalNode != null)
-        {
-            bool update = false;
-            if (internalNode.Version != Globals.Version.ToString())
-            {
-                internalNode.Version = Globals.Version.ToString();
-                update = true;
-            }
-
-            if (internalNode.OperatingSystem == OperatingSystemType.Unknown)
-            {
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                    internalNode.OperatingSystem = OperatingSystemType.Windows;
-                else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-                    internalNode.OperatingSystem = OperatingSystemType.Mac;
-                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-                    internalNode.OperatingSystem = OperatingSystemType.Linux;
-                else if (RuntimeInformation.IsOSPlatform(OSPlatform.FreeBSD))
-                    internalNode.OperatingSystem = OperatingSystemType.Linux;
-
-                if (internalNode.OperatingSystem != OperatingSystemType.Unknown)
-                    update = true;
-            }
-            if(update)
-                service.Update(internalNode);
-        }
+        
 #if (DEBUG)
+        var internalNode = nodes.FirstOrDefault(x => x.Uid == Globals.InternalNodeUid);
         // set this to linux so we can test the full UI
         if (internalNode != null)
             internalNode.OperatingSystem = OperatingSystemType.Linux;
 #endif
+        
         return nodes.OrderBy(x => x.Name.ToLowerInvariant());
     }
 
