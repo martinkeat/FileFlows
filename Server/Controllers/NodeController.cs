@@ -108,15 +108,13 @@ public class NodeController : Controller
         }
         else
         {
-            Logger.Instance.ILog("Exiting Node update before saving");
-            return Ok(node);
             Logger.Instance.ILog("Updating external processing node: " + node.Name);
             var existing = service.GetByUid(node.Uid);
             if (existing == null)
                 return BadRequest("Node not found");
-            service.Update(node);
+            //service.Update(node);
             Logger.Instance.ILog("Updated external processing node: " + node.Name);
-            // CheckLicensedNodes(node.Uid, node.Enabled);
+            CheckLicensedNodes(node.Uid, node.Enabled);
             return Ok(existing);
         }
     }
