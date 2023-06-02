@@ -58,7 +58,6 @@ public class NodeController : Controller
         if(node.Libraries?.Any() == true)
         {
             // remove any removed libraries and update any names
-            // TODO: update LibraryController to use LibraryService
             var libraries = new LibraryService().GetAll().ToDictionary(x => x.Uid, x => x.Name);
             node.Libraries = node.Libraries.Where(x => libraries.ContainsKey(x.Uid)).Select(x => new Plugin.ObjectReference
             {
@@ -70,6 +69,7 @@ public class NodeController : Controller
 
         if(node.Uid == Globals.InternalNodeUid)
         {
+            Logger.Instance.ILog("Updating internal processing node");
             var internalNode = GetAll().FirstOrDefault(x => x.Uid == Globals.InternalNodeUid);
             if(internalNode != null)
             {
@@ -96,6 +96,7 @@ public class NodeController : Controller
             }
             
             // internal but doesnt exist
+            Logger.Instance.ILog("Internal processing node does not exist, creating.");
             node.Address = Globals.InternalNodeName;
             node.Name = Globals.InternalNodeName;
             node.AllLibraries = ProcessingLibraries.All;
@@ -106,11 +107,13 @@ public class NodeController : Controller
         }
         else
         {
+            Logger.Instance.ILog("Updating external processing node: " + node.Name);
             var existing = service.GetByUid(node.Uid);
             if (existing == null)
                 return BadRequest("Node not found");
             service.Update(node);
-            CheckLicensedNodes(existing.Uid, existing.Enabled);
+            Logger.Instance.ILog("Updated external processing node: " + node.Name);
+            //CheckLicensedNodes(existing.Uid, existing.Enabled);
             return Ok(existing);
         }
     }
