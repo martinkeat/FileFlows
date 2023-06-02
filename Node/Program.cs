@@ -152,8 +152,13 @@ public class Program
 
                 Shared.Logger.Instance?.ILog("Registering FileFlow Node");
 
-                if (Manager.Register().Result == false)
+                var registerResult = Manager.Register().Result;
+                if (registerResult.Success == false)
+                {
+                    Logger.Instance?.WLog("Register failed: " + registerResult.Message);
                     return;
+                }
+
 
                 Shared.Logger.Instance?.ILog("FileFlows node starting");
                 

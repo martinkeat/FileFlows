@@ -191,9 +191,22 @@ public class MainWindow : Window
     /// </summary>
     public async Task SaveRegister()
     {
-        if(Program.Manager != null && await Program.Manager.Register() == true)
-        {
-        }
+        if (Program.Manager == null)
+            return;
+        var result = await Program.Manager.Register();
+        if (result.Success == false)
+            ShowMessage("Register Failed", result.Message);
+    }
+    
+    /// <summary>
+    /// Shows a message box message
+    /// </summary>
+    /// <param name="title">the title of the message</param>
+    /// <param name="message">the text of the message</param>
+    void ShowMessage(string title, string message)
+    {
+        var window = new MessageBox(message, title);
+        window.Show();
     }
 
     /// <summary>

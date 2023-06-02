@@ -16,7 +16,6 @@ using FileFlows.ServerShared.Workers;
 
 namespace FileFlows.Node;
 
-
 /// <summary>
 /// A manager that handles registering a node with the FileFlows server
 /// </summary>
@@ -128,7 +127,7 @@ public class NodeManager
     /// Registers the node with the server
     /// </summary>
     /// <returns>whether or not it was registered</returns>
-    public async Task<bool> Register()
+    public async Task<(bool Success, string Message)> Register()
     {
         string path = DirectoryHelper.BaseDirectory;
 
@@ -158,6 +157,9 @@ public class NodeManager
         string tempPath =  AppSettings.ForcedTempPath?.EmptyAsNull() ?? (Globals.IsDocker ? "/temp" : Path.Combine(DirectoryHelper.BaseDirectory, "Temp"));
 
         var settings = AppSettings.Instance;
+        if (string.IsNullOrEmpty(settings.ServerUrl))
+            return (false, "Server URL not set");
+        
         var nodeService = new NodeService();
         Shared.Models.ProcessingNode result;
         try
@@ -166,14 +168,14 @@ public class NodeManager
             if (result == null)
             {
                 this.Registered = false;
-                return false;
+                return (false, "Failed to register");
             }
         }
         catch (Exception ex)
         {
             Logger.Instance?.ELog("Failed to register with server: " + ex.Message);
             this.Registered = false;
-            return false;
+            return (false, ex.Message);
         }
 
         Service.ServiceBaseUrl = settings.ServerUrl;
@@ -185,6 +187,6 @@ public class NodeManager
         //settings.Runners = result.FlowRunners;
         settings.Save();
         this.Registered = true;
-        return true;
+        return (true, string.Empty);
     }
 }
