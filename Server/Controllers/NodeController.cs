@@ -66,6 +66,7 @@ public class NodeController : Controller
                 Type = typeof(Library).FullName
             }).DistinctBy(x => x.Uid).ToList();
         }
+        
 
         if(node.Uid == Globals.InternalNodeUid)
         {
@@ -107,13 +108,15 @@ public class NodeController : Controller
         }
         else
         {
+            Logger.Instance.ILog("Exiting Node update before saving");
+            return Ok(node);
             Logger.Instance.ILog("Updating external processing node: " + node.Name);
             var existing = service.GetByUid(node.Uid);
             if (existing == null)
                 return BadRequest("Node not found");
             service.Update(node);
             Logger.Instance.ILog("Updated external processing node: " + node.Name);
-            //CheckLicensedNodes(existing.Uid, existing.Enabled);
+            // CheckLicensedNodes(node.Uid, node.Enabled);
             return Ok(existing);
         }
     }
@@ -244,15 +247,20 @@ public class NodeController : Controller
         int current = 0;
         foreach (var node in nodes.OrderBy(x => x.Uid == nodeUid ? 1 : 2).ThenBy(x => x.Name))
         {
-            if (node.Uid == nodeUid)
+            if (node.Uid == nodeUid && enabled != node.Enabled)
+            {
+                Logger.Instance.ILog($"Changing processing node '{node.Name}' state from '{node.Enabled}' to '{enabled}'");
                 node.Enabled = enabled;
-            
+                service.Update(node);
+            }
+
             if (node.Enabled)
             {
                 if (current >= licensedNodes)
                 {
                     node.Enabled = false;
                     service.SetState(node.Uid, false);
+                    Logger.Instance.ILog($"Disabled processing node '{node.Name}' due to license restriction");
                 }
                 else
                 {
