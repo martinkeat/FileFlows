@@ -90,8 +90,8 @@ public class NodeController : Controller
                     internalNode.PreExecuteScript = node.PreExecuteScript;
                 
                 internalNode.Libraries = node.Libraries;
+                service.Update(internalNode);
                 CheckLicensedNodes(internalNode.Uid, internalNode.Enabled);
-                //var processingNode = await Update(internalNode, checkDuplicateName: true, useCache:true);
                 
                 return Ok(internalNode);
             }
@@ -112,7 +112,7 @@ public class NodeController : Controller
             var existing = service.GetByUid(node.Uid);
             if (existing == null)
                 return BadRequest("Node not found");
-            //service.Update(node);
+            service.Update(node);
             Logger.Instance.ILog("Updated external processing node: " + node.Name);
             CheckLicensedNodes(node.Uid, node.Enabled);
             return Ok(existing);
