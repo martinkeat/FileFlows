@@ -200,8 +200,6 @@ public class NodeService : Service, INodeService
     /// <param name="serverUrl">The URL of the FileFlows Server</param>
     /// <param name="address">The address (Hostname or IP Address) of the node</param>
     /// <param name="tempPath">The temporary path location of the node</param>
-    /// <param name="runners">The amount of flow runners this node can execute</param>
-    /// <param name="enabled">If this node is enabled or not</param>
     /// <param name="mappings">Any mappings for the node</param>
     /// <returns>An instance of the registered node</returns>
     /// <exception cref="Exception">If fails to register, an exception will be thrown</exception>

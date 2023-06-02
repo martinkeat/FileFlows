@@ -155,7 +155,7 @@ public class FlowWorker : Worker
         }
 
 
-        string tempPath = node?.TempPath ?? string.Empty;
+        string tempPath = node?.TempPath?.EmptyAsNull() ?? AppSettings.ForcedTempPath?.EmptyAsNull() ?? string.Empty;
         if (string.IsNullOrEmpty(tempPath))
         {
             Logger.Instance?.ELog($"Temp Path not set on node '{nodeName}', cannot process");

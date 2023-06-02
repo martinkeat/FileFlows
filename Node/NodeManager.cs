@@ -155,7 +155,7 @@ public class NodeManager
         // if (AppSettings.EnvironmentalEnabled != null)
         //     AppSettings.Instance.Enabled = AppSettings.EnvironmentalEnabled.Value;
 
-        string tempPath =  Globals.IsDocker ? "/temp" : Path.Combine(DirectoryHelper.BaseDirectory, "Temp");
+        string tempPath =  AppSettings.ForcedTempPath?.EmptyAsNull() ?? (Globals.IsDocker ? "/temp" : Path.Combine(DirectoryHelper.BaseDirectory, "Temp"));
 
         var settings = AppSettings.Instance;
         var nodeService = new NodeService();
@@ -171,7 +171,7 @@ public class NodeManager
         }
         catch (Exception ex)
         {
-            Shared.Logger.Instance?.ELog("Failed to register with server: " + ex.Message);
+            Logger.Instance?.ELog("Failed to register with server: " + ex.Message);
             this.Registered = false;
             return false;
         }
@@ -180,7 +180,7 @@ public class NodeManager
         if (Service.ServiceBaseUrl.EndsWith("/"))
             Service.ServiceBaseUrl = Service.ServiceBaseUrl.Substring(0, Service.ServiceBaseUrl.Length - 1);
 
-        Shared.Logger.Instance?.ILog("Successfully registered node");
+        Logger.Instance?.ILog("Successfully registered node");
         //settings.Enabled = result.Enabled;
         //settings.Runners = result.FlowRunners;
         settings.Save();
