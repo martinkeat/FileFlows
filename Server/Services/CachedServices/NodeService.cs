@@ -132,30 +132,6 @@ public class NodeService : CachedService<ProcessingNode>, INodeService
     }
 
     /// <summary>
-    /// Updates the version of a Node
-    /// </summary>
-    /// <param name="uid">the unique identifier for the node</param>
-    /// <param name="version">the new version</param>
-    public void UpdateVersion(Guid uid, string version)
-    {
-        lock (Data)
-        {
-            var node = Data.FirstOrDefault(x => x.Uid== uid && x.Version != version);
-            if (node == null)
-                return;
-            
-            if(Version.TryParse(node.Version ?? "0.0.0.0", out Version? vOld) == false)
-                vOld = new Version();
-            if(Version.TryParse(version ?? "0.0.0.0", out Version? vNew) == false)
-                vNew = new Version();
-            if (vOld == vNew)
-                return; // nothing to do
-            node.Version = version;
-            DbHelper.UpdateJsonProperty(node.Uid, nameof(node.Version), version).Wait();
-        }
-    }
-
-    /// <summary>
     /// Changes the temp path of a node
     /// </summary>
     /// <param name="address">the nodes address</param>
@@ -172,23 +148,8 @@ public class NodeService : CachedService<ProcessingNode>, INodeService
             return;
         node.TempPath = path;
         Update(node);
-        // DbHelper.UpdateJsonProperty(node.Uid, nameof(node.TempPath), path).Wait();
     }
 
-    /// <summary>
-    /// Set state of a processing node
-    /// </summary>
-    /// <param name="uid">The UID of the processing node</param>
-    /// <param name="enable">Whether or not this node is enabled and will process files</param>
-    public void SetState(Guid uid, bool enable)
-    {
-        var node = Data.FirstOrDefault(x => x.Uid == uid && x.Enabled != enable);
-        if (node == null)
-            return;
-        node.Enabled = enable;
-        //DbHelper.UpdateJsonProperty(node.Uid, nameof(node.Enabled), enable).Wait();
-        Update(node);
-    }
 
     /// <summary>
     /// Updates an item
@@ -205,6 +166,7 @@ public class NodeService : CachedService<ProcessingNode>, INodeService
 
     private void CopyInto(ProcessingNode source, ProcessingNode destination)
     {
+        Logger.Instance.WLog("Having to copy data into Processing Node for: " + source.Name + " , dest: " + destination.Name);
         destination.Name = source.Name?.EmptyAsNull() ?? destination.Name;
         destination.Address = source.Address?.EmptyAsNull() ?? destination.Address;
         destination.TempPath = source.TempPath?.EmptyAsNull() ?? destination.TempPath;
@@ -221,4 +183,12 @@ public class NodeService : CachedService<ProcessingNode>, INodeService
         destination.DontSetPermissions = source.DontSetPermissions;
         destination.Permissions = source.Permissions;
     }
+
+    /// <summary>
+    /// Updates the last seen date for a node
+    /// </summary>
+    /// <param name="node">the node being updated</param>
+    /// <returns>a task to await</returns>
+    public Task UpdateLastSeen(ProcessingNode node)
+        => DbHelper.UpdateNodeLastSeen(node.Uid);
 }

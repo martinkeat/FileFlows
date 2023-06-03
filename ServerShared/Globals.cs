@@ -16,19 +16,19 @@ public class Globals
     /// The minimum supported node version
     /// </summary>
     public static readonly Version MinimumNodeVersion = new Version(Version);
-    
+
     public static bool IsDevelopment { get; set; }
 
     /// <summary>
     /// Gets if this is running on Windows
     /// </summary>
     public static bool IsWindows => RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
-    
+
     /// <summary>
     /// Gets if this is running on linux
     /// </summary>
-    public static bool IsLinux => RuntimeInformation.IsOSPlatform(OSPlatform.Linux); 
-    
+    public static bool IsLinux => RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
+
     /// <summary>
     /// Gets if this is running on Mac
     /// </summary>
@@ -50,15 +50,15 @@ public class Globals
     /// Gets or sets if this node is running as a systemd service
     /// </summary>
     public static bool IsSystemd { get; set; }
-    
+
     /// <summary>
     /// Gets or sets if unit testing
     /// </summary>
-    #if(DEBUG)
+#if(DEBUG)
     public static bool IsUnitTesting { get; set; }
-    #else
+#else
     public static bool IsUnitTesting => false;
-    #endif
+#endif
 
 
 
@@ -66,7 +66,7 @@ public class Globals
     /// The name of the internal processing node
     /// </summary>
     public const string InternalNodeName = "FileFlowsServer";
-    
+
     /// <summary>
     /// The UID of the internal processing node
     /// </summary>
@@ -76,20 +76,16 @@ public class Globals
     public const string FlowFailName = "Fail Flow";
     private const string FailFlowUidStr = "fabbe59c-9d4d-4b6d-b1ef-4ed6585ac7cc";
     public static readonly Guid FailFlowUid = new Guid(FailFlowUidStr);
-    public const string FailFlowDescription = "A system flow that will execute when another flow reports a failure, -1 from a node.";
+
+    public const string FailFlowDescription =
+        "A system flow that will execute when another flow reports a failure, -1 from a node.";
 
     public const string FlowFailureInputUid = "FileFlows.BasicNodes.FlowFailure";
 
     /// <summary>
     /// The URL for fileflows.com
     /// </summary>
-    #if(DEBUG)
-    public static readonly string FileFlowsDotComUrl =
-        (Environment.GetEnvironmentVariable("FFURL")?.EmptyAsNull() ?? "https://localhost:7197")
-        .TrimEnd('/');
-    #else 
     public static readonly string FileFlowsDotComUrl =
         (Environment.GetEnvironmentVariable("FFURL")?.EmptyAsNull() ?? "https://fileflows.com")
         .TrimEnd('/');
-    #endif
 }

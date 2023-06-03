@@ -260,7 +260,8 @@ public class DbHelper
     /// Updates the last seen of a node
     /// </summary>
     /// <param name="uid">the UID of the node</param>
-    public static Task UpdateNodeLastSeen(Guid uid) => Manager.UpdateNodeLastSeen(uid);
+    public static Task UpdateNodeLastSeen(Guid uid) 
+        => Manager.UpdateNodeLastSeen(uid);
     
 
     /// <summary>

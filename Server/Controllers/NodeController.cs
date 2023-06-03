@@ -150,7 +150,7 @@ public class NodeController : Controller
         if (enable != null && node.Enabled != enable.Value)
         {
             node.Enabled = enable.Value;
-            service.SetState(uid, enable.Value);
+            service.Update(node);
         }
         CheckLicensedNodes(uid, enable == true);
         return Ok(node);
@@ -176,7 +176,7 @@ public class NodeController : Controller
         if (string.IsNullOrEmpty(version) == false && node.Version != version)
         {
             node.Version = version;
-            service.UpdateVersion(node.Uid, version);
+            service.Update(node);
         }
         else
         {
@@ -257,7 +257,7 @@ public class NodeController : Controller
                 if (current >= licensedNodes)
                 {
                     node.Enabled = false;
-                    service.SetState(node.Uid, false);
+                    service.Update(node);
                     Logger.Instance.ILog($"Disabled processing node '{node.Name}' due to license restriction");
                 }
                 else
@@ -294,7 +294,8 @@ public class NodeController : Controller
                 //existing.Enabled = model.Enabled;
                 //existing.TempPath = model.TempPath;
                 //existing.OperatingSystem = model.OperatingSystem;
-                service.UpdateVersion(existing.Uid, model.Version);
+                existing.Version = model.Version;
+                service.Update(existing);
             }
             existing.SignalrUrl = "flow";
             return existing;
@@ -361,7 +362,7 @@ public class NodeController : Controller
         if (node == null)
             return;
         node.LastSeen = DateTime.Now;
-        await DbHelper.UpdateNodeLastSeen(uid);
+        await service.UpdateLastSeen(node);
     }
 }
 
