@@ -123,7 +123,7 @@ public class ScriptService:IScriptService
             type == ScriptType.Template ? DirectoryHelper.ScriptsDirectoryFunction :
             type == ScriptType.Webhook ? DirectoryHelper.ScriptsDirectoryWebhook : 
             DirectoryHelper.ScriptsDirectorySystem;
-        if(Directory.Exists(dir))
+        if(Directory.Exists(dir) == false)
            return scripts;
         try
         {
