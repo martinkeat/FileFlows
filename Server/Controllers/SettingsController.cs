@@ -303,13 +303,24 @@ public class SettingsController : Controller
         cfg.MaxNodes = LicenseHelper.IsLicensed() ? 250 : 30;
         var pluginInfos = (await new PluginController().GetAll())
             .Where(x => x.Enabled)
-            .Select(x => x.PackageName + ".ffplugin")
-            .ToArray();
+            .ToDictionary(x => x.PackageName + ".ffplugin", x => x);
         var plugins = new Dictionary<string, byte[]>();
+        List<string> flowElementsInUse = cfg.Flows.SelectMany(x => x.Parts.Select(x => x.FlowElementUid)).ToList();
+        
         foreach (var file in new DirectoryInfo(DirectoryHelper.PluginsDirectory).GetFiles("*.ffplugin"))
         {
-            if(pluginInfos.Contains(file.Name)) // only include enabled plugins
-                plugins.Add(file.Name, System.IO.File.ReadAllBytes(file.FullName));
+            if (pluginInfos.ContainsKey(file.Name) == false) 
+                continue;// not enabled, skipped
+            var pluginInfo = pluginInfos[file.Name];
+            
+            var inUse = pluginInfo.Elements.Any(x => flowElementsInUse.Contains(x.Uid));
+            if (inUse == false)
+            {
+                Logger.Instance.ILog($"Plugin '{pluginInfo.Name}' not in use by any flow, skipping");
+                continue; // plugin not used, skipping
+            }
+
+            plugins.Add(file.Name, System.IO.File.ReadAllBytes(file.FullName));
         }
 
         cfg.Plugins = plugins;
