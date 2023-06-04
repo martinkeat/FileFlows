@@ -35,6 +35,91 @@ window.ffCode = {
         );
 
         monaco.editor.createModel(
+            `const CacheStore = {
+        /**
+         * Clears the cache store.
+         */
+        Clear: function() {
+            // Implementation
+        },
+        
+        /**
+         * Gets an object from the cache store.
+         * @param {string} key - The name of the object to get.
+         * @returns {object} - The value of the object.
+         */
+        Get: function(key) {
+            // Implementation
+        },
+        
+        /**
+         * Gets an integer from the cache store.
+         * @param {string} key - The name of the object to get.
+         * @returns {number} - The value of the integer.
+         */
+        GetInt: function(key) {
+            // Implementation
+        },
+        
+        /**
+         * Gets a boolean from the cache store.
+         * @param {string} key - The name of the object to get.
+         * @returns {boolean} - The value of the boolean.
+         */
+        GetBool: function(key) {
+            // Implementation
+        },
+        
+        /**
+         * Gets a string from the cache store.
+         * @param {string} key - The name of the object to get.
+         * @returns {string} - The value of the string.
+         */
+        GetString: function(key) {
+            // Implementation
+        },
+        
+        /**
+         * Sets an object in the cache store.
+         * @param {string} key - The name of the object to set.
+         * @param {object} value - The value of the object.
+         */
+        Set: function(key, value) {
+            // Implementation
+        },
+        
+        /**
+         * Sets an integer in the cache store.
+         * @param {string} key - The name of the object to set.
+         * @param {number} value - The value of the integer.
+         */
+        SetInt: function(key, value) {
+            // Implementation
+        },
+        
+        /**
+         * Sets a string in the cache store.
+         * @param {string} key - The name of the object to set.
+         * @param {string} value - The value of the string.
+         */
+        SetString: function(key, value) {
+            // Implementation
+        },
+        
+        /**
+         * Sets a boolean in the cache store.
+         * @param {string} key - The name of the object to set.
+         * @param {boolean} value - The value of the boolean.
+         */
+        SetBool: function(key, value) {
+            // Implementation
+        }
+    }`,
+            "javascript"
+        );
+
+
+        monaco.editor.createModel(
             "const Flow = { " +
             "CreateDirectoryIfNotExists: function (path:string)," +
             "GetDirectorySize: function (path: string):number, " +

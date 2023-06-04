@@ -154,6 +154,7 @@ public class Executor
             .SetValue("Variables", Variables)
             .SetValue("Sleep", (int milliseconds) => Thread.Sleep(milliseconds))
             .SetValue("http", HttpClient)
+            .SetValue("CacheStore", CacheStore.Instance)
             .SetValue("StringContent", (string content) => new System.Net.Http.StringContent(content))
             .SetValue("JsonContent", (object content) =>
             {
@@ -214,6 +215,8 @@ public class Executor
         {
             if (ex.Message == "true")
                 return true;
+            if (ex.Message == "undefined")
+                return null;
             if (int.TryParse(ex.Message, out int code))
                 return code;
             if (DontLogCode == false)
