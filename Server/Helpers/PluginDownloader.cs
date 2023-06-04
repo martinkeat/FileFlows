@@ -38,11 +38,11 @@ public class PluginDownloader
                 var dlResult = HttpHelper.Get<byte[]>(url).Result;
                 if (dlResult.Success)
                     return (true, dlResult.Data);
-                throw new Exception(dlResult.Body);
+                throw new Exception(dlResult.Body?.EmptyAsNull() ?? "Unexpected error");
             }
             catch (Exception ex)
             {
-                Logger.Instance.WLog("Failed downloading plugin: " + ex.Message);
+                Logger.Instance.WLog($"Failed downloading plugin '{packageName}': " + ex.Message);
             }
         }
         return (false, new byte[0]);
