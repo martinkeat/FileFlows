@@ -264,6 +264,8 @@ public class PluginScanner
     /// <returns>true if successful</returns>
     internal static bool UpdatePlugin(string packageName, byte[] data)
     {
+        if (string.IsNullOrEmpty(packageName))
+            throw new InvalidDataException("PackageName is required");
         try
         {
             string dest = Path.Combine(GetPluginDirectory(), packageName);

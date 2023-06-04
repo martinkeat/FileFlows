@@ -57,7 +57,7 @@ public class PluginUpdaterWorker : Worker
                     Logger.Instance.WLog($"Failed to download package '{plugin.PackageName}' update");
                     continue;
                 }
-                Helpers.PluginScanner.UpdatePlugin(package.Package, dlResult.Data);
+                PluginScanner.UpdatePlugin(package.Package, dlResult.Data);
             }
             catch(Exception ex)
             {

@@ -162,7 +162,7 @@ public class PluginController : Controller
             // remove plugins already installed
             var installed = new Services.PluginService().GetAll()
                 .Where(x => x.Deleted != true).Select(x => x.PackageName).ToList();
-            return data.Where(x => installed.Contains(x.Package) == false);
+            data = data.Where(x => installed.Contains(x.Package) == false).ToList();
         }
 
         return data.OrderBy(x => x.Name);
@@ -191,6 +191,11 @@ public class PluginController : Controller
             if (ppi == null)
             {
                 Logger.Instance.WLog("PluginUpdate: No plugin info found for plugin: " + plugin.Name);
+                continue;
+            }
+            if(string.IsNullOrEmpty(ppi.Package))
+            {
+                Logger.Instance.WLog("PluginUpdate: No plugin info did not contain Package name for plugin: " + plugin.Name);
                 continue;
             }
 
