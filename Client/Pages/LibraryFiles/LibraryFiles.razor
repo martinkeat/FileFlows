@@ -60,7 +60,7 @@
                 @Globals.lblName
             </Header>
             <Cell Context="item">
-                <span>@item.RelativePath</span>
+                <span title="@item.Name">@item.RelativePath</span>
             </Cell>
         </FlowTableColumn>
         <FlowTableColumn TItem="LibaryFileListModel" Hidden="(SelectedStatus != FileStatus.Duplicate)" Pre="true">
