@@ -115,10 +115,7 @@ public class DashboardController : Controller
     /// <returns>The saved dashboard</returns>
     [HttpPut]
     public Dashboard Save([FromBody] Dashboard model)
-    {
-        new DashboardService().Update(model);
-        return model;
-    }
+        => new DashboardService().Update(model);
 
     /// <summary>
     /// Saves a dashboard
@@ -134,7 +131,6 @@ public class DashboardController : Controller
         if (dashboard == null)
             throw new Exception("Dashboard not found");
         dashboard.Widgets = widgets ?? new List<Widget>();
-        service.Update(dashboard);
-        return dashboard;
+        return service.Update(dashboard);
     }
 }

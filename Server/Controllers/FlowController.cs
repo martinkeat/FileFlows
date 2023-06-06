@@ -208,8 +208,7 @@ public class FlowController : Controller
         flow.DateModified = DateTime.Now;
         flow.DateCreated = DateTime.Now;
         flow.Name = service.GetNewUniqueName(flow.Name);
-        service.Update(flow);
-        return flow;
+        return service.Update(flow);
     }
 
 
@@ -281,7 +280,7 @@ public class FlowController : Controller
         if (enable != null)
         {
             flow.Enabled = enable.Value;
-            service.Update(flow);
+            flow = service.Update(flow);
         }
 
         return flow;
@@ -573,7 +572,7 @@ public class FlowController : Controller
             nameChanged = existing != null && existing.Name != model.Name;
         }
 
-        service.Update(model);
+        model = service.Update(model);
         if(nameChanged)
             _ = new ObjectReferenceUpdater().RunAsync();
 
@@ -600,7 +599,7 @@ public class FlowController : Controller
             return; // name already is the requested name
 
         flow.Name = name;
-        service.Update(flow);
+        flow = service.Update(flow);
 
         // update any object references
         await new LibraryFileService().UpdateFlowName(flow.Uid, flow.Name);

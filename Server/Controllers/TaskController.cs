@@ -43,10 +43,7 @@ public class TaskController : Controller
     /// <returns>The saved instance</returns>
     [HttpPost]
     public FileFlowsTask Save([FromBody] FileFlowsTask fileFlowsTask)
-    {
-        new TaskService().Update(fileFlowsTask);
-        return fileFlowsTask;
-    }
+        => new TaskService().Update(fileFlowsTask);
 
     /// <summary>
     /// Delete scheduled tasks from the system

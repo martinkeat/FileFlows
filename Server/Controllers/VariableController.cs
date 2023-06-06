@@ -44,10 +44,7 @@ public class VariableController : Controller
     /// <returns>The saved instance</returns>
     [HttpPost]
     public Variable Save([FromBody] Variable variable)
-    {
-        new VariableService().Update(variable);
-        return variable;
-    }
+     => new VariableService().Update(variable);
 
     /// <summary>
     /// Delete variables from the system

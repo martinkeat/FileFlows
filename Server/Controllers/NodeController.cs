@@ -90,7 +90,7 @@ public class NodeController : Controller
                     internalNode.PreExecuteScript = node.PreExecuteScript;
                 
                 internalNode.Libraries = node.Libraries;
-                service.Update(internalNode);
+                internalNode = service.Update(internalNode);
                 CheckLicensedNodes(internalNode.Uid, internalNode.Enabled);
                 
                 return Ok(internalNode);
@@ -102,7 +102,7 @@ public class NodeController : Controller
             node.Name = Globals.InternalNodeName;
             node.AllLibraries = ProcessingLibraries.All;
             node.Mappings = null; // no mappings for internal
-            service.Update(node);
+            node = service.Update(node);
             CheckLicensedNodes(node.Uid, node.Enabled);
             return Ok(node);
         }
@@ -112,10 +112,10 @@ public class NodeController : Controller
             var existing = service.GetByUid(node.Uid);
             if (existing == null)
                 return BadRequest("Node not found");
-            service.Update(node);
+            node = service.Update(node);
             Logger.Instance.ILog("Updated external processing node: " + node.Name);
             CheckLicensedNodes(node.Uid, node.Enabled);
-            return Ok(existing);
+            return Ok(node);
         }
     }
 
@@ -150,7 +150,7 @@ public class NodeController : Controller
         if (enable != null && node.Enabled != enable.Value)
         {
             node.Enabled = enable.Value;
-            service.Update(node);
+            node = service.Update(node);
         }
         CheckLicensedNodes(uid, enable == true);
         return Ok(node);
@@ -176,7 +176,7 @@ public class NodeController : Controller
         if (string.IsNullOrEmpty(version) == false && node.Version != version)
         {
             node.Version = version;
-            service.Update(node);
+            node = service.Update(node);
         }
         else
         {
@@ -226,7 +226,7 @@ public class NodeController : Controller
                     KeyValuePair<string, string>(x.Value, string.Empty)
                 ).ToList()
         };
-        service.Update(node);
+        node = service.Update(node);
         node.SignalrUrl = "flow";
         CheckLicensedNodes(Guid.Empty, false);
         return node;
@@ -295,7 +295,7 @@ public class NodeController : Controller
                 //existing.TempPath = model.TempPath;
                 //existing.OperatingSystem = model.OperatingSystem;
                 existing.Version = model.Version;
-                service.Update(existing);
+                existing = service.Update(existing);
             }
             existing.SignalrUrl = "flow";
             return existing;
@@ -335,7 +335,7 @@ public class NodeController : Controller
                            KeyValuePair<string, string>(x.Value, "")
                        )?.ToList() ?? new()
         };
-        service.Update(node);
+        node = service.Update(node);
         node.SignalrUrl = "flow";
         return node;
     }

@@ -73,7 +73,7 @@ public class LibraryController : Controller
         }
         
         bool newLib = library.Uid == Guid.Empty;
-        service.Update(library);
+        library = service.Update(library);
 
         _ = Task.Run(async () =>
         {
@@ -115,7 +115,7 @@ public class LibraryController : Controller
         if (library.Enabled != enable)
         {
             library.Enabled = enable;
-            service.Update(library);
+            library = service.Update(library);
         }
         return library;
     }

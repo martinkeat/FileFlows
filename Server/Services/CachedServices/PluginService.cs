@@ -29,10 +29,7 @@ public class PluginService : CachedService<PluginInfo>, IPluginService
     /// <param name="pluginInfo">the plugin info</param>
     /// <returns>the updated plugininfo</returns>
     public Task<PluginInfo> Update(PluginInfo pluginInfo)
-    {
-        Update(pluginInfo, false);
-        return Task.FromResult(pluginInfo);
-    }
+        => Task.FromResult<PluginInfo>(Update(pluginInfo, false));
 
     /// <summary>
     /// Download a plugin

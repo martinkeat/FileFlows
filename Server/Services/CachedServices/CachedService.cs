@@ -94,22 +94,24 @@ public abstract class CachedService<T> where T : FileFlowObject, new()
     /// </summary>
     /// <param name="item">the item being updated</param>
     /// <param name="dontIncrementConfigRevision">if this is a revision object, if the revision should be updated</param>
-    public virtual void Update(T item, bool dontIncrementConfigRevision = false)
+    public virtual T Update(T item, bool dontIncrementConfigRevision = false)
     {
         if (item == null)
             throw new Exception("No model");
-        
+
         if (string.IsNullOrWhiteSpace(item.Name))
             throw new Exception("ErrorMessages.NameRequired");
-        
+
         var existingName = GetByName(item.Name);
         if (existingName != null && existingName.Uid != item.Uid)
             throw new Exception("ErrorMessages.NameInUse");
-        
+
         UpdateActual(item, dontIncrementConfigRevision);
         if (dontIncrementConfigRevision == false)
             IncrementConfigurationRevision();
         Refresh();
+
+        return GetByUid(item.Uid);
     }
 
     /// <summary>
@@ -119,14 +121,48 @@ public abstract class CachedService<T> where T : FileFlowObject, new()
     /// <param name="dontIncrementConfigRevision">if this is a revision object, if the revision should be updated</param>
     protected virtual void UpdateActual(T item, bool dontIncrementConfigRevision = false)
         => DbHelper.Update(item);
-        
+
 
     /// <summary>
     /// Refreshes the data
     /// </summary>
     public virtual void Refresh()
-        => Data = DbHelper.Select<T>().Result.ToList();
-    
+    {
+        var newData = DbHelper.Select<T>().Result.ToList();
+        if (_Data?.Any() != true)
+        {
+            _Data = newData;
+            return;
+        }
+        
+        List<T> updatedData = new List<T>();
+
+        foreach (var newItem in newData)
+        {
+            var existingItem = _Data.FirstOrDefault(item => item.Uid == newItem.Uid);
+            if (existingItem != null)
+            {
+                // Update properties of existing item with values from newItem
+                var properties = typeof(T).GetProperties();
+                foreach (var property in properties)
+                {
+                    if (property.CanRead && property.CanWrite)
+                    {
+                        var value = property.GetValue(newItem);
+                        property.SetValue(existingItem, value);
+                    }
+                }
+                updatedData.Add(existingItem);
+            }
+            else
+            {
+                updatedData.Add(newItem);
+            }
+        }
+
+        _Data = updatedData;
+    }
+
     /// <summary>
     /// Deletes items matching the UIDs
     /// </summary>
@@ -177,4 +213,22 @@ public abstract class CachedService<T> where T : FileFlowObject, new()
         name = name.ToLowerInvariant().Trim();
         return Data.Any(x => uid != x.Uid && x.Name.ToLowerInvariant() == name);
     }
+
+    // /// <summary>
+    // /// Copies the data from one object into another
+    // /// </summary>
+    // /// <param name="source">the source object</param>
+    // /// <param name="destination">the destination object</param>
+    // protected virtual void CopyInto(T source, T destination)
+    // {
+    //     var properties = typeof(T).GetProperties();
+    //     foreach (var property in properties)
+    //     {
+    //         if (property.CanRead && property.CanWrite)
+    //         {
+    //             var value = property.GetValue(source);
+    //             property.SetValue(destination, value);
+    //         }
+    //     }
+    // }
 }

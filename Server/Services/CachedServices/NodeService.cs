@@ -149,40 +149,26 @@ public class NodeService : CachedService<ProcessingNode>, INodeService
         node.TempPath = path;
         Update(node);
     }
-
-
-    /// <summary>
-    /// Updates an item
-    /// </summary>
-    /// <param name="item">the item being updated</param>
-    /// <param name="dontIncrementConfigRevision">if this is a revision object, if the revision should be updated</param>
-    public override void Update(ProcessingNode item, bool dontIncrementConfigRevision = false)
-    {
-        base.Update(item, dontIncrementConfigRevision: dontIncrementConfigRevision);
-        var cached = GetByUid(item.Uid);
-        if(item != cached)
-            CopyInto(source: item, destination: cached);
-    }
-
-    private void CopyInto(ProcessingNode source, ProcessingNode destination)
-    {
-        Logger.Instance.WLog("Having to copy data into Processing Node for: " + source.Name + " , dest: " + destination.Name);
-        destination.Name = source.Name?.EmptyAsNull() ?? destination.Name;
-        destination.Address = source.Address?.EmptyAsNull() ?? destination.Address;
-        destination.TempPath = source.TempPath?.EmptyAsNull() ?? destination.TempPath;
-        destination.Enabled = source.Enabled;
-        destination.FlowRunners = source.FlowRunners;
-        destination.Priority = source.Priority;
-        destination.PreExecuteScript = source.PreExecuteScript;
-        destination.Schedule = source.Schedule?.EmptyAsNull()  ?? destination.Schedule;
-        destination.Mappings = source.Mappings ?? new();
-        destination.AllLibraries = source.AllLibraries;
-        destination.Libraries = source.Libraries;
-        destination.MaxFileSizeMb = source.MaxFileSizeMb;
-        destination.DontChangeOwner = source.DontChangeOwner;
-        destination.DontSetPermissions = source.DontSetPermissions;
-        destination.Permissions = source.Permissions;
-    }
+    
+    // protected override void CopyInto(ProcessingNode source, ProcessingNode destination)
+    // {
+    //     Logger.Instance.WLog("Having to copy data into Processing Node for: " + source.Name + " , dest: " + destination.Name);
+    //     destination.Name = source.Name?.EmptyAsNull() ?? destination.Name;
+    //     destination.Address = source.Address?.EmptyAsNull() ?? destination.Address;
+    //     destination.TempPath = source.TempPath?.EmptyAsNull() ?? destination.TempPath;
+    //     destination.Enabled = source.Enabled;
+    //     destination.FlowRunners = source.FlowRunners;
+    //     destination.Priority = source.Priority;
+    //     destination.PreExecuteScript = source.PreExecuteScript;
+    //     destination.Schedule = source.Schedule?.EmptyAsNull()  ?? destination.Schedule;
+    //     destination.Mappings = source.Mappings ?? new();
+    //     destination.AllLibraries = source.AllLibraries;
+    //     destination.Libraries = source.Libraries;
+    //     destination.MaxFileSizeMb = source.MaxFileSizeMb;
+    //     destination.DontChangeOwner = source.DontChangeOwner;
+    //     destination.DontSetPermissions = source.DontSetPermissions;
+    //     destination.Permissions = source.Permissions;
+    //}
 
     /// <summary>
     /// Updates the last seen date for a node
