@@ -571,6 +571,8 @@ public class FlowController : Controller
             var existing = service.GetByUid(model.Uid);
             nameChanged = existing != null && existing.Name != model.Name;
         }
+        
+        Logger.Instance.ILog($"Saving Flow '{model.Name}'");
 
         model = service.Update(model);
         if(nameChanged)

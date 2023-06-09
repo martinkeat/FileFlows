@@ -105,7 +105,8 @@ public abstract class CachedService<T> where T : FileFlowObject, new()
         var existingName = GetByName(item.Name);
         if (existingName != null && existingName.Uid != item.Uid)
             throw new Exception("ErrorMessages.NameInUse");
-
+        
+        Logger.Instance.ILog($"Updating {item.GetType().Name}: '{item.Name}'");
         UpdateActual(item, dontIncrementConfigRevision);
         if (dontIncrementConfigRevision == false)
             IncrementConfigurationRevision();
@@ -128,6 +129,8 @@ public abstract class CachedService<T> where T : FileFlowObject, new()
     /// </summary>
     public virtual void Refresh()
     {
+        
+        Logger.Instance.ILog($"Refreshing Data for '{typeof(T).Name}'");
         var newData = DbHelper.Select<T>().Result.ToList();
         if (_Data?.Any() != true)
         {
