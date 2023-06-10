@@ -11,7 +11,7 @@ public class AnyCondition : Condition
     /// </summary>
     /// <param name="field">the field this condition is attached to</param>
     /// <param name="initialValue">the initial value of the field</param>
-    /// <param name="value">the value to evaluate for</param>
+    /// <param name="values">the value to evaluate for</param>
     /// <param name="isNot">if the condition should NOT match the value</param>
     public AnyCondition(ElementField field, object initialValue, object values = null, bool isNot = false) : base(field, initialValue)
     {

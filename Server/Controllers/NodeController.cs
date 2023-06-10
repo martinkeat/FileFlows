@@ -51,7 +51,7 @@ public class NodeController : Controller
     /// <param name="node">The node to save</param>
     /// <returns>The saved instance</returns>
     [HttpPost]
-    public IActionResult Save([FromBody] ProcessingNode node)
+    public async Task<IActionResult> Save([FromBody] ProcessingNode node)
     {
         // see if we are updating the internal node
         var service = new NodeService();
@@ -90,7 +90,7 @@ public class NodeController : Controller
                     internalNode.PreExecuteScript = node.PreExecuteScript;
                 
                 internalNode.Libraries = node.Libraries;
-                internalNode = service.Update(internalNode);
+                internalNode = await service.Update(internalNode);
                 CheckLicensedNodes(internalNode.Uid, internalNode.Enabled);
                 
                 return Ok(internalNode);
@@ -102,7 +102,7 @@ public class NodeController : Controller
             node.Name = Globals.InternalNodeName;
             node.AllLibraries = ProcessingLibraries.All;
             node.Mappings = null; // no mappings for internal
-            node = service.Update(node);
+            node = await service.Update(node);
             CheckLicensedNodes(node.Uid, node.Enabled);
             return Ok(node);
         }
@@ -112,7 +112,7 @@ public class NodeController : Controller
             var existing = service.GetByUid(node.Uid);
             if (existing == null)
                 return BadRequest("Node not found");
-            node = service.Update(node);
+            node = await service.Update(node);
             Logger.Instance.ILog("Updated external processing node: " + node.Name);
             CheckLicensedNodes(node.Uid, node.Enabled);
             return Ok(node);
@@ -150,7 +150,7 @@ public class NodeController : Controller
         if (enable != null && node.Enabled != enable.Value)
         {
             node.Enabled = enable.Value;
-            node = service.Update(node);
+            node = await service.Update(node);
         }
         CheckLicensedNodes(uid, enable == true);
         return Ok(node);
@@ -176,7 +176,7 @@ public class NodeController : Controller
         if (string.IsNullOrEmpty(version) == false && node.Version != version)
         {
             node.Version = version;
-            node = service.Update(node);
+            node = await service.Update(node);
         }
         else
         {
@@ -226,7 +226,7 @@ public class NodeController : Controller
                     KeyValuePair<string, string>(x.Value, string.Empty)
                 ).ToList()
         };
-        node = service.Update(node);
+        node = await service.Update(node);
         node.SignalrUrl = "flow";
         CheckLicensedNodes(Guid.Empty, false);
         return node;
@@ -275,7 +275,7 @@ public class NodeController : Controller
     /// <param name="model">The register model containing information about the processing node being registered</param>
     /// <returns>The processing node instance</returns>
     [HttpPost("register")]
-    public ProcessingNode RegisterPost([FromBody] RegisterModel model)
+    public async Task<ProcessingNode> RegisterPost([FromBody] RegisterModel model)
     {
         if (string.IsNullOrWhiteSpace(model?.Address))
             throw new ArgumentNullException(nameof(model.Address));
@@ -295,7 +295,7 @@ public class NodeController : Controller
                 //existing.TempPath = model.TempPath;
                 //existing.OperatingSystem = model.OperatingSystem;
                 existing.Version = model.Version;
-                existing = service.Update(existing);
+                existing = await service.Update(existing);
             }
             existing.SignalrUrl = "flow";
             return existing;
@@ -335,7 +335,7 @@ public class NodeController : Controller
                            KeyValuePair<string, string>(x.Value, "")
                        )?.ToList() ?? new()
         };
-        node = service.Update(node);
+        node = await service.Update(node);
         node.SignalrUrl = "flow";
         return node;
     }

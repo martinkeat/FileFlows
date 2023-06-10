@@ -54,7 +54,7 @@ public class LibraryController : Controller
     /// <param name="library">The library to save</param>
     /// <returns>the saved library instance</returns>
     [HttpPost]
-    public Library Save([FromBody] Library library)
+    public async Task<Library> Save([FromBody] Library library)
     {
         if (library?.Flow == null)
             throw new Exception("ErrorMessages.NoFlowSpecified");
@@ -73,7 +73,7 @@ public class LibraryController : Controller
         }
         
         bool newLib = library.Uid == Guid.Empty;
-        library = service.Update(library);
+        library = await service.Update(library);
 
         _ = Task.Run(async () =>
         {
@@ -105,7 +105,7 @@ public class LibraryController : Controller
     /// <param name="enable">true if enabled, otherwise false</param>
     /// <returns>the updated library instance</returns>
     [HttpPut("state/{uid}")]
-    public Library SetState([FromRoute] Guid uid, [FromQuery] bool enable)
+    public async Task<Library> SetState([FromRoute] Guid uid, [FromQuery] bool enable)
     {
         var service = new LibraryService();
         var library = service.GetByUid(uid);
@@ -115,7 +115,7 @@ public class LibraryController : Controller
         if (library.Enabled != enable)
         {
             library.Enabled = enable;
-            library = service.Update(library);
+            library = await service.Update(library);
         }
         return library;
     }

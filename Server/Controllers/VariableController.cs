@@ -43,7 +43,7 @@ public class VariableController : Controller
     /// <param name="variable">The variable to save</param>
     /// <returns>The saved instance</returns>
     [HttpPost]
-    public Variable Save([FromBody] Variable variable)
+    public Task<Variable> Save([FromBody] Variable variable)
      => new VariableService().Update(variable);
 
     /// <summary>

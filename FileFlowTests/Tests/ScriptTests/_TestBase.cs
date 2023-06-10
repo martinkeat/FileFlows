@@ -45,8 +45,9 @@ public class ExecuteResult
     /// Gets or sets the exit code from the execution
     /// </summary>
     public int ExitCode { get; set; }
+
     /// <summary>
     /// Gets or sets the log of the execution
     /// </summary>
-    public string Log { get; set; }
+    public string Log { get; set; } = string.Empty;
 }

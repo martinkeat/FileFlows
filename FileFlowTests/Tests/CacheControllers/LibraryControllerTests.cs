@@ -28,7 +28,7 @@ public class LibraryControllerTests:CacheControllerTestBase
                 Type = 0,
             }
         };
-        return new FileFlows.Server.Services.FlowService().Update(flow);
+        return new FileFlows.Server.Services.FlowService().Update(flow).Result;
     }
     
     /// <summary>
@@ -64,7 +64,7 @@ public class LibraryControllerTests:CacheControllerTestBase
             Filter = filter,
             ExclusionFilter = exclude
         };
-        var updated = controller.Save(lib);
+        var updated = controller.Save(lib).Result;
         var list = controller.GetAll();
         var fromList = list.First(x => x.Name == name);
         foreach (var other in new[] { updated, fromList })

@@ -114,7 +114,7 @@ public class DashboardController : Controller
     /// <param name="model">The dashboard being saved</param>
     /// <returns>The saved dashboard</returns>
     [HttpPut]
-    public Dashboard Save([FromBody] Dashboard model)
+    public Task<Dashboard> Save([FromBody] Dashboard model)
         => new DashboardService().Update(model);
 
     /// <summary>
@@ -124,7 +124,7 @@ public class DashboardController : Controller
     /// <param name="widgets">The Widgets to save</param>
     /// <returns>The saved dashboard</returns>
     [HttpPut("{uid}")]
-    public Dashboard Save([FromRoute] Guid uid, [FromBody] List<Widget> widgets)
+    public Task<Dashboard> Save([FromRoute] Guid uid, [FromBody] List<Widget> widgets)
     {
         var service = new DashboardService();
         var dashboard = service.GetByUid(uid);

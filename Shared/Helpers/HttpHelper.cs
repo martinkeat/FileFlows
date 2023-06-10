@@ -181,100 +181,99 @@ public class HttpHelper
     /// <param name="noLog">if the request show record nothing to the log</param>
     /// <typeparam name="T">The request object returned</typeparam>
     /// <returns>a processing result of the request</returns>
-    private static async Task<RequestResult<T>> MakeRequest<T>(HttpMethod method, string url, object data = null, int timeoutSeconds = 0, bool noLog = false)
+    private static async Task<RequestResult<T>> MakeRequest<T>(HttpMethod method, string url, object data = null,
+        int timeoutSeconds = 0, bool noLog = false)
     {
-        try
-        {
 #if (DEBUG)
-            if (url.Contains("i18n") == false && url.StartsWith("http") == false)
-                url = "http://localhost:6868" + url;
+        if (url.Contains("i18n") == false && url.StartsWith("http") == false)
+            url = "http://localhost:6868" + url;
 #endif
-            var request = new HttpRequestMessage
-            {
-                Method = method,
-                RequestUri = new Uri(url, UriKind.RelativeOrAbsolute),
-                Content = data != null ? AsJson(data) : null
-            };
-
-            if (method == HttpMethod.Post && data == null)
-            {
-                // if this is null, asp.net will return a 415 content not support, as the content-type will not be set
-                request.Content = new StringContent("", Encoding.UTF8, "application/json");
-            }
-
-            if(noLog == false)
-                Log("Making request [" + method + "]: " + url);
-            HttpResponseMessage response;
-            if (timeoutSeconds > 0)
-            {
-                using var cancelToken = new CancellationTokenSource(TimeSpan.FromSeconds(timeoutSeconds));
-                response = await Client.SendAsync(request, cancelToken.Token);
-            }
-            else
-                response = await Client.SendAsync(request);
-
-            if (typeof(T) == typeof(byte[]))
-            {
-                var bytes = await response.Content.ReadAsByteArrayAsync();
-                if (response.IsSuccessStatusCode)
-                    return new RequestResult<T> { Success = true, Data = (T)(object)bytes, Headers = GetHeaders(response)};
-                return new RequestResult<T> { Success = false, Headers = GetHeaders(response) };
-            }
-
-            // if (TryGetHeader(response, "x-files-remaining", out int filesRemaining))
-            // {
-            //     if (OnRemainingFilesHeader != null)
-            //     {
-            //         try
-            //         {
-            //             OnRemainingFilesHeader.Invoke(filesRemaining);
-            //         }
-            //         catch (Exception)
-            //         {
-            //         }
-            //     }
-            // }
-            
-            
-            string body = await response.Content.ReadAsStringAsync();
-            
-
-            if (response.IsSuccessStatusCode && (body.Contains("INFO") == false && body.Contains("An unhandled error has occurred.")) == false)
-            {
-                var options = new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true,
-                    Converters = { new FileFlows.Shared.Json.ValidatorConverter() }
-                };
-#pragma warning disable CS8600
-                T result = string.IsNullOrEmpty(body) ? default(T) : typeof(T) == typeof(string) ? (T)(object)body : JsonSerializer.Deserialize<T>(body, options);
-#pragma warning restore CS8600
-                return new RequestResult<T> { Success = true, Body = body, Data = result, Headers = GetHeaders(response) };
-            }
-            else
-            {
-                if (body.Contains("An unhandled error has occurred."))
-                    body = "An unhandled error has occurred."; // asp.net error
-                else if (body.Contains("502 Bad Gateway"))
-                {
-                    body = "Unable to connect, server possibly down";
-                    noLog = true;
-                }
-                if(noLog == false)
-                    Log("Error Body: " + body);
-                return new RequestResult<T> { Success = false, Body = body, Data = default(T), Headers = GetHeaders(response) };
-            }
-        }
-        catch (Exception ex)
+        var request = new HttpRequestMessage
         {
-            throw;
+            Method = method,
+            RequestUri = new Uri(url, UriKind.RelativeOrAbsolute),
+            Content = data != null ? AsJson(data) : null
+        };
+
+        if (method == HttpMethod.Post && data == null)
+        {
+            // if this is null, asp.net will return a 415 content not support, as the content-type will not be set
+            request.Content = new StringContent("", Encoding.UTF8, "application/json");
         }
-        
+
+        if (noLog == false)
+            Log("Making request [" + method + "]: " + url);
+        HttpResponseMessage response;
+        if (timeoutSeconds > 0)
+        {
+            using var cancelToken = new CancellationTokenSource(TimeSpan.FromSeconds(timeoutSeconds));
+            response = await Client.SendAsync(request, cancelToken.Token);
+        }
+        else
+            response = await Client.SendAsync(request);
+
+        if (typeof(T) == typeof(byte[]))
+        {
+            var bytes = await response.Content.ReadAsByteArrayAsync();
+            if (response.IsSuccessStatusCode)
+                return new RequestResult<T> { Success = true, Data = (T)(object)bytes, Headers = GetHeaders(response) };
+            return new RequestResult<T> { Success = false, Headers = GetHeaders(response) };
+        }
+
+        // if (TryGetHeader(response, "x-files-remaining", out int filesRemaining))
+        // {
+        //     if (OnRemainingFilesHeader != null)
+        //     {
+        //         try
+        //         {
+        //             OnRemainingFilesHeader.Invoke(filesRemaining);
+        //         }
+        //         catch (Exception)
+        //         {
+        //         }
+        //     }
+        // }
+
+
+        string body = await response.Content.ReadAsStringAsync();
+
+
+        if (response.IsSuccessStatusCode &&
+            (body.Contains("INFO") == false && body.Contains("An unhandled error has occurred.")) == false)
+        {
+            var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true,
+                Converters = { new FileFlows.Shared.Json.ValidatorConverter() }
+            };
+#pragma warning disable CS8600
+            T result = string.IsNullOrEmpty(body) ? default(T) :
+                typeof(T) == typeof(string) ? (T)(object)body : JsonSerializer.Deserialize<T>(body, options);
+#pragma warning restore CS8600
+            return new RequestResult<T> { Success = true, Body = body, Data = result, Headers = GetHeaders(response) };
+        }
+        else
+        {
+            if (body.Contains("An unhandled error has occurred."))
+                body = "An unhandled error has occurred."; // asp.net error
+            else if (body.Contains("502 Bad Gateway"))
+            {
+                body = "Unable to connect, server possibly down";
+                noLog = true;
+            }
+
+            if (noLog == false)
+                Log("Error Body: " + body);
+            return new RequestResult<T>
+                { Success = false, Body = body, Data = default(T), Headers = GetHeaders(response) };
+        }
+
+
         Dictionary<string, string> GetHeaders(HttpResponseMessage response)
         {
             return response.Headers.Where(x => x.Key.StartsWith("x-"))
                 .DistinctBy(x => x.Key)
-                .ToDictionary(x => x.Key, x => x.Value.FirstOrDefault());
+                .ToDictionary(x => x.Key, x => x.Value.FirstOrDefault() ?? string.Empty);
         }
     }
 
@@ -319,6 +318,11 @@ public class HttpHelper
         return new StringContent(json, Encoding.UTF8, "application/json");
     }
 
+    /// <summary>
+    /// Gets the default HttpClient
+    /// </summary>
+    /// <param name="serviceBaseUrl">the base URL for services</param>
+    /// <returns>a HttpClient</returns>
     public static HttpClient GetDefaultHttpHelper(string serviceBaseUrl)
     {
         #if(!DEBUG)

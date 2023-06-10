@@ -35,7 +35,7 @@ public class FlowControllerTests:CacheControllerTestBase
                 Type = 0,
             }
         };
-        var updated = controller.Save(flow);
+        var updated = controller.Save(flow).Result;
         var list = controller.GetAll();
         var fromList = list.First(x => x.Name == name);
         foreach (var other in new[] { updated, fromList })

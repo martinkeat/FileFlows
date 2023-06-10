@@ -42,7 +42,7 @@ public class TaskController : Controller
     /// <param name="fileFlowsTask">The scheduled task to save</param>
     /// <returns>The saved instance</returns>
     [HttpPost]
-    public FileFlowsTask Save([FromBody] FileFlowsTask fileFlowsTask)
+    public Task<FileFlowsTask> Save([FromBody] FileFlowsTask fileFlowsTask)
         => new TaskService().Update(fileFlowsTask);
 
     /// <summary>

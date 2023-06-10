@@ -221,7 +221,7 @@ public class NodeParameters
     /// <param name="logger">the logger used during execution</param>
     /// <param name="isDirectory">if this is executing against a directory instead of a file</param>
     /// <param name="libraryPath">the path of the library this file exists in</param>
-    public NodeParameters(string filename, ILogger logger, bool isDirectory, string libraryPath)
+    public NodeParameters(string? filename, ILogger logger, bool isDirectory, string? libraryPath)
     {
         Fake = string.IsNullOrEmpty(filename);
         this.IsDirectory = isDirectory;

@@ -22,6 +22,6 @@ public static class RandomExtensions
 
         var array = Enum.GetValues(type);
         var index = random.Next(array.GetLowerBound(0), array.GetUpperBound(0) + 1);
-        return (T)array.GetValue(index);
+        return (T)array.GetValue(index)!;
     }
 }

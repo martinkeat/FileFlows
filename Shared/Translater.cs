@@ -157,7 +157,7 @@ public class Translater
             string msg = Lookup(possibleKeys, supressWarnings: supressWarnings);
             if (msg == "")
                 return "";
-            if (parameters is IDictionary<string, object?> dict)
+            if (parameters is IDictionary<string, object> dict)
                 return Formatter.FormatMessage(msg, dict);
 
             return Formatter.FormatMessage(msg, parameters ?? new { });

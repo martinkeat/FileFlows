@@ -93,6 +93,13 @@ public class Condition
     public virtual bool Matches(object value)
         => Matches(this.Value, value, this.IsNot);
 
+    /// <summary>
+    /// Tests if a value matches the expected value
+    /// </summary>
+    /// <param name="expected">the expected value</param>
+    /// <param name="value">the value to test</param>
+    /// <param name="isNot">if the result should be inverted</param>
+    /// <returns>the result of the match</returns>
     protected static bool Matches(object expected, object value, bool isNot)
     {
         bool matches = false;

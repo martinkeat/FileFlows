@@ -94,7 +94,7 @@ public abstract class CachedService<T> where T : FileFlowObject, new()
     /// </summary>
     /// <param name="item">the item being updated</param>
     /// <param name="dontIncrementConfigRevision">if this is a revision object, if the revision should be updated</param>
-    public virtual T Update(T item, bool dontIncrementConfigRevision = false)
+    public async virtual Task<T> Update(T item, bool dontIncrementConfigRevision = false)
     {
         if (item == null)
             throw new Exception("No model");
@@ -107,7 +107,7 @@ public abstract class CachedService<T> where T : FileFlowObject, new()
             throw new Exception("ErrorMessages.NameInUse");
         
         Logger.Instance.ILog($"Updating {item.GetType().Name}: '{item.Name}'");
-        UpdateActual(item, dontIncrementConfigRevision);
+        await UpdateActual(item, dontIncrementConfigRevision);
         if (dontIncrementConfigRevision == false)
             IncrementConfigurationRevision();
         Refresh();
@@ -120,7 +120,7 @@ public abstract class CachedService<T> where T : FileFlowObject, new()
     /// </summary>
     /// <param name="item">the item being updated</param>
     /// <param name="dontIncrementConfigRevision">if this is a revision object, if the revision should be updated</param>
-    protected virtual void UpdateActual(T item, bool dontIncrementConfigRevision = false)
+    protected virtual Task UpdateActual(T item, bool dontIncrementConfigRevision = false)
         => DbHelper.Update(item);
 
 

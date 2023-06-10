@@ -185,7 +185,7 @@ public class FlowController : Controller
     /// <param name="json">The json data to import</param>
     /// <returns>The newly import flow</returns>
     [HttpPost("import")]
-    public Flow Import([FromBody] string json)
+    public Task<Flow> Import([FromBody] string json)
     {
         Flow? flow = JsonSerializer.Deserialize<Flow>(json);
         if (flow == null)
@@ -218,7 +218,7 @@ public class FlowController : Controller
     /// <param name="uid">The UID of the flow</param>
     /// <returns>The duplicated flow</returns>
     [HttpGet("duplicate/{uid}")]
-    public Flow Duplicate([FromRoute] Guid uid)
+    public Task<Flow> Duplicate([FromRoute] Guid uid)
     { 
         var flow = new FlowService().GetByUid(uid);
         if (flow == null)
@@ -271,7 +271,7 @@ public class FlowController : Controller
     /// <param name="enable">Whether or not the flow should be enabled</param>
     /// <returns>The updated flow</returns>
     [HttpPut("state/{uid}")]
-    public Flow SetState([FromRoute] Guid uid, [FromQuery] bool? enable)
+    public async Task<Flow> SetState([FromRoute] Guid uid, [FromQuery] bool? enable)
     {
         var service = new FlowService();
         var flow = service.GetByUid(uid);
@@ -280,7 +280,7 @@ public class FlowController : Controller
         if (enable != null)
         {
             flow.Enabled = enable.Value;
-            flow = service.Update(flow);
+            flow = await service.Update(flow);
         }
 
         return flow;
@@ -514,7 +514,7 @@ public class FlowController : Controller
     /// <param name="uniqueName">Whether or not a new unique name should be generated if the name already exists</param>
     /// <returns>The saved flow</returns>
     [HttpPut]
-    public Flow Save([FromBody] Flow model, [FromQuery] bool uniqueName = false)
+    public async Task<Flow> Save([FromBody] Flow model, [FromQuery] bool uniqueName = false)
     {
         if (model == null)
             throw new Exception("No model");
@@ -553,7 +553,7 @@ public class FlowController : Controller
             .Where(x => x.Type == FlowElementType.Input || x.Type == FlowElementType.Failure).Count();
         if (inputNodes == 0)
             throw new Exception("Flow.ErrorMessages.NoInput");
-        else if (inputNodes > 1)
+        if (inputNodes > 1)
             throw new Exception("Flow.ErrorMessages.TooManyInputNodes");
 
         if (model.Uid == Guid.Empty && model.Type == FlowType.Failure)
@@ -574,7 +574,7 @@ public class FlowController : Controller
         
         Logger.Instance.ILog($"Saving Flow '{model.Name}'");
 
-        model = service.Update(model);
+        model = await service.Update(model);
         if(nameChanged)
             _ = new ObjectReferenceUpdater().RunAsync();
 
@@ -601,7 +601,7 @@ public class FlowController : Controller
             return; // name already is the requested name
 
         flow.Name = name;
-        flow = service.Update(flow);
+        flow = await service.Update(flow);
 
         // update any object references
         await new LibraryFileService().UpdateFlowName(flow.Uid, flow.Name);
