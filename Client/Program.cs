@@ -1,3 +1,4 @@
+using System.Globalization;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.Extensions.DependencyInjection;
@@ -29,6 +30,11 @@ public class Program
 
         builder.Services.AddBlazoredLocalStorage();
         builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
+        
+        // FF-458 - fixing issue with date humanizer on non-english browsers
+        var cultureInfo = new CultureInfo("en-US");
+        CultureInfo.DefaultThreadCurrentCulture = cultureInfo;
+        CultureInfo.DefaultThreadCurrentUICulture = cultureInfo;
 
         await builder.Build().RunAsync();
     }
