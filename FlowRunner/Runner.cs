@@ -1,4 +1,5 @@
-﻿using FileFlows.Server;
+﻿using System.Diagnostics;
+using FileFlows.Server;
 using FileFlows.ServerShared;
 using FileFlows.ServerShared.Helpers;
 using FileFlows.Plugin;
@@ -403,18 +404,7 @@ public class Runner
         nodeParameters.PartPercentageUpdate = UpdatePartPercentage;
         Shared.Helpers.HttpHelper.Logger = nodeParameters.Logger;
 
-        nodeParameters.Logger!.ILog("File: " + nodeParameters.FileName);
-        nodeParameters.Logger!.ILog("Executing Flow: " + Flow.Name);
-        nodeParameters.Logger!.ILog("Version: " + Globals.Version);
-        if(Globals.IsDocker)
-            nodeParameters.Logger!.ILog("Platform: Docker" + (Globals.IsArm ? " (ARM)" : string.Empty));
-        else if(Globals.IsLinux)
-            nodeParameters.Logger!.ILog("Platform: Linux" + (Globals.IsArm ? " (ARM)" : string.Empty));
-        else if(Globals.IsWindows)
-            nodeParameters.Logger!.ILog("Platform: Windows" + (Globals.IsArm ? " (ARM)" : string.Empty));
-        else if(Globals.IsMac)
-            nodeParameters.Logger!.ILog("Platform: Mac" + (Globals.IsArm ? " (ARM)" : string.Empty));
-
+        LogHeader(nodeParameters, Info.ConfigDirectory, Flow);
         DownloadPlugins();
         DownloadScripts();
 
@@ -458,6 +448,46 @@ public class Runner
         }
     }
 
+    /// <summary>
+    /// Logs the version info for all plugins etc
+    /// </summary>
+    /// <param name="nodeParameters">the node parameters</param>
+    /// <param name="configDirectory">the directory of the configuration</param>
+    /// <param name="flow">the flow being executed</param>
+    private static void LogHeader(NodeParameters nodeParameters, string configDirectory, Flow flow)
+    {
+        nodeParameters.Logger!.ILog("Version: " + Globals.Version);
+        if(Globals.IsDocker)
+            nodeParameters.Logger!.ILog("Platform: Docker" + (Globals.IsArm ? " (ARM)" : string.Empty));
+        else if(Globals.IsLinux)
+            nodeParameters.Logger!.ILog("Platform: Linux" + (Globals.IsArm ? " (ARM)" : string.Empty));
+        else if(Globals.IsWindows)
+            nodeParameters.Logger!.ILog("Platform: Windows" + (Globals.IsArm ? " (ARM)" : string.Empty));
+        else if(Globals.IsMac)
+            nodeParameters.Logger!.ILog("Platform: Mac" + (Globals.IsArm ? " (ARM)" : string.Empty));
+
+        nodeParameters.Logger!.ILog("File: " + nodeParameters.FileName);
+        nodeParameters.Logger!.ILog("Executing Flow: " + flow.Name);
+        
+        var dir = Path.Combine(configDirectory, "Plugins");
+        if (Directory.Exists(dir) == false)
+            return;
+        foreach (var dll in new DirectoryInfo(dir).GetFiles("*.dll", SearchOption.AllDirectories))
+        {
+            try
+            {
+                string version = string.Empty;
+                var versionInfo = FileVersionInfo.GetVersionInfo(dll.FullName);
+                if (versionInfo.CompanyName != "FileFlows")
+                    continue;
+                version = versionInfo.FileVersion?.EmptyAsNull() ?? versionInfo.ProductVersion ?? string.Empty;
+                nodeParameters.Logger!.ILog("Plugin:  " + dll.Name + " version " + (version?.EmptyAsNull() ?? "unknown"));
+            }
+            catch (Exception)
+            {
+            }
+        }
+    }
     private FileStatus ExecuteFlow(Flow flow, List<Guid> runFlows, bool failure = false)
     { 
         int count = 0;
@@ -632,7 +662,7 @@ public class Runner
         foreach (var sub in new DirectoryInfo(dir).GetDirectories())
         {
             string dest = Path.Combine(nodeParameters.TempPath, sub.Name);
-            ServerShared.Helpers.DirectoryHelper.CopyDirectory(sub.FullName, dest);
+            DirectoryHelper.CopyDirectory(sub.FullName, dest);
         }
     }
 
