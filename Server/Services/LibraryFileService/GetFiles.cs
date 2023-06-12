@@ -90,7 +90,7 @@ public partial class LibraryFileService
     private bool HigherPriorityWaiting(ProcessingNode node, LibraryFile file)
     {
         var allNodes = new NodeService().GetAll().Where(x => 
-            x.Uid != node.Uid && node.Priority > node.Priority && node.Enabled);
+            x.Uid != node.Uid && node.Priority > x.Priority && x.Enabled);
         var allLibraries = new LibraryService().GetAll().Select(x => x.Uid).ToList();
         var executors = WorkerController.Executors.Values.GroupBy(x => x.NodeUid)
             .ToDictionary(x => x.Key, x => x.Count());
