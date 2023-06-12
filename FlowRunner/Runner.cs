@@ -7,6 +7,7 @@ using FileFlows.ServerShared.Services;
 using FileFlows.Shared;
 using FileFlows.Shared.Models;
 using System.Reflection;
+using System.Text.RegularExpressions;
 
 namespace FileFlows.FlowRunner;
 
@@ -457,37 +458,42 @@ public class Runner
     private static void LogHeader(NodeParameters nodeParameters, string configDirectory, Flow flow)
     {
         nodeParameters.Logger!.ILog("Version: " + Globals.Version);
-        if(Globals.IsDocker)
+        if (Globals.IsDocker)
             nodeParameters.Logger!.ILog("Platform: Docker" + (Globals.IsArm ? " (ARM)" : string.Empty));
-        else if(Globals.IsLinux)
+        else if (Globals.IsLinux)
             nodeParameters.Logger!.ILog("Platform: Linux" + (Globals.IsArm ? " (ARM)" : string.Empty));
-        else if(Globals.IsWindows)
+        else if (Globals.IsWindows)
             nodeParameters.Logger!.ILog("Platform: Windows" + (Globals.IsArm ? " (ARM)" : string.Empty));
-        else if(Globals.IsMac)
+        else if (Globals.IsMac)
             nodeParameters.Logger!.ILog("Platform: Mac" + (Globals.IsArm ? " (ARM)" : string.Empty));
 
         nodeParameters.Logger!.ILog("File: " + nodeParameters.FileName);
         nodeParameters.Logger!.ILog("Executing Flow: " + flow.Name);
-        
+
         var dir = Path.Combine(configDirectory, "Plugins");
-        if (Directory.Exists(dir) == false)
-            return;
-        foreach (var dll in new DirectoryInfo(dir).GetFiles("*.dll", SearchOption.AllDirectories))
+        if (Directory.Exists(dir))
         {
-            try
+            foreach (var dll in new DirectoryInfo(dir).GetFiles("*.dll", SearchOption.AllDirectories))
             {
-                string version = string.Empty;
-                var versionInfo = FileVersionInfo.GetVersionInfo(dll.FullName);
-                if (versionInfo.CompanyName != "FileFlows")
-                    continue;
-                version = versionInfo.FileVersion?.EmptyAsNull() ?? versionInfo.ProductVersion ?? string.Empty;
-                nodeParameters.Logger!.ILog("Plugin:  " + dll.Name + " version " + (version?.EmptyAsNull() ?? "unknown"));
-            }
-            catch (Exception)
-            {
+                try
+                {
+                    string version = string.Empty;
+                    var versionInfo = FileVersionInfo.GetVersionInfo(dll.FullName);
+                    if (versionInfo.CompanyName != "FileFlows")
+                        continue;
+                    version = versionInfo.FileVersion?.EmptyAsNull() ?? versionInfo.ProductVersion ?? string.Empty;
+                    nodeParameters.Logger!.ILog("Plugin:  " + dll.Name + " version " +
+                                                (version?.EmptyAsNull() ?? "unknown"));
+                }
+                catch (Exception)
+                {
+                }
             }
         }
+
+        LogFFmpegVersion(nodeParameters);
     }
+
     private FileStatus ExecuteFlow(Flow flow, List<Guid> runFlows, bool failure = false)
     { 
         int count = 0;
@@ -793,6 +799,52 @@ public class Runner
         {
             Logger.Instance.ELog($"Error executing plugin method [{plugin}.{method}]: " + ex.Message);
             return null;
+        }
+    }
+
+    private static void LogFFmpegVersion(NodeParameters args)
+    {
+        string ffmpeg = args.GetToolPath("FFmpeg")?.Trim() ?? string.Empty;
+        if (string.IsNullOrEmpty(ffmpeg) || File.Exists(ffmpeg) == false)
+        {
+            args.Logger.ILog("FFmpeg Version: Not configured");
+            return; // no FFmpeg
+        }
+
+        try
+        {
+            Process process = new Process();
+            process.StartInfo.FileName = ffmpeg;
+            process.StartInfo.Arguments = "-version";
+            process.StartInfo.UseShellExecute = false;
+            process.StartInfo.RedirectStandardOutput = true;
+            process.StartInfo.CreateNoWindow = true;
+
+            process.Start();
+            string output = process.StandardOutput.ReadToEnd();
+            process.WaitForExit();
+
+            if (string.IsNullOrEmpty(output))
+            {
+                args.Logger.ELog("Failed detecting FFmpeg version");
+                return;
+
+            }
+            // Split the output into lines
+            var line = output.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries).First();
+            
+            
+            string pattern = @"ffmpeg\s+version\s+(.*?)(?:\s+Copyright|$)";
+            Regex regex = new Regex(pattern);
+            Match match = regex.Match(line);
+            var version = match.Success ? match.Groups[1].Value.Trim() : line;
+            
+            args.Logger.ILog("FFmpeg Version: " + version);
+        }
+        catch (Exception ex)
+        {
+            // Handle any exceptions that occurred during the process execution
+            args.Logger.WLog("Failed detecting FFmpeg version: " + ex.Message);
         }
     }
 }
