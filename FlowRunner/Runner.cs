@@ -482,7 +482,7 @@ public class Runner
                     if (versionInfo.CompanyName != "FileFlows")
                         continue;
                     version = versionInfo.FileVersion?.EmptyAsNull() ?? versionInfo.ProductVersion ?? string.Empty;
-                    nodeParameters.Logger!.ILog("Plugin:  " + dll.Name + " version " +
+                    nodeParameters.Logger!.ILog("Plugin: " + dll.Name + " version " +
                                                 (version?.EmptyAsNull() ?? "unknown"));
                 }
                 catch (Exception)
