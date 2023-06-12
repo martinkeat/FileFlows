@@ -405,10 +405,6 @@ public class Runner
         nodeParameters.PartPercentageUpdate = UpdatePartPercentage;
         Shared.Helpers.HttpHelper.Logger = nodeParameters.Logger;
 
-        LogHeader(nodeParameters, Info.ConfigDirectory, Flow);
-        DownloadPlugins();
-        DownloadScripts();
-
         nodeParameters.Result = NodeResult.Success;
         nodeParameters.GetToolPathActual = (name) =>
         {
@@ -429,6 +425,10 @@ public class Runner
             var statService = StatisticService.Load();
             statService.Record(name, value);
         };
+        
+        LogHeader(nodeParameters, Info.ConfigDirectory, Flow);
+        DownloadPlugins();
+        DownloadScripts();
 
         var status = ExecuteFlow(Flow, runFlows);
         SetStatus(status);
@@ -805,7 +805,7 @@ public class Runner
     private static void LogFFmpegVersion(NodeParameters args)
     {
         string ffmpeg = args.GetToolPath("FFmpeg")?.Trim() ?? string.Empty;
-        if (string.IsNullOrEmpty(ffmpeg) || File.Exists(ffmpeg) == false)
+        if (string.IsNullOrEmpty(ffmpeg))
         {
             args.Logger.ILog("FFmpeg Version: Not configured");
             return; // no FFmpeg
@@ -839,7 +839,7 @@ public class Runner
             Match match = regex.Match(line);
             var version = match.Success ? match.Groups[1].Value.Trim() : line;
             
-            args.Logger.ILog("FFmpeg Version: " + version);
+            args.Logger.ILog("FFmpeg: " + version);
         }
         catch (Exception ex)
         {
