@@ -573,8 +573,7 @@ public class NodeParameters
                 File.Move(WorkingFile, destination, true);
                 Logger?.ILog("File moved successfully");
 
-                if (isWindows == false && isTempFile)
-                    Helpers.FileHelper.ChangeOwner(Logger, destination, file: true);
+                Helpers.FileHelper.ChangeOwner(Logger, destination, file: true);
 
                 this.WorkingFile = destination;
                 try
@@ -687,8 +686,7 @@ public class NodeParameters
                 File.Copy(source, destination, true);
                 Logger?.ILog("File copied successfully");
 
-                if (isWindows == false && isTempFile)
-                    Helpers.FileHelper.ChangeOwner(Logger, destination, file: true);
+                Helpers.FileHelper.ChangeOwner(Logger, destination, file: true);
 
                 if (updateWorkingFile == false)
                 {
