@@ -685,7 +685,10 @@ public class Runner
                 if (pluginType != null)
                     return pluginType;
             }
-            catch (Exception) { }
+            catch (Exception ex)
+            {
+                Logger.Instance.WLog("Failed to load assembly: " + dll.FullName + " > " + ex.Message);
+            }
         }
         return null;
     }
