@@ -30,7 +30,9 @@ public class SystemdService
         RunService(isNode);
         Console.WriteLine("Run the following to check the status of the service: ");
         string name = isNode ? "fileflows-node" : "fileflows";
-        Console.WriteLine($"sudo systemctl status {name}.service ");
+        Console.WriteLine($"systemctl --user status {name}.service ");
+        Console.WriteLine();
+        Console.WriteLine();
     }
 
     /// <summary>
