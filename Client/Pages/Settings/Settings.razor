@@ -39,7 +39,6 @@
                         }
                     </FlowTab>
                     <FlowTab Title=@lblLogging>
-                        <InputSwitch @bind-Value="@Model.DisableTelemetry" Inverse="@true" Label="Pages.Settings.Fields.Telemetry"/>
                         <InputSwitch @bind-Value="@Model.LogQueueMessages" Label="Pages.Settings.Fields.LogQueueMessages"/>
                         @if (IsLicensed)
                         {
@@ -84,8 +83,13 @@
                             <button class="btn" @onclick=@Restart>@lblRestart</button>
                         </div>
                     </FlowTab>
-                    <FlowTab Title="@lblAdvanced" Visible="@IsLicensed">
-                        <InputTextAreaList @bind-Value="@Model.PluginRepositoryUrls" Label="Pages.Settings.Fields.PluginRepositoryUrls"/>
+                    <FlowTab Title="@lblAdvanced">
+                        <InputSwitch @bind-Value="@Model.DisableTelemetry" Inverse="@true" Label="Pages.Settings.Fields.Telemetry"/>
+                        <InputSwitch @bind-Value="@Model.KeepFailedFlowTempFiles" Label="Pages.Settings.Fields.KeepFailedFlowTempFiles"/>
+                        @if (IsLicensed)
+                        {
+                            <InputTextAreaList @bind-Value="@Model.PluginRepositoryUrls" Label="Pages.Settings.Fields.PluginRepositoryUrls"/>
+                        }
                     </FlowTab>
                     <FlowTab Title="@lblLicense">
                         <p class="box info">Here you can enter your license key to enable additional features

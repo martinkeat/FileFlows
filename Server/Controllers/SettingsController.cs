@@ -170,7 +170,8 @@ public class SettingsController : Controller
             AutoUpdateNodes = model.AutoUpdateNodes,
             AutoUpdatePlugins = model.AutoUpdatePlugins,
             LogQueueMessages = model.LogQueueMessages,
-            PluginRepositoryUrls = model.PluginRepositoryUrls
+            PluginRepositoryUrls = model.PluginRepositoryUrls,
+            KeepFailedFlowTempFiles = model.KeepFailedFlowTempFiles
         });
         
         // validate license it
@@ -301,6 +302,7 @@ public class SettingsController : Controller
         cfg.Libraries = new LibraryService().GetAll();
         cfg.PluginSettings = new PluginService().GetAllPluginSettings().Result;
         cfg.MaxNodes = LicenseHelper.IsLicensed() ? 250 : 30;
+        cfg.KeepFailedFlowTempFiles = Instance.KeepFailedFlowTempFiles;
         var pluginInfos = (await new PluginController().GetAll())
             .Where(x => x.Enabled)
             .ToDictionary(x => x.PackageName + ".ffplugin", x => x);

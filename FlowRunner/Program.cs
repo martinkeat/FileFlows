@@ -26,8 +26,20 @@ public class Program
     /// <param name="args">the command line arguments</param>
     public static void Main(string[] args)
     {
+        int exitCode = Run(args);
+        LogInfo("Exit Code: " + exitCode);
+        Environment.ExitCode = exitCode;
+    }
+    
+    
+    /// <summary>
+    /// Runs the runnner
+    /// </summary>
+    /// <param name="args">the args for the runner</param>
+    /// <returns>the exit code of the runner</returns>
+    public static int Run(string[] args)
+    {
         LogInfo("Flow Runner Version: " + Globals.Version);
-        int exitCode = 0;
         ServicePointManager.DefaultConnectionLimit = 50;
         try
         {
@@ -97,8 +109,7 @@ public class Program
                 LogError("Failed to create working directory, this is likely caused by the mapped '/temp' directory is missing or has become unavailable from the host machine");
                 LogError(ex.Message);
                 LogError("==========================================================================================");
-                exitCode = 1;
-                return;
+                return 1;
             }
 
             LogInfo("Created Directory: " + workingDir);
@@ -115,23 +126,17 @@ public class Program
                 WorkingDirectory = workingDir,
                 Hostname = hostname
             });
-
+            return 0;
         }
         catch (Exception ex)
         {
-            exitCode = 1;
             LogInfo("Error: " + ex.Message + Environment.NewLine + ex.StackTrace);
             while(ex.InnerException != null)
             {
                 LogInfo("Error: " + ex.Message + Environment.NewLine + ex.StackTrace);
                 ex = ex.InnerException;
             }
-            return;
-        }
-        finally
-        {
-            LogInfo("Exit Code: " + exitCode);
-            Environment.ExitCode = exitCode;
+            return 1;
         }
     }
 

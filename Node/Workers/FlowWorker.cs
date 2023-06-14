@@ -36,6 +36,11 @@ public class FlowWorker : Worker
     /// The current configuration
     /// </summary>
     internal static int CurrentConfigurationRevision { get; private set; } = -1;
+    
+    /// <summary>
+    /// Gets or sets if a failed flow should keep its files
+    /// </summary>
+    static bool CurrentConfigurationKeepFailedFlowFiles { get; set; }
 
     /// <summary>
     /// The instance of the flow worker 
@@ -197,6 +202,7 @@ public class FlowWorker : Worker
         AddExecutingRunner(processUid);
         Task.Run(() =>
         {
+            int exitCode = 0; 
             try
             {
 #pragma warning disable CS8601 // Possible null reference assignment.
@@ -224,7 +230,7 @@ public class FlowWorker : Worker
                 try
                 {
 #if (DEBUG)
-                    FileFlows.FlowRunner.Program.Main(parameters);
+                    exitCode = FileFlows.FlowRunner.Program.Run(parameters);
 #else   
                     using Process process = new Process();
                 
@@ -272,7 +278,8 @@ public class FlowWorker : Worker
 
                     SaveLog(libFile, completeLog.ToString());
 
-                    if (process.ExitCode != 0)
+                    exitCode = process.ExitCode;
+                    if (exitCode != 0)
                     {
                         Logger.Instance?.ELog("Error executing runner: Invalid exit code: " + process.ExitCode);
                         libFile.Status = FileStatus.ProcessingFailed;
@@ -285,6 +292,7 @@ public class FlowWorker : Worker
                     Logger.Instance?.ELog("Error executing runner: " + ex.Message + Environment.NewLine + ex.StackTrace);
                     libFile.Status = FileStatus.ProcessingFailed;
                     libFileService.Update(libFile);
+                    exitCode = -999;
                 }
             }
             finally
@@ -293,9 +301,16 @@ public class FlowWorker : Worker
 
                 try
                 {
-                    string dir = Path.Combine(tempPath, "Runner-" + processUid.ToString());
-                    if(Directory.Exists(dir))
-                        Directory.Delete(dir, true);
+                    string dir = Path.Combine(tempPath, "Runner-" + processUid);
+                    if (exitCode == 0 || CurrentConfigurationKeepFailedFlowFiles == false)
+                    {
+                        if (Directory.Exists(dir))
+                            Directory.Delete(dir, true);
+                    }
+                    else
+                    {
+                        Logger.Instance?.ILog("Flow failed keeping temporary files in: " + dir);
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -621,6 +636,7 @@ public class FlowWorker : Worker
         }
 
         CurrentConfigurationRevision = revision;
+        CurrentConfigurationKeepFailedFlowFiles = config.KeepFailedFlowTempFiles;
 
         return true;
 

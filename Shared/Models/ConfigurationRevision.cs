@@ -14,6 +14,11 @@ public class ConfigurationRevision
     /// Gets or sets the maximum nodes that can be executed
     /// </summary>
     public int MaxNodes { get; set; }
+    
+    /// <summary>
+    /// Gets or sets if temporary files should be kept if the flow fails
+    /// </summary>
+    public bool KeepFailedFlowTempFiles { get; set; }
 
     /// <summary>
     /// Gets or sets the system variables

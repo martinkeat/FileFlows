@@ -556,6 +556,8 @@
       "Fields": {
         "Telemetry": "Telemetry",
         "Telemetry-Help": "Telemetry is useful to help know what devices we need to support, what Flow parts are the most used and where we should focus on the development.\nNo information about your files or identify information is sent.",
+        "KeepFailedFlowTempFiles": "Keep Failed Temp Files",
+        "KeepFailedFlowTempFiles-Help": "When checked if aa flow fails, the temporary files it used will be kept and not automatically deleted.\nUse with caution.",
         "AutoUpdate": "Auto Update",
         "AutoUpdate-Help": "When enabled FileFlows will routinely be checked for updates, and if an update is found, will automatically be downloaded and installed.",
         "AutoUpdatePlugins": "Auto Update Plugins",
