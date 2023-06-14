@@ -15,7 +15,7 @@ mv NodeUpdate/run-node.sh run-node.sh
 
 rm -rf NodeUpdate
 
-if [ "$1" != "systemd" && "$1" != "docker" ]; then 
+if [[ "$1" != "systemd" && "$1" != "docker" ]]; then 
   chmod +x run-node.sh
   ./run-node.sh
 fi
