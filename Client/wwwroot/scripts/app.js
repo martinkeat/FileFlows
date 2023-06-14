@@ -64,7 +64,9 @@ window.ff = {
                 const readableStream = response.body;
                 const writableStream = new WritableStream({
                     async write(chunk) {
+                        const blob = new Blob([chunk]);
                         const reader = new FileReader();
+
                         reader.onload = () => {
                             const dataURL = reader.result;
                             const downloadElement = document.createElement('a');
@@ -74,7 +76,7 @@ window.ff = {
                             downloadElement.remove();
                         };
 
-                        reader.readAsDataURL(chunk);
+                        reader.readAsDataURL(blob);
                     }
                 });
 
@@ -83,8 +85,8 @@ window.ff = {
 
             anchorElement.click();
         } catch (error) {
-            Toast.error('Error occurred:', error);
-        }        
+            Toast.error('Error occurred', error);
+        }     
     },
     copyToClipboard: function (text) {
         if (window.clipboardData && window.clipboardData.setData) {

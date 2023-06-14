@@ -6,7 +6,6 @@ class Toast {
     }
 
     static error(title, message, timeout = 5000) {
-        console.log('tost arror!');
         Toast.showToast('error',  title, message, timeout);
     }
 
