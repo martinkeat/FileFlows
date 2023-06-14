@@ -32,7 +32,6 @@ public class SystemdService
         string name = isNode ? "fileflows-node" : "fileflows";
         Console.WriteLine($"systemctl --user status {name}.service ");
         Console.WriteLine();
-        Console.WriteLine();
     }
 
     /// <summary>
