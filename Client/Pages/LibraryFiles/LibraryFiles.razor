@@ -37,6 +37,7 @@
         <FlowTableButton Visible="@(SelectedStatus == FileStatus.Processing)" Clicked=Cancel SelectedOneOrMore="true" Icon="fas fa-window-close" Label="Labels.Cancel" />
         <FlowTableButton Visible="@(SelectedStatus != FileStatus.Processing)" Clicked=Delete SelectedOneOrMore="true" Icon="fas fa-trash" Label="Labels.Remove" />
         <FlowTableButton Visible="@(SelectedStatus != FileStatus.Processing)" Area="ButtonArea.ContextMenu" Clicked=DeleteFile SelectedOneOrMore="true" Icon="fas fa-trash" Label="Labels.Delete" />
+        <FlowTableButton Visible="@(SelectedStatus != FileStatus.Processing)" Area="ButtonArea.ContextMenu" Clicked=DownloadFile SelectedOne="true" Icon="fas fa-download" Label="Labels.Download" />
         
         <FlowTableButtonSeparator Visible="@(SelectedStatus == FileStatus.Unprocessed)" />    
         <FlowTableButton Visible="@(SelectedStatus == FileStatus.Unprocessed)" Clicked=MoveToTop SelectedOneOrMore="true" Icon="far fa-caret-square-up" Label="Pages.LibraryFiles.Buttons.MoveToTop" />

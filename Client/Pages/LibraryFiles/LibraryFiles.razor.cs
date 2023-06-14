@@ -394,6 +394,20 @@ public partial class LibraryFiles : ListPage<Guid, LibaryFileListModel>
         }
     }
 
+    async Task DownloadFile()
+    {
+        var file = Table.GetSelected()?.FirstOrDefault();
+        if (file == null)
+            return; // nothing to delete
+        string name = file.Name.Replace("\\", "/");
+        name = name.Substring(name.LastIndexOf("/", StringComparison.Ordinal) + 1);
+        string url = "/api/library-file/download/" + file.Uid;
+#if (DEBUG)
+        url = "http://localhost:6868" + url;
+#endif
+        await jsRuntime.InvokeVoidAsync("ff.downloadFile", url, name);
+    }
+
     async Task SetStatus(FileStatus status)
     {
         var uids = Table.GetSelected()?.Select(x => x.Uid)?.ToArray() ?? new Guid[] { };

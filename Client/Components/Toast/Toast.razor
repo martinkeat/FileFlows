@@ -1,14 +1,1 @@
 ﻿@namespace FileFlows.Client.Components
-
-@if(Messages.Any())
-{
-    <div class="flow-toasts">
-    @foreach(var toast in Messages)
-    {
-        <div class="flow-toast @toast.Class @(toast.Dismissing ? "dismissing" : "")">
-            <span class="dismiss fas fa-times" @onclick="() => Dismiss(toast)"></span>
-            <span class="flow-toast-msg">@toast.Message</span>
-        </div>
-    }
-    </div>
-}

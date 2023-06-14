@@ -46,12 +46,45 @@ window.ff = {
         };
         document.body.appendChild(tag);
     },
-    downloadFile: function (url, filename) {
-        const anchorElement = document.createElement('a');
-        anchorElement.href = url;
-        anchorElement.download = filename ? filename : 'File';
-        anchorElement.click();
-        anchorElement.remove();
+    downloadFile: async function (url, filename) {
+        try {
+            const response = await fetch(url);
+
+            if (!response.ok) {
+                Toast.error('File not found.');
+                return;
+            }
+
+            const anchorElement = document.createElement('a');
+            anchorElement.href = '#';
+
+            anchorElement.addEventListener('click', async (event) => {
+                event.preventDefault();
+
+                const readableStream = response.body;
+                const writableStream = new WritableStream({
+                    async write(chunk) {
+                        const reader = new FileReader();
+                        reader.onload = () => {
+                            const dataURL = reader.result;
+                            const downloadElement = document.createElement('a');
+                            downloadElement.href = dataURL;
+                            downloadElement.download = filename ? filename : 'File';
+                            downloadElement.click();
+                            downloadElement.remove();
+                        };
+
+                        reader.readAsDataURL(chunk);
+                    }
+                });
+
+                await readableStream.pipeTo(writableStream);
+            });
+
+            anchorElement.click();
+        } catch (error) {
+            Toast.error('Error occurred:', error);
+        }        
     },
     copyToClipboard: function (text) {
         if (window.clipboardData && window.clipboardData.setData) {
@@ -359,6 +392,15 @@ window.ff = {
         {
             event.stopPropagation();
             return false;
+        }
+    },
+    toast: function(type, title, message, timeout){
+        switch(type)
+        {
+            case 'info': Toast.info(title, message, timeout); break;
+            case 'warn': Toast.warn(title, message, timeout); break;
+            case 'success': Toast.success(title, message, timeout); break;
+            case 'error': Toast.error(title, message, timeout); break;
         }
     }
 };

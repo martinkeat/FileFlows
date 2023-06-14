@@ -470,6 +470,30 @@ public class LibraryFileController : Controller //ControllerStore<LibraryFile>
         => new LibraryFileService().Get(uid);
 
     /// <summary>
+    /// Downloads a library file
+    /// </summary>
+    /// <param name="uid">the UID of the library file</param>
+    /// <returns>the download</returns>
+    [HttpGet("download/{uid}")]
+    public IActionResult Download([FromRoute] Guid uid)
+    {
+        var file = new LibraryFileService().GetByUid(uid);
+        if (file == null)
+            return NotFound();
+        string filePath = file.Name;
+        if (System.IO.File.Exists(filePath) == false)
+        {
+            filePath = file.OutputPath;
+            if (string.IsNullOrEmpty(filePath) || System.IO.File.Exists(filePath) == false)
+                return NotFound();
+        }
+        
+        var fileInfo = new FileInfo(filePath);
+        var stream = fileInfo.OpenRead();
+        return File(stream, "application/octet-stream", fileInfo.Name);
+    }
+
+    /// <summary>
     /// Processes a file or adds it to the queue to add to the system
     /// </summary>
     /// <param name="filename">the filename of the file to process</param>
