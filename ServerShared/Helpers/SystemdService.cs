@@ -17,7 +17,8 @@ public class SystemdService
     public static void Install(string baseDirectory, bool isNode)
     {
         string bashScript = CreateEntryPoint(baseDirectory, isNode);
-        SaveServiceFile(baseDirectory, isNode, bashScript);
+        if (SaveServiceFile(baseDirectory, isNode, bashScript) == false)
+            return;
         RunService(isNode);
         Console.WriteLine("Run the following to check the status of the service: ");
         string name = isNode ? "fileflows-node" : "fileflows";
@@ -32,12 +33,12 @@ public class SystemdService
     {
         string name = isNode ? "fileflows-node" : "fileflows";
         
-        Process.Start("systemctl", "stop " + name);
-        Process.Start("systemctl", "disable " + name);
-        if(File.Exists($"/etc/systemd/system/{name}.service"))
-            File.Delete($"/etc/systemd/system/{name}.service");
-        Process.Start("systemctl", "daemon-reload");
-        Process.Start("systemctl", "reset-failed");
+        Process.Start("systemctl", "--user stop " + name);
+        Process.Start("systemctl", "--user disable " + name);
+        if(File.Exists($"~/.config/systemd/user/{name}.service"))
+            File.Delete($"~/.config/systemd/user/{name}.service");
+        Process.Start("systemctl", "--user daemon-reload");
+        Process.Start("systemctl", "--user reset-failed");
     }
 
     /// <summary>
@@ -47,9 +48,9 @@ public class SystemdService
     private static void RunService(bool isNode)
     {
         string name = isNode ? "fileflows-node" : "fileflows";
-        Process.Start("systemctl", $"enable {name}.service");
-        Process.Start("systemctl", "daemon-reload");
-        Process.Start("systemctl", $"start {name}.service");
+        Process.Start("systemctl", $"--user enable {name}.service");
+        Process.Start("systemctl", "--user daemon-reload");
+        Process.Start("systemctl", $"--user start {name}.service");
     }
 
     private static string GetDotnetLocation()
@@ -114,7 +115,7 @@ public class SystemdService
         string dll = isNode ? "FileFlows.Node.dll" : "FileFlows.Server.dll";
         string shScript = $@"#!/usr/bin/env bash
 
- if test -f ""{fullUS}""; then
+if test -f ""{fullUS}""; then
     echo ""Upgrade found""
     chmod +x {fullUS}
     cd {updatePath}
@@ -127,7 +128,7 @@ cd {appPath}
 exec {dotnet} {dll} --no-gui --systemd-service
 ";
         string entryPoint = Path.Combine(baseDirectory, "fileflows" + (isNode ? "-node" : "") + "-systemd-entrypoint.sh");
-        System.IO.File.WriteAllText(entryPoint, shScript);
+        File.WriteAllText(entryPoint, shScript);
         FileHelper.MakeExecutable(entryPoint);
         return entryPoint;
     }
@@ -138,7 +139,8 @@ exec {dotnet} {dll} --no-gui --systemd-service
     /// <param name="baseDirectory">the base directory for the FileFiles install, DirectoryHelper.BaseDirectory</param>
     /// <param name="isNode">if installing node or server</param>
     /// <param name="bashScript">the bash script used to run the service</param>
-    private static void SaveServiceFile(string baseDirectory, bool isNode, string bashScript)
+    /// <returns>if it was successful or not</returns>
+    private static bool SaveServiceFile(string baseDirectory, bool isNode, string bashScript)
     {
         string contents = $@"[Unit]
 Description={(isNode ? "FileFlows Node" :"FileFlows")}
@@ -152,7 +154,31 @@ RestartSec=10
 
 [Install]
 WantedBy=multi-user.target";
-        
-        File.WriteAllText($"/etc/systemd/system/fileflows{(isNode ? "-node" : "")}.service", contents);
+
+        string file = $"~/.config/systemd/user/fileflows{(isNode ? "-node" : "")}.service";
+        var fileInfo = new FileInfo(file);
+        if (fileInfo.Directory.Exists == false)
+        {
+            try
+            {
+                fileInfo.Directory.Create();
+            }
+            catch (Exception)
+            {
+                Console.WriteLine("Failed to create directory: " + fileInfo.Directory.FullName);
+                return false;
+            }
+        }
+
+        try
+        {
+            File.WriteAllText(file, contents);
+            return true;
+        }
+        catch (Exception)
+        {
+            Console.WriteLine("Failed to create file: " + file);
+            return false;
+        }
     }
 }
