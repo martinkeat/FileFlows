@@ -20,6 +20,11 @@ class Toast {
         if (!Toast.toastContainer) {
             Toast.createToastContainer();
         }
+        
+        if(title && !message){
+            message = title;
+            title = '';
+        }
 
         const toast = document.createElement('div');
         toast.classList.add('ff-toast', type);

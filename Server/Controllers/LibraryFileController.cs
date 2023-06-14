@@ -473,20 +473,24 @@ public class LibraryFileController : Controller //ControllerStore<LibraryFile>
     /// Downloads a library file
     /// </summary>
     /// <param name="uid">the UID of the library file</param>
+    /// <param name="test">[Optional] if the file should be tested to see if it still exists and can be downloaded</param>
     /// <returns>the download</returns>
     [HttpGet("download/{uid}")]
-    public IActionResult Download([FromRoute] Guid uid)
+    public IActionResult Download([FromRoute] Guid uid, [FromQuery] bool test = false)
     {
         var file = new LibraryFileService().GetByUid(uid);
         if (file == null)
-            return NotFound();
+            return NotFound("File not found.");
         string filePath = file.Name;
         if (System.IO.File.Exists(filePath) == false)
         {
             filePath = file.OutputPath;
             if (string.IsNullOrEmpty(filePath) || System.IO.File.Exists(filePath) == false)
-                return NotFound();
+                return NotFound("File not found.");
         }
+
+        if (test)
+            return Ok();
         
         var fileInfo = new FileInfo(filePath);
         var stream = fileInfo.OpenRead();

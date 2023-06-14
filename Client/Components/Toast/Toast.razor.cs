@@ -36,7 +36,7 @@ public partial class Toast:ComponentBase
     /// <param name="message">the message</param>
     /// <param name="duration">the duration in milliseconds to show the message</param>
     public static void ShowError(string message, int duration = 5_000)
-        => _ = Instance.jsRuntime.InvokeVoidAsync("ff.toast", "error", Translater.TranslateIfNeeded(message), null, duration);
+        => _ = Instance.jsRuntime.InvokeVoidAsync("ff.toast", "error", Translater.TranslateIfNeeded(message), string.Empty, duration);
 
     /// <summary>
     /// Show an information message
@@ -44,7 +44,7 @@ public partial class Toast:ComponentBase
     /// <param name="message">the message</param>
     /// <param name="duration">the duration in milliseconds to show the message</param>
     public static void ShowInfo(string message, int duration = 5_000)
-        => _ = Instance.jsRuntime.InvokeVoidAsync("ff.toast", "info", Translater.TranslateIfNeeded(message), null, duration);
+        => _ = Instance.jsRuntime.InvokeVoidAsync("ff.toast", "info", Translater.TranslateIfNeeded(message), string.Empty, duration);
     
     /// <summary>
     /// Show an success message
@@ -52,7 +52,7 @@ public partial class Toast:ComponentBase
     /// <param name="message">the message</param>
     /// <param name="duration">the duration in milliseconds to show the message</param>
     public static void ShowSuccess(string message, int duration = 5_000)
-        => _ = Instance.jsRuntime.InvokeVoidAsync("ff.toast", "success", Translater.TranslateIfNeeded(message), null, duration);
+        => _ = Instance.jsRuntime.InvokeVoidAsync("ff.toast", "success", Translater.TranslateIfNeeded(message), string.Empty, duration);
 
     /// <summary>
     /// Show an warning message
@@ -60,7 +60,7 @@ public partial class Toast:ComponentBase
     /// <param name="message">the message</param>
     /// <param name="duration">the duration in milliseconds to show the message</param>
     public static void ShowWarning(string message, int duration = 5_000)
-        => _ = Instance.jsRuntime.InvokeVoidAsync("ff.toast", "warn", Translater.TranslateIfNeeded(message), null, duration);
+        => _ = Instance.jsRuntime.InvokeVoidAsync("ff.toast", "warn", Translater.TranslateIfNeeded(message), string.Empty, duration);
 
 }
 

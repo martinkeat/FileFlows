@@ -46,47 +46,12 @@ window.ff = {
         };
         document.body.appendChild(tag);
     },
-    downloadFile: async function (url, filename) {
-        try {
-            const response = await fetch(url);
-
-            if (!response.ok) {
-                Toast.error('File not found.');
-                return;
-            }
-
-            const anchorElement = document.createElement('a');
-            anchorElement.href = '#';
-
-            anchorElement.addEventListener('click', async (event) => {
-                event.preventDefault();
-
-                const readableStream = response.body;
-                const writableStream = new WritableStream({
-                    async write(chunk) {
-                        const blob = new Blob([chunk]);
-                        const reader = new FileReader();
-
-                        reader.onload = () => {
-                            const dataURL = reader.result;
-                            const downloadElement = document.createElement('a');
-                            downloadElement.href = dataURL;
-                            downloadElement.download = filename ? filename : 'File';
-                            downloadElement.click();
-                            downloadElement.remove();
-                        };
-
-                        reader.readAsDataURL(blob);
-                    }
-                });
-
-                await readableStream.pipeTo(writableStream);
-            });
-
-            anchorElement.click();
-        } catch (error) {
-            Toast.error('Error occurred', error);
-        }     
+    downloadFile: function (url, filename) {
+        const anchorElement = document.createElement('a');
+        anchorElement.href = url;
+        anchorElement.download = filename ? filename : 'File';
+        anchorElement.click();
+        anchorElement.remove();
     },
     copyToClipboard: function (text) {
         if (window.clipboardData && window.clipboardData.setData) {

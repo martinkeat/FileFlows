@@ -399,12 +399,21 @@ public partial class LibraryFiles : ListPage<Guid, LibaryFileListModel>
         var file = Table.GetSelected()?.FirstOrDefault();
         if (file == null)
             return; // nothing to delete
-        string name = file.Name.Replace("\\", "/");
-        name = name.Substring(name.LastIndexOf("/", StringComparison.Ordinal) + 1);
+        
         string url = "/api/library-file/download/" + file.Uid;
 #if (DEBUG)
         url = "http://localhost:6868" + url;
 #endif
+        
+        var apiResult = await HttpHelper.Get<string>($"{url}?test=true");
+        if (apiResult.Success == false)
+        {
+            Toast.ShowError(apiResult.Body?.EmptyAsNull() ?? apiResult.Data?.EmptyAsNull() ?? "Failed to download.");
+            return;
+        }
+        
+        string name = file.Name.Replace("\\", "/");
+        name = name.Substring(name.LastIndexOf("/", StringComparison.Ordinal) + 1);
         await jsRuntime.InvokeVoidAsync("ff.downloadFile", url, name);
     }
 
