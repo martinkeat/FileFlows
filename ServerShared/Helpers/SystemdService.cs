@@ -9,6 +9,14 @@ namespace FileFlows.ServerShared.Helpers;
 /// </summary>
 public class SystemdService
 {
+
+    /// <summary>
+    /// Gets the location where to save the users systemd service file
+    /// </summary>
+    /// <returns></returns>
+    private static string GetSystemdServiceFolder()
+        => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), ".config", "systemd", "user");
+    
     /// <summary>
     /// Installs the service
     /// </summary>
@@ -35,8 +43,11 @@ public class SystemdService
         
         Process.Start("systemctl", "--user stop " + name);
         Process.Start("systemctl", "--user disable " + name);
-        if(File.Exists($"~/.config/systemd/user/{name}.service"))
-            File.Delete($"~/.config/systemd/user/{name}.service");
+
+        string serviceFile = Path.Combine(GetSystemdServiceFolder(), name + ".service");
+        if(File.Exists(serviceFile))
+            File.Delete(serviceFile);
+        
         Process.Start("systemctl", "--user daemon-reload");
         Process.Start("systemctl", "--user reset-failed");
     }
@@ -155,7 +166,7 @@ RestartSec=10
 [Install]
 WantedBy=multi-user.target";
 
-        string file = $"~/.config/systemd/user/fileflows{(isNode ? "-node" : "")}.service";
+        string file = Path.Combine(GetSystemdServiceFolder(), $"fileflows{(isNode ? "-node" : "")}.service");
         var fileInfo = new FileInfo(file);
         if (fileInfo.Directory.Exists == false)
         {
@@ -173,6 +184,7 @@ WantedBy=multi-user.target";
         try
         {
             File.WriteAllText(file, contents);
+            Console.WriteLine("Created service file: " + file);
             return true;
         }
         catch (Exception)
