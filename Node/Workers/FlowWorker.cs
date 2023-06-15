@@ -203,6 +203,7 @@ public class FlowWorker : Worker
         Task.Run(() =>
         {
             int exitCode = 0; 
+            StringBuilder completeLog = new StringBuilder();
             try
             {
 #pragma warning disable CS8601 // Possible null reference assignment.
@@ -250,7 +251,6 @@ public class FlowWorker : Worker
                     process.StartInfo.CreateNoWindow = true;
                     process.Start();
                     string output = process.StandardOutput.ReadToEnd();
-                    StringBuilder completeLog = new StringBuilder();
                     if (string.IsNullOrEmpty(output) == false)
                     {
                         completeLog.AppendLine(
@@ -276,7 +276,6 @@ public class FlowWorker : Worker
                             "==============================================================================");
                     }
 
-                    SaveLog(libFile, completeLog.ToString());
 
                     exitCode = process.ExitCode;
                     if (exitCode != 0)
@@ -289,7 +288,7 @@ public class FlowWorker : Worker
                 }
                 catch (Exception ex)
                 {
-                    Logger.Instance?.ELog("Error executing runner: " + ex.Message + Environment.NewLine + ex.StackTrace);
+                    completeLog.AppendLine("Error executing runner: " + ex.Message + Environment.NewLine + ex.StackTrace);
                     libFile.Status = FileStatus.ProcessingFailed;
                     libFileService.Update(libFile);
                     exitCode = -999;
@@ -305,17 +304,21 @@ public class FlowWorker : Worker
                     if (exitCode == 0 || CurrentConfigurationKeepFailedFlowFiles == false)
                     {
                         if (Directory.Exists(dir))
+                        {
                             Directory.Delete(dir, true);
+                            completeLog.AppendLine("Deleted temporary directory: " + dir);
+                        }
                     }
                     else
                     {
-                        Logger.Instance?.ILog("Flow failed keeping temporary files in: " + dir);
+                        completeLog.AppendLine("Flow failed keeping temporary files in: " + dir);
                     }
                 }
                 catch (Exception ex)
                 {
-                    Logger.Instance?.WLog("Failed to clean up runner directory: " + ex.Message);
+                    completeLog.AppendLine("Failed to clean up runner directory: " + ex.Message);
                 }
+                SaveLog(libFile, completeLog.ToString());
 
                 Trigger();
             }
@@ -470,7 +473,9 @@ public class FlowWorker : Worker
     /// <param name="libFile">The Library File that was processed</param>
     /// <param name="log">The full flow runner log</param>
     private void SaveLog(LibraryFile libFile, string log)
-    { 
+    {
+        if (string.IsNullOrWhiteSpace(log))
+            return;
         var service = new LibraryFileService();
         bool saved = service.SaveFullLog(libFile.Uid, log).Result;
         if (!saved)

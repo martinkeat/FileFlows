@@ -603,7 +603,7 @@ public class Runner
                     if (output == -1)
                     {
                         // the execution failed                     
-                        nodeParameters.Logger?.ELog("node returned error code:", CurrentNode!.Name);
+                        nodeParameters.Logger?.ELog("node returned error code: " + CurrentNode!.Name);
                         nodeParameters.Result = NodeResult.Failure;
                         return FileStatus.ProcessingFailed;
                     }
