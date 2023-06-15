@@ -15,9 +15,9 @@ public partial class Nodes : ListPage<Guid, ProcessingNode>
     private string lblInternal, lblAddress, lblRunners, lblVersion, lblDownloadNode, lblUpgradeRequired, lblUpgradeRequiredHint;
      
 #if(DEBUG)
-    string DownlaodUrl = "http://localhost:6868/download";
+    string DownloadUrl = "http://localhost:6868/download";
 #else
-    string DownlaodUrl = "/download";
+    string DownloadUrl = "/download";
 #endif
     protected override void OnInitialized()
     {

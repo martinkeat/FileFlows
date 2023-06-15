@@ -9,7 +9,7 @@
     <Head>
         @if (App.Instance.IsMobile == false)
         {
-            <a class="btn btn-download-node" target="_blank" href="@DownlaodUrl">@lblDownloadNode</a>
+            <a class="btn btn-download-node" target="_blank" href="@DownloadUrl">@lblDownloadNode</a>
         }
     </Head>
 
@@ -17,7 +17,6 @@
         <FlowTable @ref="Table" Data="@Data" TItem="ProcessingNode" Selection="SelectionMode.Multiple" TableIdentifier="Nodes"
             DoubleClick="@OnDoubleClick">
             <ToolBar>            
-                <FlowTableButton Clicked=Add Icon="fas fa-plus" Label="Labels.Add" />
                 <FlowTableButton Clicked=Edit SelectedOne="true" Icon="fas fa-edit" Label="Labels.Edit" />
                 <FlowTableButton Clicked=Delete SelectedOneOrMore="true" Icon="fas fa-trash" Label="Labels.Delete" />    
                 <FlowTableButtonSeparator />            

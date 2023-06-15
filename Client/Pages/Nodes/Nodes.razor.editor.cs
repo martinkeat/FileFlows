@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using FileFlows.Client.Components;
+using FileFlows.Client.Components.Dialogs;
 using FileFlows.Client.Components.Inputs;
 using FileFlows.Plugin;
 using Microsoft.AspNetCore.Components;
@@ -162,24 +163,7 @@ public partial class Nodes : ListPage<Guid, ProcessingNode>
             InputType = FormInputType.Label,
             Name = "MappingsDescription"
         });
-        
-        var onClickCallback = EventCallback.Factory.Create(this, () =>
-        {
-            Toast.ShowInfo("test");
-        });
-
-        
-        fields.Add(new ElementField()
-        {
-            Name = "CopyMappings",
-            HideLabel = true,
-            InputType  = FormInputType.Button,
-            Parameters = new ()
-            {
-                { nameof(InputButton.OnClick), onClickCallback }
-            }
-        });
-        fields.Add(new ElementField
+        var efMappings = new ElementField
         {
             InputType = FormInputType.KeyValue,
             Name = nameof(node.Mappings),
@@ -187,8 +171,48 @@ public partial class Nodes : ListPage<Guid, ProcessingNode>
             {
                 { "HideLabel", true }
             }
-        });
+        };
+        var otherNodes = this.Data.Where(x => x.Uid != node.Uid && x.Mappings?.Any() == true).ToList();
+        if (otherNodes.Any() == true)
+        {
+            var onClickCallback = EventCallback.Factory.Create(this, () => { _ = CopyMappingsDialog(node, otherNodes, efMappings); });
+            fields.Add(new ElementField()
+            {
+                Name = "CopyMappings",
+                HideLabel = true,
+                InputType = FormInputType.Button,
+                Parameters = new()
+                {
+                    { nameof(InputButton.OnClick), onClickCallback }
+                }
+            });
+        }
+
+        fields.Add(efMappings);
         return fields;
+    }
+
+    private async Task CopyMappingsDialog(ProcessingNode node, List<ProcessingNode> otherNodes, ElementField efMappings)
+    {
+        ProcessingNode source = await SelectDialog.Show("Copy Mappings", "Select a Node to copy mappings from", otherNodes.Select(
+            x => new ListOption()
+            {
+                Value = x,
+                Label = x.Name
+            }).ToList(), otherNodes.First());
+        if (source == null)
+            return; // was canceled
+        if (node.Mappings == null)
+            node.Mappings = new();
+        
+        
+        foreach (var mapping in source.Mappings ?? new())
+        {
+            if (node.Mappings.Any(x => x.Key == mapping.Key))
+                continue;
+            node.Mappings.Add(new(mapping.Key, mapping.Value));
+        }
+        efMappings.InvokeValueChanged(this, node.Mappings);
     }
     
     

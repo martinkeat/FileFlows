@@ -1,27 +1,26 @@
-using System.Threading.Tasks;
+﻿using FileFlows.Plugin;
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Web;
-using FileFlows.Shared;
 using Microsoft.JSInterop;
+using NPoco.Expressions;
 
 namespace FileFlows.Client.Components.Dialogs;
 
 /// <summary>
-/// A prompt dialog that asks the user for text input
+/// Dialog that prompts a user to select from a select dropdown
 /// </summary>
-public partial class Prompt : ComponentBase, IDisposable
+public partial class SelectDialog: ComponentBase, IDisposable
 {
     private string lblOk, lblCancel;
     private string Message, Title;
     /// <summary>
     /// The task used for when the dialog is closed
     /// </summary>
-    TaskCompletionSource<string> ShowTask;
+    object ShowTask;
 
     /// <summary>
     /// Gets or sets the singleton instance
     /// </summary>
-    private static Prompt Instance { get; set; }
+    private static SelectDialog Instance { get; set; }
 
     /// <summary>
     /// Gets or sets if this is visible
@@ -29,9 +28,9 @@ public partial class Prompt : ComponentBase, IDisposable
     private bool Visible { get; set; }
 
     /// <summary>
-    /// Gets or sets the current value
+    /// Gets or sets the index of the selected value
     /// </summary>
-    private string Value { get; set; }
+    public int SelectedIndex { get; set; }
 
     /// <summary>
     /// The unique identifier for this dialog
@@ -47,6 +46,11 @@ public partial class Prompt : ComponentBase, IDisposable
     /// Gets or sets the Javascript runtime
     /// </summary>
     [Inject] private IJSRuntime jsRuntime { get; set; }
+    
+    /// <summary>
+    /// Gets or sets the list options
+    /// </summary>
+    private List<ListOption> Options { get; set; }
 
     /// <summary>
     /// Initializes the component
@@ -77,14 +81,15 @@ public partial class Prompt : ComponentBase, IDisposable
     /// </summary>
     /// <param name="title">the title of the dialog</param>
     /// <param name="message">the message of the dialog</param>
+    /// <param name="options">the options to show in the list</param>
     /// <param name="value">the current value</param>
     /// <returns>an task to await for the dialog result</returns>
-    public static Task<string> Show(string title, string message, string value = "")
+    public static Task<T> Show<T>(string title, string message, List<ListOption> options, T value)
     {
         if (Instance == null)
-            return Task.FromResult<string>("");
+            return Task.FromResult<T>(default);
 
-        return Instance.ShowInstance(title, message, value);
+        return Instance.ShowInstance(title, message, options, value);
     }
 
     /// <summary>
@@ -92,19 +97,22 @@ public partial class Prompt : ComponentBase, IDisposable
     /// </summary>
     /// <param name="title">the title of the dialog</param>
     /// <param name="message">the message of the dialog</param>
+    /// <param name="options">the options to show in the list</param>
     /// <param name="value">the current value</param>
     /// <returns>an task to await for the dialog result</returns>
-    private Task<string> ShowInstance(string title, string message, string value = "")
+    private Task<T> ShowInstance<T>(string title, string message, List<ListOption> options, T value)
     {
         this.Title = Translater.TranslateIfNeeded(title?.EmptyAsNull() ?? "Labels.Prompt");
         this.Message = Translater.TranslateIfNeeded(message ?? "");
-        this.Value = value ?? "";
+        this.Options = options;
+        this.SelectedIndex = Math.Max(0, options.FindIndex(x => x.Value == (object)value));
         this.Visible = true;
         this.Focus = true;
         this.StateHasChanged();
 
-        Instance.ShowTask = new TaskCompletionSource<string>();
-        return Instance.ShowTask.Task;
+        var task = new TaskCompletionSource<T>();
+        Instance.ShowTask = task;
+        return task.Task;
     }
 
     /// <summary>
@@ -121,27 +129,27 @@ public partial class Prompt : ComponentBase, IDisposable
     }
 
     /// <summary>
-    /// A key was pressed
-    /// </summary>
-    /// <param name="e">the keyboard event</param>
-    private void OnKeyDown(KeyboardEventArgs e)
-    {
-        if (e.AltKey || e.CtrlKey || e.ShiftKey || string.IsNullOrWhiteSpace(Value))
-            return;
-        if (e.Key == "Enter")
-        {
-            Accept();
-        }
-    }
-
-    /// <summary>
     /// Accept the dialog
     /// </summary>
     private async void Accept()
     {
         this.Visible = false;
-        Instance.ShowTask.TrySetResult(Value);
+        SetResult(this.Options[this.SelectedIndex].Value);
         await Task.CompletedTask;
+    }
+
+    /// <summary>
+    /// Sets the result
+    /// </summary>
+    /// <param name="value">the value to set</param>
+    private void SetResult(object value)
+    {
+        object instance = Instance.ShowTask; // Assuming you have stored the instance in a variable
+        Type taskCompletionSourceType = instance.GetType();
+        var trySetResultMethod = taskCompletionSourceType.GetMethod("TrySetResult");
+        if (trySetResultMethod != null)
+            trySetResultMethod.Invoke(instance, new [] { value });
+        
     }
 
     /// <summary>
@@ -150,7 +158,7 @@ public partial class Prompt : ComponentBase, IDisposable
     private async void Cancel()
     {
         this.Visible = false;
-        Instance.ShowTask.TrySetResult("");
+        SetResult(null);
         await Task.CompletedTask;
     }
 
@@ -161,4 +169,12 @@ public partial class Prompt : ComponentBase, IDisposable
     {
         App.Instance.OnEscapePushed -= InstanceOnOnEscapePushed;
     }
+    
+    /// <summary>
+    /// Updates the selected index
+    /// </summary>
+    /// <param name="e">the change event args</param>
+    private void UpdateSelectedOption(ChangeEventArgs e)
+         => this.SelectedIndex = Convert.ToInt32(e.Value);
+
 }

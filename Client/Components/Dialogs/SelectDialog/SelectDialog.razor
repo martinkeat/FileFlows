@@ -1,0 +1,20 @@
+@namespace FileFlows.Client.Components.Dialogs
+
+<Modal Title="@Title" Visible="Visible">
+    <Body>
+        @if (string.IsNullOrEmpty(Message) == false)
+        {
+            <span>@Message</span>
+        }
+        <select id="@Uid" value="@SelectedIndex" @onchange="UpdateSelectedOption" style="display: block;width: 100%;margin: 0.5rem 0;">
+            @foreach(var opt in Options)
+            {
+                <option value="@Options.IndexOf(opt)">@opt.Label</option>
+            }
+        </select>
+    </Body>
+    <Footer>
+        <button @onclick=@Accept>@lblOk</button>
+        <button @onclick=@Cancel>@lblCancel</button>
+    </Footer>
+</Modal>
