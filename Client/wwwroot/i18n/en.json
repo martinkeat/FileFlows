@@ -475,7 +475,8 @@
         "MaxFileSizeMb-Suffix": "MB",
         "MaxFileSizeMb-Help": "The maximum file size this Processing Node can process.  If set to 0, there will be no limit.",
         "PreExecuteScript":"Pre-Execute Script",
-        "PreExecuteScript-Help":"A script that will run before any file is processed.  The result of this script must be 1 for it to pass anything else and the node will not process a file."
+        "PreExecuteScript-Help":"A script that will run before any file is processed.  The result of this script must be 1 for it to pass anything else and the node will not process a file.",
+        "CopyMappings": "Copy Mappings"
       }
     },
     "Plugins": {

@@ -1,6 +1,8 @@
 ﻿using System.ComponentModel;
+using FileFlows.Client.Components;
 using FileFlows.Client.Components.Inputs;
 using FileFlows.Plugin;
+using Microsoft.AspNetCore.Components;
 
 namespace FileFlows.Client.Pages;
 
@@ -9,8 +11,6 @@ public partial class Nodes : ListPage<Guid, ProcessingNode>
 
     public override async Task<bool> Edit(ProcessingNode node)
     {
-#if (!DEMO)
-
         bool isServerProcessingNode = node.Address == FileFlowsServer;
         node.Mappings ??= new();
         this.EditingItem = node;
@@ -36,7 +36,6 @@ public partial class Nodes : ListPage<Guid, ProcessingNode>
             Large = true,
             SaveCallback = Save, HelpUrl = helpUrl
         });
-#endif
         return false;
     }
 
@@ -162,6 +161,23 @@ public partial class Nodes : ListPage<Guid, ProcessingNode>
         {
             InputType = FormInputType.Label,
             Name = "MappingsDescription"
+        });
+        
+        var onClickCallback = EventCallback.Factory.Create(this, () =>
+        {
+            Toast.ShowInfo("test");
+        });
+
+        
+        fields.Add(new ElementField()
+        {
+            Name = "CopyMappings",
+            HideLabel = true,
+            InputType  = FormInputType.Button,
+            Parameters = new ()
+            {
+                { nameof(InputButton.OnClick), onClickCallback }
+            }
         });
         fields.Add(new ElementField
         {

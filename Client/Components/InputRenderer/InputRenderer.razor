@@ -18,6 +18,13 @@
     bool hideLabel = GetParameter<bool>(field, "HideLabel");
     switch (field.InputType)
     {
+        case FormInputType.Button:
+            {
+                var text = Translater.TranslateIfNeeded(label);
+                var onclick = GetParameter<EventCallback>(field, nameof(InputButton.OnClick));
+                <InputButton Field=@field Text="@text" OnClick="@onclick" />
+            }
+            break;
         case FormInputType.Text:
             {
                 var value = GetValue<string>(field.Name) ?? "";

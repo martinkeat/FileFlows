@@ -32,12 +32,8 @@ public partial class Nodes : ListPage<Guid, ProcessingNode>
     }
 
 
-    private async Task Add()
-    {
-#if (!DEMO)
-        await Edit(new ProcessingNode());
-#endif
-    }
+    private Task Add()
+        => Edit(new ProcessingNode());
 
     public override Task PostLoad()
     {
@@ -52,9 +48,6 @@ public partial class Nodes : ListPage<Guid, ProcessingNode>
 
     async Task Enable(bool enabled, ProcessingNode node)
     {
-#if (DEMO)
-        return;
-#else
         Blocker.Show();
         try
         {
@@ -65,14 +58,10 @@ public partial class Nodes : ListPage<Guid, ProcessingNode>
         {
             Blocker.Hide();
         }
-#endif
     }
 
     async Task<bool> Save(ExpandoObject model)
     {
-#if (DEMO)
-        return true;
-#else
         Blocker.Show();
         this.StateHasChanged();
 
@@ -99,7 +88,6 @@ public partial class Nodes : ListPage<Guid, ProcessingNode>
             Blocker.Hide();
             this.StateHasChanged();
         }
-#endif
     }
 
 }
