@@ -288,7 +288,7 @@ public class FlowWorker : Worker
                 }
                 catch (Exception ex)
                 {
-                    completeLog.AppendLine("Error executing runner: " + ex.Message + Environment.NewLine + ex.StackTrace);
+                    AppendToCompleteLog(completeLog, "Error executing runner: " + ex.Message + Environment.NewLine + ex.StackTrace, type: "ERR");
                     libFile.Status = FileStatus.ProcessingFailed;
                     libFileService.Update(libFile);
                     exitCode = -999;
@@ -306,17 +306,17 @@ public class FlowWorker : Worker
                         if (Directory.Exists(dir))
                         {
                             Directory.Delete(dir, true);
-                            completeLog.AppendLine("Deleted temporary directory: " + dir);
+                            AppendToCompleteLog(completeLog, "Deleted temporary directory: " + dir);
                         }
                     }
                     else
                     {
-                        completeLog.AppendLine("Flow failed keeping temporary files in: " + dir);
+                        AppendToCompleteLog(completeLog, "Flow failed keeping temporary files in: " + dir);
                     }
                 }
                 catch (Exception ex)
                 {
-                    completeLog.AppendLine("Failed to clean up runner directory: " + ex.Message);
+                    AppendToCompleteLog(completeLog, "Failed to clean up runner directory: " + ex.Message, type: "ERR");
                 }
                 SaveLog(libFile, completeLog.ToString());
 
@@ -324,6 +324,14 @@ public class FlowWorker : Worker
             }
         });
     }
+
+    /// <summary>
+    /// Adds a message to the complete log with a formatted date
+    /// </summary>
+    /// <param name="completeLog">the complete log</param>
+    /// <param name="message">the message to add</param>
+    private void AppendToCompleteLog(StringBuilder completeLog, string message, string type = "INFO")
+        => completeLog.AppendLine($"{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff")} [{type}] -> {message}");
 
     private bool PreExecuteScriptTest(ProcessingNode node)
     {

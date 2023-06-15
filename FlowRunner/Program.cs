@@ -33,7 +33,7 @@ public class Program
     
     
     /// <summary>
-    /// Runs the runnner
+    /// Runs the runner
     /// </summary>
     /// <param name="args">the args for the runner</param>
     /// <returns>the exit code of the runner</returns>
@@ -116,7 +116,7 @@ public class Program
 
             var libfileUid = Guid.Parse(GetArgument(args, "--libfile"));
             HttpHelper.Client = HttpHelper.GetDefaultHttpHelper(Service.ServiceBaseUrl);
-            Execute(new()
+            var result = Execute(new()
             {
                 IsServer = server,
                 Config = config,
@@ -126,7 +126,7 @@ public class Program
                 WorkingDirectory = workingDir,
                 Hostname = hostname
             });
-            return 0;
+            return result == null ? -2 : result == FileStatus.Processed ? 0 : -1;
         }
         catch (Exception ex)
         {
@@ -151,7 +151,13 @@ public class Program
     }
 
 
-    static void Execute(ExecuteArgs args)
+    /// <summary>
+    /// Executes teh runner
+    /// </summary>
+    /// <param name="args">the args</param>
+    /// <returns>the library file status, or null if library file was not loaded</returns>
+    /// <exception cref="Exception">error was thrown</exception>
+    static FileStatus? Execute(ExecuteArgs args)
     {
         ProcessingNode node;
         var nodeService = NodeService.Load();
@@ -182,7 +188,7 @@ public class Program
         if (libFile == null)
         {
             LogInfo("Library file not found, must have been deleted from the library files.  Nothing to process");
-            return; // nothing to process
+            return null; // nothing to process
         }
 
         string workingFile = node.Map(libFile.Name);
@@ -193,7 +199,7 @@ public class Program
         {
             LogInfo("Library was not found, deleting library file");
             libfileService.Delete(libFile.Uid).Wait();
-            return;
+            return null;
         }
 
         FileSystemInfo file = lib.Folders ? new DirectoryInfo(workingFile) : new FileInfo(workingFile);
@@ -210,12 +216,12 @@ public class Program
                     libFile.Status = FileStatus.MappingIssue;
                     libFile.ExecutedNodes = new List<ExecutedNode>();                        
                     libfileService.Update(libFile).Wait();
-                    return;
+                    return libFile.Status;
                 }                    
             }
             LogInfo("Library file does not exist, deleting from library files: " + file.FullName);
             libfileService.Delete(libFile.Uid).Wait();
-            return;
+            return libFile.Status;
         }
 
         var flow = args.Config.Flows.FirstOrDefault(x => x.Uid == (lib.Flow?.Uid ?? Guid.Empty));
@@ -224,7 +230,7 @@ public class Program
             LogInfo("Flow not found, cannot process file: " + file.FullName);
             libFile.Status = FileStatus.FlowNotFound;
             libfileService.Update(libFile).Wait();
-            return;
+            return libFile.Status;
         }
 
         libFile.Status = FileStatus.Processing;
@@ -272,6 +278,7 @@ public class Program
 
         var runner = new Runner(info, flow, node, args.WorkingDirectory);
         runner.Run();
+        return libFile.Status;
     }
 
     private static long GetDirectorySize(string path)
