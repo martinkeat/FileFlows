@@ -23,7 +23,6 @@
   #flow-zoomer {
     display: none;
   }
-
   .flow-name {
     background: var(--base) !important;
     left: 0rem;
@@ -32,11 +31,9 @@
     top: 0;
     padding-top: 1rem;
   }
-
   .elements-hidden .flow-elements {
     display: none;
   }
-
   .elements-visible .flow-elements {
     position: fixed;
     left: 0;
@@ -67,7 +64,6 @@
   .elements-visible .show-elements:before {
     content: "\f00d";
   }
-
   .show-elements {
     position: fixed;
     top: 4rem;
@@ -86,6 +82,7 @@ canvas {
   right: 0;
   bottom: 0;
   left: 0;
+  outline: none;
 }
 
 .flow-elements {

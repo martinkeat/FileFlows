@@ -242,7 +242,11 @@ public partial class Editor : InputRegister, IDisposable
             {
                 builder.OpenElement(++count, "div");
                 builder.AddAttribute(++count, "class", "description");
-                builder.AddContent(++count, EditorDescription);
+                string desc = Markdig.Markdown.ToHtml(EditorDescription).Trim();
+                if (desc.StartsWith("<p>") && desc.EndsWith("</p>"))
+                    desc = desc[3..^4].Trim();
+                desc = desc.Replace("<a ", "<a rel=\"noreferrer\" target=\"_blank\" ");
+                builder.AddContent(++count, new MarkupString(desc));
                 builder.CloseElement();
             }
 

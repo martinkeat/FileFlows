@@ -318,7 +318,9 @@ public class FlowWorker : Worker
                 {
                     AppendToCompleteLog(completeLog, "Failed to clean up runner directory: " + ex.Message, type: "ERR");
                 }
+                #if(!DEBUG) // not in debug since complete log is mostly empty
                 SaveLog(libFile, completeLog.ToString());
+                #endif
 
                 Trigger();
             }
