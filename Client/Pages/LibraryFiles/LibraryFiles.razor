@@ -188,7 +188,7 @@
                     var worker = WorkerStatus?.FirstOrDefault(x => x.LibraryFile?.Uid == item.Uid);
                     if (worker != null)
                     {
-                        var overall = worker.TotalParts == 0 ? 100 : (worker.CurrentPart / worker.TotalParts) * 100;
+                        var overall = worker.TotalParts == 0 ? 100 : ((worker.CurrentPart / (double)worker.TotalParts)) * 100;
                         var current = worker.CurrentPartPercent;
                         <div class="flow-bar worker-progress @(current > 0 ? "has-current" : "")">
                             @if (current > 0)
