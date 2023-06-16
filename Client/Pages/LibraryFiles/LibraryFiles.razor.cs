@@ -99,7 +99,11 @@ public partial class LibraryFiles : ListPage<Guid, LibaryFileListModel>, IDispos
     /// <param name="sender">the sender</param>
     /// <param name="e">the event args</param>
     void AutoRefreshTimerElapsed(object sender, ElapsedEventArgs e)
-        => _ = Refresh(false);
+    {
+        if(SelectedStatus == FileStatus.Processing)
+            _ = Refresh(false);
+    }
+        
 
     /// <summary>
     /// Refreshes the page
