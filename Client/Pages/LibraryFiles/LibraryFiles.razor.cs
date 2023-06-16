@@ -38,6 +38,7 @@ public partial class LibraryFiles : ListPage<Guid, LibaryFileListModel>
     private string Title;
     private string lblLibraryFiles, lblFileFlowsServer;
     private int TotalItems;
+    private List<FlowExecutorInfo> WorkerStatus = new ();
 
     protected override string DeleteMessage => "Labels.DeleteLibraryFiles";
     
@@ -147,6 +148,19 @@ public partial class LibraryFiles : ListPage<Guid, LibaryFileListModel>
         this.StateHasChanged();
     }
 
+    /// <summary>
+    /// Refreshes the worker status
+    /// </summary>
+    private async Task RefreshWorkerStatus()
+    {
+        var response = await HttpHelper.Get<List<FlowExecutorInfo>>("/api/worker");
+        if (response.Success == false)
+            return;
+        this.WorkerStatus = response.Data;
+        if(this.SelectedStatus == FileStatus.Processing)
+            this.StateHasChanged();
+    }
+
     public override async Task<bool> Edit(LibaryFileListModel item)
     {
         await Helpers.LibraryFileEditor.Open(Blocker, Editor, item.Uid);
@@ -250,6 +264,7 @@ public partial class LibraryFiles : ListPage<Guid, LibaryFileListModel>
             };
         }
 
+        await RefreshWorkerStatus();
         RefreshStatus(request.Data?.Status?.ToList() ?? new List<LibraryStatus>());
 
         if (request.Headers.ContainsKey("x-total-items") &&

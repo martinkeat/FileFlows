@@ -20,5 +20,15 @@
     width: unset;
   }
 }
+.worker-progress.has-current .current-progress {
+  bottom: 0.3rem !important;
+  background: #2b8fb3 !important;
+}
+.worker-progress.has-current .overall-progress {
+  flex-grow: 1;
+  width: 25%;
+  top: unset;
+  height: 0.2rem;
+}
 
 /*# sourceMappingURL=LibraryFiles.razor.css.map */

@@ -165,43 +165,8 @@ public partial class BasicDashboard : IDisposable
         }
     }
 
-    async Task<RequestResult<List<FlowExecutorInfo>>> GetData()
-    {
-#if (DEMO)
-        return new RequestResult<List<FlowExecutorInfo>>
-        {
-            Success = true,
-            Data = new List<FlowExecutorInfo>
-            {
-                new FlowExecutorInfo
-                {
-                    LibraryFile = new LibraryFile { Name = "DemoFile.mkv" },
-                    LibraryPath = @"C:\Videos",
-                    CurrentPart = 1,
-                    CurrentPartName = "Curren Flow Part",
-                    CurrentPartPercent = 50,
-                    LastUpdate = DateTime.Now,
-                    Log = "Test Log",
-                    NodeName = "Remote Processing Node",
-                    NodeUid = Guid.NewGuid(),
-                    Library = new ObjectReference
-                    {
-                        Name = "Demo Library",
-                        Uid = Guid.NewGuid()
-                    },
-                    RelativeFile = "DemoFile.mkv",
-                    StartedAt = DateTime.Now.AddMinutes(-1),
-                    TotalParts = 5,
-                    WorkingFile = "tempfile.mkv",
-                    Uid = Guid.NewGuid()
-                }
-            }
-        };
-#else
-        return await HttpHelper.Get<List<FlowExecutorInfo>>(ApiUrl);
-#endif
-        
-    }
+    Task<RequestResult<List<FlowExecutorInfo>>> GetData()
+        => HttpHelper.Get<List<FlowExecutorInfo>>(ApiUrl);
 
 
     private async Task WaitForRender()

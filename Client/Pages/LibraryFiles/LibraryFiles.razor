@@ -152,7 +152,7 @@
                 <span>@(item.Status == null ? string.Empty : Translater.Instant("Enums.FileStatus." + item.Status))</span>
             </Cell>
         </FlowTableColumn>
-        <FlowTableColumn TItem="LibaryFileListModel" Width="min(6rem, 10vw)" Hidden="@App.Instance.IsMobile">
+        <FlowTableColumn TItem="LibaryFileListModel" Width="min(6rem, 10vw)" Hidden="@(SelectedStatus == FileStatus.Processing || App.Instance.IsMobile)">
             <Header>
                 Size
             </Header>
@@ -176,6 +176,28 @@
                 else if(item.OriginalSize != null)
                 {
                     <span>@Helpers.FileSizeFormatter.FormatSize(item.OriginalSize.Value)</span>
+                }
+            </Cell>
+        </FlowTableColumn>
+        <FlowTableColumn TItem="LibaryFileListModel" Width="8rem" Hidden="@(SelectedStatus != FileStatus.Processing)">
+            <Header>
+                Progress
+            </Header>
+            <Cell Context="item">
+                @{
+                    var worker = WorkerStatus?.FirstOrDefault(x => x.LibraryFile?.Uid == item.Uid);
+                    if (worker != null)
+                    {
+                        var overall = worker.TotalParts == 0 ? 100 : (worker.CurrentPart / worker.TotalParts) * 100;
+                        var current = worker.CurrentPartPercent;
+                        <div class="flow-bar worker-progress @(current > 0 ? "has-current" : "")">
+                            @if (current > 0)
+                            {
+                                <div class="current-progress bar-value" style="width:@current%"></div>
+                            }
+                            <div class="overall-progress  bar-value" style="width:@overall%"></div>
+                        </div>
+                    }
                 }
             </Cell>
         </FlowTableColumn>
