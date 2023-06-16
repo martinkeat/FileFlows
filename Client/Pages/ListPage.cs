@@ -45,7 +45,7 @@ public abstract class ListPage<U, T> : ComponentBase where T : IUniqueObject<U>
             _ = Load(default);
     }
 
-    public virtual async Task Refresh() => await Load(default);
+    public virtual async Task Refresh(bool showBlocker = true) => await Load(default, showBlocker);
 
     public virtual string FetchUrl => ApiUrl;
 
@@ -73,11 +73,12 @@ public abstract class ListPage<U, T> : ComponentBase where T : IUniqueObject<U>
     /// Sets the table data, virtual so a filter can be set if needed
     /// </summary>
     /// <param name="data">the data to set</param>
-    protected virtual void SetTableData(List<T> data) => Table.SetData(data);
+    protected virtual void SetTableData(List<T> data) => Table.SetData(data, clearSelected: false);
 
-    public virtual async Task Load(U selectedUid)
+    public virtual async Task Load(U selectedUid, bool showBlocker = true)
     {
-        Blocker.Show("Loading Data");
+        if(showBlocker)
+            Blocker.Show("Loading Data");
         await this.WaitForRender();
         try
         {
@@ -108,7 +109,8 @@ public abstract class ListPage<U, T> : ComponentBase where T : IUniqueObject<U>
             fetching.Release();
             HasData = this.Data?.Any() == true;
             this.Loaded = true;
-            Blocker.Hide();
+            if(showBlocker)
+                Blocker.Hide();
             await this.WaitForRender();
         }
     }

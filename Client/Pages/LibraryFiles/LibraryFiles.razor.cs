@@ -99,17 +99,18 @@ public partial class LibraryFiles : ListPage<Guid, LibaryFileListModel>, IDispos
     /// <param name="sender">the sender</param>
     /// <param name="e">the event args</param>
     void AutoRefreshTimerElapsed(object sender, ElapsedEventArgs e)
-        => _ = Refresh();
+        => _ = Refresh(false);
 
     /// <summary>
     /// Refreshes the page
     /// </summary>
-    public override async Task Refresh()
+    /// <param name="showBlocker">if the blocker should be shown or not</param>
+    public override async Task Refresh(bool showBlocker = true)
     {
         AutoRefreshTimer?.Stop();
         try
         {
-            await base.Refresh();
+            await base.Refresh(showBlocker);
         }
         finally
         {
@@ -117,6 +118,9 @@ public partial class LibraryFiles : ListPage<Guid, LibaryFileListModel>, IDispos
         }
     }
 
+    /// <summary>
+    /// Disposes of the component
+    /// </summary>
     public void Dispose()
     {
         if (AutoRefreshTimer != null)

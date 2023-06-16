@@ -69,11 +69,11 @@ public partial class LibraryFilesSearch : ListPage<Guid, LibraryFile>
         SearchModel.ToDate = range.End.Date;
     }
 
-    public override Task Load(Guid selectedUid)
+    public override Task Load(Guid selectedUid, bool showBlocker = true)
     {
         if (Searched == false)
             return Task.CompletedTask;
-        return base.Load(selectedUid);
+        return base.Load(selectedUid, showBlocker: showBlocker);
     }
 
     protected override Task<RequestResult<List<LibraryFile>>> FetchData()
