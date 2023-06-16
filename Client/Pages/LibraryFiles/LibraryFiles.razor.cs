@@ -1,3 +1,4 @@
+using System.Timers;
 using FileFlows.Client.Components.Common;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
@@ -6,7 +7,7 @@ using FileFlows.Client.Components.Dialogs;
 
 namespace FileFlows.Client.Pages;
 
-public partial class LibraryFiles : ListPage<Guid, LibaryFileListModel>
+public partial class LibraryFiles : ListPage<Guid, LibaryFileListModel>, IDisposable
 {
     private string filter = string.Empty;
     private FileStatus? filterStatus;
@@ -39,6 +40,7 @@ public partial class LibraryFiles : ListPage<Guid, LibaryFileListModel>
     private string lblLibraryFiles, lblFileFlowsServer;
     private int TotalItems;
     private List<FlowExecutorInfo> WorkerStatus = new ();
+    private Timer AutoRefreshTimer;
 
     protected override string DeleteMessage => "Labels.DeleteLibraryFiles";
     
@@ -82,6 +84,48 @@ public partial class LibraryFiles : ListPage<Guid, LibaryFileListModel>
         this.lblSearch = Translater.Instant("Labels.Search");
         this.lblDeleteSwitch = Translater.Instant("Labels.DeleteLibraryFilesPhysicallySwitch");
         base.OnInitialized(true);
+        
+        
+        AutoRefreshTimer = new Timer();
+        AutoRefreshTimer.Elapsed += AutoRefreshTimerElapsed;
+        AutoRefreshTimer.Interval = 10_000;
+        AutoRefreshTimer.AutoReset = false;
+        AutoRefreshTimer.Start();
+    }
+
+    /// <summary>
+    /// Auto refresh timer elapsed
+    /// </summary>
+    /// <param name="sender">the sender</param>
+    /// <param name="e">the event args</param>
+    void AutoRefreshTimerElapsed(object sender, ElapsedEventArgs e)
+        => _ = Refresh();
+
+    /// <summary>
+    /// Refreshes the page
+    /// </summary>
+    public override async Task Refresh()
+    {
+        AutoRefreshTimer?.Stop();
+        try
+        {
+            await base.Refresh();
+        }
+        finally
+        {
+            AutoRefreshTimer?.Start();
+        }
+    }
+
+    public void Dispose()
+    {
+        if (AutoRefreshTimer != null)
+        {
+            AutoRefreshTimer.Stop();
+            AutoRefreshTimer.Elapsed -= AutoRefreshTimerElapsed;
+            AutoRefreshTimer.Dispose();
+            AutoRefreshTimer = null;
+        }
     }
 
     private Task<RequestResult<List<LibraryStatus>>> GetStatus() => HttpHelper.Get<List<LibraryStatus>>(ApiUrl + "/status");

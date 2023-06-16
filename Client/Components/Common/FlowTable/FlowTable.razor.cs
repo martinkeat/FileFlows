@@ -118,7 +118,7 @@ public partial class FlowTable<TItem>: FlowTableBase,IDisposable, INotifyPropert
         {
             if (this._Data == value)
                 return;
-            SetData(value);
+            SetData(value, clearSelected: false);
         }
     }
 
