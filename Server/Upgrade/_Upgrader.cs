@@ -1,7 +1,8 @@
-﻿using FileFlows.Server.Controllers;
+﻿using FileFlows.Server.Database;
 using FileFlows.Server.Database.Managers;
 using FileFlows.Server.Helpers;
 using FileFlows.Shared.Models;
+using MySql.Data.MySqlClient;
 
 namespace FileFlows.Server.Upgrade;
 
@@ -15,18 +16,38 @@ public class Upgrader
         // so on a clean install these do not run
         if (currentVersion > new Version(0, 4, 0))
         {
-            if (settings.Version != Globals.Version.ToString())
+            if (new Version(settings.Version).ToString() != new Version(Globals.Version).ToString())
             {
                 // first backup the database
                 if (DbHelper.UseMemoryCache)
                 {
                     try
                     {
+                        Logger.Instance.ILog("Backing up database");
                         string source = SqliteDbManager.SqliteDbFile;
-                        File.Copy(source, source.Replace(".sqlite", "-" + currentVersion.Major + "." + currentVersion.Minor + "." + currentVersion.Build + ".sqlite.backup"));
+                        string dbBackup = source.Replace(".sqlite",
+                            "-" + currentVersion.Major + "." + currentVersion.Minor + "." + currentVersion.Build +
+                            ".sqlite.backup");
+                        File.Copy(source, dbBackup);
+                        Logger.Instance.ILog("Backed up database to: " + dbBackup);
                     }
                     catch (Exception)
                     {
+                    }
+                }
+                else
+                {
+                    // backup a MySQL db using the migrator
+                    try
+                    {
+                        Logger.Instance.ILog("Backing up database, please wait this may take a while");
+                        string dbBackup = DatabaseBackupManager.CreateBackup(AppSettings.Instance.DatabaseConnection,
+                            DirectoryHelper.DatabaseDirectory, currentVersion);
+                        Logger.Instance.ILog("Backed up database to: " + dbBackup);
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.Instance.ELog("Failed creating database backup: " + ex.Message);
                     }
                 }
             }
