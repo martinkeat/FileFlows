@@ -111,9 +111,11 @@ where Status = 1 and ProcessingEnded > ProcessingStarted;";
     /// <returns>the shrinkage groups</returns>
     public List<ShrinkageData> GetShrinkageGroups()
     {
+        var libs = new LibraryService().GetAll().ToDictionary(x => x.Uid, x => x.Name);
+        
         var libraries = Data.Where(x => x.Value.Status == FileStatus.Processed)
             .Select(x => x.Value)
-            .GroupBy(x => x.LibraryName)
+            .GroupBy(x => x.LibraryUid != null && libs.ContainsKey(x.LibraryUid.Value) ? libs[x.LibraryUid.Value] : x.LibraryName)
             .Select(x => new ShrinkageData()
             {
                 Library = x.Key,

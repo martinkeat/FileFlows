@@ -59,7 +59,8 @@ public class ObjectReferenceUpdater:Worker
                 if (dictLibraries.ContainsKey(lf.Library.Uid) && lf.Library.Name != dictLibraries[lf.Library.Uid])
                 {
                     string oldName = lf.Library.Name;
-                    lf.Library.Name = dictLibraries[lf.Library.Uid];
+                    string newName = dictLibraries[lf.Library.Uid];
+                    lf.LibraryName = newName;
                     Logger.Instance.ILog($"Updating Library name reference '{oldName}' to '{lf.Library.Name}' in file: {lf.Name}");
                     changed = true;
                 }
