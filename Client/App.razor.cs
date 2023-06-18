@@ -93,22 +93,15 @@ namespace FileFlows.Client
             PageSize = await LocalStorage.GetItemAsync<int>(nameof(PageSize));
             if (PageSize < 100 || PageSize > 5000)
                 PageSize = 1000;
-            
+
             var dimensions = await jsRuntime.InvokeAsync<Dimensions>("ff.deviceDimensions");
             DisplayWidth = dimensions.width;
             DisplayHeight = dimensions.height;
             var dotNetObjRef = DotNetObjectReference.Create(this);
             _ = jsRuntime.InvokeVoidAsync("ff.onEscapeListener", new object[] { dotNetObjRef });
             _ = jsRuntime.InvokeVoidAsync("ff.attachEventListeners", new object[] { dotNetObjRef });
-
-#if (DEMO)
-            Settings = new FileFlows.Shared.Models.Settings
-            {
-                
-            };
-#else
-            Settings = (await HttpHelper.Get<FileFlows.Shared.Models.Settings>("/api/settings")).Data ?? new FileFlows.Shared.Models.Settings();
-#endif
+            Settings = (await HttpHelper.Get<FileFlows.Shared.Models.Settings>("/api/settings")).Data ??
+                       new FileFlows.Shared.Models.Settings();
             await LoadAppInfo();
             await LoadLanguage();
             LanguageLoaded = true;

@@ -15,6 +15,11 @@ public partial class LibraryFiles : ListPage<Guid, LibaryFileListModel>, IDispos
     [Inject] private INavigationService NavigationService { get; set; }
     [Inject] private Blazored.LocalStorage.ILocalStorageService LocalStorage { get; set; }
     
+    /// <summary>
+    /// Gets or sets the client service
+    /// </summary>
+    [Inject] private ClientService ClientService { get; set; }
+    
     [Inject] private IJSRuntime jsRuntime { get; set; }
 
     private FlowSkyBox<FileStatus> Skybox;
@@ -205,10 +210,7 @@ public partial class LibraryFiles : ListPage<Guid, LibaryFileListModel>, IDispos
     /// </summary>
     private async Task RefreshWorkerStatus()
     {
-        var response = await HttpHelper.Get<List<FlowExecutorInfo>>("/api/worker");
-        if (response.Success == false)
-            return;
-        this.WorkerStatus = response.Data;
+        this.WorkerStatus = await ClientService.GetExecutorInfo();
         if(this.SelectedStatus == FileStatus.Processing)
             this.StateHasChanged();
     }

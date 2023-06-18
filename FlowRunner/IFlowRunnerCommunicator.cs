@@ -25,7 +25,7 @@ public interface IFlowRunnerCommunicator
 public class FlowRunnerCommunicator : IFlowRunnerCommunicator
 {
     /// <summary>
-    /// Gets ors sets the URL to the signalr endpoint on the FileFlows server
+    /// Gets or sets the URL to the signalr endpoint on the FileFlows server
     /// </summary>
     public static string SignalrUrl { get; set; }
     

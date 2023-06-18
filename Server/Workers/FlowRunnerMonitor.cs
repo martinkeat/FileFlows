@@ -1,4 +1,6 @@
+using FileFlows.Plugin;
 using FileFlows.Server.Controllers;
+using FileFlows.Server.Hubs;
 using FileFlows.Server.Services;
 using FileFlows.ServerShared.Workers;
 using FileFlows.Shared.Models;
@@ -27,6 +29,7 @@ public class FlowRunnerMonitor:Worker
 
     protected override void Execute()
     {
+        ClientServiceManager.Instance.SendToast(LogType.Info, "this iss a test");
         Controller.AbortDisconnectedRunners();
         if (StartUpRunningFiles?.Any() == true)
         {

@@ -3,16 +3,10 @@ using FileFlows.Server.Workers;
 using System.Text.RegularExpressions;
 using Microsoft.OpenApi.Models;
 using System.Runtime.InteropServices;
-using System.Security.Cryptography.X509Certificates;
+using FileFlows.Server.Hubs;
 using FileFlows.Server.Middleware;
 using FileFlows.ServerShared.Workers;
-using FileFlows.Shared.Helpers;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Server.Kestrel.Core;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.FileProviders;
-using Microsoft.Extensions.Hosting;
+using Microsoft.AspNetCore.SignalR;
 
 namespace FileFlows.Server;
 
@@ -210,10 +204,16 @@ public class WebServer
 
         app.MapHub<Hubs.FlowHub>("/flow");
 
+        app.MapHub<Hubs.ClientServiceHub>("/client-service");
+
+
         app.UseResponseCompression();
 
         // this will run the asp.net app and wait until it is killed
         Console.WriteLine("Running FileFlows Server");
+     
+        var _clientServiceHub = app.Services.GetRequiredService<IHubContext<ClientServiceHub>>();
+        _ = new ClientServiceManager(_clientServiceHub); 
 
         app.Run($"{protocol}://0.0.0.0:{Port}/");                
         
