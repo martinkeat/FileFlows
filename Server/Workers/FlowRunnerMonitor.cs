@@ -29,7 +29,6 @@ public class FlowRunnerMonitor:Worker
 
     protected override void Execute()
     {
-        ClientServiceManager.Instance.SendToast(LogType.Info, "this iss a test");
         Controller.AbortDisconnectedRunners();
         if (StartUpRunningFiles?.Any() == true)
         {

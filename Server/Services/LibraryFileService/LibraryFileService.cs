@@ -1,5 +1,6 @@
 ﻿using FileFlows.Server.Helpers;
 using FileFlows.Server.Controllers;
+using FileFlows.Server.Hubs;
 using FileFlows.ServerShared.Services;
 using FileFlows.Shared.Models;
 
@@ -40,6 +41,7 @@ public partial class LibraryFileService : ILibraryFileService
         file.FinalMetadata ??= new ();
         await Database_Insert(file);
         AddFile(file);
+        ClientServiceManager.Instance.UpdateFileStatus();
         return await Get(file.Uid);
     }
     
@@ -87,6 +89,7 @@ public partial class LibraryFileService : ILibraryFileService
             file.Flags = LibraryFileFlags.None;
         Database_Update(file);
         UpdateFile(file);
+        ClientServiceManager.Instance.UpdateFileStatus();
         return Task.FromResult(file);
     }
 
@@ -131,6 +134,7 @@ public partial class LibraryFileService : ILibraryFileService
         string inStr = string.Join(",", uids.Select(x => $"'{x}'"));
         await Database_Execute($"delete from LibraryFile where Uid in ({inStr})", null);
         Remove(uids);
+        ClientServiceManager.Instance.UpdateFileStatus();
     }
 
     /// <summary>
@@ -145,6 +149,7 @@ public partial class LibraryFileService : ILibraryFileService
         string inStr = string.Join(",", libraryUids.Select(x => $"'{x}'"));
         await Database_Execute($"delete from LibraryFile where LibraryUid in ({inStr})", null);
         RemoveLibraries(libraryUids);
+        ClientServiceManager.Instance.UpdateFileStatus();
     }
 
     /// <summary>
@@ -241,6 +246,7 @@ public partial class LibraryFileService : ILibraryFileService
         string inStr = string.Join(",", uids.Select(x => $"'{x}'"));
         await Database_Execute($"update LibraryFile set Status = 0 where Uid in ({inStr})");
         await SetStatus(FileStatus.Unprocessed, uids);
+        ClientServiceManager.Instance.UpdateFileStatus();
     }
 
     /// <summary>
@@ -262,6 +268,7 @@ public partial class LibraryFileService : ILibraryFileService
             await Database_Execute($"update LibraryFile set Status = 0 where Status = {(int)FileStatus.Processing} and NodeUid = '{nodeUid}'");
         else
             await Database_Execute($"update LibraryFile set Status = 0 where Status = {(int)FileStatus.Processing}");
+        ClientServiceManager.Instance?.UpdateFileStatus();
     }
     
     /// <summary>

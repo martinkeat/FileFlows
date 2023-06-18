@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Timers;
+using FileFlows.Server.Hubs;
 using FileFlows.Server.Services;
 using FileHelper = FileFlows.ServerShared.Helpers.FileHelper;
 
@@ -71,27 +72,19 @@ public class WatchedLibrary:IDisposable
         Logger.Instance.DLog(message);
     }
 
+    /// <summary>
+    /// Fired when the queue timer elapses
+    /// </summary>
+    /// <param name="sender">the sender</param>
+    /// <param name="e">the event args</param>
     private void QueueTimerOnElapsed(object? sender, ElapsedEventArgs e)
-    {
-        ProcessQueue();
-        // try
-        // {
-        //     ProcessQueuedItem();
-        // }
-        // catch (Exception)
-        // {
-        // }
-        // finally
-        // {
-        //     if (Disposed == false && QueuedHasItems())
-        //     {
-        //         Thread.Sleep(1000);
-        //         // QueueTimer.Start();
-        //     }
-        // }
-    }
+        => ProcessQueue();
 
     private SemaphoreSlim processorLock= new (1);
+    
+    /// <summary>
+    /// Processes the queue
+    /// </summary>
     private void ProcessQueue()
     {
         if (processorLock.Wait(1000) == false)
@@ -259,6 +252,8 @@ public class WatchedLibrary:IDisposable
                 SystemEvents.TriggerFileAdded(result, Library);
                 Logger.Instance.DLog(
                     $"Time taken \"{(DateTime.Now.Subtract(dtTotal))}\" to successfully add new library file: \"{fullpath}\"");
+                
+                ClientServiceManager.Instance.SendToast(LogType.Info, "New File: " + result.RelativePath);
             }
             else
             {

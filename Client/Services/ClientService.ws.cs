@@ -1,6 +1,8 @@
-﻿using FileFlows.Client.Components;
+﻿using System.Text.Json;
+using FileFlows.Client.Components;
 using FileFlows.Plugin;
 using Microsoft.AspNetCore.SignalR.Client;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace FileFlows.Client.Services;
 
@@ -28,6 +30,16 @@ public partial class ClientService
     /// Event raised when the client is disconnected from the SignalR server.
     /// </summary>
     public event Action Disconnected;
+
+    /// <summary>
+    /// Event raised when the executors have bene updated
+    /// </summary>
+    public event Action<List<FlowExecutorInfo>> ExecutorsUpdated;
+
+    /// <summary>
+    /// Event raised when the file status have bene updated
+    /// </summary>
+    public event Action<List<LibraryStatus>> FileStatusUpdated;
 
     /// <summary>
     /// Starts the client service asynchronously.
@@ -59,6 +71,8 @@ public partial class ClientService
                 };
 
                 _hubConnection.On<ToastData>("Toast", HandleToast);
+                _hubConnection.On<Dictionary<Guid, FlowExecutorInfo>>("UpdateExecutors", UpdateExecutors);
+                _hubConnection.On<List<LibraryStatus>>("UpdateFileStatus", UpdateFileStatus);
 
                 await _hubConnection.StartAsync();
 
@@ -96,6 +110,25 @@ public partial class ClientService
                 Toast.ShowError(data.Message);
                 break;
         }
+    }
+
+    /// <summary>
+    /// Called when the executors have changed
+    /// </summary>
+    /// <param name="executors">the executors</param>
+    private void UpdateExecutors(Dictionary<Guid, FlowExecutorInfo> executors)
+    {   
+        var cacheEntryOptions = new MemoryCacheEntryOptions().SetSize(1);
+        cacheEntryOptions.SetPriority(CacheItemPriority.High);
+        cacheEntryOptions.SetAbsoluteExpiration(TimeSpan.FromMinutes(5));
+        _cache.Set("FlowExecutorInfo", executors.Values.ToList(), cacheEntryOptions);
+        
+        ExecutorsUpdated?.Invoke(executors.Values.ToList());
+    }
+
+    private void UpdateFileStatus(List<LibraryStatus> data)
+    {
+        FileStatusUpdated?.Invoke(data);
     }
     
     /// <summary>

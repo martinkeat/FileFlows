@@ -1,4 +1,5 @@
 using FileFlows.Server.Helpers;
+using FileFlows.Server.Hubs;
 using FileFlows.Shared.Models;
 
 namespace FileFlows.Server.Services;
@@ -35,6 +36,7 @@ public partial class LibraryFileService
                 file.Status = status;
             }
         }
+        ClientServiceManager.Instance.UpdateFileStatus();
     }
 
     /// <summary>

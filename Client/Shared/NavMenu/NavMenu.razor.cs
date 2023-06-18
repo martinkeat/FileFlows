@@ -14,6 +14,10 @@ public partial class NavMenu : IDisposable
 {
     [Inject] private INavigationService NavigationService { get; set; }
     [Inject] private NavigationManager NavigationManager { get; set; }
+    /// <summary>
+    /// Gets or sets teh client service
+    /// </summary>
+    [Inject] private ClientService ClientService { get; set; }
     [Inject] public IJSRuntime jSRuntime { get; set; }
     private List<NavMenuGroup> MenuItems = new List<NavMenuGroup>();
     private bool collapseNavMenu = true;
@@ -27,7 +31,7 @@ public partial class NavMenu : IDisposable
 
     private int Unprocessed = -1, Processing = -1, Failed = -1;
 
-    private BackgroundTask bubblesTask;
+    // private BackgroundTask bubblesTask;
 
     protected override void OnInitialized()
     {
@@ -38,11 +42,21 @@ public partial class NavMenu : IDisposable
         
         App.Instance.OnFileFlowsSystemUpdated += FileFlowsSystemUpdated;
 
-        bubblesTask = new BackgroundTask(TimeSpan.FromMilliseconds(10_000), () => _ = RefreshBubbles());
+        // bubblesTask = new BackgroundTask(TimeSpan.FromMilliseconds(10_000), () => _ = RefreshBubbles());
         _ = RefreshBubbles();
-        bubblesTask.Start();
+        // bubblesTask.Start();
+        
+        this.ClientService.FileStatusUpdated += ClientServiceOnFileStatusUpdated;
         
         this.LoadMenu();
+    }
+
+    private void ClientServiceOnFileStatusUpdated(List<LibraryStatus> data)
+    {
+        Unprocessed = data.Where(x => x.Status == FileStatus.Unprocessed).Select(x => x.Count).FirstOrDefault();
+        Processing = data.Where(x => x.Status == FileStatus.Processing).Select(x => x.Count).FirstOrDefault();
+        Failed = data.Where(x => x.Status == FileStatus.ProcessingFailed).Select(x => x.Count).FirstOrDefault();
+        this.StateHasChanged();
     }
 
     private async Task RefreshBubbles()
@@ -192,8 +206,8 @@ public partial class NavMenu : IDisposable
 
     public void Dispose()
     {
-        _ = bubblesTask?.StopAsync();
-        bubblesTask = null;
+        // _ = bubblesTask?.StopAsync();
+        // bubblesTask = null;
     }
 }
 

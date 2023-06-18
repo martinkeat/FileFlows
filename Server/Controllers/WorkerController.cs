@@ -1,3 +1,4 @@
+using FileFlows.Plugin;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using FileFlows.Shared.Models;
@@ -21,9 +22,8 @@ public class WorkerController : Controller
     /// The running executors
     /// </summary>
     internal readonly static Dictionary<Guid, FlowExecutorInfo> Executors = new();
-    private readonly Queue<Guid> CompletedExecutors = new Queue<Guid>(50);
+    private readonly Queue<Guid> CompletedExecutors = new (50);
 
-    private static CacheStore LibraryFileCacheStore = new();
     private IHubContext<FlowHub> Context;
     
     public WorkerController(IHubContext<FlowHub> context)
@@ -41,6 +41,9 @@ public class WorkerController : Controller
     {
         _ = new NodeController().UpdateLastSeen(info.NodeUid);
         
+        ClientServiceManager.Instance.SendToast(LogType.Info, "Started processing: " + info.LibraryFile.RelativePath);
+        ClientServiceManager.Instance.UpdateFileStatus();
+        
         try
         {
             // try to delete a log file for this library file if one already exists (in case the flow was cancelled and now its being re-run)                
@@ -57,6 +60,7 @@ public class WorkerController : Controller
             Logger.Instance.ILog($"Adding executor: {info.Uid} = {info.LibraryFile.Name}");
             Executors.Add(info.Uid, info);
         }
+        ClientServiceManager.Instance.UpdateExecutors(Executors);
         Logger.Instance.ILog($"Starting processing on {info.NodeName}: {info.LibraryFile.Name}");
         if (info.LibraryFile != null)
         {
@@ -118,6 +122,8 @@ public class WorkerController : Controller
                 Logger.Instance?.DLog("Could not remove as not in list of Executors [2]: " + info.Uid + ", file: " + info.LibraryFile.Name);
             }
         }
+        ClientServiceManager.Instance.UpdateExecutors(Executors);
+        ClientServiceManager.Instance.UpdateFileStatus();
 
         if (info.LibraryFile != null)
         {
@@ -165,9 +171,16 @@ public class WorkerController : Controller
                 await lfService.Update(libfile);
                 var library = new LibraryService().GetByUid(libfile.Library.Uid);
                 if (libfile.Status == FileStatus.ProcessingFailed)
+                {
                     SystemEvents.TriggerLibraryFileProcessedFailed(libfile, library);
+                    ClientServiceManager.Instance.SendToast(LogType.Error, "Failed processing: " + info.LibraryFile.RelativePath);
+                }
                 else
+                {
                     SystemEvents.TriggerLibraryFileProcessedSuccess(libfile, library);
+                    ClientServiceManager.Instance.SendToast(LogType.Info, "Finished processing: " + info.LibraryFile.RelativePath);
+                }
+
                 SystemEvents.TriggerLibraryFileProcessed(libfile, library);
             }
         }
@@ -201,12 +214,6 @@ public class WorkerController : Controller
                 // this can happen if the server is restarted but the node is still processing, update the status
                 await libfileService.Update(libFile);
             }
-            // now using memory cache, we dont need to save this info constantly, can save it for the end
-            // else if (await LibraryFileHasChanged(libFile))
-            // {
-            //     await libfileService.UpdateWork(libFile);
-            // }
-
             if (libFile.Status == FileStatus.ProcessingFailed || info.LibraryFile.Status == FileStatus.Processed)
             {
                 lock (Executors)
@@ -214,6 +221,7 @@ public class WorkerController : Controller
                     CompletedExecutors.Append(info.Uid);
                     if (Executors.ContainsKey(info.Uid))
                         Executors.Remove(info.Uid);
+                    ClientServiceManager.Instance.UpdateExecutors(Executors);
                     return;
                 }
             }
@@ -230,52 +238,7 @@ public class WorkerController : Controller
             //else // this is causing a finished executors to stick around.
             //    Executors.Add(info.Uid, info);
         }
-    }
-
-    private bool LibraryFileHasChanged(LibraryFile file)
-    {
-        var cached = LibraryFileCacheStore.Get<LibraryFileRecord>(file.Uid);
-        LibraryFileCacheStore.Store(file.Uid, new LibraryFileRecord
-        {
-            Status = file.Status,
-            ExecutedNodes = file.ExecutedNodes?.Count ?? 0,
-            WorkerUid = file.WorkerUid,
-            NodeUid = file.NodeUid,
-            FinalSize = file.FinalSize,
-            ProcessingStarted = file.ProcessingStarted,
-            ProcessingEnded = file.ProcessingEnded
-        });
-        if (cached == null)
-            return true;
-        var dbStatus = new LibraryFileService().GetFileStatus(file.Uid);
-        if (dbStatus != file.Status)
-            return true;
-        if (file.Status != cached.Status)
-            return true;
-        if (file.ExecutedNodes?.Count != cached.ExecutedNodes)
-            return true;
-        if(file.WorkerUid != cached.WorkerUid)
-            return true;
-        if(file.Node?.Uid != cached.NodeUid)
-            return true;
-        if(file.FinalSize != cached.FinalSize)
-            return true;
-        if(file.ProcessingStarted != cached.ProcessingStarted)
-            return true;
-        if(file.ProcessingEnded != cached.ProcessingEnded)
-            return true;
-        return false;
-    }
-
-    class LibraryFileRecord
-    {
-        public FileStatus Status { get; set; }
-        public int ExecutedNodes { get; set; }
-        public Guid? WorkerUid { get; set; }
-        public Guid? NodeUid { get; set; }
-        public long FinalSize { get; set; }
-        public DateTime ProcessingStarted { get; set; }
-        public DateTime ProcessingEnded { get; set; }
+        ClientServiceManager.Instance.UpdateExecutors(Executors);
     }
 
     /// <summary>
@@ -295,6 +258,7 @@ public class WorkerController : Controller
                 Executors.Remove(item.Key);
         }
         await new LibraryFileService().ResetProcessingStatus(nodeUid);
+        ClientServiceManager.Instance.UpdateExecutors(Executors);
     }
 
     /// <summary>
@@ -331,33 +295,6 @@ public class WorkerController : Controller
             Uid = x.Uid,
             WorkingFile = x.WorkingFile
         }).ToList();
-        #if(DEBUG)
-        if (false && results.Any() != true)
-        {
-            results = Enumerable.Range(1, 2).Select(x => new FlowExecutorInfo
-            {
-                LibraryFile = new LibraryFile()
-                {
-                    Name = "/ssssssssssssssssssss/dddddddddddddddwwwwwwwww/wwwwwweeeeeeeeeeeeexxxxxxxxxx/xxxxxxxxdffffffffffffffff/ffffddddddddddxzfdgffdgFile_x." + new string('w', 200)
-                },
-                CurrentPart = x,
-                CurrentPartName = "Part " + x,
-                CurrentPartPercent = x * 10,
-                Library = new()
-                {
-                    Name = "Library " + x
-                },
-                NodeUid = new Guid("00000000-0000-0000-0000-00000000000" + x),
-                NodeName = "FFMPEG Builder: Audio Normalization",
-                RelativeFile = "/tv/dfgdfgfffffffffffffffffffffff/dfffffffffffffffffff/dfddddddddddddddd/file" + x + ".mkv",
-                StartedAt = DateTime.Now.AddMinutes(-x * 5),
-                TotalParts = 20,
-                Uid = new Guid("00000000-0000-0000-0000-00000000000" + x),
-                WorkingFile = "workingfile-" + x
-            }).ToList();
-
-        }
-        #endif
         return results;
     }
 
@@ -406,6 +343,7 @@ public class WorkerController : Controller
                 return;
         }
         await Abort(executorId, uid);
+        ClientServiceManager.Instance.UpdateExecutors(Executors);
     }
 
     /// <summary>
@@ -489,6 +427,7 @@ public class WorkerController : Controller
                     }
                 }
             }
+            ClientServiceManager.Instance.UpdateExecutors(Executors);
             Logger.Instance?.DLog("Abortion complete: " + uid);
         }
         catch (Exception ex)
@@ -516,6 +455,7 @@ public class WorkerController : Controller
                 if(Executors.TryAdd(runnerUid, info) == false)
                     return false; 
             }
+            ClientServiceManager.Instance.UpdateExecutors(Executors);
 
             if(executorInfo != null)
                 executorInfo.LastUpdate = DateTime.Now;

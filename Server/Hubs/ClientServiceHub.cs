@@ -1,4 +1,6 @@
 ﻿using FileFlows.Plugin;
+using FileFlows.Server.Services;
+using FileFlows.Shared.Models;
 using Microsoft.AspNetCore.SignalR;
 
 
@@ -47,4 +49,20 @@ public class ClientServiceManager
     /// <param name="message">the message of the toast</param>
     public void SendToast(LogType type, string message)
         => _hubContext.Clients.All.SendAsync("Toast", new { Type = type, Message = message });
+    
+    /// <summary>
+    /// Update executes
+    /// </summary>
+    /// <param name="executors">the executors</param>
+    public void UpdateExecutors(Dictionary<Guid, FlowExecutorInfo> executors)
+        => _hubContext.Clients.All.SendAsync("UpdateExecutors", executors);
+
+    /// <summary>
+    /// Updates the file status
+    /// </summary>
+    public void UpdateFileStatus()
+    {
+        var status = new LibraryFileService().GetStatus().ToList();
+        _hubContext.Clients.All.SendAsync("UpdateFileStatus", status);
+    }
 }
