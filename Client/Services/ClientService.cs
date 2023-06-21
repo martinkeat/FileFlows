@@ -37,16 +37,16 @@ public partial class ClientService
     /// <param name="jsRuntime">The javascript runtime.</param>
     public ClientService(NavigationManager navigationManager, IMemoryCache memoryCache, IJSRuntime jsRuntime)
     {
+        _jsRuntime = jsRuntime; 
+        _navigationManager = navigationManager; 
+        _cache = memoryCache;
+        _isConnected = false;
         #if(DEBUG)
         //ServerUri = "ws://localhost:6868/client-service";
         ServerUri = "http://localhost:6868/client-service";
         #else
         ServerUri = $"{(_navigationManager.BaseUri.Contains("https") ? "wss" : "ws")}://{_navigationManager.BaseUri.Replace("https://", "").Replace("http://", "")}client-service";
         #endif
-        _jsRuntime = jsRuntime; 
-        _navigationManager = navigationManager; 
-        _cache = memoryCache;
-        _isConnected = false;
         _ = StartAsync();
     }
 
