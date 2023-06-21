@@ -875,22 +875,22 @@ public abstract class DbManager
         }
     }
 
-    /// <summary>
-    /// Gets the sql scripts for a database
-    /// </summary>
-    /// <param name="dbType">the type of database</param>
-    /// <returns>a list of stored procedures</returns>
-    protected static Dictionary<string, string> GetStoredProcedureScripts(string dbType)
-    {
-        Dictionary<string, string> scripts = new();
-        foreach (string script in new[] { "DeleteOldLogs" })
-        {
-            string sql = GetSqlScript(dbType, script + ".sql");
-            scripts.Add(script, sql);
-        }
-
-        return scripts;
-    }
+    // /// <summary>
+    // /// Gets the sql scripts for a database
+    // /// </summary>
+    // /// <param name="dbType">the type of database</param>
+    // /// <returns>a list of stored procedures</returns>
+    // protected static Dictionary<string, string> GetStoredProcedureScripts(string dbType)
+    // {
+    //     Dictionary<string, string> scripts = new();
+    //     foreach (string script in new[] { "DeleteOldLogs" })
+    //     {
+    //         string sql = GetSqlScript(dbType, script + ".sql");
+    //         scripts.Add(script, sql);
+    //     }
+    //
+    //     return scripts;
+    // }
 
     /// <summary>
     /// Logs a message to the database

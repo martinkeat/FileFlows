@@ -71,20 +71,27 @@ public class MySqlDbManager: DbManager
         return db.Execute("create database " + dbName + " character set utf8 collate 'utf8_unicode_ci';") > 0 ? DbCreateResult.Created : DbCreateResult.Failed;
     }
 
-    protected override void CreateStoredProcedures()
-    {
-        Logger.Instance.ILog("Creating Stored Procedures");
-        using var db = new NPoco.Database(ConnectionString + ";Allow User Variables=True", null, MySqlConnector.MySqlConnectorFactory.Instance);
-        
-        
-        var scripts = GetStoredProcedureScripts("MySql");
-        foreach (var script in scripts)
-        {
-            Logger.Instance.ILog("Creating script: " + script.Key);
-            var sql = script.Value.Replace("@", "@@");
-            db.Execute(sql);
-        }
-    }
+    // protected override void CreateStoredProcedures()
+    // {
+    //     Logger.Instance.ILog("Creating Stored Procedures");
+    //     using var db = new NPoco.Database(ConnectionString + ";Allow User Variables=True", null, MySqlConnector.MySqlConnectorFactory.Instance);
+    //     
+    //     
+    //     var scripts = GetStoredProcedureScripts("MySql");
+    //     foreach (var script in scripts)
+    //     {
+    //         Logger.Instance.ILog("Creating script: " + script.Key);
+    //         var sql = script.Value.Replace("@", "@@");
+    //         try
+    //         {
+    //             db.Execute(sql);
+    //         }
+    //         catch (Exception ex)
+    //         {
+    //             Logger.Instance.WLog($"Failed executing script '{script.Key}: {ex.Message}");
+    //         }
+    //     }
+    // }
 
     protected override bool CreateDatabaseStructure()
     {
@@ -156,7 +163,22 @@ public class MySqlDbManager: DbManager
         {
             using (var db = await GetDb())
             {
-                await db.Db.ExecuteAsync($"call DeleteOldLogs({maxLogs});");
+                //await db.Db.ExecuteAsync($"call DeleteOldLogs({maxLogs});");
+                string sql = $@"
+DELETE FROM DbLogMessage
+WHERE LogDate < (
+    SELECT LogDate
+    FROM (
+        SELECT LogDate
+        FROM DbLogMessage
+        ORDER BY LogDate DESC
+        LIMIT {maxLogs}
+    ) AS subquery
+    ORDER BY LogDate ASC
+    LIMIT 1
+);
+";
+                await db.Db.ExecuteAsync(sql);
             }
         }
         catch (Exception)
