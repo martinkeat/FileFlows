@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.JSInterop;
 
 namespace FileFlows.Client.Services;
 
@@ -24,11 +25,17 @@ public partial class ClientService
     private readonly IMemoryCache _cache;
 
     /// <summary>
+    /// The javascript runtime
+    /// </summary>
+    private readonly IJSRuntime _jsRuntime;
+
+    /// <summary>
     /// Initializes a new instance of the ClientService class.
     /// </summary>
     /// <param name="navigationManager">The navigation manager instance.</param>
     /// <param name="memoryCache">The memory cache instance used for caching.</param>
-    public ClientService(NavigationManager navigationManager, IMemoryCache memoryCache)
+    /// <param name="jsRuntime">The javascript runtime.</param>
+    public ClientService(NavigationManager navigationManager, IMemoryCache memoryCache, IJSRuntime jsRuntime)
     {
         #if(DEBUG)
         //ServerUri = "ws://localhost:6868/client-service";
@@ -36,6 +43,7 @@ public partial class ClientService
         #else
         ServerUri = $"{(_navigationManager.BaseUri.Contains("https") ? "wss" : "ws")}://{_navigationManager.BaseUri.Replace("https://", "").Replace("http://", "")}client-service";
         #endif
+        _jsRuntime = jsRuntime; 
         _navigationManager = navigationManager; 
         _cache = memoryCache;
         _isConnected = false;
@@ -77,5 +85,15 @@ public partial class ClientService
         }
 
         return cacheEntry;
+    }
+
+    /// <summary>
+    /// Fires a javascript event
+    /// </summary>
+    /// <param name="eventName">the name of the event</param>
+    /// <param name="data">the event data</param>
+    private void FireJsEvent(string eventName, object data)
+    {
+        _jsRuntime.InvokeVoidAsync("clientServiceInstance.onEvent", eventName, data);
     }
 }

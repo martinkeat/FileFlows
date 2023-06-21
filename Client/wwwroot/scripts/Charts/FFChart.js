@@ -1388,36 +1388,52 @@ export class Processing extends FFChart
     runners = {};
     infoTemplate;
     isPaused;
+    eventListener;
 
     constructor(uid, args) {
         super(uid, args);
         this.recentlyFinished = args.flags === 1;
         this.infoTemplate = Handlebars.compile(this.infoTemplateHtml);
+        this.eventListener = (event) => this.onExecutorsUpdated(event);
+        document.addEventListener("onClientServiceUpdateExecutors", this.eventListener);
+    }
+    dispose() {
+        super.dispose();
+        document.removeEventListener("onClientServiceUpdateExecutors", this.eventListener);
     }
 
     async fetchData(){
-        this.isPaused = false;
-        let response = await fetch(this.url);
-        if(response.headers.get('x-paused') === '1')
-            this.isPaused = true;
-        return await response.json();
+        // this.isPaused = false;
+        // let response = await fetch(this.url);
+        // if(response.headers.get('x-paused') === '1')
+        //     this.isPaused = true;
+        // return await response.json();
+    }
+
+    onExecutorsUpdated(event) {
+        let data = event?.detail?.data;
+        if(!data)
+            return;
+        console.log('onExecutorsUpdated', data);
+        this.createChart(data);
     }
 
     async getData() {
-        if(this.timer)
-            clearTimeout(this.timer);
-        
-        if(this.disposed)
-            return;
-        super.getData();
-        
-        this.timer = setTimeout(() => this.getData(), document.hasFocus() ? 5000 : 10000);
+        // if(this.timer)
+        //     clearTimeout(this.timer);
+        //
+        // if(this.disposed)
+        //     return;
+        // super.getData();
+        //
+        // this.timer = setTimeout(() => this.getData(), document.hasFocus() ? 5000 : 10000);
     }
     
     createChart(data) {
         let json = (data ? JSON.stringify(data) : '') + (':' + this.isPaused);
         if(json === this.existing) 
             return;
+        console.log('onExecutorsUpdated.createChart', data.length);
         this.existing = json; // so we dont refresh if we don't have to
         let title = 'FileFlows - Dashboard';
         if(data?.length)
@@ -1578,16 +1594,17 @@ export class Processing extends FFChart
     
     updateRunner(runner)
     {
-        this.csharp.invokeMethodAsync("HumanizeStepName", runner.CurrentPartName).then((step) =>
+        console.log('onExecutorsUpdated.runner', runner)
+        this.csharp.invokeMethodAsync("HumanizeStepName", runner.currentPartName).then((step) =>
         {            
             let args = {
-                file: runner.LibraryFile.Name,
-                node: runner.NodeName,
-                library: runner.Library.Name,
+                file: runner.libraryFile.name,
+                node: runner.nodeName,
+                library: runner.library.name,
                 step: step,
-                time: this.timeDiff( Date.parse(runner.StartedAt), Date.now())
+                time: this.timeDiff( Date.parse(runner.startedAt), Date.now())
             };
-            let eleInfo = document.getElementById('runner-' + runner.Uid + '-info');
+            let eleInfo = document.getElementById('runner-' + runner.uid + '-info');
             if(eleInfo)
                 eleInfo.innerHTML = this.infoTemplate(args);
         });

@@ -122,8 +122,10 @@ public partial class ClientService
         cacheEntryOptions.SetPriority(CacheItemPriority.High);
         cacheEntryOptions.SetAbsoluteExpiration(TimeSpan.FromMinutes(5));
         _cache.Set("FlowExecutorInfo", executors.Values.ToList(), cacheEntryOptions);
-        
-        ExecutorsUpdated?.Invoke(executors.Values.ToList());
+
+        var list = executors.Values.ToList();
+        ExecutorsUpdated?.Invoke(list);
+        FireJsEvent("UpdateExecutors", list);
     }
 
     private void UpdateFileStatus(List<LibraryStatus> data)
