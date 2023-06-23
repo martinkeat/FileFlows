@@ -26,7 +26,7 @@ namespace FileFlows.Client.Components.Common
             if (string.IsNullOrEmpty(HelpUrl))
                 url = "https://fileflows.com/docs";
             else if (url.ToLower().StartsWith("http") == false)
-                url = "https://fileflows.com/docs/" + url;
+                url = "https://fileflows.com/docs/pages/" + url;
             await jsRuntime.InvokeVoidAsync("open", url.ToLower(), "_blank");
         }
     }
