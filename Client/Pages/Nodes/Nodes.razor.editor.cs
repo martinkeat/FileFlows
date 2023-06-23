@@ -29,7 +29,7 @@ public partial class Nodes : ListPage<Guid, ProcessingNode>
 
         string helpUrl = isServerProcessingNode
             ? string.Empty
-            : "http://docs.fileflows.com/guides/external-processing-node";
+            : "https://fileflows.com/docs/guides/external-processing-node";
 
         var result = await Editor.Open(new()
         {

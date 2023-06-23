@@ -31,7 +31,7 @@ public partial class Libraries : ListPage<Guid, Library>
         var result = await Editor.Open(new()
         {
             TypeName = "Pages.Library", Title = "Pages.Library.Title", Model = library, SaveCallback = Save, Tabs = tabs,
-            HelpUrl = "https://docs.fileflows.com/libraries"
+            HelpUrl = "https://fileflows.com/docs/pages/libraries"
         });
         if (efTemplate != null)
         {
