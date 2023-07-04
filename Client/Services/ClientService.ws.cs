@@ -56,10 +56,13 @@ public partial class ClientService
     {
         while (true) // Retry indefinitely
         {
+            // string url = ServerUri.Replace("https", "wss").Replace("http", "ws");
+            string url = ServerUri; //ServerUri.Replace("wss", "https").Replace("ws", "http");
+            Logger.Instance.ILog("ServerUri: " + url);
             try
             {
                 _hubConnection = new HubConnectionBuilder()
-                    .WithUrl(ServerUri)
+                    .WithUrl(url)
                     .Build();
 
                 _hubConnection.Closed += async (exception) =>

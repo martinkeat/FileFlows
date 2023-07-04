@@ -45,7 +45,7 @@ public partial class ClientService
         //ServerUri = "ws://localhost:6868/client-service";
         ServerUri = "http://localhost:6868/client-service";
         #else
-        ServerUri = $"{(_navigationManager.BaseUri.Contains("https") ? "wss" : "ws")}://{_navigationManager.BaseUri.Replace("https://", "").Replace("http://", "")}client-service";
+        ServerUri = $"{_navigationManager.BaseUri}client-service";
         #endif
         _ = StartAsync();
     }
