@@ -1,4 +1,9 @@
 import { FFChart } from './FFChart.js';
+
+/**
+ * Represents the Processing class.
+ * @extends FFChart
+ */
 export class Processing extends FFChart
 {
     recentlyFinished;
@@ -8,29 +13,35 @@ export class Processing extends FFChart
     isPaused;
     eventListener;
 
+    /**
+     * Constructs a new Processing instance.
+     * @param {string} uid - The UID of the Processing instance.
+     * @param {Object} args - The arguments for the Processing instance.
+     */
     constructor(uid, args) {        
         super(uid, args);
-        console.log('#### PROCESSING!!!');
         this.recentlyFinished = args.flags === 1;
         this.eventListener = (event) => this.onExecutorsUpdated(event);
         document.addEventListener("onClientServiceUpdateExecutors", this.eventListener);
     }
+    
+    /**
+     * Disposes of the Processing instance.
+     */
     dispose() {
         super.dispose();
         document.removeEventListener("onClientServiceUpdateExecutors", this.eventListener);
     }
 
+    /**
+     * Fetches data asynchronously.
+     */
     async fetchData(){
-        // this.isPaused = false;
-        // let response = await fetch(this.url);
-        // if(response.headers.get('x-paused') === '1')
-        //     this.isPaused = true;
-        // return await response.json();
     }
 
     /**
-     * Called when the websocket receives an update to the executors
-     * @param event the event from the websocket
+     * Called when the websocket receives an update to the executors.
+     * @param {Event} event - The event from the websocket.
      */
     onExecutorsUpdated(event) {
         let data = event?.detail?.data;
@@ -39,12 +50,15 @@ export class Processing extends FFChart
         this.createChart(data);
     }
 
+    /**
+     * Gets data asynchronously.
+     */
     async getData() {
     }
 
     /**
-     * Creates a chart for the runner
-     * @param data the data for teh chart
+     * Creates a chart for the runner.
+     * @param {Object[]} data - The data for the chart.
      */
     createChart(data) {
         // check if the data has changed
@@ -78,16 +92,17 @@ export class Processing extends FFChart
     }
 
     /**
-     * Sets the size of the widget
-     * @param size the size as in how many rows
+     * Sets the size of the widget.
+     * @param {number} size - The size in terms of how many rows.
      */
     setSize(size) {
         let rows = Math.floor((size - 1) / 2) + 1;
         ffGrid.update(this.ele, { h: rows});
     }
 
+
     /**
-     * Create teh no data element when no runners are running
+     * Creates the no data element when no runners are running.
      */
     createNoData(){
         this.hasNoData = true;
@@ -116,9 +131,10 @@ export class Processing extends FFChart
         chartDiv.appendChild(div);
     }
 
+
     /**
-     * Create the runners for the data
-     * @param data the data from the websocket
+     * Creates the runners for the data.
+     * @param {Object[]} data - The data from the websocket.
      */
     createRunners(data) {
         let running = [];
@@ -148,242 +164,250 @@ export class Processing extends FFChart
     }
 }
 
+
 /**
  * A runner in the processing tab
  */
 class Runner {
     /**
-     * Constructs a new runnner 
-     * @param parent the parent element to attach this new runner to
-     * @param csharp the csharp instance to call csharp methods
-     * @param runner the runner being executed
+     * Constructs a new runner
+     * @param {HTMLElement} parent - The parent element to attach this new runner to
+     * @param {Object} csharp - The csharp instance to call csharp methods
+     * @param {Object} runner - The runner being executed
      */
-    constructor(parent, csharp, runner) 
-    {
-        console.log('creating runner: ' + runner.uid);
+    constructor(parent, csharp, runner) {
         this.uid = runner.uid;
-        this.eleChartId = 'runner-' + this.uid + '-chart';
+        this.eleChartId = `runner-${this.uid}-chart`;
         this.libraryFile = runner.libraryFile;
         this.library = runner.library;
         this.csharp = csharp;
-        this.infoTemplate = Handlebars.compile(this.infoTemplateHtml);
         this.createElement(parent);
-    }
 
-    infoTemplateHtml = `
-<div class="lv w-2 file">
-    <span class="l">File</span>
-    <span class="v">{{file}}</span>
-</div>
-<div class="lv node">
-    <span class="l">Node</span>
-    <span class="v">{{node}}</span>
-</div>
-<div class="lv library">
-    <span class="l">Library</span>
-    <span class="v">{{library}}</span>
-</div>
-<div class="lv step">
-    <span class="l">Step</span>
-    <span class="v">{{step}}</span>
-</div>
-<div class="lv time">
-    <span class="l">Time</span>
-    <span class="v">{{time}}</span>
-</div>
-`;
-    
-    /**
-     * Log was clicked
-     */
-    logClicked() {
-        this.csharp.invokeMethodAsync("OpenFileViewer", this.libraryFile.uid);       
-    }
-
-    /**
-     * Cancel was clicked
-     */
-    async cancelClicked() {
-        this.csharp.invokeMethodAsync("CancelRunner", this.uid, this.libraryFile.uid, this.libraryFile.name);
-    }
-
-    /**
-     * Updates the runner
-     * @param data the runner data
-     * @param totalRunners the total runners
-     */
-    update({data, totalRunners}) {
-        this.updateInfo(data);
-        this.createOrUpdateRadialBar({totalParts: data.totalParts, currentPart: data.currentPart, 
-            currentPartPercent: data.currentPartPercent, totalRunners: totalRunners});        
-    }
-
-    /**
-     * Updates the runner info 
-     * @param runner the runnner
-     */
-    async updateInfo(runner)
-    {
-        let step = await this.csharp.invokeMethodAsync("HumanizeStepName", runner.currentPartName);
-        let args = {
-            file: runner.libraryFile?.name,
-            node: runner.nodeName,
-            library: runner.library?.name,
-            step: step,
-            time: this.timeDiff( Date.parse(runner.startedAt), Date.now())
+        this.eleChart = document.getElementById(this.eleChartId);
+        this.infoElements = {
+            file: this.element.querySelector(".info-file"),
+            node: this.element.querySelector(".info-node"),
+            library: this.element.querySelector(".info-library"),
+            step: this.element.querySelector(".info-step"),
+            time: this.element.querySelector(".info-time"),
         };
-        console.log('runner', runner);
-        console.log('args', args);
-        this.eleInfo.innerHTML = this.infoTemplate(args);
-    }    
-    
+    }
+
     /**
-     * Creates the element for this runner
-     * @param parent the parent to attach this to
+     * Event handler for log button click
+     */
+    logClicked = () => {
+        this.csharp.invokeMethodAsync("OpenFileViewer", this.libraryFile.uid);
+    };
+
+    /**
+     * Event handler for cancel button click
+     */
+    cancelClicked = async () => {
+        this.csharp.invokeMethodAsync(
+            "CancelRunner",
+            this.uid,
+            this.libraryFile.uid,
+            this.libraryFile.name
+        );
+    };
+
+
+    /**
+     * Updates the runner with new data
+     * @param {Object} data - The runner data
+     * @param {number} totalRunners - The total runners
+     */
+    update = ({ data, totalRunners }) => {
+        this.updateInfo(data);
+        this.createOrUpdateRadialBar({
+            totalParts: data.totalParts,
+            currentPart: data.currentPart,
+            currentPartPercent: data.currentPartPercent,
+            totalRunners: totalRunners,
+        });
+    };
+
+    /**
+     * Updates the runner info
+     * @param {Object} runner - The runner
+     */
+    updateInfo = (runner) => {
+        const step = this.humanizeStepName(runner.currentPartName);
+        const time = this.timeDiff(Date.parse(runner.startedAt), Date.now());
+
+        this.infoElements.file.textContent = runner.libraryFile?.name || "";
+        this.infoElements.node.textContent = runner.nodeName || "";
+        this.infoElements.library.textContent = runner.library?.name || "";
+        this.infoElements.step.textContent = step || "";
+        this.infoElements.time.textContent = time || "";
+    };
+
+    /**
+     * Creates the HTML elements for the runner
+     * @param {HTMLElement} parent - The parent to attach the runner to
      */
     createElement(parent) {
-        this.element  = document.createElement('div');
-        this.element .className = 'runner';
-        this.element .id = 'runner-' + this.uid;
+        this.element = document.createElement("div");
+        this.element.className = "runner";
+        this.element.id = `runner-${this.uid}`;
         parent.appendChild(this.element);
 
-        this.eleChart = document.createElement('div');
-        this.element .appendChild(this.eleChart);
-        this.eleChart.id = this.eleChartId;
-        this.eleChart.className = 'chart chart-' + this.uid;
+        this.element.innerHTML = `
+      <div class="chart chart-${this.uid}" id="${this.eleChartId}"></div>
+      <div class="info">
+        <div class="lv w-2 file">
+          <span class="l">File</span>
+          <span class="v info-file"></span>
+        </div>
+        <div class="lv node">
+          <span class="l">Node</span>
+          <span class="v info-node"></span>
+        </div>
+        <div class="lv library">
+          <span class="l">Library</span>
+          <span class="v info-library"></span>
+        </div>
+        <div class="lv step">
+          <span class="l">Step</span>
+          <span class="v info-step"></span>
+        </div>
+        <div class="lv time">
+          <span class="l">Time</span>
+          <span class="v info-time"></span>
+        </div>
+      </div>
+      <div class="buttons">
+        <button class="btn btn-log" onclick="logClicked">Info</button>
+        <button class="btn btn-cancel" onclick="cancelClicked">Cancel</button>
+      </div>
+    `;
 
-        this.eleInfo = document.createElement('div');
-        this.eleInfo.id = 'runner-' + this.uid + '-info';
-        this.element .appendChild(this.eleInfo);
-        this.eleInfo.className = 'info';
 
-        let buttons = document.createElement('div');
-        this.element .appendChild(buttons);
-        buttons.className = 'buttons';
-
-        let btnLog = document.createElement('button');
-        btnLog.className = 'btn btn-log';
-        btnLog.innerText = 'Info';
-        btnLog.addEventListener('click', () => {
-            this.logClicked();
-        });
-        buttons.appendChild(btnLog);
-
-        let btnCancel = document.createElement('button');
-        btnCancel.className = 'btn btn-cancel';
-        btnCancel.innerText = 'Cancel';
-        btnCancel.addEventListener('click', () => {
-            this.cancelClicked();
-        });
-        buttons.appendChild(btnCancel);
+        this.element.querySelector(".btn-log").addEventListener(
+            "click",
+            this.logClicked
+        );
+        this.element.querySelector(".btn-cancel").addEventListener(
+            "click",
+            this.cancelClicked
+        );
     }
 
     /**
-     * Creates or updates the radial bar chart for this runner 
-     * @param totalParts the total parts in the runner
-     * @param currentPart the current part in the runner 
-     * @param currentPartPercent the current part percent
-     * @param totalRunners the total runners currently running
+     * Creates or updates the radial bar chart for the runner
+     * @param {Object} options - Chart options
      */
-    createOrUpdateRadialBar({
-        totalParts, 
-        currentPart,
-        currentPartPercent,
-        totalRunners
-    })
-    {
-        let overall = totalParts === 0 ? 100 : (currentPart / totalParts) * 100;
-        let options = {
+    createOrUpdateRadialBar(options) {
+        const { totalParts, currentPart, currentPartPercent, totalRunners } = options;
+
+        const overall = totalParts === 0 ? 100 : (currentPart / totalParts) * 100;
+        const chartOptions = {
             chart: {
                 id: this.eleChartId,
-                height: totalRunners > 3 ? '200px' : '190px',
+                height: totalRunners > 3 ? "200px" : "190px",
                 type: "radialBar",
-                foreColor: 'var(--color)',
+                foreColor: "var(--color)",
             },
             plotOptions: {
                 radialBar: {
                     hollow: {
                         margin: 5,
-                        size: '48%',
-                        background: 'transparent',
+                        size: "48%",
+                        background: "transparent",
                     },
                     track: {
-                        background: '#333',
+                        background: "#333",
                     },
                     startAngle: -135,
                     endAngle: 135,
                     stroke: {
-                        lineCap: 'round'
+                        lineCap: "round",
                     },
                     dataLabels: {
                         total: {
                             show: true,
-                            label: currentPartPercent ? (currentPartPercent.toFixed(1) + ' %') : 'Overall',
-                            fontSize: '0.8rem',
-                            formatter: function (val) {
-                                return parseFloat(''+overall).toFixed(1) + ' %';
-                            }
+                            label: currentPartPercent ? `${currentPartPercent.toFixed(1)} %` : "Overall",
+                            fontSize: "0.8rem",
+                            formatter: (val) => parseFloat("" + overall).toFixed(1) + " %",
                         },
                         value: {
                             show: true,
-                            fontSize: '0.7rem',
-                            formatter: function (val) {
-                                return +(parseFloat(val).toFixed(1)) + ' %';
-                            }
-                        }
-
-                    }
-                }
+                            fontSize: "0.7rem",
+                            formatter: (val) => +(parseFloat(val).toFixed(1)) + " %",
+                        },
+                    },
+                },
             },
-            colors: [
-                '#2b8fb3',
-                '#c30471',
-            ],
+            colors: ["#2b8fb3", "#c30471"],
             series: [overall],
-            labels: ['Overall']
+            labels: ["Overall"],
         };
+
         if (currentPartPercent > 0) {
-            options.series.push(currentPartPercent);
-            options.labels.push('Current');
+            chartOptions.series.push(currentPartPercent);
+            chartOptions.labels.push("Current");
         }
 
         let updated = false;
 
-        if (this.eleChart.querySelector('.apexcharts-canvas')) {
+        if (this.eleChart.querySelector(".apexcharts-canvas")) {
             try {
-                ApexCharts.exec(this.eleChartId, 'updateOptions', options, false, false);
+                ApexCharts.exec(this.eleChartId, "updateOptions", chartOptions, false, false);
                 updated = true;
-            } catch (err) { }
+            } catch (err) {}
         }
 
-        if (updated === false && this.eleChart) {
-            new ApexCharts(this.eleChart, options).render();
+        if (!updated && this.eleChart) {
+            new ApexCharts(this.eleChart, chartOptions).render();
         }
     }
 
     /**
-     * Gets the time difference  between two dates
-     * @param start the start date
-     * @param end the end date
-     * @returns {string} the time difference as a string
+     * Gets the time difference between two dates
+     * @param {number} start - The start date
+     * @param {number} end - The end date
+     * @returns {string} The time difference as a string
      */
-    timeDiff(start, end)
-    {
+    timeDiff(start, end) {
         let diff = (end - start) / 1000;
         let hours = Math.floor(diff / 3600);
-        diff -= (hours * 3600);
+        diff -= hours * 3600;
         let minutes = Math.floor(diff / 60);
-        diff -= (minutes * 60);
+        diff -= minutes * 60;
         let seconds = Math.floor(diff);
 
-        return hours.toString().padStart(2, '0') + ':' + minutes.toString().padStart(2, '0') + ':' + seconds.toString().padStart(2, '0')
+        return (
+            hours.toString().padStart(2, "0") +
+            ":" +
+            minutes.toString().padStart(2, "0") +
+            ":" +
+            seconds.toString().padStart(2, "0")
+        );
     }
 
     /**
-     * disposes of this runner
+     * Humanizes the step name
+     * @param {string} step - The name fo the step
+     * @returns {string} The humanized name
+     */
+    humanizeStepName(step) {
+        if (!step || step.trim() === "") {
+            return "Starting...";
+        }
+
+        return step
+            .trim()
+            .replace(/([A-Z]+|[0-9]+)/g, " $1") // Add spaces before uppercase letters and numbers
+            .replace(/^\s+|\s+$/g, "") // Trim leading and trailing spaces
+            .replace(/\b\w/g, (match) => match.toUpperCase()) // Capitalize the first letter of each word
+            .replace("Ffmpeg", "FFMPEG"); // Replace specific word
+    }
+
+    /**
+     * Disposes of the runner by removing its HTML element
      */
     dispose() {
         this.element.remove();
     }
 }
-
