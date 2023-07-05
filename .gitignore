@@ -43,3 +43,5 @@ Data/
 Server/appsettings.development.json
 *.map
 docs/css/*.css
+
+*.scssc
