@@ -1,4 +1,4 @@
-﻿import { FFChart } from './FFChart.js';
+import { FFChart } from './FFChart.js';
 export class Processing extends FFChart
 {
     recentlyFinished;

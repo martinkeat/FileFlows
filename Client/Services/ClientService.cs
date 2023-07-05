@@ -95,6 +95,13 @@ public partial class ClientService
     /// <param name="data">the event data</param>
     private void FireJsEvent(string eventName, object data)
     {
+        if (data is string == false && data != null)
+        {
+            data = JsonSerializer.Serialize(data, new JsonSerializerOptions()
+            {
+                
+            });
+        }
         _jsRuntime.InvokeVoidAsync("clientServiceInstance.onEvent", eventName, data);
     }
 }
