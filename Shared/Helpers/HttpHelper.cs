@@ -201,8 +201,6 @@ public class HttpHelper
             request.Content = new StringContent("", Encoding.UTF8, "application/json");
         }
 
-        if (noLog == false)
-            Log("Making request [" + method + "]: " + url);
         HttpResponseMessage response;
         if (timeoutSeconds > 0)
         {

@@ -135,8 +135,6 @@ public partial class FlowTable<TItem>: FlowTableBase,IDisposable, INotifyPropert
     /// <param name="filter">[Optional] text for the filter</param>
     public void SetData(List<TItem> value, bool clearSelected = true, string filter = null)
     {
-        if(value?.Any() != true)
-            Logger.Instance.ILog("## SetData to nothing!");
         this._FilterText = filter ?? string.Empty;
         this._Data = value ?? new();
         var jsonOptions = new System.Text.Json.JsonSerializerOptions()
@@ -182,22 +180,9 @@ public partial class FlowTable<TItem>: FlowTableBase,IDisposable, INotifyPropert
     /// </summary>
     [Parameter] public EventCallback<TItem> DoubleClick { get; set; }
 
-    
-    private Dictionary<TItem, string> _DisplayData = new ();
 
-    private Dictionary<TItem, string> DisplayData
-    {
-        get => _DisplayData;
-        set
-        {
-            if (value?.Any() != true)
-            {
-                Logger.Instance.ILog("Setting display data to nothing! previous : " + _DisplayData?.Count);
-            }
+    private Dictionary<TItem, string> DisplayData { get; set; } = new ();
 
-            _DisplayData = value;
-        }
-    }
     private readonly List<TItem> SelectedItems = new ();
 
     private string CurrentFilter = string.Empty;

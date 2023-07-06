@@ -76,6 +76,8 @@ public partial class ClientService
                 _hubConnection.On<ToastData>("Toast", HandleToast);
                 _hubConnection.On<Dictionary<Guid, FlowExecutorInfo>>("UpdateExecutors", UpdateExecutors);
                 _hubConnection.On<List<LibraryStatus>>("UpdateFileStatus", UpdateFileStatus);
+                _hubConnection.On<LibraryFile>("StartProcessing", StartProcessing);
+                _hubConnection.On<LibraryFile>("FinishProcessing", FinishProcessing);
 
                 await _hubConnection.StartAsync();
 
@@ -135,6 +137,21 @@ public partial class ClientService
     {
         FileStatusUpdated?.Invoke(data);
     }
+    
+    /// <summary>
+    /// Called when a file starts processing
+    /// </summary>
+    /// <param name="file">the file</param>
+    private void StartProcessing(LibraryFile file)
+        => FireJsEvent("StartProcessing", file);
+    
+    /// <summary>
+    /// Called when a file is finished processing
+    /// </summary>
+    /// <param name="file">the file</param>
+    private void FinishProcessing(LibraryFile file)
+        => FireJsEvent("FinishProcessing", file);
+        
     
     /// <summary>
     /// Represents the toast data received from the SignalR server.

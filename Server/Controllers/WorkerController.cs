@@ -42,6 +42,7 @@ public class WorkerController : Controller
         _ = new NodeController().UpdateLastSeen(info.NodeUid);
         
         ClientServiceManager.Instance.SendToast(LogType.Info, "Started processing: " + info.LibraryFile.RelativePath);
+        ClientServiceManager.Instance.StartProcessing(info.LibraryFile);
         ClientServiceManager.Instance.UpdateFileStatus();
         
         try
@@ -127,6 +128,7 @@ public class WorkerController : Controller
 
         if (info.LibraryFile != null)
         {
+            ClientServiceManager.Instance.FinishProcessing(info.LibraryFile);
             var lfService= new LibraryFileService();
             var libfile = lfService.GetByUid(info.LibraryFile.Uid);
             if (libfile != null)

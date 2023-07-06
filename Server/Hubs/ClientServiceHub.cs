@@ -67,4 +67,18 @@ public class ClientServiceManager
         var status = new LibraryFileService().GetStatus().ToList();
         _hubContext.Clients.All.SendAsync("UpdateFileStatus", status);
     }
+
+    /// <summary>
+    /// Called when a file starts processing
+    /// </summary>
+    /// <param name="file">the file that's starting processing</param>
+    public void StartProcessing(LibraryFile file)
+        => _hubContext.Clients.All.SendAsync("StartProcessing", file);
+    
+    /// <summary>
+    /// Called when a file finish processing
+    /// </summary>
+    /// <param name="file">the file that's finished processing</param>
+    public void FinishProcessing(LibraryFile file)
+        => _hubContext.Clients.All.SendAsync("FinishProcessing", file);
 }

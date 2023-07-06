@@ -55,7 +55,6 @@ public partial class LibraryFiles : ListPage<Guid, LibaryFileListModel>, IDispos
         this.PageIndex = 0;
         Title = lblLibraryFiles + ": " + status.Name;
         await this.Refresh();
-        Logger.Instance.ILog("SetSelected: " + this.Data?.Count);
         this.StateHasChanged();
     }
 
@@ -70,7 +69,6 @@ public partial class LibraryFiles : ListPage<Guid, LibaryFileListModel>, IDispos
             this.NameMinWidth = this.Data?.Any() == true ? Math.Min(120, Math.Max(20, this.Data.Max(x => (x.Name?.Length / 2) ?? 0))) + "ch" : "20ch";
         else
             this.NameMinWidth = this.Data?.Any() == true ? Math.Min(120, Math.Max(20, this.Data.Max(x => (x.Name?.Length) ?? 0))) + "ch" : "20ch";
-        Logger.Instance.ILog("PostLoad: " + this.Data.Count);
         await jsRuntime.InvokeVoidAsync("ff.scrollTableToTop");
     }
 
