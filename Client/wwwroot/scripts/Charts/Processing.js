@@ -21,6 +21,7 @@ export class Processing extends FFChart
     constructor(uid, args) {        
         super(uid, args);
         this.recentlyFinished = args.flags === 1;
+        this.createNoData();
         this.eventListener = (event) => this.onExecutorsUpdated(event);
         document.addEventListener("onClientServiceUpdateExecutors", this.eventListener);
     }
@@ -83,7 +84,7 @@ export class Processing extends FFChart
             else
                 title = 'FileFlows - ' + first.CurrentPartName;
         }
-        else
+        else if(!this.hasNoData)
             this.createNoData();
 
         document.title = title;
