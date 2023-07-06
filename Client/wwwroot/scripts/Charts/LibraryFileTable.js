@@ -41,16 +41,7 @@ export class LibraryFileTable extends FFChart
      * @param {object} event - The event data
      */
     handleEvent(event) {
-        console.log('handle event', event);
         this.getData();
-        let data = event?.detail?.data;
-        if(!data)
-            return;
-        console.log('handle event', data);
-        let index = items.findIndex(x => x.uid === data.uid);
-        if(index < 0)
-            return;
-        console.log('handle event index: ' + index);
     }
 
     /**
