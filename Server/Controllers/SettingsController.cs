@@ -311,17 +311,23 @@ public class SettingsController : Controller
         
         foreach (var file in new DirectoryInfo(DirectoryHelper.PluginsDirectory).GetFiles("*.ffplugin"))
         {
-            if (pluginInfos.ContainsKey(file.Name) == false) 
-                continue;// not enabled, skipped
+            Logger.Instance.DLog($"Plugin found '{file.Name}'");
+            if (pluginInfos.ContainsKey(file.Name) == false)
+            {
+                Logger.Instance.DLog($"Plugin '{file.Name}' not enabled skipping for configuration.");
+                continue; // not enabled, skipped
+            }
+
             var pluginInfo = pluginInfos[file.Name];
             
             var inUse = pluginInfo.Elements.Any(x => flowElementsInUse.Contains(x.Uid));
             if (inUse == false)
             {
-                Logger.Instance.ILog($"Plugin '{pluginInfo.Name}' not in use by any flow, skipping");
+                Logger.Instance.DLog($"Plugin '{pluginInfo.Name}' not in use by any flow, skipping");
                 continue; // plugin not used, skipping
             }
 
+            Logger.Instance.DLog($"Plugin '{pluginInfo.Name}' is used in configuration.");
             plugins.Add(file.Name, System.IO.File.ReadAllBytes(file.FullName));
         }
 
