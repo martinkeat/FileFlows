@@ -159,8 +159,8 @@ public class SystemMonitor:Worker
                 }
             }
 
-            Logger.Instance.DLog(
-                $"Getting directory size {(logginDir ? "(LOGGING DIR)" : "(TEMP DIR)")} '{path}': {FileSizeHelper.Humanize(size)}");
+            // Logger.Instance.DLog(
+            //     $"Getting directory size {(logginDir ? "(LOGGING DIR)" : "(TEMP DIR)")} '{path}': {FileSizeHelper.Humanize(size)}");
 
             lock (NodeStatistics)
             {
@@ -169,8 +169,8 @@ public class SystemMonitor:Worker
                     if (nts.RecordedAt > DateTime.Now.AddMinutes(-5))
                     {
                         var npath = logginDir ? nts.LogDirectorySize : nts.TemporaryDirectorySize;
-                        Logger.Instance.DLog(
-                            $"Getting node '{nts.Uid}' size {(logginDir ? "(LOGGING DIR)" : "(TEMP DIR)")} '{npath.Path}': {FileSizeHelper.Humanize(npath.Size)}");
+                        // Logger.Instance.DLog(
+                        //     $"Getting node '{nts.Uid}' size {(logginDir ? "(LOGGING DIR)" : "(TEMP DIR)")} '{npath.Path}': {FileSizeHelper.Humanize(npath.Size)}");
                         size += npath.Size;
                     }
                 }
