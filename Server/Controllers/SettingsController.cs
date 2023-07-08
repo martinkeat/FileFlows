@@ -335,6 +335,7 @@ public class SettingsController : Controller
         }
 
         cfg.Plugins = plugins;
+        Logger.Instance.DLog($"Plugin list that is used in configuration:\n", string.Join("\n", plugins));
         
         return cfg;
     }
