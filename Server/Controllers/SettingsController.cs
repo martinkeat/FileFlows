@@ -309,6 +309,8 @@ public class SettingsController : Controller
         var plugins = new Dictionary<string, byte[]>();
         List<string> flowElementsInUse = cfg.Flows.SelectMany(x => x.Parts.Select(x => x.FlowElementUid)).ToList();
         
+        Logger.Instance.DLog("Plugin, Flow Elements in Use: \n" + string.Join("\n", flowElementsInUse));
+
         foreach (var file in new DirectoryInfo(DirectoryHelper.PluginsDirectory).GetFiles("*.ffplugin"))
         {
             Logger.Instance.DLog($"Plugin found '{file.Name}'");
@@ -324,6 +326,7 @@ public class SettingsController : Controller
             if (inUse == false)
             {
                 Logger.Instance.DLog($"Plugin '{pluginInfo.Name}' not in use by any flow, skipping");
+                Logger.Instance.DLog("Plugin not using flow parts:\n" + string.Join("\n", pluginInfo.Elements.Select(x => x.Uid)));
                 continue; // plugin not used, skipping
             }
 
