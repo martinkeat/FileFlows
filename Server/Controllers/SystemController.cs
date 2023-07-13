@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Reactive.Linq;
 using FileFlows.Node.Workers;
 using FileFlows.Server.Helpers;
+using FileFlows.Server.Hubs;
 using FileFlows.Server.Services;
 using FileFlows.Server.Workers;
 using FileFlows.ServerShared.Models;
@@ -88,10 +89,16 @@ public class SystemController:Controller
         var controller = new SettingsController();
         var settings = await controller.Get();
         if (duration < 1)
+        {
             settings.PausedUntil = DateTime.MinValue;
+            ClientServiceManager.Instance.SystemPaused(0);
+        }
         else
+        {
             settings.PausedUntil = DateTime.Now.AddMinutes(duration);
-        
+            ClientServiceManager.Instance.SystemPaused(duration);
+        }
+
         await controller.Save(settings);
     }
 

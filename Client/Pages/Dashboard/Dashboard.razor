@@ -64,10 +64,22 @@
             }
             else if (App.Instance.FileFlowsSystem.Licensed && ActiveDashboardUid != Guid.Empty)
             {
+                if (ClientService.IsPaused)
+                {
+                    <div class="system-paused">
+                        <i class="fas fa-pause"></i> FileFlows is currently paused!
+                    </div>
+                }
                 <CustomDashboard ActiveDashboardUid=@ActiveDashboardUid />
             }
             else if(ActiveDashboardSet || App.Instance.IsMobile)
             {
+                if (ClientService.IsPaused)
+                {
+                    <div class="system-paused">
+                        <i class="fas fa-pause"></i> FileFlows is currently paused!
+                    </div>
+                }
                 <BasicDashboard />
             }
         </Body>

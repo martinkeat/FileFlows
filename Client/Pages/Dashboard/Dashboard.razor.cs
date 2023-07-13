@@ -6,7 +6,7 @@ using FileFlows.Plugin;
 
 namespace FileFlows.Client.Pages;
 
-public partial class Dashboard : ComponentBase
+public partial class Dashboard : ComponentBase, IDisposable
 {
     private ConfigurationStatus ConfiguredStatus = ConfigurationStatus.Flows | ConfigurationStatus.Libraries;
     [Inject] public IJSRuntime jSRuntime { get; set; }
@@ -14,6 +14,7 @@ public partial class Dashboard : ComponentBase
     [CascadingParameter] public Blocker Blocker { get; set; }
     [CascadingParameter] Editor Editor { get; set; }
     public EventHandler AddWidgetEvent { get; set; }
+    
 
     private string lblAddWidget;
     
@@ -22,6 +23,10 @@ public partial class Dashboard : ComponentBase
     private Guid? _ActiveDashboardUid = null;
 
     private bool ActiveDashboardSet => _ActiveDashboardUid != null;
+    /// <summary>
+    /// Gets or sets the client service
+    /// </summary>
+    [Inject]public ClientService ClientService { get; set; }
 
     /// <summary>
     /// Gets the UID of the active dashboard
@@ -47,12 +52,20 @@ public partial class Dashboard : ComponentBase
         ConfiguredStatus = App.Instance.FileFlowsSystem.ConfigurationStatus;
 #endif
         lblAddWidget = Translater.Instant("Pages.Dashboard.Labels.AddWidget");
+        ClientService.SystemPausedUpdated += ClientServiceOnSystemPausedUpdated;
 
         if (Unlicensed == false)
             await LoadDashboards();
         else
             ActiveDashboardUid = Guid.Empty;
     }
+
+    /// <summary>
+    /// Called when the paused time is updated
+    /// </summary>
+    /// <param name="paused">if the system is paused</param>
+    private void ClientServiceOnSystemPausedUpdated(bool paused)
+        => StateHasChanged();
 
     private async Task LoadDashboards()
     {
@@ -147,4 +160,12 @@ public partial class Dashboard : ComponentBase
 
     private void AddWidget() => AddWidgetEvent?.Invoke(this, new EventArgs());
 
+    /// <summary>
+    /// Disposes of the component
+    /// </summary>
+    public void Dispose()
+    {
+        Editor?.Dispose();
+        ClientService.SystemPausedUpdated -= ClientServiceOnSystemPausedUpdated;
+    }
 }
