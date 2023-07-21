@@ -102,7 +102,7 @@
                         @if (IsLicensed)
                         {
                             <InputText Value=@Model.LicenseExpiryDate.ToString("f") Label="Pages.Settings.Fields.License.ExpiryDate" ReadOnly="true"/>
-                            <InputText @bind-Value=@LicenseFlagsString Label="Pages.Settings.Fields.License.Flags" ReadOnly="true"/>
+                            <InputTextArea @bind-Value=@LicenseFlagsString Label="Pages.Settings.Fields.License.Flags" ReadOnly="true"/>
                         }
                     </FlowTab>
                 </FlowTabs>

@@ -99,7 +99,7 @@ public partial class Settings : InputRegister
         if (response.Success)
         {
             this.Model = response.Data;
-            LicenseFlagsString = SplitWordsOnCapitalLetters(Model.LicenseFlags.ToString());
+            LicenseFlagsString = LicenseFlagsToString(Model.LicenseFlags);
             this.OriginalServer = this.Model?.DbServer;
             this.OriginalDatabase = this.Model?.DbName;
             if (this.Model != null && this.Model.DbPort < 1)
@@ -245,7 +245,40 @@ public partial class Settings : InputRegister
         }
     }
     
+    /// <summary>
+    /// Enumerates through the specified enum flags and returns a comma-separated string
+    /// containing the names of the enum values that are present in the given flags.
+    /// </summary>
+    /// <param name="myValue">The enum value with flags set.</param>
+    /// <returns>A comma-separated string of the enum values present in the given flags.</returns>
+    string LicenseFlagsToString(LicenseFlags myValue)
+    {
+        string myString = "";
+
+        foreach (LicenseFlags enumValue in Enum.GetValues(typeof(LicenseFlags)))
+        {
+            if (enumValue == LicenseFlags.NotLicensed)
+                continue;
+            if (myValue.HasFlag(enumValue))
+            {
+                myString += SplitWordsOnCapitalLetters(enumValue.ToString()) + "\n";
+            }
+        }
+
+        // Remove the trailing comma if any
+        if (!string.IsNullOrEmpty(myString))
+        {
+            myString = myString.TrimEnd('\n');
+        }
+
+        return myString;
+    }
     
+    /// <summary>
+    /// Splits a given input string into separate words whenever a capital letter is encountered.
+    /// </summary>
+    /// <param name="input">The input string to be split.</param>
+    /// <returns>A new string with spaces inserted before each capital letter (except the first one).</returns>
     string SplitWordsOnCapitalLetters(string input)
     {
         if (string.IsNullOrEmpty(input))
