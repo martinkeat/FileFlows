@@ -44,19 +44,3 @@ enum LicenseStatus
     /// </summary>
     Revoked = 4
 }
-
-/// <summary>
-/// License flags
-/// </summary>
-[Flags]
-enum LicenseFlags
-{
-    /// <summary>
-    /// Allowed to use an external database
-    /// </summary>
-    ExternalDatabase = 1,
-    /// <summary>
-    /// Allowed to use auto updates
-    /// </summary>
-    AutoUpdates = 2
-}

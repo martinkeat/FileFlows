@@ -614,7 +614,7 @@
           "Email": "License Email",
           "Status": "Status",
           "ProcessingNodes":"Processing Nodes",
-          "Flags":"Flags",
+          "Flags":"Features",
           "ExpiryDate":"Expiry Date"
         }
       }

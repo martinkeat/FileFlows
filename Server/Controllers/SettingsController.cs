@@ -142,7 +142,7 @@ public class SettingsController : Controller
     {
         settings.LicenseKey = AppSettings.Instance.LicenseKey;
         settings.LicenseEmail  = AppSettings.Instance.LicenseEmail;
-        settings.LicenseFlags = license == null ? string.Empty : license.Flags.ToString();
+        settings.LicenseFlags = license == null ? 0 : license.Flags;
         settings.LicenseProcessingNodes = LicenseHelper.GetLicensedProcessingNodes();
         settings.LicenseExpiryDate = license == null ? DateTime.MinValue : license.ExpirationDateUtc.ToLocalTime();
         settings.LicenseStatus = (license == null ? LicenseStatus.Unlicensed : license.Status).ToString();

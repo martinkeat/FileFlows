@@ -213,3 +213,23 @@ public enum HttpMethod
     /// </summary>
     Delete = 3
 }
+
+/// <summary>
+/// License flags
+/// </summary>
+[Flags]
+public enum LicenseFlags
+{
+    /// <summary>
+    /// Not licensed
+    /// </summary>
+    NotLicensed = 0,
+    /// <summary>
+    /// Allowed to use an external database
+    /// </summary>
+    ExternalDatabase = 1,
+    /// <summary>
+    /// Allowed to use auto updates
+    /// </summary>
+    AutoUpdates = 2
+}

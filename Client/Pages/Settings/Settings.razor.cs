@@ -1,3 +1,5 @@
+using System.Text;
+
 namespace FileFlows.Client.Pages;
 
 using FileFlows.Client.Components.Dialogs;
@@ -17,7 +19,7 @@ public partial class Settings : InputRegister
     [CascadingParameter] Blocker Blocker { get; set; }
     [Inject] IJSRuntime jsRuntime { get; set; }
 
-    private bool ShowExternalDatabase => LicensedFor("ExternalDatabase");
+    private bool ShowExternalDatabase => LicensedFor(LicenseFlags.ExternalDatabase);
 
     private bool IsSaving { get; set; }
 
@@ -28,6 +30,7 @@ public partial class Settings : InputRegister
     private string OriginalDatabase, OriginalServer;
 
     private SettingsUiModel Model { get; set; } = new ();
+    private string LicenseFlagsString = string.Empty;
     
     private ProcessingNode InternalProcessingNode { get; set; }
 
@@ -96,10 +99,7 @@ public partial class Settings : InputRegister
         if (response.Success)
         {
             this.Model = response.Data;
-            var flags = this.Model.LicenseFlags?.Split(new[] { ", " }, StringSplitOptions.RemoveEmptyEntries) ??
-                           new string[] { };
-            // humanize the flags
-            this.Model.LicenseFlags = string.Join(", ", flags.OrderBy(x => x).Select(FlowHelper.FormatLabel));
+            LicenseFlagsString = SplitWordsOnCapitalLetters(Model.LicenseFlags.ToString());
             this.OriginalServer = this.Model?.DbServer;
             this.OriginalDatabase = this.Model?.DbName;
             if (this.Model != null && this.Model.DbPort < 1)
@@ -225,11 +225,11 @@ public partial class Settings : InputRegister
     /// </summary>
     /// <param name="feature">the feature to check</param>
     /// <returns>If the user is licensed for a feature</returns>
-    private bool LicensedFor(string feature)
+    private bool LicensedFor(LicenseFlags feature)
     {
         if (IsLicensed == false)
             return false;
-        return Model.LicenseFlags.ToLower().Replace(" ", "").Contains(feature.ToLower().Replace(" ", ""));
+        return (Model.LicenseFlags & feature) == feature;
     }
 
     private async Task CheckForUpdateNow()
@@ -243,5 +243,22 @@ public partial class Settings : InputRegister
         {
             Toast.ShowError("Pages.Settings.Messages.CheckUpdateFailed");
         }
+    }
+    
+    
+    string SplitWordsOnCapitalLetters(string input)
+    {
+        if (string.IsNullOrEmpty(input))
+            return input;
+
+        StringBuilder sb = new StringBuilder();
+        foreach (char c in input)
+        {
+            if (char.IsUpper(c) && sb.Length > 0)
+                sb.Append(' ');
+            sb.Append(c);
+        }
+
+        return sb.ToString();
     }
 }

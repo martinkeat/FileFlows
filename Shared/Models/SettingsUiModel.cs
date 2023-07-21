@@ -19,7 +19,7 @@ public class SettingsUiModel:Settings
     /// <summary>
     /// Gets the license flags for the user
     /// </summary>
-    public string LicenseFlags { get; set; }
+    public LicenseFlags LicenseFlags { get; set; }
     /// <summary>
     /// Gets the license expiry date for the user
     /// </summary>

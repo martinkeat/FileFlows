@@ -50,8 +50,8 @@
                             }
                         }
                     </FlowTab>
-                    <FlowTab Title="@lblUpdates" Visible="@LicensedFor("AutoUpdates")">
-                        @if (LicensedFor("AutoUpdates"))
+                    <FlowTab Title="@lblUpdates" Visible="@LicensedFor(LicenseFlags.AutoUpdates)">
+                        @if (LicensedFor(LicenseFlags.AutoUpdates))
                         {
                             <InputButton Label="Pages.Settings.Fields.CheckForUpdateNow" Text="@lblCheckNow" OnClick=@CheckForUpdateNow/>
 
@@ -102,7 +102,7 @@
                         @if (IsLicensed)
                         {
                             <InputText Value=@Model.LicenseExpiryDate.ToString("f") Label="Pages.Settings.Fields.License.ExpiryDate" ReadOnly="true"/>
-                            <InputText @bind-Value=@Model.LicenseFlags Label="Pages.Settings.Fields.License.Flags" ReadOnly="true"/>
+                            <InputText @bind-Value=@LicenseFlagsString Label="Pages.Settings.Fields.License.Flags" ReadOnly="true"/>
                         }
                     </FlowTab>
                 </FlowTabs>
