@@ -231,5 +231,17 @@ public enum LicenseFlags
     /// <summary>
     /// Allowed to use auto updates
     /// </summary>
-    AutoUpdates = 2
+    AutoUpdates = 2,
+    /// <summary>
+    /// Allowed advanced dashboards
+    /// </summary>
+    Dashboards = 4,
+    /// <summary>
+    /// Allowed to access revisions
+    /// </summary>
+    Revisions = 8,
+    /// <summary>
+    /// Can execute tasks
+    /// </summary>
+    Tasks = 16
 }
