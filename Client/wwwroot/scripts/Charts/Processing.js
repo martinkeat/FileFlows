@@ -79,10 +79,12 @@ export class Processing extends FFChart
             }
             this.createRunners(data);
             let first = data[0];
-            if(first.CurrentPartPercent > 0)
-                title = 'FileFlows - ' + first.CurrentPartPercent.toFixed(1) + ' %';
+            if(first.currentPartPercent > 0)
+                title = 'FileFlows - ' + first.currentPartPercent.toFixed(1) + ' %';
+            else if(first.currentPartName)
+                title = 'FileFlows - ' + first.currentPartName;
             else
-                title = 'FileFlows - ' + first.CurrentPartName;
+                title = 'FileFlows - Dashboard';
         }
         else if(!this.hasNoData)
             this.createNoData();

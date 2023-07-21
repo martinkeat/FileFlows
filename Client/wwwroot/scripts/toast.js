@@ -74,6 +74,8 @@ class Toast {
     static removeToast(toast) {
         toast.classList.add('hide');
         setTimeout(() => {
+            if(!Toast.toastContainer)
+                return;
             if (toast.parentNode === Toast.toastContainer) {
                 Toast.toastContainer.removeChild(toast);
             }

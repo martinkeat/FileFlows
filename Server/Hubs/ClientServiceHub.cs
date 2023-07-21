@@ -67,6 +67,12 @@ public class ClientServiceManager
         var status = new LibraryFileService().GetStatus().ToList();
         _hubContext.Clients.All.SendAsync("UpdateFileStatus", status);
     }
+    /// <summary>
+    /// Called when a system is paused/unpaused
+    /// </summary>
+    /// <param name="minutes">how many minutes to pause the system for</param>
+    public void SystemPaused(int minutes)
+        => _hubContext.Clients.All.SendAsync("SystemPaused", minutes);
 
     /// <summary>
     /// Called when a file starts processing

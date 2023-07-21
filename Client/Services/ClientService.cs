@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+﻿using System.Timers;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.JSInterop;
@@ -31,6 +31,21 @@ public partial class ClientService
     private readonly IJSRuntime _jsRuntime;
 
     /// <summary>
+    /// Gets when this is paused until
+    /// </summary>
+    private DateTime? PausedUntil { get; set; }
+
+    /// <summary>
+    /// Gets if this system is paused
+    /// </summary>
+    public bool IsPaused => PausedUntil != null && PausedUntil > DateTime.Now;
+
+    /// <summary>
+    /// The paused timer that will trigger when the system is no longer paused
+    /// </summary>
+    private System.Timers.Timer PausedTimer;
+
+    /// <summary>
     /// Initializes a new instance of the ClientService class.
     /// </summary>
     /// <param name="navigationManager">The navigation manager instance.</param>
@@ -42,6 +57,7 @@ public partial class ClientService
         _navigationManager = navigationManager; 
         _cache = memoryCache;
         _isConnected = false;
+        _ = InitializeSystemInfo();
         #if(DEBUG)
         //ServerUri = "ws://localhost:6868/client-service";
         ServerUri = "http://localhost:6868/client-service";
@@ -49,6 +65,25 @@ public partial class ClientService
         ServerUri = $"{_navigationManager.BaseUri}client-service";
         #endif
         _ = StartAsync();
+    }
+
+    async Task InitializeSystemInfo()
+    {
+        try
+        {
+            var systemInfoResult = (await HttpHelper.Get<SystemInfo>("/api/system/info"));
+            if (systemInfoResult.Success)
+            {
+                var sysInfo = systemInfoResult.Data;
+                if (sysInfo.IsPaused)
+                {
+                    SetPausedFor(sysInfo.PausedUntil.Subtract(sysInfo.CurrentTime).TotalMinutes);
+                }
+            }
+        }
+        catch (Exception)
+        {
+        }
     }
 
     /// <summary>
@@ -96,5 +131,40 @@ public partial class ClientService
     private void FireJsEvent(string eventName, object data)
     {
         _jsRuntime.InvokeVoidAsync("clientServiceInstance.onEvent", eventName, data);
+    }
+
+    private void SetPausedFor(double minutes)
+    {
+        if (PausedTimer?.Enabled == true)
+        {
+            PausedTimer.Stop();
+            PausedTimer.Elapsed -= PausedTimerOnElapsed;
+            PausedTimer.Dispose();
+            PausedTimer = null;
+        }
+        if (minutes <= 0)
+        {
+            PausedUntil = DateTime.MinValue;
+            SystemPausedUpdated(false);
+            return;
+        }
+
+        if (Math.Abs(minutes - int.MaxValue) < 10)
+            PausedUntil = DateTime.MaxValue;
+        else
+        {
+            PausedUntil = DateTime.Now.AddMinutes(minutes);
+            PausedTimer = new Timer();
+            PausedTimer.Interval = minutes * 1000;
+            PausedTimer.Elapsed += PausedTimerOnElapsed;
+            PausedTimer.Start();
+        }
+
+        SystemPausedUpdated(true);
+    }
+
+    private void PausedTimerOnElapsed(object sender, ElapsedEventArgs e)
+    {
+        SystemPausedUpdated(false);
     }
 }

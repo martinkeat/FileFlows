@@ -309,23 +309,33 @@ public class SettingsController : Controller
         var plugins = new Dictionary<string, byte[]>();
         List<string> flowElementsInUse = cfg.Flows.SelectMany(x => x.Parts.Select(x => x.FlowElementUid)).ToList();
         
+        Logger.Instance.DLog("Plugin, Flow Elements in Use: \n" + string.Join("\n", flowElementsInUse));
+
         foreach (var file in new DirectoryInfo(DirectoryHelper.PluginsDirectory).GetFiles("*.ffplugin"))
         {
-            if (pluginInfos.ContainsKey(file.Name) == false) 
-                continue;// not enabled, skipped
+            Logger.Instance.DLog($"Plugin found '{file.Name}'");
+            if (pluginInfos.ContainsKey(file.Name) == false)
+            {
+                Logger.Instance.DLog($"Plugin '{file.Name}' not enabled skipping for configuration.");
+                continue; // not enabled, skipped
+            }
+
             var pluginInfo = pluginInfos[file.Name];
             
             var inUse = pluginInfo.Elements.Any(x => flowElementsInUse.Contains(x.Uid));
             if (inUse == false)
             {
-                Logger.Instance.ILog($"Plugin '{pluginInfo.Name}' not in use by any flow, skipping");
+                Logger.Instance.DLog($"Plugin '{pluginInfo.Name}' not in use by any flow, skipping");
+                Logger.Instance.DLog("Plugin not using flow parts:\n" + string.Join("\n", pluginInfo.Elements.Select(x => x.Uid)));
                 continue; // plugin not used, skipping
             }
 
+            Logger.Instance.DLog($"Plugin '{pluginInfo.Name}' is used in configuration.");
             plugins.Add(file.Name, System.IO.File.ReadAllBytes(file.FullName));
         }
 
         cfg.Plugins = plugins;
+        Logger.Instance.DLog($"Plugin list that is used in configuration:\n", string.Join("\n", plugins.Select(x => x.Key)));
         
         return cfg;
     }
