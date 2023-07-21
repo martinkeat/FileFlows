@@ -171,7 +171,10 @@ public class SettingsController : Controller
             AutoUpdatePlugins = model.AutoUpdatePlugins,
             LogQueueMessages = model.LogQueueMessages,
             PluginRepositoryUrls = model.PluginRepositoryUrls,
-            KeepFailedFlowTempFiles = model.KeepFailedFlowTempFiles
+            KeepFailedFlowTempFiles = model.KeepFailedFlowTempFiles,
+            HideFileAddedNotifications = model.HideFileAddedNotifications,
+            HideProcessingStartedNotifications = model.HideProcessingStartedNotifications,
+            HideProcessingFinishedNotifications = model.HideProcessingFinishedNotifications,
         });
         
         // validate license it

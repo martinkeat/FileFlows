@@ -253,7 +253,8 @@ public class WatchedLibrary:IDisposable
                 Logger.Instance.DLog(
                     $"Time taken \"{(DateTime.Now.Subtract(dtTotal))}\" to successfully add new library file: \"{fullpath}\"");
                 
-                ClientServiceManager.Instance.SendToast(LogType.Info, "New File: " + result.RelativePath);
+                if (new SettingsService().Get()?.Result?.HideFileAddedNotifications != true)
+                    ClientServiceManager.Instance.SendToast(LogType.Info, "New File: " + result.RelativePath);
             }
             else
             {
