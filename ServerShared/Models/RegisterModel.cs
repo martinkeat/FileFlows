@@ -1,4 +1,5 @@
-﻿using FileFlows.Shared;
+﻿using System.Runtime.InteropServices;
+using FileFlows.Shared;
 
 namespace FileFlows.ServerShared.Models;
 
@@ -32,6 +33,10 @@ public class RegisterModel
     /// Gets or sets the type of operating system this node is running on
     /// </summary>
     public OperatingSystemType OperatingSystem { get; set; }
+    /// <summary>
+    /// Gets or sets the architecture type
+    /// </summary>
+    public ArchitectureType Architecture { get; set; }
     /// <summary>
     /// Gets or sets the version of this node
     /// </summary>

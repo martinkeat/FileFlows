@@ -213,6 +213,7 @@ public class NodeService : Service, INodeService
         bool isLinux = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
         if (RuntimeInformation.IsOSPlatform(OSPlatform.FreeBSD))
             isLinux = true;
+        bool isDocker = Globals.IsDocker;
 
         var result = await HttpHelper.Post<ProcessingNode>(serverUrl + "/api/node/register", new RegisterModel
         {
@@ -221,11 +222,18 @@ public class NodeService : Service, INodeService
             // FlowRunners = runners,
             // Enabled = enabled,
             Mappings = mappings,
-            Version = Globals.Version.ToString(),
-            OperatingSystem = isWindows ? Shared.OperatingSystemType.Windows : 
-                 isLinux ? Shared.OperatingSystemType.Linux :       
-                 isMacOs ? Shared.OperatingSystemType.Mac :
-                 Shared.OperatingSystemType.Unknown
+            Version = Globals.Version,
+            Architecture = RuntimeInformation.ProcessArchitecture == Architecture.Arm ? ArchitectureType.Arm32 :
+                           RuntimeInformation.ProcessArchitecture == Architecture.Arm64 ? ArchitectureType.Arm64 :
+                           RuntimeInformation.ProcessArchitecture == Architecture.Arm ? ArchitectureType.Arm64 :
+                           RuntimeInformation.ProcessArchitecture == Architecture.X64 ? ArchitectureType.x64 : 
+                           RuntimeInformation.ProcessArchitecture == Architecture.X86 ? ArchitectureType.x86 :
+                           ArchitectureType.Unknown,
+            OperatingSystem = isDocker ? OperatingSystemType.Docker : 
+                isWindows ? OperatingSystemType.Windows : 
+                 isLinux ? OperatingSystemType.Linux :       
+                 isMacOs ? OperatingSystemType.Mac :
+                 OperatingSystemType.Unknown
         }, timeoutSeconds: 15);
 
         if (result.Success == false)

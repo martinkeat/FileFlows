@@ -20,7 +20,38 @@ public enum OperatingSystemType
     /// <summary>
     /// Mac/Apple operating system
     /// </summary>
-    Mac = 3
+    Mac = 3,
+    /// <summary>
+    /// A docker system
+    /// </summary>
+    Docker = 4
+}
+
+/// <summary>
+/// A list of architecture types
+/// </summary>
+public enum ArchitectureType
+{
+    /// <summary>
+    /// Unknown
+    /// </summary>
+    Unknown = 0,
+    /// <summary>
+    /// 32 bit x86
+    /// </summary>
+    x86 = 1,
+    /// <summary>
+    /// 64bit x86
+    /// </summary>
+    x64 = 2,
+    /// <summary>
+    /// ARM 32 bit
+    /// </summary>
+    Arm32 = 3,
+    /// <summary> 
+    /// ARM 64 bit
+    /// </summary>
+    Arm64 = 4
 }
 
 /// <summary>

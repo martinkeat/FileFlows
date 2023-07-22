@@ -39,6 +39,10 @@ public class ProcessingNode: FileFlowObject
     /// </summary>
     public OperatingSystemType OperatingSystem { get; set; }
     /// <summary>
+    /// Gets or sets the architecture type
+    /// </summary>
+    public ArchitectureType Architecture { get; set; }
+    /// <summary>
     /// Gets or sets the FileFlows version of this node
     /// </summary>
     public string Version { get; set; }
@@ -77,7 +81,6 @@ public class ProcessingNode: FileFlowObject
     /// Gets or sets the permissions to set
     /// </summary>
     public string Permissions { get; set; }
-
     /// <summary>
     /// Gets or sets if this node can process all libraries
     /// </summary>

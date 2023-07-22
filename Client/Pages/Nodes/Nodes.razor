@@ -84,6 +84,22 @@
                         <span>@item.FlowRunners</span>
                     </Cell>
                 </FlowTableColumn>
+                <FlowTableColumn TItem="ProcessingNode" Width="9rem" LargeWidth="18rem" Align="FlowTableAlignment.Center" MobileWidth="0">
+                    <Header>
+                        Architecture
+                    </Header>
+                    <Cell Context="item">
+                        <span>@item.Architecture</span>
+                    </Cell>
+                </FlowTableColumn>
+                <FlowTableColumn TItem="ProcessingNode" Width="9rem" LargeWidth="18rem" Align="FlowTableAlignment.Center" MobileWidth="0">
+                    <Header>
+                        OS
+                    </Header>
+                    <Cell Context="item">
+                        <span>@item.OperatingSystem</span>
+                    </Cell>
+                </FlowTableColumn>
                 <FlowTableColumn TItem="ProcessingNode" Width="9rem" LargeWidth="18rem" Align="FlowTableAlignment.Center">
                     <Header>
                         @Globals.lblEnabled

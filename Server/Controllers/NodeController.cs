@@ -327,6 +327,7 @@ public class NodeController : Controller
             FlowRunners = 1,
             TempPath = model.TempPath,
             OperatingSystem = model.OperatingSystem,
+            Architecture = model.Architecture,
             Version = model.Version,
             Schedule = new string('1', 672),
             AllLibraries = ProcessingLibraries.All,

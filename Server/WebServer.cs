@@ -182,6 +182,7 @@ public class WebServer
 
         LibraryWorker.ResetProcessing(internalOnly: true);
         WorkerManager.StartWorkers(
+            new StartupWorker(),
             new LicenseValidatorWorker(),
             new SystemMonitor(),
             new LibraryWorker(),
