@@ -4,6 +4,7 @@ using FileFlows.Server.Helpers;
 using System.Runtime.InteropServices;
 using FileFlows.Server.Services;
 using FileFlows.ServerShared.Models;
+using Instances.Exceptions;
 
 namespace FileFlows.Server.Controllers;
 
@@ -294,6 +295,8 @@ public class NodeController : Controller
                 //existing.Enabled = model.Enabled;
                 //existing.TempPath = model.TempPath;
                 //existing.OperatingSystem = model.OperatingSystem;
+                existing.Architecture = model.Architecture;
+                existing.OperatingSystem = model.OperatingSystem;
                 existing.Version = model.Version;
                 existing = await service.Update(existing);
             }
