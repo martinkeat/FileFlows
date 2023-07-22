@@ -88,4 +88,9 @@ public class Globals
     public static readonly string FileFlowsDotComUrl =
         (Environment.GetEnvironmentVariable("FFURL")?.EmptyAsNull() ?? "https://fileflows.com")
         .TrimEnd('/');
+
+    /// <summary>
+    /// The base url for Plugin 
+    /// </summary>
+    public static readonly string PluginBaseUrl = FileFlowsDotComUrl + "/api/plugin";
 }

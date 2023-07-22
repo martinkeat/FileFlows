@@ -89,10 +89,6 @@
                     <FlowTab Title="@lblAdvanced">
                         <InputSwitch @bind-Value="@Model.DisableTelemetry" Inverse="@true" Label="Pages.Settings.Fields.Telemetry" />
                         <InputSwitch @bind-Value="@Model.KeepFailedFlowTempFiles" Label="Pages.Settings.Fields.KeepFailedFlowTempFiles" />
-                        @if (IsLicensed)
-                        {
-                            <InputTextAreaList @bind-Value="@Model.PluginRepositoryUrls" Label="Pages.Settings.Fields.PluginRepositoryUrls" />
-                        }
                     </FlowTab>
                     <FlowTab Title="@lblLicense">
                         <p class="box info">Here you can enter your license key to enable additional features

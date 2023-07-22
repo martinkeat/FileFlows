@@ -214,27 +214,11 @@ public class HttpHelper
         {
             var bytes = await response.Content.ReadAsByteArrayAsync();
             if (response.IsSuccessStatusCode)
-                return new RequestResult<T> { Success = true, Data = (T)(object)bytes, Headers = GetHeaders(response) };
-            return new RequestResult<T> { Success = false, Headers = GetHeaders(response) };
+                return new RequestResult<T> { Success = true, Data = (T)(object)bytes, StatusCode = response.StatusCode, Headers = GetHeaders(response) };
+            return new RequestResult<T> { Success = false, Headers = GetHeaders(response), StatusCode = response.StatusCode };
         }
 
-        // if (TryGetHeader(response, "x-files-remaining", out int filesRemaining))
-        // {
-        //     if (OnRemainingFilesHeader != null)
-        //     {
-        //         try
-        //         {
-        //             OnRemainingFilesHeader.Invoke(filesRemaining);
-        //         }
-        //         catch (Exception)
-        //         {
-        //         }
-        //     }
-        // }
-
-
         string body = await response.Content.ReadAsStringAsync();
-
 
         if (response.IsSuccessStatusCode &&
             (body.Contains("INFO") == false && body.Contains("An unhandled error has occurred.")) == false)
@@ -248,7 +232,7 @@ public class HttpHelper
             T result = string.IsNullOrEmpty(body) ? default(T) :
                 typeof(T) == typeof(string) ? (T)(object)body : JsonSerializer.Deserialize<T>(body, options);
 #pragma warning restore CS8600
-            return new RequestResult<T> { Success = true, Body = body, Data = result, Headers = GetHeaders(response) };
+            return new RequestResult<T> { Success = true, Body = body, Data = result, StatusCode = response.StatusCode, Headers = GetHeaders(response) };
         }
         else
         {
@@ -263,7 +247,7 @@ public class HttpHelper
             if (noLog == false)
                 Log("Error Body: " + body);
             return new RequestResult<T>
-                { Success = false, Body = body, Data = default(T), Headers = GetHeaders(response) };
+                { Success = false, Body = body, Data = default(T), StatusCode = response.StatusCode, Headers = GetHeaders(response) };
         }
 
 

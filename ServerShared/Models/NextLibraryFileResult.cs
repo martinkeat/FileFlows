@@ -51,5 +51,9 @@ public enum NextLibraryFileStatus
     /// <summary>
     /// The node is not enabled
     /// </summary>
-    NodeNotEnabled = 6
+    NodeNotEnabled = 6,
+    /// <summary>
+    /// License limit reached
+    /// </summary>
+    LicenseLimitReached = 7
 }

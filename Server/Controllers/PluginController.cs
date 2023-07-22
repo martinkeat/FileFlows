@@ -1,5 +1,7 @@
+using System.Net;
 using FileFlows.Server.Services;
 using FileFlows.ServerShared.Services;
+using FluentResults;
 
 namespace FileFlows.Server.Controllers;
 
@@ -21,11 +23,6 @@ using System.Text.Json;
 public class PluginController : Controller
 {
     /// <summary>
-    /// The base URL for the plugins
-    /// </summary>
-    internal static readonly string PluginBaseUrl = Globals.FileFlowsDotComUrl + "/api/plugin";
-
-    /// <summary>
     /// Get a list of all plugins in the system
     /// </summary>
     /// <param name="includeElements">If data should contain all the elements for the plugins</param>
@@ -36,8 +33,9 @@ public class PluginController : Controller
         var plugins = new Services.PluginService().GetAll()
             .Where(x => x.Deleted == false);
         List<PluginInfoModel> pims = new List<PluginInfoModel>();
-        var packages = await GetPluginPackages();
-
+        var packagesResult = await GetPluginPackagesActual();
+        var packages = packagesResult.IsFailed ? new () : packagesResult.Value;
+        
         Dictionary<string, PluginInfoModel> pluginDict = new();
         foreach (var plugin in plugins)
         {
@@ -124,18 +122,31 @@ public class PluginController : Controller
     /// <param name="missing">If only missing plugins should be included, ie plugins not installed</param>
     /// <returns>a list of plugins</returns>
     [HttpGet("plugin-packages")]
-    public async Task<IEnumerable<PluginPackageInfo>> GetPluginPackages([FromQuery] bool missing = false)
+    public async Task<IActionResult> GetPluginPackages([FromQuery] bool missing = false)
+    {
+        var result = await GetPluginPackagesActual(missing);
+        if (result.IsFailed)
+            return BadRequest(result.Errors.FirstOrDefault()?.Message ?? string.Empty);
+        return Ok(result.Value);
+    }
+    
+    /// <summary>
+    /// Get the available plugin packages 
+    /// </summary>
+    /// <param name="missing">If only missing plugins should be included, ie plugins not installed</param>
+    /// <returns>a list of plugins</returns>
+    internal async Task<Result<List<PluginPackageInfo>>> GetPluginPackagesActual([FromQuery] bool missing = false)
     {
         Version ffVersion = new Version(Globals.Version);
         List<PluginPackageInfo> data = new List<PluginPackageInfo>();
-        var repos = GetRepositories();
-        foreach (string repo in repos)
-        {
             try
             {
-                var plugins = await HttpHelper.Get<IEnumerable<PluginPackageInfo>>(repo + $"?version={Globals.Version}&rand={DateTime.Now.ToFileTime()}");
+                var plugins = await HttpHelper.Get<IEnumerable<PluginPackageInfo>>(Globals.PluginBaseUrl + $"?version={Globals.Version}&rand={DateTime.Now.ToFileTime()}");
                 if (plugins.Success == false)
-                    continue;
+                {
+                    if (plugins.StatusCode == HttpStatusCode.PreconditionFailed)
+                        return Result.Fail("To access additional plugins, you must upgrade FileFlows to the latest version.");
+                }
                 foreach(var plugin in plugins.Data)
                 {
                     if (data.Any(x => x.Name == plugin.Name))
@@ -152,10 +163,7 @@ public class PluginController : Controller
                 }
             }
             catch (Exception) { }
-        }
-
-#if (DEBUG)
-#endif
+        
 
         if (missing)
         {
@@ -165,7 +173,7 @@ public class PluginController : Controller
             data = data.Where(x => installed.Contains(x.Package) == false).ToList();
         }
 
-        return data.OrderBy(x => x.Name);
+        return data.OrderBy(x => x.Name).ToList();
     }
 
     /// <summary>
@@ -177,9 +185,10 @@ public class PluginController : Controller
     public async Task<bool> Update([FromBody] ReferenceModel<Guid> model)
     {
         bool updated = false;
-        var plugins = await GetPluginPackages();
+        var pluginsResult = await GetPluginPackagesActual();
+        var plugins = pluginsResult.IsFailed ? new() : pluginsResult.Value;
 
-        var pluginDownloader = new PluginDownloader(this.GetRepositories());
+        var pluginDownloader = new PluginDownloader();
         foreach (var uid in model?.Uids ?? new Guid[] { })
         {
             var plugin = new Services.PluginService().GetByUid(uid);
@@ -246,7 +255,7 @@ public class PluginController : Controller
         if (model == null || model.Packages?.Any() != true)
             return; // nothing to delete
 
-        var pluginDownloader = new PluginDownloader(GetRepositories());
+        var pluginDownloader = new PluginDownloader();
         foreach(var package in model.Packages)
         {
             try
@@ -412,13 +421,5 @@ public class PluginController : Controller
         /// A list of plugin packages to download
         /// </summary>
         public List<PluginPackageInfo> Packages { get; set; }
-    }
-
-    internal List<string> GetRepositories()
-    {
-        var repos = new SettingsController().Get().Result.PluginRepositoryUrls?.Select(x => x)?.ToList() ?? new List<string>();
-        if (repos.Contains(PluginBaseUrl) == false)
-            repos.Add(PluginBaseUrl);
-        return repos;
     }
 }

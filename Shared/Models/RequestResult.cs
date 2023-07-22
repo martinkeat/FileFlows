@@ -1,3 +1,5 @@
+using System.Net;
+
 namespace FileFlows.Shared.Models;
 
 /// <summary>
@@ -20,6 +22,11 @@ public class RequestResult<T>
     /// Gets or sets the parsed response object 
     /// </summary>
     public T Data { get; set; }
+    
+    /// <summary>
+    /// Gets or sets the status code from the response
+    /// </summary>
+    public HttpStatusCode StatusCode { get; set; }
     
     /// <summary>
     /// Gets or sets any custom headers returned

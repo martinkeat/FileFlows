@@ -32,9 +32,11 @@ public class PluginUpdaterWorker : Worker
         Logger.Instance?.ILog("Plugin Updater started");
         var controller = new PluginController();
         var plugins = controller.GetAll().Result;
-        var latestPackages = controller.GetPluginPackages().Result;
+        var latestPackagesResult = controller.GetPluginPackagesActual().Result;
+        var latestPackages = latestPackagesResult.IsFailed ? new () 
+            : latestPackagesResult.Value;
 
-        var pluginDownloader = new PluginDownloader(controller.GetRepositories());
+        var pluginDownloader = new PluginDownloader();
         
         foreach(var plugin in plugins)
         {

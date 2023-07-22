@@ -29,16 +29,6 @@ public class Settings : FileFlowObject
     /// Gets or sets if temporary files from a failed flow should be kept
     /// </summary>
     public bool KeepFailedFlowTempFiles { get; set; }
-    
-    private List<string> _PluginRepositoryUrls = new ();
-    /// <summary>
-    /// Gets or sets a list of available URLs to additional plugin repositories
-    /// </summary>
-    public List<string> PluginRepositoryUrls
-    {
-        get => _PluginRepositoryUrls;
-        set => _PluginRepositoryUrls = value ?? new();
-    }
 
     /// <summary>
     /// Gets or sets if the Queue messages should be logged

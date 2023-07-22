@@ -8,15 +8,11 @@ namespace FileFlows.Server.Helpers;
 /// </summary>
 public class PluginDownloader
 {
-    private List<string> Repositories;
-    
     /// <summary>
     /// Constructs a plugin download
     /// </summary>
-    /// <param name="repositories">the available repositories to download a plugin from</param>
-    public PluginDownloader(List<string> repositories)
+    public PluginDownloader()
     {
-        this.Repositories = repositories;
     }
     
 
@@ -30,20 +26,17 @@ public class PluginDownloader
     {
         Logger.Instance.ILog("Downloading Plugin Package: " + packageName);
         Version ffVersion = new Version(Globals.Version);
-        foreach (string repo in Repositories)
+        try
         {
-            try
-            {
-                string url = repo + "/download/" + packageName + $"?version={version}&rand=" + DateTime.Now.ToFileTime();
-                var dlResult = HttpHelper.Get<byte[]>(url).Result;
-                if (dlResult.Success)
-                    return (true, dlResult.Data);
-                throw new Exception(dlResult.Body?.EmptyAsNull() ?? "Unexpected error");
-            }
-            catch (Exception ex)
-            {
-                Logger.Instance.WLog($"Failed downloading plugin '{packageName}': " + ex.Message);
-            }
+            string url = Globals.PluginBaseUrl + "/download/" + packageName + $"?version={version}&rand=" + DateTime.Now.ToFileTime();
+            var dlResult = HttpHelper.Get<byte[]>(url).Result;
+            if (dlResult.Success)
+                return (true, dlResult.Data);
+            throw new Exception(dlResult.Body?.EmptyAsNull() ?? "Unexpected error");
+        }
+        catch (Exception ex)
+        {
+            Logger.Instance.WLog($"Failed downloading plugin '{packageName}': " + ex.Message);
         }
         return (false, new byte[0]);
     }

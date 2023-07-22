@@ -53,6 +53,7 @@ public partial class PluginBrowser : ComponentBase
             var result = await HttpHelper.Get<List<PluginPackageInfo>>(ApiUrl + "/plugin-packages?missing=true");
             if (result.Success == false)
             {
+                Toast.ShowError(result.Body, duration: 15_000);
                 // close this and show message
                 this.Close();
                 return;

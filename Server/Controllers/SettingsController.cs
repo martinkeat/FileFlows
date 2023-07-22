@@ -172,7 +172,6 @@ public class SettingsController : Controller
             AutoUpdateNodes = model.AutoUpdateNodes,
             AutoUpdatePlugins = model.AutoUpdatePlugins,
             LogQueueMessages = model.LogQueueMessages,
-            PluginRepositoryUrls = model.PluginRepositoryUrls,
             KeepFailedFlowTempFiles = model.KeepFailedFlowTempFiles,
             HideFileAddedNotifications = model.HideFileAddedNotifications,
             HideProcessingStartedNotifications = model.HideProcessingStartedNotifications,
