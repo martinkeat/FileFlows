@@ -1074,10 +1074,10 @@ export class NvidiaChart extends FFChart
         if(data?.length)
             this.createTableData(data);
         else
-            this.createNoData();
+            this.createNoData('No encoders currently in use');
     }
 
-    createNoData(data){
+    createNoData(message){
         let chartDiv = document.getElementById(this.chartUid);
         if(chartDiv == null)
             return;
@@ -1095,7 +1095,10 @@ export class NvidiaChart extends FFChart
 
         let spanText = document.createElement('span');
         span.appendChild(spanText);
-        spanText.innerText = this.recentlyFinished ? 'No files recently finished' : 'No upcoming files';
+        if(message && typeof(message) === 'string')
+            spanText.innerText = message;
+        else
+            spanText.innerText = this.recentlyFinished ? 'No files recently finished' : 'No upcoming files';
 
         chartDiv.appendChild(div);
 
