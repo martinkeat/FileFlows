@@ -44,7 +44,8 @@ public class TelemetryReporter : Worker
             data.ProcessingNodeData = pNodes.Select(x => new ProcessingNodeData()
             {
                 OS = x.OperatingSystem,
-                Architecture = x.Architecture
+                Architecture = x.Architecture,
+                Runners = x.FlowRunners
             }).ToList();
             data.Architecture = RuntimeInformation.ProcessArchitecture.ToString();
             data.OS = isDocker ? "Docker" :
@@ -208,5 +209,10 @@ public class TelemetryReporter : Worker
         /// Gets or sets the architecture of the processing node's operating system.
         /// </summary>
         public ArchitectureType Architecture { get; set; }
+        
+        /// <summary>
+        /// Gets or sets the number of runners on this node
+        /// </summary>
+        public int Runners { get; set; }
     }
 }
