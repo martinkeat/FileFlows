@@ -15,6 +15,11 @@ public class SettingsUiModel:Settings
     /// Gets or sets the licensed key
     /// </summary>
     public string LicenseKey { get; set; }
+    
+    /// <summary>
+    /// Gets or sets the number of they can process
+    /// </summary>
+    public string LicenseFiles { get; set; }
 
     /// <summary>
     /// Gets the license flags for the user

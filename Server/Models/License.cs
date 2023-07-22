@@ -8,6 +8,8 @@ class License
     public DateTime ExpirationDateUtc { get; set; }
     public LicenseFlags Flags { get; set; }
 
+    public int Files { get; set; }
+
     public int ProcessingNodes { get; set; }
 
     internal static License DefaultLicense() => new License

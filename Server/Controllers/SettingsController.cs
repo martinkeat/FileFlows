@@ -142,6 +142,8 @@ public class SettingsController : Controller
     {
         settings.LicenseKey = AppSettings.Instance.LicenseKey;
         settings.LicenseEmail  = AppSettings.Instance.LicenseEmail;
+        settings.LicenseFiles = license == null ? string.Empty :
+            license.Files >= 1_000_000_000 ? "Unlimited" : license.Files.ToString();
         settings.LicenseFlags = license == null ? 0 : license.Flags;
         settings.LicenseProcessingNodes = LicenseHelper.GetLicensedProcessingNodes();
         settings.LicenseExpiryDate = license == null ? DateTime.MinValue : license.ExpirationDateUtc.ToLocalTime();

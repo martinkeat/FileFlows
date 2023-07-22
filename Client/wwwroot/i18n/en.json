@@ -621,7 +621,8 @@
           "Status": "Status",
           "ProcessingNodes":"Processing Nodes",
           "Flags":"Features",
-          "ExpiryDate":"Expiry Date"
+          "ExpiryDate":"Expiry Date",
+          "Files": "Files"
         }
       }
     },
