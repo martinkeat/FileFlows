@@ -45,7 +45,8 @@ public class TelemetryReporter : Worker
             {
                 OS = x.OperatingSystem,
                 Architecture = x.Architecture,
-                Runners = x.FlowRunners
+                Runners = x.FlowRunners,
+                Internal = x.Uid == Globals.InternalNodeUid || x.Name == Globals.InternalNodeName
             }).ToList();
             data.Architecture = RuntimeInformation.ProcessArchitecture.ToString();
             data.OS = isDocker ? "Docker" :
@@ -214,5 +215,10 @@ public class TelemetryReporter : Worker
         /// Gets or sets the number of runners on this node
         /// </summary>
         public int Runners { get; set; }
+    
+        /// <summary>
+        /// Gets or sets if this is the internal processing node
+        /// </summary>
+        public bool Internal { get; set; }
     }
 }
