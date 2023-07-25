@@ -330,7 +330,7 @@ public class SettingsController : Controller
             if (inUse == false)
             {
                 Logger.Instance.DLog($"Plugin '{pluginInfo.Name}' not in use by any flow, skipping");
-                Logger.Instance.DLog("Plugin not using flow parts:\n" + string.Join("\n", pluginInfo.Elements.Select(x => x.Uid)));
+                Logger.Instance.DLog("Plugin not using flow parts: " + string.Join(", ", pluginInfo.Elements.Select(x => x.Uid)));
                 continue; // plugin not used, skipping
             }
 
@@ -339,7 +339,7 @@ public class SettingsController : Controller
         }
 
         cfg.Plugins = plugins;
-        Logger.Instance.DLog($"Plugin list that is used in configuration:\n", string.Join("\n", plugins.Select(x => x.Key)));
+        Logger.Instance.DLog($"Plugin list that is used in configuration:", string.Join(", ", plugins.Select(x => x.Key)));
         
         return cfg;
     }

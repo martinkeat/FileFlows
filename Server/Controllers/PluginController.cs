@@ -260,7 +260,7 @@ public class PluginController : Controller
         {
             try
             {
-                var dlResult = pluginDownloader.Download(Version.Parse(package.Version), package.Name);
+                var dlResult = pluginDownloader.Download(Version.Parse(package.Version), package.Package);
                 if (dlResult.Success)
                 {
                     PluginScanner.UpdatePlugin(package.Name, dlResult.Data);
