@@ -32,9 +32,6 @@ public class TelemetryReporter : Worker
                 return; // they have turned it off, dont report anything
 
             bool isDocker = Program.Docker;
-            bool isMacOs = RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
-            bool isLinux = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
-            bool isWindows = !isDocker && !isMacOs && !isLinux;
 
             TelemetryData data = new TelemetryData();
             data.ClientUid = settings.Uid;
@@ -50,9 +47,11 @@ public class TelemetryReporter : Worker
             }).ToList();
             data.Architecture = RuntimeInformation.ProcessArchitecture.ToString();
             data.OS = isDocker ? "Docker" :
-                isMacOs ? "MacOS" :
-                isLinux ? "Linux" :
-                "Windows";
+                Globals.IsLinux ? "MacOS" :
+                Globals.IsLinux ? "Linux" :
+                Globals.IsFreeBsd ? "FreeBSD" :
+                Globals.IsWindows ? "Windows" :
+                RuntimeInformation.OSDescription;
             var libFiles = new LibraryFileController().GetAll(null).Result;
             data.FilesFailed = libFiles.Count(x => x.Status == FileStatus.ProcessingFailed);
             data.FilesProcessed = libFiles.Count(x => x.Status == FileStatus.Processed);

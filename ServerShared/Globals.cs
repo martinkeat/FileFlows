@@ -35,6 +35,11 @@ public class Globals
     public static bool IsMac => RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
 
     /// <summary>
+    /// Gets if this is running on FreeBSD
+    /// </summary>
+    public static bool IsFreeBsd => RuntimeInformation.IsOSPlatform(OSPlatform.FreeBSD);
+
+    /// <summary>
     /// Gets if this is running on an ARM CPU
     /// </summary>
     public static bool IsArm =>

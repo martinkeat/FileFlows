@@ -24,7 +24,11 @@ public enum OperatingSystemType
     /// <summary>
     /// A docker system
     /// </summary>
-    Docker = 4
+    Docker = 4,
+    /// <summary>
+    /// Free BSD
+    /// </summary>
+    FreeBsd = 5
 }
 
 /// <summary>

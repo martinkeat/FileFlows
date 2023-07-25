@@ -38,11 +38,14 @@ public class StartupWorker:Worker
                                     RuntimeInformation.ProcessArchitecture == Architecture.Arm ? ArchitectureType.Arm64 :
                                     RuntimeInformation.ProcessArchitecture == Architecture.X64 ? ArchitectureType.x64 : 
                                     RuntimeInformation.ProcessArchitecture == Architecture.X86 ? ArchitectureType.x86 :
+                                    IntPtr.Size == 8 ? ArchitectureType.x64 :
+                                    IntPtr.Size == 4 ? ArchitectureType.x86 : 
                                     ArchitectureType.Unknown;
         internalNode.OperatingSystem = Globals.IsDocker  ? OperatingSystemType.Docker : 
                                        Globals.IsWindows ? OperatingSystemType.Windows :
                                        Globals.IsLinux ? OperatingSystemType.Linux :
                                        Globals.IsMac ? OperatingSystemType.Mac :
+                                       Globals.IsFreeBsd ? OperatingSystemType.FreeBsd :
                                        OperatingSystemType.Unknown;
         service.Update(internalNode).Wait();
     }

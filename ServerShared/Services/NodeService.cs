@@ -208,13 +208,6 @@ public class NodeService : Service, INodeService
         if(serverUrl.EndsWith("/"))
             serverUrl = serverUrl.Substring(0, serverUrl.Length - 1);
 
-        bool isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
-        bool isMacOs = RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
-        bool isLinux = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.FreeBSD))
-            isLinux = true;
-        bool isDocker = Globals.IsDocker;
-
         var result = await HttpHelper.Post<ProcessingNode>(serverUrl + "/api/node/register", new RegisterModel
         {
             Address = address,
@@ -228,11 +221,14 @@ public class NodeService : Service, INodeService
                            RuntimeInformation.ProcessArchitecture == Architecture.Arm ? ArchitectureType.Arm64 :
                            RuntimeInformation.ProcessArchitecture == Architecture.X64 ? ArchitectureType.x64 : 
                            RuntimeInformation.ProcessArchitecture == Architecture.X86 ? ArchitectureType.x86 :
+                           IntPtr.Size == 8 ? ArchitectureType.x64 : 
+                           IntPtr.Size == 4 ? ArchitectureType.x86 :
                            ArchitectureType.Unknown,
-            OperatingSystem = isDocker ? OperatingSystemType.Docker : 
-                isWindows ? OperatingSystemType.Windows : 
-                 isLinux ? OperatingSystemType.Linux :       
-                 isMacOs ? OperatingSystemType.Mac :
+            OperatingSystem = Globals.IsDocker ? OperatingSystemType.Docker : 
+                Globals.IsWindows ? OperatingSystemType.Windows : 
+                 Globals.IsLinux ? OperatingSystemType.Linux :       
+                 Globals.IsMac ? OperatingSystemType.Mac :
+                 Globals.IsFreeBsd ? OperatingSystemType.FreeBsd :
                  OperatingSystemType.Unknown
         }, timeoutSeconds: 15);
 
