@@ -263,7 +263,7 @@ public class PluginController : Controller
                 var dlResult = pluginDownloader.Download(Version.Parse(package.Version), package.Package);
                 if (dlResult.Success)
                 {
-                    PluginScanner.UpdatePlugin(package.Name, dlResult.Data);
+                    PluginScanner.UpdatePlugin(package.Package, dlResult.Data);
                 }
             }
             catch (Exception ex)
