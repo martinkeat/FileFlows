@@ -159,7 +159,7 @@ public partial class LibraryFileService
             
             // the "other" node is higher priority, its not maxed out, its in-schedule, so we dont want the "node"
             // processing this file
-            Logger.Instance.ILog($"Higher priority node '{other.Name}' can process file, skipping node: '{node.Name}'");
+            Logger.Instance.ILog($"Higher priority node '{other.Name}' can process file, skipping node: '{node.Name}': {file.Name}");
             return true;
         }
         // no other node is higher priority, this node can process this file
