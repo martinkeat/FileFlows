@@ -150,31 +150,7 @@ public class ScriptController : Controller
 
         var service = new ScriptService();
         script.Name = service.GetNewUniqueName(name);
-
-        if (isRepositoryScript)
-        {
-            var rgxComments = new Regex(@"\/\*(\*)?(.*?)\*\/", RegexOptions.Singleline);
-            string replacement = $"/**\n * @basedOn {(name)}\n";
-            var commentMatch = rgxComments.Match(script.Code);
-            if (commentMatch.Success)
-            {
-                var descMatch = Regex.Match(commentMatch.Value, "(?<=(@description ))[^@]+");
-                if (descMatch.Success)
-                {
-                    string desc = descMatch.Value.Trim();
-                    if (desc.EndsWith("*"))
-                        desc = desc[..^1].Trim();
-                    replacement += " * @description " + desc + "\n";
-                }
-            }
-            replacement += " */";
-            script.Code = rgxComments.Replace(script.Code, replacement);
-        }
-        else if (script.Type != ScriptType.Flow)
-            script.Code = script.Code.Replace("@name ", "@basedOn ");
-        else
-            script.Code = Regex.Replace(script.Code, "@name(.*?)$", "@name " + script.Name, RegexOptions.Multiline);
-        
+        script.Code = Regex.Replace(script.Code, "@name(.*?)$", "@name " + script.Name, RegexOptions.Multiline);
         script.Repository = false;
         script.Uid = script.Name;
         script.Type = type;
