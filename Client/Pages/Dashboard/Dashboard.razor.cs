@@ -46,11 +46,7 @@ public partial class Dashboard : ComponentBase, IDisposable
     
     protected override async Task OnInitializedAsync()
     {
-#if (DEMO)
-        ConfiguredStatus = ConfigurationStatus.Flows | ConfigurationStatus.Libraries;
-#else
         ConfiguredStatus = App.Instance.FileFlowsSystem.ConfigurationStatus;
-#endif
         lblAddWidget = Translater.Instant("Pages.Dashboard.Labels.AddWidget");
         ClientService.SystemPausedUpdated += ClientServiceOnSystemPausedUpdated;
 

@@ -35,18 +35,8 @@ public class SettingsController : Controller
             status.ExternalDatabase = (string.IsNullOrWhiteSpace(dbConnStr) || dbConnStr.ToLower().Contains("sqlite")) == false;
         }
 
-        bool libs, flows;
-
-        if (DbHelper.UseMemoryCache)
-        {
-            libs = new LibraryService().GetAll().Any();
-            flows = new FlowService().GetAll().Any();
-        }
-        else
-        {
-            flows = FlowController.HasFlows;
-            libs = LibraryController.HasLibraries;
-        }
+        bool libs = new LibraryService().GetAll().Any();
+        bool flows = new FlowService().GetAll().Any();
 
         if (flows)
             status.ConfigurationStatus |= ConfigurationStatus.Flows;
@@ -173,7 +163,7 @@ public class SettingsController : Controller
             AutoUpdatePlugins = model.AutoUpdatePlugins,
             LogQueueMessages = model.LogQueueMessages,
             KeepFailedFlowTempFiles = model.KeepFailedFlowTempFiles,
-            HideFileAddedNotifications = model.HideFileAddedNotifications,
+            ShowFileAddedNotifications = model.ShowFileAddedNotifications,
             HideProcessingStartedNotifications = model.HideProcessingStartedNotifications,
             HideProcessingFinishedNotifications = model.HideProcessingFinishedNotifications,
         });

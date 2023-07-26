@@ -36,9 +36,9 @@ public class Settings : FileFlowObject
     public bool LogQueueMessages { get; set; }
     
     /// <summary>
-    /// Gets or sets if the notifications for file added should not be shown
+    /// Gets or sets if the notifications for file added should be shown
     /// </summary>
-    public bool HideFileAddedNotifications { get; set; }
+    public bool ShowFileAddedNotifications { get; set; }
     
     /// <summary>
     /// Gets or sets if the notifications for processing started added should not be shown

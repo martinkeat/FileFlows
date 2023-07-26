@@ -49,7 +49,7 @@
                                 <InputNumber @bind-Value="@Model.LogDatabaseRetention" Label="Pages.Settings.Fields.LogDatabaseRetention" Min=1000 Max=1000000 />
                             }
                         }
-                        <InputSwitch @bind-Value="@Model.HideFileAddedNotifications" Inverse="true" Label="Pages.Settings.Fields.HideFileAddedNotifications" />
+                        <InputSwitch @bind-Value="@Model.ShowFileAddedNotifications" Inverse="false" Label="Pages.Settings.Fields.ShowFileAddedNotifications" />
                         <InputSwitch @bind-Value="@Model.HideProcessingStartedNotifications" Inverse="true" Label="Pages.Settings.Fields.HideProcessingStartedNotifications" />
                         <InputSwitch @bind-Value="@Model.HideProcessingFinishedNotifications" Inverse="true" Label="Pages.Settings.Fields.HideProcessingFinishedNotifications" />
                     </FlowTab>
