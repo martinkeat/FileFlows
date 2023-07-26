@@ -1,3 +1,5 @@
+using System.Globalization;
+using Avalonia.Styling;
 using FileFlows.Server.Helpers;
 using FileFlows.ServerShared.Models;
 using FileFlows.Server.Controllers;
@@ -138,7 +140,17 @@ public partial class LibraryFileService
             // check the last time this node was seen to make sure its not disconnected
             if (other.LastSeen < DateTime.Now.AddMinutes(10))
             {
-                Logger.Instance.ILog("Higher priority node is offline: " + other.Name + ", last seen: " + other.LastSeen.Humanize() + " ago");
+                string lastSeen = DateTime.Now.Subtract(other.LastSeen)+ " ago";
+                try
+                {
+                    lastSeen = other.LastSeen.Humanize() + " ago";
+                }
+                catch (Exception)
+                {
+                    // this can throw
+                }
+
+                Logger.Instance.ILog("Higher priority node is offline: " + other.Name + ", last seen: " + lastSeen);
                 continue; // 10 minute cut off, give it some grace period
             }
             
