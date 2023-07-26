@@ -135,8 +135,11 @@ public partial class LibraryFileService
                 _ => allLibraries,
             };
             if (allowedLibraries.Contains(file.LibraryUid!.Value) == false)
+            {
+                Logger.Instance.DLog($"Node '{other.Name}' cannot process the file due to library restrictions: {file.Name}");
                 continue;
-            
+            }
+
             // check the last time this node was seen to make sure its not disconnected
             if (other.LastSeen < DateTime.Now.AddMinutes(10))
             {
