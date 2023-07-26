@@ -41,16 +41,13 @@ public partial class Dashboard : ComponentBase, IDisposable
         }
     }
 
-
-    private bool Unlicensed => App.Instance.FileFlowsSystem.Licensed == false;
-    
     protected override async Task OnInitializedAsync()
     {
         ConfiguredStatus = App.Instance.FileFlowsSystem.ConfigurationStatus;
         lblAddWidget = Translater.Instant("Pages.Dashboard.Labels.AddWidget");
         ClientService.SystemPausedUpdated += ClientServiceOnSystemPausedUpdated;
 
-        if (Unlicensed == false)
+        if (App.Instance.FileFlowsSystem.LicenseDashboards)
             await LoadDashboards();
         else
             ActiveDashboardUid = Guid.Empty;

@@ -20,6 +20,9 @@ public class DashboardController : Controller
     [HttpGet]
     public IEnumerable<Dashboard> GetAll()
     {
+        if (LicenseHelper.IsLicensed(LicenseFlags.Dashboards) == false)
+            return new List<Dashboard>();
+        
         var dashboards = new DashboardService().GetAll()
             .OrderBy(x => x.Name.ToLower()).ToList();
         if (dashboards.Any() == false)
@@ -36,6 +39,9 @@ public class DashboardController : Controller
     [HttpGet("list")]
     public IEnumerable<ListOption> ListAll()
     {
+        if (LicenseHelper.IsLicensed(LicenseFlags.Dashboards) == false)
+            return new List<ListOption>();
+        
         var dashboards = new DashboardService().GetAll()
             .OrderBy(x => x.Name.ToLower()).Select(x => new ListOption
         {
@@ -59,6 +65,8 @@ public class DashboardController : Controller
     [HttpGet("{uid}/Widgets")]
     public IEnumerable<WidgetUiModel> Get(Guid uid)
     {
+        if (LicenseHelper.IsLicensed(LicenseFlags.Dashboards) == false)
+            return null;
         var db = new DashboardService().GetByUid(uid);;
         if ((db == null || db.Uid == Guid.Empty) && uid == Dashboard.DefaultDashboardUid)
             db = Dashboard.GetDefaultDashboard(DbHelper.UseMemoryCache == false);
@@ -126,6 +134,8 @@ public class DashboardController : Controller
     [HttpPut("{uid}")]
     public Task<Dashboard> Save([FromRoute] Guid uid, [FromBody] List<Widget> widgets)
     {
+        if (LicenseHelper.IsLicensed(LicenseFlags.Dashboards) == false)
+            return null;
         var service = new DashboardService();
         var dashboard = service.GetByUid(uid);
         if (dashboard == null)

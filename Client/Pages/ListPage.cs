@@ -9,6 +9,10 @@ namespace FileFlows.Client.Pages;
 
 public abstract class ListPage<U, T> : ComponentBase where T : IUniqueObject<U>
 {
+    /// <summary>
+    /// Gets or sets the navigation manager
+    /// </summary>
+    [Inject] public NavigationManager NavigationManager { get; set; }
     protected FlowTable<T> Table { get; set; }
     [CascadingParameter] public Blocker Blocker { get; set; }
     [CascadingParameter] public Editor Editor { get; set; }
@@ -31,7 +35,15 @@ public abstract class ListPage<U, T> : ComponentBase where T : IUniqueObject<U>
         }
     }
 
-    protected override void OnInitialized() => OnInitialized(true);
+    protected override void OnInitialized()
+    {
+        if (Licensed() == false)
+        {
+            NavigationManager.NavigateTo("/");
+            return;
+        }
+        OnInitialized(true);
+    }
 
     protected void OnInitialized(bool load)
     {
@@ -149,6 +161,12 @@ public abstract class ListPage<U, T> : ComponentBase where T : IUniqueObject<U>
             duration: 60_000
         );
     }
+    
+    /// <summary>
+    /// Tests if the user is licensed for this page
+    /// </summary>
+    /// <returns>true if they are licensed</returns>
+    protected virtual bool Licensed() => true;
 
 
     public async Task Enable(bool enabled, T item)

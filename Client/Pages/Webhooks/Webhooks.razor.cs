@@ -32,6 +32,13 @@ public partial class Webhooks : ListPage<string, Webhook>
     [Inject] IClipboardService ClipboardService { get; set; }   
 
     /// <summary>
+    /// Gets if they are licensed for this page
+    /// </summary>
+    /// <returns>if they are licensed for this page</returns>
+    protected override bool Licensed()
+        => App.Instance.FileFlowsSystem.LicenseWebhooks; 
+
+    /// <summary>
     /// Initializes the webhooks page
     /// </summary>
     protected override void OnInitialized()

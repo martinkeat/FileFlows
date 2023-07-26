@@ -278,5 +278,9 @@ public enum LicenseFlags
     /// <summary>
     /// Can execute tasks
     /// </summary>
-    Tasks = 16
+    Tasks = 16,
+    /// <summary>
+    /// Can use webhooks
+    /// </summary>
+    Webhooks = 32
 }

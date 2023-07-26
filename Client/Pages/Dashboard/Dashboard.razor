@@ -8,7 +8,7 @@
     <div class="mobile-pause-resume">
         <PauseResume />   
     </div>
-    @if (App.Instance.FileFlowsSystem.Licensed)
+    @if (App.Instance.FileFlowsSystem.LicenseDashboards)
     {
         <div class="mobile-dashboard-selector dashboard-selector">
             <select @bind="ActiveDashboardUid">
@@ -29,7 +29,7 @@
     <PageView ClassName="fix-width">
 
         <Head>
-            @if (App.Instance.FileFlowsSystem.Licensed && App.Instance.IsMobile == false)
+            @if (App.Instance.FileFlowsSystem.LicenseDashboards && App.Instance.IsMobile == false)
             {
                 if (ActiveDashboardUid != Guid.Empty && ActiveDashboardUid != FileFlows.Shared.Models.Dashboard.DefaultDashboardUid)
                 {
@@ -62,7 +62,7 @@
             {
                 <InitialConfigWelcome />
             }
-            else if (App.Instance.FileFlowsSystem.Licensed && ActiveDashboardUid != Guid.Empty)
+            else if (App.Instance.FileFlowsSystem.LicenseDashboards && ActiveDashboardUid != Guid.Empty)
             {
                 if (ClientService.IsPaused)
                 {

@@ -19,6 +19,31 @@ public class FileFlowsStatus
     /// Gets or sets if FileFlows is licensed
     /// </summary>
     public bool Licensed { get; set; }
+    
+    /// <summary>
+    /// Gets or sets if license allowed for custom dashboards
+    /// </summary>
+    public bool LicenseDashboards { get; set; }
+    
+    /// <summary>
+    /// Gets or sets if license allowed for revisions
+    /// </summary>
+    public bool LicenseRevisions { get; set; }
+    
+    /// <summary>
+    /// Gets or sets if license allowed for tasks
+    /// </summary>
+    public bool LicenseTasks { get; set; }
+    
+    /// <summary>
+    /// Gets or sets if license allowed for webhooks
+    /// </summary>
+    public bool LicenseWebhooks { get; set; }
+    
+    /// <summary>
+    /// Gets or sets if license allowed for auto updates
+    /// </summary>
+    public bool LicenseAutoUpdates { get; set; }
 }
 
 /// <summary>

@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Components;
+
 namespace FileFlows.Client.Pages;
 
 /// <summary>
@@ -8,6 +10,13 @@ public partial class Revisions: ListPage<Guid, RevisionedObject>
     public override string ApiUrl => "/api/revision";
 
     public override string FetchUrl => $"{ApiUrl}/list";
+
+    /// <summary>
+    /// Gets if they are licensed for this page
+    /// </summary>
+    /// <returns>if they are licensed for this page</returns>
+    protected override bool Licensed()
+        => App.Instance.FileFlowsSystem.LicenseRevisions; 
 
     public override async Task<bool> Edit(RevisionedObject item)
     {

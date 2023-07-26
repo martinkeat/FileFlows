@@ -100,13 +100,10 @@ public partial class NavMenu : IDisposable
             {
                 nmiFlows,
                 nmiLibraries,
-#if (!DEMO)
                 new ("Pages.Nodes.Title", "fas fa-desktop", "nodes")
-#endif
             }
         });
 
-#if (!DEMO)
         MenuItems.Add(new NavMenuGroup
         {
             Name = "Extensions",
@@ -124,9 +121,9 @@ public partial class NavMenu : IDisposable
             Icon = "fas fa-desktop",
             Items = new List<NavMenuItem>
             {
-                App.Instance.FileFlowsSystem.Licensed ? new ("Pages.Revisions.Title", "fas fa-history", "revisions") : null,
-                App.Instance.FileFlowsSystem.Licensed ? new ("Pages.Tasks.Title", "fas fa-clock", "tasks") : null,
-                App.Instance.FileFlowsSystem.Licensed ? new ("Pages.Webhooks.Title", "fas fa-handshake", "webhooks") : null,
+                App.Instance.FileFlowsSystem.LicenseRevisions ? new ("Pages.Revisions.Title", "fas fa-history", "revisions") : null,
+                App.Instance.FileFlowsSystem.LicenseTasks ? new ("Pages.Tasks.Title", "fas fa-clock", "tasks") : null,
+                App.Instance.FileFlowsSystem.LicenseWebhooks ? new ("Pages.Webhooks.Title", "fas fa-handshake", "webhooks") : null,
                 new ("Pages.Settings.Title", "fas fa-cogs", "settings"),
             }
         });
@@ -140,8 +137,6 @@ public partial class NavMenu : IDisposable
                 new NavMenuItem("Pages.Log.Title", "fas fa-file-alt", "log")
             }
         });
-
-#endif
 
         try
         {

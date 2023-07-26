@@ -28,6 +28,14 @@ public partial class Tasks: ListPage<Guid, FileFlowsTask>
     private static readonly string SCHEDULE_12_HOURLY = string.Concat(Enumerable.Repeat("1" + new string('0', 47), 2 * 7));
     private static readonly string SCHEDULE_DAILY = string.Concat(Enumerable.Repeat("1" + new string('0', 95), 7));
 
+
+    /// <summary>
+    /// Gets if they are licensed for this page
+    /// </summary>
+    /// <returns>if they are licensed for this page</returns>
+    protected override bool Licensed()
+        => App.Instance.FileFlowsSystem.LicenseTasks; 
+    
     protected override void OnInitialized()
     {
         lblNever = Translater.Instant("Labels.Never");
