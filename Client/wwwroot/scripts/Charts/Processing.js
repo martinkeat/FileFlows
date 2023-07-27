@@ -99,6 +99,8 @@ export class Processing extends FFChart
      * @param {number} size - The size in terms of how many rows.
      */
     setSize(size) {
+        if(typeof(ffGrid) === 'undefined')
+            return;
         let rows = Math.floor((size - 1) / 2) + 1;
         ffGrid.update(this.ele, { h: rows});
     }
@@ -257,7 +259,7 @@ class Runner {
         parent.appendChild(this.element);
 
         this.element.innerHTML = `
-      <div class="chart chart-${this.uid}" id="${this.eleChartId}"></div>
+      <div class="chart chart-${this.uid} chart-runner" id="${this.eleChartId}"></div>
       <div class="info">
         <div class="lv w-2 file">
           <span class="l">File</span>

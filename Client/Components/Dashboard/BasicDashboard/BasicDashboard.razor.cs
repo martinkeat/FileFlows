@@ -44,7 +44,6 @@ public partial class BasicDashboard : IDisposable
     
     protected override async Task OnInitializedAsync()
     {
-        Logger.Instance.ILog("basic dashboard!");
         AutoRefreshTimer = new Timer();
         AutoRefreshTimer.Elapsed += AutoRefreshTimerElapsed;
         AutoRefreshTimer.Interval = 5_000;

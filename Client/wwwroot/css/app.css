@@ -1505,4 +1505,54 @@ hr {
   display: unset;
 }
 
+@media screen and (max-width: 850px) {
+  .dashboard.grid-stack {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 6rem;
+  }
+  .processing-runners {
+    display: flex !important;
+    flex-direction: column;
+  }
+  .processing-runners .runner {
+    margin: 0 0.5rem 1rem 0;
+    width: calc(100% - 0.5rem);
+  }
+  .grid-stack-item {
+    left: unset !important;
+    right: unset !important;
+    width: unset !important;
+    position: unset !important;
+    min-width: unset !important;
+    height: fit-content !important;
+    display: flex;
+    flex-direction: column;
+  }
+  .grid-stack-item.chart-type-105 {
+    height: 10rem !important;
+  }
+  .grid-stack-item.chart-type-101, .grid-stack-item.chart-type-102, .grid-stack-item.chart-type-103, .grid-stack-item.chart-type-104, .grid-stack-item.chart-type-106 {
+    height: 25rem !important;
+  }
+  .grid-stack-item:not(.chart-type-105) .content {
+    height: fit-content;
+    flex-grow: 1;
+  }
+  .grid-stack-item:not(.chart-type-105) .content > div {
+    height: unset !important;
+    max-height: unset !important;
+  }
+  .grid-stack-item:not(.chart-type-105) .content .no-data {
+    height: unset !important;
+    padding: 4rem;
+  }
+  .grid-stack-item:not(.chart-type-105) .content .no-data > span {
+    position: unset !important;
+  }
+  .grid-stack-item:not(.chart-type-105) table {
+    height: unset !important;
+  }
+}
+
 /*# sourceMappingURL=app.css.map */

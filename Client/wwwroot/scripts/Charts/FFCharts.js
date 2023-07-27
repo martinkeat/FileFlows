@@ -5,6 +5,12 @@ import { LibraryFileTable } from "./LibraryFileTable.js";
 export function initDashboard(uid, Widgets, csharp, isReadOnly){
     if(!Widgets)
         return;
+    
+    let defaultDashboard = uid === 'bed286d9-68f0-48a8-8c6d-05ec6f81d67c';
+    if(defaultDashboard && window.innerWidth <= 850) {
+        // rearrange widgets so Runners is first
+        Widgets = [...Widgets.filter(x => x.type === 1), ...Widgets.filter(x => x.type !== 105 && x.type !== 1),  ...Widgets.filter(x => x.type === 105)]        
+    }
     disposeAll();
     destroyDashboard();
     
@@ -95,6 +101,10 @@ export function disposeAll(){
 }
 
 function intDashboardActual(uid, csharp, isReadOnly) {
+
+    if (window.innerWidth < 850)
+        return;
+    
     let grid = GridStack.init({
         cellHeight:170,
         handle: '.draghandle',
@@ -128,7 +138,7 @@ function addWidget(dashboard, p, csharp){
 
     let div = document.createElement("div");
     div.setAttribute('id', p.uid);
-    div.className = 'grid-stack-item widget';
+    div.className = 'grid-stack-item widget chart-type-' + p.type;
     div.setAttribute('gs-w', p.width);
     div.setAttribute('gs-h', p.height);
     div.setAttribute('gs-x', p.x);
