@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using FileFlows.Shared.Models;
 
 namespace FileFlows.Server.Services;
@@ -7,7 +8,7 @@ namespace FileFlows.Server.Services;
 /// </summary>
 public partial class LibraryFileService 
 {
-    private static Dictionary<Guid, LibraryFile> Data = new Dictionary<Guid, LibraryFile>();
+    private static ConcurrentDictionary<Guid, LibraryFile> Data = new ();
 
     static LibraryFileService()
     {
@@ -21,8 +22,14 @@ public partial class LibraryFileService
     /// </summary>
     /// <param name="data">the data</param>
     public void SetData(Dictionary<Guid, LibraryFile> data)
-        => Data = data;
-    #endif
+    {
+        // Create a new ConcurrentDictionary to hold the data
+        ConcurrentDictionary<Guid, LibraryFile> concurrentData = new ConcurrentDictionary<Guid, LibraryFile>(data);
+
+        // Replace the original Data dictionary with the concurrentData
+        Data = concurrentData;
+    }
+#endif
 
     /// <summary>
     /// Refreshes the data
@@ -32,10 +39,20 @@ public partial class LibraryFileService
         Logger.Instance.ILog("Refreshing LibraryFileService Cache");
         try
         {
-            using var db = GetDbWithMappings().Result;
-            var data = db.Db.Fetch<LibraryFile>("select * from LibraryFile");
-            var dict = data.ToDictionary(x => x.Uid, x => x);
-            Data = dict;
+            using var db =  GetDbWithMappings().Result;
+            var data = db.Db.FetchAsync<LibraryFile>("select * from LibraryFile").Result;
+    
+            // Create a new ConcurrentDictionary to hold the data
+            ConcurrentDictionary<Guid, LibraryFile> concurrentData = new ConcurrentDictionary<Guid, LibraryFile>();
+
+            // Populate the ConcurrentDictionary directly from the fetched data
+            foreach (var item in data)
+            {
+                concurrentData.TryAdd(item.Uid, item);
+            }
+
+            // Replace the original Data dictionary with the concurrentData
+            Data = concurrentData;
 
             Logger.Instance.ILog("Refreshed LibraryFileService Cache");
         }
@@ -63,7 +80,7 @@ public partial class LibraryFileService
             if (Data.ContainsKey(file.Uid))
                 Data[file.Uid] = file;
             else
-                Data.Add(file.Uid, file);
+                Data.TryAdd(file.Uid, file);
         };
     }
 
@@ -78,7 +95,7 @@ public partial class LibraryFileService
             foreach (var uid in uids)
             {
                 if (Data.ContainsKey(uid))
-                    Data.Remove(uid);
+                    Data.Remove(uid, out var lf);
             }
         }
     }
@@ -88,9 +105,22 @@ public partial class LibraryFileService
     /// </summary>
     /// <param name="uids">UIDs of the libraries</param>
     private void RemoveLibraries(params Guid[] uids)
-        => Data = Data.Where(x =>
-            x.Value.LibraryUid == null || uids.Contains(x.Value.LibraryUid.Value) == false
-        ).ToDictionary(x => x.Key, x => x.Value);
+    {
+        // Create a new ConcurrentDictionary to hold the filtered data
+        ConcurrentDictionary<Guid, LibraryFile> concurrentData = new ();
+
+        // Filter and populate the ConcurrentDictionary
+        foreach (var kvp in Data)
+        {
+            if (kvp.Value.LibraryUid == null || uids.Contains(kvp.Value.LibraryUid.Value) == false)
+            {
+                concurrentData.TryAdd(kvp.Key, kvp.Value);
+            }
+        }
+
+        // Replace the original Data dictionary with the filtered concurrentData
+        Data = concurrentData;
+    }
 
     /// <summary>
     /// Deletes a file to the data
@@ -101,7 +131,7 @@ public partial class LibraryFileService
         lock (Data)
         {
             if (Data.ContainsKey(file.Uid))
-                Data.Remove(file.Uid);
+                Data.Remove(file.Uid, out var lf);
         }
     }
 }
