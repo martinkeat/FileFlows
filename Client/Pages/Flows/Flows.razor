@@ -42,7 +42,7 @@ FileFlows will search for the 'Default' Failure Flow to use if a flow fails, if 
                     <FlowTableButtonSeparator />
                 }
                 <FlowTableButton Clicked=UsedBy SelectedOne="true" Icon="fas fa-info-circle" Label="Labels.UsedBy" />   
-                @if (App.Instance.FileFlowsSystem.Licensed)
+                @if (App.Instance.FileFlowsSystem.LicenseRevisions)
                 {
                     <FlowTableButton Clicked=Revisions SelectedOne="true" Icon="fas fa-history" Label="Labels.Revisions" />
                 }
