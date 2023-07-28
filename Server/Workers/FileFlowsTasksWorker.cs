@@ -54,8 +54,7 @@ public class FileFlowsTasksWorker: Worker
             dict.Add(var.Name, var.Value);
         }
         
-        if(dict.ContainsKey("FileFlows.Url") == false)
-            dict.Add("FileFlows.Url", ServerShared.Services.Service.ServiceBaseUrl);
+        dict.TryAdd("FileFlows.Url", ServerShared.Services.Service.ServiceBaseUrl);
         return dict;
     }
 
@@ -64,7 +63,7 @@ public class FileFlowsTasksWorker: Worker
     /// </summary>
     protected override void Execute()
     {
-        if (LicenseHelper.IsLicensed() == false)
+        if (LicenseHelper.IsLicensed(LicenseFlags.Tasks) == false)
             return;
         
         int quarter = TimeHelper.GetCurrentQuarter();
@@ -79,10 +78,7 @@ public class FileFlowsTasksWorker: Worker
             if (TaskLastRun.ContainsKey(task.Uid) && TaskLastRun[task.Uid] == quarter)
                 continue;
             _ = RunTask(task);
-            if (TaskLastRun.ContainsKey(task.Uid))
-                TaskLastRun[task.Uid] = quarter;
-            else
-                TaskLastRun.Add(task.Uid, quarter);
+            TaskLastRun[task.Uid] = quarter;
         }
     }
 
@@ -93,6 +89,8 @@ public class FileFlowsTasksWorker: Worker
     /// <returns>the result of the executed task</returns>
     internal async Task<FileFlowsTaskRun> RunByUid(Guid uid)
     {
+        if (LicenseHelper.IsLicensed(LicenseFlags.Tasks) == false) 
+            return new() { Success = false, Log = "Not licensed" };
         var task = new TaskService().GetByUid(uid);
         if (task == null)
             return new() { Success = false, Log = "Task not found" };
@@ -121,10 +119,7 @@ public class FileFlowsTasksWorker: Worker
         {
             foreach (var variable in additionalVariables)
             {
-                if (variables.ContainsKey(variable.Key))
-                    variables[variable.Key] = variable.Value;
-                else
-                    variables.Add(variable.Key, variable.Value);
+                variables[variable.Key] = variable.Value;
             }
         }
 
@@ -141,12 +136,14 @@ public class FileFlowsTasksWorker: Worker
             while (task.RunHistory.Count > 10 && task.RunHistory.TryDequeue(out _));
         }
 
-        new TaskService().Update(task);
+        await new TaskService().Update(task);
         return result;
     }
     
     private void TriggerTaskType(TaskType type, Dictionary<string, object> variables)
     {
+        if (LicenseHelper.IsLicensed(LicenseFlags.Tasks) == false)
+            return;
         var tasks = new TaskService().GetAll().Where(x => x.Type == type).ToArray();
         foreach (var task in tasks)
         {
@@ -156,6 +153,8 @@ public class FileFlowsTasksWorker: Worker
 
     private void UpdateEventTriggered(TaskType type, SystemEvents.UpdateEventArgs args)
     {
+        if (LicenseHelper.IsLicensed(LicenseFlags.Tasks) == false)
+            return;
         TriggerTaskType(type, new Dictionary<string, object>
         {
             { nameof(args.Version), args.Version },
@@ -170,6 +169,8 @@ public class FileFlowsTasksWorker: Worker
 
     private void LibraryFileEventTriggered(TaskType type, SystemEvents.LibraryFileEventArgs args)
     {
+        if (LicenseHelper.IsLicensed(LicenseFlags.Tasks) == false)
+            return;
         TriggerTaskType(type, new Dictionary<string, object>
         {
             { "FileName", args.File.Name },

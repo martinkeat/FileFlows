@@ -1,6 +1,4 @@
 using FileFlows.Server.Helpers;
-using FileFlows.Server.Services;
-using FileFlows.Shared.Models;
 using Microsoft.AspNetCore.Mvc;
 using HttpMethod = FileFlows.Shared.HttpMethod;
 
@@ -56,7 +54,7 @@ public class WebhookHandlerController:Controller
     /// <returns>the result from the webhook</returns>
     private async Task<IActionResult> Process(HttpMethod method, string route)
     {
-        if (LicenseHelper.IsLicensed() == false)
+        if (LicenseHelper.IsLicensed(LicenseFlags.Webhooks) == false)
             return NotFound();
 
         var webhook = (await new WebhookController().GetAll()).FirstOrDefault(x => x.Route == route && x.Method == method);

@@ -21,7 +21,7 @@ public class WebhookController : Controller
     [HttpGet]
     public async Task<IEnumerable<Webhook>> GetAll()
     {
-        if(LicenseHelper.IsLicensed() == false)
+        if(LicenseHelper.IsLicensed(LicenseFlags.Webhooks) == false)
             return new List<Webhook>();
         return (await new ScriptController().GetAllByType(ScriptType.Webhook))
             .Select(x => FromScript(x))
@@ -77,7 +77,7 @@ public class WebhookController : Controller
     [HttpGet("{name}")]
     public async Task<Webhook?> Get(string name)
     {
-        if(LicenseHelper.IsLicensed() == false)
+        if(LicenseHelper.IsLicensed(LicenseFlags.Webhooks) == false)
             return null;
         var script = await new ScriptController().Get(name, ScriptType.Webhook);
         return script != null ? FromScript(script) : null;
@@ -91,7 +91,7 @@ public class WebhookController : Controller
     [HttpPost]
     public async Task<Webhook> Save([FromBody] Webhook webhook)
     {
-        if(LicenseHelper.IsLicensed() == false || string.IsNullOrWhiteSpace(webhook.Name))
+        if(LicenseHelper.IsLicensed(LicenseFlags.Webhooks) == false || string.IsNullOrWhiteSpace(webhook.Name))
             return null;
         var existing = await Get(webhook.Uid?.EmptyAsNull() ?? webhook.Name);
         CommentBlock comments;
@@ -124,7 +124,7 @@ public class WebhookController : Controller
     [HttpDelete]
     public void Delete([FromBody] ReferenceModel<string> model)
     {
-        if(LicenseHelper.IsLicensed() == false)
+        if(LicenseHelper.IsLicensed(LicenseFlags.Webhooks) == false)
             return;
         new ScriptController().Delete(model, ScriptType.Webhook);
     }
