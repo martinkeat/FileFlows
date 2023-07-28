@@ -26,12 +26,13 @@ public class MainWindow : Window
         {
             CustomTitle = Globals.IsWindows
         };
+        
 
         ExtendClientAreaChromeHints =
             dc.CustomTitle ? ExtendClientAreaChromeHints.NoChrome : ExtendClientAreaChromeHints.Default;
         ExtendClientAreaToDecorationsHint = dc.CustomTitle;
-        this.MaxHeight = dc.CustomTitle ? 260 : 230;
-        this.Height = dc.CustomTitle ? 260 : 230;
+        this.MaxHeight = dc.CustomTitle ? 300 : 270;
+        this.Height = dc.CustomTitle ? 300 : 270;
 
         DataContext = dc;
         
@@ -63,7 +64,6 @@ public class MainWindow : Window
     {
         BeginMoveDrag(e);
     }
-
 
     private bool ConfirmedQuit = false;
     protected override void OnClosing(CancelEventArgs e)
@@ -162,6 +162,22 @@ public class MainWindowViewModel
     private MainWindow Window { get; set; }
     public string ServerUrl { get; set; }
     public string Version { get; set; }
+
+    /// <summary>
+    /// Gets or sets if the app should start minimized
+    /// </summary>
+    public bool StartMinimized
+    {
+        get => AppSettings.Instance.StartMinimized;
+        set
+        {
+            if (AppSettings.Instance.StartMinimized != value)
+            {
+                AppSettings.Instance.StartMinimized = value;
+                AppSettings.Instance.Save();
+            }
+        } 
+    }
 
     public void Launch() => Window.Launch();
     public void Quit() => Window.Quit();

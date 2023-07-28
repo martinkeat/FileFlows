@@ -56,6 +56,11 @@ public class AppSettings
         }
     }
 
+    /// <summary>
+    /// Gets or sets if the app should start minimized
+    /// </summary>
+    public bool StartMinimized { get; set; }
+
     // /// <summary>
     // /// Gets or sets the temporary path
     // /// </summary>

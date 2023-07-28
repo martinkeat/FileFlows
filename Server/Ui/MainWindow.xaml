@@ -29,6 +29,11 @@
 
 			<TextBlock Margin="6" Text="{Binding Version}" TextAlignment="Center" />
 			<TextBlock Margin="6" Text="{Binding ServerUrl}" TextAlignment="Center" />
+			
+			
+			<ToggleSwitch IsChecked="{Binding StartMinimized}" 
+			              Margin="5 5 5 5" HorizontalAlignment="Center" 
+			              OffContent="Start Minimised" OnContent="Start Minimised"  />
 
 			<StackPanel Orientation="Horizontal" Margin="20 0" HorizontalAlignment="Center">
 

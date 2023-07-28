@@ -42,6 +42,11 @@ internal class AppSettings
     /// </summary>
     public int? ServerPort { get; set; }
 
+    /// <summary>
+    /// Gets or sets if the app should start minimized
+    /// </summary>
+    public bool StartMinimized { get; set; }
+
 
     /// <summary>
     /// Gets or sets the connection string of where to migrate the data to

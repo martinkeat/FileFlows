@@ -9,6 +9,7 @@ internal class App : Application
         base.Initialize();
         
         var window = new MainWindow();
-        window.Show();
+        if(AppSettings.Instance.StartMinimized == false)
+            window.Show();
     }
 }

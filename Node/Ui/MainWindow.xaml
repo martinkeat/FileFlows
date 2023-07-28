@@ -29,7 +29,7 @@
 
 			<TextBlock Margin="6" Text="{Binding Version}" TextAlignment="Center" />
 			
-			<Grid ColumnDefinitions="140,4*" RowDefinitions="Auto,Auto,40,40,Auto"  Margin="4">
+			<Grid ColumnDefinitions="140,4*" RowDefinitions="Auto,Auto,Auto,40,40,Auto"  Margin="4">
 				<TextBlock Text="Server:" Grid.Row="0" Grid.Column="0" Margin="5 13 5 5" TextAlignment="Right" />
 				
 				<DockPanel Grid.Row="0" Grid.Column="1"  Margin="5" HorizontalAlignment="Stretch">
@@ -42,6 +42,11 @@
 					        BorderBrush="#ff0090"
 					/>
 				</DockPanel>
+				
+				
+				<ToggleSwitch Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" IsChecked="{Binding StartMinimized}" 
+				              Margin="5 5 5 5" HorizontalAlignment="Center" 
+				              OffContent="Start Minimised" OnContent="Start Minimised"  />
 				
 				<!--
 				<TextBlock Text="Temp Path:" Grid.Row="1" Grid.Column="0"  Margin="5 13 5 5" TextAlignment="Right"/>

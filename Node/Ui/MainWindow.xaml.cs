@@ -38,8 +38,8 @@ public class MainWindow : Window
         ExtendClientAreaChromeHints =
             dc.CustomTitle ? ExtendClientAreaChromeHints.NoChrome : ExtendClientAreaChromeHints.Default;
         ExtendClientAreaToDecorationsHint = dc.CustomTitle;
-        this.MaxHeight = dc.CustomTitle ? 420 : 390;
-        this.Height = dc.CustomTitle ? 420 : 390;
+        this.MaxHeight = dc.CustomTitle ? 380 : 350;
+        this.Height = dc.CustomTitle ? 380 : 350;
 
         DataContext = dc;
         _trayIcon.IsVisible = true;
@@ -251,6 +251,23 @@ public class MainWindowViewModel:INotifyPropertyChanged
             }
         }
     }
+    
+    /// <summary>
+    /// Gets or sets if the app should start minimized
+    /// </summary>
+    public bool StartMinimized
+    {
+        get => AppSettings.Instance.StartMinimized;
+        set
+        {
+            if (AppSettings.Instance.StartMinimized != value)
+            {
+                AppSettings.Instance.StartMinimized = value;
+                AppSettings.Instance.Save();
+            }
+        } 
+    }
+    
     //
     // private string _TempPath = String.Empty;
     // /// <summary>
