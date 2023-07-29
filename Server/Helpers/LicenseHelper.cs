@@ -80,6 +80,9 @@ class LicenseHelper
             return null;
         }
     }
+
+    private static DateTime LastUpdate = DateTime.MinValue;
+    private static string LastLicenseEmail, LastLicenseKey;
     
     
     /// <summary>
@@ -95,6 +98,9 @@ class LicenseHelper
             AppSettings.Instance.Save();
             return;
         }
+
+        if (LastLicenseEmail == email && LastLicenseKey == key && LastUpdate > DateTime.Now.AddHours(-1))
+            return; // last update wasn't long ago, can skip it
         try
         {
             string json = JsonSerializer.Serialize(new LicenseValidationModel
@@ -114,11 +120,11 @@ class LicenseHelper
             var license = FromCode(licenseCode);
             if (license == null)
                 return;
-
-            // only save the license if its valid, expired or if its been revoked
-            // any other, let them use the remainder of their existing license
-            if (license.Status != LicenseStatus.Valid && license.Status != LicenseStatus.Revoked && license.Status != LicenseStatus.Expired)
-                return;
+            
+            // could reach the server, license request was good, record it.
+            LastLicenseEmail = email;
+            LastLicenseKey = key;
+            LastUpdate = DateTime.Now;
 
             // code is good, save it
             AppSettings.Instance.LicenseCode = licenseCode;
