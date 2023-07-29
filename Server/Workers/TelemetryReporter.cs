@@ -83,6 +83,8 @@ public class TelemetryReporter : Worker
                     dictNodes.Add(lib.Template, 1);
             }
 
+            data.StorageSaved = new LibraryFileService().GetTotalStorageSaved();
+
             data.LibraryTemplates = dictNodes.Select(x => new TelemetryDataSet
             {
                 Name = x.Key,
@@ -177,6 +179,11 @@ public class TelemetryReporter : Worker
         /// Gets or sets the number of files that failed during processing by the client.
         /// </summary>
         public int FilesFailed { get; set; }
+        
+        /// <summary>
+        /// Gets or sets the amount of storage saved
+        /// </summary>
+        public long StorageSaved { get; set; }
     }
 
     /// <summary>

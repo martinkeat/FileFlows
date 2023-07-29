@@ -126,4 +126,17 @@ where Status = 1 and ProcessingEnded > ProcessingStarted;";
         return libraries;
     }
 
+    /// <summary>
+    /// Gets the total storage saved
+    /// </summary>
+    /// <returns>the total storage saved</returns>
+    public long GetTotalStorageSaved()
+    {
+        var total  = Data
+            .Where(x => x.Value.Status == FileStatus.Processed && x.Value.FinalSize < x.Value.OriginalSize)
+            .Select(x => x.Value.OriginalSize - x.Value.FinalSize)
+            .Sum();
+        return total;
+    }
+
 }
