@@ -99,7 +99,7 @@ class LicenseHelper
             return;
         }
 
-        if (LastLicenseEmail == email && LastLicenseKey == key && LastUpdate > DateTime.Now.AddHours(-1))
+        if (LastLicenseEmail == email && LastLicenseKey == key && LastUpdate > DateTime.Now.AddMinutes(-5))
             return; // last update wasn't long ago, can skip it
         try
         {
