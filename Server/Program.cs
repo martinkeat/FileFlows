@@ -27,15 +27,6 @@ public class Program
 
     public static void Main(string[] args)
     {
-        #if(DEBUG)
-        if (Globals.IsWindows)
-        {
-            new ProcessHelper(null, false).ExecuteShellCommand(new () {
-                Command = "Taskkill",
-                Arguments = "/IM ffmpeg.exe /F"
-            });
-        }
-        #endif
         try
         {
             if (args.Any(x =>
@@ -60,22 +51,13 @@ public class Program
             ServerShared.Globals.IsDocker = args?.Any(x => x == "--docker") == true;
             ServerShared.Globals.IsSystemd = args?.Any(x => x == "--systemd-service") == true;
             var noGui = args?.Any((x => x.ToLower() == "--no-gui")) == true || Docker;
-            DirectoryHelper.Init(Docker, false);
+
+            if (noGui == false && Globals.IsWindows)
+            {
+                // hide the console on window
+                Utils.WindowsConsoleManager.Hide();
+            }
             
-            
-            if(File.Exists(Path.Combine(DirectoryHelper.BaseDirectory, "server-upgrade.bat")))
-                File.Delete(Path.Combine(DirectoryHelper.BaseDirectory, "server-upgrade.bat"));
-            if(File.Exists(Path.Combine(DirectoryHelper.BaseDirectory, "server-upgrade.sh")))
-                File.Delete(Path.Combine(DirectoryHelper.BaseDirectory, "server-upgrade.sh"));
-
-            ServicePointManager.DefaultConnectionLimit = 50;
-
-            InitializeLoggers();
-
-            WriteLogHeader(args);
-
-            CleanDefaultTempDirectory();
-
             if (Docker == false)
             {
                 appMutex = new Mutex(true, appName, out bool createdNew);
@@ -99,9 +81,25 @@ public class Program
                     return;
                 }
             }
+            DirectoryHelper.Init(Docker, false);
+            
+            
+            if(File.Exists(Path.Combine(DirectoryHelper.BaseDirectory, "server-upgrade.bat")))
+                File.Delete(Path.Combine(DirectoryHelper.BaseDirectory, "server-upgrade.bat"));
+            if(File.Exists(Path.Combine(DirectoryHelper.BaseDirectory, "server-upgrade.sh")))
+                File.Delete(Path.Combine(DirectoryHelper.BaseDirectory, "server-upgrade.sh"));
+
+            ServicePointManager.DefaultConnectionLimit = 50;
+
+            InitializeLoggers();
+
+            WriteLogHeader(args);
+
+            CleanDefaultTempDirectory();
+
             
             // create new client, this can be used by upgrade scripts, so do this before preparing database
-            Shared.Helpers.HttpHelper.Client = Shared.Helpers.HttpHelper.GetDefaultHttpHelper(string.Empty);
+            HttpHelper.Client = HttpHelper.GetDefaultHttpHelper(string.Empty);
 
             CheckLicense();
 
@@ -115,8 +113,6 @@ public class Program
             }
             else
             {
-                if(Globals.IsWindows)
-                    Utils.WindowsConsoleManager.Hide();
                 
                 Task.Run(() =>
                 {
