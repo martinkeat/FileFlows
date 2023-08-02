@@ -27,7 +27,8 @@ public class LibaryFileListModelHelper
                 Library = x.Library?.Name,
                 RelativePath = x.RelativePath,
                 Name = x.Name,
-                OriginalSize = x.OriginalSize
+                OriginalSize = x.OriginalSize,
+                Forced = (x.Flags & LibraryFileFlags.ForceProcessing) == LibraryFileFlags.ForceProcessing
             };
 
             if (status == FileStatus.Unprocessed || status == FileStatus.OutOfSchedule || status == FileStatus.Disabled)

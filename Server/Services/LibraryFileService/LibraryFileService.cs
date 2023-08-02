@@ -258,6 +258,14 @@ public partial class LibraryFileService : ILibraryFileService
         => SetStatus(FileStatus.Unprocessed, uids);
 
     /// <summary>
+    /// Toggles force processing 
+    /// </summary>
+    /// <param name="uids">the UIDs to toggle force on</param>
+    /// <returns>an awaited task</returns>
+    public Task ToggleForce(Guid[] uids)
+        => ToggleFlag(LibraryFileFlags.ForceProcessing, uids);
+
+    /// <summary>
     /// Resets any currently processing library files 
     /// This will happen if a server or node is reset
     /// </summary>

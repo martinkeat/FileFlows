@@ -421,6 +421,24 @@ public partial class LibraryFiles : ListPage<Guid, LibaryFileListModel>, IDispos
         await Refresh();
     }
     
+    private async Task ToggleForce()
+    {
+        var selected = Table.GetSelected();
+        var uids = selected.Select(x => x.Uid)?.ToArray() ?? new Guid[] { };
+        if (uids.Length == 0)
+            return; // nothing 
+
+        Blocker.Show();
+        try
+        {
+            await HttpHelper.Post(ApiUrl + "/toggle-force", new ReferenceModel<Guid> { Uids = uids });
+        }
+        finally
+        {
+            Blocker.Hide();
+        }
+        await Refresh();
+    }
     
     Task Search() => NavigationService.NavigateTo("/library-files/search");
 

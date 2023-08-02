@@ -143,12 +143,12 @@ public class FlowWorker : Worker
             return;
         }
 
-        if(string.IsNullOrEmpty(node?.Schedule) == false && TimeHelper.InSchedule(node.Schedule) == false)
-        {
-            Logger.Instance?.DLog($"Node '{nodeName}' is out of schedule");
-            Interval = 300; // slow interval down to 5minus
-            return;
-        }
+        // if(string.IsNullOrEmpty(node?.Schedule) == false && TimeHelper.InSchedule(node.Schedule) == false)
+        // {
+        //     Logger.Instance?.DLog($"Node '{nodeName}' is out of schedule");
+        //     Interval = 300; // slow interval down to 5minus
+        //     return;
+        // }
 
         if (Interval == 300)
             Interval = DEFAULT_INTERVAL;

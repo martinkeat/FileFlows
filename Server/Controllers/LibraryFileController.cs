@@ -337,12 +337,21 @@ public class LibraryFileController : Controller //ControllerStore<LibraryFile>
     /// <summary>
     /// Unhold library files
     /// </summary>
-    /// <param name="model">A reference model containing UIDs to reprocess</param>
+    /// <param name="model">A reference model containing UIDs to unhold</param>
     /// <returns>an awaited task</returns>
     [HttpPost("unhold")]
     public Task Unhold([FromBody] ReferenceModel<Guid> model)
         => new LibraryFileService().Unhold(model?.Uids ?? new Guid[]{});
 
+    /// <summary>
+    /// Toggles force processing 
+    /// </summary>
+    /// <param name="model">A reference model containing UIDs to toggle force on</param>
+    /// <returns>an awaited task</returns>
+    [HttpPost("toggle-force")]
+    public Task ToggleForce([FromBody] ReferenceModel<Guid> model)
+        => new LibraryFileService().ToggleForce(model?.Uids ?? new Guid[]{});
+    
 
     /// <summary>
     /// Force processing of files

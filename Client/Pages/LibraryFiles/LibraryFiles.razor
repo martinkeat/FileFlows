@@ -50,6 +50,7 @@
     
         <FlowTableButtonSeparator Visible="@(SelectedStatus == FileStatus.OnHold)" />    
         <FlowTableButton Visible=@(SelectedStatus == FileStatus.OnHold) Clicked=Unhold SelectedOneOrMore="true" Icon="fas fa-running" Label="Pages.LibraryFiles.Buttons.Unhold" />
+        <FlowTableButton Visible=@(SelectedStatus == FileStatus.Unprocessed) Area="ButtonArea.ContextMenu" Clicked=ToggleForce SelectedOneOrMore="true" Icon="fas fa-hammer" Label="Pages.LibraryFiles.Buttons.ToggleForce" />
         
         <FlowTableButtonSeparator />    
         <FlowTableHelpButton HelpUrl="library-files" />
@@ -61,6 +62,12 @@
                 @Globals.lblName
             </Header>
             <Cell Context="item">
+                @if (item.Forced)
+                {
+                    <span class="flags">
+                        <i class="fas fa-hammer" title="Force Processing" />
+                    </span>
+                }
                 <span title="@item.Name">@item.RelativePath</span>
             </Cell>
         </FlowTableColumn>

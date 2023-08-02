@@ -193,12 +193,13 @@ public partial class LibraryFileService
     /// <param name="allowedLibraries">[Optional] list of libraries to include</param>
     /// <param name="maxSizeMBs">[Optional] maximum file size to include</param>
     /// <param name="exclusionUids">[Optional] list of UIDs to exclude</param>
+    /// <param name="forcedOnly">[Optional] if only forced files should be returned</param>
     /// <returns>a list of matching library files</returns>
     public async Task<IEnumerable<LibraryFile>> GetAll(FileStatus? status, int skip = 0, int rows = 0,
         string filter = null, List<Guid> allowedLibraries = null, long? maxSizeMBs = null,
-        List<Guid> exclusionUids = null)
+        List<Guid> exclusionUids = null, bool forcedOnly = false)
     {
-        var query = await ConstructQuery(status, allowedLibraries, maxSizeMBs, exclusionUids);
+        var query = await ConstructQuery(status, allowedLibraries, maxSizeMBs, exclusionUids, forcedOnly: forcedOnly);
         if (string.IsNullOrWhiteSpace(filter) == false)
         {
             filter = filter.ToLowerInvariant();
@@ -216,12 +217,13 @@ public partial class LibraryFileService
     /// Constructs the query of the cached data
     /// </summary>
     /// <param name="status">the status of the data</param>
-    /// <param name="allowedLibraries"></param>
-    /// <param name="maxSizeMBs"></param>
-    /// <param name="exclusionUids"></param>
-    /// <returns></returns>
+    /// <param name="allowedLibraries">a list of libraries that are allowed, or null if any are allowed</param>
+    /// <param name="maxSizeMBs">maximum size in MBs of the file to be returned</param>
+    /// <param name="exclusionUids">UIDs of files to be ignored</param>
+    /// <param name="forcedOnly">if only forced files should be returned</param>
+    /// <returns>a IEnumerable of files</returns>
     private async Task<IEnumerable<LibraryFile>> ConstructQuery(FileStatus? status, List<Guid> allowedLibraries = null,
-        long? maxSizeMBs = null, List<Guid> exclusionUids = null)
+        long? maxSizeMBs = null, List<Guid> exclusionUids = null, bool forcedOnly = false)
     {
         try
         {
@@ -238,6 +240,10 @@ public partial class LibraryFileService
 
                 query = Data.Where(x =>  x.Value.Status == status.Value)
                     .Select(x => x.Value);
+
+                if (forcedOnly)
+                    query = query.Where(x =>
+                        (x.Flags & LibraryFileFlags.ForceProcessing) == LibraryFileFlags.ForceProcessing);
 
                 if (status is FileStatus.Processed or FileStatus.ProcessingFailed)
                     query = query.OrderByDescending(x => x.ProcessingEnded)
@@ -266,9 +272,13 @@ public partial class LibraryFileService
                         return false; // shouldn't happen
                     if (libraries.ContainsKey(x.Value.LibraryUid.Value) == false)
                         return false; // also shouldn't happen
+                        
                     
                     if (x.Value.Status != FileStatus.Unprocessed)
                         return false;
+                    if (forcedOnly && (x.Value.Flags & LibraryFileFlags.ForceProcessing) !=
+                        LibraryFileFlags.ForceProcessing)
+                        return false; // they want forced only, but this file is not forced
                     if (maxSizeMBs is > 0)
                     {
                         if (x.Value.OriginalSize > maxSizeMBs * 1_000_000)
@@ -367,6 +377,8 @@ public partial class LibraryFileService
     {
         var nodeLibraries = node?.Libraries?.Select(x => x.Uid)?.ToList() ?? new List<Guid>();
 
+        var outOfSchedule = TimeHelper.InSchedule(node.Schedule) == false;
+
         var canProcess = new LibraryService().GetAll().Where(x =>
         {
             if (node.AllLibraries == ProcessingLibraries.All)
@@ -381,7 +393,7 @@ public partial class LibraryFileService
         try
         {
             var nextFile = (await GetAll(FileStatus.Unprocessed, skip: 0, rows: 1, allowedLibraries: canProcess,
-                maxSizeMBs: node.MaxFileSizeMb, exclusionUids: executing)).FirstOrDefault();
+                maxSizeMBs: node.MaxFileSizeMb, exclusionUids: executing, forcedOnly: outOfSchedule)).FirstOrDefault();
 
             if (nextFile == null)
                 return nextFile;

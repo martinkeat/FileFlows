@@ -40,6 +40,33 @@ public partial class LibraryFileService
     }
 
     /// <summary>
+    /// Toggles a flag on files
+    /// </summary>
+    /// <param name="flag">the flag to toggle</param>
+    /// <param name="uids">the UIDs of the files</param>
+    public async Task ToggleFlag(LibraryFileFlags flag, Guid[] uids)
+    {
+        if (uids?.Any() != true)
+            return;
+        int iflag = (int)flag;
+        string inStr = string.Join(",", uids.Select(x => $"'{x}'"));
+        await DbHelper.Execute(@$"UPDATE LibraryFile
+        SET Flags = CASE
+        WHEN Flags & {iflag} > 0 THEN Flags & ~{iflag}
+        ELSE Flags | {iflag}
+        END
+        where Uid in ({inStr})");
+        
+        foreach (var uid in uids)
+        {
+            if (Data.TryGetValue(uid, out LibraryFile? file))
+            {
+                file.Flags ^= flag;
+            }
+        }
+    }
+
+    /// <summary>
     /// Force processing a set of files
     /// </summary>
     /// <param name="uids">the UIDs of the files</param>

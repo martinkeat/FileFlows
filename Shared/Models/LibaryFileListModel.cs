@@ -72,4 +72,9 @@ public class LibaryFileListModel: IUniqueObject<Guid>
     /// Gets or sets the status of the file
     /// </summary>
     public FileStatus? Status { get; set; }
+    
+    /// <summary>
+    /// Gets or sets if this file has been marked force processing
+    /// </summary>
+    public bool Forced { get; set; }
 }
