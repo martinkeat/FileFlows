@@ -16,8 +16,19 @@ namespace FileFlows.Client.Pages;
 
 public partial class Flows : ListPage<Guid, FlowListModel>
 {
+    /// <summary>
+    /// Gets or sets the navigation manager
+    /// </summary>
     [Inject] NavigationManager NavigationManager { get; set; }
+    /// <summary>
+    /// Gets or sets the JavaScript runtime
+    /// </summary>
     [Inject] public IJSRuntime jsRuntime { get; set; }
+    
+    /// <summary>
+    /// Gets or sets the script browser, which is used to load community flows
+    /// </summary>
+    private ScriptBrowser ScriptBrowser { get; set; }
 
     private NewFlowEditor AddEditor;
     private string TableIdentifier => "Flows-" + this.SelectedType;
@@ -102,7 +113,6 @@ public partial class Flows : ListPage<Guid, FlowListModel>
 
     private async Task Import()
     {
-#if (!DEMO)
         var idResult = await ImportDialog.Show();
         string json = idResult.content;
         if (string.IsNullOrEmpty(json))
@@ -122,7 +132,6 @@ public partial class Flows : ListPage<Guid, FlowListModel>
         {
             Blocker.Hide();
         }
-#endif
     }
 
     private async Task Template()
@@ -146,7 +155,6 @@ public partial class Flows : ListPage<Guid, FlowListModel>
     
     private async Task Duplicate()
     {
-#if (!DEMO)
         Blocker.Show();
         try
         {
@@ -173,7 +181,6 @@ public partial class Flows : ListPage<Guid, FlowListModel>
         {
             Blocker.Hide();
         }
-#endif
     }
 
     protected override Task PostDelete() => Refresh();
@@ -250,5 +257,12 @@ public partial class Flows : ListPage<Guid, FlowListModel>
         if (item?.UsedBy?.Any() != true)
             return;
         await UsedByDialog.Show(item.UsedBy);
+    }
+    
+    async Task Browser()
+    {
+        bool result = await ScriptBrowser.Open(ScriptType.CommunityFlows);
+        if (result)
+            AddEditor.Templates = null;
     }
 }

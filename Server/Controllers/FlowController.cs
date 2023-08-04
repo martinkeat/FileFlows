@@ -6,6 +6,7 @@ using System.Dynamic;
 using System.IO.Compression;
 using FileFlows.Plugin;
 using System.Runtime.InteropServices;
+using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using FileFlows.ScriptExecution;
 using FileFlows.Server.Services;
@@ -150,9 +151,23 @@ public class FlowController : Controller
         if (flows.Count() == 1)
         {
             var flow = flows[0];
-            string json = JsonSerializer.Serialize(flow, new JsonSerializerOptions
+            string json = JsonSerializer.Serialize(new
             {
-                WriteIndented = true
+                flow.Name,
+                flow.Description,
+                flow.Type,
+                Revision = Math.Max(1, flow.Revision),
+                Author = flow.Author?.EmptyAsNull(),
+                flow.Parts,
+                Properties = new
+                {
+                    flow.Properties.Fields,
+                    flow.Properties.Variables
+                }
+            }, new JsonSerializerOptions
+            {
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+                WriteIndented = true,
             });
             byte[] data = System.Text.Encoding.UTF8.GetBytes(json);
             return File(data, "application/octet-stream", flow.Name + ".json");
@@ -525,6 +540,7 @@ public class FlowController : Controller
         
         var service = new FlowService();
         model.Name = model.Name.Trim();
+        model.Revision++;
         if (uniqueName == false)
         {
             bool inUse = service.NameInUse(model.Uid, model.Name);
@@ -934,6 +950,7 @@ public class FlowController : Controller
             var tf = new TemplateField();
             tf.Name = field.Name;
             tf.Default = field.DefaultValue;
+            tf.Help = field.Description;
             tf.Label = field.Name.Replace("_" , " ");
             tf.Type = field.Type switch
             {

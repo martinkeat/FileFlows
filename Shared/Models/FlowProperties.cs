@@ -41,6 +41,10 @@ public class FlowField
     /// </summary>
     public FlowFieldType Type { get; set; }
     /// <summary>
+    /// Gets or sets an optional description for this field
+    /// </summary>
+    public string Description { get; set; }
+    /// <summary>
     /// Gets or sets if this is required
     /// </summary>
     public bool Required { get; set; }

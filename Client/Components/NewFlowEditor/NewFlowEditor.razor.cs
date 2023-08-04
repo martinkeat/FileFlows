@@ -21,7 +21,7 @@ public partial class NewFlowEditor : Editor
     /// <summary>
     /// Gets or sets the available templates
     /// </summary>
-    [Parameter] public Dictionary<string, List<FlowTemplateModel>> Templates { get; set; }
+    public Dictionary<string, List<FlowTemplateModel>> Templates { get; set; }
 
     private const string FIELD_NAME = "Name";
     private const string FIELD_TEMPLATE = "Template";

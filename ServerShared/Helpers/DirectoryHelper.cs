@@ -243,6 +243,10 @@ public class DirectoryHelper
     /// </summary>
     public static string TemplateDirectoryFlow => Path.Combine(TemplateDirectory, "Flow");
     /// <summary>
+    /// Gets the directory for community flow templates
+    /// </summary>
+    public static string TemplateDirectoryFlowCommunity => Path.Combine(TemplateDirectory, "Flow", "Community");
+    /// <summary>
     /// Gets the directory for library templates
     /// </summary>
     public static string TemplateDirectoryLibrary => Path.Combine(TemplateDirectory, "Library");

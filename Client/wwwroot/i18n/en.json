@@ -91,6 +91,7 @@
     "LogPartialNotAvailable":"Unable to find partial log for node.",
     "ViewLog":"View Log",
     "SetStatusProcessed": "Mark as Processed",
+    "CommunityFlows": "Community Flows",
     "ObsoleteConfirm": {
       "Title": "Obsolete Node",
       "Message": "It is recommended you switch to a different node.",
@@ -252,7 +253,8 @@
     "Flow": {
       "Title": "Flow",
       "Labels": {
-        "EditFlow": "Flow: {Name}"
+        "EditFlow": "Flow: {Name}",
+        "FlowProperties": "Flow Properties"
       },
       "Messages": {
         "Close": "Are you sure you want to close and discard all changes?"
@@ -260,7 +262,22 @@
       "Fields": {
         "Variables": "Variables",
         "VariablesKey": "Name",
-        "VariablesValue": "Value"
+        "VariablesValue": "Value",
+        "Description": "The description of this flow template.",
+        "Author": "Author",
+        "Author-Help": "Optionally specify the author of this flow.",
+        "Field": {            
+          "Description": "An optional description to be shown with this field.  This can be help text for the field.",
+          "Required": "Required",
+          "Required-Help": "If this value is required and must be set.",
+          "Default": "Default",
+          "IfName": "If",
+          "IfName-Help": "If this should only be shown to the user if another value matches these conditions.",
+          "IfValue": "IF Value",
+          "IfValue-Help": "The value to match against, can be a regular expression.  For booleans use true or false.",
+          "IfNot": "If Not",
+          "IfNot-Help": "If the value should be inversed and should only show if the value does not match."
+        }
       }
     },
     "Flows": {
@@ -271,6 +288,9 @@
           "PageDescription": "Select a template to base the flow on, this will help you get started with a flow.",
           "Template": "Template"
         }
+      },
+      "Buttons": {
+        "Repository": "Repository"
       },
       "Fields": {
         "Template":"Template"

@@ -267,7 +267,7 @@ public partial class Flow : ComponentBase, IDisposable
             if (string.IsNullOrEmpty(p.Name) == false || string.IsNullOrEmpty(p?.FlowElementUid))
                 continue;
             string type = p.FlowElementUid.Substring(p.FlowElementUid.LastIndexOf(".") + 1);
-            string name = Translater.Instant($"Flow.Parts.{type}.Label", supressWarnings: true);
+            string name = Translater.Instant($"Flow.Parts.{type}.Label", suppressWarnings: true);
             if (name == "Label")
                 name = FlowHelper.FormatLabel(type);
             p.Name = name;
@@ -300,7 +300,7 @@ public partial class Flow : ComponentBase, IDisposable
         else
         {
             string type = element.Uid.Substring(element.Uid.LastIndexOf(".") + 1);
-            name = Translater.Instant($"Flow.Parts.{type}.Label", supressWarnings: true);
+            name = Translater.Instant($"Flow.Parts.{type}.Label", suppressWarnings: true);
             if (name == "Label")
                 name = FlowHelper.FormatLabel(type);
         }
@@ -330,7 +330,10 @@ public partial class Flow : ComponentBase, IDisposable
             prefix = Translater.Instant("Labels.Output") + " " + key.Substring(key.LastIndexOf(".") + 1) + ": ";
         }
 
-        string translated = Translater.Instant(key, model);
+        var dict = model?.Where(x => x.Value != null)?.ToDictionary(x => x.Key, x => x.Value)
+                   ?? new();
+
+        string translated = Translater.Instant(key, dict);
         if (Regex.IsMatch(key, "^[\\d]+$"))
             return string.Empty;
         return prefix + translated;

@@ -48,7 +48,7 @@ public class FlowElement
     /// <returns>the formateted name</returns>
     public static string FormatName(string name)
     {
-        string translated = Translater.Instant($"Flow.Parts.{name}.Label", supressWarnings: true);
+        string translated = Translater.Instant($"Flow.Parts.{name}.Label", suppressWarnings: true);
         if (string.IsNullOrEmpty(translated) == false && translated != "Label")
             return translated;
 

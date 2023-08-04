@@ -24,19 +24,29 @@ public class RepositoryController : Controller
         var scripts = (
                 type == ScriptType.System ? repo.SystemScripts : 
                 type == ScriptType.Webhook ? repo.WebhookScripts : 
+                type == ScriptType.CommunityFlows ? repo.CommunityFlowTemplates :
                 repo.FlowScripts)
             .Where(x => new Version(Globals.Version) >= x.MinimumVersion);
         if (missing)
         {
             List<string> known = new();
-            foreach (string file in Directory.GetFiles(
-                         type == ScriptType.System
-                             ? DirectoryHelper.ScriptsDirectorySystem
-                             : DirectoryHelper.ScriptsDirectoryFlow, "*.js", SearchOption.AllDirectories))
+            string extension = type == ScriptType.CommunityFlows ? "json" : "js";
+            foreach (var file in new DirectoryInfo(
+                         type == ScriptType.CommunityFlows ? DirectoryHelper.TemplateDirectoryFlowCommunity :
+                         type == ScriptType.System ? DirectoryHelper.ScriptsDirectorySystem : 
+                         DirectoryHelper.ScriptsDirectoryFlow).GetFiles("*." + extension, SearchOption.AllDirectories))
             {
                 try
                 {
-                    string line = (await System.IO.File.ReadAllLinesAsync(file)).First();
+                    if (type == ScriptType.CommunityFlows)
+                    {
+                        var json =  System.IO.File.ReadAllText(file.FullName);
+                        var name = System.Text.Json.JsonSerializer.Deserialize<FlowTemplate>(json).Name;
+                        known.Add(name);
+                        continue;
+                    }
+
+                    string line = (await System.IO.File.ReadAllLinesAsync(file.FullName)).First();
                     if (line?.StartsWith("// path:") == true)
                         known.Add(line[9..].Trim());
                 }
@@ -45,7 +55,7 @@ public class RepositoryController : Controller
                 }
             }
 
-            scripts = scripts.Where(x => known.Contains(x.Path) == false).ToList();
+            scripts = scripts.Where(x => known.Contains(x.Path) == false && known.Contains(x.Name) == false).ToList();
         }
         return scripts;
     }

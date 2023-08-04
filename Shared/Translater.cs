@@ -137,10 +137,10 @@ public class Translater
     /// </summary>
     /// <param name="key">The string to translate</param>
     /// <param name="parameters">any translation parameters</param>
-    /// <param name="supressWarnings">if translation warnings should be suppressed and not printed to the log</param>
+    /// <param name="suppressWarnings">if translation warnings should be suppressed and not printed to the log</param>
     /// <returns>the translated string</returns>
-    public static string Instant(string key, object parameters = null, bool supressWarnings = false)
-        => Instant(new[] { key }, parameters, supressWarnings: supressWarnings);
+    public static string Instant(string key, object parameters = null, bool suppressWarnings = false)
+        => Instant(new[] { key }, parameters, suppressWarnings: suppressWarnings);
 
     /// <summary>
     /// Attempts to translate from a range of possible keys.
@@ -148,13 +148,13 @@ public class Translater
     /// </summary>
     /// <param name="possibleKeys">a list of possible translation keys</param>
     /// <param name="parameters">any translation parameters</param>
-    /// <param name="supressWarnings">if translation warnings should be suppressed and not printed to the log</param>
+    /// <param name="suppressWarnings">if translation warnings should be suppressed and not printed to the log</param>
     /// <returns>the translated string</returns>
-    public static string Instant(string[] possibleKeys, object parameters = null, bool supressWarnings = false)
+    public static string Instant(string[] possibleKeys, object parameters = null, bool suppressWarnings = false)
     {
         try
         {
-            string msg = Lookup(possibleKeys, supressWarnings: supressWarnings);
+            string msg = Lookup(possibleKeys, supressWarnings: suppressWarnings);
             if (msg == "")
                 return "";
             if (parameters is IDictionary<string, object> dict)
@@ -164,7 +164,7 @@ public class Translater
         }
         catch (Exception ex)
         {
-            if(supressWarnings == false)
+            if(suppressWarnings == false)
                 Logger.Instance.WLog("Failed to translating key: " + possibleKeys[0] + ", " + ex.Message);
             return possibleKeys[0];
         }

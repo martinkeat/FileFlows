@@ -46,7 +46,7 @@ public partial class FlowPropertiesEditor
 
     protected override void OnInitialized()
     {
-        lblTitle = Translater.Instant("Labels.FlowProperties");
+        lblTitle = Translater.Instant("Pages.Flow.Labels.FlowProperties");
         lblClose = Translater.Instant("Labels.Close");
         lblHelp = Translater.Instant("Labels.Help");
         _FlowVariables = Flow.Properties.Variables?.Select(x => new KeyValuePair<string, string>(x.Key, x.Value.ToString()))

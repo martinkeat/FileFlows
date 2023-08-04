@@ -19,6 +19,16 @@ public class Flow : FileFlowObject
     /// Gets or sets the description of the flow
     /// </summary>
     public string Description { get; set; }
+    
+    /// <summary>
+    /// Gets or sets the author or this flow
+    /// </summary>
+    public string Author { get; set; }
+    
+    /// <summary>
+    /// Gets or sets the revision of this flow
+    /// </summary>
+    public int Revision { get; set; }
 
     /// <summary>
     /// Gets or sets the type of flow

@@ -14,7 +14,8 @@
         
         <FlowTabs>
             <FlowTab Title="General">
-                <InputTextArea @bind-Value="@Flow.Description" Label="Description"></InputTextArea>
+                <InputTextArea @bind-Value="@Flow.Description" Label="Pages.Flows.Fields.Description"></InputTextArea>
+                <InputText @bind-Value="@Flow.Author" Label="Pages.Flows.Fields.Author"></InputText>
                 <InputKeyValue @bind-Value="@FlowVariables" Label="Pages.Flow.Fields.Variables" />
             </FlowTab>
             <FlowTab Title="Fields">
@@ -60,23 +61,24 @@
                                 </h2>
                             </div>
                             <div class="content">
+                                <InputText @bind-Value="@Editing.Description" Label="Pages.Flow.Fields.Field.Description"></InputText>
                                 @if (Editing.Type == FlowFieldType.String || Editing.Type == FlowFieldType.Directory)
                                 {
-                                    <InputSwitch @bind-Value="@Editing.Required" Label="Required" Help="If this value is required and must be set."></InputSwitch>
-                                    <InputText @bind-Value="@DefaultValueString" Label="Default"></InputText>
+                                    <InputSwitch @bind-Value="@Editing.Required" Label="Pages.Flow.Fields.Field.Required"></InputSwitch>
+                                    <InputText @bind-Value="@DefaultValueString" Label="Pages.Flow.Fields.Field.Default"></InputText>
                                 }
                                 else if (Editing.Type == FlowFieldType.Boolean)
                                 {
-                                    <InputSwitch @bind-Value="@DefaultValueBoolean" Label="Required"></InputSwitch>
+                                    <InputSwitch @bind-Value="@DefaultValueBoolean" Label="Pages.Flow.Fields.Field.Default"></InputSwitch>
                                 }
                                 else if (Editing.Type == FlowFieldType.Number)
                                 {
-                                    <InputNumber TItem="Int32" @bind-Value="@DefaultValueNumber" Label="Required"></InputNumber>
+                                    <InputNumber TItem="Int32" @bind-Value="@DefaultValueNumber" Label="Pages.Flow.Fields.Field.Required"></InputNumber>
                                 }
                                 <hr/>
-                                <InputText @bind-Value="@Editing.IfName" Label="If" Help="If this should only be shown to the user if another value matches these conditions."></InputText>
-                                <InputText @bind-Value="@Editing.IfValue" Label="If Value" Help="The value to match against, can be a regular expression.  For booleans use true or false."></InputText>
-                                <InputSwitch @bind-Value="@Editing.IfNot" Label="If Not" Help="If the value should be inversed and should only show if the value does not match."></InputSwitch>
+                                <InputText @bind-Value="@Editing.IfName" Label="Pages.Flow.Fields.Field.IfName"></InputText>
+                                <InputText @bind-Value="@Editing.IfValue" Label="Pages.Flow.Fields.Field.IfValue"></InputText>
+                                <InputSwitch @bind-Value="@Editing.IfNot" Label="Pages.Flow.Fields.Field.IfNot"></InputSwitch>
                             </div>
                         </div>
                     }
