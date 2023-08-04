@@ -283,9 +283,24 @@ public partial class NewFlowEditor : Editor
 
         foreach (var tfm in TemplateFields.Values)
         {
+            var value = dict[tfm.ElementField.Name];
+            if (value == null || value.Equals(string.Empty))
+                continue;
+            
             var part = flow.Parts.FirstOrDefault(x => x.Uid == tfm.TemplateField.Uid);
             if (part == null)
+            {
+                // flow variable
+                if(string.IsNullOrEmpty(tfm.TemplateField.Name))
+                    continue;
+                if (int.TryParse(value?.ToString() ?? string.Empty, out int iValue))
+                    flow.Properties.Variables[tfm.TemplateField.Name] = iValue;
+                else if (bool.TryParse(value?.ToString() ?? string.Empty, out bool bValue))
+                    flow.Properties.Variables[tfm.TemplateField.Name] = bValue;
+                else
+                    flow.Properties.Variables[tfm.TemplateField.Name] = value;
                 continue;
+            }
 
             if (dict.ContainsKey(tfm.ElementField.Name) == false)
             {
@@ -294,10 +309,6 @@ public partial class NewFlowEditor : Editor
                 else
                     continue;
             }
-
-            var value = dict[tfm.ElementField.Name];
-            if (value == null || value.Equals(string.Empty))
-                continue;
 
             if (value?.ToString().StartsWith("OUTPUT:") == true)
             {

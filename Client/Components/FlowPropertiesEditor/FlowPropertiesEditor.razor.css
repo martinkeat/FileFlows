@@ -1,0 +1,119 @@
+.flow-properties {
+  background: var(--base);
+  height: 100%;
+  width: 40rem;
+  overflow: auto;
+  z-index: 5;
+  border-left: solid 1px var(--border-color);
+  display: flex;
+  flex-direction: column;
+  max-height: 100vh;
+}
+.flow-properties .title {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 0.75rem 0.75rem 0;
+}
+.flow-properties .title h2 {
+  flex-grow: 1;
+}
+.flow-properties .title button {
+  width: 7rem;
+}
+
+h2 {
+  font-size: 1.25rem;
+  margin: 0;
+  padding: 0 1rem;
+}
+h2 i {
+  margin-right: 0.25rem;
+  cursor: pointer;
+}
+
+.field-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-height: calc(100vh - 9rem);
+}
+
+.field-list {
+  flex-grow: 1;
+  overflow: auto;
+}
+.field-list input[type=text], .field-list select {
+  width: 100%;
+  height: 2.1875rem;
+  line-height: 1.5;
+  font-size: 1rem;
+  padding: 0.1875rem 0.625rem;
+  outline: none !important;
+  border: none;
+  background: transparent;
+}
+.field-list .field {
+  display: flex;
+  margin: 0.25rem;
+  border-radius: 0.25rem;
+  overflow: hidden;
+}
+.field-list .field .input {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: row;
+  border: solid 1px transparent;
+  border-left: solid 0.5rem var(--base);
+  background: var(--input-background);
+}
+.field-list .field .input .name {
+  flex-grow: 1;
+}
+.field-list .field .input select {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  width: 8rem;
+}
+.field-list .field .input select option {
+  background: var(--input-background);
+  color: var(--color);
+}
+.field-list .field.selected .input {
+  border-color: var(--accent);
+}
+.field-list .field .actions {
+  width: 5rem;
+  text-align: center;
+  align-self: center;
+}
+.field-list .field .actions i {
+  cursor: pointer;
+  padding: 0.5rem 0.25rem;
+  font-size: 1.25rem;
+  opacity: 0.5;
+}
+.field-list .field .actions i:hover {
+  opacity: 1;
+}
+.field-list .btn {
+  margin: 1rem 1rem;
+}
+
+.field-editor {
+  border-top: 1px solid var(--border-color);
+  padding: 1rem 0;
+}
+.field-editor .content {
+  width: 90%;
+  margin: auto;
+}
+
+::deep .row {
+  margin: 0 1rem;
+  flex-direction: column !important;
+}
+::deep .row .input-label {
+  width: 100% !important;
+}
+
+/*# sourceMappingURL=FlowPropertiesEditor.razor.css.map */

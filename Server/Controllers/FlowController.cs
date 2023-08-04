@@ -775,7 +775,7 @@ public class FlowController : Controller
 
         var templateList = GetFlowTemplates(parts)
             .Where(x => x.Template.Type == type)
-            .OrderBy(x => x.Template.Group.ToLowerInvariant())
+            .OrderBy(x => x.Template.Group == "Community" ? "zzz" : x.Template.Group.ToLowerInvariant())
             .ThenBy(x => x.Template.Name == x.Template.Group + " File" ? 0 : 1)
             .ThenBy(x => x.Template.Name.ToLowerInvariant());
         foreach (var item in templateList)
@@ -806,7 +806,8 @@ public class FlowController : Controller
     private List<(FlowTemplate Template, List<FlowPart> Parts)> GetFlowTemplates(Dictionary<string, FlowElement> parts)
     {
         var templates = new List<(FlowTemplate, List<FlowPart>)>();
-        foreach (var tf in GetTemplateFiles())
+        var templateFiles = GetTemplateFiles();
+        foreach (var tf in templateFiles)
         {
             try
             {
@@ -824,11 +825,20 @@ public class FlowController : Controller
                 }
 
                 json = TemplateHelper.ReplaceWindowsPathIfWindows(json);
-                var jst = JsonSerializer.Deserialize<FlowTemplate>(json, new JsonSerializerOptions
+                FlowTemplate jst;
+                if (tf.FullName.Contains("Community"))
                 {
-                    AllowTrailingCommas = true,
-                    PropertyNameCaseInsensitive = true
-                });
+                    jst = LoadCommunityTemplate(json);
+                }
+                else
+                {
+                    jst = JsonSerializer.Deserialize<FlowTemplate>(json, new JsonSerializerOptions
+                    {
+                        AllowTrailingCommas = true,
+                        PropertyNameCaseInsensitive = true
+                    });
+                }
+
                 if (jst == null)
                     continue;
                 try
@@ -888,5 +898,72 @@ public class FlowController : Controller
             }
         }
         return templates;
+    }
+
+    private FlowTemplate LoadCommunityTemplate(string json)
+    {
+        var flow = JsonSerializer.Deserialize<Flow>(json);
+        var template = new FlowTemplate();
+        template.Name = flow.Name;
+        template.Description = flow.Description;
+        template.Group = "Community";
+        template.Save = true; // this means the flow will be saved automatically and not opened when creating a flow based on this template
+        template.Parts = new();
+        foreach(var fp in flow.Parts)
+        {
+            var tfp = new FlowTemplatePart();
+            tfp.Uid = fp.Uid;
+            tfp.Model = fp.Model;
+            tfp.Name = fp.Name;
+            tfp.Outputs = fp.Outputs;
+            tfp.xPos = (int)fp.xPos;
+            tfp.yPos = (int)fp.yPos;
+            tfp.Node = fp.FlowElementUid;
+            tfp.Connections = fp.OutputConnections?.Select(x => new FlowTemplateConnection()
+            {
+                Node = x.InputNode,
+                Input = x.Input,
+                Output = x.Output
+            })?.ToList() ?? new();
+            template.Parts.Add(tfp);
+        }
+
+        template.Fields = new();
+        foreach (var field in flow.Properties?.Fields ?? new())
+        {
+            var tf = new TemplateField();
+            tf.Name = field.Name;
+            tf.Default = field.DefaultValue;
+            tf.Label = field.Name.Replace("_" , " ");
+            tf.Type = field.Type switch
+            {
+                FlowFieldType.Directory => "Directory",
+                FlowFieldType.Boolean => "Switch",
+                FlowFieldType.Number => "Int",
+                _ => "Text"
+            };
+            
+            template.Fields.Add(tf);
+
+            if (string.IsNullOrWhiteSpace(field.IfName))
+                continue;
+            var other = flow.Properties.Fields.FirstOrDefault(x => x.Name == field.IfName);
+            if (other == null)
+                continue;
+
+            var condition = new Condition();
+            condition.Property = other.Name;
+            if (other.Type == FlowFieldType.Boolean)
+                condition.Value = field.IfValue?.ToLowerInvariant()?.Trim() == "true";
+            else if (other.Type == FlowFieldType.Number && int.TryParse(field.IfValue?.Trim(), out int iOther))
+                condition.Value = iOther;
+            else
+                condition.Value = field.IfValue;
+            condition.IsNot = field.IfNot;
+
+            tf.Conditions.Add(condition);
+        }
+
+        return template;
     }
 }

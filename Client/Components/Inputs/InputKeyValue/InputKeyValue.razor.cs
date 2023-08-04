@@ -44,7 +44,8 @@ public partial class InputKeyValue : Input<List<KeyValuePair<string, string>>>
             Value = new List<KeyValuePair<string, string>>();
 
         this.Data = Value.Select(x => new KeyValue {  Key = x.Key, Value = x.Value }).ToList();
-        this.Field.ValueChanged += FieldOnValueChanged; 
+        if(Field != null)
+            this.Field.ValueChanged += FieldOnValueChanged; 
     }
 
     private void FieldOnValueChanged(object sender, object value)
@@ -102,6 +103,7 @@ public partial class InputKeyValue : Input<List<KeyValuePair<string, string>>>
         NewKey = string.Empty;
         NewValue = string.Empty;
         FocusUid();
+        UpdateBindValue();
     }
 
     /// <summary>

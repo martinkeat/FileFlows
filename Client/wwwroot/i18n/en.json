@@ -256,6 +256,11 @@
       },
       "Messages": {
         "Close": "Are you sure you want to close and discard all changes?"
+      },
+      "Fields": {
+        "Variables": "Variables",
+        "VariablesKey": "Name",
+        "VariablesValue": "Value"
       }
     },
     "Flows": {

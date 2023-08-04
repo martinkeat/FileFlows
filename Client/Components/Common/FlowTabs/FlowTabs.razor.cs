@@ -16,6 +16,8 @@
             if (Tabs.Contains(tab) == false)
             {
                 Tabs.Add(tab);
+                if (ActiveTab == null)
+                    ActiveTab = tab;
                 this.StateHasChanged();
             }
         }

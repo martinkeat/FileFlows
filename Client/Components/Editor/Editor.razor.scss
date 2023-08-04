@@ -17,3 +17,18 @@
 .hide-fields-scrollbar ::deep .content > .fields {
   overflow: hidden; 
 } 
+
+.flow-element-editor-overlay.background-overlay { 
+  z-index:3;
+}
+.flow-element-editor {
+  z-index:4;
+  .editor {
+    position:unset;
+    top:unset;
+    bottom:unset;
+    left:unset;
+    right:unset;
+    height: 100%;
+  }
+}

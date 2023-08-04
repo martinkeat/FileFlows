@@ -387,8 +387,11 @@ public class Runner
         };
         foreach (var variable in Info.Config.Variables)
         {
-            if (nodeParameters.Variables.ContainsKey(variable.Key) == false)
-                nodeParameters.Variables.Add(variable.Key, variable.Value);
+            nodeParameters.Variables.TryAdd(variable.Key, variable.Value);
+        }
+        foreach (var variable in Flow.Properties?.Variables ?? new ())
+        {
+            nodeParameters.Variables[variable.Key] = variable.Value;
         }
 
         Plugin.Helpers.FileHelper.DontChangeOwner = Node.DontChangeOwner;
@@ -594,6 +597,11 @@ public class Runner
                         nodeParameters.Logger!.ELog("Failed to find Input node");
                         return FileStatus.ProcessingFailed;
                     }
+                    // update the flow properties if there are any
+                    foreach (var variable in flow.Properties?.Variables ?? new ())
+                    {
+                        nodeParameters.Variables[variable.Key] = variable.Value;
+                    }
                     Info.TotalParts = flow.Parts.Count;
                     step = 0;
                 }
@@ -718,6 +726,9 @@ public class Runner
         }
 
         var node = Activator.CreateInstance(nt);
+        if(node == null)
+            return default;
+        var properties = nt.GetProperties(BindingFlags.Instance | BindingFlags.Public);
         if (part.Model is IDictionary<string, object> dict)
         {
             foreach (var k in dict.Keys)
@@ -726,14 +737,14 @@ public class Runner
                 {
                     if (k == "Name")
                         continue; // this is just the display name in the flow UI
-                    var prop = nt.GetProperty(k, BindingFlags.Instance | BindingFlags.Public);
+                    var prop = properties.FirstOrDefault(x => x.Name == k);
                     if (prop == null)
                         continue;
 
                     if (dict[k] == null)
                         continue;
 
-                    var value = FileFlows.Shared.Converter.ConvertObject(prop.PropertyType, dict[k]);
+                    var value = Converter.ConvertObject(prop.PropertyType, dict[k]);
                     if (value != null)
                         prop.SetValue(node, value);
                 }
@@ -744,8 +755,18 @@ public class Runner
                 }
             }
         }
-        if(node == null)
-            return default;
+        
+        // load any values that have been set by properties
+        foreach (var prop in properties)
+        {
+            string strongName = part.Name + "." + prop.Name;
+            if (nodeParameters.Variables.TryGetValue(strongName, out object varValue) == false)
+                continue;
+            
+            var value = Converter.ConvertObject(prop.PropertyType, varValue);
+            if (value != null)
+                prop.SetValue(node, value);
+        }
         return (Node)node;
 
     }

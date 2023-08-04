@@ -1,3 +1,13 @@
+.flow-wrapper {
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+}
+.flow-wrapper > ::deep .vi-container {
+  flex-basis: 1;
+  flex-grow: 1;
+}
+
 .flow-container {
   display: flex;
   flex-direction: row-reverse;
@@ -133,9 +143,9 @@ canvas {
 
 ::deep .flow-part, .flow-element {
   text-align: center;
-  border-radius: 0.75rem;
+  border-radius: 0.5rem;
   min-width: 12rem;
-  border: solid 3px transparent;
+  border: solid 2px transparent;
   background: var(--base);
 }
 ::deep .flow-part.Logic, .flow-element.Logic {

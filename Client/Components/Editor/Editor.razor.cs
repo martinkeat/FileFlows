@@ -23,7 +23,18 @@ namespace FileFlows.Client.Components;
 
 public partial class Editor : InputRegister, IDisposable
 {
+    /// <summary>
+    /// Gets or sets the JavaScript runtime
+    /// </summary>
     [Inject] IJSRuntime jsRuntime { get; set; }
+    
+    
+    /// <summary>
+    /// Gets or sets if this is the flow element editor, and if it is, renders slightly differently
+    /// </summary>
+    [Parameter]
+    public bool FlowElementEditor { get; set; }
+    
 
     private readonly List<ActionButton> AdditionalButtons = new();
 

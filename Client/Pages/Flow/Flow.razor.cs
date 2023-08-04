@@ -12,13 +12,13 @@ using FileFlows.Plugin;
 using System.Text.RegularExpressions;
 using BlazorContextMenu;
 using Microsoft.AspNetCore.Components.Web;
-using Microsoft.Extensions.Logging;
 
 namespace FileFlows.Client.Pages;
 
 public partial class Flow : ComponentBase, IDisposable
 {
-    [CascadingParameter] public Editor Editor { get; set; }
+    //[CascadingParameter] public Editor Editor { get; set; }
+    public Editor Editor { get; set; }
     [Parameter] public System.Guid Uid { get; set; }
     [Inject] INavigationService NavigationService { get; set; }
     [Inject] IBlazorContextMenuService ContextMenuService { get; set; }
@@ -27,6 +27,11 @@ public partial class Flow : ComponentBase, IDisposable
     private ffElement[] Available { get; set; }
     private ffElement[] Filtered { get; set; }
     private List<ffPart> Parts { get; set; } = new List<ffPart>();
+    
+    /// <summary>
+    /// Gets or sets the properties editor
+    /// </summary>
+    private FlowPropertiesEditor PropertiesEditor { get; set; }
 
     private string lblObsoleteMessage, lblEdit, lblHelp, lblDelete, lblCopy, lblPaste, lblRedo, lblUndo, lblAdd;
     private string SelectedElement;
@@ -189,6 +194,9 @@ public partial class Flow : ComponentBase, IDisposable
             this.StateHasChanged();
         }
     }
+
+    private void OpenProperties()
+        => PropertiesEditor.Show();
 
     private async Task<RequestResult<ff>> GetModel(string url)
     {
@@ -438,6 +446,12 @@ public partial class Flow : ComponentBase, IDisposable
                 variables = variablesResult.Data;
         }
         finally { Blocker.Hide(); }
+
+        // add the flow variables to the variables dictionary
+        foreach (var variable in Model.Properties?.Variables ?? new())
+        {
+            variables[variable.Key] = variable.Value;
+        }
 
 
         var flowElement = this.Available.FirstOrDefault(x => x.Uid == part.FlowElementUid);

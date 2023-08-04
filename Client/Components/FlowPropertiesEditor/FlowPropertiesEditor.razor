@@ -1,0 +1,89 @@
+﻿@using FileFlows.Plugin
+@namespace FileFlows.Client.Components
+
+@if (Visible)
+{
+    <div class="flow-properties">
+        <span class="title">
+            <h2>
+                <i class="fas fa-times" title="Close" @onclick="() => Close()" />
+                Flow Properties
+            </h2>
+            <button @onclick=@OpenHelp>@lblHelp</button>
+        </span>
+        
+        <FlowTabs>
+            <FlowTab Title="General">
+                <InputTextArea @bind-Value="@Flow.Description" Label="Description"></InputTextArea>
+                <InputKeyValue @bind-Value="@FlowVariables" Label="Pages.Flow.Fields.Variables" />
+            </FlowTab>
+            <FlowTab Title="Fields">
+                <div class="field-wrapper">
+                    <div class="field-list">
+                        @if (Fields.Any())
+                        {
+                            @foreach (var field in Fields)
+                            {
+                                <div @onclick="() => Edit(field)" class="field @(field == Editing ? "selected" : string.Empty)">
+                                    <div class="input">
+                                        <div class="name">
+                                            <input type="text" @bind-value=@field.Name/>
+                                        </div>
+                                        <div class="type">
+                                            <select @bind="@field.Type">
+                                                <option value=@FlowFieldType.String>String</option>
+                                                <option value=@FlowFieldType.Number>Number</option>
+                                                <option value=@FlowFieldType.Boolean>Boolean</option>
+                                                <option value=@FlowFieldType.Directory>Directory</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="actions">
+                                        <i class="fas fa-trash" title="Delete" @onclick="() => Delete(field)"></i>
+                                    </div>
+                                </div>
+                            }
+                        }
+                        <button class="btn" @onclick=Add>
+                            <i class="fas fa-plus"></i>
+                            Add Field
+                        </button>
+                    </div>
+
+                    @if (Editing != null)
+                    {
+                        <div class="field-editor">
+                            <div class="head">
+                                <h2>
+                                    <i class="fas fa-times" title="Close" @onclick="() => Edit(null)"/>
+                                    @Editing.Name Properties
+                                </h2>
+                            </div>
+                            <div class="content">
+                                @if (Editing.Type == FlowFieldType.String || Editing.Type == FlowFieldType.Directory)
+                                {
+                                    <InputSwitch @bind-Value="@Editing.Required" Label="Required" Help="If this value is required and must be set."></InputSwitch>
+                                    <InputText @bind-Value="@DefaultValueString" Label="Default"></InputText>
+                                }
+                                else if (Editing.Type == FlowFieldType.Boolean)
+                                {
+                                    <InputSwitch @bind-Value="@DefaultValueBoolean" Label="Required"></InputSwitch>
+                                }
+                                else if (Editing.Type == FlowFieldType.Number)
+                                {
+                                    <InputNumber TItem="Int32" @bind-Value="@DefaultValueNumber" Label="Required"></InputNumber>
+                                }
+                                <hr/>
+                                <InputText @bind-Value="@Editing.IfName" Label="If" Help="If this should only be shown to the user if another value matches these conditions."></InputText>
+                                <InputText @bind-Value="@Editing.IfValue" Label="If Value" Help="The value to match against, can be a regular expression.  For booleans use true or false."></InputText>
+                                <InputSwitch @bind-Value="@Editing.IfNot" Label="If Not" Help="If the value should be inversed and should only show if the value does not match."></InputSwitch>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </FlowTab>
+        </FlowTabs>
+        
+        
+    </div>
+}

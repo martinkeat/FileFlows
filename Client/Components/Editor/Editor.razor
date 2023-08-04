@@ -6,57 +6,78 @@
 
 @if (Visible)
 {
-    <div class="editor-wrapper @(HideFieldsScroller ? "hide-fields-scrollbar" : string.Empty)">
-        <div class="background-overlay"></div>
-        <div id=@Uid class="editor @(Maximised ? "maximised" : "") @(Large ? "large" : "") @(FullWidth ? "full-width" : "") @(TypeName?.Dehumanize()) @(ReadOnly ? "readonly" : "") buttons-@NumberOfButtons">
-
-            <ViContainer Title="@Title" Icon="@Icon" FullWidth=@true AlwaysShowTitle=@true Maximise=true OnMaximised=@OnMaximised>
-
-                <Head>
-                    @if (ShowDownload)
-                    {
-                        <a href="@DownloadUrl" class="btn btn-download" target="_blank"><span>@lblDownloadButton</span></a>
-                    }
-                    
-                    @foreach (var btn in AdditionalButtons)
-                    {
-                        <button @onclick=@((e) => btn.Clicked(this, e))>@btn.Label</button>
-                    }
-
-                    @if (ReadOnly)
-                    {
-                        <button @onclick=@Cancel>@lblClose</button>
-                    }
-                    else
-                    {
-                        <button @onclick=@Save>
-                            @if (IsSaving)
-                            {
-                                @lblSaving
-                            }
-                            else
-                            {
-                                @lblSave
-                            }
-                        </button>
+    @if (FlowElementEditor)
+    {
+        <div class="flow-element-editor-overlay background-overlay"></div>
+        <div class="flow-element-editor editor-wrapper">
+            <div class="editor">
+                <ViContainer Title="@Title" Icon="@Icon" FullWidth=@true AlwaysShowTitle=@true Maximise=true OnMaximised=@OnMaximised>
+                    <Head>
+                        <button @onclick=@Save>@(IsSaving ? lblSaving : lblSave)</button>
                         <button @onclick=@Cancel>@lblCancel</button>
-                    }
 
-                    @if (string.IsNullOrEmpty(HelpUrl) == false)
-                    {
-                        <button @onclick=@OpenHelp>@lblHelp</button>
-                    }
-                </Head>
+                        @if (string.IsNullOrEmpty(HelpUrl) == false)
+                        {
+                            <button @onclick=@OpenHelp>@lblHelp</button>
+                        }
+                    </Head>
 
-                <Body>
-                <CascadingValue IsFixed="true" Value="this">
-                    <div class="fields">
-                        @FieldsFragment
-                    </div>
-                </CascadingValue>
-                </Body>
-            </ViContainer>
+                    <Body>
+                    <CascadingValue IsFixed="true" Value="this">
+                        <div class="fields">
+                            @FieldsFragment
+                        </div>
+                    </CascadingValue>
+                    </Body>
+                </ViContainer>
+            </div>
         </div>
+    }
+    else
+    {
+        <div class="editor-wrapper @(HideFieldsScroller ? "hide-fields-scrollbar" : string.Empty)">
+            <div class="background-overlay"></div>
+            <div id=@Uid class="editor @(Maximised ? "maximised" : "") @(Large ? "large" : "") @(FullWidth ? "full-width" : "") @(TypeName?.Dehumanize()) @(ReadOnly ? "readonly" : "") buttons-@NumberOfButtons">
 
-    </div>
+                <ViContainer Title="@Title" Icon="@Icon" FullWidth=@true AlwaysShowTitle=@true Maximise=true OnMaximised=@OnMaximised>
+
+                    <Head>
+                        @if (ShowDownload)
+                        {
+                            <a href="@DownloadUrl" class="btn btn-download" target="_blank"><span>@lblDownloadButton</span></a>
+                        }
+
+                        @foreach (var btn in AdditionalButtons)
+                        {
+                            <button @onclick=@((e) => btn.Clicked(this, e))>@btn.Label</button>
+                        }
+
+                        @if (ReadOnly)
+                        {
+                            <button @onclick=@Cancel>@lblClose</button>
+                        }
+                        else
+                        {
+                            <button @onclick=@Save>@(IsSaving ? lblSaving : lblSave)</button>
+                            <button @onclick=@Cancel>@lblCancel</button>
+                        }
+
+                        @if (string.IsNullOrEmpty(HelpUrl) == false)
+                        {
+                            <button @onclick=@OpenHelp>@lblHelp</button>
+                        }
+                    </Head>
+
+                    <Body>
+                    <CascadingValue IsFixed="true" Value="this">
+                        <div class="fields">
+                            @FieldsFragment
+                        </div>
+                    </CascadingValue>
+                    </Body>
+                </ViContainer>
+            </div>
+
+        </div>
+    }
 }

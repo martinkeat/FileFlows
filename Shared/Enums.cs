@@ -284,3 +284,27 @@ public enum LicenseFlags
     /// </summary>
     Webhooks = 32
 }
+
+
+/// <summary>
+/// Flow Property Types
+/// </summary>
+public enum FlowFieldType
+{
+    /// <summary>
+    /// A string 
+    /// </summary>
+    String = 0,
+    /// <summary>
+    /// A number, integer
+    /// </summary>
+    Number = 1,
+    /// <summary>
+    /// A boolean
+    /// </summary>
+    Boolean = 2,
+    /// <summary>
+    /// A directory, this is a special string
+    /// </summary>
+    Directory = 3
+}
