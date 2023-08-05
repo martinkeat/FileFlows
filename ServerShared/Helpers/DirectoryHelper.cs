@@ -72,7 +72,7 @@ public class DirectoryHelper
 #if(DEBUG && false)
         return;
 #else
-        foreach (var dir in new[] { TemplateDirectory, TemplateDirectoryFlow, TemplateDirectoryLibrary })
+        foreach (var dir in new[] { TemplateDirectory, TemplateDirectoryFlow, TemplateDirectoryLibrary, TemplateDirectoryFlowCommunity })
         {
             if (Directory.Exists(dir) == false)
                 Directory.CreateDirectory(dir);
