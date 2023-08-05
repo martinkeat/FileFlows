@@ -277,7 +277,7 @@
           "IfValue": "IF Value",
           "IfValue-Help": "The value to match against, can be a regular expression.  For booleans use true or false.",
           "IfNot": "If Not",
-          "IfNot-Help": "If the value should be inversed and should only show if the value does not match."
+          "IfNot-Help": "If the value should be inverted and should only show if the value does not match."
         }
       }
     },
