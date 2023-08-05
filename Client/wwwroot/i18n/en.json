@@ -545,6 +545,7 @@
         "UpdateAllScripts": "Update All Scripts"
       },
       "Fields":{
+        "Code": "Code"
       }
     },
     "Script": {
