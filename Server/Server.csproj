@@ -110,11 +110,6 @@
             <DependentUpon>Confirm.axaml</DependentUpon>
             <SubType>Code</SubType>
         </Compile>
-        <Compile Remove="Upgrade\Upgrade0_6_3.cs" />
-    </ItemGroup>
-
-    <ItemGroup>
-        <_ContentIncludedByDefault Remove="Plugins\Emby\en.json" />
     </ItemGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
