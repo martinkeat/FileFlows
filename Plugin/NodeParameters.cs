@@ -83,6 +83,10 @@ public class NodeParameters
     /// Gets or sets the function responsible for getting the actual tool path
     /// </summary>
     public Func<string, string>? GetToolPathActual { get; set; }
+    /// <summary>
+    /// Gets or sets the function responsible for getting if a plugin is available
+    /// </summary>
+    public Func<string, bool>? HasPluginActual { get; set; }
     
     /// <summary>
     /// Gets or sets the action that records statistics
@@ -299,6 +303,17 @@ public class NodeParameters
         if (PathUnMapper == null)
             return path;
         return PathUnMapper(path);
+    }
+    
+    /// <summary>
+    /// Checks if a plugin is available
+    /// </summary>
+    /// <param name="name">The name of the plugin</param>
+    /// <returns>true if the plugin is available</returns>
+    public bool HasPlugin(string name)
+    {
+        if (HasPluginActual == null) return false;
+        return HasPluginActual(name);
     }
 
     private bool initDone = false;

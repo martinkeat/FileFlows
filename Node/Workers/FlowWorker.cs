@@ -631,6 +631,7 @@ public class FlowWorker : Worker
             config.MaxNodes,
             config.Variables,
             config.Libraries,
+            config.PluginNames,
             config.PluginSettings,
             config.Flows,
             config.FlowScripts,

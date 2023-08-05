@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using System.Text.Json;
 using FileFlows.Client.Components.Dialogs;
 using FileFlows.Plugin;
 using Microsoft.AspNetCore.Components;
@@ -51,6 +52,20 @@ public partial class FlowPropertiesEditor
         lblHelp = Translater.Instant("Labels.Help");
         _FlowVariables = Flow.Properties.Variables?.Select(x => new KeyValuePair<string, string>(x.Key, x.Value.ToString()))
             ?.ToList() ?? new ();
+        foreach (var field in Flow.Properties.Fields)
+        {
+            if (field.DefaultValue is JsonElement jsonElement)
+            {
+                if (jsonElement.ValueKind == JsonValueKind.Number)
+                    field.DefaultValue = jsonElement.GetInt32();
+                if (jsonElement.ValueKind == JsonValueKind.False)
+                    field.DefaultValue = false;
+                if (jsonElement.ValueKind == JsonValueKind.True)
+                    field.DefaultValue = true;
+                else
+                    field.DefaultValue = jsonElement.GetString();
+            }
+        }
     }
 
     /// <summary>
@@ -97,6 +112,41 @@ public partial class FlowPropertiesEditor
         if (await Confirm.Show("Labels.Delete", "Are you sure you want to delete this field?") == false)
             return;
         Fields.Remove(item);
+        StateHasChanged();
+    }
+
+    /// <summary>
+    /// Moves an item up or down in the list
+    /// </summary>
+    /// <param name="item">the item to move</param>
+    /// <param name="up">true to move up, false to move down</param>
+    async Task Move(FlowField item, bool up)
+    {
+        // Fields == List<>
+        var index = Fields.IndexOf(item);
+        if (index < 0)
+        {
+            // Item not found in the list, do nothing
+            return;
+        }
+
+        // Calculate the new index after moving up or down
+        var newIndex = up ? index - 1 : index + 1;
+
+        if (newIndex < 0 || newIndex >= Fields.Count)
+        {
+            // If the new index is out of range, do nothing
+            return;
+        }
+
+        // Remove the item from its current position
+        Fields.RemoveAt(index);
+
+        // Insert the item at the new position
+        Fields.Insert(newIndex, item);
+
+        await Task.Delay(50);
+        Editing = item;
         StateHasChanged();
     }
 

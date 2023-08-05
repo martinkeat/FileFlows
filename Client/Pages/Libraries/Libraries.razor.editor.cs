@@ -151,7 +151,7 @@ public partial class Libraries : ListPage<Guid, Library>
             }
         });
         
-        if(App.Instance.FileFlowsSystem.Licensed)
+        if(App.Instance.FileFlowsSystem.LicenseProcessingOrder)
         {
             fields.Add(new ElementField
             {

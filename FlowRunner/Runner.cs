@@ -372,6 +372,13 @@ public class Runner
     private void RunActual(IFlowRunnerCommunicator communicator)
     {
         nodeParameters = new NodeParameters(Node.Map(Info.LibraryFile.Name), new FlowLogger(communicator), Info.IsDirectory, Info.LibraryPath);
+        nodeParameters.HasPluginActual = (name) =>
+        {
+            var normalizedSearchName = Regex.Replace(name.ToLower(), "[^a-z]", string.Empty);
+            return Info.Config.PluginNames?.Any(x =>
+                Regex.Replace(x.ToLower(), "[^a-z]", string.Empty) == normalizedSearchName) == true;
+        };
+        
         nodeParameters.IsDocker = Globals.IsDocker;
         nodeParameters.IsWindows = Globals.IsWindows;
         nodeParameters.IsLinux = Globals.IsLinux;
@@ -389,11 +396,9 @@ public class Runner
         {
             nodeParameters.Variables.TryAdd(variable.Key, variable.Value);
         }
-        foreach (var variable in Flow.Properties?.Variables ?? new ())
-        {
-            nodeParameters.Variables[variable.Key] = variable.Value;
-        }
 
+        LoadFlowVariables(Flow.Properties?.Variables);
+        
         Plugin.Helpers.FileHelper.DontChangeOwner = Node.DontChangeOwner;
         Plugin.Helpers.FileHelper.DontSetPermissions = Node.DontSetPermissions;
         Plugin.Helpers.FileHelper.Permissions = Node.Permissions;
@@ -450,6 +455,36 @@ public class Runner
                 ExecuteFlow(failureFlow, runFlows, failure: true);
             }
         }
+    }
+
+    /// <summary>
+    /// Loads flow variables into the node parameters variables
+    /// </summary>
+    /// <param name="flowVariables">the variables</param>
+    private void LoadFlowVariables(Dictionary<string, object> flowVariables)
+    {
+        if (flowVariables?.Any() != true)
+            return;
+        
+        foreach (var variable in flowVariables)
+        {
+            object value = variable.Value;
+            if (value is JsonElement je)
+            {
+                if (je.ValueKind == JsonValueKind.False)
+                    value = false;
+                else if (je.ValueKind == JsonValueKind.True)
+                    value = true;
+                else if (je.ValueKind == JsonValueKind.Number)
+                    value = je.GetInt32();
+                else if (je.ValueKind == JsonValueKind.String)
+                    value = je.GetString() ?? string.Empty;
+                else
+                    continue; // bad type
+            }
+            this.nodeParameters.Variables[variable.Key] = value;
+        }
+
     }
 
     /// <summary>
@@ -598,10 +633,7 @@ public class Runner
                         return FileStatus.ProcessingFailed;
                     }
                     // update the flow properties if there are any
-                    foreach (var variable in flow.Properties?.Variables ?? new ())
-                    {
-                        nodeParameters.Variables[variable.Key] = variable.Value;
-                    }
+                    LoadFlowVariables(flow.Properties?.Variables);
                     Info.TotalParts = flow.Parts.Count;
                     step = 0;
                 }

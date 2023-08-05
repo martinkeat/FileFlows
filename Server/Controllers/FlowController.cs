@@ -959,6 +959,9 @@ public class FlowController : Controller
                 FlowFieldType.Number => "Int",
                 _ => "Text"
             };
+
+            if (field.Type == FlowFieldType.Directory && string.IsNullOrWhiteSpace(tf.Default as string))
+                tf.Default = DirectoryHelper.GetUsersHomeDirectory();
             
             template.Fields.Add(tf);
 
@@ -977,7 +980,7 @@ public class FlowController : Controller
             else
                 condition.Value = field.IfValue;
             condition.IsNot = field.IfNot;
-
+            tf.Conditions ??= new();
             tf.Conditions.Add(condition);
         }
 

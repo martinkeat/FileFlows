@@ -282,7 +282,11 @@ public enum LicenseFlags
     /// <summary>
     /// Can use webhooks
     /// </summary>
-    Webhooks = 32
+    Webhooks = 32,
+    /// <summary>
+    /// Can use custom processing order
+    /// </summary>
+    ProcessingOrder = 64
 }
 
 

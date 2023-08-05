@@ -415,4 +415,17 @@ public class DirectoryHelper
             }
         }
     }
+
+    /// <summary>
+    /// Gets the home directory, this will be used as the default location when adding flows/libraries etc
+    /// </summary>
+    /// <returns>the users home directory</returns>
+    public static string GetUsersHomeDirectory()
+    {
+        if (OperatingSystem.IsWindows())
+            return Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)?.EmptyAsNull() ?? "C:\\";
+        if (Globals.IsDocker)
+            return "/media";
+        return Environment.GetEnvironmentVariable("HOME")?.EmptyAsNull() ?? "/";
+    }
 }

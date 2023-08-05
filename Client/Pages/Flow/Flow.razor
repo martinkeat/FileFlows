@@ -19,7 +19,6 @@
                 {
                     <input class="flow-name" type="text" @bind-value="@Name" autocomplete="off" placeholder="@lblName"/>
                 }
-                <button class="btn" @onclick="() => OpenProperties()">Properties</button>
                 <button class="save-button" @onclick="() => Save()">
                     @if (IsSaving)
                     {
@@ -167,6 +166,10 @@
         @lblDelete
     </Item>
     <BlazorContextMenu.Seperator/>
+    <Item OnClick="OpenProperties">
+        <i class="fas fa-clipboard-list"></i>
+        @lblProperties
+    </Item>
     <Item OnClick="OpenHelp">
         <i class="fas fa-question-circle"></i>
         @lblHelp
@@ -194,6 +197,10 @@
         @lblUndo
     </Item>
     <BlazorContextMenu.Seperator/>
+    <Item OnClick="OpenProperties">
+        <i class="fas fa-clipboard-list"></i>
+        @lblProperties
+    </Item>
     <Item OnClick="OpenHelp">
         <i class="fas fa-question-circle"></i>
         @lblHelp

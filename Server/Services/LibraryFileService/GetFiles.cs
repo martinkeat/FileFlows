@@ -266,6 +266,8 @@ public partial class LibraryFileService
             if (status == FileStatus.OutOfSchedule && outOfSchedule.Any() == false)
                 return new List<LibraryFile>(); // no out of schedule libraries, therefore no data
 
+            var canUserCustomProcessingOrder = LicenseHelper.IsLicensed(LicenseFlags.ProcessingOrder);
+
             query = Data.Where(x =>
                 {
                     if (x.Value.LibraryUid == null)
@@ -337,20 +339,23 @@ public partial class LibraryFileService
             }).ThenBy(x =>
             {
                 var library = libraries[x.LibraryUid!.Value]; // cant be null due to previous checks
-                if (library.ProcessingOrder == ProcessingOrder.Random)
-                    return random.Next();
+                if (canUserCustomProcessingOrder)
+                {
+                    if (library.ProcessingOrder == ProcessingOrder.Random)
+                        return random.Next();
 
-                if (library.ProcessingOrder == ProcessingOrder.LargestFirst)
-                    return x.OriginalSize * -1;
+                    if (library.ProcessingOrder == ProcessingOrder.LargestFirst)
+                        return x.OriginalSize * -1;
 
-                if (library.ProcessingOrder == ProcessingOrder.SmallestFirst)
-                    return x.OriginalSize;
+                    if (library.ProcessingOrder == ProcessingOrder.SmallestFirst)
+                        return x.OriginalSize;
 
-                if (library.ProcessingOrder == ProcessingOrder.OldestFirst)
-                    return x.CreationTime.Ticks;
-                
-                if (library.ProcessingOrder == ProcessingOrder.NewestFirst)
-                    return x.CreationTime.Ticks * -1;
+                    if (library.ProcessingOrder == ProcessingOrder.OldestFirst)
+                        return x.CreationTime.Ticks;
+
+                    if (library.ProcessingOrder == ProcessingOrder.NewestFirst)
+                        return x.CreationTime.Ticks * -1;
+                }
 
                 // as found
                 return x.DateCreated.Ticks;

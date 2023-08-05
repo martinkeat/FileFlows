@@ -38,6 +38,7 @@ public class SettingsController : Controller
             status.LicenseTasks = (license.Flags & LicenseFlags.Tasks) == LicenseFlags.Tasks;
             status.LicenseAutoUpdates = (license.Flags & LicenseFlags.AutoUpdates) == LicenseFlags.AutoUpdates;
             status.LicenseWebhooks = (license.Flags & LicenseFlags.Webhooks) == LicenseFlags.Webhooks;
+            status.LicenseProcessingOrder = (license.Flags & LicenseFlags.ProcessingOrder) == LicenseFlags.ProcessingOrder;
         }
 
         bool libs = new LibraryService().GetAll().Any();
@@ -306,6 +307,7 @@ public class SettingsController : Controller
             .Where(x => x.Enabled)
             .ToDictionary(x => x.PackageName + ".ffplugin", x => x);
         var plugins = new Dictionary<string, byte[]>();
+        var pluginNames = new List<string>();
         List<string> flowElementsInUse = cfg.Flows.SelectMany(x => x.Parts.Select(x => x.FlowElementUid)).ToList();
         
         Logger.Instance.DLog("Plugin, Flow Elements in Use: \n" + string.Join("\n", flowElementsInUse));
@@ -331,9 +333,11 @@ public class SettingsController : Controller
 
             Logger.Instance.DLog($"Plugin '{pluginInfo.Name}' is used in configuration.");
             plugins.Add(file.Name, System.IO.File.ReadAllBytes(file.FullName));
+            pluginNames.Add(pluginInfo.Name);
         }
 
         cfg.Plugins = plugins;
+        cfg.PluginNames = pluginNames;
         Logger.Instance.DLog($"Plugin list that is used in configuration:", string.Join(", ", plugins.Select(x => x.Key)));
         
         return cfg;

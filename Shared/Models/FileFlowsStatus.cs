@@ -44,6 +44,11 @@ public class FileFlowsStatus
     /// Gets or sets if license allowed for auto updates
     /// </summary>
     public bool LicenseAutoUpdates { get; set; }
+    
+    /// <summary>
+    /// Gets or sets if license allowed for library processing order
+    /// </summary>
+    public bool LicenseProcessingOrder { get; set; }
 }
 
 /// <summary>

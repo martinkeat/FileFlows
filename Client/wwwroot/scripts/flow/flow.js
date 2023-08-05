@@ -88,7 +88,7 @@ window.ffFlow = {
         // container.addEventListener("touchstart", (e) => ffFlow.Mouse.dragStart(e), false);
         // container.addEventListener("touchend", (e) => ffFlow.Mouse.dragEnd(e), false);
         // container.addEventListener("touchmove", (e) => ffFlow.Mouse.drag(e), false);
-        container.addEventListener("mousedown", (e) => ffFlow.Mouse.dragStart(e), false);
+        container.addEventListener("mousedown", (e) => e.button === 0 && ffFlow.Mouse.dragStart(e), false);
         container.addEventListener("mouseup", (e) => ffFlow.Mouse.dragEnd(e), false);
         container.addEventListener("mousemove", (e) => ffFlow.Mouse.drag(e), false);
 
@@ -98,7 +98,7 @@ window.ffFlow = {
         container.addEventListener("dragover", (e) => { ffFlow.drop(e, false) }, false);
         container.addEventListener("drop", (e) => { ffFlow.drop(e, true) }, false);
 
-        container.addEventListener("contextmenu", (e) => { ffFlow.contextMenu(e); return false; }, false);
+        container.addEventListener("contextmenu", (e) => { e.preventDefault(); e.stopPropagation(); ffFlow.contextMenu(e); return false; }, false);
 
 
         document.removeEventListener('copy', ffFlow.CopyEventListener);

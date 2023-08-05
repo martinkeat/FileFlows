@@ -27,7 +27,6 @@ class ffFlowMouse {
     }
 
     dragStart(e) {
-        console.log('dragstart');
         if (e.type === "touchstart") {
             this.initialX = e.touches[0].clientX - this.xOffset;
             this.initialY = e.touches[0].clientY - this.yOffset;

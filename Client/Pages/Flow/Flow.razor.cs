@@ -33,7 +33,7 @@ public partial class Flow : ComponentBase, IDisposable
     /// </summary>
     private FlowPropertiesEditor PropertiesEditor { get; set; }
 
-    private string lblObsoleteMessage, lblEdit, lblHelp, lblDelete, lblCopy, lblPaste, lblRedo, lblUndo, lblAdd;
+    private string lblObsoleteMessage, lblEdit, lblHelp, lblDelete, lblCopy, lblPaste, lblRedo, lblUndo, lblAdd, lblProperties;
     private string SelectedElement;
 
     private int _Zoom = 100;
@@ -111,6 +111,7 @@ public partial class Flow : ComponentBase, IDisposable
         lblUndo = Translater.Instant("Labels.Undo");
         lblDelete = Translater.Instant("Labels.Delete");
         lblHelp = Translater.Instant("Labels.Help");
+        lblProperties = Translater.Instant("Labels.Properties");
         lblObsoleteMessage = Translater.Instant("Labels.ObsoleteConfirm.Message");
 
 

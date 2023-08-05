@@ -92,6 +92,7 @@
     "ViewLog":"View Log",
     "SetStatusProcessed": "Mark as Processed",
     "CommunityFlows": "Community Flows",
+    "Properties": "Properties",
     "ObsoleteConfirm": {
       "Title": "Obsolete Node",
       "Message": "It is recommended you switch to a different node.",
