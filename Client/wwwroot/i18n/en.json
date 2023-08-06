@@ -270,7 +270,7 @@
         "Field": {            
           "Description": "An optional description to be shown with this field.  This can be help text for the field.",
           "FlowElementField": "Element Field",
-          "FlowElementField-Help": "Optional, set this in the format {Uid}.{FieldName} eg `53a72207-34a2-4b71-b3d8-8b12764a85fe.Force` to set a field in a flow element directly.  See help for more information.",
+          "FlowElementField-Help": "Optional, set this in the format {Uid}.{FieldName} eg ''53a72207-34a2-4b71-b3d8-8b12764a85fe.Force'' to set a field in a flow element directly.  See help for more information.",
           "Required": "Required",
           "Required-Help": "If this value is required and must be set.",
           "Default": "Default",
