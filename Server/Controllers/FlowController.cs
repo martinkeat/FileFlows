@@ -781,7 +781,7 @@ public class FlowController : Controller
     [HttpGet("templates")]
     public async Task<IDictionary<string, List<FlowTemplateModel>>> GetTemplates([FromQuery] FlowType type = FlowType.Standard)
     {
-        var elements = await GetElements((FlowType)(-1)); // special case to load all template typs
+        var elements = await GetElements((FlowType)(-1)); // special case to load all template types
         var parts = elements.ToDictionary(x => x.Uid, x => x);
 
         Dictionary<string, List<FlowTemplateModel>> templates = new();
@@ -805,6 +805,7 @@ public class FlowController : Controller
                 Fields = item.Template.Fields,
                 Save = item.Template.Save,
                 Type = item.Template.Type,
+                TreeShake = item.Template.Group != "Community",
                 Flow = new Flow
                 {
                     Name = item.Template.Name,
@@ -949,9 +950,17 @@ public class FlowController : Controller
         {
             var tf = new TemplateField();
             tf.Name = field.Name;
+            tf.Label = field.Name.Replace("_" , " ");
             tf.Default = field.DefaultValue;
             tf.Help = field.Description;
-            tf.Label = field.Name.Replace("_" , " ");
+            if (string.IsNullOrWhiteSpace(field.FlowElementField) == false && Regex.IsMatch(field.FlowElementField,
+                    @"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\.[a-zA-Z_][a-zA-Z0-9_]*$"))
+            {
+                // this is a strong name to a field
+                var parts = field.FlowElementField.Split('.');
+                tf.Uid = Guid.Parse(parts[0]);
+                tf.Name = parts[1];
+            }
             tf.Type = field.Type switch
             {
                 FlowFieldType.Directory => "Directory",

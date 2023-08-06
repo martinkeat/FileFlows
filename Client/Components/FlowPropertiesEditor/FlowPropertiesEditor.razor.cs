@@ -25,7 +25,11 @@ public partial class FlowPropertiesEditor
 
     private FlowField Editing;
     protected string lblClose, lblHelp, lblTitle;
-    private bool Visible;
+    
+    /// <summary>
+    /// Gets or sets if this is visible
+    /// </summary>
+    public bool Visible { get; private set; }
 
     private List<KeyValuePair<string, string>> _FlowVariables;
     private List<KeyValuePair<string, string>> FlowVariables

@@ -13,6 +13,18 @@ using FileFlows.Plugin;
 public class ElementField
 {
     /// <summary>
+    /// Gets or sets a value that makes this field read-only
+    /// Special case, used by the flow editor to show the UID of flow elements
+    /// </summary>
+    public object ReadOnlyValue { get; set; }
+    
+    /// <summary>
+    /// Gets or sets a value that can be copied to the clipboard for this field
+    /// If set, a copy icon will be shown next to the label
+    /// </summary>
+    public string CopyValue { get; set; }
+    
+    /// <summary>
     /// A unique identifier for this field
     /// </summary>
     public readonly Guid Uid = Guid.NewGuid(); 

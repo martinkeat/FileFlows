@@ -17,8 +17,14 @@ namespace FileFlows.Client.Services
             this.JsRuntime = jsRuntime;
         }
 
+        /// <summary>
+        /// Copies text to the clipboard and shows a toast
+        /// </summary>
+        /// <param name="text">th text to copy</param>
         public async Task CopyToClipboard(string text)
         {
+            if (string.IsNullOrWhiteSpace(text))
+                return;
             await JsRuntime.InvokeVoidAsync("ff.copyToClipboard", text);
             Toast.ShowInfo(Translater.Instant("Labels.CopiedToClipboard", new { text }));
         }

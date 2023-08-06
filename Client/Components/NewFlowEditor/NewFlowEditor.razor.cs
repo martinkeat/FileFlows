@@ -422,31 +422,36 @@ public partial class NewFlowEditor : Editor
 
         // shake lose any nodes that have no connections
         // stop at one to skip the input node
-        int count;
-        do
+        if (CurrentTemplate.TreeShake)
         {
-            var inputNodes = flow.Parts.SelectMany(x => x.OutputConnections.Select(x => x.InputNode)).ToList();
-            count = flow.Parts.Count;
-            for (int i = flow.Parts.Count - 1; i >= 1; i--)
+            int count;
+            do
             {
-                if (inputNodes.Contains(flow.Parts[i].Uid) == false)
+                var inputNodes = flow.Parts.SelectMany(x => x.OutputConnections.Select(x => x.InputNode)).ToList();
+                count = flow.Parts.Count;
+                for (int i = flow.Parts.Count - 1; i >= 1; i--)
                 {
-                    flow.Parts.RemoveAt(i);
+                    if (inputNodes.Contains(flow.Parts[i].Uid) == false)
+                    {
+                        flow.Parts.RemoveAt(i);
+                    }
                 }
-            }
-        } while (count != flow.Parts.Count); // loop over as we may have removed a connection that now makes other nodes disconnected/redundant
+            } while
+                (count != flow.Parts
+                    .Count); // loop over as we may have removed a connection that now makes other nodes disconnected/redundant
 
-        // remove any missing connections
-        var partUids = flow.Parts.Select(x => x.Uid).ToList();
-        foreach (var part in flow.Parts)
-        {
-            if (part.OutputConnections?.Any() != true)
-                continue;
-            for(int i=part.OutputConnections.Count - 1;i>=0;i--)
+            // remove any missing connections
+            var partUids = flow.Parts.Select(x => x.Uid).ToList();
+            foreach (var part in flow.Parts)
             {
-                if (partUids.Contains(part.OutputConnections[i].InputNode) == false)
+                if (part.OutputConnections?.Any() != true)
+                    continue;
+                for (int i = part.OutputConnections.Count - 1; i >= 0; i--)
                 {
-                    part.OutputConnections.RemoveAt(i);
+                    if (partUids.Contains(part.OutputConnections[i].InputNode) == false)
+                    {
+                        part.OutputConnections.RemoveAt(i);
+                    }
                 }
             }
         }

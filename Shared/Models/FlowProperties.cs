@@ -45,6 +45,10 @@ public class FlowField
     /// </summary>
     public string Description { get; set; }
     /// <summary>
+    /// Gets or sets the strong name of the flow element field this value will set
+    /// </summary>
+    public string FlowElementField { get; set; }
+    /// <summary>
     /// Gets or sets if this is required
     /// </summary>
     public bool Required { get; set; }

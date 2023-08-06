@@ -15,7 +15,13 @@
         <div class="input-label">
             @if (string.IsNullOrEmpty(Input?.Label) == false)
             {
-                <label>@Input.Label</label>
+                <label>
+                @Input.Label
+                @if(string.IsNullOrEmpty(Input?.Field?.CopyValue) == false)
+                {
+                 <i @onclick="CopyToClipboard" class="far fa-clipboard" title="@lblTooltip"></i>
+                }
+                </label>
             }
         </div>
     }

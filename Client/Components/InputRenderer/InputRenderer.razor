@@ -27,9 +27,17 @@
             break;
         case FormInputType.Text:
             {
-                var value = GetValue<string>(field.Name) ?? "";
-                <InputText Field=@field Label="@label" Value="@value" ReadOnly=@readOnly ValueChanged="@(x => UpdateValue(field, x))"
-    Validators=@field.Validators Placeholder="@field.Placeholder" HideLabel=@hideLabel OnSubmit=@OnSubmit OnClose=@OnClose Help=@field.HelpText />
+                if (field.ReadOnlyValue is string strValue)
+                {
+                    <InputText Label="@label" Value="@strValue" ReadOnly=@readOnly 
+                               Placeholder="@field.Placeholder" HideLabel=@hideLabel Help=@field.HelpText />
+                }
+                else
+                {
+                    var value = GetValue<string>(field.Name) ?? "";
+                    <InputText Field=@field Label="@label" Value="@value" ReadOnly=@readOnly ValueChanged="@(x => UpdateValue(field, x))"
+                               Validators=@field.Validators Placeholder="@field.Placeholder" HideLabel=@hideLabel OnSubmit=@OnSubmit OnClose=@OnClose Help=@field.HelpText/>
+                }
             }
             break;
         case FormInputType.TextVariable:
@@ -203,12 +211,19 @@
             break;
         case FormInputType.TextLabel:
             {
-                object oValue = GetValue<object>(field.Name);
-                var pre = GetParameter<bool>(field, nameof(InputTextLabel.Pre));
-                var link = GetParameter<bool>(field, nameof(InputTextLabel.Link));
-                var formatter = GetParameter<string>(field, nameof(InputTextLabel.Formatter));
-                <InputTextLabel Field=@field Label="@label" Value="@oValue" HideLabel=@hideLabel 
-                                Pre=@pre Link=@link Formatter="@formatter" Help=@field.HelpText />
+                if (field.ReadOnlyValue is string strValue)
+                {
+                    <InputTextLabel Label="@label" Value="@strValue" HideLabel=@hideLabel Help=@field.HelpText />
+                }
+                else
+                {
+                    object oValue = GetValue<object>(field.Name);
+                    var pre = GetParameter<bool>(field, nameof(InputTextLabel.Pre));
+                    var link = GetParameter<bool>(field, nameof(InputTextLabel.Link));
+                    var formatter = GetParameter<string>(field, nameof(InputTextLabel.Formatter));
+                    <InputTextLabel Field=@field Label="@label" Value="@oValue" HideLabel=@hideLabel
+                                    Pre=@pre Link=@link Formatter="@formatter" Help=@field.HelpText/>
+                }
             }
             break;
         case FormInputType.ExecutedNodes:

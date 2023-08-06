@@ -8,6 +8,11 @@
 .input-label {
   margin-bottom: auto;
 }
+.input-label .fa-clipboard {
+  color: var(--info);
+  padding-left: 0.25rem;
+  cursor: pointer;
+}
 
 .error-text {
   font-size: 0.8rem;
@@ -37,8 +42,7 @@
 .input-value {
   flex-grow: 1;
   position: relative;
-  margin: 1px;
-  /* one pixel margin for outline of selected inputs */
+  margin: 1px; /* one pixel margin for outline of selected inputs */
 }
 
 .row.disabled {
@@ -49,7 +53,6 @@
   .row {
     flex-direction: column;
   }
-
   .input-label {
     width: unset;
     margin: unset;

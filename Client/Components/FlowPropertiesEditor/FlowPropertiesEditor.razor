@@ -64,6 +64,7 @@
                             </div>
                             <div class="content">
                                 <InputText @bind-Value="@Editing.Description" Label="Pages.Flow.Fields.Field.Description"></InputText>
+                                <InputText @bind-Value="@Editing.FlowElementField" Label="Pages.Flow.Fields.Field.FlowElementField"></InputText>
                                 @if (Editing.Type == FlowFieldType.String || Editing.Type == FlowFieldType.Directory)
                                 {
                                     <InputSwitch @bind-Value="@Editing.Required" Label="Pages.Flow.Fields.Field.Required"></InputSwitch>

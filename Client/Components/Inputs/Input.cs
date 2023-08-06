@@ -217,7 +217,6 @@ public abstract class Input<T> : ComponentBase, IInput, IDisposable
     protected override void OnInitialized()
     {
         base.OnInitialized();
-        Logger.Instance.ILog("InputRegister: " + (InputRegister?.GetTheType()?.Name ?? "null"));
         if(this.Field != null)
             InputRegister.RegisterInput(this.Field.Uid, this);
         this.Visible = true;

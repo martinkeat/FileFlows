@@ -479,7 +479,12 @@ public partial class Flow : ComponentBase, IDisposable
             typeDisplayName = Translater.TranslateIfHasTranslation($"Flow.Parts.{typeName}.Label", FlowHelper.FormatLabel(typeName));
         }
 
-        var fields = ObjectCloner.Clone(flowElement.Fields);
+        var fields = ObjectCloner.Clone(flowElement.Fields).Select(x =>
+        {
+            if (PropertiesEditor.Visible)
+                x.CopyValue = $"{part.Uid}.{x.Name}";
+            return x;
+        }).ToList();
         // add the name to the fields, so a node can be renamed
         fields.Insert(0, new ElementField
         {
@@ -487,6 +492,18 @@ public partial class Flow : ComponentBase, IDisposable
             Placeholder = typeDisplayName,
             InputType = FormInputType.Text
         });
+
+        if (PropertiesEditor.Visible)
+        {
+            fields.Insert(0, new ElementField
+            {
+                Name = "UID",
+                InputType = FormInputType.TextLabel,
+                ReadOnlyValue = part.Uid.ToString(),
+                UiOnly = true
+            });
+            
+        }
 
         bool isFunctionNode = flowElement.Uid == "FileFlows.BasicNodes.Functions.Function";
 

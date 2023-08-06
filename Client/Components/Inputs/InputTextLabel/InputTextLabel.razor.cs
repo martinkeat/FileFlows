@@ -8,6 +8,9 @@ namespace FileFlows.Client.Components.Inputs
         [Parameter] public bool Link { get; set; }
         [Parameter] public string Formatter { get; set; }
 
+        /// <summary>
+        /// Gets or sets the clipboard service
+        /// </summary>
         [Inject] IClipboardService ClipboardService { get; set; }   
 
         private string StringValue { get; set; }

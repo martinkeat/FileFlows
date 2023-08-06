@@ -15,13 +15,20 @@ namespace FileFlows.Client.Components.Inputs
 
         [Parameter] public bool NoSpacing { get; set;}
 
+        /// <summary>
+        /// Gets or sets the clipboard service
+        /// </summary>
+        [Inject] IClipboardService ClipboardService { get; set; }   
+
         [Parameter] public RenderFragment ChildContent { get; set; }
 
         private string HelpHtml = string.Empty;
         private string CurrentHelpText;
+        private string lblTooltip;
         
         protected override void OnInitialized()
         {
+            this.lblTooltip = Translater.Instant("Labels.CopyToClipboard");
             InitHelpText();
         }
 
@@ -54,6 +61,11 @@ namespace FileFlows.Client.Components.Inputs
                 help = help.Replace("<a ", "<a rel=\"noreferrer\" target=\"_blank\" ");
                 this.HelpHtml = help;
             }
+        }
+        
+        async Task CopyToClipboard()
+        {
+            await ClipboardService.CopyToClipboard(this?.Input?.Field?.CopyValue);
         }
     }
 }

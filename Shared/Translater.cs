@@ -125,7 +125,7 @@ public class Translater
             return Language["Labels.Name"];
 
         string result = possibleKeys?.FirstOrDefault() ?? "";
-        if(supressWarnings == false)
+        if(supressWarnings == false && result.EndsWith(".UID") == false)
             Logger.Instance.WLog("Failed to lookup key: " + result);
         result = result.Substring(result.LastIndexOf(".") + 1);
 
@@ -164,6 +164,8 @@ public class Translater
         }
         catch (Exception ex)
         {
+            if (possibleKeys[0].EndsWith(".UID"))
+                return "UID";
             if(suppressWarnings == false)
                 Logger.Instance.WLog("Failed to translating key: " + possibleKeys[0] + ", " + ex.Message);
             return possibleKeys[0];
