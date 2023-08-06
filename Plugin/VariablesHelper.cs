@@ -21,13 +21,18 @@ public class VariablesHelper
         if (string.IsNullOrEmpty(input))
             return string.Empty;
         
-        foreach(Match match in Regex.Matches(input,  @"{([a-zA-Z_][a-zA-Z0-9_]*)}"))
+        foreach(Match match in Regex.Matches(input,  @"{([a-zA-Z_][a-zA-Z0-9_.]*)(?:(!)|\|([^{}]*))?}"))
         {
             object value = match.Groups[1].Value;
             if (variables != null && variables.ContainsKey((string)value))
                 value = variables[(string)value];
             
-            var format = match.Groups[2].Value;
+            var format = match.Groups
+                .Cast<Group>()
+                .Skip(2) // Skip the first group (group 0 is the entire match)
+                .LastOrDefault(group => group.Success && !string.IsNullOrEmpty(group.Value))
+                ?.Value ?? string.Empty;
+            
             var formatter = Formatters.Formatter.GetFormatter(format);
             string strValue = formatter.Format(value, format);
             

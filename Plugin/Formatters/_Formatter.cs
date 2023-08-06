@@ -1,3 +1,5 @@
+using System.Text.RegularExpressions;
+
 namespace FileFlows.Plugin.Formatters;
 
 /// <summary>
@@ -27,17 +29,25 @@ public abstract class Formatter
     /// <returns></returns>
     public static Formatter GetFormatter(string format)
     {
+        if (string.IsNullOrWhiteSpace(format))
+            return _noFormatter;
         foreach (var formatter in Formatters)
         {
             if (formatter.IsMatch(format))
                 return formatter;
         }
 
-        return new NoFormatter();
+        if (Regex.IsMatch(format, @"^[yMdHhmstf\-._/:\s]+$"))
+            return _dateFormatter;
+
+        return _noFormatter;
     }
 
     private static readonly List<Formatter> Formatters;
 
+    private static readonly DateFormatter _dateFormatter = new();
+    private static readonly NoFormatter _noFormatter = new ();
+    
     static Formatter()
     {
         Formatters = new List<Formatter>()
@@ -45,7 +55,7 @@ public abstract class Formatter
             new UpperCaseFormatter(),
             new NumberFormatter(),
             new SizeFormatter(),
-            new DateFormatter(),
+            _dateFormatter
         };
     }
 }

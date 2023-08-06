@@ -35,7 +35,7 @@ public class NumberFormatter  : Formatter
         if (value == null)
             return string.Empty;
         
-        int digits = format.Length - 1;
+        int digits = format.Length;
         
         if (value is int iValue)
             return iValue.ToString(new string('0', digits));
