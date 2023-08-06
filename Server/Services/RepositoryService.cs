@@ -133,6 +133,7 @@ class RepositoryService
             string content = await GetContent(path);
             if(outputFile.EndsWith(".json") == false)
                 content = "// path: " + path + "\n\n" + content;
+            
             var dir = new FileInfo(outputFile).Directory;
             if(dir.Exists == false)
                 dir.Create();

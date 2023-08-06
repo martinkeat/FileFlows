@@ -194,7 +194,9 @@ public class LibraryController : Controller
         {
             try
             {
-                string json = string.Join("\n", System.IO.File.ReadAllText(tf.FullName).Split('\n').Skip(1)); // remove the //path comment
+                string json = System.IO.File.ReadAllText(tf.FullName);
+                if(json.StartsWith("//"))
+                    json = string.Join("\n", json.Split('\n').Skip(1)); // remove the //path comment
                 json = TemplateHelper.ReplaceWindowsPathIfWindows(json);
                 var jst =JsonSerializer.Deserialize<LibraryTemplate>(json, new JsonSerializerOptions
                 {

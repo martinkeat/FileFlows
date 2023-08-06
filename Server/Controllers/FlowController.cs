@@ -829,7 +829,7 @@ public class FlowController : Controller
             try
             {
                 string json = System.IO.File.ReadAllText(tf.FullName);
-                if (json.StartsWith("// path"))
+                if (json.StartsWith("//"))
                 {
                     json = string.Join("\n", json.Split('\n').Skip(1)).Trim();
                 }
