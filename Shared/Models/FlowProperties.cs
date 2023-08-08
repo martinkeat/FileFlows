@@ -6,6 +6,11 @@
 public class FlowProperties
 {
     private List<FlowField> _Fields = new();
+    
+    /// <summary>
+    /// Gets or sets tags for this flow
+    /// </summary>
+    public List<string> Tags { get; set; }
 
     /// <summary>
     /// Gets or sets the fields

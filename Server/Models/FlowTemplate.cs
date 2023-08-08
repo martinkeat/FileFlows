@@ -16,6 +16,16 @@ class FlowTemplate
     /// Gets or sets the group of this template
     /// </summary>
     public string Group { get; set; }
+
+    /// <summary>
+    /// Gets or sets the minimum version this template supports
+    /// </summary>
+    public Version? MinimumVersion { get; set; }
+
+    /// <summary>
+    /// Gets or sets the tags for this template
+    /// </summary>
+    public List<string> Tags { get; set; }
     
     /// <summary>
     /// Gets or sets the description of the template
@@ -40,7 +50,7 @@ class FlowTemplate
     /// <summary>
     /// Gets or sets the Flow Type
     /// </summary>
-    public FlowType Type{ get; set; }
+    public FlowType Type { get; set; }
     
     /// <summary>
     /// Gets or sets if this flow should have skip tree shaking applied after being used in a template

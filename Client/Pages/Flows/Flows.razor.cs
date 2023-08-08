@@ -30,6 +30,7 @@ public partial class Flows : ListPage<Guid, FlowListModel>
     /// </summary>
     private ScriptBrowser ScriptBrowser { get; set; }
 
+    private FlowTemplatePicker TemplatePicker;
     private NewFlowEditor AddEditor;
     private string TableIdentifier => "Flows-" + this.SelectedType;
 
@@ -65,12 +66,26 @@ public partial class Flows : ListPage<Guid, FlowListModel>
 
     private async void Add()
     {
+        if (TemplatePicker == null)
+        {
+            NavigationManager.NavigateTo("flows/" + Guid.Empty);
+            return;
+        }
+
+        var flowTemplateModel = await TemplatePicker.Show(FlowType.Standard);
+        if (flowTemplateModel == null)
+            return; // twas canceled
+        AddWithForm(flowTemplateModel);
+    }
+
+    private async void AddWithForm(FlowTemplateModel flowTemplateModel)
+    {
         if (AddEditor == null)
         {
             NavigationManager.NavigateTo("flows/" + Guid.Empty);
             return;
         }
-        var newFlow = await AddEditor.Show(this.SelectedType);
+        var newFlow = await AddEditor.Show(flowTemplateModel);
         if (newFlow == null)
             return; // was canceled
         
@@ -262,7 +277,7 @@ public partial class Flows : ListPage<Guid, FlowListModel>
     async Task Browser()
     {
         bool result = await ScriptBrowser.Open(ScriptType.CommunityFlows);
-        if (result)
-            AddEditor.Templates = null;
+        // if (result)
+        //     AddEditor.Templates = null;
     }
 }

@@ -20,11 +20,8 @@ public partial class NewFlowEditor : Editor
 
     private FlowType? _flowType = null;
     
-    /// <summary>
-    /// Gets or sets the available templates
-    /// </summary>
-    public Dictionary<string, List<FlowTemplateModel>> Templates { get; set; }
 
+    FlowTemplateModel CurrentTemplate;
     private const string FIELD_NAME = "Name";
     private const string FIELD_TEMPLATE = "Template";
 
@@ -34,7 +31,6 @@ public partial class NewFlowEditor : Editor
     private ElementField efTemplate;
     private readonly Dictionary<string, TemplateFieldModel> TemplateFields = new ();
     private bool InitializingTemplate = false;
-    private FlowTemplateModel CurrentTemplate;
 
     protected override async Task OnInitializedAsync()
     {
@@ -48,14 +44,13 @@ public partial class NewFlowEditor : Editor
 
     private async Task InitTemplate(FlowTemplateModel template)
     {
-        if (Fields?.Any() == true && template == this.CurrentTemplate)
+        if (Fields?.Any() == true)
             return;
         
         this.InitializingTemplate = true;
         try
         {
             DisposeCurrentTemplate();
-            this.CurrentTemplate = template;
             
             if (this.Model is IDictionary<string, object> oldDict && oldDict.TryGetValue("Name", out object oName) &&
                 oName is string sName && string.IsNullOrWhiteSpace(sName) == false)
@@ -78,21 +73,6 @@ public partial class NewFlowEditor : Editor
                     new FileFlows.Shared.Validators.Required()
                 }
             });
-            this.efTemplate = new ElementField
-            {
-                InputType = FormInputType.Select,
-                Name = FIELD_TEMPLATE,
-                Parameters = new Dictionary<string, object>
-                {
-                    { "Options", TemplateOptions }
-                },
-                Validators = new List<FileFlows.Shared.Validators.Validator>
-                {
-                    new FileFlows.Shared.Validators.Required()
-                }
-            };
-            this.efTemplate.ValueChanged += EfTemplateOnValueChanged;
-            fields.Add(this.efTemplate);
 
             if (template?.Fields?.Any() == true)
             {
@@ -175,79 +155,18 @@ public partial class NewFlowEditor : Editor
         }
     }
 
-    private void EfTemplateOnValueChanged(object sender, object value)
-    {
-        if (value is FlowTemplateModel template)
-        {
-            if (template == CurrentTemplate)
-                return;
-            
-            _ = InitTemplate(template);
-        }
-    }
-
     /// <summary>
     /// Shows the new flow editor
     /// </summary>
-    public Task<Flow> Show(FlowType type)
+    public Task<Flow> Show(FlowTemplateModel flowTemplateModel)
     {
         ShowTask = new TaskCompletionSource<Flow>();
-        _ = Task.Run(async () =>
+        Task.Run(async () =>
         {
-            if (this.Templates == null || _flowType != type)
-            {
-                _flowType = type;
-                TemplateOptions = new();
-                this.Blocker.Show("Pages.Flows.Messages.LoadingTemplates");
-                this.StateHasChanged();
-                try
-                {
-                    var flowResult =
-                        await HttpHelper.Get<Dictionary<string, List<FlowTemplateModel>>>("/api/flow/templates?type=" + type);
-                    if (flowResult.Success)
-                        Templates = flowResult.Data ?? new();
-                    else
-                        Templates = new();
-                    TemplateOptions ??= new();
-
-                    foreach (var group in Templates)
-                    {
-                        if (string.IsNullOrEmpty(group.Key) == false)
-                        {
-                            TemplateOptions.Add(new Plugin.ListOption
-                            {
-                                Value = Globals.LIST_OPTION_GROUP,
-                                Label = group.Key
-                            });
-                        }
-                        TemplateOptions.AddRange(group.Value.Select(x => new Plugin.ListOption
-                        {
-                            Label = x.Flow.Name,
-                            Value = x
-                        }));
-                    }
-                }
-                finally
-                {
-                    this.Blocker.Hide();
-                }
-            }
-
-            if (efTemplate != null)
-                efTemplate.ValueChanged -= EfTemplateOnValueChanged;
-            if (this.TemplateOptions.Any() == false)
-            {
-                // no templates, give them a blank
-                NavigationManager.NavigateTo("flows/" + Guid.Empty);
-                var flow = default(Flow);
-                flow.Type = type;
-                ShowTask.TrySetResult(flow);
-                return;
-            }
             this.Model = null;
-            this.CurrentTemplate = null;
+            this.CurrentTemplate = flowTemplateModel;
             this.Visible = true;
-            await this.InitTemplate(null);
+            await this.InitTemplate(flowTemplateModel);
             this.StateHasChanged();
         });
         return ShowTask.Task;

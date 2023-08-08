@@ -1,0 +1,40 @@
+﻿@namespace FileFlows.Client.Components.Dialogs
+
+@if (Templates != null)
+{
+    <Modal Title="@lblTitle" Visible="Visible" Styling="width:min(90vw, 60rem);max-width: unset;max-height: unset;">
+        <Body>
+        <span>@lblDescription</span>
+        <div class="top-bar">
+            <div class="tag-filter">
+                @foreach (var tag in Tags)
+                {
+                    <span class="tag @(SelectedTags.Contains(tag) ? "selected" : string.Empty)" @onclick="((ev) => ToggleTag(ev,  tag))">@tag</span>
+                }
+            </div>
+            <div class="filter">
+                <input type="text" placeholder="@lblFilter" @bind-value="FilterText" @bind-value:event="oninput" @onkeydown="FilterKeyDown"  autocomplete="off" / />
+                <i class="fas fa-search" @onclick="() => Filter()"></i>
+            </div>
+        </div>
+        <div class="templates">
+            @foreach (var template in FilteredTemplates)
+            {
+                if (SelectedTags.All(tag => template.Tags.Contains(tag)) == false)
+                {
+                    continue;
+                }
+                <div class="template @(Selected == template ? "selected" : string.Empty)" @onclick="@(() => SelectTemplate(template))">
+                    <span class="name">@template.Flow.Name</span>
+                    <span class="author">@template.Flow.Author</span>
+                    <span class="description">@template.Flow.Description</span>
+                </div>
+            }
+        </div>
+        </Body>
+        <Footer>
+            <button @onclick=@New disabled="@(Selected == null)">@lblNext &gt;</button>
+            <button @onclick=@Cancel>@lblCancel</button>
+        </Footer>
+    </Modal>
+}

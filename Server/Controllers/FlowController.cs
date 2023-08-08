@@ -779,32 +779,22 @@ public class FlowController : Controller
     /// <param name="type">the flow type</param>
     /// <returns>A list of flow templates</returns>
     [HttpGet("templates")]
-    public async Task<IDictionary<string, List<FlowTemplateModel>>> GetTemplates([FromQuery] FlowType type = FlowType.Standard)
+    //public async Task<IDictionary<string, List<FlowTemplateModel>>> GetTemplates([FromQuery] FlowType type = FlowType.Standard)
+    public async Task<List<FlowTemplateModel>> GetTemplates([FromQuery] FlowType type = FlowType.Standard)
     {
         var elements = await GetElements((FlowType)(-1)); // special case to load all template types
         var parts = elements.ToDictionary(x => x.Uid, x => x);
 
-        Dictionary<string, List<FlowTemplateModel>> templates = new();
-        string group = string.Empty;
-        templates.Add(group, new List<FlowTemplateModel>());
-        templates.Add("Basic", new List<FlowTemplateModel>());
-
-        var templateList = GetFlowTemplates(parts)
+        return GetFlowTemplates(parts)
             .Where(x => x.Template.Type == type)
-            .OrderBy(x => x.Template.Group == "Community" ? "zzz" : x.Template.Group.ToLowerInvariant())
-            .ThenBy(x => x.Template.Name == x.Template.Group + " File" ? 0 : 1)
-            .ThenBy(x => x.Template.Name.ToLowerInvariant());
-        foreach (var item in templateList)
-        {
-
-            if (templates.ContainsKey(item.Template.Group ?? String.Empty) == false)
-                templates.Add(item.Template.Group ?? String.Empty, new List<FlowTemplateModel>());
-
-            templates[item.Template.Group ?? String.Empty].Add(new FlowTemplateModel
+            .OrderBy(x => x.Template.Tags.Contains("Blank") ? 1 : 2)
+            .ThenBy(x => x.Template.Name)
+            .Select(item => new FlowTemplateModel
             {
                 Fields = item.Template.Fields,
                 Save = item.Template.Save,
                 Type = item.Template.Type,
+                Tags = item.Template.Tags,
                 TreeShake = item.Template.SkipTreeShaking != true,
                 Flow = new Flow
                 {
@@ -814,10 +804,43 @@ public class FlowController : Controller
                     Description = item.Template.Description,
                     Parts = item.Parts
                 }
-            });
-        }
+            })
+            .ToList();
 
-        return templates;
+        // Dictionary<string, List<FlowTemplateModel>> templates = new();
+        // string group = string.Empty;
+        // templates.Add(group, new List<FlowTemplateModel>());
+        // templates.Add("Basic", new List<FlowTemplateModel>());
+        //
+        // var templateList = GetFlowTemplates(parts)
+        //     .Where(x => x.Template.Type == type)
+        //     .OrderBy(x => x.Template.Group == "Community" ? "zzz" : x.Template.Group.ToLowerInvariant())
+        //     .ThenBy(x => x.Template.Name == x.Template.Group + " File" ? 0 : 1)
+        //     .ThenBy(x => x.Template.Name.ToLowerInvariant());
+        // foreach (var item in templateList)
+        // {
+        //
+        //     if (templates.ContainsKey(item.Template.Group ?? String.Empty) == false)
+        //         templates.Add(item.Template.Group ?? String.Empty, new List<FlowTemplateModel>());
+        //
+        //     templates[item.Template.Group ?? String.Empty].Add(new FlowTemplateModel
+        //     {
+        //         Fields = item.Template.Fields,
+        //         Save = item.Template.Save,
+        //         Type = item.Template.Type,
+        //         TreeShake = item.Template.SkipTreeShaking != true,
+        //         Flow = new Flow
+        //         {
+        //             Name = item.Template.Name,
+        //             Template = item.Template.Name,
+        //             Enabled = true,
+        //             Description = item.Template.Description,
+        //             Parts = item.Parts
+        //         }
+        //     });
+        // }
+        //
+        // return templates;
     }
 
     private List<(FlowTemplate Template, List<FlowPart> Parts)> GetFlowTemplates(Dictionary<string, FlowElement> parts)
@@ -858,6 +881,19 @@ public class FlowController : Controller
 
                 if (jst == null)
                     continue;
+
+                jst.Tags ??= new ();
+                if (jst.Tags.Any() == false)
+                {
+                    if(jst.Name == "File" || jst.Name == "Folder")
+                        jst.Tags.Add("Blank");
+                    foreach (var str in new[] { "community", "video", "audio", "comic", "image" })
+                    {
+                        if (tf.FullName.Contains(str) || tf.Name.ToLowerInvariant().Contains(str))
+                            jst.Tags.Add(str[0..1].ToUpper() + str[1..]);
+                    }
+                }
+                
                 try
                 {
 
@@ -924,6 +960,7 @@ public class FlowController : Controller
         template.Name = flow.Name;
         template.Description = flow.Description;
         template.Group = "Community";
+        template.Tags = flow.Properties.Tags;
         template.SkipTreeShaking = true;
         template.Save = true; // this means the flow will be saved automatically and not opened when creating a flow based on this template
         template.Parts = new();

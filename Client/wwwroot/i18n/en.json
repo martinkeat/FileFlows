@@ -19,6 +19,7 @@
     "None": "None",
     "Add": "Add",
     "Edit": "Edit",
+    "Next": "Next",
     "Remove":"Remove",
     "Copy":"Copy",
     "Paste":"Paste",
@@ -126,6 +127,10 @@
     {
       "Title":"Pause Processing",
       "Message":"Select the amount of time to pause processing for.\nNote: The current flows will continue to execute, but no other flows will be executed until his time is up."
+    },
+    "FlowTemplatePicker": {
+      "Title": "New Flow",
+      "Description": "Select a template or start from a blank template"
     }
   },
   "Enums": {

@@ -18,6 +18,11 @@ public class FlowTemplateModel
     public bool TreeShake { get; set; }
     
     /// <summary>
+    /// Gets or sets the tags for the template
+    /// </summary>
+    public List<string> Tags { get; set; }
+
+    /// <summary>
     /// Gets or sets fields used in the template
     /// </summary>
     public List<TemplateField> Fields { get; set; }
