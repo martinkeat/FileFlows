@@ -805,7 +805,7 @@ public class FlowController : Controller
                 Fields = item.Template.Fields,
                 Save = item.Template.Save,
                 Type = item.Template.Type,
-                TreeShake = item.Template.Group != "Community",
+                TreeShake = item.Template.SkipTreeShaking != true,
                 Flow = new Flow
                 {
                     Name = item.Template.Name,
@@ -924,6 +924,7 @@ public class FlowController : Controller
         template.Name = flow.Name;
         template.Description = flow.Description;
         template.Group = "Community";
+        template.SkipTreeShaking = true;
         template.Save = true; // this means the flow will be saved automatically and not opened when creating a flow based on this template
         template.Parts = new();
         foreach(var fp in flow.Parts)

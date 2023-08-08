@@ -41,6 +41,11 @@ class FlowTemplate
     /// Gets or sets the Flow Type
     /// </summary>
     public FlowType Type{ get; set; }
+    
+    /// <summary>
+    /// Gets or sets if this flow should have skip tree shaking applied after being used in a template
+    /// </summary>
+    public bool SkipTreeShaking { get; set; }
 }
 
 /// <summary>

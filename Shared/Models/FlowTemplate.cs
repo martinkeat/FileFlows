@@ -39,7 +39,7 @@ public class FlowTemplateModel
 public class TemplateField
 {
     /// <summary>
-    /// Gets or sets the UID of the template field
+    /// Gets or sets the UID of the target to set for this template field
     /// </summary>
     public Guid Uid { get; set; }
     

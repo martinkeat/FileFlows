@@ -585,7 +585,22 @@ public partial class Editor : InputRegister, IDisposable
             if (typeof(T) == typeof(int))
                 return (T)(object)je.GetInt32();
             if (typeof(T) == typeof(bool))
-                return (T)(object)je.GetBoolean();
+            {
+                if (je.ValueKind == JsonValueKind.False)
+                    return (T)(object)false;
+                if (je.ValueKind == JsonValueKind.True)
+                    return (T)(object)true;
+                if (je.ValueKind == JsonValueKind.String)
+                {
+                    var str = je.GetString().ToLowerInvariant();
+                    return (T)(object)(str == "true" || str == "1");
+                }
+                if (je.ValueKind == JsonValueKind.Number)
+                    return (T)(object)(je.GetInt32() > 0);
+
+                return (T)(object)false;
+            }
+
             if (typeof(T) == typeof(float))
             {
                 try

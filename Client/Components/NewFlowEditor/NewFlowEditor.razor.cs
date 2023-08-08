@@ -1,3 +1,5 @@
+using System.Collections;
+using System.Runtime.InteropServices.JavaScript;
 using System.Text.Json;
 using FileFlows.Client.Components.Inputs;
 using FileFlows.Plugin;
@@ -147,7 +149,7 @@ public partial class NewFlowEditor : Editor
                                     out TemplateFieldModel efOther) == false)
                                 continue;
                             tfm.ElementField.Conditions ??= new();
-                            var newCon = new Condition(efOther.ElementField, null, condition.Value, condition.IsNot);
+                            var newCon = new Condition(efOther.ElementField, efOther.TemplateField.Default, condition.Value, condition.IsNot);
                             newCon.Owner = tfm.ElementField;
                             tfm.ElementField.Conditions.Add(newCon);
                         }
@@ -422,39 +424,7 @@ public partial class NewFlowEditor : Editor
 
         // shake lose any nodes that have no connections
         // stop at one to skip the input node
-        if (CurrentTemplate.TreeShake)
-        {
-            int count;
-            do
-            {
-                var inputNodes = flow.Parts.SelectMany(x => x.OutputConnections.Select(x => x.InputNode)).ToList();
-                count = flow.Parts.Count;
-                for (int i = flow.Parts.Count - 1; i >= 1; i--)
-                {
-                    if (inputNodes.Contains(flow.Parts[i].Uid) == false)
-                    {
-                        flow.Parts.RemoveAt(i);
-                    }
-                }
-            } while
-                (count != flow.Parts
-                    .Count); // loop over as we may have removed a connection that now makes other nodes disconnected/redundant
-
-            // remove any missing connections
-            var partUids = flow.Parts.Select(x => x.Uid).ToList();
-            foreach (var part in flow.Parts)
-            {
-                if (part.OutputConnections?.Any() != true)
-                    continue;
-                for (int i = part.OutputConnections.Count - 1; i >= 0; i--)
-                {
-                    if (partUids.Contains(part.OutputConnections[i].InputNode) == false)
-                    {
-                        part.OutputConnections.RemoveAt(i);
-                    }
-                }
-            }
-        }
+        TreeShake(flow);
 
         Logger.Instance.ILog("Flow", flow);
 
@@ -474,6 +444,148 @@ public partial class NewFlowEditor : Editor
             ShowTask.TrySetResult(flow);
         }
         return true;
+    }
+
+    /// <summary>
+    /// Performs tree shaking on the flow removing any disconnected flow elements or unneeded flow elements
+    /// </summary>
+    /// <param name="flow">the flow to shake</param>
+    private void TreeShake(Flow flow)
+    {
+        // ensure these aren't null
+        flow.Properties ??= new();
+        flow.Properties.Variables ??= new();
+        
+        // loop through looking if If Condition flow elements we can remove
+        List<string> variablesToRemove = new();
+        for (int i=flow.Parts.Count -1;i>=0;i--)
+        {
+            var part = flow.Parts[i];
+            if (part.FlowElementUid == "FileFlows.BasicNodes.Conditions.IfBoolean")
+            {
+                // model here is a { Variable: "string" }
+                var varResult = GetVariableFromModel<bool>(flow, part);
+                if (varResult.Success == false)
+                    continue;
+                if(variablesToRemove.Contains(varResult.Variable) == false)
+                    variablesToRemove.Add(varResult.Variable);
+
+                Guid? newInput = varResult.Value
+                    ? part.OutputConnections.Where(x => x.Output == 1).Select(x => x.InputNode).FirstOrDefault()
+                    : part.OutputConnections.Where(x => x.Output == 2).Select(x => x.InputNode).FirstOrDefault();
+                if (newInput == Guid.Empty)
+                    newInput = null;
+
+                var newTargetNode = newInput == null ? "DISCONNECTED" : flow.Parts.Where(x => x.Uid == newInput).Select(x => x.Name?.EmptyAsNull() ?? x.Label?.EmptyAsNull() ?? x.FlowElementUid).First();
+
+                // loop through all other flow parts looking for an output connection to this node
+                foreach (var otherPart in flow.Parts)
+                {
+                    // check if the other flow element has any output connections and not this node
+                    if (otherPart == part || otherPart.OutputConnections?.Any() != true)
+                        continue;
+                    // check each output connection in this other flow element
+                    for (int otherIndex = otherPart.OutputConnections.Count - 1; otherIndex>=0;otherIndex--)
+                    {
+                        var output = otherPart.OutputConnections[otherIndex];
+                        // check this other connection is to the current flow element
+                        if (output.InputNode != part.Uid)
+                            continue;
+                        // check if there is actually a connection to be made, or if it should be removed/disconnected
+                        if (newInput == null)
+                            otherPart.OutputConnections.RemoveAt(otherIndex);
+                        else // else set the new connection
+                        {
+                            string msg =
+                                $"Connecting '{otherPart.Name?.EmptyAsNull() ?? otherPart.Label?.EmptyAsNull() ?? otherPart.FlowElementUid}'[{output.Output}] -> '{newTargetNode}'";
+                            Logger.Instance.ILog(msg);
+                            output.InputNode = newInput.Value;
+                        }
+                    }
+                }
+                // remove this if boolean check
+                flow.Parts.RemoveAt(i);
+                continue;
+            }
+        }
+
+        // remove any variables that we used in the If Conditions that we no longer need
+        foreach (var variable in variablesToRemove)
+            flow.Properties.Variables.Remove(variable);
+
+        // if (CurrentTemplate.TreeShake == false)
+        //     return;
+        
+        int count;
+        do
+        {
+            var inputNodes = flow.Parts.SelectMany(x => x.OutputConnections.Select(x => x.InputNode)).ToList();
+            count = flow.Parts.Count;
+            for (int i = flow.Parts.Count - 1; i >= 1; i--)
+            {
+                if (inputNodes.Contains(flow.Parts[i].Uid) == false)
+                {
+                    flow.Parts.RemoveAt(i);
+                }
+            }
+        } while
+            (count != flow.Parts
+                .Count); // loop over as we may have removed a connection that now makes other nodes disconnected/redundant
+
+        // remove any missing connections
+        var partUids = flow.Parts.Select(x => x.Uid).ToList();
+        foreach (var part in flow.Parts)
+        {
+            if (part.OutputConnections?.Any() != true)
+                continue;
+            for (int i = part.OutputConnections.Count - 1; i >= 0; i--)
+            {
+                if (partUids.Contains(part.OutputConnections[i].InputNode) == false)
+                {
+                    part.OutputConnections.RemoveAt(i);
+                }
+            }
+        }
+    }
+
+    private (bool Success, string Variable, T Value) GetVariableFromModel<T>(Flow flow, FlowPart part, string variableName = "Variable")
+    {
+        var dict = part.Model as IDictionary<string, object>;
+        if (dict?.TryGetValue(variableName, out object oVariable) != true || oVariable == null)
+            return (Success: false, Variable: string.Empty, Value: default);
+
+        string varibleStr;
+        if (oVariable is JsonElement jeVariable)
+            varibleStr = jeVariable.GetString();
+        else
+            varibleStr = oVariable.ToString();
+
+        if (flow.Properties.Variables.TryGetValue(varibleStr, out object oValue) != true || oValue == null)
+            return (Success: false, Variable: varibleStr, Value: default);
+        
+        if(oValue is JsonElement je)
+        {
+            if (je.ValueKind == JsonValueKind.False)
+                oValue = false;
+            else if (je.ValueKind == JsonValueKind.True)
+                oValue = true;
+            else if (je.ValueKind == JsonValueKind.String)
+                oValue = je.GetString();
+            else if (je.ValueKind == JsonValueKind.Number)
+                oValue = je.GetInt32();
+            else if (je.ValueKind == JsonValueKind.Null)
+                oValue = null;
+        }
+
+        if (typeof(T) == typeof(bool))
+        {
+            if (oValue is bool bValue)
+                return (true, varibleStr, (T)(object)bValue);
+            if(oValue is string sValue)
+                return (true, varibleStr, (T)(object)(sValue.ToLowerInvariant() == "true" || sValue  == "1"));
+            return (true, varibleStr, (T)(object)false);
+        }
+        return (Success: false, varibleStr, Value: default);
     }
 
     private class SelectParameters

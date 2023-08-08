@@ -62,9 +62,9 @@ public partial class FlowPropertiesEditor
             {
                 if (jsonElement.ValueKind == JsonValueKind.Number)
                     field.DefaultValue = jsonElement.GetInt32();
-                if (jsonElement.ValueKind == JsonValueKind.False)
+                else if (jsonElement.ValueKind == JsonValueKind.False)
                     field.DefaultValue = false;
-                if (jsonElement.ValueKind == JsonValueKind.True)
+                else if (jsonElement.ValueKind == JsonValueKind.True)
                     field.DefaultValue = true;
                 else
                     field.DefaultValue = jsonElement.GetString();
