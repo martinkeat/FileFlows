@@ -1,5 +1,6 @@
 ﻿using System.Text.RegularExpressions;
 using FileFlows.Server.Helpers;
+using FileFlows.Server.Services;
 using FileFlows.Shared.Helpers;
 using FileFlows.Shared.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -28,7 +29,29 @@ public class FlowTemplateController : Controller
     {
         if (Templates == null || FetchedAt < DateTime.Now.AddMinutes(-10))
             await RefreshTemplates();
-        return Templates ?? new();
+        return (Templates ?? new()).Union(LocalFlows()).ToList();
+    }
+
+    private List<FlowTemplateModel> LocalFlows()
+    {
+        var flows = new FlowService().GetAll().Where(x => x.Properties?.Fields?.Any() == true).OrderBy(x => x.Name).ToList();
+        var results = new List<FlowTemplateModel>();
+        foreach (var flow in flows)
+        {
+            var ftm = new FlowTemplateModel();
+            ftm.Author = flow.Author;
+            ftm.Description = flow.Description;
+            ftm.Fields = FlowFieldToTemplateField(flow);
+            ftm.Parts = flow.Parts;
+            ftm.Path = "local:" + flow.Uid;
+            ftm.Name = flow.Name;
+            ftm.Revision = flow.Revision;
+            ftm.Tags = flow.Properties.Tags ?? new ();
+            ftm.Tags.Add("Local");
+            ftm.Type = flow.Type;
+            results.Add(ftm);
+        }
+        return results;
     }
 
     /// <summary>
@@ -39,6 +62,15 @@ public class FlowTemplateController : Controller
     [HttpPost]
     public async Task<IActionResult> FetchTemplate([FromBody] FlowTemplateModel model)
     {
+        if (model.Path.StartsWith("local:"))
+        {
+            var uid = Guid.Parse(model.Path[6..]);
+            var flow = new FlowService().GetByUid(uid);
+            model.Fields = FlowFieldToTemplateField(flow);
+            model.Parts = flow.Parts;
+            model.Flow = flow;
+            return Ok(model);
+        }
         string json;
         string fileName = Path.Combine(DirectoryHelper.TemplateDirectoryFlow, MakeSafeFilename(model.Path.Replace(".json", "_" + model.Revision + ".json")));
         if (System.IO.File.Exists(fileName) == false)
@@ -57,6 +89,7 @@ public class FlowTemplateController : Controller
         
         var elements = await FlowController.GetFlowElements((FlowType)(-1)); // special case to load all template types
         var parts = elements.ToDictionary(x => x.Uid, x => x);
+        
         var fresult = GetFlowTemplate(parts, json);
         model.Fields = fresult.Template.Fields;
         model.Parts = fresult.Flow.Parts;
@@ -232,11 +265,16 @@ public class FlowTemplateController : Controller
         }
         return (false, null, null);
     }
-    
-    
+
+
     private FlowTemplate LoadModernTemplate(string json)
     {
         var flow = JsonSerializer.Deserialize<Flow>(json);
+        return FlowToFlowTemplateModel(flow);
+    }
+    
+    private FlowTemplate FlowToFlowTemplateModel(Flow flow)
+    {
         var template = new FlowTemplate();
         template.Name = flow.Name;
         template.Description = flow.Description;
@@ -265,7 +303,18 @@ public class FlowTemplateController : Controller
             template.Parts.Add(tfp);
         }
 
-        template.Fields = new();
+        template.Fields = FlowFieldToTemplateField(flow);
+        return template;
+    }
+
+    /// <summary>
+    /// Converts flow fields to template fields
+    /// </summary>
+    /// <param name="flow">the flow</param>
+    /// <returns>the results</returns>
+    private List<TemplateField> FlowFieldToTemplateField(Flow flow)
+    {
+        List<TemplateField> results = new();
         foreach (var field in flow.Properties?.Fields ?? new())
         {
             var tf = new TemplateField();
@@ -286,13 +335,28 @@ public class FlowTemplateController : Controller
                 FlowFieldType.Directory => "Directory",
                 FlowFieldType.Boolean => "Switch",
                 FlowFieldType.Number => "Int",
+                FlowFieldType.Select => "Select",
                 _ => "Text"
             };
 
             if (field.Type == FlowFieldType.Directory && string.IsNullOrWhiteSpace(tf.Default as string))
                 tf.Default = DirectoryHelper.GetUsersHomeDirectory();
+
+            if (field.Type == FlowFieldType.Select)
+            {
+                tf.Parameters = new
+                {
+                    options = field.Options.Select(x =>
+                    {
+                        var parts = x.Split('|');
+                        if (parts.Length == 1)
+                            return new { label = parts[0], value = parts[0] };
+                        return new { label = parts[0], value = parts[1] };
+                    })
+                };
+            }
             
-            template.Fields.Add(tf);
+            results.Add(tf);
 
             if (string.IsNullOrWhiteSpace(field.IfName))
                 continue;
@@ -313,6 +377,6 @@ public class FlowTemplateController : Controller
             tf.Conditions.Add(condition);
         }
 
-        return template;
+        return results;
     }
 }

@@ -310,5 +310,9 @@ public enum FlowFieldType
     /// <summary>
     /// A directory, this is a special string
     /// </summary>
-    Directory = 3
+    Directory = 3,
+    /// <summary>
+    /// A select input
+    /// </summary>
+    Select = 4
 }

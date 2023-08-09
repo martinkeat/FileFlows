@@ -164,9 +164,6 @@ window.ffFlow = {
             }
 
         }
-
-        // this.ioOutputConnections.set(output, []);
-        //     this.ioOutputConnections.get(output).push(input);
     },
 
     /*
@@ -542,6 +539,5 @@ window.ffFlow = {
         let ele = document.getElementById('show-elements')
         if(ele)
             ele.click();
-        bottom-buttons
     }
 }

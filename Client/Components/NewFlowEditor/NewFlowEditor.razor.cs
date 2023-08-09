@@ -443,7 +443,9 @@ public partial class NewFlowEditor : Editor
         int count;
         do
         {
-            var inputNodes = flow.Parts.SelectMany(x => x.OutputConnections.Select(x => x.InputNode)).ToList();
+            var inputNodes = flow.Parts.Where(x => x.OutputConnections?.Any() == true)
+                .SelectMany(x => x.OutputConnections.Select(x => x.InputNode))
+                .ToList();
             count = flow.Parts.Count;
             for (int i = flow.Parts.Count - 1; i >= 1; i--)
             {

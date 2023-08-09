@@ -205,6 +205,7 @@ window.ffFlowPart = {
             return;
 
         ffFlow.csharp.invokeMethodAsync("Edit", part, deleteOnCancel === true).then(result => {
+            console.log('edit result', result);
             if (!result || !result.model) {
                 if (deleteOnCancel === true) {
                     ffFlowPart.deleteFlowPart(uid);
@@ -246,6 +247,7 @@ window.ffFlowPart = {
 
 
     updateOutputNodes: function (uid, part, div) {
+        console.log('updateOutputNodes', part);
         if (!part)
             part = ffFlow.parts.filter(x => x.uid === uid)[0];
         if (!part) {

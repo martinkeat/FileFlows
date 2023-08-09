@@ -1,4 +1,6 @@
-﻿namespace FileFlows.Shared.Models;
+﻿using FileFlows.Plugin;
+
+namespace FileFlows.Shared.Models;
 
 /// <summary>
 /// Advanced flow properties
@@ -53,6 +55,10 @@ public class FlowField
     /// Gets or sets the strong name of the flow element field this value will set
     /// </summary>
     public string FlowElementField { get; set; }
+    /// <summary>
+    /// Gets or sets list options for a select input
+    /// </summary>
+    public string[] Options { get; set; }
     /// <summary>
     /// Gets or sets if this is required
     /// </summary>

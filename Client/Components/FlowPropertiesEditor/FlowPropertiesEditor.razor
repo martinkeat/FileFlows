@@ -36,6 +36,7 @@
                                                 <option value=@FlowFieldType.Number>Number</option>
                                                 <option value=@FlowFieldType.Boolean>Boolean</option>
                                                 <option value=@FlowFieldType.Directory>Directory</option>
+                                                <option value=@FlowFieldType.Select>Select</option>
                                             </select>
                                         </div>
                                     </div>
@@ -77,6 +78,11 @@
                                 else if (Editing.Type == FlowFieldType.Number)
                                 {
                                     <InputNumber TItem="Int32" @bind-Value="@DefaultValueNumber" Label="Pages.Flow.Fields.Field.Required"></InputNumber>
+                                }
+                                else if (Editing.Type == FlowFieldType.Select)
+                                {
+                                    <InputArray @bind-Value="@Editing.Options" Label="Pages.Flow.Fields.Field.Options" ></InputArray> 
+                                    <InputText @bind-Value="@DefaultValueString" Label="Pages.Flow.Fields.Field.Default"></InputText>
                                 }
                                 <hr/>
                                 <InputText @bind-Value="@Editing.IfName" Label="Pages.Flow.Fields.Field.IfName"></InputText>

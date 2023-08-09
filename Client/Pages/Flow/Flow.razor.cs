@@ -347,14 +347,10 @@ public partial class Flow : ComponentBase, IDisposable
 
     private async Task Save()
     {
-#if (DEMO)
-        return;
-#else
         this.Blocker.Show(lblSaving);
         this.IsSaving = true;
         try
         {
-
             var parts = await jsRuntime.InvokeAsync<List<FileFlows.Shared.Models.FlowPart>>("ffFlow.getModel");
 
             Model ??= new ff();
@@ -395,7 +391,6 @@ public partial class Flow : ComponentBase, IDisposable
             this.IsSaving = false;
             this.Blocker.Hide();
         }
-#endif
     }
 
     private async Task<RequestResult<Dictionary<string, object>>> GetVariables(string url, List<FileFlows.Shared.Models.FlowPart> parts)

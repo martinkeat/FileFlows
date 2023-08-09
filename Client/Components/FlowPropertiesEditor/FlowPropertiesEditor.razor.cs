@@ -162,7 +162,7 @@ public partial class FlowPropertiesEditor
         get => Editing?.DefaultValue as string ?? string.Empty;
         set
         {
-            if (Editing?.Type == FlowFieldType.String || Editing?.Type == FlowFieldType.Directory)
+            if (Editing?.Type == FlowFieldType.String || Editing?.Type == FlowFieldType.Directory || Editing?.Type == FlowFieldType.Select)
                 Editing.DefaultValue = value;
         } 
     }

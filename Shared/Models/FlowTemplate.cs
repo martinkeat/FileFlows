@@ -124,7 +124,7 @@ public class TemplateField
     public object Parameters { get; set; }
 
     /// <summary>
-    /// Gets or sets teh conditions of the field
+    /// Gets or sets thw conditions of the field
     /// </summary>
     public List<Condition> Conditions { get; set; }
 }
