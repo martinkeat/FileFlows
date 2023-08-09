@@ -8,34 +8,69 @@ namespace FileFlows.Shared.Models;
 public class FlowTemplateModel
 {
     /// <summary>
-    /// Gets or sets the flow
+    /// Gets or sets the path of the script
     /// </summary>
-    public Flow Flow { get; set; }
-    
+    public string Path { get; set; } = string.Empty;
+
     /// <summary>
-    /// Gets or sets if tree shaking should take place
+    /// Gets or sets the name
     /// </summary>
-    public bool TreeShake { get; set; }
-    
+    public string Name { get; set; } = string.Empty;
+
     /// <summary>
-    /// Gets or sets the tags for the template
+    /// Gets or sets the description
+    /// </summary>
+    public string Description { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the revision of the script
+    /// </summary>
+    public int Revision { get; set; }
+
+    /// <summary>
+    /// Gets or sets the author of this object
+    /// </summary>
+    public string Author { get; set; }
+
+    /// <summary>
+    /// Gets or sets the minimum version of FileFlows required for this object
+    /// </summary>
+    public string MinimumVersion { get; set; }
+
+    /// <summary>
+    /// Gets or sets tags for this object
     /// </summary>
     public List<string> Tags { get; set; }
 
     /// <summary>
-    /// Gets or sets fields used in the template
+    /// Gets or sets plugins used by this object
     /// </summary>
-    public List<TemplateField> Fields { get; set; }
-    
+    public List<string> Plugins { get; set; }
+
     /// <summary>
-    /// Gets or sets if this flow template should be saved after creation
+    /// Gets or sets scripts used by this object
     /// </summary>
-    public bool Save { get; set; }
+    public List<string> Scripts { get; set; }
 
     /// <summary>
     /// Gets or sets the type of flow
     /// </summary>
     public FlowType Type { get; set; }
+    
+    /// <summary>
+    /// Gets or sets the parts in this template
+    /// </summary>
+    public List<FlowPart> Parts { get; set; }
+    
+    /// <summary>
+    /// Gets or sets the fields in this template
+    /// </summary>
+    public List<TemplateField> Fields { get; set; }
+    
+    /// <summary>
+    /// Gets or sets the actual flow
+    /// </summary>
+    public Flow Flow { get; set; }
 }
 
 /// <summary>

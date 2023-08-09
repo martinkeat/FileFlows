@@ -7,9 +7,24 @@
         <span>@lblDescription</span>
         <div class="top-bar">
             <div class="tag-filter">
-                @foreach (var tag in Tags)
+                <div class="top-level-tag">
+                    @foreach (var tag in Tags)
+                    {
+                        if (tag.IndexOf(":") > 0)
+                        {
+                            continue;
+                        }
+                        <span class="tag @(SelectedTag == tag ? "selected" : string.Empty)" @onclick="((ev) => ToggleTag(ev, tag))">@tag</span>
+                    }
+                </div>
+                @if (SelectedTag.Any())
                 {
-                    <span class="tag @(SelectedTags.Contains(tag) ? "selected" : string.Empty)" @onclick="((ev) => ToggleTag(ev,  tag))">@tag</span>
+                    <div class="sub-tags">
+                        @foreach (var tag in Tags.Where(x => x.StartsWith(SelectedTag +":")))
+                        {
+                            <span class="tag @(SelectedSubTag == tag ? "selected" : string.Empty)" @onclick="((ev) => ToggleSubTag(ev, tag))">@tag.Substring(tag.IndexOf(":") + 1)</span>
+                        }
+                    </div>
                 }
             </div>
             <div class="filter">
@@ -20,12 +35,20 @@
         <div class="templates">
             @foreach (var template in FilteredTemplates)
             {
-                if (SelectedTags.All(tag => template.Tags.Contains(tag)) == false)
+                if (string.IsNullOrEmpty(SelectedTag) == false)
                 {
-                    continue;
+                    if (template.Tags.Contains(SelectedTag) == false)
+                    {
+                        continue;
+                    }
+                    if (string.IsNullOrEmpty(SelectedSubTag) == false && template.Tags.Contains(SelectedSubTag) == false)
+                    {
+                        continue;
+                    }
                 }
                 <FlowTemplateItem Template="@template" Selected="@(Selected == template)" 
-                                  OnClick="@((_,_) => SelectTemplate(template))"/>
+                                  OnClick="@((_,_) => SelectTemplate(template))"
+                                  OnDoubleClick="@((_,_) => SelectTemplate(template, true))"/>
             }
         </div>
         </Body>

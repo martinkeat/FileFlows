@@ -437,12 +437,20 @@ public class FlowController : Controller
     /// </summary>
     /// <returns>Returns a list of all the nodes in the system</returns>
     [HttpGet("elements")]
-    public async Task<FlowElement[]> GetElements(FlowType type = FlowType.Standard)
+    public Task<FlowElement[]> GetElements(FlowType type = FlowType.Standard)
+        => GetFlowElements(type);
+
+    /// <summary>
+    /// Get all available flow elements in the system
+    /// </summary>
+    /// <param name="type">the type of flow to get flow elements for</param>
+    /// <returns>all the flow elements</returns>
+    internal static async Task<FlowElement[]> GetFlowElements(FlowType? type = null)
     {
         var plugins = await new PluginController().GetAll(includeElements: true);
         var results = plugins.Where(x => x.Enabled && x.Elements != null).SelectMany(x => x.Elements)?.Where(x =>
         {
-            if ((int)type == -1) // special case used by get variables, we want everything
+            if (type == null || (int)type == -1) // special case used by get variables, we want everything
                 return true;
             if (type == FlowType.Failure)
             {
@@ -458,7 +466,7 @@ public class FlowController : Controller
         })?.ToList();
 
         // get scripts 
-        var scripts = (await new ScriptController().GetAll())?
+        var scripts = (await new ScriptService().GetAll())?
             .Where(x => x.Type == ScriptType.Flow)
             .Select(x => ScriptToFlowElement(x))
             .Where(x => x != null)
@@ -466,6 +474,7 @@ public class FlowController : Controller
         results.AddRange(scripts);
 
         return results?.ToArray() ?? new FlowElement[] { };
+        
     }
 
     /// <summary>
@@ -473,7 +482,7 @@ public class FlowController : Controller
     /// </summary>
     /// <param name="script"></param>
     /// <returns></returns>
-    private FlowElement ScriptToFlowElement(Script script)
+    private static FlowElement ScriptToFlowElement(Script script)
     {
         try
         {
@@ -773,77 +782,77 @@ public class FlowController : Controller
     private FileInfo[] GetTemplateFiles() 
         => new DirectoryInfo(DirectoryHelper.TemplateDirectoryFlow).GetFiles("*.json", SearchOption.AllDirectories);
 
-    /// <summary>
-    /// Get flow templates
-    /// </summary>
-    /// <param name="type">the flow type</param>
-    /// <returns>A list of flow templates</returns>
-    [HttpGet("templates")]
-    //public async Task<IDictionary<string, List<FlowTemplateModel>>> GetTemplates([FromQuery] FlowType type = FlowType.Standard)
-    public async Task<List<FlowTemplateModel>> GetTemplates([FromQuery] FlowType type = FlowType.Standard)
-    {
-        var elements = await GetElements((FlowType)(-1)); // special case to load all template types
-        var parts = elements.ToDictionary(x => x.Uid, x => x);
-
-        return GetFlowTemplates(parts)
-            .Where(x => x.Template.Type == type)
-            .OrderBy(x => x.Template.Tags.Contains("Blank") ? 1 : 2)
-            .ThenBy(x => Regex.IsMatch(x.Template.Name, "[\\w]+ File") ? 1 : 2)
-            .ThenBy(x => x.Template.Name)
-            .Select(item => new FlowTemplateModel
-            {
-                Fields = item.Template.Fields,
-                Save = item.Template.Save,
-                Type = item.Template.Type,
-                Tags = item.Template.Tags,
-                TreeShake = item.Template.SkipTreeShaking != true,
-                Flow = new Flow
-                {
-                    Name = item.Template.Name,
-                    Template = item.Template.Name,
-                    Author = item.Template.Author,
-                    Enabled = true,
-                    Description = item.Template.Description,
-                    Parts = item.Parts
-                }
-            })
-            .ToList();
-
-        // Dictionary<string, List<FlowTemplateModel>> templates = new();
-        // string group = string.Empty;
-        // templates.Add(group, new List<FlowTemplateModel>());
-        // templates.Add("Basic", new List<FlowTemplateModel>());
-        //
-        // var templateList = GetFlowTemplates(parts)
-        //     .Where(x => x.Template.Type == type)
-        //     .OrderBy(x => x.Template.Group == "Community" ? "zzz" : x.Template.Group.ToLowerInvariant())
-        //     .ThenBy(x => x.Template.Name == x.Template.Group + " File" ? 0 : 1)
-        //     .ThenBy(x => x.Template.Name.ToLowerInvariant());
-        // foreach (var item in templateList)
-        // {
-        //
-        //     if (templates.ContainsKey(item.Template.Group ?? String.Empty) == false)
-        //         templates.Add(item.Template.Group ?? String.Empty, new List<FlowTemplateModel>());
-        //
-        //     templates[item.Template.Group ?? String.Empty].Add(new FlowTemplateModel
-        //     {
-        //         Fields = item.Template.Fields,
-        //         Save = item.Template.Save,
-        //         Type = item.Template.Type,
-        //         TreeShake = item.Template.SkipTreeShaking != true,
-        //         Flow = new Flow
-        //         {
-        //             Name = item.Template.Name,
-        //             Template = item.Template.Name,
-        //             Enabled = true,
-        //             Description = item.Template.Description,
-        //             Parts = item.Parts
-        //         }
-        //     });
-        // }
-        //
-        // return templates;
-    }
+    // /// <summary>
+    // /// Get flow templates
+    // /// </summary>
+    // /// <param name="type">the flow type</param>
+    // /// <returns>A list of flow templates</returns>
+    // [HttpGet("templates")]
+    // //public async Task<IDictionary<string, List<FlowTemplateModel>>> GetTemplates([FromQuery] FlowType type = FlowType.Standard)
+    // public async Task<List<FlowTemplateModel>> GetTemplates([FromQuery] FlowType type = FlowType.Standard)
+    // {
+    //     var elements = await GetElements((FlowType)(-1)); // special case to load all template types
+    //     var parts = elements.ToDictionary(x => x.Uid, x => x);
+    //
+    //     return GetFlowTemplates(parts)
+    //         .Where(x => x.Template.Type == type)
+    //         .OrderBy(x => x.Template.Tags.Contains("Blank") ? 1 : 2)
+    //         .ThenBy(x => Regex.IsMatch(x.Template.Name, "[\\w]+ File") ? 1 : 2)
+    //         .ThenBy(x => x.Template.Name)
+    //         .Select(item => new FlowTemplateModel
+    //         {
+    //             Fields = item.Template.Fields,
+    //             Save = item.Template.Save,
+    //             Type = item.Template.Type,
+    //             Tags = item.Template.Tags,
+    //             TreeShake = item.Template.SkipTreeShaking != true,
+    //             Flow = new Flow
+    //             {
+    //                 Name = item.Template.Name,
+    //                 Template = item.Template.Name,
+    //                 Author = item.Template.Author,
+    //                 Enabled = true,
+    //                 Description = item.Template.Description,
+    //                 Parts = item.Parts
+    //             }
+    //         })
+    //         .ToList();
+    //
+    //     // Dictionary<string, List<FlowTemplateModel>> templates = new();
+    //     // string group = string.Empty;
+    //     // templates.Add(group, new List<FlowTemplateModel>());
+    //     // templates.Add("Basic", new List<FlowTemplateModel>());
+    //     //
+    //     // var templateList = GetFlowTemplates(parts)
+    //     //     .Where(x => x.Template.Type == type)
+    //     //     .OrderBy(x => x.Template.Group == "Community" ? "zzz" : x.Template.Group.ToLowerInvariant())
+    //     //     .ThenBy(x => x.Template.Name == x.Template.Group + " File" ? 0 : 1)
+    //     //     .ThenBy(x => x.Template.Name.ToLowerInvariant());
+    //     // foreach (var item in templateList)
+    //     // {
+    //     //
+    //     //     if (templates.ContainsKey(item.Template.Group ?? String.Empty) == false)
+    //     //         templates.Add(item.Template.Group ?? String.Empty, new List<FlowTemplateModel>());
+    //     //
+    //     //     templates[item.Template.Group ?? String.Empty].Add(new FlowTemplateModel
+    //     //     {
+    //     //         Fields = item.Template.Fields,
+    //     //         Save = item.Template.Save,
+    //     //         Type = item.Template.Type,
+    //     //         TreeShake = item.Template.SkipTreeShaking != true,
+    //     //         Flow = new Flow
+    //     //         {
+    //     //             Name = item.Template.Name,
+    //     //             Template = item.Template.Name,
+    //     //             Enabled = true,
+    //     //             Description = item.Template.Description,
+    //     //             Parts = item.Parts
+    //     //         }
+    //     //     });
+    //     // }
+    //     //
+    //     // return templates;
+    // }
 
     private List<(FlowTemplate Template, List<FlowPart> Parts)> GetFlowTemplates(Dictionary<string, FlowElement> parts)
     {

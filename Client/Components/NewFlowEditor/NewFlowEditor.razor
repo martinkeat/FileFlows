@@ -11,7 +11,7 @@
         <div class="background-overlay"></div>
         <div class="editor @(Maximised ? "maximised" : "") @(Large ? "large" : "") @(TypeName?.Dehumanize()) @(ReadOnly ? "readonly" : "")">
 
-            <ViContainer Title="@(CurrentTemplate?.Flow?.Name?.EmptyAsNull() ?? Title)" Icon="@Icon" FullWidth=@true AlwaysShowTitle=@true Maximise=true OnMaximised=@OnMaximised>
+            <ViContainer Title="@(CurrentTemplate?.Name?.EmptyAsNull() ?? Title)" Icon="@Icon" FullWidth=@true AlwaysShowTitle=@true Maximise=true OnMaximised=@OnMaximised>
 
                 <Head>
                     <button @onclick=@Save> 
@@ -19,7 +19,7 @@
                         {
                             @lblSaving
                         }
-                        else if(CurrentTemplate?.Save == true)
+                        else if(CurrentTemplate?.Fields?.Any() != true)
                         {
                             @lblSave
                         }

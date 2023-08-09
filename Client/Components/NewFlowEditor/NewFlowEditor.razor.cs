@@ -352,7 +352,7 @@ public partial class NewFlowEditor : Editor
 
         Logger.Instance.ILog("Flow", flow);
 
-        if (CurrentTemplate.Save)
+        if (CurrentTemplate.Fields?.Any() != true)
         {
             var newFlowResult = await HttpHelper.Put<Flow>("/api/flow", flow);
             if (newFlowResult.Success == false)

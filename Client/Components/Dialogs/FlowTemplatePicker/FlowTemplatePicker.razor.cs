@@ -20,7 +20,8 @@ public partial class FlowTemplatePicker : ComponentBase
     TaskCompletionSource<FlowTemplateModel?> ShowTask;
 
     private FlowTemplateModel Selected = null;
-    private List<string> SelectedTags = new();
+    private string SelectedTag = string.Empty;
+    private string SelectedSubTag = string.Empty;
     private List<FlowTemplateModel> FilteredTemplates;
     
     /// <summary>
@@ -60,10 +61,11 @@ public partial class FlowTemplatePicker : ComponentBase
 
     public Task<FlowTemplateModel?> Show(FlowType type)
     {
-        this.Selected = null;
-        this.FilterText = string.Empty;
-        this.SelectedTags.Clear();
-        this.Visible = true;
+        Selected = null;
+        FilterText = string.Empty;
+        SelectedTag = string.Empty;
+        SelectedSubTag = string.Empty;
+        Visible = true;
         ShowTask = new TaskCompletionSource<FlowTemplateModel?>();
         Blocker.Show();
         Task.Run(async () =>
@@ -77,16 +79,37 @@ public partial class FlowTemplatePicker : ComponentBase
         return ShowTask.Task;
     }
 
-    void SelectTemplate(FlowTemplateModel item)
+    void SelectTemplate(FlowTemplateModel item, bool andAccept = false)
     {
         Selected = item;
+        if (andAccept)
+            _ = New();
         StateHasChanged();
     }
 
-    void New()
+    async Task New()
     {
-        ShowTask.SetResult(this.Selected);
-        this.Visible = false;
+        Blocker.Show();
+        
+        StateHasChanged();
+        try
+        {
+            var flowResult =
+                await HttpHelper.Post<FlowTemplateModel>("/api/flow-template", Selected);
+            if (flowResult.Success == false)
+            {
+                return;
+            }
+            ShowTask.SetResult(flowResult.Data);
+            Visible = false;
+            
+        }
+        finally
+        {
+            Blocker.Hide();
+            StateHasChanged();
+        }
+        
     }
 
     void Cancel()
@@ -97,14 +120,29 @@ public partial class FlowTemplatePicker : ComponentBase
 
     void ToggleTag(MouseEventArgs ev, string tag)
     {
-        if (ev.CtrlKey == false && SelectedTags.Contains(tag) == false)
-            SelectedTags.Clear();
-        
-        if (SelectedTags.Contains(tag))
-            SelectedTags.Remove(tag);
+        if (SelectedTag == tag)
+        {
+            SelectedTag = string.Empty;
+            SelectedSubTag = string.Empty;
+        }
         else
-            SelectedTags.Add(tag);
-        if (Selected != null && Selected.Tags.Any(x => SelectedTags.Contains(x) == false))
+        {
+            SelectedTag = tag;
+            SelectedSubTag = string.Empty;
+        }
+
+        if (Selected != null && Selected.Tags.Contains(SelectedTag) == false)
+            Selected = null; // clear it
+    }
+
+    void ToggleSubTag(MouseEventArgs ev, string tag)
+    {
+        if (SelectedSubTag == tag)
+            SelectedSubTag = string.Empty;
+        else
+            SelectedSubTag = tag;
+
+        if (Selected != null && Selected.Tags.Contains(SelectedSubTag) == false)
             Selected = null; // clear it
     }
 
@@ -129,7 +167,7 @@ public partial class FlowTemplatePicker : ComponentBase
 
         string text = FilterText.ToLowerInvariant();
         FilteredTemplates = Templates.Where(x =>
-                x.Flow.Name.ToLowerInvariant().Contains(text) || x.Flow.Description.ToLowerInvariant().Contains(text) || x.Flow.Author.ToLowerInvariant().Contains(text))
+                x.Name.ToLowerInvariant().Contains(text) || x.Description.ToLowerInvariant().Contains(text) || x.Author.ToLowerInvariant().Contains(text))
             .ToList();
     }
     
@@ -147,7 +185,7 @@ public partial class FlowTemplatePicker : ComponentBase
         try
         {
             var flowResult =
-                await HttpHelper.Get<List<FlowTemplateModel>>("/api/flow/templates?type=" + type);
+                await HttpHelper.Get<List<FlowTemplateModel>>("/api/flow-template?type=" + type);
             if (flowResult.Success)
             {
                 if (type == FlowType.Standard)
