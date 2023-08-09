@@ -15,7 +15,6 @@
   display: inline-block;
   border: solid 1px var(--input-background);
   padding: 0.5rem;
-  border-radius: 0.5rem;
   font-size: 0.85rem;
   margin-right: 0.5rem;
 }
@@ -57,33 +56,6 @@
   cursor: pointer;
   align-self: center;
   text-align: center;
-}
-
-.template {
-  user-select: none;
-  cursor: pointer;
-  border: solid 1px transparent;
-  border-left: solid 0.5rem transparent;
-  margin: 0.25rem;
-  background: rgba(133, 133, 133, 0.0705882353);
-  padding: 0.5rem;
-}
-.template.selected {
-  border-color: var(--accent);
-}
-.template .name {
-  display: block;
-  font-weight: 600;
-}
-.template .tags {
-  display: block;
-}
-.template .author {
-  display: block;
-}
-.template .description {
-  display: block;
-  white-space: pre-line;
 }
 
 /*# sourceMappingURL=FlowTemplatePicker.razor.css.map */

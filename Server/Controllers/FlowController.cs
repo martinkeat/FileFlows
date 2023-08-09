@@ -788,6 +788,7 @@ public class FlowController : Controller
         return GetFlowTemplates(parts)
             .Where(x => x.Template.Type == type)
             .OrderBy(x => x.Template.Tags.Contains("Blank") ? 1 : 2)
+            .ThenBy(x => Regex.IsMatch(x.Template.Name, "[\\w]+ File") ? 1 : 2)
             .ThenBy(x => x.Template.Name)
             .Select(item => new FlowTemplateModel
             {
@@ -800,6 +801,7 @@ public class FlowController : Controller
                 {
                     Name = item.Template.Name,
                     Template = item.Template.Name,
+                    Author = item.Template.Author,
                     Enabled = true,
                     Description = item.Template.Description,
                     Parts = item.Parts
@@ -877,6 +879,7 @@ public class FlowController : Controller
                         AllowTrailingCommas = true,
                         PropertyNameCaseInsensitive = true
                     });
+                    jst.Author = "FileFlows";
                 }
 
                 if (jst == null)
@@ -885,13 +888,13 @@ public class FlowController : Controller
                 jst.Tags ??= new ();
                 if (jst.Tags.Any() == false)
                 {
-                    if(jst.Name == "File" || jst.Name == "Folder")
-                        jst.Tags.Add("Blank");
-                    foreach (var str in new[] { "community", "video", "audio", "comic", "image" })
+                    foreach (var str in new[] { "video", "audio", "comic", "image" })
                     {
                         if (tf.FullName.Contains(str) || tf.Name.ToLowerInvariant().Contains(str))
                             jst.Tags.Add(str[0..1].ToUpper() + str[1..]);
                     }
+                    if(jst.Fields?.Any() != true)
+                        jst.Tags.Add("Basic");
                 }
                 
                 try
@@ -959,8 +962,19 @@ public class FlowController : Controller
         var template = new FlowTemplate();
         template.Name = flow.Name;
         template.Description = flow.Description;
-        template.Group = "Community";
+        template.Author = flow.Author;
         template.Tags = flow.Properties.Tags;
+        if (template.Tags?.Any() != true)
+        {
+            template.Tags = new List<string> { "Community" };
+            
+            foreach (var str in new[] { "video", "audio", "comic", "image" })
+            {
+                if (template.Description.ToLowerInvariant().Contains(str))
+                    template.Tags.Add(str[0..1].ToUpper() + str[1..]);
+            }
+        }
+
         template.SkipTreeShaking = true;
         template.Save = true; // this means the flow will be saved automatically and not opened when creating a flow based on this template
         template.Parts = new();

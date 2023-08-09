@@ -5,8 +5,15 @@ using Microsoft.AspNetCore.Components.Web;
 
 namespace FileFlows.Client.Components.Dialogs;
 
+/// <summary>
+/// A modal dialog for selecting a flow template
+/// </summary>
 public partial class FlowTemplatePicker : ComponentBase
 {
+    /// <summary>
+    /// Gets or sets the blocker to use
+    /// </summary>
+    [CascadingParameter] public Blocker Blocker { get; set; }
     private string lblTitle, lblDescription, lblFilter, lblNext, lblCancel;
     private string FilterText = string.Empty;
     private bool Visible { get; set; }
@@ -58,19 +65,24 @@ public partial class FlowTemplatePicker : ComponentBase
         this.SelectedTags.Clear();
         this.Visible = true;
         ShowTask = new TaskCompletionSource<FlowTemplateModel?>();
+        Blocker.Show();
         Task.Run(async () =>
         {
             Templates = await GetTemplates(type);
             Filter();
             Tags = Templates.SelectMany(x => x.Tags).Distinct().OrderBy(x => x).ToList();
+            Blocker.Hide();
             StateHasChanged();
         });
         return ShowTask.Task;
     }
 
     void SelectTemplate(FlowTemplateModel item)
-        => Selected = item;
-    
+    {
+        Selected = item;
+        StateHasChanged();
+    }
+
     void New()
     {
         ShowTask.SetResult(this.Selected);
@@ -117,7 +129,7 @@ public partial class FlowTemplatePicker : ComponentBase
 
         string text = FilterText.ToLowerInvariant();
         FilteredTemplates = Templates.Where(x =>
-                x.Flow.Name.ToLowerInvariant().Contains(text) || x.Flow.Description.ToLowerInvariant().Contains(text))
+                x.Flow.Name.ToLowerInvariant().Contains(text) || x.Flow.Description.ToLowerInvariant().Contains(text) || x.Flow.Author.ToLowerInvariant().Contains(text))
             .ToList();
     }
     

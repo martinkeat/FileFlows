@@ -62,7 +62,7 @@ public partial class Editor : InputRegister, IDisposable
     public string TypeName { get; set; }
     protected bool IsSaving { get; set; }
 
-    protected string lblSave, lblSaving, lblCancel, lblClose, lblHelp, lblDownloadButton;
+    protected string lblSave, lblSaving, lblNext, lblCancel, lblClose, lblHelp, lblDownloadButton;
 
     protected List<ElementField> Fields { get; set; }
 
@@ -130,6 +130,7 @@ public partial class Editor : InputRegister, IDisposable
         lblCancel = Translater.Instant("Labels.Cancel");
         lblClose = Translater.Instant("Labels.Close");
         lblHelp = Translater.Instant("Labels.Help");
+        lblNext = Translater.Instant("Labels.Next");
         this.Maximised = false;
         App.Instance.OnEscapePushed += InstanceOnOnEscapePushed;
     }

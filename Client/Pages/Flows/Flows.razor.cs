@@ -72,9 +72,17 @@ public partial class Flows : ListPage<Guid, FlowListModel>
             return;
         }
 
-        var flowTemplateModel = await TemplatePicker.Show(FlowType.Standard);
+        var flowTemplateModel = await TemplatePicker.Show(SelectedType);
         if (flowTemplateModel == null)
             return; // twas canceled
+        if (flowTemplateModel.Fields?.Any() != true)
+        {
+            // nothing extra to fill in, go to the flow editor, typically this if basic flows
+            App.Instance.NewFlowTemplate = flowTemplateModel.Flow;
+            NavigationManager.NavigateTo("flows/" + Guid.Empty);
+            return;
+
+        }
         AddWithForm(flowTemplateModel);
     }
 

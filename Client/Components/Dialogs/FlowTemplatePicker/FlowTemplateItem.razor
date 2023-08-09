@@ -1,0 +1,30 @@
+﻿@namespace FileFlows.Client.Components.Dialogs
+
+<div class="template @(Selected ? "selected" : string.Empty) @(Expanded ? "expanded" : "collapsed")" @onclick="HandleOnClick">
+    <div class="expand-collapse">
+        <i class="fas fa-chevron-circle-@(Expanded ? "up" : "down")" @onclick="HandleExpandCollapse" @onclick:preventDefault @onclick:stopPropagation></i>
+    </div>
+    <span class="name">@Template.Flow.Name</span>
+    <span class="description">@Template.Flow.Description</span>
+    
+    <div class="extra-info">
+        <span class="author"><span class="label">Author:</span><span class="value">@Template.Flow.Author</span></span>
+        <div class="plugins-and-scripts">
+            <div class="plugins">
+                @foreach (var plugin in Plugins)
+                {
+                    <span class="plugin">@plugin</span>  
+                }
+            </div>
+            @if(Scripts.Any()) 
+            {        
+                <div class="scripts">
+                    @foreach (var script in Scripts)
+                    {
+                        <span class="script">@script</span>  
+                    }
+                </div>
+            } 
+        </div>
+    </div>
+</div>

@@ -24,11 +24,8 @@
                 {
                     continue;
                 }
-                <div class="template @(Selected == template ? "selected" : string.Empty)" @onclick="@(() => SelectTemplate(template))">
-                    <span class="name">@template.Flow.Name</span>
-                    <span class="author">@template.Flow.Author</span>
-                    <span class="description">@template.Flow.Description</span>
-                </div>
+                <FlowTemplateItem Template="@template" Selected="@(Selected == template)" 
+                                  OnClick="@((_,_) => SelectTemplate(template))"/>
             }
         </div>
         </Body>

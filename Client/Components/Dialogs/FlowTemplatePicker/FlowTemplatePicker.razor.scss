@@ -14,7 +14,6 @@
     display: inline-block;
     border: solid 1px var(--input-background);
     padding: 0.5rem;
-    border-radius: 0.5rem;
     font-size: 0.85rem;
     margin-right: 0.5rem;
     &.selected {
@@ -56,33 +55,5 @@
       align-self: center;
       text-align: center;
     }
-  }
-}
-
-
-.template {
-  user-select: none;
-  cursor: pointer;
-  border:solid 1px transparent;
-  border-left:solid 0.5rem transparent;
-  margin:0.25rem;
-  background:#85858512;
-  padding:0.5rem;
-  &.selected {
-    border-color: var(--accent);
-  }
-  .name {
-    display:block;
-    font-weight: 600;
-  }
-  .tags {
-    display: block;
-  }
-  .author {
-    display: block;
-  }
-  .description {
-    display: block;
-    white-space:pre-line;
   }
 }

@@ -28,6 +28,11 @@ class FlowTemplate
     public List<string> Tags { get; set; }
     
     /// <summary>
+    /// Gets or sets the author of the template
+    /// </summary>
+    public string Author { get; set; }
+    
+    /// <summary>
     /// Gets or sets the description of the template
     /// </summary>
     public string Description { get; set; }

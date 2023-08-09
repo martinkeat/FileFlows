@@ -11,7 +11,7 @@
         <div class="background-overlay"></div>
         <div class="editor @(Maximised ? "maximised" : "") @(Large ? "large" : "") @(TypeName?.Dehumanize()) @(ReadOnly ? "readonly" : "")">
 
-            <ViContainer Title="@Title" Icon="@Icon" FullWidth=@true AlwaysShowTitle=@true Maximise=true OnMaximised=@OnMaximised>
+            <ViContainer Title="@(CurrentTemplate?.Flow?.Name?.EmptyAsNull() ?? Title)" Icon="@Icon" FullWidth=@true AlwaysShowTitle=@true Maximise=true OnMaximised=@OnMaximised>
 
                 <Head>
                     <button @onclick=@Save> 
@@ -19,9 +19,13 @@
                         {
                             @lblSaving
                         }
-                        else
+                        else if(CurrentTemplate?.Save == true)
                         {
                             @lblSave
+                        }
+                        else
+                        {
+                            @lblNext
                         }
                     </button>
                     <button @onclick=@Cancel>@lblCancel</button>
@@ -35,17 +39,11 @@
                 <Body>
                     <CascadingValue IsFixed="true" Value="this">
                         <div class="fields">
-                            <div class="description">@lblDescription</div>
+                            <div class="description">@(CurrentTemplate?.Flow?.Description?.EmptyAsNull() ?? lblDescription)</div>
                             @if (Fields?.Any() == true)
                             {
                                 @foreach (var field in Fields)
                                 {
-                                    if (field.Name == "Template")
-                                    {
-                                        Logger.Instance.ILog("Tryinbg to get template description", CurrentTemplate);
-                                        field.HelpText = CurrentTemplate?.Flow?.Description ?? string.Empty;
-                                        Logger.Instance.ILog("Tryinbg to get template description", field.HelpText);
-                                    }
                                     <InputRenderer field="field" OnSubmit=@OnSubmit OnClose=@OnClose />
                                 }
                                 <div class="empty"></div>

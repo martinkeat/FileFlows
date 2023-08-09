@@ -15,6 +15,9 @@ namespace FileFlows.Client.Components;
 public partial class NewFlowEditor : Editor
 {
     [Inject] NavigationManager NavigationManager { get; set; }
+    /// <summary>
+    /// Gets or sets the blocker to use
+    /// </summary>
     [CascadingParameter] public Blocker Blocker { get; set; }
     TaskCompletionSource<Flow> ShowTask;
 
@@ -46,6 +49,8 @@ public partial class NewFlowEditor : Editor
     {
         if (Fields?.Any() == true)
             return;
+
+        this._flowType = template.Flow.Type;
         
         this.InitializingTemplate = true;
         try

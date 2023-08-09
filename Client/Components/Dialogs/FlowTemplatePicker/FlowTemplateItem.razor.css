@@ -1,0 +1,65 @@
+.template {
+  user-select: none;
+  cursor: pointer;
+  border: solid 1px transparent;
+  border-left: solid 0.5rem transparent;
+  margin: 0.25rem;
+  background: rgba(133, 133, 133, 0.0705882353);
+  padding: 0.5rem;
+  position: relative;
+}
+.template.selected {
+  border-color: var(--accent);
+}
+.template .name {
+  display: block;
+  font-weight: 600;
+}
+.template .tags {
+  display: block;
+}
+.template .author {
+  display: block;
+}
+.template .description {
+  display: block;
+  white-space: pre-line;
+}
+.template .extra-info {
+  display: none;
+}
+.template.expanded .extra-info {
+  display: block;
+}
+
+.extra-info {
+  border-top: solid 1px var(--input-background);
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.label {
+  font-weight: 600;
+  margin-right: 0.5rem;
+}
+
+.expand-collapse {
+  position: absolute;
+  right: 0.25rem;
+  top: 0.25rem;
+}
+
+.plugins-and-scripts div {
+  margin-top: 0.5rem;
+}
+.plugins-and-scripts span {
+  margin-right: 0.5rem;
+  border: solid 1px var(--flow-process);
+  padding: 0.25rem;
+}
+.plugins-and-scripts span.script {
+  border-color: var(--flow-script);
+}
+
+/*# sourceMappingURL=FlowTemplateItem.razor.css.map */
