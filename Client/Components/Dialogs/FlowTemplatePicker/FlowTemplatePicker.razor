@@ -4,6 +4,7 @@
 {
     <Modal Title="@lblTitle" Visible="Visible" Styling="width:min(100vw, 60rem);max-width: unset;max-height: unset;">
         <Body>
+        <div class="wrapper">
         <div class="top-bar">
             <div class="tag-filter">
                 <div class="top-level-tag">
@@ -19,7 +20,7 @@
                 @if (SelectedTag.Any())
                 {
                     <div class="sub-tags">
-                        @foreach (var tag in Tags.Where(x => x.StartsWith(SelectedTag +":")))
+                        @foreach (var tag in Tags.Where(x => x.StartsWith(SelectedTag + ":")))
                         {
                             <span class="tag @(SelectedSubTag == tag ? "selected" : string.Empty)" @onclick="((ev) => ToggleSubTag(ev, tag))">@tag.Substring(tag.IndexOf(":") + 1)</span>
                         }
@@ -27,7 +28,7 @@
                 }
             </div>
             <div class="filter">
-                <input type="text" placeholder="@lblFilter" @bind-value="FilterText" @bind-value:event="oninput" @onkeydown="FilterKeyDown"  autocomplete="off" / />
+                <input type="text" placeholder="@lblFilter" @bind-value="FilterText" @bind-value:event="oninput" @onkeydown="FilterKeyDown" autocomplete="off" //>
                 <i class="fas fa-search" @onclick="() => Filter()"></i>
             </div>
         </div>
@@ -50,10 +51,11 @@
                     // only show local when local is selected
                     continue;
                 }
-                <FlowTemplateItem Template="@template" Selected="@(Selected == template)" 
-                                  OnClick="@((_,_) => SelectTemplate(template))"
-                                  OnDoubleClick="@((_,_) => SelectTemplate(template, true))"/>
+                <FlowTemplateItem Template="@template" Selected="@(Selected == template)"
+                                  OnClick="@((_, _) => SelectTemplate(template))"
+                                  OnDoubleClick="@((_, _) => SelectTemplate(template, true))"/>
             }
+        </div>
         </div>
         </Body>
         <Footer>

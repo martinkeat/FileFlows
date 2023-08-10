@@ -1,9 +1,16 @@
+.wrapper {
+  height: min(60vh, 50rem);
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
 .templates {
   display: flex;
   flex-direction: column;
+  flex-grow: 1;
   overflow: auto;
-  height: min(60vh, 50rem);
-  width: 100%;
 }
 
 .tag-filter {
