@@ -56,25 +56,23 @@ public class RepositoryUpdaterWorker: Worker
                 return;
 
             // Group files by base filename and sort by revision number
-            var revisionGroups = Directory.GetFiles(FolderPath, "*_.json")
+            var revisionGroups = Directory.GetFiles(FolderPath, "*_*.json")
                 .Where(file => GetRevisionNumber(file) >= 0)
                 .GroupBy(file => GetBaseFileName(file))
                 .Select(group => group.OrderByDescending(file => GetRevisionNumber(file)));
 
             foreach (var group in revisionGroups)
             {
-                bool first = true;
                 foreach (var file in group.Skip(1)) // Skip the newest revision
                 {
-                    if (first)
+                    Logger.Instance.ILog("Deleting old file revision: " + file);
+                    try
                     {
-                        Console.WriteLine($"Keeping {file}");
-                        first = false;
-                    }
-                    else
-                    {
-                        Console.WriteLine($"Deleting {file}");
                         File.Delete(file);
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.Instance.WLog("Failed to delete file: " + ex.Message);
                     }
                 }
             }
@@ -87,7 +85,13 @@ public class RepositoryUpdaterWorker: Worker
         /// <returns>The base filename without extension.</returns>
         string GetBaseFileName(string filePath)
         {
-            return Path.GetFileNameWithoutExtension(filePath);
+            string fileName = Path.GetFileNameWithoutExtension(filePath);
+            int lastUnderscoreIndex = fileName.LastIndexOf('_');
+            if (lastUnderscoreIndex >= 0)
+            {
+                return fileName.Substring(0, lastUnderscoreIndex);
+            }
+            return fileName;
         }
 
         /// <summary>
