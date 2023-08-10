@@ -4,7 +4,6 @@
 {
     <Modal Title="@lblTitle" Visible="Visible" Styling="width:min(90vw, 60rem);max-width: unset;max-height: unset;">
         <Body>
-        <span>@lblDescription</span>
         <div class="top-bar">
             <div class="tag-filter">
                 <div class="top-level-tag">
@@ -45,6 +44,11 @@
                     {
                         continue;
                     }
+                }
+                if (SelectedTag != "Local" && template.Tags.Contains("Local"))
+                {
+                    // only show local when local is selected
+                    continue;
                 }
                 <FlowTemplateItem Template="@template" Selected="@(Selected == template)" 
                                   OnClick="@((_,_) => SelectTemplate(template))"

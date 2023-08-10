@@ -18,11 +18,6 @@ public partial class Flows : ListPage<Guid, FlowListModel>
     /// Gets or sets the JavaScript runtime
     /// </summary>
     [Inject] public IJSRuntime jsRuntime { get; set; }
-    
-    /// <summary>
-    /// Gets or sets the script browser, which is used to load community flows
-    /// </summary>
-    private ScriptBrowser ScriptBrowser { get; set; }
 
     private FlowTemplatePicker TemplatePicker;
     private NewFlowEditor AddEditor;
@@ -35,12 +30,6 @@ public partial class Flows : ListPage<Guid, FlowListModel>
     private List<FlowListModel> DataStandard = new();
     private List<FlowListModel> DataFailure = new();
     private FlowType SelectedType = FlowType.Standard;
-
-    #if(DEBUG)
-    private bool DEBUG = true;
-    #else
-    private bool DEBUG = false;
-    #endif
 
     public override string FetchUrl => ApiUrl + "/list-all";
 
@@ -151,25 +140,6 @@ public partial class Flows : ListPage<Guid, FlowListModel>
         }
     }
 
-    private async Task Template()
-    {
-#if (DEBUG)
-
-        var item = Table.GetSelected()?.FirstOrDefault();
-        if (item == null)
-            return;
-        string url = $"/api/flow/template/{item.Uid}";
-        url = "http://localhost:6868" + url;
-        await jsRuntime.InvokeVoidAsync("ff.downloadFile", new object[] { url, item.Name + ".json" });
-#endif
-    }
-
-    private class TemplateSelectParameters
-    {
-        public List<Plugin.ListOption> Options { get; set; }
-    }
-    
-    
     private async Task Duplicate()
     {
         Blocker.Show();
@@ -274,12 +244,5 @@ public partial class Flows : ListPage<Guid, FlowListModel>
         if (item?.UsedBy?.Any() != true)
             return;
         await UsedByDialog.Show(item.UsedBy);
-    }
-    
-    async Task Browser()
-    {
-        bool result = await ScriptBrowser.Open(ScriptType.CommunityFlows);
-        // if (result)
-        //     AddEditor.Templates = null;
     }
 }

@@ -152,7 +152,7 @@ public class Program
 
 
     /// <summary>
-    /// Executes teh runner
+    /// Executes the runner
     /// </summary>
     /// <param name="args">the args</param>
     /// <returns>the library file status, or null if library file was not loaded</returns>
@@ -176,7 +176,7 @@ public class Program
             throw;
         }
 
-        if (node.SignalrUrl == "flow" && string.IsNullOrEmpty(Service.ServiceBaseUrl) == false)
+        if ((node.Address == "FileFlowsServer" || node.SignalrUrl == "flow") && string.IsNullOrEmpty(Service.ServiceBaseUrl) == false)
             FlowRunnerCommunicator.SignalrUrl = Service.ServiceBaseUrl.EndsWith("/")
                 ? Service.ServiceBaseUrl + "flow"
                 : Service.ServiceBaseUrl + "/flow";

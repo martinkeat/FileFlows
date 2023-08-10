@@ -226,6 +226,7 @@ a.btn {
 }
 .flow-modal-title {
   color: var(--accent);
+  font-weight: 600;
 }
 
 .flow-modal-body {

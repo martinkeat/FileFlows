@@ -18,7 +18,6 @@
     box-shadow: 0 3px 10px rgba(var(--color-rgb), 0.1);
     background: rgba(var(--base-rgb), 0.9);
   }
-
   .flow-modal-footer {
     text-align: right;
   }
@@ -36,18 +35,15 @@
     right: 0;
     background: var(--base);
   }
-
   .flow-modal-inner {
     height: 100%;
     display: flex;
     flex-direction: column;
   }
-
   .flow-modal-body {
     flex-grow: 1;
     position: relative;
   }
-
   .flow-modal-footer {
     display: flex;
     flex-direction: row;
@@ -64,6 +60,7 @@
 }
 .flow-modal-title {
   color: var(--accent);
+  font-weight: 600;
 }
 
 .flow-modal-body {

@@ -39,14 +39,14 @@ public class FlowTemplateController : Controller
         foreach (var flow in flows)
         {
             var ftm = new FlowTemplateModel();
-            ftm.Author = flow.Author;
-            ftm.Description = flow.Description;
+            ftm.Author = flow.Properties.Author;
+            ftm.Description = flow.Properties.Description;
             ftm.Fields = FlowFieldToTemplateField(flow);
             ftm.Parts = flow.Parts;
             ftm.Path = "local:" + flow.Uid;
             ftm.Name = flow.Name;
             ftm.Revision = flow.Revision;
-            ftm.Tags = flow.Properties.Tags ?? new ();
+            ftm.Tags = flow.Properties.Tags?.ToList() ?? new ();
             ftm.Tags.Add("Local");
             ftm.Type = flow.Type;
             results.Add(ftm);
@@ -241,12 +241,15 @@ public class FlowTemplateController : Controller
                 {
                     Template = jst.Name,
                     Name = jst.Name,
-                    Author = jst.Author,
                     Type = jst.Type,
                     Uid = Guid.Empty,
-                    Description = jst.Description,
                     Parts = flowParts,
-                    Enabled = true
+                    Enabled = true,
+                    Properties = new ()
+                    {
+                        Author = jst.Author,
+                        Description = jst.Description
+                    }
                 };
 
                 return (true, jst, flow);
@@ -277,9 +280,9 @@ public class FlowTemplateController : Controller
     {
         var template = new FlowTemplate();
         template.Name = flow.Name;
-        template.Description = flow.Description;
-        template.Author = flow.Author;
-        template.Tags = flow.Properties.Tags;
+        template.Description = flow.Properties.Description;
+        template.Author = flow.Properties.Author;
+        template.Tags = flow.Properties.Tags?.ToList() ?? new ();
 
         template.SkipTreeShaking = true;
         template.Save = true; // this means the flow will be saved automatically and not opened when creating a flow based on this template

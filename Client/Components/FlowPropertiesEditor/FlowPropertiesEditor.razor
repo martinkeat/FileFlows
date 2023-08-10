@@ -14,8 +14,10 @@
         
         <FlowTabs>
             <FlowTab Title="General">
-                <InputTextArea @bind-Value="@Flow.Description" Label="Pages.Flows.Fields.Description"></InputTextArea>
-                <InputText @bind-Value="@Flow.Author" Label="Pages.Flows.Fields.Author"></InputText>
+                <InputTextArea @bind-Value="@Flow.Properties.Description" Label="Pages.Flows.Fields.Description"></InputTextArea>
+                <InputText @bind-Value="@Flow.Properties.Author" Label="Pages.Flows.Fields.Author"></InputText>
+                <InputArray @bind-Value="@Flow.Properties.Tags" Label="Pages.Flow.Fields.Tags" />
+                <InputText @bind-Value="@Flow.Properties.MinimumVersion" Label="Pages.Flow.Fields.MinimumVersion" />
                 <InputKeyValue @bind-Value="@FlowVariables" Label="Pages.Flow.Fields.Variables" />
             </FlowTab>
             <FlowTab Title="Fields">

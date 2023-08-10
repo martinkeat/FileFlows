@@ -107,6 +107,7 @@ public class Runner
                                 Communicator_OnCancel();
                                 return;
                             }
+
                             nodeParameters?.Logger?.WLog("Hello failed, if continues the flow will be canceled");
                         }
                         else
@@ -122,14 +123,14 @@ public class Runner
             {
                 RunActual(communicator);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 finished = true;
                 task.Wait();
-                
+
                 if (Info.LibraryFile?.Status == FileStatus.Processing)
                     Info.LibraryFile.Status = FileStatus.ProcessingFailed;
-                
+
                 nodeParameters?.Logger?.ELog("Error in runner: " + ex.Message + Environment.NewLine + ex.StackTrace);
                 throw;
             }
@@ -140,6 +141,10 @@ public class Runner
                 communicator.OnCancel -= Communicator_OnCancel;
                 communicator.Close();
             }
+        }
+        catch (Exception ex)
+        {
+            Logger.Instance.ELog("Failure in runner: " + ex.Message + Environment.NewLine + ex.StackTrace);
         }
         finally
         {
@@ -185,8 +190,11 @@ public class Runner
         if (nodeParameters?.Metadata != null)
             Info.LibraryFile.FinalMetadata = nodeParameters.Metadata;
         // calculates the final finger print
-        Info.LibraryFile.FinalFingerprint =
-            FileFlows.ServerShared.Helpers.FileHelper.CalculateFingerprint(Info.LibraryFile.OutputPath);
+        if (string.IsNullOrWhiteSpace(Info.LibraryFile.OutputPath) == false)
+        {
+            Info.LibraryFile.FinalFingerprint =
+                FileFlows.ServerShared.Helpers.FileHelper.CalculateFingerprint(Info.LibraryFile.OutputPath);
+        }
 
         await Complete();
         OnFlowCompleted?.Invoke(this, Info.LibraryFile.Status == FileStatus.Processed);

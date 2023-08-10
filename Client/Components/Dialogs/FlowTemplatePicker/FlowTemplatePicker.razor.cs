@@ -14,7 +14,7 @@ public partial class FlowTemplatePicker : ComponentBase
     /// Gets or sets the blocker to use
     /// </summary>
     [CascadingParameter] public Blocker Blocker { get; set; }
-    private string lblTitle, lblDescription, lblFilter, lblNext, lblCancel;
+    private string lblTitle, lblFilter, lblNext, lblCancel;
     private string FilterText = string.Empty;
     private bool Visible { get; set; }
     TaskCompletionSource<FlowTemplateModel?> ShowTask;
@@ -43,7 +43,6 @@ public partial class FlowTemplatePicker : ComponentBase
     protected override void OnInitialized()
     {
         lblTitle = Translater.Instant("Dialogs.FlowTemplatePicker.Title");
-        lblDescription = Translater.Instant("Dialogs.FlowTemplatePicker.Description");
         lblNext = Translater.Instant("Labels.Next");
         lblCancel = Translater.Instant("Labels.Cancel");
         lblFilter = Translater.Instant("Labels.Filter");
@@ -72,7 +71,9 @@ public partial class FlowTemplatePicker : ComponentBase
         {
             Templates = await GetTemplates(type);
             Filter();
-            Tags = Templates.SelectMany(x => x.Tags).Distinct().OrderBy(x => x).ToList();
+            Tags = Templates.SelectMany(x => x.Tags).Distinct().OrderBy(x => x == "Basic" ? 1 : 2).ThenBy(x => x).ToList();
+            if(Tags.FirstOrDefault() == "Basic")
+                SelectedTag = Tags[0];
             Blocker.Hide();
             StateHasChanged();
         });
@@ -100,6 +101,8 @@ public partial class FlowTemplatePicker : ComponentBase
             {
                 return;
             }
+
+            flowResult.Data.Flow.Uid = Guid.NewGuid(); // ensure its a new UID and not an existing one
             ShowTask.SetResult(flowResult.Data);
             Visible = false;
             
@@ -167,7 +170,7 @@ public partial class FlowTemplatePicker : ComponentBase
 
         string text = FilterText.ToLowerInvariant();
         FilteredTemplates = Templates.Where(x =>
-                x.Name.ToLowerInvariant().Contains(text) || x.Description.ToLowerInvariant().Contains(text) || x.Author.ToLowerInvariant().Contains(text))
+                x.Name?.ToLowerInvariant().Contains(text) == true || x.Description?.ToLowerInvariant().Contains(text) == true || x.Author?.ToLowerInvariant().Contains(text) == true)
             .ToList();
     }
     

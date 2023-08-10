@@ -1,27 +1,30 @@
 ﻿@namespace FileFlows.Client.Components.Dialogs
 
 <div class="template @(Selected ? "selected" : string.Empty) @(Selected ? "expanded" : "collapsed")" @onclick="HandleOnClick" @ondblclick="HandleOnDoubleClick">
+    @if (string.IsNullOrWhiteSpace(Template.Author) == false)
+    {
+        <span class="author">@Template.Author</span>
+    }
     <span class="name">@Template.Name</span>
     <span class="description">@Template.Description</span>
-    
+
     <div class="extra-info">
-        <span class="author"><span class="label">Author:</span><span class="value">@Template.Author</span></span>
         <div class="plugins-and-scripts">
             <div class="plugins">
                 @foreach (var plugin in Plugins)
                 {
-                    <span class="plugin">@plugin</span>  
+                    <span class="plugin">@plugin</span>
                 }
             </div>
-            @if(Scripts.Any()) 
-            {        
+            @if (Scripts.Any())
+            {
                 <div class="scripts">
                     @foreach (var script in Scripts)
                     {
-                        <span class="script">@script</span>  
+                        <span class="script">@script</span>
                     }
                 </div>
-            } 
+            }
         </div>
     </div>
 </div>

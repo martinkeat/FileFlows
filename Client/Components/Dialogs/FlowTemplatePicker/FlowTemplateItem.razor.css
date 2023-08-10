@@ -20,6 +20,12 @@
 }
 .template .author {
   display: block;
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: rgba(63, 63, 63, 0.5490196078);
+  padding: 0.25rem 0.75rem;
+  font-size: 0.9rem;
 }
 .template .description {
   display: block;

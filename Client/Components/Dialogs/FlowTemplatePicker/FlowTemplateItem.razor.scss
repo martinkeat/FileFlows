@@ -17,8 +17,14 @@
   .tags {
     display: block;
   }
-  .author {
+  .author {    
     display: block;
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: #3f3f3f8c;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.9rem;
   }
   .description {
     display: block;

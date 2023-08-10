@@ -247,7 +247,6 @@ window.ffFlowPart = {
 
 
     updateOutputNodes: function (uid, part, div) {
-        console.log('updateOutputNodes', part);
         if (!part)
             part = ffFlow.parts.filter(x => x.uid === uid)[0];
         if (!part) {

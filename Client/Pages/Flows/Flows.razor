@@ -35,12 +35,6 @@ FileFlows will search for the 'Default' Failure Flow to use if a flow fails, if 
                     <FlowTableButton Clicked=Duplicate SelectedOne="true" Icon="fas fa-clone" Label="Labels.Duplicate" />
                     <FlowTableButton Clicked=Import Icon="fas fa-file-import" Label="Labels.Import" />
                     <FlowTableButton Clicked=Export SelectedOneOrMore="true" Icon="fas fa-file-export" Label="Labels.Export" />
-                    if (DEBUG)
-                    {
-                        <FlowTableButton Clicked=Template SelectedOne="true" Icon="fas fa-file-export" Label="Template" />
-                    }
-                    <FlowTableButtonSeparator />
-                    <FlowTableButton Clicked=Browser Icon="fas fa-code-branch" Label="Pages.Flows.Buttons.Repository"/>
                     <FlowTableButtonSeparator />
                 }
                 <FlowTableButton Clicked=UsedBy SelectedOne="true" Icon="fas fa-info-circle" Label="Labels.UsedBy" />   
@@ -102,5 +96,3 @@ FileFlows will search for the 'Default' Failure Flow to use if a flow fails, if 
 <FileFlows.Client.Components.Dialogs.FlowTemplatePicker @ref=TemplatePicker />
 
 <NewFlowEditor @ref=AddEditor />
-
-<ScriptBrowser @ref="ScriptBrowser" />

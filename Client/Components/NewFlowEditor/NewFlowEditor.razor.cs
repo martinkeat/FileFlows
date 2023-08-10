@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Runtime.InteropServices.JavaScript;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using FileFlows.Client.Components.Inputs;
 using FileFlows.Plugin;
 using Humanizer;
@@ -202,6 +203,7 @@ public partial class NewFlowEditor : Editor
 
     private async Task<bool> SaveCallback(ExpandoObject model)
     {
+        Logger.Instance.ILog("NewFlowEditor.SaveCallback", model);
         var dict = model as IDictionary<string, object>;
         var flow = CurrentTemplate.Flow;
         if (dict.TryGetValue("Name", out object oName) && oName is string sName)
@@ -234,24 +236,6 @@ public partial class NewFlowEditor : Editor
                     dict.Add(tfm.ElementField.Name, false); // special case, switches sometimes dont have their false values set
                 else
                     continue;
-            }
-
-            if (value?.ToString().StartsWith("OUTPUT:") == true)
-            {
-                // special case, removing this node and wiring up a different output
-                var parts = value.ToString().Split(':');
-                var outputNode = flow.Parts.FirstOrDefault(x => x.Uid.ToString() == parts[1]);
-                int outputIndex = int.Parse(parts[2]);
-                // remove any existing output connections
-                outputNode.OutputConnections.RemoveAll(x => x.Output == outputIndex);
-                outputNode.OutputConnections.Add(new ()
-                {
-                    Input = 1,
-                    Output = outputIndex,
-                    InputNode = Guid.Parse(parts[3])
-                });
-                flow.Parts.Remove(part);
-                continue;
             }
             
             part.Model ??= new ExpandoObject();
@@ -319,25 +303,14 @@ public partial class NewFlowEditor : Editor
                 }
             }
 
-            // do this after the JsonElement stuff so Value can be converted to true/false etc values
-            if (key.StartsWith("Output-"))
+            if (value is string sValue)
             {
-                if (Guid.TryParse(value?.ToString() ?? string.Empty, out Guid inputNode) == false)
-                {
-                    // if the input value means no connection,
-                    // eg a switch where true is connecting Delete Original and false connects to nothing
-                    continue;
-                }
-
-                int output = int.Parse(key.Substring("Output-".Length));
-                // the value is then the UID of the node to connect this one too
-                part.OutputConnections.Add(new ()
-                {
-                    Input = 1,
-                    Output = output,
-                    InputNode = inputNode
-                });
-                continue;
+                if (Regex.IsMatch(sValue, "^[\\d]+$"))
+                    value = int.Parse(sValue); // convert to int
+                else if (Regex.IsMatch(sValue, "^(true|false)$", RegexOptions.IgnoreCase))
+                    value = bool.Parse(sValue); // convert to boolean
+                else if (sValue == " ")
+                    value = string.Empty; // special case, allows users to enter a empty in a option
             }
 
             if (dictPartModel.ContainsKey(key))
@@ -352,7 +325,7 @@ public partial class NewFlowEditor : Editor
 
         Logger.Instance.ILog("Flow", flow);
 
-        if (CurrentTemplate.Fields?.Any() != true)
+        if (CurrentTemplate.Fields?.Any() == true)
         {
             var newFlowResult = await HttpHelper.Put<Flow>("/api/flow", flow);
             if (newFlowResult.Success == false)
@@ -385,50 +358,47 @@ public partial class NewFlowEditor : Editor
         for (int i=flow.Parts.Count -1;i>=0;i--)
         {
             var part = flow.Parts[i];
+            Logger.Instance.ILog("part.FlowElementUid: " + part.FlowElementUid);
             if (part.FlowElementUid == "FileFlows.BasicNodes.Conditions.IfBoolean")
             {
                 // model here is a { Variable: "string" }
                 var varResult = GetVariableFromModel<bool>(flow, part);
                 if (varResult.Success == false)
                     continue;
-                if(variablesToRemove.Contains(varResult.Variable) == false)
+                if (variablesToRemove.Contains(varResult.Variable) == false)
                     variablesToRemove.Add(varResult.Variable);
 
                 Guid? newInput = varResult.Value
                     ? part.OutputConnections.Where(x => x.Output == 1).Select(x => x.InputNode).FirstOrDefault()
                     : part.OutputConnections.Where(x => x.Output == 2).Select(x => x.InputNode).FirstOrDefault();
-                if (newInput == Guid.Empty)
-                    newInput = null;
 
-                var newTargetNode = newInput == null ? "DISCONNECTED" : flow.Parts.Where(x => x.Uid == newInput).Select(x => x.Name?.EmptyAsNull() ?? x.Label?.EmptyAsNull() ?? x.FlowElementUid).First();
+                IfFlowElements(flow, part, newInput);
+                continue;
+            }
+            if (part.FlowElementUid == "FileFlows.BasicNodes.Conditions.IfString")
+            {
+                // model here is a { Variable: "string" }
+                var varResult = GetVariableFromModel<string>(flow, part);
+                if (varResult.Success == false)
+                    continue;
+                if (variablesToRemove.Contains(varResult.Variable) == false)
+                    variablesToRemove.Add(varResult.Variable);
+                var options = ((IDictionary<string, object>)part.Model)["Options"];
+                Logger.Instance.ILog("Options", options);
+                Logger.Instance.ILog("Options", options.GetType().FullName);
+                if (options is JsonElement je == false || je.ValueKind != JsonValueKind.Array)
+                    continue;
+                var optionsList  = JsonSerializer.Deserialize<List<string>>(je.GetRawText());
+                    
+                int index = optionsList.IndexOf(varResult.Value) + 1;
+                Logger.Instance.ILog("optionsList: ", optionsList);
+                Logger.Instance.ILog("varResult Value: " , varResult.Value);
+                Logger.Instance.ILog("Options index: " , index);
 
-                // loop through all other flow parts looking for an output connection to this node
-                foreach (var otherPart in flow.Parts)
-                {
-                    // check if the other flow element has any output connections and not this node
-                    if (otherPart == part || otherPart.OutputConnections?.Any() != true)
-                        continue;
-                    // check each output connection in this other flow element
-                    for (int otherIndex = otherPart.OutputConnections.Count - 1; otherIndex>=0;otherIndex--)
-                    {
-                        var output = otherPart.OutputConnections[otherIndex];
-                        // check this other connection is to the current flow element
-                        if (output.InputNode != part.Uid)
-                            continue;
-                        // check if there is actually a connection to be made, or if it should be removed/disconnected
-                        if (newInput == null)
-                            otherPart.OutputConnections.RemoveAt(otherIndex);
-                        else // else set the new connection
-                        {
-                            string msg =
-                                $"Connecting '{otherPart.Name?.EmptyAsNull() ?? otherPart.Label?.EmptyAsNull() ?? otherPart.FlowElementUid}'[{output.Output}] -> '{newTargetNode}'";
-                            Logger.Instance.ILog(msg);
-                            output.InputNode = newInput.Value;
-                        }
-                    }
-                }
-                // remove this if boolean check
-                flow.Parts.RemoveAt(i);
+                Guid? newInput = part.OutputConnections.Where(x => x.Output == index).Select(x => x.InputNode)
+                    .FirstOrDefault();
+                Logger.Instance.ILog("newInput: " + newInput);
+                IfFlowElements(flow, part, newInput);
                 continue;
             }
         }
@@ -474,6 +444,52 @@ public partial class NewFlowEditor : Editor
         }
     }
 
+    /// <summary>
+    /// Processes a If flow element 
+    /// </summary>
+    /// <param name="flow">the flow</param>
+    /// <param name="part">the flow part</param>
+    /// <param name="newInput">where the input of this if flow element should now be connected to</param>
+    private void IfFlowElements(Flow flow, FlowPart part, Guid? newInput)
+    {
+        if (newInput == Guid.Empty)
+            newInput = null;
+        
+        var newTargetNode = newInput == null
+            ? "DISCONNECTED"
+            : flow.Parts.Where(x => x.Uid == newInput)
+                .Select(x => x.Name?.EmptyAsNull() ?? x.Label?.EmptyAsNull() ?? x.FlowElementUid).First();
+
+        // loop through all other flow parts looking for an output connection to this node
+        foreach (var otherPart in flow.Parts)
+        {
+            // check if the other flow element has any output connections and not this node
+            if (otherPart == part || otherPart.OutputConnections?.Any() != true)
+                continue;
+            // check each output connection in this other flow element
+            for (int otherIndex = otherPart.OutputConnections.Count - 1; otherIndex >= 0; otherIndex--)
+            {
+                var output = otherPart.OutputConnections[otherIndex];
+                // check this other connection is to the current flow element
+                if (output.InputNode != part.Uid)
+                    continue;
+                // check if there is actually a connection to be made, or if it should be removed/disconnected
+                if (newInput == null)
+                    otherPart.OutputConnections.RemoveAt(otherIndex);
+                else // else set the new connection
+                {
+                    string msg =
+                        $"Connecting '{otherPart.Name?.EmptyAsNull() ?? otherPart.Label?.EmptyAsNull() ?? otherPart.FlowElementUid}'[{output.Output}] -> '{newTargetNode}'";
+                    Logger.Instance.ILog(msg);
+                    output.InputNode = newInput.Value;
+                    var newFlowPart =flow.Parts.FirstOrDefault(x => x.Uid == newInput.Value);
+                    newFlowPart.xPos = part.xPos;
+                    newFlowPart.yPos = part.yPos;
+                }
+            }
+        }
+    }
+
     private (bool Success, string Variable, T Value) GetVariableFromModel<T>(Flow flow, FlowPart part, string variableName = "Variable")
     {
         var dict = part.Model as IDictionary<string, object>;
@@ -510,6 +526,13 @@ public partial class NewFlowEditor : Editor
             if(oValue is string sValue)
                 return (true, varibleStr, (T)(object)(sValue.ToLowerInvariant() == "true" || sValue  == "1"));
             return (true, varibleStr, (T)(object)false);
+        }
+
+        if (typeof(T) == typeof(string))
+        {
+            if(oValue is string sValue)
+                return (Success: true, varibleStr, Value: (T)(object)sValue);    
+            return (Success: true, varibleStr, Value: (T)(object)oValue.ToString());
         }
         return (Success: false, varibleStr, Value: default);
     }

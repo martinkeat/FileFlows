@@ -129,8 +129,7 @@
       "Message":"Select the amount of time to pause processing for.\nNote: The current flows will continue to execute, but no other flows will be executed until his time is up."
     },
     "FlowTemplatePicker": {
-      "Title": "New Flow",
-      "Description": "Select a template or start from a blank template"
+      "Title": "Select a template to start from"
     }
   },
   "Enums": {
@@ -267,6 +266,8 @@
       },
       "Fields": {
         "Variables": "Variables",
+        "Tags": "Tags",
+        "MinimumVersion": "Minimum Version",
         "VariablesKey": "Name",
         "VariablesValue": "Value",
         "Description": "The description of this flow template.",
