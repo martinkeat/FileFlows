@@ -7,9 +7,13 @@
   background: rgba(133, 133, 133, 0.0705882353);
   padding: 0.5rem;
   position: relative;
+  border-radius: 0.5rem;
 }
 .template.selected {
   border-color: var(--accent);
+}
+.template.selected .author {
+  background: var(--accent);
 }
 .template .name {
   display: block;
@@ -20,12 +24,15 @@
 }
 .template .author {
   display: block;
+  font-weight: 600;
   position: absolute;
   top: 0;
   right: 0;
   background: rgba(63, 63, 63, 0.5490196078);
   padding: 0.25rem 0.75rem;
   font-size: 0.9rem;
+  border-top-right-radius: 0.5rem;
+  border-bottom-left-radius: 0.5rem;
 }
 .template .description {
   display: block;

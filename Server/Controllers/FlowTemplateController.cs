@@ -34,7 +34,9 @@ public class FlowTemplateController : Controller
 
     private List<FlowTemplateModel> LocalFlows()
     {
-        var flows = new FlowService().GetAll().Where(x => x.Properties?.Fields?.Any() == true).OrderBy(x => x.Name).ToList();
+        var flows = new FlowService().GetAll().Where(x => x.Properties?.Fields?.Any() == true 
+                                                          && string.IsNullOrWhiteSpace(x.Properties?.Author) == false
+                                                          && string.IsNullOrWhiteSpace(x.Properties?.Description) == false).OrderBy(x => x.Name).ToList();
         var results = new List<FlowTemplateModel>();
         foreach (var flow in flows)
         {

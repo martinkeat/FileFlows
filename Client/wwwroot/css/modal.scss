@@ -4,18 +4,17 @@
 
 .flow-modal {
     z-index: 11;
-    padding: 1rem;
 }
 @media screen and (min-width: 578.0001px) {
     .flow-modal {
-        position: absolute;
+        position: fixed;
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
         min-width: min(28rem, 80vw);
-        max-width: min(40rem, 80vw);
-        box-shadow: 0 3px 10px rgba(var(--color-rgb), 0.1);
-        background: rgba(var(--base-rgb), 0.9);
+        max-width: min(40rem, 80vw); 
+        background: var(--base);
+        border: solid 1px var(--border-color);
     }
     .flow-modal-footer {
         text-align: right;
@@ -64,11 +63,16 @@
 }
 
 .flow-modal-title {
-    color: var(--accent);
+    background: var(--input-background);
     font-weight: 600;
+    padding: 0.5rem 1rem;
 }
 
 .flow-modal-body {
     margin: 1rem 0;
+    padding: 0.5rem 1rem;
+}
+.flow-modal-footer {
+    padding: 0.5rem 1rem;
 }
 

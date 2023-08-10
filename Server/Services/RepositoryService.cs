@@ -66,14 +66,6 @@ class RepositoryService
         => DownloadObjects(repo.FunctionScripts, DirectoryHelper.ScriptsDirectoryFunction, force);
     
     /// <summary>
-    /// Downloads the flow templates from the repository
-    /// <param name="force">when true, this will force every template to be re-downloaded and not just updates</param>
-    /// </summary>
-    /// <returns>a task to await</returns>
-    internal Task DownloadFlowTemplates(bool force = false)
-        => DownloadObjects(repo.FlowTemplates, DirectoryHelper.TemplateDirectoryFlow, force);
-    
-    /// <summary>
     /// Downloads the library templates from the repository
     /// <param name="force">when true, this will force every template to be re-downloaded and not just updates</param>
     /// </summary>

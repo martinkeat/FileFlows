@@ -7,8 +7,12 @@
   background:#85858512;
   padding:0.5rem;
   position: relative;
+  border-radius:0.5rem;
   &.selected {
     border-color: var(--accent);
+    .author {
+      background:var(--accent);
+    }
   }
   .name {
     display:block;
@@ -19,12 +23,15 @@
   }
   .author {    
     display: block;
+    font-weight: 600;
     position: absolute;
     top: 0;
     right: 0;
     background: #3f3f3f8c;
     padding: 0.25rem 0.75rem;
     font-size: 0.9rem;
+    border-top-right-radius: 0.5rem;
+    border-bottom-left-radius: 0.5rem;
   }
   .description {
     display: block;

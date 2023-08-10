@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using FileFlows.Server.Services;
 using FileFlows.ServerShared.Workers;
 
@@ -27,8 +28,80 @@ public class RepositoryUpdaterWorker: Worker
     {
         var service = new RepositoryService();
         service.Init().Wait();
-        service.DownloadFlowTemplates().Wait();
         service.DownloadLibraryTemplates().Wait();
         service.DownloadFunctionScripts().Wait();
+
+        new RevisionCleaner(DirectoryHelper.TemplateDirectoryFlow).DeleteOldRevisions();
+    }
+
+    class RevisionCleaner
+    {
+        private readonly string FolderPath;
+
+        /// <summary>
+        /// Creates an instance
+        /// </summary>
+        /// <param name="folderPath">the folder path</param>
+        public RevisionCleaner(string folderPath)
+        {
+            this.FolderPath = folderPath;
+        }
+
+        /// <summary>
+        /// Deletes older revisions of JSON files based on a naming convention.
+        /// </summary>
+        public void DeleteOldRevisions()
+        {
+            if (Directory.Exists(FolderPath) == false)
+                return;
+
+            // Group files by base filename and sort by revision number
+            var revisionGroups = Directory.GetFiles(FolderPath, "*_.json")
+                .Where(file => GetRevisionNumber(file) >= 0)
+                .GroupBy(file => GetBaseFileName(file))
+                .Select(group => group.OrderByDescending(file => GetRevisionNumber(file)));
+
+            foreach (var group in revisionGroups)
+            {
+                bool first = true;
+                foreach (var file in group.Skip(1)) // Skip the newest revision
+                {
+                    if (first)
+                    {
+                        Console.WriteLine($"Keeping {file}");
+                        first = false;
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Deleting {file}");
+                        File.Delete(file);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Extracts the base filename from a file path.
+        /// </summary>
+        /// <param name="filePath">The full path of the file.</param>
+        /// <returns>The base filename without extension.</returns>
+        string GetBaseFileName(string filePath)
+        {
+            return Path.GetFileNameWithoutExtension(filePath);
+        }
+
+        /// <summary>
+        /// Extracts the revision number from a filename.
+        /// </summary>
+        /// <param name="fileName">The filename to extract the revision number from.</param>
+        /// <returns>The extracted revision number.</returns>
+        int GetRevisionNumber(string fileName)
+        {
+            Match match = Regex.Match(fileName, @"_(\d+)\.json$");
+            if (match.Success && int.TryParse(match.Groups[1].Value, out int revisionNumber))
+                return revisionNumber;
+
+            return -1; // Default revision number if parsing fails
+        }
     }
 }

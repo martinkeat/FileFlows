@@ -11,7 +11,7 @@
     <div class="extra-info">
         <div class="plugins-and-scripts">
             <div class="plugins">
-                @foreach (var plugin in Plugins)
+                @foreach (var plugin in Plugins.OrderBy(x => x))
                 {
                     <span class="plugin">@plugin</span>
                 }
@@ -19,7 +19,7 @@
             @if (Scripts.Any())
             {
                 <div class="scripts">
-                    @foreach (var script in Scripts)
+                    @foreach (var script in Scripts.OrderBy(x => x))
                     {
                         <span class="script">@script</span>
                     }

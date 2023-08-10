@@ -284,12 +284,7 @@ public partial class NewFlowEditor : Editor
                         dict = dictPartModel[key] as IDictionary<string, object>;
                     
                         foreach (var kv in tv.Keys)
-                        {
-                            if (dict.ContainsKey(kv))
-                                dict[kv] = tv[kv];
-                            else
-                                dict.Add(kv, tv[kv]);
-                        }
+                            dict[kv] = tv[kv];
                         continue;
                     }
                 }
@@ -313,10 +308,7 @@ public partial class NewFlowEditor : Editor
                     value = string.Empty; // special case, allows users to enter a empty in a option
             }
 
-            if (dictPartModel.ContainsKey(key))
-                dictPartModel[key] = value;
-            else
-                dictPartModel.Add(key, value);
+            dictPartModel[key] = value;
         }
 
         // shake lose any nodes that have no connections
