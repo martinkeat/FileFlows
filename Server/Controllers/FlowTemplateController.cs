@@ -44,7 +44,6 @@ public class FlowTemplateController : Controller
             ftm.Author = flow.Properties.Author;
             ftm.Description = flow.Properties.Description;
             ftm.Fields = FlowFieldToTemplateField(flow);
-            ftm.Parts = flow.Parts;
             ftm.Path = "local:" + flow.Uid;
             ftm.Name = flow.Name;
             ftm.Revision = flow.Revision;
@@ -64,38 +63,40 @@ public class FlowTemplateController : Controller
     [HttpPost]
     public async Task<IActionResult> FetchTemplate([FromBody] FlowTemplateModel model)
     {
+        string json;
         if (model.Path.StartsWith("local:"))
         {
             var uid = Guid.Parse(model.Path[6..]);
-            var flow = new FlowService().GetByUid(uid);
-            model.Fields = FlowFieldToTemplateField(flow);
-            model.Parts = flow.Parts;
-            model.Flow = flow;
-            return Ok(model);
-        }
-        string json;
-        string fileName = Path.Combine(DirectoryHelper.TemplateDirectoryFlow, MakeSafeFilename(model.Path.Replace(".json", "_" + model.Revision + ".json")));
-        if (System.IO.File.Exists(fileName) == false)
-        {
-            // need to download the flow template from github
-            var result = await HttpHelper.Get<string>("https://raw.githubusercontent.com/revenz/FileFlowsRepository/master/" + model.Path);
-            if (result.Success == false)
-                return BadRequest("Failed to download from repository");
-            await System.IO.File.WriteAllTextAsync(fileName, result.Data);
-            json = result.Data;
+            var tFlow = new FlowService().GetByUid(uid);
+            json = JsonSerializer.Serialize(tFlow); // we serialize this so any changes we make arent on the original flow object
         }
         else
         {
-            json = await System.IO.File.ReadAllTextAsync(fileName);
+            string fileName = Path.Combine(DirectoryHelper.TemplateDirectoryFlow,
+                MakeSafeFilename(model.Path.Replace(".json", "_" + model.Revision + ".json")));
+            if (System.IO.File.Exists(fileName) == false)
+            {
+                // need to download the flow template from github
+                var result =
+                    await HttpHelper.Get<string>(
+                        "https://raw.githubusercontent.com/revenz/FileFlowsRepository/master/" + model.Path);
+                if (result.Success == false)
+                    return BadRequest("Failed to download from repository");
+                await System.IO.File.WriteAllTextAsync(fileName, result.Data);
+                json = result.Data;
+            }
+            else
+            {
+                json = await System.IO.File.ReadAllTextAsync(fileName);
+            }
         }
+
+        json = TemplateHelper.ReplaceOutputPathVariable(json);
+
+        var flow = JsonSerializer.Deserialize<Flow>(json);
         
-        var elements = await FlowController.GetFlowElements((FlowType)(-1)); // special case to load all template types
-        var parts = elements.ToDictionary(x => x.Uid, x => x);
-        
-        var fresult = GetFlowTemplate(parts, json);
-        model.Fields = fresult.Template.Fields;
-        model.Parts = fresult.Flow.Parts;
-        model.Flow = fresult.Flow;
+        model.Fields = FlowFieldToTemplateField(flow);
+        model.Flow = flow;
         return Ok(model);
     }
 
@@ -179,21 +180,11 @@ public class FlowTemplateController : Controller
             }
 
             json = TemplateHelper.ReplaceWindowsPathIfWindows(json);
-            FlowTemplate jst;
-            if (json.Contains("\"node\"") == false)
+            FlowTemplate jst = JsonSerializer.Deserialize<FlowTemplate>(json, new JsonSerializerOptions
             {
-                // "node" is legacy
-                jst = LoadModernTemplate(json);
-            }
-            else
-            {
-                jst = JsonSerializer.Deserialize<FlowTemplate>(json, new JsonSerializerOptions
-                {
-                    AllowTrailingCommas = true,
-                    PropertyNameCaseInsensitive = true
-                });
-                jst.Author = "FileFlows";
-            }
+                AllowTrailingCommas = true,
+                PropertyNameCaseInsensitive = true
+            });
 
             if (jst == null)
                 return (false, null, null);
@@ -269,47 +260,6 @@ public class FlowTemplateController : Controller
             Logger.Instance.ELog("Error reading template: " + ex.Message + Environment.NewLine + ex.StackTrace);
         }
         return (false, null, null);
-    }
-
-
-    private FlowTemplate LoadModernTemplate(string json)
-    {
-        var flow = JsonSerializer.Deserialize<Flow>(json);
-        return FlowToFlowTemplateModel(flow);
-    }
-    
-    private FlowTemplate FlowToFlowTemplateModel(Flow flow)
-    {
-        var template = new FlowTemplate();
-        template.Name = flow.Name;
-        template.Description = flow.Properties.Description;
-        template.Author = flow.Properties.Author;
-        template.Tags = flow.Properties.Tags?.ToList() ?? new ();
-
-        template.SkipTreeShaking = true;
-        template.Save = true; // this means the flow will be saved automatically and not opened when creating a flow based on this template
-        template.Parts = new();
-        foreach(var fp in flow.Parts)
-        {
-            var tfp = new FlowTemplatePart();
-            tfp.Uid = fp.Uid;
-            tfp.Model = fp.Model;
-            tfp.Name = fp.Name;
-            tfp.Outputs = fp.Outputs;
-            tfp.xPos = (int)fp.xPos;
-            tfp.yPos = (int)fp.yPos;
-            tfp.Node = fp.FlowElementUid;
-            tfp.Connections = fp.OutputConnections?.Select(x => new FlowTemplateConnection()
-            {
-                Node = x.InputNode,
-                Input = x.Input,
-                Output = x.Output
-            })?.ToList() ?? new();
-            template.Parts.Add(tfp);
-        }
-
-        template.Fields = FlowFieldToTemplateField(flow);
-        return template;
     }
 
     /// <summary>

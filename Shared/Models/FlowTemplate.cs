@@ -58,11 +58,6 @@ public class FlowTemplateModel
     public FlowType Type { get; set; }
     
     /// <summary>
-    /// Gets or sets the parts in this template
-    /// </summary>
-    public List<FlowPart> Parts { get; set; }
-    
-    /// <summary>
     /// Gets or sets the fields in this template
     /// </summary>
     public List<TemplateField> Fields { get; set; }

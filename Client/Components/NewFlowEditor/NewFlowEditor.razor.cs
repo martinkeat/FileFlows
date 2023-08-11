@@ -84,6 +84,16 @@ public partial class NewFlowEditor : Editor
             {
                 foreach (var field in template.Fields)
                 {
+                    if (field.Type == "OutputPath")
+                    {
+                        var parameters = JsonSerializer.Deserialize<OutputPathParameters>(
+                            JsonSerializer.Serialize(field.Parameters), new JsonSerializerOptions
+                            {
+                                PropertyNameCaseInsensitive = true
+                            });
+                        fields.AddRange(OutputPathFields(parameters));
+                        continue;
+                    }
                     string efName = field.Label.Dehumanize();
                     var ef = new ElementField()
                     {
@@ -159,6 +169,81 @@ public partial class NewFlowEditor : Editor
         {
             InitializingTemplate = false;
         }
+    }
+
+    /// <summary>
+    /// Adds the special output path fields
+    /// </summary>
+    /// <returns>a list of output path fields</returns>
+    private List<ElementField> OutputPathFields(OutputPathParameters parameters)
+    {
+        List<ElementField> fields = new();
+        
+        fields.Add(new ()
+        {
+            Name = "Output_Path",
+            HelpText = "The destination where the file should be save to",
+            InputType = FormInputType.Select,
+            Parameters = new()
+            {
+                { "Options", new List<string>
+                {
+                    "Replace Original", "Save to Folder"
+                }}
+            },
+        });
+        fields.Add(new ()
+        {
+            Name = "Destination_Folder",
+            HelpText = "The folder where the converted file will be saved to",
+            InputType = FormInputType.Folder,
+            Conditions = new ()
+            {
+                new ()
+                {
+                    Property = "Output_Path",
+                    Value = "Save to Folder"
+                }
+            }
+        });
+        fields.Add(new ()
+        {
+            Name = "Delete_Original",
+            HelpText = "If the original file should be deleted or not",
+            InputType = FormInputType.Switch,
+            Conditions = new ()
+            {
+                new ()
+                {
+                    Property = "Output_Path",
+                    Value = "Save to Folder"
+                }
+            }
+        });
+        if (parameters?.NotEmptyDirectory?.Any() == true)
+        {
+            fields.Add(new ()
+            {
+                Name = "Delete_Directory_If_Empty",
+                HelpText = "If the source directory should be deleted if it is now empty",
+                InputType = FormInputType.Switch,
+                Conditions = new ()
+                {
+                    new ()
+                    {
+                        Property = "Output_Path",
+                        Value = "Save to Folder"
+                    },
+                    new ()
+                    {
+                        Property = "Delete_Original",
+                        Value = true
+                    }
+                }
+            });
+        }
+
+        return fields;
     }
 
     /// <summary>
@@ -393,6 +478,11 @@ public partial class NewFlowEditor : Editor
                 IfFlowElements(flow, part, newInput);
                 continue;
             }
+
+            if (part.FlowElementUid == "FileFlows.BasicNodes.Templating.OutputPath")
+            {
+                
+            }
         }
 
         // remove any variables that we used in the If Conditions that we no longer need
@@ -409,8 +499,11 @@ public partial class NewFlowEditor : Editor
                 .SelectMany(x => x.OutputConnections.Select(x => x.InputNode))
                 .ToList();
             count = flow.Parts.Count;
-            for (int i = flow.Parts.Count - 1; i >= 1; i--)
+            for (int i = flow.Parts.Count - 1; i >= 0; i--)
             {
+                if (flow.Parts[i].Inputs == 0)
+                    continue; // it's an input node
+                
                 if (inputNodes.Contains(flow.Parts[i].Uid) == false)
                 {
                     flow.Parts.RemoveAt(i);
@@ -538,6 +631,11 @@ public partial class NewFlowEditor : Editor
     {
         public int Minimum { get; set; }
         public int Maximum { get; set; }
+    }
+
+    private class OutputPathParameters
+    {
+        public List<string> NotEmptyDirectory { get; set; }
     }
     
     private record TemplateFieldModel(TemplateField TemplateField, ElementField ElementField);

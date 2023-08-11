@@ -30,7 +30,15 @@
                                 <div @onclick="() => Edit(field)" class="field @(field == Editing ? "selected" : string.Empty)">
                                     <div class="input">
                                         <div class="name">
-                                            <input type="text" @bind-value=@field.Name/>
+                                            @if (field.Type == FlowFieldType.OutputPath)
+                                            {
+                                                field.Name = "Output_Path";
+                                                <input type="text" @bind-value=@field.Name readonly />   
+                                            }
+                                            else
+                                            {
+                                                <input type="text" @bind-value=@field.Name/>
+                                            }
                                         </div>
                                         <div class="type">
                                             <select @bind="@field.Type">
@@ -39,6 +47,7 @@
                                                 <option value=@FlowFieldType.Boolean>Boolean</option>
                                                 <option value=@FlowFieldType.Directory>Directory</option>
                                                 <option value=@FlowFieldType.Select>Select</option>
+                                                <option value=@FlowFieldType.OutputPath>Output Path</option>
                                             </select>
                                         </div>
                                     </div>
@@ -68,6 +77,7 @@
                             <div class="content">
                                 <InputText @bind-Value="@Editing.Description" Label="Pages.Flow.Fields.Field.Description"></InputText>
                                 <InputText @bind-Value="@Editing.FlowElementField" Label="Pages.Flow.Fields.Field.FlowElementField"></InputText>
+                                
                                 @if (Editing.Type == FlowFieldType.String || Editing.Type == FlowFieldType.Directory)
                                 {
                                     <InputSwitch @bind-Value="@Editing.Required" Label="Pages.Flow.Fields.Field.Required"></InputSwitch>
@@ -85,6 +95,10 @@
                                 {
                                     <InputArray @bind-Value="@Editing.Options" Label="Pages.Flow.Fields.Field.Options" ></InputArray> 
                                     <InputText @bind-Value="@DefaultValueString" Label="Pages.Flow.Fields.Field.Default"></InputText>
+                                }
+                                else if (Editing.Type == FlowFieldType.OutputPath)
+                                {
+                                    <InputArray @bind-Value="@Editing.Options" Label="Pages.Flow.Fields.Field.DeleteIfEmpty" ></InputArray>
                                 }
                                 <hr/>
                                 <InputText @bind-Value="@Editing.IfName" Label="Pages.Flow.Fields.Field.IfName"></InputText>

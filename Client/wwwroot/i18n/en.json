@@ -281,6 +281,8 @@
           "Required-Help": "If this value is required and must be set.",
           "Default": "Default",
           "Options": "Options",
+          "DeleteIfEmpty": "Delete If Empty",
+          "DeleteIfEmpty-Help": "If any values are added here and the  user selects 'Delete Original' the folder will also be deleted if no file matching any of these regular expressions match.",
           "Options-Help": "An array of list options, to set a label and value use a | separator eg `label|value`",
           "IfName": "If",
           "IfName-Help": "If this should only be shown to the user if another value matches these conditions.",

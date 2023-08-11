@@ -314,5 +314,9 @@ public enum FlowFieldType
     /// <summary>
     /// A select input
     /// </summary>
-    Select = 4
+    Select = 4,
+    /// <summary>
+    /// Special output path field
+    /// </summary>
+    OutputPath = 5
 }

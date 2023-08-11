@@ -66,16 +66,8 @@ public partial class Flows : ListPage<Guid, FlowListModel>
             return;
 
         }
-        AddWithForm(flowTemplateModel);
-    }
-
-    private async void AddWithForm(FlowTemplateModel flowTemplateModel)
-    {
-        if (AddEditor == null)
-        {
-            NavigationManager.NavigateTo("flows/" + Guid.Empty);
-            return;
-        }
+        
+        Logger.Instance.ILog("flowTemplateModel: " , flowTemplateModel);
         var newFlow = await AddEditor.Show(flowTemplateModel);
         if (newFlow == null)
             return; // was canceled
