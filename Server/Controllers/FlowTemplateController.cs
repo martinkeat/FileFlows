@@ -18,7 +18,7 @@ public class FlowTemplateController : Controller
     const int DEFAULT_YPOS = 50;
     private static List<FlowTemplateModel> Templates;
     private static DateTime FetchedAt = DateTime.MinValue;
-    private static readonly string FlowTemplatesFile = Path.Combine(DirectoryHelper.ConfigDirectory, "flow-templates.json");
+    private static readonly string FlowTemplatesFile = Path.Combine(DirectoryHelper.TemplateDirectoryFlow, "flow-templates.json");
     
     /// <summary>
     /// Gets all the flow templates
@@ -29,7 +29,11 @@ public class FlowTemplateController : Controller
     {
         if (Templates == null || FetchedAt < DateTime.Now.AddMinutes(-10))
             await RefreshTemplates();
-        return (Templates ?? new()).Union(LocalFlows()).ToList();
+        var plugins = new PluginService().GetAll().Where(x => x.Enabled).Select(x => x.Name.Replace(" ", string.Empty).ToLowerInvariant()).ToList();
+        return (Templates ?? new()).Where(x =>
+            // check this template only contains plugins we have
+            x.Plugins.Any(pl => plugins.Contains(pl.ToLowerInvariant().Replace(" ", String.Empty)) == false) == false
+        ).Union(LocalFlows()).ToList();
     }
 
     private List<FlowTemplateModel> LocalFlows()
@@ -108,6 +112,7 @@ public class FlowTemplateController : Controller
         var result = await HttpHelper.Get<List<FlowTemplateModel>>(
             "https://raw.githubusercontent.com/revenz/FileFlowsRepository/master/flows.json?dt=" +
             DateTime.UtcNow.Ticks);
+
         
         if (result.Success == false)
         {

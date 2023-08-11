@@ -89,7 +89,7 @@ public partial class Libraries : ListPage<Guid, Library>
                         Parameters = new Dictionary<string, object>
                         {
                             { nameof(InputSelect.Options), templates },
-                            { nameof(InputSelect.AllowClear), false},
+                            { nameof(InputSelect.AllowClear), true},
                             { nameof(InputSelect.ShowDescription), true }
                         }
                     };

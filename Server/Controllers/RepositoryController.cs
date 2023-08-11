@@ -24,28 +24,17 @@ public class RepositoryController : Controller
         var scripts = (
                 type == ScriptType.System ? repo.SystemScripts : 
                 type == ScriptType.Webhook ? repo.WebhookScripts : 
-                type == ScriptType.CommunityFlows ? repo.CommunityFlowTemplates :
                 repo.FlowScripts)
             .Where(x => new Version(Globals.Version) >= x.MinimumVersion);
         if (missing)
         {
             List<string> known = new();
-            string extension = type == ScriptType.CommunityFlows ? "json" : "js";
             foreach (var file in new DirectoryInfo(
-                         type == ScriptType.CommunityFlows ? DirectoryHelper.TemplateDirectoryFlowCommunity :
                          type == ScriptType.System ? DirectoryHelper.ScriptsDirectorySystem : 
-                         DirectoryHelper.ScriptsDirectoryFlow).GetFiles("*." + extension, SearchOption.AllDirectories))
+                         DirectoryHelper.ScriptsDirectoryFlow).GetFiles("*.js", SearchOption.AllDirectories))
             {
                 try
                 {
-                    if (type == ScriptType.CommunityFlows)
-                    {
-                        var json =  System.IO.File.ReadAllText(file.FullName);
-                        var name = System.Text.Json.JsonSerializer.Deserialize<FlowTemplate>(json).Name;
-                        known.Add(name);
-                        continue;
-                    }
-
                     string line = (await System.IO.File.ReadAllLinesAsync(file.FullName)).First();
                     if (line?.StartsWith("// path:") == true)
                         known.Add(line[9..].Trim());

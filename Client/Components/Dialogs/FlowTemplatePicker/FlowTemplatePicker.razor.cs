@@ -28,14 +28,6 @@ public partial class FlowTemplatePicker : ComponentBase
     /// Gets or sets the available templates
     /// </summary>
     private List<FlowTemplateModel> Templates { get; set; }
-    /// <summary>
-    /// Gets or sets the standard templates
-    /// </summary>
-    private List<FlowTemplateModel> StandardTemplates { get; set; }
-    /// <summary>
-    /// Gets or sets the failure templates
-    /// </summary>
-    private List<FlowTemplateModel> FailureTemplates { get; set; }
 
     private List<string> Tags { get; set; }
 
@@ -153,7 +145,7 @@ public partial class FlowTemplatePicker : ComponentBase
     {
         if (args.Key == "Escape")
         {
-            this.FilterText = string.Empty;
+            FilterText = string.Empty;
             Filter();
         }
         else if (args.Key == "Enter")
@@ -179,36 +171,10 @@ public partial class FlowTemplatePicker : ComponentBase
     /// </summary>
     public async Task<List<FlowTemplateModel>> GetTemplates(FlowType type)
     {
-        if (type == FlowType.Standard && Templates != null)
-            return StandardTemplates;
-        if (type == FlowType.Failure && FailureTemplates != null)
-            return FailureTemplates;
-        //this.Blocker.Show("Pages.Flows.Messages.LoadingTemplates");
-        this.StateHasChanged();
-        try
-        {
-            var flowResult =
-                await HttpHelper.Get<List<FlowTemplateModel>>("/api/flow-template?type=" + type);
-            if (flowResult.Success)
-            {
-                if (type == FlowType.Standard)
-                    StandardTemplates = flowResult.Data ?? new();
-                else
-                    FailureTemplates = flowResult.Data ?? new();
-            }
-            else if (type == FlowType.Standard)
-                StandardTemplates = new();
-            else
-                FailureTemplates = new();
-            
-            if (type == FlowType.Failure)
-                return FailureTemplates;
-            
-            return StandardTemplates;
-        }
-        finally
-        {
-            // this.Blocker.Hide();
-        }
+        var result = await HttpHelper.Get<List<FlowTemplateModel>>("/api/flow-template?type=" + type);
+        if (result.Success)
+            return result.Data ?? new();
+        
+        return new ();
     }
 }

@@ -72,7 +72,7 @@ public class DirectoryHelper
 #if(DEBUG && false)
         return;
 #else
-        foreach (var dir in new[] { TemplateDirectory, TemplateDirectoryFlow, TemplateDirectoryLibrary, TemplateDirectoryFlowCommunity })
+        foreach (var dir in new[] { TemplateDirectory, TemplateDirectoryFlow, TemplateDirectoryLibrary })
         {
             if (Directory.Exists(dir) == false)
                 Directory.CreateDirectory(dir);
@@ -242,10 +242,6 @@ public class DirectoryHelper
     /// Gets the directory for flow templates
     /// </summary>
     public static string TemplateDirectoryFlow => Path.Combine(TemplateDirectory, "Flow");
-    /// <summary>
-    /// Gets the directory for community flow templates
-    /// </summary>
-    public static string TemplateDirectoryFlowCommunity => Path.Combine(TemplateDirectory, "Flow", "Community");
     /// <summary>
     /// Gets the directory for library templates
     /// </summary>

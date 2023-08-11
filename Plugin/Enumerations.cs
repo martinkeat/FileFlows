@@ -158,9 +158,5 @@ public enum ScriptType
     /// <summary>
     /// A scripts used by webhooks
     /// </summary>
-    Webhook = 4,
-    /// <summary>
-    /// Community flows
-    /// </summary>
-    CommunityFlows = 5
+    Webhook = 4
 }

@@ -42,16 +42,8 @@ public partial class ScriptBrowser: ComponentBase
     internal Task<bool> Open(ScriptType type)
     {
         this.ScriptType = type;
-        if (type == ScriptType.CommunityFlows)
-        {
-            lblTitle = Translater.Instant("Labels.CommunityFlows");
-            Icon = "fas fa-sitemap";
-        }
-        else
-        {
-            lblTitle = Translater.Instant("Pages.Scripts.Labels.ScriptBrowser") + " - " + type + " Scripts";
-            Icon = "fas fa-code";
-        }
+        lblTitle = Translater.Instant("Pages.Scripts.Labels.ScriptBrowser") + " - " + type + " Scripts";
+        Icon = "fas fa-code";
 
         this.Visible = true;
         this.Loading = true;
