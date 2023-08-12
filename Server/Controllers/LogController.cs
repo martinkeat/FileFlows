@@ -13,7 +13,7 @@ namespace FileFlows.Server.Controllers;
 /// <summary>
 /// System log controller
 /// </summary>
-[Route("/api/log")]
+[Route("/api/fileflows-log")] // FF-1060 renamed route to fileflows-log to avoid uBlock origin blacking /api/log
 public class LogController : Controller
 {
     /// <summary>

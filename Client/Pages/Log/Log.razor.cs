@@ -44,15 +44,15 @@ public partial class Log : ComponentBase
         SearchModel.FromDate = DateRangeHelper.LiveStart;
         SearchModel.ToDate = DateRangeHelper.LiveEnd;
 
-        LoggingSources = (await HttpHelper.Get<List<ListOption>>("/api/log/log-sources")).Data;
+        LoggingSources = (await HttpHelper.Get<List<ListOption>>("/api/fileflows-log/log-sources")).Data;
 
         this.lblSearch = Translater.Instant("Labels.Search");
         this.lblSearching = Translater.Instant("Labels.Searching");
         this.lblDownload = Translater.Instant("Labels.Download");
 #if (DEBUG)
-        this.DownloadUrl = "http://localhost:6868/api/log/download";
+        this.DownloadUrl = "http://localhost:6868/api/fileflows-log/download";
 #else
-        this.DownloadUrl = "/api/log/download";
+        this.DownloadUrl = "/api/fileflows-log/download";
 #endif
         NavigationManager.LocationChanged += NavigationManager_LocationChanged;
         AutoRefreshTimer = new Timer();
@@ -135,7 +135,7 @@ public partial class Log : ComponentBase
         bool nearBottom = string.IsNullOrWhiteSpace(LogText) == false && await jsRuntime.InvokeAsync<bool>("ff.nearBottom", new object[]{ ".page .content"});
         if (App.Instance.FileFlowsSystem.ExternalDatabase)
         {
-            var response = await HttpHelper.Post<string>("/api/log/search", SearchModel);
+            var response = await HttpHelper.Post<string>("/api/fileflows-log/search", SearchModel);
             if (response.Success)
             {
                 this.LogText = response.Data;
@@ -145,7 +145,7 @@ public partial class Log : ComponentBase
         }
         else
         {
-            var response = await HttpHelper.Get<string>("/api/log?logLevel=" + LogLevel);
+            var response = await HttpHelper.Get<string>("/api/fileflows-log?logLevel=" + LogLevel);
             if (response.Success)
             {
                 this.LogText = response.Data;

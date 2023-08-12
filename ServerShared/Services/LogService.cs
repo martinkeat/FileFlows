@@ -64,7 +64,7 @@ public class LogService:Service, ILogService
     {
         try
         {
-            await HttpHelper.Post($"{ServiceBaseUrl}/api/log/message", message, noLog: true);
+            await HttpHelper.Post($"{ServiceBaseUrl}/api/fileflows-log/message", message, noLog: true);
         }
         catch (Exception)
         {
