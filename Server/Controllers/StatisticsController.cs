@@ -1,8 +1,10 @@
-﻿namespace FileFlows.Server.Controllers;
-
+﻿using Mysqlx.Datatypes;
 using Microsoft.AspNetCore.Mvc;
-using FileFlows.Shared.Models;
 using FileFlows.Server.Helpers;
+using FileFlows.Server.Services;
+
+namespace FileFlows.Server.Controllers;
+
 
 /// <summary>
 /// Status controller
@@ -15,14 +17,8 @@ public class StatisticsController : Controller
     /// </summary>
     /// <param name="statistic">the statistic to record</param>
     [HttpPost("record")]
-    public async Task Record([FromBody] Statistic statistic)
-    {
-        if (statistic == null)
-            return;
-        if (LicenseHelper.IsLicensed() == false)
-            return; // only save this to an external database
-        await DbHelper.RecordStatistic(statistic);
-    }
+    public Task Record([FromBody] Statistic statistic)
+        => new StatisticService().Record(statistic);
 
     /// <summary>
     /// Gets statistics by name
@@ -30,11 +26,26 @@ public class StatisticsController : Controller
     /// <returns>the matching statistics</returns>
     [HttpGet("by-name/{name}")]
     public Task<IEnumerable<Statistic>> GetStatisticsByName([FromRoute] string name)
+        => new StatisticService().GetStatisticsByName(name);
+
+    /// <summary>
+    /// Clears statistics for
+    /// </summary>
+    /// <param name="name">[Optional] the name of the statistic to clear</param>
+    /// <param name="before">[Optional] the date of the statistic to clear</param>
+    /// <returns>the response</returns>
+    [HttpPost("clear")]
+    public IActionResult Clear([FromQuery] string? name = null, DateTime? before = null)
     {
-        if (LicenseHelper.IsLicensed() == false)
-            throw new Exception("Not supported by this installation.");
-        
-        return DbHelper.GetStatisticsByName(name);
+        try
+        {
+            new StatisticService().Clear(name, before);
+            return Ok();
+        }
+        catch (Exception)
+        {
+            return BadRequest();
+        }
     }
 }
 
