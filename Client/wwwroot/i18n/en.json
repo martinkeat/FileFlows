@@ -365,7 +365,7 @@
         "Scan": "Scan",
         "Scan-Help": "When Scan is enabled the library will be routinely scanned for new content.\nWhen disabled the library will listen for file system events to detect new files.\nIt is best to leave this off unless you are having issues with files not being detected.",
         "UpdateMovedFiles": "Update Moved Files",
-        "UpdateMovedFiles-Help": "When enabled if a file has been detected that it has been moved within the same library, meaning the original file no longer exists and a new file is found with the same signature, then the original file will be updated to point to this new file.\nOtherwise when disabled, a duplicate will be added instead.",
+        "UpdateMovedFiles-Help": "When enabled, if a file has been detected as moved within the same library, then the original file will be updated to point to this new file.\nOtherwise when disabled, a duplicate will be added instead.\n\nA file will be detected as moved if the original file does not exist and a new file is found with the same signature.",
         "ReprocessRecreatedFiles":"Reprocess Recreated Files",
         "ReprocessRecreatedFiles-Help":"When enabled if a file is re-detected with a different creation time than that is recorded, the file will be automatically set to reprocess.\nThis is helpful on a library of downloaded files, where you may download the same file multiple times and wish to process it each time.",
         "ProcessingOrder":"Processing Order",
