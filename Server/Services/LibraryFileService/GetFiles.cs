@@ -342,23 +342,35 @@ public partial class LibraryFileService
                 if (canUserCustomProcessingOrder)
                 {
                     if (library.ProcessingOrder == ProcessingOrder.Random)
-                        return random.Next();
+                        return random.Next(); // int
 
                     if (library.ProcessingOrder == ProcessingOrder.LargestFirst)
-                        return x.OriginalSize * -1;
+                        return x.OriginalSize * -1; // long
 
                     if (library.ProcessingOrder == ProcessingOrder.SmallestFirst)
-                        return x.OriginalSize;
+                        return x.OriginalSize; // long
 
                     if (library.ProcessingOrder == ProcessingOrder.OldestFirst)
-                        return x.CreationTime.Ticks;
+                        return x.CreationTime.Ticks; // long
 
                     if (library.ProcessingOrder == ProcessingOrder.NewestFirst)
-                        return x.CreationTime.Ticks * -1;
+                        return x.CreationTime.Ticks * -1; // long
+
+                    if (library.ProcessingOrder == ProcessingOrder.Alphabetical)
+                        return 0; // order by next ThenBy as it's a string // string 
                 }
 
                 // as found
-                return x.DateCreated.Ticks;
+                return x.DateCreated.Ticks; // long;
+            }).ThenBy(x =>
+            {
+                if (canUserCustomProcessingOrder)
+                {
+                    var library = libraries[x.LibraryUid!.Value]; // cant be null due to previous checks
+                    if (library.ProcessingOrder == ProcessingOrder.Alphabetical)
+                        return x.RelativePath;
+                }
+                return string.Empty;
             });
 
             return query;

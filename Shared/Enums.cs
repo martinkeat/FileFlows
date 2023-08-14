@@ -222,7 +222,11 @@ public enum ProcessingOrder
     /// <summary>
     /// Oldest files first
     /// </summary>
-    OldestFirst = 5
+    OldestFirst = 5,
+    /// <summary>
+    /// Sort the files alphabetically
+    /// </summary>
+    Alphabetical
 }
 
 

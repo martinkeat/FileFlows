@@ -171,6 +171,7 @@
     },
     "ProcessingOrder":{
       "AsFound": "As Found (Default)",
+      "Alphabetical": "Alphabetical",
       "LargestFirst":"Largest First",
       "NewestFirst":"Newest First",
       "OldestFirst":"Oldest First",
