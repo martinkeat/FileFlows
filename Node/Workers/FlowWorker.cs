@@ -24,13 +24,43 @@ public class FlowWorker : Worker
     /// </summary>
     public readonly Guid Uid = Guid.NewGuid();
 
-    private static readonly string ConfigKey = Environment.GetEnvironmentVariable("FF_ENCRYPT")?.EmptyAsNull() ?? Guid.NewGuid().ToString();
+    private readonly string _configKeyDefault = Guid.NewGuid().ToString();
+    
+    /// <summary>
+    /// Gets if the config encryption key 
+    /// </summary>
+    /// <returns>the configuration encryption key</returns>
+    private string GetConfigKey(ProcessingNode node)
+    {
+        var key = Environment.GetEnvironmentVariable("FF_ENCRYPT");
+        if (string.IsNullOrWhiteSpace(key) == false)
+            return key;
+        key = node?.GetVariable("FF_ENCRYPT");
+        
+        if (string.IsNullOrWhiteSpace(key) == false)
+            return key;
+        
+        return _configKeyDefault;;
+    }
+    // #if(DEBUG)
+    // private static readonly bool ConfigNoEncrypt = true;
+    // #else
+    // private static readonly bool ConfigNoEncrypt = Environment.GetEnvironmentVariable("FF_NO_ENCRYPT") == "1";
+    // #endif
 
-    #if(DEBUG)
-    private static readonly bool ConfigNoEncrypt = true;
-    #else
-    private static readonly bool ConfigNoEncrypt = Environment.GetEnvironmentVariable("FF_NO_ENCRYPT") == "1";
-    #endif
+    /// <summary>
+    /// Gets if the config should not be encrypted
+    /// </summary>
+    /// <returns>true if the configuration should NOT be encrypted</returns>
+    private bool GetConfigNoEncrypt(ProcessingNode node)
+    {
+        if (Environment.GetEnvironmentVariable("FF_NO_ENCRYPT") == "1")
+            return true;
+        if (node?.GetVariable("FF_NO_ENCRYPT") == "1")
+            return true;
+        
+        return false;
+    }
 
     /// <summary>
     /// The current configuration
@@ -129,7 +159,7 @@ public class FlowWorker : Worker
             return;
         }
 
-        if (UpdateConfiguration().Result == false)
+        if (UpdateConfiguration(node).Result == false)
             return;
 
         var settingsService = SettingsService.Load();
@@ -218,7 +248,7 @@ public class FlowWorker : Worker
                     "--cfgPath",
                     GetConfigurationDirectory(),
                     "--cfgKey",
-                    ConfigNoEncrypt ? "NO_ENCRYPT" : ConfigKey,
+                    GetConfigNoEncrypt(node) ? "NO_ENCRYPT" : GetConfigKey(node),
                     "--baseUrl",
                     Service.ServiceBaseUrl,
                     Globals.IsDocker ? "--docker" : null,
@@ -537,8 +567,9 @@ public class FlowWorker : Worker
     /// <summary>
     /// Ensures the local configuration is current with the server
     /// </summary>
+    /// <param name="node">the processing node</param>
     /// <returns>an awaited task</returns>
-    private async Task<bool> UpdateConfiguration()
+    private async Task<bool> UpdateConfiguration(ProcessingNode node)
     {
         var service = new SettingsService();
         int revision = await service.GetCurrentConfigurationRevision();
@@ -640,7 +671,7 @@ public class FlowWorker : Worker
         });
 
         string cfgFile = Path.Combine(dir, "config.json");
-        if (ConfigNoEncrypt)
+        if (GetConfigNoEncrypt(node))
         {
             Logger.Instance?.DLog("Configuration set to no encryption, saving as plain text");
             await File.WriteAllTextAsync(cfgFile, json);
@@ -648,7 +679,7 @@ public class FlowWorker : Worker
         else
         {
             Logger.Instance?.DLog("Saving encrypted configuration");
-            Utils.ConfigEncrypter.Save(json, ConfigKey, cfgFile);
+            Utils.ConfigEncrypter.Save(json, GetConfigKey(node), cfgFile);
         }
 
         CurrentConfigurationRevision = revision;

@@ -1,9 +1,6 @@
-using System.Globalization;
-using Avalonia.Styling;
 using FileFlows.Server.Helpers;
 using FileFlows.ServerShared.Models;
 using FileFlows.Server.Controllers;
-using FileFlows.ServerShared.Services;
 using FileFlows.ServerShared.Workers;
 using FileFlows.Shared.Models;
 using Humanizer;
@@ -34,10 +31,10 @@ public partial class LibraryFileService
         if (settings.IsPaused)
             return NextFileResult(NextLibraryFileStatus.SystemPaused);
 
-        if (DateTime.UtcNow > new DateTime(2023, 09, 1))
+        if (DateTime.UtcNow > new DateTime(2023, 10, 1))
         {
             int current = Data.Count(x => x.Value.Status == FileStatus.Processed);
-            if (current > 10_000)
+            if (current > 15_000)
             {
                 if (LicenseHelper.IsLicensed() == false)
                 {

@@ -66,6 +66,10 @@ public class ProcessingNode: FileFlowObject
     /// </summary>
     public List<KeyValuePair<string, string>> Mappings { get; set; }
     /// <summary>
+    /// Gets or sets the variables for this node
+    /// </summary>
+    public List<KeyValuePair<string, string>> Variables { get; set; }
+    /// <summary>
     /// Gets or sets the schedule for this node
     /// </summary>
     public string Schedule { get; set; }
@@ -162,4 +166,12 @@ public class ProcessingNode: FileFlowObject
 
         return path;
     }
+
+    /// <summary>
+    /// Gets a variable, or empty if not found
+    /// </summary>
+    /// <param name="key">the key to the variable</param>
+    /// <returns>the variable value</returns>
+    public string GetVariable(string key)
+        => Variables?.FirstOrDefault(x => x.Key == key).Value ?? string.Empty;
 }

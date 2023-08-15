@@ -26,6 +26,7 @@ public partial class Nodes : ListPage<Guid, ProcessingNode>
         tabs.Add("Processing", await TabProcessing(node));
         if (node.OperatingSystem == OperatingSystemType.Linux || node.OperatingSystem == OperatingSystemType.Unknown)
             tabs.Add("Advanced", TabAdvanced(node));
+        tabs.Add("Variables", TabVariables(node));
 
         string helpUrl = isServerProcessingNode
             ? string.Empty
@@ -309,6 +310,32 @@ public partial class Nodes : ListPage<Guid, ProcessingNode>
             InputType = FormInputType.Text,
             Name = nameof(node.Permissions),
             DisabledConditions = new List<Condition> { condition }
+        });
+        return fields;
+    }
+    
+    
+    /// <summary>
+    /// Adds the variables element fields
+    /// </summary>
+    /// <param name="node">the processing node</param>
+    /// <returns>a list of element fields</returns>
+    private List<ElementField> TabVariables(ProcessingNode node)
+    {
+        List<ElementField> fields = new List<ElementField>();
+        fields.Add(new ElementField
+        {
+            InputType = FormInputType.Label,
+            Name = "VariablesDescription"
+        });
+        fields.Add(new ElementField
+        {
+            InputType = FormInputType.KeyValue,
+            Name = nameof(node.Variables),
+            Parameters = new()
+            {
+                { "HideLabel", true }
+            }
         });
         return fields;
     }

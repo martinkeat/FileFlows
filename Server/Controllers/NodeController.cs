@@ -1,10 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using FileFlows.Shared.Models;
 using FileFlows.Server.Helpers;
-using System.Runtime.InteropServices;
 using FileFlows.Server.Services;
 using FileFlows.ServerShared.Models;
-using Instances.Exceptions;
 
 namespace FileFlows.Server.Controllers;
 
@@ -85,6 +83,7 @@ public class NodeController : Controller
                 internalNode.Permissions = node.Permissions;
                 internalNode.AllLibraries = node.AllLibraries;
                 internalNode.MaxFileSizeMb = node.MaxFileSizeMb;
+                internalNode.Variables = node.Variables ?? new();
                 if (string.IsNullOrWhiteSpace(node.PreExecuteScript))
                     internalNode.PreExecuteScript = null;
                 else
@@ -103,6 +102,7 @@ public class NodeController : Controller
             node.Name = Globals.InternalNodeName;
             node.AllLibraries = ProcessingLibraries.All;
             node.Mappings = null; // no mappings for internal
+            node.Variables ??= new();
             node = await service.Update(node);
             CheckLicensedNodes(node.Uid, node.Enabled);
             return Ok(node);
@@ -113,6 +113,7 @@ public class NodeController : Controller
             var existing = service.GetByUid(node.Uid);
             if (existing == null)
                 return BadRequest("Node not found");
+            node.Variables ??= new();
             node = await service.Update(node);
             Logger.Instance.ILog("Updated external processing node: " + node.Name);
             CheckLicensedNodes(node.Uid, node.Enabled);
