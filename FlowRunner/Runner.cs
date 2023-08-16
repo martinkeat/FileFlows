@@ -589,8 +589,11 @@ public class Runner
 
                 if (CurrentNode == null)
                 {
-                    // happens when canceled    
-                    nodeParameters.Logger?.ELog("Failed to load node: " + part.Name);                    
+                    // happens when canceled or when the node failed to load
+                    if(part.Name == "FileFlows.VideoNodes.VideoFile")
+                        nodeParameters.Logger?.ELog("Video Nodes Plugin missing, download the from the Plugins page");
+                    else
+                        nodeParameters.Logger?.ELog("Failed to load node: " + part.Name);                    
                     nodeParameters.Result = NodeResult.Failure;
                     return FileStatus.ProcessingFailed;
                 }
@@ -761,8 +764,9 @@ public class Runner
         var nt = GetNodeType(part.FlowElementUid);
         if (nt == null)
         {
-            throw new Exception("Failed to load Node: " + part.FlowElementUid);
+            //throw new Exception("Failed to load Node: " + part.FlowElementUid);
             //return new Node();
+            return null;
         }
 
         var node = Activator.CreateInstance(nt);
