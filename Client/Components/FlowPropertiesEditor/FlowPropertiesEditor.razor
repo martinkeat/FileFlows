@@ -75,35 +75,42 @@
                                 </h2>
                             </div>
                             <div class="content">
-                                <InputText @bind-Value="@Editing.Description" Label="Pages.Flow.Fields.Field.Description"></InputText>
-                                <InputText @bind-Value="@Editing.FlowElementField" Label="Pages.Flow.Fields.Field.FlowElementField"></InputText>
                                 
-                                @if (Editing.Type == FlowFieldType.String || Editing.Type == FlowFieldType.Directory)
-                                {
-                                    <InputSwitch @bind-Value="@Editing.Required" Label="Pages.Flow.Fields.Field.Required"></InputSwitch>
-                                    <InputText @bind-Value="@DefaultValueString" Label="Pages.Flow.Fields.Field.Default"></InputText>
-                                }
-                                else if (Editing.Type == FlowFieldType.Boolean)
-                                {
-                                    <InputSwitch @bind-Value="@DefaultValueBoolean" Label="Pages.Flow.Fields.Field.Default"></InputSwitch>
-                                }
-                                else if (Editing.Type == FlowFieldType.Number)
-                                {
-                                    <InputNumber TItem="Int32" @bind-Value="@DefaultValueNumber" Label="Pages.Flow.Fields.Field.Required"></InputNumber>
-                                }
-                                else if (Editing.Type == FlowFieldType.Select)
-                                {
-                                    <InputArray @bind-Value="@Editing.Options" Label="Pages.Flow.Fields.Field.Options" ></InputArray> 
-                                    <InputText @bind-Value="@DefaultValueString" Label="Pages.Flow.Fields.Field.Default"></InputText>
-                                }
-                                else if (Editing.Type == FlowFieldType.OutputPath)
-                                {
-                                    <InputArray @bind-Value="@Editing.Options" Label="Pages.Flow.Fields.Field.DeleteIfEmpty" ></InputArray>
-                                }
-                                <hr/>
-                                <InputText @bind-Value="@Editing.IfName" Label="Pages.Flow.Fields.Field.IfName"></InputText>
-                                <InputText @bind-Value="@Editing.IfValue" Label="Pages.Flow.Fields.Field.IfValue"></InputText>
-                                <InputSwitch @bind-Value="@Editing.IfNot" Label="Pages.Flow.Fields.Field.IfNot"></InputSwitch>
+                                <FlowTabs>
+                                    <FlowTab Title="General">
+                                        <InputText @bind-Value="@Editing.Description" Label="Pages.Flow.Fields.Field.Description"></InputText>
+                                        <InputText @bind-Value="@Editing.FlowElementField" Label="Pages.Flow.Fields.Field.FlowElementField"></InputText>
+
+                                        @if (Editing.Type == FlowFieldType.String || Editing.Type == FlowFieldType.Directory)
+                                        {
+                                            <InputSwitch @bind-Value="@Editing.Required" Label="Pages.Flow.Fields.Field.Required"></InputSwitch>
+                                            <InputText @bind-Value="@DefaultValueString" Label="Pages.Flow.Fields.Field.Default"></InputText>
+                                        }
+                                        else if (Editing.Type == FlowFieldType.Boolean)
+                                        {
+                                            <InputSwitch @bind-Value="@DefaultValueBoolean" Label="Pages.Flow.Fields.Field.Default"></InputSwitch>
+                                        }
+                                        else if (Editing.Type == FlowFieldType.Number)
+                                        {
+                                            <InputNumber TItem="Int32" @bind-Value="@DefaultValueNumber" Label="Pages.Flow.Fields.Field.Required"></InputNumber>
+                                        }
+                                        else if (Editing.Type == FlowFieldType.Select)
+                                        {
+                                            <InputArray @bind-Value="@Editing.Options" Label="Pages.Flow.Fields.Field.Options"></InputArray>
+                                            <InputText @bind-Value="@DefaultValueString" Label="Pages.Flow.Fields.Field.Default"></InputText>
+                                        }
+                                        else if (Editing.Type == FlowFieldType.OutputPath)
+                                        {
+                                            <InputArray @bind-Value="@Editing.Options" Label="Pages.Flow.Fields.Field.DeleteIfEmpty"></InputArray>
+                                        }
+                                        
+                                    </FlowTab>
+                                    <FlowTab Title="Conditions">
+                                        <InputText @bind-Value="@Editing.IfName" Label="Pages.Flow.Fields.Field.IfName"></InputText>
+                                        <InputText @bind-Value="@Editing.IfValue" Label="Pages.Flow.Fields.Field.IfValue"></InputText>
+                                        <InputSwitch @bind-Value="@Editing.IfNot" Label="Pages.Flow.Fields.Field.IfNot"></InputSwitch>
+                                    </FlowTab>
+                                </FlowTabs>
                             </div>
                         </div>
                     }
