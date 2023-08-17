@@ -243,4 +243,11 @@
   }
 }
 
+.column {
+  pointer-events: none;
+}
+.column ::deep label {
+  pointer-events: auto;
+}
+
 /*# sourceMappingURL=FlowTable.razor.css.map */

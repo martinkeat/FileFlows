@@ -99,9 +99,9 @@
             <div class="flowtable-row flowtable-header-row">
                 @if(Selection != SelectionMode.None)
                 {
-                    <span class="flowtable-select" style="width:2rem;min-width:2rem;max-width:2rem">
+                    <label class="flowtable-select" style="width:2rem;min-width:2rem;max-width:2rem">
                         <input type="checkbox" @onchange="(e) => SelectAll(e)" checked="@(DisplayData.Any(i => SelectedItems != null && SelectedItems.Contains(i.Key)))"  />                        
-                    </span>
+                    </label>
                 }
                 @foreach(var col in ColumnList)
                 {
@@ -119,18 +119,18 @@
                     @{
                         bool selected = Selection != SelectionMode.None && SelectedItems?.Contains(item.Key) == true;
                     }
-                    <div class="flowtable-row @(selected ? "selected" : "")" @ondblclick="() => OnDoubleClick(item.Key)" @onclick="(e) => OnClick(e, item.Key)">
+                    <div class="flowtable-row @(selected ? "selected" : "")" @ondblclick="() => OnDoubleClick(item.Key)" @onclick="(e) => OnClick(e, item.Key)" @onclick:preventDefault @onclick:stopPropagation>
                         @if(Selection!= SelectionMode.None)
                         {
-                            <span class="flowtable-select" style="width:2rem;min-width:2rem;max-width:2rem">
+                            <label class="flowtable-select" style="width:2rem;min-width:2rem;max-width:2rem">
                                 <input type="checkbox" @onchange="(e) => CheckItem(e, item.Key)" checked="@(SelectedItems?.Contains(item.Key) == true)"
                                        onclick="ff.stopSelectPropagation(event)" />                        
-                            </span>
+                            </label>
                         }
                         @foreach (var col in ColumnList)
                         {
                             string hashcode = "col-" + col.GetHashCode();
-                            <span class="@col.ClassName @hashcode @(col.Pre ? "pre-text" : "") @(col.Hidden ? "hidden": "")" style="@col.Style">
+                            <span class="column @col.ClassName @hashcode @(col.Pre ? "pre-text" : "") @(col.Hidden ? "hidden": "")" style="@col.Style">
                                 @col.Cell(item.Key)
                             </span>
                         }

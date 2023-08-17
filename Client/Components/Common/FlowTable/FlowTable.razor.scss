@@ -275,3 +275,10 @@
         }
     }
 }
+
+.column {
+    pointer-events: none;
+    ::deep label {
+        pointer-events: auto;
+    }
+}

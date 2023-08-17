@@ -409,7 +409,17 @@ public partial class FlowTable<TItem>: FlowTableBase,IDisposable, INotifyPropert
     {
         bool changed = false;
         bool wasSelected = this.SelectedItems.Contains(item);
-        if (e.CtrlKey == false && e.ShiftKey == false)
+        
+        if (e.CtrlKey || e.OffsetX < 35) // FF-1073 - 35 makes it easier to select multiple without unselecting others
+        {
+            // multiselect changing one item
+            if (wasSelected)
+                this.SelectedItems.Remove(item);
+            else
+                this.SelectedItems.Add(item);
+            changed = true;
+        }
+        else if (e.CtrlKey == false && e.ShiftKey == false)
         {
             // just select/unselect this one
             if(wasSelected && this.SelectedItems.Count == 1)
@@ -421,22 +431,8 @@ public partial class FlowTable<TItem>: FlowTableBase,IDisposable, INotifyPropert
             }
             changed = true;
         }
-        else if (e.CtrlKey)
-        {
-            // multiselect changing one item
-            if (wasSelected)
-            {
-                this.SelectedItems.Remove(item);
-            }
-            else
-            {
-                this.SelectedItems.Add(item);
-            }
-            changed = true;
-        }
         else
         {
-
             if (wasSelected == false)
             {
                 this.SelectedItems.Add(item);
