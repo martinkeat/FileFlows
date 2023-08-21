@@ -25,10 +25,11 @@ public class FlowRunnerService : IFlowRunnerService
     /// Called when a flow execution starts
     /// </summary>
     /// <param name="info">The information about the flow execution</param>
+    /// <param name="log">The full log for the file</param>
     /// <returns>The updated information</returns>
-    public Task Complete(FlowExecutorInfo info)
+    public Task Complete(FlowExecutorInfo info, string log)
     {
-        new WorkerController(null).FinishWork(info);
+        new WorkerController(null).FinishWork(new() { Info = info, Log = log });
         return Task.CompletedTask;
     }
 

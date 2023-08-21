@@ -256,7 +256,7 @@ public class Program
             Config = args.Config,
             ConfigDirectory = args.ConfigDirectory,
             LibraryFile = libFile,
-            Log = String.Empty,
+            //Log = String.Empty,
             NodeUid = node.Uid,
             NodeName = node.Name,
             RelativeFile = libFile.RelativePath,

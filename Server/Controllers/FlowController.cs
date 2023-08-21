@@ -1,13 +1,11 @@
 using FileFlows.Server.Workers;
 using Microsoft.AspNetCore.Mvc;
 using FileFlows.Shared.Models;
-using FileFlows.Server.Helpers;
 using System.Dynamic;
 using System.IO.Compression;
 using FileFlows.Plugin;
 using System.Runtime.InteropServices;
 using System.Text.Json.Serialization;
-using System.Text.RegularExpressions;
 using FileFlows.ScriptExecution;
 using FileFlows.Server.Services;
 using Logger = FileFlows.Shared.Logger;

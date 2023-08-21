@@ -179,9 +179,10 @@ public class Runner
     /// </summary>
     public async Task Finish()
     {
+        string log = null;
         if (nodeParameters?.Logger is FlowLogger fl)
         {
-            Info.Log = fl.ToString();
+            log = fl.ToString();
             await fl.Flush();
         }
 
@@ -196,7 +197,7 @@ public class Runner
                 FileFlows.ServerShared.Helpers.FileHelper.CalculateFingerprint(Info.LibraryFile.OutputPath);
         }
 
-        await Complete();
+        await Complete(log);
         OnFlowCompleted?.Invoke(this, Info.LibraryFile.Status == FileStatus.Processed);
     }
 
@@ -239,7 +240,7 @@ public class Runner
     /// <summary>
     /// Called when the flow execution completes
     /// </summary>
-    private async Task Complete()
+    private async Task Complete(string log)
     {
         DateTime start = DateTime.Now;
         do
@@ -249,7 +250,7 @@ public class Runner
                 CalculateFinalSize();
 
                 var service = FlowRunnerService.Load();
-                await service.Complete(Info);
+                await service.Complete(Info, log);
                 return;
             }
             catch (Exception) { }

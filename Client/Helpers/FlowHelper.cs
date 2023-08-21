@@ -25,6 +25,7 @@ public class FlowHelper
     /// <returns>a human readable formatted string</returns>
     public static string FormatLabel(string name)
     {
-        return Regex.Replace(name.Replace("_", " "), "(?<=[A-Za-z])(?=[A-Z][a-z])|(?<=[a-z0-9])(?=[0-9]?[A-Z])", " ").Replace("Ffmpeg", "FFMPEG");
+        return Regex.Replace(name.Replace("_", " "), "(?<=[A-Za-z])(?=[A-Z][a-z])|(?<=[a-z0-9])(?=[0-9]?[A-Z])", " ")
+            .Replace("Ffmpeg", "FFmpeg");
     }
 }

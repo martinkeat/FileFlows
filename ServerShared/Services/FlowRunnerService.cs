@@ -18,8 +18,9 @@ public interface IFlowRunnerService
     /// Called when the flow execution has completed
     /// </summary>
     /// <param name="info">The information about the flow execution</param>
+    /// <param name="log">the full log for the file</param>
     /// <returns>a completed task</returns>
-    Task Complete(FlowExecutorInfo info);
+    Task Complete(FlowExecutorInfo info, string log);
     /// <summary>
     /// Called to update the status of the flow execution on the server
     /// </summary>
@@ -55,12 +56,17 @@ public class FlowRunnerService : Service, IFlowRunnerService
     /// Called when a flow execution starts
     /// </summary>
     /// <param name="info">The information about the flow execution</param>
+    /// <param name="log">the full log for the file</param>
     /// <returns>The updated information</returns>
-    public async Task Complete(FlowExecutorInfo info)
+    public async Task Complete(FlowExecutorInfo info, string log)
     {
         try
         {
-            var result = await HttpHelper.Post($"{ServiceBaseUrl}/api/worker/work/finish", info);
+            var result = await HttpHelper.Post($"{ServiceBaseUrl}/api/worker/work/finish", new
+            {
+                Info = info,
+                Log = log
+            });
             if (result.Success == false)
                 throw new Exception("Failed to finish work: " + result.Body);
         }

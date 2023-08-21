@@ -332,7 +332,7 @@ public class SettingsController : Controller
             }
 
             Logger.Instance.DLog($"Plugin '{pluginInfo.Name}' is used in configuration.");
-            plugins.Add(file.Name, System.IO.File.ReadAllBytes(file.FullName));
+            plugins.Add(file.Name, await System.IO.File.ReadAllBytesAsync(file.FullName));
             pluginNames.Add(pluginInfo.Name);
         }
 

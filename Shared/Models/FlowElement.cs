@@ -45,10 +45,10 @@ public class FlowElement
     /// Formats the name and translated if needed
     /// </summary>
     /// <param name="name">the name to format</param>
-    /// <returns>the formateted name</returns>
+    /// <returns>the formatted name</returns>
     public static string FormatName(string name)
     {
-        string translated = Translater.Instant($"Flow.Parts.{name}.Label", suppressWarnings: true);
+        string translated = Translater.Instant($"Flow.Parts.{name}.Label", suppressWarnings: false);
         if (string.IsNullOrEmpty(translated) == false && translated != "Label")
             return translated;
 

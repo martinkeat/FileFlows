@@ -82,20 +82,21 @@ public class WorkerController : Controller
     /// <summary>
     /// Finish work, tells the server work has finished on a flow runner
     /// </summary>
-    /// <param name="info">Info about the finished work</param>
+    /// <param name="args">the complete args</param>
     [HttpPost("work/finish")]
-    public async void FinishWork([FromBody] FlowExecutorInfo info)
+    public async void FinishWork([FromBody] FinishWorkArgs args)
     {
+        FlowExecutorInfo info = args.Info;
         _ = new NodeController().UpdateLastSeen(info.NodeUid);
         
         Logger.Instance.ILog($"Finishing executor: {info.Uid} = {info.LibraryFile?.Name ?? string.Empty}");
         
-        if (string.IsNullOrEmpty(info.Log) == false)
+        if (string.IsNullOrEmpty(args.Log) == false)
         {
             // this contains the full log file, save it in case a message was lost or received out of order during processing
             try
             {
-                _ = LibraryFileLogHelper.SaveLog(info.LibraryFile.Uid, info.Log, saveHtml: true);
+                _ = LibraryFileLogHelper.SaveLog(info.LibraryFile.Uid, args.Log, saveHtml: true);
             }
             catch (Exception) { }
         }
@@ -201,7 +202,6 @@ public class WorkerController : Controller
     public async Task UpdateWork([FromBody] FlowExecutorInfo info)
     {
         _ = new NodeController().UpdateLastSeen(info.NodeUid);
-
         
         if (info.LibraryFile != null)
         {
@@ -517,4 +517,20 @@ public class WorkerController : Controller
         => Executors?.Select(x => x.Value?.LibraryFile?.Uid)?
                .Where(x => x != null)?.Select(x => x!.Value)?.ToArray() ??
            new Guid[] { };
+}
+
+/// <summary>
+/// Arguments for FinishWork call
+/// </summary>
+public class FinishWorkArgs
+{
+    /// <summary>
+    /// Gets or sets the information for the work
+    /// </summary>
+    public FlowExecutorInfo Info { get; set; }
+    
+    /// <summary>
+    /// Gets or sets the full log for the file
+    /// </summary>
+    public string Log { get; set; }
 }

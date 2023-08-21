@@ -56,7 +56,19 @@
                         @foreach (var grp in Filtered.GroupBy(x => x.Group))
                         {
                             <li class="group">@Helpers.FlowHelper.FormatLabel(grp.Key)</li>
-                            foreach (var ele in grp.OrderBy(x => x.Type == FlowElementType.Script ? x.Name : string.Empty).ThenBy(x => x.Type).ThenBy(x => x.DisplayName.Substring(x.DisplayName.IndexOf(":") + 1)))
+                            foreach (var ele in grp.OrderBy(x => x.Type == FlowElementType.Script ? x.Name : string.Empty)
+                                .ThenBy(x =>
+                                {
+                                    if (grp.Key != "FfmpegBuilderNodes")
+                                        return (int)x.Type;
+                                    if (x.Type == FlowElementType.BuildStart)
+                                        return 1;
+                                    if (x.Type == FlowElementType.BuildEnd)
+                                        return 2;
+                                    if (x.Type == FlowElementType.BuildPart)
+                                        return 3;
+                                    return 100 + (int)x.Type;
+                                }).ThenBy(x => x.DisplayName.Substring(x.DisplayName.IndexOf(":") + 1)))
                             {
                                 <li id="@ele.Uid" draggable="true" class="flow-element draggable @ele.Type @(ele.Obsolete ? "obsolete" : "") @(App.Instance.IsMobile && SelectedElement == ele.Uid ? "selected" : "") " 
                                     ondragstart="ffFlow.Mouse.dragElementStart(event)" @onclick="() => SelectPart(ele.Uid)">
