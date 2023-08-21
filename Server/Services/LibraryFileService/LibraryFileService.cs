@@ -284,20 +284,39 @@ public partial class LibraryFileService : ILibraryFileService
     /// </summary>
     /// <param name="includeOutput">if output names should be included</param>
     /// <returns>a list of all filenames</returns>
-    public Dictionary<string, (DateTime CreationTime, DateTime LastWriteTime)> GetKnownLibraryFilesWithCreationTimes(bool includeOutput = false)
+    public Dictionary<string, KnownFileInfo> GetKnownLibraryFilesWithCreationTimes(bool includeOutput = false)
     {
         if (includeOutput == false)
         {
             return Data.DistinctBy(x => x.Value.Name.ToLowerInvariant())
-                .ToDictionary(x => x.Value.Name.ToLowerInvariant(), x => (x.Value.CreationTime, x.Value.LastWriteTime));
+                .ToDictionary(x => x.Value.Name.ToLowerInvariant(), x =>
+                    new KnownFileInfo()
+                    {
+                        Name = x.Value.Name,
+                        Status = x.Value.Status,
+                        CreationTime = x.Value.CreationTime, 
+                        LastWriteTime = x.Value.LastWriteTime
+                    });
         }
 
-        var query = Data.Select(x => (x.Value.Name, x.Value.CreationTime, x.Value.LastWriteTime))
+        var query = Data.Select(x =>  new KnownFileInfo()
+            {
+                Name = x.Value.Name,
+                Status = x.Value.Status,
+                CreationTime = x.Value.CreationTime, 
+                LastWriteTime = x.Value.LastWriteTime
+            })
             .Union(Data.Where(x => string.IsNullOrEmpty(x.Value.OutputPath) == false)
-                .Select(x => (x.Value.Name, x.Value.CreationTime, x.Value.LastWriteTime)));
+                .Select(x =>  new KnownFileInfo()
+                {
+                    Name = x.Value.Name,
+                    Status = x.Value.Status,
+                    CreationTime = x.Value.CreationTime, 
+                    LastWriteTime = x.Value.LastWriteTime
+                }));
         
         return query.DistinctBy(x => x.Name.ToLowerInvariant())
-            .ToDictionary(x => x.Name.ToLowerInvariant(), x => (x.CreationTime, x.LastWriteTime));
+            .ToDictionary(x => x.Name.ToLowerInvariant(), x => x);
     }
 
     /// <summary>
@@ -363,4 +382,27 @@ public partial class LibraryFileService : ILibraryFileService
             file.Name, file.RelativePath, file.OutputPath, 
             file.CreationTime.ToString("yyyy-MM-dd HH:mm:ss"), file.LastWriteTime.ToString("yyyy-MM-dd HH:mm:ss"), 
             file.Uid);
+}
+
+/// <summary>
+/// Known file info
+/// </summary>
+public class KnownFileInfo
+{
+    /// <summary>
+    /// Gets or sets the filename
+    /// </summary>
+    public string Name { get; set; }
+    /// <summary>
+    /// Gets or sets the creation time
+    /// </summary>
+    public DateTime CreationTime { get; set; } 
+    /// <summary>
+    /// Gets or sets the last write time
+    /// </summary>
+    public DateTime LastWriteTime { get; set; }
+    /// <summary>
+    /// Gets or sets the status
+    /// </summary>
+    public FileStatus Status { get; set; }
 }

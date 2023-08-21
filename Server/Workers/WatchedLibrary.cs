@@ -683,9 +683,12 @@ public class WatchedLibrary:IDisposable
                     if (MatchesDetection(file.FullName) == false)
                         continue;
                 
-                    if (knownFiles.ContainsKey(file.FullName.ToLowerInvariant()))
+                    if (knownFiles.TryGetValue(file.FullName.ToLowerInvariant(), out KnownFileInfo info))
                     {
-                        if (DatesAreSame(file, knownFiles[file.FullName.ToLowerInvariant()]))
+                        if (Library.DownloadsDirectory && info.Status == FileStatus.Processed)
+                        {
+                            
+                        }else if (DatesAreSame(file, info))
                             continue;
                     }
 
@@ -719,7 +722,7 @@ public class WatchedLibrary:IDisposable
         }
     }
 
-    private bool DatesAreSame(FileInfo file, (DateTime CreationTime, DateTime LastWriteTime) knownFile)
+    private bool DatesAreSame(FileInfo file, KnownFileInfo knownFile)
     {
         if (datesSame(
                 file.CreationTime, knownFile.CreationTime,
