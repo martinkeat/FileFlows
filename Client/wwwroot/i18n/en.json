@@ -389,7 +389,9 @@
         "FullScanDisabled": "Disable Full Scan",
         "FullScanDisabled-Help": "The full scan''s intended purpose is to catch any files that may be missed by the file system watch events.",
         "FullScanIntervalMinutes": "Full Scan Interval",
-        "FullScanIntervalMinutes-Help": "The interval when a full scan of this library should take place"
+        "FullScanIntervalMinutes-Help": "The interval when a full scan of this library should take place",
+        "DownloadsDirectory": "Downloads Directory",
+        "DownloadsDirectory-Help": "A special directory where if a file that has been successfully processed is rediscovered in this folder, that file will automatically be reprocessed.\nThis is helpful if you re-download a file."
       }
     },
     "LibraryFile": {

@@ -273,6 +273,11 @@ public partial class Libraries : ListPage<Guid, Library>
                 new Condition(efFolders, library.Folders, value: true)                    
             }
         });
+        fields.Add(new ElementField
+        {
+            InputType = FormInputType.Switch,
+            Name = nameof(library.DownloadsDirectory)
+        });
         return fields;
     }
 

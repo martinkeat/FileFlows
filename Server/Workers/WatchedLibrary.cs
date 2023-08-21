@@ -327,6 +327,12 @@ public class WatchedLibrary:IDisposable
         string? fingerprint = null;
         if (knownFile != null)
         {
+            if (Library.DownloadsDirectory && knownFile.Status == FileStatus.Processed)
+            {
+                Logger.Instance.DLog("Processed file found in download library, reprocessing: " + fullpath);
+                new LibraryFileService().SetStatus(FileStatus.Unprocessed).Wait();
+                return (true, null, null);
+            }
             // FF-393 - check to see if the file has been modified
             var creationDiff = Math.Abs(fsInfo.CreationTime.Subtract(knownFile.CreationTime).TotalSeconds);
             var writeDiff = Math.Abs(fsInfo.LastWriteTime.Subtract(knownFile.LastWriteTime).TotalSeconds);

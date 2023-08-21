@@ -79,6 +79,12 @@ public class Library : FileFlowObject
     /// Gets or sets the flow this library uses
     /// </summary>
     public ObjectReference Flow { get; set; }
+    
+    /// <summary>
+    /// Gets or sets if this is a downloads directory and if such any file that's
+    /// found that has been processed will be reprocessed
+    /// </summary>
+    public bool DownloadsDirectory { get; set; }
 
     /// <summary>
     /// Gets or sets if the file access tests should be skipped for this library
