@@ -330,7 +330,7 @@ public class WatchedLibrary:IDisposable
             if (Library.DownloadsDirectory && knownFile.Status == FileStatus.Processed)
             {
                 Logger.Instance.DLog("Processed file found in download library, reprocessing: " + fullpath);
-                new LibraryFileService().SetStatus(FileStatus.Unprocessed).Wait();
+                new LibraryFileService().SetStatus(FileStatus.Unprocessed, knownFile.Uid).Wait();
                 return (true, null, null);
             }
             // FF-393 - check to see if the file has been modified
