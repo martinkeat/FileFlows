@@ -104,24 +104,25 @@ a, .btn-link {
 
 
 ::-webkit-scrollbar{
-    width: 10px;
+    width: 6px;
     height: 10px;
+    border-radius: 6px;
+    --scrollbar-track-color: #333;
+    background-color: var(--scrollbar-track-color);
+    
 }
 ::-webkit-scrollbar-track{
     background: var(--base) !important;
     border-radius: 0px;
 }
 ::-webkit-scrollbar-thumb {
-    border-radius: 0 !important;
-    &:not(:hover){
-        background:rgba(var(--accent-rgb), 0.5) !important;
-    }
-    &:hover
-    {
-        background:var(--accent) !important;
-    }
+    border-radius: 6px !important;
+    --scrollbar-thumb-color: #444;
+    background-color: var(--scrollbar-thumb-color);
 }
 ::-webkit-scrollbar-corner {background-color: var(--base) !important;}
+
+
 .draggable {
     cursor:grab;
     
