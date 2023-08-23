@@ -69,7 +69,10 @@ public class DashboardController : Controller
             return null;
         var db = new DashboardService().GetByUid(uid);;
         if ((db == null || db.Uid == Guid.Empty) && uid == Dashboard.DefaultDashboardUid)
-            db = Dashboard.GetDefaultDashboard(DbHelper.UseMemoryCache == false);
+        {
+            var nodes = new NodeService().GetAll().Count(x => x.Enabled);
+            db = Dashboard.GetDefaultDashboard(DbHelper.UseMemoryCache == false, nodes);
+        }
         else if (db == null)
             throw new Exception("Dashboard not found");
         List<WidgetUiModel> Widgets = new List<WidgetUiModel>();

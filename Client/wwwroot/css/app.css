@@ -1005,6 +1005,7 @@ hr {
   max-height: 100%;
   height: 100%;
   margin: 0.5rem 0.25rem 0;
+  max-width: 100%;
 }
 .widget .content tr td {
   border-top: solid 1px rgba(var(--color-rgb), 0.1);
@@ -1020,6 +1021,11 @@ hr {
 }
 .widget .content tr th:first-child, .widget .content tr td:first-child {
   padding-left: 0.5rem;
+}
+.widget .content td.no-wrap {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
 }
 .widget .content tbody {
   display: block;

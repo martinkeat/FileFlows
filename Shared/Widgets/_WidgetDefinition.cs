@@ -54,6 +54,8 @@ public abstract class WidgetDefinition
             return new StorageSaved();
         if (uid == NvidiaSmi.WD_UID)
             return new NvidiaSmi();
+        if (uid == ProcessingNodes.WD_UID)
+            return new ProcessingNodes();
         throw new Exception("Unknown widget: " + uid);
     }
     
@@ -97,6 +99,10 @@ public enum WidgetType
     /// Table of library files
     /// </summary>
     LibraryFileTable = 2,
+    /// <summary>
+    /// Processing nodes overview
+    /// </summary>
+    ProcessingNodes = 3,
     /// <summary>
     /// Box plot 
     /// </summary>

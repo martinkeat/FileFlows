@@ -1,6 +1,7 @@
 import { FFChart } from './FFChart.js';
 import { Processing } from './Processing.js';
 import { LibraryFileTable } from "./LibraryFileTable.js";
+import { ProcessingNodes } from './ProcessingNodes.js';
 
 export function initDashboard(uid, Widgets, csharp, isReadOnly){
     if(!Widgets)
@@ -202,6 +203,8 @@ function newChart(type, uid, args){
         window.FlowCharts[uid] = new Processing(uid, args);
     else if(type == 'LibraryFileTable' || type === 2)
         window.FlowCharts[uid] = new LibraryFileTable(uid, args);
+    else if(type == 'ProcessingNodes' || type === 3)
+        window.FlowCharts[uid] = new ProcessingNodes(uid, args);
     else if(type == 'BoxPlot' || type === 101)
         window.FlowCharts[uid] = new BoxPlotChart(uid, args);
     else if(type == 'HeatMap' || type === 102)

@@ -479,7 +479,9 @@
         "ComicFormats": "Comic Formats",
         "ComicPages": "Comic Pages",
         "ImageFormats": "Image Formats",
-        "NvidiaSmi": "NVIDIA SMI"
+        "NvidiaSmi": "NVIDIA SMI",
+        "Processing": "Processing",
+        "ProcessingNodes": "Processing Nodes"
       }
     },
     "ProcessingNode": {

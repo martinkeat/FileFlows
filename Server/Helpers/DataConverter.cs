@@ -58,6 +58,10 @@ public class DataConverter : JsonConverter<FileFlowObject>
                     continue; // dont write defaults
                 if (propValue as bool? == false)
                     continue; // don't write default false booleans
+                
+                var ignore = prop.GetCustomAttribute<DbIgnoreAttribute>();
+                if (ignore != null)
+                    continue;
 
                 var encrypted = prop.GetCustomAttribute<EncryptedAttribute>();
                 if (encrypted != null)

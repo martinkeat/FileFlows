@@ -3,6 +3,7 @@ using FileFlows.Shared.Models;
 using FileFlows.Server.Helpers;
 using FileFlows.Server.Services;
 using FileFlows.ServerShared.Models;
+using Humanizer;
 
 namespace FileFlows.Server.Controllers;
 
@@ -31,8 +32,39 @@ public class NodeController : Controller
         if (internalNode != null)
             internalNode.OperatingSystem = OperatingSystemType.Linux;
 #endif
+
+        foreach (var node in nodes)
+        {
+            if (node.Enabled == false)
+                node.Status = ProcessingNodeStatus.Disabled;
+            else if (TimeHelper.InSchedule(node.Schedule) == false)
+                node.Status = ProcessingNodeStatus.OutOfSchedule;
+            else if (node.Version != Globals.Version)
+                node.Status = ProcessingNodeStatus.VersionMismatch;
+            else if (node.LastSeen < DateTime.Now.AddMinutes(-5))
+                node.Status = ProcessingNodeStatus.Offline;
+            else if (WorkerController.Executors.Any(x => x.Value.NodeUid == node.Uid))
+                node.Status = ProcessingNodeStatus.Processing;
+            else
+                node.Status = ProcessingNodeStatus.Idle;
+        }
         
         return nodes.OrderBy(x => x.Name.ToLowerInvariant());
+    }
+
+    /// <summary>
+    /// Gets an overview of the nodes
+    /// </summary>
+    /// <returns>the response</returns>
+    [HttpGet("overview")]
+    public IActionResult Overview()
+    {
+        var data = GetAll().Select(x => new
+        {
+            Name = x.Uid == Globals.InternalNodeUid ? "Internal" : x.Name,
+            Status = x.Status.ToString().Humanize()
+        });
+        return Ok(data);
     }
 
     /// <summary>

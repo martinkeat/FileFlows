@@ -1,5 +1,6 @@
 @namespace FileFlows.Client.Pages
 @using FileFlows.Shared.Models
+@using Humanizer
 @inherits ListPage<Guid, ProcessingNode>
 
 @page "/nodes"
@@ -29,7 +30,7 @@
                         @Globals.lblName
                     </Header>
                     <Cell Context="item">
-                        @if (item.Address != FileFlowsServer && item.LastSeen < DateTime.Now.AddMinutes(-5))
+                        @if (item.Address != FileFlowsServer && item.Status == ProcessingNodeStatus.Offline)
                         {
                             <i title="Disconnected" class="processing-node status-error fas fa-times-circle"></i>
                         }
@@ -44,17 +45,22 @@
                         <span>@item.Name</span>
                     </Cell>
                 </FlowTableColumn>
-                <FlowTableColumn TItem="ProcessingNode" Width="9rem" LargeWidth="18rem" Align="FlowTableAlignment.Center" MobileWidth="0">
+                <FlowTableColumn TItem="ProcessingNode" Width="15rem" Align="FlowTableAlignment.Center" MobileWidth="0">
                     <Header>
+                        Status
                     </Header>
                     <Cell Context="item">
-                        @if (item.Address != FileFlowsServer && string.Equals(Globals.Version, item.Version, StringComparison.InvariantCulture) == false)
+                        @if (item.Status == ProcessingNodeStatus.VersionMismatch)
                         {
                             <span style="font-style: italic;color: var(--warning);" title="@lblUpgradeRequiredHint">@lblUpgradeRequired</span>
                         }
+                        else
+                        {
+                            <span>@item.Status.ToString().Humanize()</span>
+                        }
                     </Cell>
                 </FlowTableColumn>
-                <FlowTableColumn TItem="ProcessingNode" MobileWidth="0" Width="14rem">
+                <FlowTableColumn TItem="ProcessingNode" MobileWidth="0" Width="12rem" LargeWidth="14rem" Align="FlowTableAlignment.Center">
                     <Header>
                         @lblAddress
                     </Header>
@@ -68,31 +74,7 @@
                         }
                     </Cell>
                 </FlowTableColumn>
-                <FlowTableColumn TItem="ProcessingNode" Width="9rem" LargeWidth="18rem" Align="FlowTableAlignment.Center" MobileWidth="0">
-                    <Header>
-                        @lblVersion
-                    </Header>
-                    <Cell Context="item">
-                        <span>@item.Version</span>
-                    </Cell>
-                </FlowTableColumn>
-                <FlowTableColumn TItem="ProcessingNode" Width="9rem" LargeWidth="18rem" Align="FlowTableAlignment.Center" MobileWidth="0">
-                    <Header>
-                        @lblRunners
-                    </Header>
-                    <Cell Context="item">
-                        <span>@item.FlowRunners</span>
-                    </Cell>
-                </FlowTableColumn>
-                <FlowTableColumn TItem="ProcessingNode" Width="9rem" LargeWidth="18rem" Align="FlowTableAlignment.Center" MobileWidth="0">
-                    <Header>
-                        Architecture
-                    </Header>
-                    <Cell Context="item">
-                        <span>@item.Architecture</span>
-                    </Cell>
-                </FlowTableColumn>
-                <FlowTableColumn TItem="ProcessingNode" Width="9rem" LargeWidth="18rem" Align="FlowTableAlignment.Center" MobileWidth="0">
+                <FlowTableColumn TItem="ProcessingNode" Width="9rem" LargeWidth="14rem" Align="FlowTableAlignment.Center" MobileWidth="0">
                     <Header>
                         OS
                     </Header>
@@ -100,7 +82,31 @@
                         <span>@item.OperatingSystem</span>
                     </Cell>
                 </FlowTableColumn>
-                <FlowTableColumn TItem="ProcessingNode" Width="9rem" LargeWidth="18rem" Align="FlowTableAlignment.Center">
+                <FlowTableColumn TItem="ProcessingNode" Width="8rem" Align="FlowTableAlignment.Center" MobileWidth="0">
+                    <Header>
+                        Architecture
+                    </Header>
+                    <Cell Context="item">
+                        <span>@item.Architecture</span>
+                    </Cell>
+                </FlowTableColumn>
+                <FlowTableColumn TItem="ProcessingNode" Width="8rem" Align="FlowTableAlignment.Center" MobileWidth="0">
+                    <Header>
+                        @lblVersion
+                    </Header>
+                    <Cell Context="item">
+                        <span>@item.Version</span>
+                    </Cell>
+                </FlowTableColumn>
+                <FlowTableColumn TItem="ProcessingNode" Width="8rem" Align="FlowTableAlignment.Center" MobileWidth="0">
+                    <Header>
+                        @lblRunners
+                    </Header>
+                    <Cell Context="item">
+                        <span>@item.FlowRunners</span>
+                    </Cell>
+                </FlowTableColumn>
+                <FlowTableColumn TItem="ProcessingNode" Width="8rem" Align="FlowTableAlignment.Center">
                     <Header>
                         @Globals.lblEnabled
                     </Header>
