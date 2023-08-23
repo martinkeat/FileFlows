@@ -391,7 +391,9 @@
         "FullScanIntervalMinutes": "Full Scan Interval",
         "FullScanIntervalMinutes-Help": "The interval when a full scan of this library should take place",
         "DownloadsDirectory": "Downloads Directory",
-        "DownloadsDirectory-Help": "A special directory where if a file that has been successfully processed is rediscovered in this folder, that file will automatically be reprocessed.\nThis is helpful if you re-download a file."
+        "DownloadsDirectory-Help": "A special directory where if a file that has been successfully processed is rediscovered in this folder, that file will automatically be reprocessed.\nThis is helpful if you re-download a file.",
+        "MaxRunners": "Max Runners",
+        "MaxRunners-Help": "The maximum runners that can process files in this library at one time.\nSet to 0 for unlimited."
       }
     },
     "LibraryFile": {

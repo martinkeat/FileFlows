@@ -182,4 +182,9 @@ public class Library : FileFlowObject
     /// Note: this only happens if the original file no longer exists.  This is also is limited to files in the same library
     /// </summary>
     public bool UpdateMovedFiles { get; set; }
+    
+    /// <summary>
+    /// Gets or sets the maximum concurrent files that can be processed at one time in this library
+    /// </summary>
+    public int MaxRunners { get; set; }
 }
