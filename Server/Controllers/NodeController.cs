@@ -59,11 +59,13 @@ public class NodeController : Controller
     [HttpGet("overview")]
     public IActionResult Overview()
     {
-        var data = GetAll().Select(x => new
-        {
-            Name = x.Uid == Globals.InternalNodeUid ? "Internal" : x.Name,
-            Status = x.Status.ToString().Humanize()
-        });
+        var data = GetAll().OrderBy(x => x.Enabled ? 1 : 2).ThenBy(x => x.Uid == Globals.InternalNodeUid ? 1 : 2)
+            .ThenBy(x => x.Name)
+            .Select(x => new
+            {
+                Name = x.Uid == Globals.InternalNodeUid ? "Internal" : x.Name,
+                Status = x.Status.ToString().Humanize()
+            });
         return Ok(data);
     }
 

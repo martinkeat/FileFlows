@@ -58,7 +58,6 @@ public partial class Plugins : ListPage<Guid, PluginInfoModel>
 
     async Task<bool> SaveSettings(ExpandoObject model)
     {
-#if (!DEMO)
         Blocker.Show();
         this.StateHasChanged();
 
@@ -78,14 +77,10 @@ public partial class Plugins : ListPage<Guid, PluginInfoModel>
             Blocker.Hide();
             this.StateHasChanged();
         }
-#else
-        return true;
-#endif
     }
 
     public override async Task<bool> Edit(PluginInfoModel plugin)
     {
-#if (!DEMO)
         if (plugin?.Settings?.Any() != true)
             return false;
         Blocker.Show();
@@ -114,12 +109,10 @@ public partial class Plugins : ListPage<Guid, PluginInfoModel>
         var result = await Editor.Open(new()
         {
             TypeName = "Plugins." + plugin.PackageName, Title = plugin.Name, Fields = fields, Model = model,
+            HelpUrl = GetPluginHelpUrl(plugin, true),
             SaveCallback = SaveSettings
         });
         return false; // we dont need to reload the list
-#else
-        return false;
-#endif
     }
 
 
@@ -141,7 +134,7 @@ public partial class Plugins : ListPage<Guid, PluginInfoModel>
     {
         await Editor.Open(new()
         {
-            TypeName = "Pages.Plugins", Title = plugin.Name, Fields = new List<ElementField>
+            TypeName = "Pages.Plugins", Title = plugin.Name, HelpUrl = GetPluginHelpUrl(plugin), Fields = new List<ElementField>
             {
                 new ElementField
                 {
@@ -195,7 +188,22 @@ public partial class Plugins : ListPage<Guid, PluginInfoModel>
         });
     }
 
-    
+    /// <summary>
+    /// Gets the help URL for the plugin 
+    /// </summary>
+    /// <param name="plugin">the plugin</param>
+    /// <returns>the help URL</returns>
+    private string GetPluginHelpUrl(PluginInfoModel plugin, bool settings = false)
+    {
+        string name = plugin.Name;
+        name = name.Replace(" ", "-").ToLowerInvariant();
+        string url = $"https://fileflows.com/docs/plugins/{name}";
+        if (settings)
+            url += "/settings";
+        return url;
+    }
+
+
     public override async Task Delete()
     {
         var used = Table.GetSelected()?.Any(x => x.UsedBy?.Any() == true) == true;
