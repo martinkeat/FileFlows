@@ -98,16 +98,20 @@ public class SettingsService : Service, ISettingsService
     /// <returns>the current configuration revision number</returns>
     public async Task<int> GetCurrentConfigurationRevision()
     {
+        const string errorPrefix = "Failed to get FileFlows current configuration revision: ";
         try
         {
             var result = await HttpHelper.Get<int>($"{ServiceBaseUrl}/api/settings/current-config/revision");
             if (result.Success == false)
-                throw new Exception("Failed to get FileFlows current configuration revision: " + result.Body);
+                throw new Exception(errorPrefix + result.Body);
             return result.Data;
         }
         catch (Exception ex)
         {
-            Logger.Instance?.WLog("Failed to get FileFlows current configuration revision: " + ex.Message);
+            if(ex.Message.StartsWith(errorPrefix))
+                Logger.Instance?.WLog(ex.Message);
+            else
+                Logger.Instance?.WLog("Failed to get FileFlows current configuration revision: " + ex.Message);
             return -1;
         }
     }
