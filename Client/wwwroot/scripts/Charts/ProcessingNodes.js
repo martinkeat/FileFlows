@@ -106,6 +106,12 @@ export class ProcessingNodes extends FFChart
         for(let item of data)
         {
             let tr = document.createElement('tr');
+            if(item.Status.toLowerCase() === 'version mismatch')
+                tr.style.color = 'var(--orange)';
+            else if(item.Status.toLowerCase() === 'out of schedule')
+                tr.style.color = 'var(--yellow)';
+            else if(item.Status.toLowerCase() === 'disabled')
+                tr.style.opacity = '0.6';
             tbody.appendChild(tr);
 
             let tdName = document.createElement('td');
