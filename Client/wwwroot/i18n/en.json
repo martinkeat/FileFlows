@@ -700,6 +700,9 @@
       "Messages": {
         "NoScripts":"No scripts found to create a task for.",
         "NoHistory": "This task has no run history available."
+      },
+      "Buttons": {
+        "EditScript": "Edit Script"
       }
     },
     "FileFlowsTask":{
