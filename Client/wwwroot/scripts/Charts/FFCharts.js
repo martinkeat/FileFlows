@@ -10,7 +10,9 @@ export function initDashboard(uid, Widgets, csharp, isReadOnly){
     let defaultDashboard = uid === 'bed286d9-68f0-48a8-8c6d-05ec6f81d67c';
     if(defaultDashboard && window.innerWidth <= 850) {
         // rearrange widgets so Runners is first
-        Widgets = [...Widgets.filter(x => x.type === 1), ...Widgets.filter(x => x.type !== 105 && x.type !== 1),  ...Widgets.filter(x => x.type === 105)]        
+        Widgets = [...Widgets.filter(x => x.type === 1), 
+            ...Widgets.filter(x => x.type !== 105 && x.type !== 1 && x.type !== 3),  
+            ...Widgets.filter(x => x.type === 105 || x.type === 3)]        
     }
     disposeAll();
     destroyDashboard();
@@ -35,7 +37,7 @@ export function initDashboard(uid, Widgets, csharp, isReadOnly){
     {
         addWidget(dashboard, p, csharp);
     }
-    intDashboardActual(uid, csharp, isReadOnly);
+    initDashboardActual(uid, csharp, isReadOnly);
 }
 
 export function destroyDashboard()
@@ -101,7 +103,7 @@ export function disposeAll(){
     });
 }
 
-function intDashboardActual(uid, csharp, isReadOnly) {
+function initDashboardActual(uid, csharp, isReadOnly) {
 
     if (window.innerWidth < 850)
         return;
