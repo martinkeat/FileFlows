@@ -27,6 +27,9 @@ public class Program
 
     public static void Main(string[] args)
     {
+        #if(DEBUG)
+        args = new[] { "--no-gui" };
+        #endif
         try
         {
             if (args.Any(x =>

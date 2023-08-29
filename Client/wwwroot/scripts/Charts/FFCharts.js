@@ -1,6 +1,7 @@
 import { FFChart } from './FFChart.js';
 import { Processing } from './Processing.js';
 import { LibraryFileTable } from "./LibraryFileTable.js";
+import { ProcessingNodes } from './ProcessingNodes.js';
 
 export function initDashboard(uid, Widgets, csharp, isReadOnly){
     if(!Widgets)
@@ -9,7 +10,9 @@ export function initDashboard(uid, Widgets, csharp, isReadOnly){
     let defaultDashboard = uid === 'bed286d9-68f0-48a8-8c6d-05ec6f81d67c';
     if(defaultDashboard && window.innerWidth <= 850) {
         // rearrange widgets so Runners is first
-        Widgets = [...Widgets.filter(x => x.type === 1), ...Widgets.filter(x => x.type !== 105 && x.type !== 1),  ...Widgets.filter(x => x.type === 105)]        
+        Widgets = [...Widgets.filter(x => x.type === 1), 
+            ...Widgets.filter(x => x.type !== 105 && x.type !== 1 && x.type !== 3),  
+            ...Widgets.filter(x => x.type === 105 || x.type === 3)]        
     }
     disposeAll();
     destroyDashboard();
@@ -34,7 +37,7 @@ export function initDashboard(uid, Widgets, csharp, isReadOnly){
     {
         addWidget(dashboard, p, csharp);
     }
-    intDashboardActual(uid, csharp, isReadOnly);
+    initDashboardActual(uid, csharp, isReadOnly);
 }
 
 export function destroyDashboard()
@@ -100,7 +103,7 @@ export function disposeAll(){
     });
 }
 
-function intDashboardActual(uid, csharp, isReadOnly) {
+function initDashboardActual(uid, csharp, isReadOnly) {
 
     if (window.innerWidth < 850)
         return;
@@ -202,6 +205,8 @@ function newChart(type, uid, args){
         window.FlowCharts[uid] = new Processing(uid, args);
     else if(type == 'LibraryFileTable' || type === 2)
         window.FlowCharts[uid] = new LibraryFileTable(uid, args);
+    else if(type == 'ProcessingNodes' || type === 3)
+        window.FlowCharts[uid] = new ProcessingNodes(uid, args);
     else if(type == 'BoxPlot' || type === 101)
         window.FlowCharts[uid] = new BoxPlotChart(uid, args);
     else if(type == 'HeatMap' || type === 102)

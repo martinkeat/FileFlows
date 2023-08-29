@@ -55,7 +55,7 @@ public class ScriptController : Controller
     /// <param name="type">The type of script</param>
     /// <returns>the script instance</returns>
     [HttpGet("{name}")]
-    public Task<Script> Get([FromRoute] string name, ScriptType type = ScriptType.Flow)
+    public Task<Script> Get([FromRoute] string name, [FromQuery] ScriptType type = ScriptType.Flow)
         => new ScriptService().Get(name, type);
 
 

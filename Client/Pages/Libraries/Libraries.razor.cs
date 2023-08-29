@@ -12,7 +12,7 @@ public partial class Libraries : ListPage<Guid, Library>
     private async Task Add()
     {
         await Edit(new ()
-        {
+        {  
             Enabled = true, 
             ScanInterval = 60, 
             FileSizeDetectionInterval = 5,

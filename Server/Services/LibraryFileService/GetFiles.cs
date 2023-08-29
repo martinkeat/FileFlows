@@ -196,7 +196,7 @@ public partial class LibraryFileService
         string filter = null, List<Guid> allowedLibraries = null, long? maxSizeMBs = null,
         List<Guid> exclusionUids = null, bool forcedOnly = false)
     {
-        var query = await ConstructQuery(status, allowedLibraries, maxSizeMBs, exclusionUids, forcedOnly: forcedOnly);
+        var query = await ConstructQuery(status, allowedLibraries, maxSizeMBs, exclusionUids, forcedOnly: forcedOnly, rows: rows);
         if (string.IsNullOrWhiteSpace(filter) == false)
         {
             filter = filter.ToLowerInvariant();
@@ -218,9 +218,11 @@ public partial class LibraryFileService
     /// <param name="maxSizeMBs">maximum size in MBs of the file to be returned</param>
     /// <param name="exclusionUids">UIDs of files to be ignored</param>
     /// <param name="forcedOnly">if only forced files should be returned</param>
+    /// <param name="rows">the number to rows that will be fetched, not fetched now, but later on, used to determine
+    /// if we are getting the 'NextFile' which takes Library runners into account</param>
     /// <returns>a IEnumerable of files</returns>
     private async Task<IEnumerable<LibraryFile>> ConstructQuery(FileStatus? status, List<Guid> allowedLibraries = null,
-        long? maxSizeMBs = null, List<Guid> exclusionUids = null, bool forcedOnly = false)
+        long? maxSizeMBs = null, List<Guid> exclusionUids = null, bool forcedOnly = false, int rows = 0)
     {
         try
         {
@@ -263,6 +265,14 @@ public partial class LibraryFileService
             if (status == FileStatus.OutOfSchedule && outOfSchedule.Any() == false)
                 return new List<LibraryFile>(); // no out of schedule libraries, therefore no data
 
+            var maxedOutLibraries = libraries.Where(lib =>
+            {
+                if (lib.Value.MaxRunners < 1)
+                    return false; // no limit
+                int count = WorkerController.Executors.Values.Count(exe => exe.Library.Uid == lib.Value.Uid);
+                return count >= lib.Value.MaxRunners;
+            }).Select(x => x.Value.Uid).ToList();
+
             var canUserCustomProcessingOrder = LicenseHelper.IsLicensed(LicenseFlags.ProcessingOrder);
 
             query = Data.Where(x =>
@@ -304,6 +314,12 @@ public partial class LibraryFileService
                         return onHold; // we only want on hold files
                     if (onHold)
                         return false; // this file is on hold, they dont want on hold files, so don't return it
+
+                    if (rows == 1)
+                    {
+                        if (maxedOutLibraries.Contains(x.Value.LibraryUid.Value))
+                            return false; // library is maxed out, cant process this file yet
+                    }
                     
                     return true;
                 })

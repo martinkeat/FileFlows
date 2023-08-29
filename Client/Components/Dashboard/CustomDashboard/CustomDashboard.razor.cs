@@ -270,7 +270,7 @@ public partial class CustomDashboard : IDisposable
     }
 
     /// <summary>
-    /// Humanzies a step name
+    /// Humanizes a step name
     /// </summary>
     /// <param name="step">The unhumanized step name</param>
     /// <returns>the humanized step name</returns>

@@ -21,6 +21,8 @@
             <FlowTableButton Clicked=Run SelectedOne="true" Icon="fas fa-running" Label="Labels.Run"/>
             <FlowTableButton Clicked=RunHistory SelectedOne="true" Icon="fas fa-history" Label="Labels.RunHistory"/>
             <FlowTableButtonSeparator />             
+            <FlowTableButton Clicked=EditScript SelectedOne="true" Icon="fas fa-edit" Label="@lblEditScript" />
+            <FlowTableButtonSeparator />             
             <FlowTableHelpButton HelpUrl="tasks" />
         </ToolBar>
 
@@ -76,3 +78,4 @@
     </Body>
 
 </PageView>
+<FileFlows.Client.Components.Dialogs.ImportScript @ref="ScriptImporter" />

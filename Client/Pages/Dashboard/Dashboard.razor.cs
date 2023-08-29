@@ -47,10 +47,7 @@ public partial class Dashboard : ComponentBase, IDisposable
         lblAddWidget = Translater.Instant("Pages.Dashboard.Labels.AddWidget");
         ClientService.SystemPausedUpdated += ClientServiceOnSystemPausedUpdated;
 
-        if (App.Instance.FileFlowsSystem.LicenseDashboards)
-            await LoadDashboards();
-        else
-            ActiveDashboardUid = Guid.Empty;
+        await LoadDashboards();
     }
 
     /// <summary>

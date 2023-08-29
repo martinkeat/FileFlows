@@ -1,5 +1,7 @@
+using System.Web;
 using FileFlows.Client.Components;
 using FileFlows.Client.Components.Inputs;
+using FileFlows.Client.Components.ScriptEditor;
 using FileFlows.Plugin;
 using Humanizer;
 
@@ -10,7 +12,7 @@ public partial class Tasks: ListPage<Guid, FileFlowsTask>
     public override string ApiUrl => "/api/task";
 
     private string lblLastRun, lblNever, lblTrigger;
-    private string lblRunAt, lblSuccess, lblReturnCode;
+    private string lblRunAt, lblSuccess, lblReturnCode, lblEditScript;
 
     private enum TimeSchedule
     {
@@ -28,6 +30,10 @@ public partial class Tasks: ListPage<Guid, FileFlowsTask>
     private static readonly string SCHEDULE_12_HOURLY = string.Concat(Enumerable.Repeat("1" + new string('0', 47), 2 * 7));
     private static readonly string SCHEDULE_DAILY = string.Concat(Enumerable.Repeat("1" + new string('0', 95), 7));
 
+    /// <summary>
+    /// The script importer
+    /// </summary>
+    private Components.Dialogs.ImportScript ScriptImporter;
 
     /// <summary>
     /// Gets if they are licensed for this page
@@ -44,6 +50,7 @@ public partial class Tasks: ListPage<Guid, FileFlowsTask>
         lblRunAt = Translater.Instant("Labels.RunAt");
         lblSuccess = Translater.Instant("Labels.Success");
         lblReturnCode = Translater.Instant("Labels.ReturnCode");
+        lblEditScript = Translater.Instant("Pages.Tasks.Buttons.EditScript");
         base.OnInitialized();
     }
 
@@ -400,5 +407,34 @@ public partial class Tasks: ListPage<Guid, FileFlowsTask>
             ReadOnly = true,
             Fields = fields
         });
+    }
+
+    async Task EditScript()
+    {
+        var item = Table.GetSelected()?.FirstOrDefault();
+        if (item == null)
+            return;
+
+        this.Blocker.Show();
+        Script script;
+        try
+        {
+            var response =
+                await HttpHelper.Get<Script>("/api/script/" + HttpUtility.UrlPathEncode(item.Script) + "?type=System");
+            if (response.Success == false)
+            {
+                Toast.ShowError("Failed to load script");
+                return;
+            }
+
+            script = response.Data;
+        }
+        finally
+        {
+            this.Blocker.Hide();
+        }
+
+        var editor = new ScriptEditor(Editor, ScriptImporter, blocker: Blocker);
+        await editor.Open(script);
     }
 }

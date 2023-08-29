@@ -39,8 +39,9 @@ public class Dashboard: FileFlowObject
     /// Gets a default dashboard
     /// </summary>
     /// <param name="usingExternalDatabase">If the the system is using an external database or not</param>
+    /// <param name="enabledProcessingNodes">The number of enabled processing nodes</param>
     /// <returns>the default dashboard</returns>
-    public static Dashboard GetDefaultDashboard(bool usingExternalDatabase)
+    public static Dashboard GetDefaultDashboard(bool usingExternalDatabase, int enabledProcessingNodes)
     {
         var db = new Dashboard();
         db.Name = DefaultDashboardName;
@@ -67,7 +68,17 @@ public class Dashboard: FileFlowObject
             Y = rowIndex, X = 6,
             WidgetDefinitionUid = TempStorage.WD_UID
         });
-        if (usingExternalDatabase)
+        
+        if (enabledProcessingNodes > 1)
+        {
+            db.Widgets.Add(new()
+            {
+                Height = 1, Width = 3,
+                Y = rowIndex, X = 9,
+                WidgetDefinitionUid = ProcessingNodes.WD_UID
+            });
+        }
+        else if (usingExternalDatabase)
         {
             db.Widgets.Add(new()
             {

@@ -21,7 +21,7 @@ public class DashboardController : Controller
     public IEnumerable<Dashboard> GetAll()
     {
         if (LicenseHelper.IsLicensed(LicenseFlags.Dashboards) == false)
-            return new List<Dashboard>();
+             return new List<Dashboard>();
         
         var dashboards = new DashboardService().GetAll()
             .OrderBy(x => x.Name.ToLower()).ToList();
@@ -40,7 +40,7 @@ public class DashboardController : Controller
     public IEnumerable<ListOption> ListAll()
     {
         if (LicenseHelper.IsLicensed(LicenseFlags.Dashboards) == false)
-            return new List<ListOption>();
+             return new List<ListOption>();
         
         var dashboards = new DashboardService().GetAll()
             .OrderBy(x => x.Name.ToLower()).Select(x => new ListOption
@@ -66,10 +66,13 @@ public class DashboardController : Controller
     public IEnumerable<WidgetUiModel> Get(Guid uid)
     {
         if (LicenseHelper.IsLicensed(LicenseFlags.Dashboards) == false)
-            return null;
+            uid = Dashboard.DefaultDashboardUid;
         var db = new DashboardService().GetByUid(uid);;
         if ((db == null || db.Uid == Guid.Empty) && uid == Dashboard.DefaultDashboardUid)
-            db = Dashboard.GetDefaultDashboard(DbHelper.UseMemoryCache == false);
+        {
+            var nodes = new NodeService().GetAll().Count(x => x.Enabled);
+            db = Dashboard.GetDefaultDashboard(DbHelper.UseMemoryCache == false, nodes);
+        }
         else if (db == null)
             throw new Exception("Dashboard not found");
         List<WidgetUiModel> Widgets = new List<WidgetUiModel>();

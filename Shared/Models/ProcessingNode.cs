@@ -174,4 +174,42 @@ public class ProcessingNode: FileFlowObject
     /// <returns>the variable value</returns>
     public string GetVariable(string key)
         => Variables?.FirstOrDefault(x => x.Key == key).Value ?? string.Empty;
+
+    /// <summary>
+    /// Gets or sets the status of the processing node
+    /// </summary>
+    [DbIgnore]
+    public ProcessingNodeStatus Status { get; set; }
+}
+
+/// <summary>
+/// Current status of a processing node
+/// </summary>
+public enum ProcessingNodeStatus
+{
+    /// <summary>
+    /// The node is offline or cannot be reached
+    /// </summary>
+    Offline,
+    /// <summary>
+    /// The node is available but not processing
+    /// </summary>
+    Idle,
+    /// <summary>
+    /// The node is currently processing files
+    /// </summary>
+    Processing,
+    /// <summary>
+    /// The node is disabled
+    /// </summary>
+    Disabled,
+    /// <summary>
+    /// The node is out of schedule
+    /// </summary>
+    OutOfSchedule,
+    /// <summary>
+    /// The node's version does not match the servers
+    /// </summary>
+    VersionMismatch,
+    
 }
