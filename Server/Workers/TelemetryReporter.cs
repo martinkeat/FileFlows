@@ -37,7 +37,7 @@ public class TelemetryReporter : Worker
             TelemetryData data = new TelemetryData();
             data.ClientUid = settings.Uid;
             data.Version = Globals.Version.ToString();
-            data.ExternalDatabaseStorageSaved = DbHelper.IsSqlLite == false;
+            data.DatabaseProvider = DbHelper.IsSqlLite ? "SQLite" : "MySQL";
             var pNodes = new NodeService().GetAll().Where(x => x.Enabled);
             data.ProcessingNodes = pNodes.Count();
             data.ProcessingNodeData = pNodes.Select(x => new ProcessingNodeData()
@@ -188,9 +188,9 @@ public class TelemetryReporter : Worker
         public long StorageSaved { get; set; }
         
         /// <summary>
-        /// Gets or sets they are using an external database
+        /// Gets or sets the db provider they are using
         /// </summary>
-        public bool ExternalDatabaseStorageSaved { get; set; }
+        public string DatabaseProvider { get; set; }
     }
 
     /// <summary>
