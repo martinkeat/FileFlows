@@ -1,5 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 using FileFlows.Server.Controllers;
+using FileFlows.Server.Helpers;
 using FileFlows.Server.Services;
 using FileFlows.ServerShared.Workers;
 using FileFlows.Shared.Helpers;
@@ -36,6 +37,7 @@ public class TelemetryReporter : Worker
             TelemetryData data = new TelemetryData();
             data.ClientUid = settings.Uid;
             data.Version = Globals.Version.ToString();
+            data.ExternalDatabaseStorageSaved = DbHelper.IsSqlLite == false;
             var pNodes = new NodeService().GetAll().Where(x => x.Enabled);
             data.ProcessingNodes = pNodes.Count();
             data.ProcessingNodeData = pNodes.Select(x => new ProcessingNodeData()
@@ -184,6 +186,11 @@ public class TelemetryReporter : Worker
         /// Gets or sets the amount of storage saved
         /// </summary>
         public long StorageSaved { get; set; }
+        
+        /// <summary>
+        /// Gets or sets they are using an external database
+        /// </summary>
+        public bool ExternalDatabaseStorageSaved { get; set; }
     }
 
     /// <summary>

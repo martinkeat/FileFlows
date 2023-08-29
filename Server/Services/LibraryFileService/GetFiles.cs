@@ -31,26 +31,6 @@ public partial class LibraryFileService
         if (settings.IsPaused)
             return NextFileResult(NextLibraryFileStatus.SystemPaused);
 
-        if (DateTime.UtcNow > new DateTime(2023, 10, 1))
-        {
-            int current = Data.Count(x => x.Value.Status == FileStatus.Processed);
-            if (current > 15_000)
-            {
-                if (LicenseHelper.IsLicensed() == false)
-                {
-                    Logger.Instance.ILog("License limit exceed, you must upgrade your license to process more files.");
-                    return NextFileResult(NextLibraryFileStatus.LicenseLimitReached);
-                }
-
-                var license = LicenseHelper.GetLicense();
-                if (license.Files >= current)
-                {
-                    Logger.Instance.ILog("License limit exceed, you must upgrade your license to process more files.");
-                    return NextFileResult(NextLibraryFileStatus.LicenseLimitReached);
-                }
-            }
-        }
-
         var nodeService = new NodeService();
         var node = await nodeService.GetByUidAsync(nodeUid);
         if (node != null && node.Version != nodeVersion)
