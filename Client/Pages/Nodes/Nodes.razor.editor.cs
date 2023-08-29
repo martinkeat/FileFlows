@@ -24,7 +24,7 @@ public partial class Nodes : ListPage<Guid, ProcessingNode>
         if(isServerProcessingNode == false)
             tabs.Add("Mappings", TabMappings(node));
         tabs.Add("Processing", await TabProcessing(node));
-        if (node.OperatingSystem == OperatingSystemType.Linux || node.OperatingSystem == OperatingSystemType.Unknown)
+        if (node.OperatingSystem != OperatingSystemType.Windows)
             tabs.Add("Advanced", TabAdvanced(node));
         tabs.Add("Variables", TabVariables(node));
 
