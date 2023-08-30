@@ -152,8 +152,23 @@ public partial class NewFlowEditor : Editor
                     }
 
                     fields.Add(tfm.ElementField);
-                    if (tfm.TemplateField.Default != null)
-                        UpdateValue(tfm.ElementField, tfm.TemplateField.Default);
+                    object defaultValue = tfm.TemplateField.Default;
+                    if (defaultValue is JsonElement je)
+                    {
+                        if (je.ValueKind == JsonValueKind.String)
+                            defaultValue = je.GetString();
+                        else if (je.ValueKind == JsonValueKind.False)
+                            defaultValue = false;
+                        else if (je.ValueKind == JsonValueKind.True)
+                            defaultValue = true;
+                        else if (je.ValueKind == JsonValueKind.Number)
+                            defaultValue = je.GetInt32();
+                        else
+                            defaultValue = null;
+
+                    }
+                    if (defaultValue!= null)
+                        UpdateValue(tfm.ElementField, defaultValue);
                     else if(tfm.ElementField.InputType == FormInputType.Switch)
                         UpdateValue(tfm.ElementField, false);
                 }
