@@ -24,22 +24,15 @@ public class StatisticService : IStatisticService
     {
         if (statistic == null)
             return;
-        if (LicenseHelper.IsLicensed() == false)
-            return; // only save this to an external database
         await DbHelper.RecordStatistic(statistic);
     }
-    
+
     /// <summary>
     /// Gets statistics by name
     /// </summary>
     /// <returns>the matching statistics</returns>
     public Task<IEnumerable<Statistic>> GetStatisticsByName(string name)
-    {
-        if (LicenseHelper.IsLicensed() == false)
-            throw new Exception("Not supported by this installation.");
-        
-        return DbHelper.GetStatisticsByName(name);
-    }
+        => DbHelper.GetStatisticsByName(name);
     
     /// <summary>
     /// Clears statistics
@@ -49,9 +42,6 @@ public class StatisticService : IStatisticService
     /// <returns>the response</returns>
     public void Clear(string? name = null, DateTime? before = null)
     {
-        if (LicenseHelper.IsLicensed() == false)
-            throw new Exception("Not supported by this installation.");
-
         if (string.IsNullOrWhiteSpace(name) && string.IsNullOrWhiteSpace(name))
         {
             Logger.Instance.ILog($"Deleting ALL DbStatistics");

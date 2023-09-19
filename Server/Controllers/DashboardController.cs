@@ -39,21 +39,23 @@ public class DashboardController : Controller
     [HttpGet("list")]
     public IEnumerable<ListOption> ListAll()
     {
-        if (LicenseHelper.IsLicensed(LicenseFlags.Dashboards) == false)
-             return new List<ListOption>();
+
+        var dashboards = LicenseHelper.IsLicensed(LicenseFlags.Dashboards) == false
+            ? new List<ListOption>()
+            : new DashboardService().GetAll()
+                .OrderBy(x => x.Name.ToLower()).Select(x => new ListOption
+                {
+                    Label = x.Name,
+                    Value = x.Uid
+                }).ToList();
         
-        var dashboards = new DashboardService().GetAll()
-            .OrderBy(x => x.Name.ToLower()).Select(x => new ListOption
-        {
-            Label = x.Name,
-            Value = x.Uid
-        }).ToList();
         // add default
         dashboards.Insert(0, new ()
         {
             Label = Dashboard.DefaultDashboardName,
             Value = Dashboard.DefaultDashboardUid
         });
+        
         return dashboards;
     }
 
