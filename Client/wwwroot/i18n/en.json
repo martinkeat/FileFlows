@@ -526,7 +526,10 @@
         "MaxFileSizeMb-Help": "The maximum file size this Processing Node can process.  If set to 0, there will be no limit.",
         "PreExecuteScript":"Pre-Execute Script",
         "PreExecuteScript-Help":"A script that will run before any file is processed.  The result of this script must be 1 for it to pass anything else and the node will not process a file.",
-        "CopyMappings": "Copy Mappings"
+        "CopyMappings": "Copy Mappings",
+        "ProcessFileCheckInterval": "File Check Interval",
+        "ProcessFileCheckInterval-Help": "How often to check for a new file to processing in the processing nodes.\nSet to 0 to use the system value.",
+        "ProcessFileCheckInterval-Suffix": "seconds"
       }
     },
     "Plugins": {
@@ -638,6 +641,9 @@
         "HideProcessingStartedNotifications-Help": "If a toast notification should be shown in the web console when a file begins processing",
         "HideProcessingFinishedNotifications": "Processing Finished Notifications",
         "HideProcessingFinishedNotifications-Help": "If a toast notification should be shown in the web console when a file finishes processing",
+        "ProcessFileCheckInterval": "File Check Interval",
+        "ProcessFileCheckInterval-Help": "How often to check for a new file to processing in the processing nodes.",
+        "ProcessFileCheckInterval-Suffix": "seconds",
         "InternalProcessingNode": {
           "Description": "Here you can configure the Internal Processing Node of FileFlows.   A Processing Node is what executes a Flow and processes Files.",
           "Enabled": "Enabled",

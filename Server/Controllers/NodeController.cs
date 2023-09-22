@@ -118,6 +118,7 @@ public class NodeController : Controller
                 internalNode.AllLibraries = node.AllLibraries;
                 internalNode.MaxFileSizeMb = node.MaxFileSizeMb;
                 internalNode.Variables = node.Variables ?? new();
+                internalNode.ProcessFileCheckInterval = node.ProcessFileCheckInterval;
                 if (string.IsNullOrWhiteSpace(node.PreExecuteScript))
                     internalNode.PreExecuteScript = null;
                 else

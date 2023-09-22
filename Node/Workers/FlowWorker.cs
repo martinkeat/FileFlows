@@ -81,7 +81,6 @@ public class FlowWorker : Worker
     private readonly List<Guid> ExecutingRunners = new ();
 
     private const int DEFAULT_INTERVAL = 10;
-
     
     /// <summary>
     /// If this flow worker is running on the server or an external processing node
@@ -129,13 +128,37 @@ public class FlowWorker : Worker
     /// </summary>
     protected override void Execute()
     {
+        ExecuteActual(out ProcessingNode node);
+        // check if the timer has changed
+        if (node == null)
+            return;
+
+        int newInterval = node.ProcessFileCheckInterval;
+        if (newInterval < 1)
+        {
+            var settingsService = SettingsService.Load();
+            var settings = settingsService.Get().Result;
+            newInterval = settings.ProcessFileCheckInterval;
+        }
+        
+        if (newInterval == Interval || newInterval < 5)
+            return;
+        Logger.Instance.ILog($"Updating file check interval to {newInterval} seconds");
+        Initialize(ScheduleType.Second, newInterval);
+    }
+    
+    /// <summary>
+    /// Actually executes this worker
+    /// </summary>
+    private void ExecuteActual(out ProcessingNode node)
+    {
+        node = null;
         if (UpdaterWorker.UpdatePending)
             return;
 
         if (IsEnabledCheck?.Invoke() == false)
             return;
         var nodeService = NodeService.Load();
-        ProcessingNode node;
         try
         {
             node = isServer ? nodeService.GetServerNodeAsync().Result : nodeService.GetByAddressAsync(this.Hostname).Result;
@@ -145,6 +168,7 @@ public class FlowWorker : Worker
             Logger.Instance?.ELog("Failed to register node: " + ex.Message);
             return;
         }
+
 
         if (FirstExecute)
         {
@@ -172,16 +196,6 @@ public class FlowWorker : Worker
             Logger.Instance?.DLog($"Node '{nodeName}' is not enabled");
             return;
         }
-
-        // if(string.IsNullOrEmpty(node?.Schedule) == false && TimeHelper.InSchedule(node.Schedule) == false)
-        // {
-        //     Logger.Instance?.DLog($"Node '{nodeName}' is out of schedule");
-        //     Interval = 300; // slow interval down to 5minus
-        //     return;
-        // }
-
-        if (Interval == 300)
-            Interval = DEFAULT_INTERVAL;
 
         if (node?.FlowRunners <= ExecutingRunners.Count)
         {
@@ -230,6 +244,7 @@ public class FlowWorker : Worker
         bool windows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
         Guid processUid = Guid.NewGuid();
         AddExecutingRunner(processUid);
+        var node2 = node;
         Task.Run(() =>
         {
             int exitCode = 0; 
@@ -248,7 +263,7 @@ public class FlowWorker : Worker
                     "--cfgPath",
                     GetConfigurationDirectory(),
                     "--cfgKey",
-                    GetConfigNoEncrypt(node) ? "NO_ENCRYPT" : GetConfigKey(node),
+                    GetConfigNoEncrypt(node2) ? "NO_ENCRYPT" : GetConfigKey(node2),
                     "--baseUrl",
                     Service.ServiceBaseUrl,
                     Globals.IsDocker ? "--docker" : null,

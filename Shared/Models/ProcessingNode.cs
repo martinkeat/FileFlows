@@ -29,6 +29,11 @@ public class ProcessingNode: FileFlowObject
     public bool Enabled { get; set; }
     
     /// <summary>
+    /// Gets or sets the number of seconds to check for a new file to process
+    /// </summary>
+    public int ProcessFileCheckInterval { get; set; }
+    
+    /// <summary>
     /// Gets or sets the priority of the processing node
     /// Higher the value, the higher the priority 
     /// </summary>

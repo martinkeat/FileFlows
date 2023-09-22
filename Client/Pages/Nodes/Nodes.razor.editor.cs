@@ -273,6 +273,11 @@ public partial class Nodes : ListPage<Guid, ProcessingNode>
             InputType = FormInputType.Int,
             Name = nameof(node.MaxFileSizeMb)
         });
+        fields.Add(new ElementField
+        {
+            InputType = FormInputType.Int,
+            Name = nameof(node.ProcessFileCheckInterval)
+        });
         return fields;
     }
 

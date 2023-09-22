@@ -208,7 +208,7 @@ public class WatchedLibrary:IDisposable
             if (Library.SkipFileAccessTests == false && Library.Folders == false &&
                 CanAccess((FileInfo)fsInfo, Library.FileSizeDetectionInterval).Result == false)
             {
-                Logger.Instance.WLog($"Failed access checks for file file: " + fullpath +"\n" +
+                Logger.Instance.WLog($"Failed access checks for file: " + fullpath +"\n" +
                                      "These checks can be disabled in library settings, but ensure the flow can read and write to the library.");
                 return;
             }
@@ -717,7 +717,7 @@ public class WatchedLibrary:IDisposable
         }
         finally
         {
-            Logger.Instance.ILog($"WatchedLibrary: Scan finished on '{Library.Name}': {Library.Path} ({DateTime.Now.Subtract(start)}");
+            Logger.Instance.ILog($"WatchedLibrary: Scan finished on '{Library.Name}': {Library.Path} ({DateTime.Now.Subtract(start)})");
             ScanMutex.ReleaseMutex();
         }
     }

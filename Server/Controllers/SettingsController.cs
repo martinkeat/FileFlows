@@ -172,6 +172,7 @@ public class SettingsController : Controller
             ShowFileAddedNotifications = model.ShowFileAddedNotifications,
             HideProcessingStartedNotifications = model.HideProcessingStartedNotifications,
             HideProcessingFinishedNotifications = model.HideProcessingFinishedNotifications,
+            ProcessFileCheckInterval = model.ProcessFileCheckInterval
         });
         
         // validate license it

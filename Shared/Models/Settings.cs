@@ -24,6 +24,11 @@ public class Settings : FileFlowObject
     /// Gets or sets if telemetry should be disabled
     /// </summary>
     public bool DisableTelemetry { get; set; }
+    
+    /// <summary>
+    /// Gets or sets the number of seconds to check for a new file to process
+    /// </summary>
+    public int ProcessFileCheckInterval { get; set; }
 
     /// <summary>
     /// Gets or sets if temporary files from a failed flow should be kept
