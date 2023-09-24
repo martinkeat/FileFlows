@@ -129,6 +129,8 @@ public class FlowTemplateController : Controller
             _ = System.IO.File.WriteAllTextAsync(FlowTemplatesFile, json);
         }
         Templates = Templates.OrderBy(x => x.Name.IndexOf(" ", StringComparison.Ordinal) < 0 ? 1 : Regex.IsMatch(x.Name, "^[\\w]+ File") ? 2 : 3)
+            .ThenBy(x => x.Author == "FileFlows" ? 1 : 2)
+            .ThenBy(x => Regex.IsMatch(x.Name, @"^Convert [\w]+$") ? 1 : 2)
             .ThenBy(x => x.Name)
             .ToList();
     }
