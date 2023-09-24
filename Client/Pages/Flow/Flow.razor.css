@@ -8,6 +8,29 @@
   flex-grow: 1;
 }
 
+.flow-elements-top {
+  display: flex;
+  flex-direction: row;
+}
+.flow-elements-top .flow-elements-filter {
+  flex-grow: 1;
+}
+.flow-elements-top .flow-script-browser {
+  display: inline-flex;
+  align-items: center;
+  width: 2rem;
+  cursor: pointer;
+  position: relative;
+}
+.flow-elements-top .fa-plus {
+  pointer-events: none;
+  position: absolute;
+  font-size: 0.7rem;
+  bottom: 1.2rem;
+  right: 1rem;
+  color: #000;
+}
+
 .flow-container {
   display: flex;
   flex-direction: row-reverse;

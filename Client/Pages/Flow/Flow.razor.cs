@@ -27,6 +27,11 @@ public partial class Flow : ComponentBase, IDisposable
     private ffElement[] Available { get; set; }
     private ffElement[] Filtered { get; set; }
     private List<ffPart> Parts { get; set; } = new List<ffPart>();
+
+    /// <summary>
+    /// Gets or sets the instance of the ScriptBrowser
+    /// </summary>
+    private ScriptBrowser ScriptBrowser { get; set; }
     
     /// <summary>
     /// Gets or sets the properties editor
@@ -77,6 +82,8 @@ public partial class Flow : ComponentBase, IDisposable
 
     private string _txtFilter = string.Empty;
     private string lblFilter;
+
+    private FlowType _FlowType;
 
     private Func<Task<bool>> NavigationCheck;
 
@@ -174,12 +181,10 @@ public partial class Flow : ComponentBase, IDisposable
                 flow = (modelResult.Success ? modelResult.Data : null) ?? new ff() { Parts = new List<ffPart>() };
             }
 
-            var elementsResult = await GetElements(API_URL + "/elements?type=" + (int)flow.Type);
-            if (elementsResult.Success)
-            {
-                Available = elementsResult.Data;
-                this.txtFilter = string.Empty;
-            }
+            _FlowType = flow.Type;
+            
+            this.txtFilter = string.Empty;
+            await LoadFlowElements();
             await InitModel(flow);
 
             var dotNetObjRef = DotNetObjectReference.Create(this);
@@ -194,6 +199,16 @@ public partial class Flow : ComponentBase, IDisposable
             this.Blocker.Hide();
             this.StateHasChanged();
         }
+    }
+
+    private async Task LoadFlowElements()
+    {
+        var elementsResult = await GetElements(API_URL + "/elements?type=" + (int)_FlowType);
+        if (elementsResult.Success == false)
+            return;
+        
+        Available = elementsResult.Data;
+        txtFilter = "" + txtFilter;
     }
 
     private void OpenProperties()
@@ -813,6 +828,18 @@ public partial class Flow : ComponentBase, IDisposable
         /// Gets the selected parts
         /// </summary>
         public List<FlowPart> Parts { get; init; }
+    }
+
+    /// <summary>
+    /// Opens the script browser
+    /// </summary>
+    private async Task OpenScriptBrowser()
+    {
+        bool result = await ScriptBrowser.Open(ScriptType.Flow);
+        if (result == false)
+            return; // no new scripts downloaded
+
+        await LoadFlowElements();
     }
 
 } 

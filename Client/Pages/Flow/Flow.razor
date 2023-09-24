@@ -46,9 +46,15 @@
                 <i id="show-elements" class="show-elements fas fa-sitemap" @onclick="ShowElementsOnClick"></i>
             }
             <div class="flow-elements">
-                <div class="flow-elements-filter">
-                    <input @ref="eleFilter" type="text" @bind-value="txtFilter" @bind-value:event="oninput" autocomplete="off" placeholder="@lblFilter" @onkeydown="FilterKeyDown"/>
-                    <i class="fas fa-search"></i>
+                <div class="flow-elements-top">
+                    <div class="flow-elements-filter">
+                        <input @ref="eleFilter" type="text" @bind-value="txtFilter" @bind-value:event="oninput" autocomplete="off" placeholder="@lblFilter" @onkeydown="FilterKeyDown"/>
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <div class="flow-script-browser">
+                        <i class="fas fa-scroll" title="Script Repository" @onclick="() => OpenScriptBrowser()"></i>
+                        <i class="fas fa-plus"></i>
+                    </div>
                 </div>
                 <ul id="flow-elements-available">
                     @if (Filtered != null)
@@ -70,7 +76,7 @@
                                     return 100 + (int)x.Type;
                                 }).ThenBy(x => x.DisplayName.Substring(x.DisplayName.IndexOf(":") + 1)))
                             {
-                                <li id="@ele.Uid" draggable="true" class="flow-element draggable @ele.Type @(ele.Obsolete ? "obsolete" : "") @(App.Instance.IsMobile && SelectedElement == ele.Uid ? "selected" : "") " 
+                                <li id="@ele.Uid" draggable="true" class="flow-element draggable @ele.Type @(ele.Obsolete ? "obsolete" : "") @(App.Instance.IsMobile && SelectedElement == ele.Uid ? "selected" : "") "
                                     ondragstart="ffFlow.Mouse.dragElementStart(event)" @onclick="() => SelectPart(ele.Uid)">
                                     <div class="icon-wrapper"><span class="icon @ele.Icon"></span></div>
                                     @((ele.Type == FlowElementType.Script) ? ele.Name : ele.DisplayName.Substring(ele.DisplayName.IndexOf(":") + 1))
@@ -218,3 +224,5 @@
         @lblHelp
     </Item>
 </ContextMenu>
+
+<ScriptBrowser @ref="ScriptBrowser" />

@@ -33,6 +33,9 @@ public partial class Scripts : ListPage<string, Script>
 
     private string lblUpdateScripts, lblUpdatingScripts;
 
+    /// <summary>
+    /// Gets or sets the instance of the ScriptBrowser
+    /// </summary>
     private ScriptBrowser ScriptBrowser { get; set; }
 
     protected override void OnInitialized()
