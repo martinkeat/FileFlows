@@ -66,6 +66,11 @@ public class FlowTemplateModel
     /// Gets or sets the actual flow
     /// </summary>
     public Flow Flow { get; set; }
+    
+    /// <summary>
+    /// Gets or sets a list of missing dependencies for this template
+    /// </summary>
+    public List<string> MissingDependencies { get; set; }
 }
 
 /// <summary>

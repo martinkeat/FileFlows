@@ -9,6 +9,9 @@
   position: relative;
   border-radius: 0.5rem;
 }
+.template.missing-dependencies {
+  opacity: 0.6;
+}
 .template.selected {
   border-color: var(--accent);
 }
@@ -33,6 +36,9 @@
   font-size: 0.9rem;
   border-top-right-radius: 0.5rem;
   border-bottom-left-radius: 0.5rem;
+}
+.template.missing-dependencies .author {
+  background: var(--danger);
 }
 .template .description {
   display: block;

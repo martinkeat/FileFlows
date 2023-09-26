@@ -1,7 +1,13 @@
 ﻿@namespace FileFlows.Client.Components.Dialogs
 
-<div class="template @(Selected ? "selected" : string.Empty) @(Selected ? "expanded" : "collapsed")" @onclick="HandleOnClick" @ondblclick="HandleOnDoubleClick">
-    @if (string.IsNullOrWhiteSpace(Template.Author) == false)
+<div class="template @(Selected ? "selected" : string.Empty) @(Selected ? "expanded" : "collapsed") 
+           @(Template.MissingDependencies?.Any() == true ? "missing-dependencies" : "")"
+     @onclick="HandleOnClick" @ondblclick="HandleOnDoubleClick">
+    @if (Template.MissingDependencies?.Any() == true)
+    {
+        <span @onclick="HandleOnDoubleClick" class="author">@lblMissingDependencies</span>
+    }
+    else if (string.IsNullOrWhiteSpace(Template.Author) == false)
     {
         <span class="author">@Template.Author</span>
     }

@@ -15,6 +15,7 @@ public partial class FlowTemplatePicker : ComponentBase
     /// </summary>
     [CascadingParameter] public Blocker Blocker { get; set; }
     private string lblTitle, lblFilter, lblNext, lblCancel;
+    private string lblMissingDependencies, lblMissingDependenciesMessage;
     private string FilterText = string.Empty;
     private bool Visible { get; set; }
     TaskCompletionSource<FlowTemplateModel?> ShowTask;
@@ -38,6 +39,8 @@ public partial class FlowTemplatePicker : ComponentBase
         lblNext = Translater.Instant("Labels.Next");
         lblCancel = Translater.Instant("Labels.Cancel");
         lblFilter = Translater.Instant("Labels.Filter");
+        lblMissingDependencies = Translater.Instant("Labels.MissingDependencies");
+        lblMissingDependenciesMessage = Translater.Instant("Labels.MissingDependenciesMessage");
         App.Instance.OnEscapePushed += InstanceOnOnEscapePushed;
     }
 
@@ -74,6 +77,18 @@ public partial class FlowTemplatePicker : ComponentBase
 
     void SelectTemplate(FlowTemplateModel item, bool andAccept = false)
     {
+        if (item.MissingDependencies?.Any() == true)
+        {
+            if (andAccept)
+            {
+                _ = MessageBox.Show(lblMissingDependencies,
+                    lblMissingDependenciesMessage.Replace("#LIST#", string.Join(string.Empty,
+                        item.MissingDependencies.Select(x => "- " + x + "\n"))));
+            }
+
+            return;
+        }
+        
         Selected = item;
         if (andAccept)
             _ = New();

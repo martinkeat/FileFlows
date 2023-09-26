@@ -65,4 +65,12 @@ public partial class FlowTemplateItem
     /// <param name="args">the mouse client event args</param>
     private void HandleExpandCollapse(MouseEventArgs args)
         => Expanded = !Expanded;
+
+    private static string lblMissingDependencies;
+    
+    protected override void OnInitialized()
+    {
+        if(string.IsNullOrWhiteSpace(lblMissingDependencies))
+            lblMissingDependencies = Translater.Instant("Labels.MissingDependencies");
+    }
 }

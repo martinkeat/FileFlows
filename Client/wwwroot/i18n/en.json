@@ -94,6 +94,8 @@
     "SetStatusProcessed": "Mark as Processed",
     "CommunityFlows": "Community Flows",
     "Properties": "Properties",
+    "MissingDependencies": "Missing Dependencies",
+    "MissingDependenciesMessage": "The following missing plugins must be downloaded before using this template:\n\n#LIST#",
     "ObsoleteConfirm": {
       "Title": "Obsolete Node",
       "Message": "It is recommended you switch to a different node.",
