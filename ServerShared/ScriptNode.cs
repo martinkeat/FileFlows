@@ -1,12 +1,10 @@
 using System.Text.Json;
 using FileFlows.ScriptExecution;
 using Logger = FileFlows.Shared.Logger;
-
-namespace FileFlows.Server;
-
 using FileFlows.Plugin;
 using System.Dynamic;
 
+namespace FileFlows.Server;
 
 /// <summary>
 /// A special node that is not shown in the UI and only created
@@ -51,7 +49,6 @@ public class ScriptNode:Node
         {
             Args = args,
             ScriptType = ScriptType.Flow,
-            //Code = ("try\n{\n\t" + Code.Replace("\n", "\n\t") + "\n\n\t" + entryPoint + "\n} catch (err) { \n\tLogger.ELog(`Error in script [${err.line}]: ${err}`);\n\treturn -1;\n}").Replace("\t", "   ")
             Code = (Code + "\n\n" + entryPoint).Replace("\t", "   ").Trim(),
             AdditionalArguments = new (),
         };
