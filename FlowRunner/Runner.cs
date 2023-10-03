@@ -604,6 +604,7 @@ public class Runner
                 nodeParameters.Logger?.ILog(new string('=', 70));
                 nodeParameters.Logger?.ILog($"Executing Node {(Info.LibraryFile.ExecutedNodes.Count + 1)}: {part.Label?.EmptyAsNull() ?? part.Name?.EmptyAsNull() ?? CurrentNode.Name} [{CurrentNode.GetType().FullName}]");
                 nodeParameters.Logger?.ILog(new string('=', 70));
+                nodeParameters.Logger?.ILog("Working File: " + nodeParameters.WorkingFile);
 
                 gotoFlow = null; // clear it, in case this node requests going to a different flow
                 
@@ -698,6 +699,7 @@ public class Runner
             if(failure == false)
                 RecordNodeExecution(part.Label?.EmptyAsNull() ?? part.Name?.EmptyAsNull() ?? CurrentNode.Name, part.FlowElementUid, output, executionTime, part);
             nodeParameters.Logger?.ILog("Node execution time: " + executionTime);
+            nodeParameters.Logger?.ILog("Node output: " + output);
             nodeParameters.Logger?.ILog(new string('=', 70));
         }
     }
