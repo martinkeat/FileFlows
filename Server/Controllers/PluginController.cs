@@ -141,7 +141,8 @@ public class PluginController : Controller
         List<PluginPackageInfo> data = new List<PluginPackageInfo>();
             try
             {
-                var plugins = await HttpHelper.Get<IEnumerable<PluginPackageInfo>>(Globals.PluginBaseUrl + $"?version={Globals.Version}&rand={DateTime.Now.ToFileTime()}");
+                string url = Globals.PluginBaseUrl + $"?version={Globals.Version}&rand={DateTime.Now.ToFileTime()}";
+                var plugins = await HttpHelper.Get<IEnumerable<PluginPackageInfo>>(url);
                 if (plugins.Success == false)
                 {
                     if (plugins.StatusCode == HttpStatusCode.PreconditionFailed)

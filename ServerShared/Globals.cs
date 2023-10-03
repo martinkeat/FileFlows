@@ -10,11 +10,7 @@ public class Globals
     /// <summary>
     /// Gets the version of FileFlows
     /// </summary>
-    #if(DEBUG)
-    public static string Version = DateTime.Now.ToString("yy.MM") + ".5.9999";
-    #else
-    public static string Version = "23.07.4.2385";
-    #endif
+    public static string Version = "23.10.2.2469";
 
     /// <summary>
     /// The minimum supported node version

@@ -244,8 +244,9 @@ public class HttpHelper
                 noLog = true;
             }
 
-            if (noLog == false)
+            if (noLog == false && string.IsNullOrWhiteSpace(body) == false)
                 Log("Error Body: " + body);
+            
             return new RequestResult<T>
                 { Success = false, Body = body, Data = default(T), StatusCode = response.StatusCode, Headers = GetHeaders(response) };
         }
