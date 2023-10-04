@@ -33,11 +33,6 @@ public class FlowExecutorInfo
     public string NodeName { get; set; }
 
     /// <summary>
-    /// Gets or sets the executing log for of the flow
-    /// </summary>
-    //public string Log { get; set; }
-
-    /// <summary>
     /// Gets or sets the library file being executed 
     /// </summary>
     public LibraryFile LibraryFile { get; set; }

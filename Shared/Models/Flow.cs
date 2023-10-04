@@ -40,7 +40,10 @@ public class Flow : FileFlowObject
     /// </summary>
     public bool Default { get; set; }
 
-    public FlowProperties _Properties = new();
+    /// <summary>
+    /// Private instance of the FlowProperties, this ensures it is never null
+    /// </summary>
+    private FlowProperties _Properties = new();
 
     /// <summary>
     /// Gets or sets the advanced properties of this flow

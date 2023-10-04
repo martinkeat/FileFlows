@@ -13,7 +13,7 @@ public class Globals
     #if(DEBUG)
     public static readonly string Version = DateTime.Now.ToString("yy.MM") + ".5.9999";
     #else
-    public constc string Version = "23.10.2.2469";
+    public const string Version = "23.10.2.2469";
     #endif
 
     /// <summary>
