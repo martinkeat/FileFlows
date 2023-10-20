@@ -268,7 +268,8 @@ public abstract class ListPage<U, T> : ComponentBase where T : IUniqueObject<U>
         if (date.Value.Year < 2020) return string.Empty; // fixes 0000-01-01 issue
         var localDate = new DateTime(date.Value.Year, date.Value.Month, date.Value.Day, date.Value.Hour,
             date.Value.Minute, date.Value.Second);
-        return localDate.ToUniversalTime().Humanize();
+
+        return FormatHelper.HumanizeDate(localDate.ToUniversalTime());
     }
 
 }

@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices.JavaScript;
 using FileFlows.Client.Components.Dialogs;
 using FileFlows.Plugin;
 using Humanizer;
@@ -143,7 +144,7 @@ public partial class CustomDashboard : IDisposable
             return new List<object>();
         return result.Data.Select(x =>
         {
-            string when = x.ProcessingEnded.Humanize(false, DateTime.Now);
+            string when = FormatHelper.HumanizeDate(x.ProcessingEnded);
             return (object)new
             {
                 x.Uid,

@@ -143,7 +143,7 @@
                 }
                 else if (SelectedStatus == FileStatus.OnHold)
                 {
-                    <span>@item.ProcessingTime.Value.Humanize()</span>
+                    <span>@FormatHelper.HumanizeTime(item.ProcessingTime.Value)</span>
                 }
                 else
                 {

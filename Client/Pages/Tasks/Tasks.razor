@@ -53,7 +53,7 @@
                         <span>@lblNever</span>
                     }
                     else{
-                        <span>@item.LastRun.Humanize()</span>
+                        <span>@FormatHelper.HumanizeDate(item.LastRun)</span>
                     }
                 </Cell>
             </FlowTableColumn>
