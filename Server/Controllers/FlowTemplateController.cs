@@ -1,4 +1,5 @@
 ﻿using System.Text.RegularExpressions;
+using FileFlows.Plugin;
 using FileFlows.Server.Helpers;
 using FileFlows.Server.Services;
 using FileFlows.Shared.Helpers;
@@ -23,22 +24,24 @@ public class FlowTemplateController : Controller
     /// <summary>
     /// Gets all the flow templates
     /// </summary>
+    /// <param name="type">the type of templates to get</param>
     /// <returns>all the flow templates</returns>
     [HttpGet]
-    public async Task<List<FlowTemplateModel>> GetAll()
+    public async Task<List<FlowTemplateModel>> GetAll([FromQuery] FlowType type = FlowType.Standard)
     {
         if (Templates == null || FetchedAt < DateTime.Now.AddMinutes(-10))
             await RefreshTemplates();
         var plugins = new PluginService().GetAll().Where(x => x.Enabled)
             .Select(x => x.Name.Replace(" ", string.Empty).ToLowerInvariant())
             .ToList();
-        foreach (var template in Templates)
+        var templateList = Templates.Where(x => x.Type == type).ToList();
+        foreach (var template in templateList)
         {
             template.MissingDependencies = template.Plugins.Where(pl =>
                 plugins.Contains(pl.ToLowerInvariant().Replace(" ", String.Empty)) == false)
                 .ToList();
         }
-        return (Templates ?? new()).Union(LocalFlows()).ToList();
+        return (templateList ?? new()).Union(LocalFlows()).ToList();
     }
 
     private List<FlowTemplateModel> LocalFlows()
