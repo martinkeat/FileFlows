@@ -32,17 +32,18 @@ public class FlowTemplateController : Controller
         if (Templates == null || FetchedAt < DateTime.Now.AddMinutes(-10))
             await RefreshTemplates();
         var plugins = new PluginService().GetAll().Where(x => x.Enabled)
-            .Select(x => x.Name.Replace(" ", string.Empty).ToLowerInvariant())
+            .Select(x => x.Name.Replace(" ", string.Empty).ToLowerInvariant().Replace("nodes", string.Empty))
             .ToList();
         foreach (var template in Templates)
         {
             template.MissingDependencies = template.Plugins.Where(pl =>
-                plugins.Contains(pl.ToLowerInvariant().Replace(" ", String.Empty)) == false)
+                plugins.Contains(pl.ToLowerInvariant().Replace(" ", string.Empty).Replace("nodes", string.Empty)) == false)
                 .ToList();
         }
-        return (Templates ?? new()).Union(LocalFlows())
+        var results = (Templates ?? new()).Union(LocalFlows())
             .Where(x => x.Type == type)
             .ToList();
+        return results;
     }
 
     private List<FlowTemplateModel> LocalFlows()
