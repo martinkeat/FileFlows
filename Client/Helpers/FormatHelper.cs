@@ -16,7 +16,7 @@ public static class FormatHelper
     {
         try
         {
-            return date.Humanize();
+            return date.Humanize(false, DateTime.Now);
         }
         catch (Exception)
         {

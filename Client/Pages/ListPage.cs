@@ -269,7 +269,7 @@ public abstract class ListPage<U, T> : ComponentBase where T : IUniqueObject<U>
         var localDate = new DateTime(date.Value.Year, date.Value.Month, date.Value.Day, date.Value.Hour,
             date.Value.Minute, date.Value.Second);
 
-        return FormatHelper.HumanizeDate(localDate.ToUniversalTime());
+        return FormatHelper.HumanizeDate(localDate);
     }
 
 }

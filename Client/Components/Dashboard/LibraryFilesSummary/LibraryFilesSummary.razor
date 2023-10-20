@@ -42,7 +42,7 @@
                                     width = 100;
                                 string toolTip = Helpers.FileSizeFormatter.FormatShrinkage(os, fs);
 
-                                <td><a href="#" @onclick:preventDefault @onclick="() => ShowFileInfo(item)">@item.ProcessingEnded.Humanize(false, DateTime.Now)</a></td>
+                                <td><a href="#" @onclick:preventDefault @onclick="() => ShowFileInfo(item)">@Helpers.FormatHelper.HumanizeDate(item.ProcessingEnded))</a></td>
                                 <td>                                        
                                     @if (fs > 0)
                                     {
