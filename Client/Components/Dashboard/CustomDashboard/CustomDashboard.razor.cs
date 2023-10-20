@@ -1,5 +1,6 @@
 using System.Runtime.InteropServices.JavaScript;
 using FileFlows.Client.Components.Dialogs;
+using FileFlows.Client.Helpers;
 using FileFlows.Plugin;
 using Humanizer;
 using Microsoft.AspNetCore.Components;

@@ -1,6 +1,6 @@
 using Humanizer;
 
-namespace FileFlows.Shared.Helpers;
+namespace FileFlows.Client.Helpers;
 
 /// <summary>
 /// Helper used to format strings

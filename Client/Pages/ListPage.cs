@@ -3,7 +3,7 @@ using FileFlows.Client.Components;
 using FileFlows.Client.Components.Dialogs;
 using Microsoft.AspNetCore.Components;
 using FileFlows.Client.Components.Common;
-using Humanizer;
+using FileFlows.Client.Helpers;
 
 namespace FileFlows.Client.Pages;
 
