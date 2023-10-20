@@ -34,14 +34,15 @@ public class FlowTemplateController : Controller
         var plugins = new PluginService().GetAll().Where(x => x.Enabled)
             .Select(x => x.Name.Replace(" ", string.Empty).ToLowerInvariant())
             .ToList();
-        var templateList = Templates.Where(x => x.Type == type).ToList();
-        foreach (var template in templateList)
+        foreach (var template in Templates)
         {
             template.MissingDependencies = template.Plugins.Where(pl =>
                 plugins.Contains(pl.ToLowerInvariant().Replace(" ", String.Empty)) == false)
                 .ToList();
         }
-        return (templateList ?? new()).Union(LocalFlows()).ToList();
+        return (Templates ?? new()).Union(LocalFlows())
+            .Where(x => x.Type == type)
+            .ToList();
     }
 
     private List<FlowTemplateModel> LocalFlows()
