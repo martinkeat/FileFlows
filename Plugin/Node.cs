@@ -21,6 +21,11 @@ public class Node
     public virtual string ObsoleteMessage => null;
 
     /// <summary>
+    /// Gets if this is a Enterprise only flow element
+    /// </summary>
+    public virtual bool Enterprise => false;
+
+    /// <summary>
     /// Gets the number of inputs this node has
     /// </summary>
     public virtual int Inputs { get; }

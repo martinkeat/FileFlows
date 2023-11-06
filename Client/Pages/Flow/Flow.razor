@@ -76,7 +76,9 @@
                                     return 100 + (int)x.Type;
                                 }).ThenBy(x => x.DisplayName.Substring(x.DisplayName.IndexOf(":") + 1)))
                             {
-                                <li id="@ele.Uid" draggable="true" class="flow-element draggable @ele.Type @(ele.Obsolete ? "obsolete" : "") @(App.Instance.IsMobile && SelectedElement == ele.Uid ? "selected" : "") "
+                                <li id="@ele.Uid" draggable="true" class="flow-element draggable @ele.Type 
+                                        @(ele.Obsolete ? "obsolete" : "") @(ele.Enterprise ? "enterprise" : "")
+                                         @(App.Instance.IsMobile && SelectedElement == ele.Uid ? "selected" : "") "
                                     ondragstart="ffFlow.Mouse.dragElementStart(event)" @onclick="() => SelectPart(ele.Uid)">
                                     <div class="icon-wrapper"><span class="icon @ele.Icon"></span></div>
                                     @((ele.Type == FlowElementType.Script) ? ele.Name : ele.DisplayName.Substring(ele.DisplayName.IndexOf(":") + 1))
@@ -86,6 +88,10 @@
                                         if (ele.Obsolete)
                                         {
                                             ribbonTT = ele.ObsoleteMessage?.EmptyAsNull() ?? lblObsoleteMessage;
+                                        }
+                                        else if (ele.Enterprise)
+                                        {
+                                            ribbonTT = "Enterprise Flow Element";
                                         }
                                     }
 

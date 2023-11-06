@@ -380,7 +380,11 @@ public class Runner
     /// <param name="communicator">the communicator to use to communicate with the server</param>
     private void RunActual(IFlowRunnerCommunicator communicator)
     {
-        nodeParameters = new NodeParameters(Node.Map(Info.LibraryFile.Name), new FlowLogger(communicator), Info.IsDirectory, Info.LibraryPath);
+        nodeParameters = new NodeParameters(Node.Map(Info.LibraryFile.Name), new FlowLogger(communicator),
+            Info.IsDirectory, Info.LibraryPath)
+        {
+            Enterprise = Info.Config.Enterprise
+        };
         nodeParameters.HasPluginActual = (name) =>
         {
             var normalizedSearchName = Regex.Replace(name.ToLower(), "[^a-z]", string.Empty);

@@ -125,4 +125,9 @@ public class FlowElement
     /// Gets or sets a message to show when the user tries to use this obsolete node
     /// </summary>
     public virtual string ObsoleteMessage { get; set; }
+    
+    /// <summary>
+    /// Gets or sets if this is a Enterprise only flow element
+    /// </summary>
+    public virtual bool Enterprise { get; set; }
 }

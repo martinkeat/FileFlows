@@ -333,6 +333,12 @@ public partial class Flow : ComponentBase, IDisposable
                 return null;
         }
 
+        if (element.Enterprise && App.Instance.FileFlowsSystem.LicenseEnterprise != true)
+        {
+            await MessageBox.Show("Unlicensed", "You must have an Enterprise license to use this flow element.");
+            return null;
+        }
+
         element.Name = name;
         return new { element, uid = Guid.NewGuid() };
     }

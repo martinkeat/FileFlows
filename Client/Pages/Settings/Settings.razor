@@ -105,7 +105,6 @@
                         <InputText Value=@Model.LicenseProcessingNodes.ToString() Label="Pages.Settings.Fields.License.ProcessingNodes" ReadOnly="true" />
                         @if (IsLicensed)
                         {
-                            <InputText Value=@Model.LicenseFiles Label="Pages.Settings.Fields.License.Files" ReadOnly="true" />
                             <InputText Value=@Model.LicenseExpiryDate.ToString("f") Label="Pages.Settings.Fields.License.ExpiryDate" ReadOnly="true" />
                             <InputTextArea @bind-Value=@LicenseFlagsString Label="Pages.Settings.Fields.License.Flags" ReadOnly="true" />
                         }

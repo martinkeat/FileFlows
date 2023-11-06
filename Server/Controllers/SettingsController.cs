@@ -39,6 +39,7 @@ public class SettingsController : Controller
             status.LicenseAutoUpdates = (license.Flags & LicenseFlags.AutoUpdates) == LicenseFlags.AutoUpdates;
             status.LicenseWebhooks = (license.Flags & LicenseFlags.Webhooks) == LicenseFlags.Webhooks;
             status.LicenseProcessingOrder = (license.Flags & LicenseFlags.ProcessingOrder) == LicenseFlags.ProcessingOrder;
+            status.LicenseEnterprise = (license.Flags & LicenseFlags.Enterprise) == LicenseFlags.Enterprise;
         }
 
         bool libs = new LibraryService().GetAll().Any();
@@ -301,9 +302,11 @@ public class SettingsController : Controller
         cfg.Variables = new VariableService().GetAll().ToDictionary(x => x.Name, x => x.Value);
         cfg.Flows = new FlowService().GetAll();
         cfg.Libraries = new LibraryService().GetAll();
+        cfg.Enterprise = LicenseHelper.IsLicensed(LicenseFlags.Enterprise);
         cfg.PluginSettings = new PluginService().GetAllPluginSettings().Result;
         cfg.MaxNodes = LicenseHelper.IsLicensed() ? 250 : 30;
         cfg.KeepFailedFlowTempFiles = Instance.KeepFailedFlowTempFiles;
+        cfg.Enterprise = LicenseHelper.IsLicensed(LicenseFlags.Enterprise);
         var pluginInfos = (await new PluginController().GetAll())
             .Where(x => x.Enabled)
             .ToDictionary(x => x.PackageName + ".ffplugin", x => x);

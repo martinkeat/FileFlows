@@ -204,6 +204,11 @@ public class NodeParameters
     /// Gets or sets the metadata for the file
     /// </summary>
     public Dictionary<string, object> Metadata { get; private set; }
+    
+    /// <summary>
+    /// Gets if this is a enterprise user
+    /// </summary>
+    public bool Enterprise { get; init; }
 
     /// <summary>
     /// Sets the metadata for the file

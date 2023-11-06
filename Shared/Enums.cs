@@ -290,7 +290,11 @@ public enum LicenseFlags
     /// <summary>
     /// Can use custom processing order
     /// </summary>
-    ProcessingOrder = 64
+    ProcessingOrder = 64,
+    /// <summary>
+    /// Can use enterprise features
+    /// </summary>
+    Enterprise = 128
 }
 
 

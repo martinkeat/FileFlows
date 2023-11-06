@@ -16,6 +16,11 @@ public class ConfigurationRevision
     public int MaxNodes { get; set; }
     
     /// <summary>
+    /// Gets or sets if this is a enterprise user
+    /// </summary>
+    public bool Enterprise { get; set; }
+    
+    /// <summary>
     /// Gets or sets if temporary files should be kept if the flow fails
     /// </summary>
     public bool KeepFailedFlowTempFiles { get; set; }
