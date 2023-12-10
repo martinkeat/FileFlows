@@ -631,7 +631,6 @@ public class FlowWorker : Worker
         foreach (var script in config.SharedScripts)
             await System.IO.File.WriteAllTextAsync(Path.Combine(dir, "Scripts", "Shared", script.Name + ".js"), script.Code);
         
-
         bool windows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
         bool macOs = RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
         bool is64bit = IntPtr.Size == 8;
