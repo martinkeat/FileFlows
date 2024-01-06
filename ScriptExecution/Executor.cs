@@ -147,8 +147,15 @@ public class Executor
             var engine = new Engine(options =>
             {
                 options.AllowClr();
-                if(string.IsNullOrEmpty(SharedDirectory) == false)
+                if (string.IsNullOrEmpty(SharedDirectory) == false)
+                {
+                    Logger.ILog("Shared Directory for scripts: " + SharedDirectory);
                     options.EnableModules(SharedDirectory);
+                }
+                else
+                {
+                    Logger.WLog("No Shared Directory for scripts defined.");
+                }
             })
             .SetValue("Logger", Logger)
             .SetValue("Variables", Variables)
@@ -184,6 +191,7 @@ public class Executor
             foreach (var arg in AdditionalArguments ?? new ())
                 engine.SetValue(arg.Key, arg.Value);
             
+            Logger.DLog("Executing code: \n\n" + tcode + "\n\n" + new string('-', 30));
             engine.AddModule("Script", tcode);
             var ns = engine.ImportModule("Script");
             var result = ns.Get("result");
