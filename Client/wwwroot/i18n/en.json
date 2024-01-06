@@ -615,6 +615,8 @@
         "Telemetry-Help": "Telemetry is useful to help know what devices we need to support, what Flow parts are the most used and where we should focus on the development.\nNo information about your files or identify information is sent.",
         "KeepFailedFlowTempFiles": "Keep Failed Temp Files",
         "KeepFailedFlowTempFiles-Help": "Enabling this option will retain the temporary files used by a flow in case of failure, preventing them from being automatically deleted.\nUse with caution.",
+        "FileServiceDisabled": "File Service",
+        "FileServiceDisabled-Help": "Allows remote downloading and uploading of files.  This allows for external processing nodes to download a file for processing without mapping.\nThis does expose your files over your network, so disable if not on a trusted network.",
         "AutoUpdate": "Auto Update",
         "AutoUpdate-Help": "When enabled FileFlows will routinely be checked for updates, and if an update is found, will automatically be downloaded and installed.",
         "AutoUpdatePlugins": "Auto Update Plugins",
