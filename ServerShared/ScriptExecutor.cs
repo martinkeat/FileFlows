@@ -57,19 +57,14 @@ public class ScriptExecutor:IScriptExecutor
         executor.Logger.DLogAction = (largs) => args.Logger.DLog(largs);
         executor.HttpClient = HttpHelper.Client;
         if (string.IsNullOrWhiteSpace(FileFlowsUrl) == false)
-        {
-            if (args.Variables.ContainsKey("FileFlows.Url"))
-                args.Variables["FileFlows.Url"] = FileFlowsUrl;
-            else
-                args.Variables.Add("FileFlows.Url", FileFlowsUrl);
-        }
+            args.Variables["FileFlows.Url"] = FileFlowsUrl;
 
         executor.Variables = args.Variables;
         executor.SharedDirectory = SharedDirectory;
 
         
         executor.Code = execArgs.Code;
-        if (execArgs.ScriptType == ScriptType.Flow && executor.Code.IndexOf("function Script") < 0)
+        if (execArgs.ScriptType == ScriptType.Flow && executor.Code.IndexOf("function Script", StringComparison.Ordinal) < 0)
         {
             executor.Code = "function Script() {\n" + executor.Code + "\n}\n";
             executor.Code += $"var scriptResult = Script();\nexport const result = scriptResult;";
