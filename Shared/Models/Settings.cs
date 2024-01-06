@@ -99,6 +99,11 @@ public class Settings : FileFlowObject
     /// Gets or sets if every request to the server should be logged
     /// </summary>
     public bool LogEveryRequest { get; set; }
+    
+    /// <summary>
+    /// Gets or sets if the file service is disabled
+    /// </summary>
+    public bool FileServiceDisabled { get; set; }
 }
 
 /// <summary>
