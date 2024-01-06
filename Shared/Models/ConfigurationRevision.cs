@@ -21,6 +21,11 @@ public class ConfigurationRevision
     public bool Enterprise { get; set; }
     
     /// <summary>
+    /// Gets or sets if remote files are allowed
+    /// </summary>
+    public bool AllowRemote { get; set; }
+    
+    /// <summary>
     /// Gets or sets if temporary files should be kept if the flow fails
     /// </summary>
     public bool KeepFailedFlowTempFiles { get; set; }
