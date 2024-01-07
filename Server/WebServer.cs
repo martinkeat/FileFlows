@@ -36,6 +36,12 @@ public class WebServer
     {
         var builder = WebApplication.CreateBuilder(args);
 
+        builder.WebHost.ConfigureKestrel((context, options) =>
+        {
+            // remove the file upload limit so the File Service can receive larger files
+            options.Limits.MaxRequestBodySize = null; // Set to null to remove the limit
+        });
+        
         bool isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
         string protocol = "http";
         Port = AppSettings.Instance.ServerPort ?? 5000;
