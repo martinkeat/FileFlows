@@ -592,7 +592,8 @@
         "Restart":"Restart FileFlows",
         "Logging":"Logging",
         "CheckNow":"Check Now",
-        "Updates": "Updates"
+        "Updates": "Updates",
+        "FileServer": "File Server"
       },
       "Messages":{
         "Database":{
@@ -614,9 +615,7 @@
         "Telemetry": "Telemetry",
         "Telemetry-Help": "Telemetry is useful to help know what devices we need to support, what Flow parts are the most used and where we should focus on the development.\nNo information about your files or identify information is sent.",
         "KeepFailedFlowTempFiles": "Keep Failed Temp Files",
-        "KeepFailedFlowTempFiles-Help": "Enabling this option will retain the temporary files used by a flow in case of failure, preventing them from being automatically deleted.\nUse with caution.",
-        "FileServiceDisabled": "File Service",
-        "FileServiceDisabled-Help": "Allows remote downloading and uploading of files.  This allows for external processing nodes to download a file for processing without mapping.\nThis does expose your files over your network, so disable if not on a trusted network.",
+        "KeepFailedFlowTempFiles-Help": "Enabling this option will retain the temporary files used by a flow in case of failure, preventing them from being automatically deleted.\nUse with caution.",        
         "AutoUpdate": "Auto Update",
         "AutoUpdate-Help": "When enabled FileFlows will routinely be checked for updates, and if an update is found, will automatically be downloaded and installed.",
         "AutoUpdatePlugins": "Auto Update Plugins",
@@ -675,6 +674,12 @@
           "Password-Help":"The password of the user to connect to the database",
           "RecreateDatabase":"Recreate Database",
           "RecreateDatabase-Help":"When enabled, if the new database already exists, it will be dropped and recreated.  Otherwise if off, and the database already exists, no data will be migrated and the new database will just be used as is."
+        },
+        "FileServer": {
+          "Description": "This allows for external processing nodes to download a file for processing without mapping.\n\nThis does expose your files over your network, so disable if not on a trusted network.",
+          "Enabled": "Enabled",
+          "AllowList": "Allow List",
+          "AllowList-Help": "A new line separated list of paths allowed to be accessed by the exposed file server.\nThese are the locations that can be read/written to remotely.\nNote: All library paths are automatically allowed."
         },
         "License": {
           "Key": "License Key",

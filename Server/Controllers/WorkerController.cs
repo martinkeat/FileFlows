@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using FileFlows.Plugin;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
@@ -53,7 +54,6 @@ public class WorkerController : Controller
         }
         catch (Exception) { }
 
-        info.LibraryFile?.ExecutedNodes?.Clear();
         if (info.Uid == Guid.Empty)
             throw new Exception("No UID specified for flow execution info");
         info.LastUpdate = DateTime.Now;
@@ -67,8 +67,18 @@ public class WorkerController : Controller
         if (info.LibraryFile != null)
         {
             var lf = info.LibraryFile;
+            var service = new LibraryFileService();
+            service.ClearExecutedNodes(lf.Uid).Wait();
+            
+            if (lf.ExecutedNodes?.Any() == true)
+            {
+                lf.ExecutedNodes.Clear();
+            }
+            // delete the old log file
+            LibraryFileLogHelper.DeleteLogs(lf.Uid);
+
             if (lf.OriginalSize > 0)
-                _ = new LibraryFileService().UpdateOriginalSize(lf.Uid, lf.OriginalSize);
+                _ = service.UpdateOriginalSize(lf.Uid, lf.OriginalSize);
             if (lf.LibraryUid != null)
             {
                 var library = new LibraryService().GetByUid(lf.LibraryUid.Value);
@@ -136,8 +146,9 @@ public class WorkerController : Controller
             if (libfile != null)
             {
                 libfile.OutputPath = info.LibraryFile.OutputPath?.EmptyAsNull() ?? libfile.OutputPath;
-                Logger.Instance.ILog($"Recording final size for '{info.LibraryFile.FinalSize}' for '{info.LibraryFile.Name}' status: {info.LibraryFile.Status}");
-                if(info.LibraryFile.FinalSize > 0)
+                Logger.Instance.ILog(
+                    $"Recording final size for '{info.LibraryFile.FinalSize}' for '{info.LibraryFile.Name}' status: {info.LibraryFile.Status}");
+                if (info.LibraryFile.FinalSize > 0)
                     libfile.FinalSize = info.LibraryFile.FinalSize;
 
                 if (info.WorkingFile == libfile.Name)
@@ -148,19 +159,42 @@ public class WorkerController : Controller
                         // if file replaced original update the creation time to match
                         if (libfile.CreationTime != file.CreationTime)
                             libfile.CreationTime = file.CreationTime;
-                        if(libfile.LastWriteTime != file.LastWriteTime)
+                        if (libfile.LastWriteTime != file.LastWriteTime)
                             libfile.LastWriteTime = file.LastWriteTime;
                     }
                 }
 
 
                 libfile.NoLongerExistsAfterProcessing = new FileInfo(libfile.Name).Exists == false;
-                if(info.LibraryFile.FinalSize > 0)
+                if (info.LibraryFile.FinalSize > 0)
                     libfile.FinalSize = info.LibraryFile.FinalSize;
                 libfile.OutputPath = info.LibraryFile.OutputPath;
+
+                if (string.IsNullOrWhiteSpace(libfile.OutputPath) == false)
+                {
+                    if (libfile.Name.StartsWith("/"))
+                    {
+                        // start file was a linux file
+                        // check if libfile.OutputPath is using \ instead of / for linux filenames
+                        if (libfile.OutputPath.StartsWith(@"\\") == false)
+                        {
+                            libfile.OutputPath = libfile.OutputPath.Replace(@"\", "/");
+                        }
+                    }
+                    else if (Regex.IsMatch(libfile.Name, "^[a-zA-Z]:") || libfile.Name.StartsWith(@"\\")
+                                                                       || libfile.Name.StartsWith(@"//"))
+                    {
+                        // Windows-style path in Name or UNC path
+                        libfile.OutputPath = libfile.OutputPath.Replace("/", @"\");
+                    }
+                }
+
                 libfile.Fingerprint = info.LibraryFile.Fingerprint;
                 libfile.FinalFingerprint = info.LibraryFile.FinalFingerprint;
                 libfile.ExecutedNodes = info.LibraryFile.ExecutedNodes ?? new List<ExecutedNode>();
+                Logger.Instance.DLog("WorkerController.FinishWork: Executed flow elements: " +
+                                     string.Join(", ", libfile.ExecutedNodes.Select(x => x.NodeUid)));
+                
                 if (info.LibraryFile.OriginalMetadata != null)
                     libfile.OriginalMetadata = info.LibraryFile.OriginalMetadata;
                 if (info.LibraryFile.FinalMetadata != null)
@@ -192,7 +226,6 @@ public class WorkerController : Controller
             }
         }
     }
-
     
     /// <summary>
     /// Update work, tells the server about updated work on a flow runner

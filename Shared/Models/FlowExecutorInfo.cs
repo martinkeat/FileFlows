@@ -43,6 +43,11 @@ public class FlowExecutorInfo
     public string RelativeFile { get; set; }
     
     /// <summary>
+    /// Gets or sets if this is a remote file from the server
+    /// </summary>
+    public bool IsRemote { get; set; }
+    
+    /// <summary>
     /// Gets or sets an object reference of the library
     /// that the library file belongs
     /// </summary>

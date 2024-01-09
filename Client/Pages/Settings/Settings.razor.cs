@@ -24,8 +24,8 @@ public partial class Settings : InputRegister
     private bool IsSaving { get; set; }
 
     private string lblSave, lblSaving, lblHelp, lblGeneral, lblAdvanced, lblNode, lblDatabase, lblLogging, 
-        lblInternalProcessingNodeDescription, lblDbDescription, lblTest, lblRestart, lblLicense, lblUpdates, 
-        lblCheckNow, lblTestingDatabase;
+        lblInternalProcessingNodeDescription, lblDbDescription, lblFileServerDescription, lblTest, lblRestart, lblLicense, lblUpdates, 
+        lblCheckNow, lblTestingDatabase, lblFileServer;
 
     private string OriginalDatabase, OriginalServer;
 
@@ -79,6 +79,8 @@ public partial class Settings : InputRegister
         lblLogging= Translater.Instant("Pages.Settings.Labels.Logging");
         lblCheckNow = Translater.Instant("Pages.Settings.Labels.CheckNow");
         lblTestingDatabase = Translater.Instant("Pages.Settings.Messages.Database.TestingDatabase");
+        lblFileServer = Translater.Instant("Pages.Settings.Labels.FileServer");
+        lblFileServerDescription = Translater.Instant("Pages.Settings.Fields.FileServer.Description");
         Blocker.Show("Loading Settings");
         try
         {

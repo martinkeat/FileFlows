@@ -106,7 +106,6 @@ public partial class LibraryFileService
         }
     }
 
-
     /// <summary>
     /// Updates the original size of a file
     /// </summary>
@@ -122,4 +121,12 @@ public partial class LibraryFileService
         existing.OriginalSize = size;
         await DbHelper.Execute($"update LibraryFile set OriginalSize = {size} where Uid = '{uid}'");
     }
+
+    /// <summary>
+    /// Clears the executed nodes on a file
+    /// </summary>
+    /// <param name="uid">The UID of the file</param>
+    public Task ClearExecutedNodes(Guid uid)
+        => DbHelper.Execute($"update LibraryFile set ExecutedNodes = '' where Uid = '{uid}'");
+
 }

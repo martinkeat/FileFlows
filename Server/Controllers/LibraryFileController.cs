@@ -26,9 +26,29 @@ public class LibraryFileController : Controller //ControllerStore<LibraryFile>
     [HttpPost("next-file")]
     public async Task<NextLibraryFileResult> GetNext([FromBody] NextLibraryFileArgs args)
     {
-        var result = await new LibraryFileService().GetNext(args.NodeName, args.NodeUid, args.NodeVersion, args.WorkerUid);
+        var service = new LibraryFileService();
+        var result = await service.GetNext(args.NodeName, args.NodeUid, args.NodeVersion, args.WorkerUid);
         if (result == null)
             return result;
+
+        if (result.File != null)
+        {
+            try
+            {
+                // try to delete a log file for this library file if one already exists (in case the flow was cancelled and now its being re-run)                
+                LibraryFileLogHelper.DeleteLogs(result.File.Uid);
+            }
+            catch (Exception)
+            {
+            }
+
+            if (result?.File?.ExecutedNodes?.Any() == true)
+            {
+                result.File.ExecutedNodes.Clear();
+                await service.ClearExecutedNodes(result.File.Uid);
+            }
+        }
+
         Logger.Instance.ILog($"GetNextFile for ['{args.NodeName}']({args.NodeUid}): {result.Status}");
         return result;
     }

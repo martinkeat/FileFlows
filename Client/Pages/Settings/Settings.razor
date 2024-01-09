@@ -63,6 +63,13 @@
                             <InputSwitch @bind-Value="@Model.AutoUpdateNodes" Label="Pages.Settings.Fields.AutoUpdateNodes" />
                         }
                     </FlowTab>
+                    <FlowTab Title="@lblFileServer" Visible="@IsLicensed">
+                        <p style="white-space: pre-wrap">@lblFileServerDescription</p>
+                        <hr />
+                        <InputSwitch @bind-Value="@Model.FileServiceDisabled" Inverse="true" Label="Pages.Settings.Fields.FileService.Enabled" />
+
+                        <InputTextArea @bind-Value="@Model.FileServerAllowList" Label="Pages.Settings.Fields.FileServer.AllowList" />
+                    </FlowTab>
                     <FlowTab Title="@lblDatabase" Visible="@ShowExternalDatabase">
                         <p class="box info">@lblDbDescription</p>
                         <InputSelect @bind-Value="@DbType" Options=@DbTypes Label="Pages.Settings.Fields.Database.Type" AllowClear="false" />
@@ -89,7 +96,6 @@
                     <FlowTab Title="@lblAdvanced">
                         <InputSwitch @bind-Value="@Model.DisableTelemetry" Inverse="@true" Label="Pages.Settings.Fields.Telemetry" />
                         <InputSwitch @bind-Value="@Model.KeepFailedFlowTempFiles" Label="Pages.Settings.Fields.KeepFailedFlowTempFiles" />
-                        <InputSwitch @bind-Value="@Model.FileServiceDisabled" Inverse="true" Label="Pages.Settings.Fields.FileServiceDisabled" />
                         @{
                             if (Model.ProcessFileCheckInterval < 5)
                                 Model.ProcessFileCheckInterval = 5;

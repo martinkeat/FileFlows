@@ -17,10 +17,6 @@ using FileFlows.Shared.Models;
 /// </summary>
 public class HttpHelper
 {
-    //public delegate void RemainingFilesHeader(int count);
-
-    //public static event RemainingFilesHeader OnRemainingFilesHeader;
-
     private static HttpClient _Client;
 
     /// <summary>
@@ -39,6 +35,11 @@ public class HttpHelper
     /// Gets or sets the logger used
     /// </summary>
     public static Plugin.ILogger Logger { get; set; }
+    
+    /// <summary>
+    /// Gets or sets an action that can adjust the http request message if needed  
+    /// </summary>
+    public static Action<HttpRequestMessage> OnHttpRequestCreated { get; set; }
 
     /// <summary>
     /// Performs a GET request
@@ -123,8 +124,8 @@ public class HttpHelper
     {
         return await MakeRequest<string>(HttpMethod.Delete, url, data);
     }
-
-
+    
+    
     /// <summary>
     /// Downloads a file from a URL
     /// </summary>
@@ -195,6 +196,8 @@ public class HttpHelper
             Content = data != null ? AsJson(data) : null
         };
 
+        OnHttpRequestCreated?.Invoke(request);
+
         if (method == HttpMethod.Post && data == null)
         {
             // if this is null, asp.net will return a 415 content not support, as the content-type will not be set
@@ -245,8 +248,11 @@ public class HttpHelper
             }
 
             if (noLog == false && string.IsNullOrWhiteSpace(body) == false)
+            {
+                Log("Request URL: " + url);
                 Log("Error Body: " + body);
-            
+            }
+
             return new RequestResult<T>
                 { Success = false, Body = body, Data = default(T), StatusCode = response.StatusCode, Headers = GetHeaders(response) };
         }

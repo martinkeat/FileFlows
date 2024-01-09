@@ -77,6 +77,13 @@ public class FlowLogger : ILogger
         this.Communicator = communicator;
     }
 
+    public void SetCommunicator(IFlowRunnerCommunicator communicator)
+    {
+        this.Communicator = communicator;
+        if (log.Any())
+            Flush().Wait();
+    }
+
     private StringBuilder Messages = new StringBuilder();
 
     /// <summary>
@@ -114,7 +121,7 @@ public class FlowLogger : ILogger
         }
 
         if (count > 10)
-            Flush();
+            _ = Flush();
     }
 
     private SemaphoreSlim semaphore = new(1);
@@ -133,7 +140,8 @@ public class FlowLogger : ILogger
 
         try
         {
-            await Communicator.LogMessage(Program.Uid, messages);
+            if(Communicator != null)
+                await Communicator.LogMessage(Program.Uid, messages);
         }
         finally
         {

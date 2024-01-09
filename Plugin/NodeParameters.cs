@@ -1,12 +1,11 @@
 using System.Text.RegularExpressions;
 using FileFlows.Plugin.Models;
+using System.Runtime.InteropServices;
+using System.Text.Json;
+using FileFlows.Plugin.Helpers;
+using FileFlows.Plugin.Services;
 
 namespace FileFlows.Plugin;
-
-using System.Collections.Generic;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Text.Json;
 
 public class NodeParameters
 {
@@ -15,6 +14,11 @@ public class NodeParameters
     /// Note: This maybe a mapped filename if executed on a external processing node
     /// </summary>
     public string FileName { get; init; }
+    
+    /// <summary>
+    /// Gets or sets the full filename as it appears in the library
+    /// </summary>
+    public string LibraryFileName { get; init; }
 
     /// <summary>
     /// Gets or sets the file relative to the library path
@@ -83,6 +87,7 @@ public class NodeParameters
     /// Gets or sets the function responsible for getting the actual tool path
     /// </summary>
     public Func<string, string>? GetToolPathActual { get; set; }
+    
     /// <summary>
     /// Gets or sets the function responsible for getting if a plugin is available
     /// </summary>
@@ -107,6 +112,16 @@ public class NodeParameters
     /// Gets or sets the function responsible for unmapping a path
     /// </summary>
     public Func<string, string>? PathUnMapper { get; set; }
+    
+    /// <summary>
+    /// Gets or sets the function responsible for uploading a file
+    /// </summary>
+    public Func<string, string, (bool Success, string Error)>? UploadFile { get; set; }
+    
+    /// <summary>
+    /// Gets or sets the function responsible for deleting a remote directory
+    /// </summary>
+    public Func<string, bool, string[], bool>? DeleteRemote { get; set; }
 
     /// <summary>
     /// Gets or sets a goto flow 
@@ -147,6 +162,11 @@ public class NodeParameters
     /// Gets or sets if this node is running on a ARM base platform
     /// </summary>
     public bool IsArm { get; set; }
+    
+    /// <summary>
+    /// Gets or sets if the file is a remote file and needs to be downloaded from the server then copied back to it
+    /// </summary>
+    public bool IsRemote { get; set; }
 
     /// <summary>
     /// Gets or sets the temporary path for this node
@@ -194,7 +214,7 @@ public class NodeParameters
     /// if this is af faked instance
     /// </summary>
     private bool Fake = false;
-
+    
     /// <summary>
     /// Gets or sets the original metadata for the input file
     /// </summary>
@@ -221,6 +241,11 @@ public class NodeParameters
         else
             Metadata = metadata;
     }
+    
+    /// <summary>
+    /// Gets or sets the file service to use
+    /// </summary>
+    public IFileService FileService { get; init; }
 
 
     /// <summary>
@@ -357,23 +382,29 @@ public class NodeParameters
             }
             else
             {
-                var fi = new FileInfo(filename);
+                var result = FileService.FileInfo(filename);
+                if (result.IsFailed)
+                    return;
+                var fi = result.Value;
                 UpdateVariables(new Dictionary<string, object> {
                     { "ext", fi.Extension ?? "" },
                     { "file.Name", fi.Name ?? "" },
                     { "file.NameNoExtension", Path.GetFileNameWithoutExtension(fi.Name ?? "") },
                     { "file.FullName", fi.FullName ?? "" },
                     { "file.Extension", fi.Extension ?? "" },
-                    { "file.Size", fi.Exists ? fi.Length : 0 },
+                    { "file.Size", fi.Length },
 
-                    { "folder.Name", fi.Directory?.Name ?? "" },
-                    { "folder.FullName", fi.DirectoryName ?? "" },
+                    { "folder.Name", FileHelper.GetDirectoryName(fi.FullName) ?? "" },
+                    { "folder.FullName", fi.Directory ?? "" },
                 });
 
                 if(initDone == false)
                 {
                     initDone = true;
-                    var fiOriginal = new FileInfo(this.FileName);
+                    var fiOrigResult = FileService.FileInfo(this.FileName);
+                    if (fiOrigResult.IsFailed)
+                        return;
+                    var fiOriginal = fiOrigResult.Value;
                     UpdateVariables(new Dictionary<string, object> {
                         { "file.Create", fiOriginal.CreationTime },
                         { "file.Create.Year", fiOriginal.CreationTime.Year },
@@ -385,14 +416,14 @@ public class NodeParameters
                         { "file.Modified.Month", fiOriginal.LastWriteTime.Month },
                         { "file.Modified.Day", fiOriginal.LastWriteTime.Day },
 
-                        { "file.Orig.Extension", fiOriginal.Extension ?? "" },
-                        { "file.Orig.FileName", fiOriginal.Name ?? "" },
+                        { "file.Orig.Extension", fiOriginal.Extension ?? string.Empty },
+                        { "file.Orig.FileName", fiOriginal.Name ?? string.Empty },
                         { "file.Orig.FileNameNoExtension", Path.GetFileNameWithoutExtension(fiOriginal.Name ?? "") },
-                        { "file.Orig.FullName", fiOriginal.FullName ?? "" },
-                        { "file.Orig.Size", fiOriginal.Exists? fiOriginal.Length: 0 },
+                        { "file.Orig.FullName", fiOriginal.FullName ?? string.Empty },
+                        { "file.Orig.Size", fiOriginal.Length },
 
-                        { "folder.Orig.Name", fiOriginal.Directory?.Name ?? "" },
-                        { "folder.Orig.FullName", fiOriginal.DirectoryName ?? "" }
+                        { "folder.Orig.Name", FileHelper.GetDirectoryName(fiOriginal.Directory) ?? string.Empty },
+                        { "folder.Orig.FullName", fiOriginal.Directory ?? "" }
                     });
 
                     if (string.IsNullOrEmpty(this.LibraryPath) == false &&
@@ -460,7 +491,7 @@ public class NodeParameters
 
         if (isDirectory == false)
         {
-            this.WorkingFileSize = new FileInfo(filename).Length;
+            this.WorkingFileSize = FileService.FileSize(filename).ValueOrDefault;
             Logger?.ILog("New working file size: " + this.WorkingFileSize);
         }
 
@@ -484,15 +515,11 @@ public class NodeParameters
                 _ = Task.Run(async () =>
                 {
                     await Task.Delay(2_000); // wait 2 seconds for the file to be released if used
-                    try
-                    {
-                        File.Delete(fileToDelete);
+                    var result = FileService.FileDelete(fileToDelete);
+                    if (result.IsFailed)
+                        Logger?.WLog("Failed to delete temporary file: " + result.Error);
+                    else
                         Logger.ILog("Deleting old working file: " + fileToDelete);
-                    }
-                    catch (Exception ex)
-                    {
-                        Logger?.WLog("Failed to delete temporary file: " + ex.Message + Environment.NewLine + ex.StackTrace);
-                    }
                 });
             }
         }
@@ -542,93 +569,106 @@ public class NodeParameters
     {
         if (Fake) return true;
 
-        FileInfo file = new FileInfo(destination);
-        // turning this of as per https://github.com/revenz/FileFlows/issues/79
-        // if (string.IsNullOrEmpty(file.Extension) == false)
-        // {
-        //     // just ensures extensions are lowercased
-        //     destination = new FileInfo(file.FullName.Substring(0, file.FullName.LastIndexOf(file.Extension)) + file.Extension.ToLower()).FullName;
-        // }
-
-        Logger?.ILog("About to move file to: " + destination);
-        destination = MapPath(destination);
-        Logger?.ILog("Mapped destination path: " + destination);
-
-        bool isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
-        if (isWindows)
+        var result = FileService.FileMove(WorkingFile, destination, true);
+        if (result.IsFailed)
         {
-            if (destination.ToLower() == WorkingFile?.ToLower())
-            {
-                Logger?.ILog("Source and destination are the same, skipping move");
-                return true;
-            }
-        }
-        else
-        {
-            // linux, is case sensitive
-            if(destination == WorkingFile)
-            {
-                Logger?.ILog("Source and destination are the same, skipping move");
-                return true;
-            }
-        }
-
-
-        bool moved = false;
-        long fileSize = new FileInfo(WorkingFile).Length;
-        Task task = Task.Run(() =>
-        {
-            try
-            {
-
-                var fileInfo = new FileInfo(destination);
-                if (fileInfo.Exists)
-                    fileInfo.Delete();
-                else
-                    CreateDirectoryIfNotExists(fileInfo?.DirectoryName);
-
-                bool isTempFile = this.WorkingFile.ToLower().StartsWith(this.TempPath.ToLower()) == true;
-
-                Logger?.ILog($"Moving file: \"{WorkingFile}\" to \"{destination}\"");                    
-                File.Move(WorkingFile, destination, true);
-                Logger?.ILog("File moved successfully");
-
-                Helpers.FileHelper.ChangeOwner(Logger, destination, file: true);
-
-                this.WorkingFile = destination;
-                try
-                {
-                    // this can fail if the file is then moved really quickly by another process, radarr/sonarr etc
-                    Logger?.ILog("Initing new moved file");
-                    InitFile(destination);
-                }
-                catch (Exception) { }
-
-                moved = true;
-            }
-            catch (Exception ex)
-            {
-                Logger?.ELog("Failed to move file: " + ex.Message);
-            }
-        });
-
-        while (task.IsCompleted == false)
-        {
-            long currentSize = 0;
-            var destFileInfo = new FileInfo(destination);
-            if (destFileInfo.Exists)
-                currentSize = destFileInfo.Length;
-
-            if (PartPercentageUpdate != null && fileSize > 0)
-                PartPercentageUpdate(currentSize / fileSize * 100);
-            Thread.Sleep(50);
-        }
-
-        if (moved == false)
+            Logger?.ELog("Failed to move file: " + result.Error);
             return false;
-
-        if (PartPercentageUpdate != null)
-            PartPercentageUpdate(100);
+        }
+        this.WorkingFile = destination;
+        try
+        {
+            // this can fail if the file is then moved really quickly by another process, radarr/sonarr etc
+            Logger?.ILog("Initing new moved file");
+            InitFile(destination);
+        }
+        catch (Exception) { }
+        
+        // FileInfo file = new FileInfo(destination);
+        // // turning this of as per https://github.com/revenz/FileFlows/issues/79
+        // // if (string.IsNullOrEmpty(file.Extension) == false)
+        // // {
+        // //     // just ensures extensions are lowercased
+        // //     destination = new FileInfo(file.FullName.Substring(0, file.FullName.LastIndexOf(file.Extension)) + file.Extension.ToLower()).FullName;
+        // // }
+        //
+        // Logger?.ILog("About to move file to: " + destination);
+        // destination = MapPath(destination);
+        // Logger?.ILog("Mapped destination path: " + destination);
+        //
+        // bool isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+        // if (isWindows)
+        // {
+        //     if (destination.ToLower() == WorkingFile?.ToLower())
+        //     {
+        //         Logger?.ILog("Source and destination are the same, skipping move");
+        //         return true;
+        //     }
+        // }
+        // else
+        // {
+        //     // linux, is case sensitive
+        //     if(destination == WorkingFile)
+        //     {
+        //         Logger?.ILog("Source and destination are the same, skipping move");
+        //         return true;
+        //     }
+        // }
+        //
+        //
+        // bool moved = false;
+        // long fileSize = new FileInfo(WorkingFile).Length;
+        // Task task = Task.Run(() =>
+        // {
+        //     try
+        //     {
+        //
+        //         var fileInfo = new FileInfo(destination);
+        //         if (fileInfo.Exists)
+        //             fileInfo.Delete();
+        //         else
+        //             CreateDirectoryIfNotExists(fileInfo?.DirectoryName);
+        //
+        //         Logger?.ILog($"Moving file: \"{WorkingFile}\" to \"{destination}\"");                    
+        //         File.Move(WorkingFile, destination, true);
+        //         Logger?.ILog("File moved successfully");
+        //
+        //         Helpers.FileHelper.ChangeOwner(Logger, destination, file: true);
+        //
+        //         this.WorkingFile = destination;
+        //         try
+        //         {
+        //             // this can fail if the file is then moved really quickly by another process, radarr/sonarr etc
+        //             Logger?.ILog("Initing new moved file");
+        //             InitFile(destination);
+        //         }
+        //         catch (Exception) { }
+        //
+        //         moved = true;
+        //     }
+        //     catch (Exception ex)
+        //     {
+        //         Logger?.ELog("Failed to move file: " + ex.Message);
+        //     }
+        // });
+        //
+        // while (task.IsCompleted == false)
+        // {
+        //     long currentSize = 0;
+        //     var destFileInfo = new FileInfo(destination);
+        //     if (destFileInfo.Exists)
+        //         currentSize = destFileInfo.Length;
+        //
+        //     if (PartPercentageUpdate != null && fileSize > 0)
+        //         PartPercentageUpdate(currentSize / fileSize * 100);
+        //     Thread.Sleep(50);
+        // }
+        //
+        // if (moved == false)
+        //     return false;
+        //
+        // if (PartPercentageUpdate != null)
+        //     PartPercentageUpdate(100);
         return true;
     }
 
@@ -654,6 +694,28 @@ public class NodeParameters
             Logger?.WLog("CopyFile.Destination was not supplied");
             return false;
         }
+
+        var result = FileService.FileCopy(source, destination, true);
+        if (result.IsFailed)
+        {
+            Logger?.WLog("Failed to copy file: " + result.Error);
+            return false;
+        }
+        if(updateWorkingFile)
+        {
+            this.WorkingFile = destination;
+            try
+            {
+                // this can fail if the file is then moved really quickly by another process, radarr/sonarr etc
+                Logger?.ILog("Initing new copied file");
+                InitFile(destination);
+            }
+            catch (Exception) { }
+            
+        }
+
+        return true;
+        
         
         string originalSource = source;
         source = MapPath(source);
@@ -799,7 +861,7 @@ public class NodeParameters
     /// </summary>
     /// <param name="fullFileName">the full filename of the file to make safe</param>
     /// <returns>the safe filename</returns>
-    public FileInfo GetSafeName(string fullFileName)
+    public string GetSafeName(string fullFileName)
     {
         var dest = new FileInfo(fullFileName);
 
@@ -830,9 +892,13 @@ public class NodeParameters
                     destDir = destDir.Replace(c.ToString(), "");
             }
         }
-        // put the drive letter back if it was replaced iwth a ' - '
-        destDir = System.Text.RegularExpressions.Regex.Replace(destDir, @"^([a-z]) \- ", "$1:", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
-        return new FileInfo(Path.Combine(destDir, destName));
+        // put the drive letter back if it was replaced with a ' - '
+        destDir = Regex.Replace(destDir, @"^([a-z]) \- ", "$1:", RegexOptions.IgnoreCase);
+        string seperator = destDir.Contains("\\") ? "\\" : "/";
+        if (destDir.EndsWith(seperator))
+            destDir = destDir[..^1];
+
+        return destDir + seperator + destName;
     }
 
     /// <summary>
@@ -848,7 +914,7 @@ public class NodeParameters
         if (filename.StartsWith(TempPath))
             return filename;
         string dest = Path.Combine(TempPath, new FileInfo(filename).Name);
-        System.IO.File.Copy(filename, dest);
+        File.Copy(filename, dest);
         return dest;
     }
 
@@ -860,7 +926,7 @@ public class NodeParameters
     public bool CreateDirectoryIfNotExists(string directory)
     {
         if (Fake) return true;
-        return Helpers.FileHelper.CreateDirectoryIfNotExists(Logger, directory);
+        return FileService.DirectoryCreate(directory).ValueOrDefault;
     }
 
     /// <summary>

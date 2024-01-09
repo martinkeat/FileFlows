@@ -8,6 +8,8 @@ using FileFlows.Shared;
 using FileFlows.Shared.Models;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using FileFlows.Plugin.Services;
+using FileFlows.ServerShared.FileServices;
 
 namespace FileFlows.FlowRunner;
 
@@ -76,9 +78,29 @@ public class Runner
     }
 
     /// <summary>
+    /// Downloads a file from the specified server URL and saves it to the temporary path.
+    /// </summary>
+    /// <param name="libFile">The LibraryFile object representing the file to download.</param>
+    /// <param name="serverUrl">The URL of the server where the file is located.</param>
+    /// <param name="tempPath">The temporary path where the downloaded file will be saved.</param>
+    /// <returns>The full path of the downloaded file if successful, otherwise an empty string.</returns>
+    private string DownloadFile(ILogger logger, LibraryFile libFile, string serverUrl, string tempPath)
+    {
+        string filename = Path.Combine(tempPath, new FileInfo(libFile.Name).Name);
+        var result = new FileDownloader(logger, serverUrl, Program.Uid).DownloadFile(libFile.Name, filename).Result;
+        if (result.IsFailed)
+        {
+            logger.ELog("Failed to remotely download file: " + result.Error);
+            return string.Empty;
+        }
+
+        return filename;
+    }
+
+    /// <summary>
     /// Starts the flow runner processing
     /// </summary>
-    public void Run()
+    public void Run(FlowLogger logger)
     {
         var systemHelper = new SystemHelper();
         try
@@ -90,6 +112,7 @@ public class Runner
                 return; // failed to update
             var communicator = FlowRunnerCommunicator.Load(Info.LibraryFile.Uid);
             communicator.OnCancel += Communicator_OnCancel;
+            logger.SetCommunicator(communicator);
             bool finished = false;
             DateTime lastSuccessHello = DateTime.Now;
             var task = Task.Run(async () =>
@@ -121,7 +144,7 @@ public class Runner
             });
             try
             {
-                RunActual(communicator);
+                RunActual(logger);
             }
             catch (Exception ex)
             {
@@ -144,7 +167,7 @@ public class Runner
         }
         catch (Exception ex)
         {
-            Logger.Instance.ELog("Failure in runner: " + ex.Message + Environment.NewLine + ex.StackTrace);
+            Program.Logger.ELog("Failure in runner: " + ex.Message + Environment.NewLine + ex.StackTrace);
         }
         finally
         {
@@ -154,7 +177,7 @@ public class Runner
             }
             catch (Exception ex)
             {
-                Logger.Instance.ELog("Failed 'Finishing' runner: " + ex.Message + Environment.NewLine + ex.StackTrace);
+                Program.Logger.ELog("Failed 'Finishing' runner: " + ex.Message + Environment.NewLine + ex.StackTrace);
             }
 
             systemHelper.Stop();
@@ -234,7 +257,6 @@ public class Runner
         Info.LibraryFile.OutputPath = Node.UnMap(nodeParameters.WorkingFile);
         nodeParameters?.Logger?.ILog("Output Path: " + Info.LibraryFile.OutputPath);
         nodeParameters?.Logger?.ILog("Final Status: " + Info.LibraryFile.Status);
-
     }
 
     /// <summary>
@@ -247,7 +269,8 @@ public class Runner
         {
             try
             {
-                CalculateFinalSize();
+                if(nodeParameters != null) // this is null if it fails to remotely download the file
+                    CalculateFinalSize();
 
                 var service = FlowRunnerService.Load();
                 await service.Complete(Info, log);
@@ -256,7 +279,7 @@ public class Runner
             catch (Exception) { }
             await Task.Delay(30_000);
         } while (DateTime.Now.Subtract(start) < new TimeSpan(0, 10, 0));
-        Logger.Instance?.ELog("Failed to inform server of flow completion");
+        Program.Logger?.ELog("Failed to inform server of flow completion");
     }
 
     /// <summary>
@@ -275,7 +298,7 @@ public class Runner
         catch (Exception ex) 
         { 
             // silently fail, not a big deal, just incremental progress update
-            Logger.Instance.WLog("Failed to record step change: " + step + " : " + partName);
+            Program.Logger.WLog("Failed to record step change: " + step + " : " + partName);
         }
     }
 
@@ -321,7 +344,7 @@ public class Runner
     {
         if (UpdateSemaphore.Wait(waitMilliseconds) == false)
         {
-            Logger.Instance.DLog("Failed to wait for SendUpdate semaphore");
+            Program.Logger.DLog("Failed to wait for SendUpdate semaphore");
             return;
         }
 
@@ -362,13 +385,13 @@ public class Runner
             {
                 CalculateFinalSize();
                 SendUpdate(Info, waitMilliseconds: 1000);
-                Logger.Instance?.DLog("Set final status to: " + status);
+                Program.Logger?.DLog("Set final status to: " + status);
                 return;
             }
             catch (Exception ex)
             {
                 // this is more of a problem, its not ideal, so we do try again
-                Logger.Instance?.WLog("Failed to set status on server: " + ex.Message);
+                Program.Logger?.WLog("Failed to set status on server: " + ex.Message);
             }
             Thread.Sleep(5_000);
         } while (DateTime.Now.Subtract(start) < new TimeSpan(0, 3, 0));
@@ -377,19 +400,50 @@ public class Runner
     /// <summary>
     /// Starts processing a file
     /// </summary>
-    /// <param name="communicator">the communicator to use to communicate with the server</param>
-    private void RunActual(IFlowRunnerCommunicator communicator)
+    /// <param name="logger">the logger used to log messages</param>
+    private void RunActual(FlowLogger logger)
     {
-        nodeParameters = new NodeParameters(Node.Map(Info.LibraryFile.Name), new FlowLogger(communicator),
+        string initialFile;
+        if (Info.IsRemote)
+        {
+            initialFile = DownloadFile(logger, Info.LibraryFile, Service.ServiceBaseUrl, WorkingDir);
+            if (string.IsNullOrEmpty(initialFile))
+            {
+                Info.LibraryFile.Status = FileStatus.MappingIssue;
+                SendUpdate(Info, waitMilliseconds: 1000);
+                return;
+            }
+        }
+        else
+        {
+            initialFile = Node.Map(Info.LibraryFile.Name);
+        }
+        
+        nodeParameters = new NodeParameters(initialFile, logger,
             Info.IsDirectory, Info.LibraryPath)
         {
-            Enterprise = Info.Config.Enterprise
+            Enterprise = Info.Config.Enterprise,
+            LibraryFileName = Info.LibraryFile.Name,
+            IsRemote = Info.IsRemote,
+            FileService = FileService.Instance
         };
         nodeParameters.HasPluginActual = (name) =>
         {
             var normalizedSearchName = Regex.Replace(name.ToLower(), "[^a-z]", string.Empty);
             return Info.Config.PluginNames?.Any(x =>
                 Regex.Replace(x.ToLower(), "[^a-z]", string.Empty) == normalizedSearchName) == true;
+        };
+        nodeParameters.UploadFile = (string source, string destination) =>
+        {
+            var task = new FileUploader(logger, Service.ServiceBaseUrl, Program.Uid).UploadFile(source, destination);
+            task.Wait();
+            return task.Result;
+        };
+        nodeParameters.DeleteRemote = (path, ifEmpty, includePatterns) =>
+        {
+            var task = new FileUploader(logger, Service.ServiceBaseUrl, Program.Uid).DeleteRemote(path, ifEmpty, includePatterns);
+            task.Wait();
+            return task.Result.Success;
         };
         
         nodeParameters.IsDocker = Globals.IsDocker;
@@ -407,7 +461,15 @@ public class Runner
         };
         foreach (var variable in Info.Config.Variables)
         {
-            nodeParameters.Variables.TryAdd(variable.Key, variable.Value);
+            object value = variable.Value;
+            if (variable.Value?.Trim()?.ToLowerInvariant() == "true")
+                value = true;
+            else if (variable.Value?.Trim()?.ToLowerInvariant() == "false")
+                value = false;
+            else if (Regex.IsMatch(variable.Value?.Trim(), @"^[\d](\.[\d]+)?$"))
+                value = variable.Value.IndexOf(".", StringComparison.Ordinal) > 0 ? float.Parse(variable.Value) : int.Parse(variable.Value);
+            
+            nodeParameters.Variables.TryAdd(variable.Key, value);
         }
 
         LoadFlowVariables(Flow.Properties?.Variables);
@@ -689,7 +751,7 @@ public class Runner
             {
                 nodeParameters.Result = NodeResult.Failure;
                 nodeParameters.Logger?.ELog("Execution error: " + ex.Message + Environment.NewLine + ex.StackTrace);
-                Logger.Instance?.ELog("Execution error: " + ex.Message + Environment.NewLine + ex.StackTrace);
+                Program.Logger?.ELog("Execution error: " + ex.Message + Environment.NewLine + ex.StackTrace);
                 RecordNodeFinish(nodeStartTime, -1);
                 return FileStatus.ProcessingFailed;
             }
@@ -745,7 +807,7 @@ public class Runner
             }
             catch (Exception ex)
             {
-                Logger.Instance.WLog("Failed to load assembly: " + dll.FullName + " > " + ex.Message);
+                Program.Logger.WLog("Failed to load assembly: " + dll.FullName + " > " + ex.Message);
             }
         }
         return null;
@@ -801,8 +863,8 @@ public class Runner
                 }
                 catch (Exception ex)
                 {
-                    Logger.Instance?.ELog("Failed setting property: " + ex.Message + Environment.NewLine + ex.StackTrace);
-                    Logger.Instance?.ELog("Type: " + nt.Name + ", Property: " + k);
+                    Program.Logger?.ELog("Failed setting property: " + ex.Message + Environment.NewLine + ex.StackTrace);
+                    Program.Logger?.ELog("Type: " + nt.Name + ", Property: " + k);
                 }
             }
         }
@@ -842,7 +904,7 @@ public class Runner
         var dll = new DirectoryInfo(WorkingDir).GetFiles(plugin + ".dll", SearchOption.AllDirectories).FirstOrDefault();
         if (dll == null)
         {
-            Logger.Instance.ELog("Failed to locate plugin: " + plugin);
+            Program.Logger.ELog("Failed to locate plugin: " + plugin);
             return null;
         }
 
@@ -853,14 +915,14 @@ public class Runner
             var type = assembly.GetTypes().FirstOrDefault(x => x.Name == "StaticMethods");
             if (type == null)
             {
-                Logger.Instance.ELog("No static methods found in plugin: " + plugin);
+                Program.Logger.ELog("No static methods found in plugin: " + plugin);
                 return null;
             }
 
             var methodInfo = type.GetMethod(method, BindingFlags.Public | BindingFlags.Static);
             if (methodInfo == null)
             {
-                Logger.Instance.ELog($"Method not found in plugin: {plugin}.{method}");
+                Program.Logger.ELog($"Method not found in plugin: {plugin}.{method}");
                 return null;
             }
 
@@ -872,7 +934,7 @@ public class Runner
         }
         catch (Exception ex)
         {
-            Logger.Instance.ELog($"Error executing plugin method [{plugin}.{method}]: " + ex.Message);
+            Program.Logger.ELog($"Error executing plugin method [{plugin}.{method}]: " + ex.Message);
             return null;
         }
     }

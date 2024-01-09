@@ -21,7 +21,7 @@ public class SystemHelper
 
     private void StayAwakeTimerOnElapsed(object? sender, ElapsedEventArgs e)
     {
-        Logger.Instance?.DLog("Telling Windows to stay awake");
+        Program.Logger?.DLog("Telling Windows to stay awake");
         NativeMethods.SetThreadExecutionState(EXECUTION_STATE.ES_SYSTEM_REQUIRED);
     }
 

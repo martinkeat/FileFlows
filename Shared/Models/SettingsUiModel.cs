@@ -77,5 +77,7 @@ public class SettingsUiModel:Settings
     /// Gets or sets if the file service is disabled
     /// </summary>
     public bool FileServiceDisabled { get; set; }
+    
+    public string FileServerAllowList { get; set; }
 
 }

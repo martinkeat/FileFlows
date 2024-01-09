@@ -173,9 +173,9 @@ public class SettingsController : Controller
             ShowFileAddedNotifications = model.ShowFileAddedNotifications,
             HideProcessingStartedNotifications = model.HideProcessingStartedNotifications,
             HideProcessingFinishedNotifications = model.HideProcessingFinishedNotifications,
-            ProcessFileCheckInterval = model.ProcessFileCheckInterval
+            ProcessFileCheckInterval = model.ProcessFileCheckInterval,
+            FileServiceDisabled = model.FileServiceDisabled
         });
-        
         // validate license it
         AppSettings.Instance.LicenseKey = model.LicenseKey?.Trim();
         AppSettings.Instance.LicenseEmail = model.LicenseEmail?.Trim();
@@ -208,6 +208,7 @@ public class SettingsController : Controller
         model.DateCreated = settings.DateCreated;
         model.IsWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
         model.IsDocker = Program.Docker;
+        model.Revision = Math.Max(model.Revision, Instance.Revision + 1);
         Instance = model;
         await DbHelper.Update(model);
     }
@@ -303,6 +304,7 @@ public class SettingsController : Controller
         cfg.Flows = new FlowService().GetAll();
         cfg.Libraries = new LibraryService().GetAll();
         cfg.Enterprise = LicenseHelper.IsLicensed(LicenseFlags.Enterprise);
+        cfg.AllowRemote = Instance.FileServiceDisabled == false;
         cfg.PluginSettings = new PluginService().GetAllPluginSettings().Result;
         cfg.MaxNodes = LicenseHelper.IsLicensed() ? 250 : 30;
         cfg.KeepFailedFlowTempFiles = Instance.KeepFailedFlowTempFiles;

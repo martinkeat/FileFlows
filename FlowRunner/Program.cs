@@ -1,12 +1,12 @@
-﻿using FileFlows.Plugin;
+﻿using System.Globalization;
+using FileFlows.Plugin;
 using FileFlows.ServerShared.Services;
 using FileFlows.Shared.Helpers;
 using FileFlows.Shared.Models;
 using System.Net;
-using System.Reflection;
-using System.Text;
+using FileFlows.Plugin.Services;
 using FileFlows.ServerShared;
-using FileFlows.Shared;
+using FileFlows.ServerShared.FileServices;
 
 namespace FileFlows.FlowRunner;
 
@@ -20,12 +20,17 @@ public class Program
     /// </summary>
     public static Guid Uid { get; private set; }
 
+    public static FlowLogger Logger;
+
     /// <summary>
     /// Main entry point for the flow runner
     /// </summary>
     /// <param name="args">the command line arguments</param>
     public static void Main(string[] args)
     {
+        CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
+        CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.InvariantCulture;
+
         int exitCode = Run(args);
         LogInfo("Exit Code: " + exitCode);
         Environment.ExitCode = exitCode;
@@ -39,6 +44,7 @@ public class Program
     /// <returns>the exit code of the runner</returns>
     public static int Run(string[] args)
     {
+        Logger = new (null);
         LogInfo("Flow Runner Version: " + Globals.Version);
         ServicePointManager.DefaultConnectionLimit = 50;
         try
@@ -204,6 +210,7 @@ public class Program
 
         FileSystemInfo file = lib.Folders ? new DirectoryInfo(workingFile) : new FileInfo(workingFile);
         bool fileExists = file.Exists; // set to variable so we can set this to false in debugging easily
+        bool remoteFile = false;
         if (fileExists == false)
         {
             if(args.IsServer == false)
@@ -212,17 +219,44 @@ public class Program
                 bool exists = libfileService.ExistsOnServer(libFile.Uid).Result;
                 if (exists == true)
                 {
-                    LogError("Library file exists but is not accessible from node: " + file.FullName);
-                    libFile.Status = FileStatus.MappingIssue;
-                    libFile.ExecutedNodes = new List<ExecutedNode>();                        
-                    libfileService.Update(libFile).Wait();
-                    return libFile.Status;
+                    if (args.Config.AllowRemote == false)
+                    {
+                        LogError("Library file exists but is not accessible from node: " + file.FullName);
+                        libFile.Status = FileStatus.MappingIssue;
+                        libFile.ExecutedNodes = new List<ExecutedNode>();
+                        libfileService.Update(libFile).Wait();
+                        return libFile.Status;
+                    }
+                    
+                    // we must copy this file to the local server
+                    // var fileName = DownloadFile(libFile, Service.ServiceBaseUrl, args.WorkingDirectory);
+                    // if (string.IsNullOrEmpty(fileName))
+                    // {
+                    //     LogError("Library file failed to be downloaded remotely: " + file.FullName);
+                    //     libFile.Status = FileStatus.MappingIssue;
+                    //     libFile.ExecutedNodes = new List<ExecutedNode>();
+                    //     libfileService.Update(libFile).Wait();
+                    //     return libFile.Status;
+                    // }
+
+                    //LogInfo("Downloaded file remotely to: " + fileName);
+                    remoteFile = true;
+                    // workingFile = fileName;
+                    // file = new FileInfo(workingFile);
                 }                    
             }
-            LogInfo("Library file does not exist, deleting from library files: " + file.FullName);
-            libfileService.Delete(libFile.Uid).Wait();
-            return libFile.Status;
+
+            if (remoteFile == false)
+            {
+                LogInfo("Library file does not exist, deleting from library files: " + file.FullName);
+                libfileService.Delete(libFile.Uid).Wait();
+                return libFile.Status;
+            }
         }
+
+        FileService.Instance = remoteFile
+            ? new RemoteFileService(Uid, Service.ServiceBaseUrl, args.WorkingDirectory, Logger)
+            : new LocalFileService();
 
         var flow = args.Config.Flows.FirstOrDefault(x => x.Uid == (lib.Flow?.Uid ?? Guid.Empty));
         if (flow == null || flow.Uid == Guid.Empty)
@@ -261,6 +295,7 @@ public class Program
             NodeName = node.Name,
             RelativeFile = libFile.RelativePath,
             Library = libFile.Library,
+            IsRemote = remoteFile,
             TotalParts = flow.Parts.Count,
             CurrentPart = 0,
             CurrentPartPercent = 0,
@@ -270,14 +305,15 @@ public class Program
             IsDirectory = lib.Folders,
             LibraryPath = lib.Path, 
             Fingerprint = lib.UseFingerprinting,
-            InitialSize = lib.Folders ? GetDirectorySize(workingFile) : new FileInfo(workingFile).Length
+            InitialSize = lib.Folders ? GetDirectorySize(workingFile) : FileService.Instance.FileSize(workingFile).ValueOrDefault
         };
+        LogInfo("Start Working File: " + info.WorkingFile);
         info.LibraryFile.OriginalSize = info.InitialSize;
         LogInfo("Initial Size: " + info.InitialSize);
         
 
         var runner = new Runner(info, flow, node, args.WorkingDirectory);
-        runner.Run();
+        runner.Run(Logger);
         return libFile.Status;
     }
 
@@ -298,14 +334,24 @@ public class Program
 
     internal static void LogInfo(string message)
     {
-        Console.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff") + " [INFO] -> " + message);
+        if(Logger != null)
+            Logger.ILog(message);
+        else
+            Console.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff") + " [INFO] -> " + message);
     }
     internal static void LogWarning(string message)
     {
-        Console.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff") + " [WARN] -> " + message);
+        if(Logger != null)
+            Logger.WLog(message);
+        else
+            Console.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff") + " [WARN] -> " + message);
     }
+
     internal static void LogError(string message)
     {
-        Console.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff") + " [ERRR] -> " + message);
+        if (Logger != null)
+            Logger.ELog(message);
+        else
+            Console.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff") + " [ERRR] -> " + message);
     }
 }
