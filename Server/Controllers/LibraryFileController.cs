@@ -42,11 +42,12 @@ public class LibraryFileController : Controller //ControllerStore<LibraryFile>
             {
             }
 
-            if (result?.File?.ExecutedNodes?.Any() == true)
-            {
-                result.File.ExecutedNodes.Clear();
-                await service.ClearExecutedNodes(result.File.Uid);
-            }
+            result.File.FinalSize = 0;
+            result.File.OutputPath = string.Empty;
+            result.File.ExecutedNodes = new();
+            result.File.FinalMetadata = new();
+            result.File.OriginalMetadata= new();
+            await service.ResetFileInfoForProcessing(result.File.Uid);
         }
 
         Logger.Instance.ILog($"GetNextFile for ['{args.NodeName}']({args.NodeUid}): {result.Status}");

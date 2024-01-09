@@ -123,10 +123,10 @@ public partial class LibraryFileService
     }
 
     /// <summary>
-    /// Clears the executed nodes on a file
+    /// Clears the executed nodes, metadata, final size etc for a file
     /// </summary>
     /// <param name="uid">The UID of the file</param>
-    public Task ClearExecutedNodes(Guid uid)
-        => DbHelper.Execute($"update LibraryFile set ExecutedNodes = '' where Uid = '{uid}'");
+    public Task ResetFileInfoForProcessing(Guid uid)
+        => DbHelper.Execute($"update LibraryFile set ExecutedNodes = '', OriginalMetadata = '', FinalMetadata = '', FinalSize = 0, OutputPath = '' where Uid = '{uid}'");
 
 }
