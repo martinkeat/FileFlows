@@ -55,6 +55,8 @@ public class FileDownloader
     {
         try
         {
+            logger.ILog("Downloading file: " + path);
+            logger.ILog("Destination file: " + destinationPath);
             string url = serverUrl;
             if (url.EndsWith("/") == false)
                 url += "/";
@@ -71,8 +73,9 @@ public class FileDownloader
             HttpResponseMessage response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
             if (response.IsSuccessStatusCode == false)
             {
-                string error = await response.Content.ReadAsStringAsync();
-                return Result<bool>.Fail(error?.EmptyAsNull() ?? "Failed to remotely download the file");
+                string error = (await response.Content.ReadAsStringAsync()).EmptyAsNull() ?? "Failed to remotely download the file";
+                logger.ELog("Download Failed: " + error);
+                return Result<bool>.Fail(error);
             }
 
             using Stream contentStream = await response.Content.ReadAsStreamAsync();

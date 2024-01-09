@@ -413,9 +413,9 @@ public class FileHelper
         {
             string[] linuxSystemDirs =
             {
-                "/bin", "/boot", "/dev", "/etc", "/home", "/lib", "/lib64", "/media",
-                "/mnt", "/opt", "/proc", "/root", "/run", "/sbin", "/srv", "/sys",
-                "/tmp", "/usr", "/var"
+                "/bin", "/boot", "/dev", "/etc", "/lib", "/lib64",
+                "/opt", "/proc", "/root", "/run", "/sbin", "/srv", "/sys",
+                "/usr", "/var"
             };
 
             foreach (string sysDir in linuxSystemDirs)
