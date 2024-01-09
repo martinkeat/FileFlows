@@ -274,7 +274,7 @@ public class RemoteFileService : IFileService
         }
     }
 
-    public Result<bool> FileMove(string path, string destination, bool overwrite)
+    public Result<bool> FileMove(string path, string destination, bool overwrite = true)
     {
         if (FileIsLocal(path))
         {
@@ -304,7 +304,7 @@ public class RemoteFileService : IFileService
         }
     }
 
-    public Result<bool> FileCopy(string path, string destination, bool overwrite)
+    public Result<bool> FileCopy(string path, string destination, bool overwrite = true)
     {
         if (FileIsLocal(path))
         {

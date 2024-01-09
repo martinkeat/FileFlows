@@ -95,4 +95,15 @@ public readonly struct Result<TValue>
 
         return false;
     }
+
+    /// <summary>
+    /// If the result failed or not
+    /// </summary>
+    /// <param name="error">the error if failed, otherwise null</param>
+    /// <returns>true if failed, false if did not fail</returns>
+    public bool Failed(out string error)
+    {
+        error = IsFailed ? _error : null;
+        return IsFailed;
+    }
 }

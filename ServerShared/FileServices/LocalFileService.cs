@@ -210,7 +210,7 @@ public class LocalFileService : IFileService
         }
     }
 
-    public Result<bool> FileMove(string path, string destination, bool overwrite)
+    public Result<bool> FileMove(string path, string destination, bool overwrite = true)
     {
         if (IsProtectedPath(path))
             return Result<bool>.Fail("Cannot access protected path: " + path);
@@ -230,7 +230,7 @@ public class LocalFileService : IFileService
         }
     }
 
-    public Result<bool> FileCopy(string path, string destination, bool overwrite)
+    public Result<bool> FileCopy(string path, string destination, bool overwrite = true)
     {
         if (IsProtectedPath(path))
             return Result<bool>.Fail("Cannot access protected path: " + path);

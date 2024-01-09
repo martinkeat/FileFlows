@@ -20,14 +20,13 @@ public class FileHelper
     /// Gets or sets the file permissions used when setting permissions
     /// </summary>
     public static string Permissions { get; set; }
-
+    
     /// <summary>
     /// Creates a directory if it doesn't already exist.
     /// </summary>
     /// <param name="logger">The logger instance.</param>
     /// <param name="directory">The path of the directory to create.</param>
     /// <returns>True if the directory already exists or if creation succeeds; otherwise, false.</returns>
-
     public static bool CreateDirectoryIfNotExists(ILogger logger, string directory)
     {
         if (string.IsNullOrEmpty(directory))
@@ -447,4 +446,43 @@ public class FileHelper
 
         return false;
     }
+    /// <summary>
+    /// Combines multiple path strings, detecting the path separator from the first directory.
+    /// </summary>
+    /// <param name="path1">The first path.</param>
+    /// <param name="path2">The second path.</param>
+    /// <param name="additionalPaths">Additional paths to combine.</param>
+    /// <returns>The combined path.</returns>
+    public static string Combine(string path1, string path2, params string[] additionalPaths)
+    {
+        List<string> paths = new ();
+        paths.Add(path1);
+        paths.Add(path2);
+
+        if (additionalPaths != null)
+            paths.AddRange(additionalPaths);
+
+        char separator = '/';
+        foreach (var sep in new char[] { '/', '\\' })
+        {
+            if (path1.Contains(sep))
+            {
+                separator = sep;
+                break;
+            }
+        }
+
+        string? combinedPath = paths[0]?.TrimEnd(separator);
+
+        for (int i = 1; i < paths.Count; i++)
+        {
+            if (string.IsNullOrEmpty(paths[i]))
+                continue;
+
+            combinedPath += $"{separator}{paths[i].TrimStart(separator)}";
+        }
+
+        return combinedPath;
+    }
+
 }

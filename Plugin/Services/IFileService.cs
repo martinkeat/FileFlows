@@ -121,7 +121,7 @@ public interface IFileService
     /// <param name="destination">the destination of the file</param>
     /// <param name="overwrite">if the destination should be overwritten if it exists</param>
     /// <returns>true if successful or false if not</returns>
-    Result<bool> FileMove(string path, string destination, bool overwrite);
+    Result<bool> FileMove(string path, string destination, bool overwrite = true);
 
     /// <summary>
     /// Copies a file
@@ -130,7 +130,7 @@ public interface IFileService
     /// <param name="destination">the destination to move the file</param>
     /// <param name="overwrite">if the destination should be overwritten if it exists</param>
     /// <returns>true if successfully copied or not</returns>
-    Result<bool> FileCopy(string path, string destination, bool overwrite);
+    Result<bool> FileCopy(string path, string destination, bool overwrite = true);
 
     /// <summary>
     /// Appends the specified text to the file at the given path.
