@@ -11,7 +11,7 @@ public class Globals
     /// Gets the version of FileFlows
     /// </summary>
     #if(DEBUG)
-    public static readonly string Version = DateTime.Now.ToString("yy.MM") + ".2.2512";
+    public static readonly string Version = DateTime.Now.ToString("yy.MM") + ".2.2513";
     #else
     public const string Version = "23.10.2.2469";
     #endif
