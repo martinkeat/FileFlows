@@ -255,7 +255,7 @@ public class Program
         }
 
         FileService.Instance = remoteFile
-            ? new RemoteFileService(Uid, Service.ServiceBaseUrl, args.WorkingDirectory, Logger)
+            ? new RemoteFileService(Uid, Service.ServiceBaseUrl, args.WorkingDirectory, Logger, libFile.Name.Contains('/') ? '/' : '\\')
             : new LocalFileService();
 
         var flow = args.Config.Flows.FirstOrDefault(x => x.Uid == (lib.Flow?.Uid ?? Guid.Empty));

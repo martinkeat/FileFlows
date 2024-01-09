@@ -522,136 +522,136 @@ public class FileServerController : Controller
         return base64ActualHash.Equals(expectedFileHash);
     }
 
-    /// <summary>
-    /// Deletes a remote file or folder
-    /// </summary>
-    /// <param name="model">the model to delete</param>
-    /// <returns>An asynchronous action result indicating the success or failure of the save operation.</returns>
-    [HttpPost("delete")]
-    public async Task<IActionResult> DeleteRemote([FromBody] DeleteRemoteModel model)
-    {
-        if (ValidateRequest(out string message) == false)
-            return StatusCode(503, message?.EmptyAsNull() ?? "File service is currently disabled.");
-
-        string path = model.Path;
-        
-        if(string.IsNullOrWhiteSpace(path))
-            return StatusCode(503, "No path specified to delete.");
-
-        var libraryPaths = (await new LibraryService().GetAllAsync()).Select(x => x.Path).ToArray();
-
-        try
-        {
-            var fileInfo = new FileInfo(path);
-            if (fileInfo.Exists)
-            {
-                bool isPathAllowed = libraryPaths.Any(allowedPath => fileInfo.FullName.StartsWith(allowedPath));
-                if (isPathAllowed == false)
-                    return StatusCode(503, "Path does not belong to a configured library, cannot delete file.");
-                
-                fileInfo.Delete();
-                return Ok();
-            }
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(503, ex.Message);
-        }
-
-        try
-        {
-            var dirInfo = new DirectoryInfo(path);
-            if (dirInfo.Exists)
-            {
-                string libPath = libraryPaths.FirstOrDefault(allowedPath => dirInfo.FullName.StartsWith(allowedPath));
-                if (string.IsNullOrWhiteSpace(libPath))
-                    return StatusCode(503, "Path does not belong to a configured library, cannot delete folder.");
-
-                if (model.IfEmpty)
-                {
-                    List<string> messages = new();
-                    var deleted = RecursiveDelete(model.IncludePatterns, libPath, path, true, messages);
-                    string log = string.Join("\n", messages);
-                    return deleted ? Ok(log) : StatusCode(503, log);
-                }
-                
-                dirInfo.Delete(true);
-                return Ok();
-            }
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(503, ex.Message);
-        }
-        
-        return Ok();
-    }
-    
-    
-        private bool RecursiveDelete(string[] IncludePatterns, string root, string path, bool deleteSubFolders, List<string> messages)
-        {
-            Logger.Instance?.ILog("Checking directory to delete: " + path);
-            DirectoryInfo dir = new DirectoryInfo(path);
-            if (dir.FullName.ToLower() == root.ToLower())
-            {
-                messages.Add("At root, stopping deleting: " + root);
-                return true;
-            }
-            if (dir.FullName.Length <= root.Length)
-            {
-                messages.Add("At root2, stopping deleting: " + root);
-                return true;
-            }
-            if (deleteSubFolders == false && dir.GetDirectories().Any())
-            {
-                messages.Add("Directory contains subfolders, cannot delete: " + dir.FullName);
-                return false;
-            }
-
-            var files = dir.GetFiles("*.*", SearchOption.AllDirectories);
-            if (IncludePatterns?.Any() == true)
-            {
-                var includedFiles = files.Where(x =>
-                {
-                    foreach (var pattern in IncludePatterns)
-                    {
-                        if (x.FullName.Contains(pattern))
-                            return true;
-                        try
-                        {
-                            if (System.Text.RegularExpressions.Regex.IsMatch(x.FullName, pattern, System.Text.RegularExpressions.RegexOptions.IgnoreCase))
-                                return true;
-                        }
-                        catch (Exception) { }
-                    }
-                    return false;
-                }).ToList();
-                if (includedFiles.Any())
-                {
-                    messages.Add("Directory is not empty, cannot delete: " + dir.FullName + "\n" + 
-                                 string.Join("\n", includedFiles.Select(x => "- " + x).ToArray()));
-                    return false;
-                }
-            }
-            else if (files.Length == 0)
-            {
-                messages.Add("Directory is not empty, cannot delete: " + dir.FullName);
-                return false;
-            }
-
-            messages.Add("Deleting directory: " + dir.FullName);
-            try
-            {
-                dir.Delete(true);
-            }
-            catch (Exception ex)
-            {
-                messages.Add("Failed to delete directory: " + ex.Message);
-                return dir.Exists == false; // silently fail
-            }
-
-            return RecursiveDelete(IncludePatterns, root, dir.Parent.FullName, false, messages);
-        }
+    // /// <summary>
+    // /// Deletes a remote file or folder
+    // /// </summary>
+    // /// <param name="model">the model to delete</param>
+    // /// <returns>An asynchronous action result indicating the success or failure of the save operation.</returns>
+    // [HttpPost("delete")]
+    // public async Task<IActionResult> DeleteRemote([FromBody] DeleteRemoteModel model)
+    // {
+    //     if (ValidateRequest(out string message) == false)
+    //         return StatusCode(503, message?.EmptyAsNull() ?? "File service is currently disabled.");
+    //
+    //     string path = model.Path;
+    //     
+    //     if(string.IsNullOrWhiteSpace(path))
+    //         return StatusCode(503, "No path specified to delete.");
+    //
+    //     var libraryPaths = (await new LibraryService().GetAllAsync()).Select(x => x.Path).ToArray();
+    //
+    //     try
+    //     {
+    //         var fileInfo = new FileInfo(path);
+    //         if (fileInfo.Exists)
+    //         {
+    //             bool isPathAllowed = libraryPaths.Any(allowedPath => fileInfo.FullName.StartsWith(allowedPath));
+    //             if (isPathAllowed == false)
+    //                 return StatusCode(503, "Path does not belong to a configured library, cannot delete file.");
+    //             
+    //             fileInfo.Delete();
+    //             return Ok();
+    //         }
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         return StatusCode(503, ex.Message);
+    //     }
+    //
+    //     try
+    //     {
+    //         var dirInfo = new DirectoryInfo(path);
+    //         if (dirInfo.Exists)
+    //         {
+    //             string libPath = libraryPaths.FirstOrDefault(allowedPath => dirInfo.FullName.StartsWith(allowedPath));
+    //             if (string.IsNullOrWhiteSpace(libPath))
+    //                 return StatusCode(503, "Path does not belong to a configured library, cannot delete folder.");
+    //
+    //             if (model.IfEmpty)
+    //             {
+    //                 List<string> messages = new();
+    //                 var deleted = RecursiveDelete(model.IncludePatterns, libPath, path, true, messages);
+    //                 string log = string.Join("\n", messages);
+    //                 return deleted ? Ok(log) : StatusCode(503, log);
+    //             }
+    //             
+    //             dirInfo.Delete(true);
+    //             return Ok();
+    //         }
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         return StatusCode(503, ex.Message);
+    //     }
+    //     
+    //     return Ok();
+    // }
+    //
+        //
+        // public static bool RecursiveDelete(string[] IncludePatterns, string root, string path, bool deleteSubFolders, List<string> messages)
+        // {
+        //     Logger.Instance?.ILog("Checking directory to delete: " + path);
+        //     DirectoryInfo dir = new DirectoryInfo(path);
+        //     if (string.Equals(dir.FullName, root, StringComparison.CurrentCultureIgnoreCase))
+        //     {
+        //         messages.Add("At root, stopping deleting: " + root);
+        //         return true;
+        //     }
+        //     if (dir.FullName.Length <= root.Length)
+        //     {
+        //         messages.Add("At root2, stopping deleting: " + root);
+        //         return true;
+        //     }
+        //     if (deleteSubFolders == false && dir.GetDirectories().Any())
+        //     {
+        //         messages.Add("Directory contains subfolders, cannot delete: " + dir.FullName);
+        //         return false;
+        //     }
+        //
+        //     var files = dir.Exists ? dir.GetFiles("*.*", SearchOption.AllDirectories) : new FileInfo[] { };
+        //     if (IncludePatterns?.Any() == true)
+        //     {
+        //         var includedFiles = files.Where(x =>
+        //         {
+        //             foreach (var pattern in IncludePatterns)
+        //             {
+        //                 if (x.FullName.Contains(pattern))
+        //                     return true;
+        //                 try
+        //                 {
+        //                     if (System.Text.RegularExpressions.Regex.IsMatch(x.FullName, pattern, System.Text.RegularExpressions.RegexOptions.IgnoreCase))
+        //                         return true;
+        //                 }
+        //                 catch (Exception) { }
+        //             }
+        //             return false;
+        //         }).ToList();
+        //         if (includedFiles.Any())
+        //         {
+        //             messages.Add("Directory is not empty, cannot delete: " + dir.FullName + "\n" + 
+        //                          string.Join("\n", includedFiles.Select(x => "- " + x).ToArray()));
+        //             return false;
+        //         }
+        //     }
+        //     else if (files.Length == 0)
+        //     {
+        //         messages.Add("Directory is not empty, cannot delete: " + dir.FullName);
+        //         return false;
+        //     }
+        //
+        //     messages.Add("Deleting directory: " + dir.FullName);
+        //     try
+        //     {
+        //         dir.Delete(true);
+        //     }
+        //     catch (Exception ex)
+        //     {
+        //         messages.Add("Failed to delete directory: " + ex.Message);
+        //         return dir.Exists == false; // silently fail
+        //     }
+        //
+        //     return RecursiveDelete(IncludePatterns, root, dir.Parent.FullName, false, messages);
+        // }
 
     /// <summary>
     /// Model used for deleting a remote path

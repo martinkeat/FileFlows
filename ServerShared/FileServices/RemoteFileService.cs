@@ -18,12 +18,13 @@ public class RemoteFileService : IFileService
     private static HttpClient _Client;
     private readonly LocalFileService _localFileService;
 
-    public RemoteFileService(Guid executorUid, string serverUrl, string tempPath, ILogger logger)
+    public RemoteFileService(Guid executorUid, string serverUrl, string tempPath, ILogger logger, char pathSeparator)
     {
         this.executorUid = executorUid;
         this.serverUrl = serverUrl;
         this.tempPath = tempPath;
         this.logger = logger;
+        this.PathSeparator = pathSeparator;
         this._localFileService = new();
         HttpHelper.OnHttpRequestCreated = OnHttpRequestCreated;
     }

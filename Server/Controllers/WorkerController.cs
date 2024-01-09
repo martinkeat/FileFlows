@@ -68,7 +68,7 @@ public class WorkerController : Controller
         {
             var lf = info.LibraryFile;
             var service = new LibraryFileService();
-            service.ClearExecutedNodes(lf.Uid).Wait();
+            service.ResetFileInfoForProcessing(lf.Uid).Wait();
             
             if (lf.ExecutedNodes?.Any() == true)
             {
