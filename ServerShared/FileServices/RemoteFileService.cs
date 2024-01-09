@@ -45,7 +45,7 @@ public class RemoteFileService : IFileService
             return _localFileService.GetFiles(path, searchPattern, recursive);
         try
         {
-            var result = HttpHelper.Post<string[]>(GetUrl("list-files"), new
+            var result = HttpHelper.Post<string[]>(GetUrl("directory/files"), new
             {
                 path,
                 searchPattern,

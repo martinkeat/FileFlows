@@ -15,7 +15,7 @@ public class LocalFileService : IFileService
             return Result<string[]>.Fail("Cannot access protected path: " + path);
         try
         {
-            return Directory.GetFiles(path, searchPattern,
+            return Directory.GetFiles(path, searchPattern ?? string.Empty,
                 recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
         }
         catch (Exception)
