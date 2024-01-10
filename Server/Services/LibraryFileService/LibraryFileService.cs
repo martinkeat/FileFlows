@@ -1,4 +1,5 @@
-﻿using FileFlows.Server.Helpers;
+﻿using System.Data;
+using FileFlows.Server.Helpers;
 using FileFlows.Server.Controllers;
 using FileFlows.Server.Hubs;
 using FileFlows.ServerShared.Services;
@@ -81,6 +82,8 @@ public partial class LibraryFileService : ILibraryFileService
     /// <returns>The newly updated library file</returns>
     public Task<LibraryFile> Update(LibraryFile file)
     {
+        if (file.Status == FileStatus.ProcessingFailed)
+            return Task.FromResult<LibraryFile>(GetByUid(file.Uid)); // handled by worker complete
         file.DateModified = DateTime.Now;
         file.ExecutedNodes ??= new ();
         file.OriginalMetadata ??= new ();

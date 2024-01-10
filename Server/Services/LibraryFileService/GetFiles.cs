@@ -225,7 +225,7 @@ public partial class LibraryFileService
                         (x.Flags & LibraryFileFlags.ForceProcessing) == LibraryFileFlags.ForceProcessing);
 
                 if (status is FileStatus.Processed or FileStatus.ProcessingFailed)
-                    query = query.OrderByDescending(x => x.ProcessingEnded)
+                    query = query.OrderByDescending(x => x.ProcessingStarted > x.ProcessingEnded ? x.ProcessingStarted : x.ProcessingEnded)
                         .ThenBy(x => x.DateModified);
                 else
                     query = query.OrderBy(x => x.DateModified);
