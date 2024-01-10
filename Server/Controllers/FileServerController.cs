@@ -457,7 +457,7 @@ public class FileServerController : Controller
                 FileHelper.ChangeOwner(null, dirPath, false, true);
             }
 
-            string outFile = Path.Combine(dirPath, fileInfo.Name + ".tmp");
+            string outFile = Path.Combine(dirPath, "_TEMP_" + fileInfo.Name);
             log.AppendLine("Writing file to temporary filename: " + outFile);
 
             using (var fileStream = new FileStream(outFile, FileMode.Create))
@@ -505,7 +505,7 @@ public class FileServerController : Controller
         catch (Exception ex)
         {
             // Log the exception
-            log.AppendLine($"FileServer: An error occurred: {ex.Message}");
+            log.AppendLine($"FileServer: An error occurred: {ex.Message}" + Environment.NewLine + ex.StackTrace);
             return StatusCode(500, log.ToString());
         }
     }
