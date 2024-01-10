@@ -130,8 +130,9 @@ public class FileDownloader
             }
 
             var timeTaken = DateTime.Now.Subtract(start);
+            var size = new FileInfo(destinationPath).Length;
             logger.ILog(
-                $"Time taken to download file: {timeTaken}, bytes read: {bytesReadTotal}, expected size: {fileSize})");
+                $"Time taken to download file: {timeTaken}, bytes read: {bytesReadTotal}, expected size: {fileSize}, size on disk: {size})");
             
             // using FileStream fileStream = File.OpenWrite(destinationPath);
             // await response.Content.CopyToAsync(fileStream);
@@ -158,7 +159,6 @@ public class FileDownloader
             //     }
             // }
 
-            var size = new FileInfo(destinationPath).Length;
             if (Math.Abs(size - fileSize) > bufferSize)
             {
                 return Result<bool>.Fail("File failed to download completely!");
