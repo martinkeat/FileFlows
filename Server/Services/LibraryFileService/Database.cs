@@ -211,6 +211,7 @@ public partial class LibraryFileService
                 file.OutputPath, file.NoLongerExistsAfterProcessing ? 1 : 0, strOriginalMetadata, strFinalMetadata,
                 strExecutedNodes
             );
+            Logger.Instance.DLog("File: " + file.Name + "\nExecuted nodes: " + strExecutedNodes);
         }
         catch (Exception ex)
         {
