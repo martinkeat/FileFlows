@@ -51,7 +51,8 @@ public class LibaryFileListModelHelper
 
             if (status == FileStatus.ProcessingFailed)
             {
-                item.Date = x.ProcessingEnded;
+                item.Node = x.Node?.Name;
+                item.Date = x.ProcessingEnded < x.ProcessingStarted ? x.ProcessingStarted : x.ProcessingEnded;
             }
 
             if (status == FileStatus.Duplicate)
@@ -66,6 +67,7 @@ public class LibaryFileListModelHelper
                 item.OutputPath = x.OutputPath;
                 item.ProcessingTime = x.ProcessingTime;
                 item.Date = x.ProcessingEnded;
+                item.Node = x.Node?.Name;
             }
             return item;
         });

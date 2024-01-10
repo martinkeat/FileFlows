@@ -118,7 +118,11 @@
                 <span>@item.Library</span>
             </Cell>
         </FlowTableColumn>
-        <FlowTableColumn TItem="LibaryFileListModel" Width="12rem" MobileWidth="0" Hidden="(Client.App.Instance.IsMobile || SelectedStatus != FileStatus.Processing)">
+        <FlowTableColumn TItem="LibaryFileListModel" Width="12rem" MobileWidth="0" Hidden="(Client.App.Instance.IsMobile || 
+                                                                                            (SelectedStatus != FileStatus.Processing && 
+                                                                                            SelectedStatus != FileStatus.ProcessingFailed &&
+                                                                                            SelectedStatus != FileStatus.Processed
+                                                                                            ))">
             <Header>
                 Node
             </Header>

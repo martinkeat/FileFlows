@@ -273,6 +273,7 @@ public class Runner
                     CalculateFinalSize();
 
                 var service = FlowRunnerService.Load();
+                Info.LibraryFile.ProcessingEnded = DateTime.Now;
                 await service.Complete(Info, log);
                 return;
             }
@@ -722,7 +723,7 @@ public class Runner
                     if (output == -1)
                     {
                         // the execution failed                     
-                        nodeParameters.Logger?.ELog("node returned error code: " + CurrentNode!.Name);
+                        nodeParameters.Logger?.ELog("Flow Element returned error code: " + CurrentNode!.Name);
                         nodeParameters.Result = NodeResult.Failure;
                         return FileStatus.ProcessingFailed;
                     }
