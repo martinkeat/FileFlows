@@ -130,7 +130,8 @@ public class FileDownloader
             }
 
             var timeTaken = DateTime.Now.Subtract(start);
-            logger.ILog($"Time taken to download file: {timeTaken}");
+            logger.ILog(
+                $"Time taken to download file: {timeTaken}, bytes read: {bytesReadTotal}, expected size: {fileSize})");
             
             // using FileStream fileStream = File.OpenWrite(destinationPath);
             // await response.Content.CopyToAsync(fileStream);
