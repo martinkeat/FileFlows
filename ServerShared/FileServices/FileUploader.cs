@@ -44,7 +44,20 @@ public class FileUploader
     /// <summary>
     /// Static HttpClient instance used for file uploading operations.
     /// </summary>
-    private static readonly HttpClient _client = new HttpClient();
+    private static readonly HttpClient _client;
+
+    /// <summary>
+    /// Static constructor
+    /// </summary>
+    static FileUploader()
+    {
+        HttpClientHandler handler = new HttpClientHandler();
+        handler.ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => true;
+
+        _client = new HttpClient(handler);
+        _client.Timeout = Timeout.InfiniteTimeSpan;
+    }
+    
     /// <summary>
     /// Uploads a file to the specified URL, along with its hash for integrity verification.
     /// </summary>

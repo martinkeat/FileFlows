@@ -1,8 +1,5 @@
-using System.Collections;
-using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
-using System.Web;
 using FileFlows.Plugin;
 using HttpMethod = System.Net.Http.HttpMethod;
 
@@ -13,7 +10,7 @@ namespace FileFlows.ServerShared.FileServices;
 /// </summary>
 public class FileDownloader
 {
-    private static readonly HttpClient _httpClient = new ();
+    private static readonly HttpClient _client;
     
     /// <summary>
     /// The logger used for log messages
@@ -42,7 +39,18 @@ public class FileDownloader
         this.serverUrl = serverUrl;
         this.executorUid = executorUid;
     }
-    
+
+    /// <summary>
+    /// Static constructor
+    /// </summary>
+    static FileDownloader()
+    {
+        HttpClientHandler handler = new HttpClientHandler();
+        handler.ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => true;
+
+        _client = new HttpClient(handler);
+        _client.Timeout = Timeout.InfiniteTimeSpan;
+    }
 
     /// <summary>
     /// Downloads a file from the specified URL and saves it to the destination path.
@@ -70,7 +78,7 @@ public class FileDownloader
             request.Content  = new StringContent(json, Encoding.UTF8, "application/json");
 
             // Send the request and read the response content as a stream
-            HttpResponseMessage response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+            HttpResponseMessage response = await _client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
             if (response.IsSuccessStatusCode == false)
             {
                 string error = (await response.Content.ReadAsStringAsync()).EmptyAsNull() ?? "Failed to remotely download the file";
@@ -106,9 +114,19 @@ public class FileDownloader
             byte[] buffer = new byte[bufferSize]; 
 
             int bytesRead;
+            long bytesReadTotal = 0;
+            int percent = 0;
             while ((bytesRead = await contentStream.ReadAsync(buffer, 0, buffer.Length)) > 0)
             {
                 await fileStream.WriteAsync(buffer, 0, bytesRead);
+                bytesReadTotal += bytesRead;
+                float percentage = bytesReadTotal * 100f / fileSize;
+                int iPercent = Math.Clamp((int)Math.Round(percentage), 0, 100);
+                if (iPercent != percent)
+                {
+                    percent = iPercent;
+                    logger.ILog("Download Percentage: "+ percent);
+                }
             }
 
             var timeTaken = DateTime.Now.Subtract(start);
@@ -173,7 +191,7 @@ public class FileDownloader
     {
         try
         {
-            var serverHash = await _httpClient.GetStringAsync(url + "/hash");;
+            var serverHash = await _client.GetStringAsync(url + "/hash");;
             bool result = string.Equals(hash, serverHash, StringComparison.InvariantCulture);
             if (result == false)
             {
@@ -205,7 +223,7 @@ public class FileDownloader
             request.Content  = new StringContent(json, Encoding.UTF8, "application/json");
 
             // Send the request and retrieve the response content as a string
-            HttpResponseMessage response = await _httpClient.SendAsync(request);
+            HttpResponseMessage response = await _client.SendAsync(request);
             response.EnsureSuccessStatusCode();
 
             string str = await response.Content.ReadAsStringAsync();
