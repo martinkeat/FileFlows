@@ -125,7 +125,7 @@ public class FileDownloader
                 if (iPercent != percent)
                 {
                     percent = iPercent;
-                    logger.ILog("Download Percentage: "+ percent);
+                    logger.ILog($"Download Percentage: {percent} %");
                 }
             }
 
