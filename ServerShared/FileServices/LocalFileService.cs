@@ -221,6 +221,10 @@ public class LocalFileService : IFileService
             var fileInfo = new FileInfo(path);
             if (fileInfo.Exists == false)
                 return Result<bool>.Fail("File does not exist");
+            var destDir = new FileInfo(destination).Directory;
+            if (destDir.Exists == false)
+                destDir.Create();
+
             fileInfo.MoveTo(destination, overwrite);
             return true;
         }
@@ -241,6 +245,11 @@ public class LocalFileService : IFileService
             var fileInfo = new FileInfo(path);
             if (fileInfo.Exists == false)
                 return Result<bool>.Fail("File does not exist");
+            
+            var destDir = new FileInfo(destination).Directory;
+            if (destDir.Exists == false)
+                destDir.Create();
+            
             fileInfo.CopyTo(destination, overwrite);
             return true;
         }

@@ -568,6 +568,9 @@ public class NodeParameters
     public bool MoveFile(string destination)
     {
         if (Fake) return true;
+        
+        Logger?.ILog("MoveFile: " + WorkingFile);
+        Logger?.ILog("Destination: " + destination);
 
         var result = FileService.FileMove(WorkingFile, destination, true);
         if (result.IsFailed)
