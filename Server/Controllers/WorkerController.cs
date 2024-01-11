@@ -206,6 +206,8 @@ public class WorkerController : Controller
                     libfile.ProcessingEnded = info.LibraryFile.ProcessingEnded;
                 if (libfile.ProcessingEnded < new DateTime(2020, 1, 1))
                     libfile.ProcessingEnded = DateTime.Now; // this avoid a "2022 years ago" issue
+                if(libfile.Flow == null)
+                    libfile.Flow = info.LibraryFile.Flow;
                 await lfService.Update(libfile);
                 var library = new LibraryService().GetByUid(libfile.Library.Uid);
                 if (libfile.Status == FileStatus.ProcessingFailed)

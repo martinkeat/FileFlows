@@ -172,7 +172,7 @@ public class LibraryFileController : Controller //ControllerStore<LibraryFile>
             existing.OriginalSize = file.OriginalSize;
         if(string.IsNullOrEmpty(file.OutputPath))
             existing.OutputPath = file.OutputPath;
-        if(file.Flow != null)
+        if(file.Flow != null && file.Flow.Uid != Guid.Empty && string.IsNullOrEmpty(file.Flow.Name) == false)
             existing.Flow = file.Flow;
         if(file.Library != null && file.Library.Uid == existing.Library.Uid)
             existing.Library = file.Library; // name may have changed and is being updated
