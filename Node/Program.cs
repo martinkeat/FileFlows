@@ -126,7 +126,7 @@ public class Program
             if (showUi)
             {
                 if(Globals.IsWindows)
-                    Utils.WindowsConsoleManager.Hide();
+                    WindowsConsoleManager.Hide();
                 
                 Logger.Instance?.ILog("Launching GUI");
                 Task.Run(async () =>

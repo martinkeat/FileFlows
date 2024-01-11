@@ -268,58 +268,6 @@ public class MainWindowViewModel:INotifyPropertyChanged
         } 
     }
     
-    //
-    // private string _TempPath = String.Empty;
-    // /// <summary>
-    // /// Gets or sets the temporary path used during flow processing
-    // /// </summary>
-    // public string TempPath
-    // {
-    //     get => _TempPath;
-    //     set
-    //     {
-    //         if (_TempPath?.EmptyAsNull() != value?.EmptyAsNull())
-    //         {
-    //             _TempPath = value ?? String.Empty;
-    //             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(TempPath)));
-    //         }
-    //     }
-    // }
-
-    // private int _FlowRunners;
-    // /// <summary>
-    // /// Gets or sets the number of FlowRunners
-    // /// </summary>
-    // public int FlowRunners
-    // {
-    //     get => _FlowRunners;
-    //     set
-    //     {
-    //         if (_FlowRunners != value)
-    //         {
-    //             _FlowRunners = value < 0 ? 0 : value > 100 ? 100 : value;
-    //             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(FlowRunners)));
-    //         }
-    //     }
-    // }
-    //
-    // private bool _Enabled;
-    // /// <summary>
-    // /// Gets or sets if the Node is enabled
-    // /// </summary>
-    // public bool Enabled
-    // {
-    //     get => _Enabled;
-    //     set
-    //     {
-    //         if (_Enabled != value)
-    //         {
-    //             _Enabled = value;
-    //             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Enabled)));
-    //         }
-    //     }
-    // }
-
     /// <summary>
     /// Event that is fired when a property value is changed
     /// </summary>
@@ -373,9 +321,6 @@ public class MainWindowViewModel:INotifyPropertyChanged
             ServerUrl += "/";
         
         AppSettings.Instance.ServerUrl = ServerUrl;
-        // AppSettings.Instance.TempPath = TempPath;
-        //AppSettings.Instance.Runners = FlowRunners;
-        //AppSettings.Instance.Enabled = Enabled;
         
         _ = Window.SaveRegister();
     }
@@ -390,9 +335,6 @@ public class MainWindowViewModel:INotifyPropertyChanged
         this.Version = "FileFlows Node Version: " + Globals.Version;
         
         ServerUrl = AppSettings.Instance.ServerUrl;
-        //TempPath = AppSettings.Instance.TempPath;
-        //FlowRunners = AppSettings.Instance.Runners;
-        //Enabled = AppSettings.Instance.Enabled;
     }
 
     /// <summary>
@@ -402,6 +344,5 @@ public class MainWindowViewModel:INotifyPropertyChanged
     {
         OpenFolderDialog ofd = new OpenFolderDialog();
         var result = await ofd.ShowAsync(Window);
-        //this.TempPath = result ?? string.Empty;
     }
 }
