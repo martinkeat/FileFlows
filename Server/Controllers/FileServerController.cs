@@ -1,6 +1,8 @@
 using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Text;
+using FileFlows.Server.Helpers;
+using FileFlows.Server.Services;
 using FileFlows.ServerShared.FileServices;
 using Microsoft.AspNetCore.Mvc;
 using FileHelper = FileFlows.Plugin.Helpers.FileHelper;
@@ -18,6 +20,29 @@ public class FileServerController : Controller
     /// Buffer size used for reading files during file operations.
     /// </summary>
     private const int BufferSize = 8192;
+
+    /// <summary>
+    /// The instance of the local file service
+    /// </summary>
+    private readonly LocalFileService _localFileService;
+
+    /// <summary>
+    /// Constructs the controller
+    /// </summary>
+    public FileServerController()
+    {
+        var settings = new SettingsController().Get().Result;
+        var allowedPaths = new LibraryService().GetAll().Select(x => x.Path)
+            .Union(settings.FileServerAllowedPaths ?? new string[] { })
+            .Where(x => string.IsNullOrWhiteSpace(x) == false)
+            .Distinct()
+            .ToArray();
+        Logger.Instance.DLog("Allowed File Server Paths: \n" + string.Join("\n", allowedPaths));
+        _localFileService = new LocalFileService()
+        {
+            AllowedPaths = allowedPaths
+        };
+    }
 
     /// <summary>
     /// Checks if the file server is enabled
@@ -56,8 +81,11 @@ public class FileServerController : Controller
     /// <returns>true if its enabled, otherwise false</returns>
     private bool GetIsFileServiceEnabled()
     {
+        if (LicenseHelper.IsLicensed(LicenseFlags.FileServer) == false)
+            return false;
+        
         var settings = new SettingsController().Get().Result;
-        return settings.FileServiceDisabled == false;
+        return settings.FileServerDisabled == false;
     }
 
     /// <summary>
@@ -70,7 +98,7 @@ public class FileServerController : Controller
     {
         if (ValidateRequest(out string message) == false)
             return StatusCode(503, message?.EmptyAsNull() ?? "File service is currently disabled.");
-        var result = new LocalFileService().GetFiles(request.Path, request.SearchPattern, request.Recursive);
+        var result = _localFileService.GetFiles(request.Path, request.SearchPattern, request.Recursive);
         if (result.IsFailed)
             return StatusCode(500, result.Error);
         return Ok(result.Value);
@@ -86,7 +114,7 @@ public class FileServerController : Controller
     {
         if (ValidateRequest(out string message) == false)
             return StatusCode(503, message?.EmptyAsNull() ?? "File service is currently disabled.");
-        var result = new LocalFileService().GetDirectories(path);
+        var result = _localFileService.GetDirectories(path);
         if (result.IsFailed)
             return StatusCode(500, result.Error);
         return Ok(result.Value);
@@ -102,7 +130,7 @@ public class FileServerController : Controller
     {
         if (ValidateRequest(out string message) == false)
             return StatusCode(503, message?.EmptyAsNull() ?? "File service is currently disabled.");
-        var result = new LocalFileService().DirectoryExists(path);
+        var result = _localFileService.DirectoryExists(path);
         if (result.IsFailed)
             return StatusCode(500, result.Error);
         return Ok(true);
@@ -118,7 +146,7 @@ public class FileServerController : Controller
     {
         if (ValidateRequest(out string message) == false)
             return StatusCode(503, message?.EmptyAsNull() ?? "File service is currently disabled.");
-        var result = new LocalFileService().DirectoryDelete(request.Path, request.Recursive);
+        var result = _localFileService.DirectoryDelete(request.Path, request.Recursive);
         if (result.IsFailed)
             return StatusCode(500, result.Error);
         return Ok(true);
@@ -134,7 +162,7 @@ public class FileServerController : Controller
     {
         if (ValidateRequest(out string message) == false)
             return StatusCode(503, message?.EmptyAsNull() ?? "File service is currently disabled.");
-        var result = new LocalFileService().DirectoryMove(request.Path, request.Destination);
+        var result = _localFileService.DirectoryMove(request.Path, request.Destination);
         if (result.IsFailed)
             return StatusCode(500, result.Error);
         return Ok(true);
@@ -150,7 +178,7 @@ public class FileServerController : Controller
     {
         if (ValidateRequest(out string message) == false)
             return StatusCode(503, message?.EmptyAsNull() ?? "File service is currently disabled.");
-        var result = new LocalFileService().DirectoryCreate(path);
+        var result = _localFileService.DirectoryCreate(path);
         if (result.IsFailed)
             return StatusCode(500, result.Error);
         return Ok(true);
@@ -167,7 +195,7 @@ public class FileServerController : Controller
     {
         if (ValidateRequest(out string message) == false)
             return StatusCode(503, message?.EmptyAsNull() ?? "File service is currently disabled.");
-        var result = new LocalFileService().FileExists(path);
+        var result = _localFileService.FileExists(path);
         if (result.IsFailed)
             return StatusCode(500, result.Error);
         return Ok(result.Value);
@@ -183,7 +211,7 @@ public class FileServerController : Controller
     {
         if (ValidateRequest(out string message) == false)
             return StatusCode(503, message?.EmptyAsNull() ?? "File service is currently disabled.");
-        var result = new LocalFileService().Touch(path);
+        var result = _localFileService.Touch(path);
         if (result.IsFailed)
             return StatusCode(500, result.Error);
         return Ok(result.Value);
@@ -199,7 +227,7 @@ public class FileServerController : Controller
     {
         if (ValidateRequest(out string message) == false)
             return StatusCode(503, message?.EmptyAsNull() ?? "File service is currently disabled.");
-        var result = new LocalFileService().FileInfo(path);
+        var result = _localFileService.FileInfo(path);
         if (result.IsFailed)
             return StatusCode(500, result.Error);
         return Ok(result.Value);
@@ -215,7 +243,7 @@ public class FileServerController : Controller
     {
         if (ValidateRequest(out string message) == false)
             return StatusCode(503, message?.EmptyAsNull() ?? "File service is currently disabled.");
-        var result = new LocalFileService().FileDelete(path);
+        var result = _localFileService.FileDelete(path);
         if (result.IsFailed)
             return StatusCode(500, result.Error);
         return Ok(result.Value);
@@ -231,7 +259,7 @@ public class FileServerController : Controller
     {
         if (ValidateRequest(out string message) == false)
             return StatusCode(503, message?.EmptyAsNull() ?? "File service is currently disabled.");
-        var result = new LocalFileService().FileSize(path);
+        var result = _localFileService.FileSize(path);
         if (result.IsFailed)
             return StatusCode(500, result.Error);
         return Ok(result.Value);
@@ -247,7 +275,7 @@ public class FileServerController : Controller
     {
         if (ValidateRequest(out string message) == false)
             return StatusCode(503, message?.EmptyAsNull() ?? "File service is currently disabled.");
-        var result = new LocalFileService().FileCreationTimeUtc(path);
+        var result = _localFileService.FileCreationTimeUtc(path);
         if (result.IsFailed)
             return StatusCode(500, result.Error);
         return Ok(result.Value);
@@ -263,7 +291,7 @@ public class FileServerController : Controller
     {
         if (ValidateRequest(out string message) == false)
             return StatusCode(503, message?.EmptyAsNull() ?? "File service is currently disabled.");
-        var result = new LocalFileService().FileLastWriteTimeUtc(path);
+        var result = _localFileService.FileLastWriteTimeUtc(path);
         if (result.IsFailed)
             return StatusCode(500, result.Error);
         return Ok(result.Value);
@@ -279,7 +307,7 @@ public class FileServerController : Controller
     {
         if (ValidateRequest(out string message) == false)
             return StatusCode(503, message?.EmptyAsNull() ?? "File service is currently disabled.");
-        var result = new LocalFileService().FileMove(request.Path, request.Destination, request.Overwrite);
+        var result = _localFileService.FileMove(request.Path, request.Destination, request.Overwrite);
         if (result.IsFailed)
             return StatusCode(500, result.Error);
         return Ok(result.Value);
@@ -295,7 +323,7 @@ public class FileServerController : Controller
     {
         if (ValidateRequest(out string message) == false)
             return StatusCode(503, message?.EmptyAsNull() ?? "File service is currently disabled.");
-        var result = new LocalFileService().FileCopy(request.Path, request.Destination, request.Overwrite);
+        var result = _localFileService.FileCopy(request.Path, request.Destination, request.Overwrite);
         if (result.IsFailed)
             return StatusCode(500, result.Error);
         return Ok(result.Value);
@@ -306,7 +334,7 @@ public class FileServerController : Controller
     {
         if (ValidateRequest(out string message) == false)
             return StatusCode(503, message?.EmptyAsNull() ?? "File service is currently disabled.");
-        var result = new LocalFileService().FileAppendAllText(request.Path, request.Text);
+        var result = _localFileService.FileAppendAllText(request.Path, request.Text);
         if (result.IsFailed)
             return StatusCode(500, result.Error);
         return Ok(result.Value);
@@ -317,7 +345,7 @@ public class FileServerController : Controller
     {
         if (ValidateRequest(out string message) == false)
             return StatusCode(503, message?.EmptyAsNull() ?? "File service is currently disabled.");
-        var result = new LocalFileService().SetCreationTimeUtc(request.Path, request.Date);
+        var result = _localFileService.SetCreationTimeUtc(request.Path, request.Date);
         if (result.IsFailed)
             return StatusCode(500, result.Error);
         return Ok(result.Value);
@@ -328,7 +356,7 @@ public class FileServerController : Controller
     {
         if (ValidateRequest(out string message) == false)
             return StatusCode(503, message?.EmptyAsNull() ?? "File service is currently disabled.");
-        var result = new LocalFileService().SetLastWriteTimeUtc(request.Path, request.Date);
+        var result = _localFileService.SetLastWriteTimeUtc(request.Path, request.Date);
         if (result.IsFailed)
             return StatusCode(500, result.Error);
         return Ok(result.Value);

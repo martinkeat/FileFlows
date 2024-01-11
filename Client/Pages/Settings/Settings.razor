@@ -63,12 +63,12 @@
                             <InputSwitch @bind-Value="@Model.AutoUpdateNodes" Label="Pages.Settings.Fields.AutoUpdateNodes" />
                         }
                     </FlowTab>
-                    <FlowTab Title="@lblFileServer" Visible="@IsLicensed">
+                    <FlowTab Title="@lblFileServer" Visible="@LicensedFor(LicenseFlags.FileServer)">
                         <p style="white-space: pre-wrap">@lblFileServerDescription</p>
                         <hr />
-                        <InputSwitch @bind-Value="@Model.FileServiceDisabled" Inverse="true" Label="Pages.Settings.Fields.FileService.Enabled" />
+                        <InputSwitch @bind-Value="@Model.FileServerDisabled" Inverse="true" Label="Pages.Settings.Fields.FileServer.Enabled" />
 
-                        <InputTextArea @bind-Value="@Model.FileServerAllowList" Label="Pages.Settings.Fields.FileServer.AllowList" />
+                        <InputTextArea @bind-Value="@Model.FileServerAllowedPathsString" Label="Pages.Settings.Fields.FileServer.AllowList" />
                     </FlowTab>
                     <FlowTab Title="@lblDatabase" Visible="@ShowExternalDatabase">
                         <p class="box info">@lblDbDescription</p>
@@ -113,7 +113,7 @@
                         @if (IsLicensed)
                         {
                             <InputText Value=@Model.LicenseExpiryDate.ToString("f") Label="Pages.Settings.Fields.License.ExpiryDate" ReadOnly="true" />
-                            <InputTextArea @bind-Value=@LicenseFlagsString Label="Pages.Settings.Fields.License.Flags" ReadOnly="true" />
+                            <InputTextArea @bind-Value=@LicenseFlagsString Label="Pages.Settings.Fields.License.Flags" ReadOnly="true" Rows="10"  />
                         }
                     </FlowTab>
                 </FlowTabs>

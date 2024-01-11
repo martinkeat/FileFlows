@@ -7,7 +7,15 @@ namespace FileFlows.ServerShared.FileServices;
 
 public class LocalFileService : IFileService
 {
-    public char PathSeparator { get; init; } = Path.PathSeparator;
+    /// <summary>
+    /// Gets or sets the path separator for the file system
+    /// </summary>
+    public char PathSeparator { get; init; } = Path.DirectorySeparatorChar;
+    
+    /// <summary>
+    /// Gets or sets the allowed paths the file service can access
+    /// </summary>
+    public string[] AllowedPaths { get; init; }
 
     public Result<string[]> GetFiles(string path, string searchPattern = "", bool recursive = false)
     {
@@ -352,6 +360,29 @@ public class LocalFileService : IFileService
         }
     }
 
+    /// <summary>
+    /// Checks if a path is accessible by the file server
+    /// </summary>
+    /// <param name="path">the path to check</param>
+    /// <returns>true if accessible, otherwise false</returns>
     private bool IsProtectedPath(string path)
-        => FileHelper.IsSystemDirectory(path);
+    {
+        if (FileHelper.IsSystemDirectory(path))
+            return false; // a system directory, no access
+
+        if (AllowedPaths?.Any() != true)
+            return true; // no allowed paths configured, allow all
+
+        if (OperatingSystem.IsWindows())
+            path = path.ToLowerInvariant();
+        
+        for(int i=0;i<AllowedPaths.Length;i++)
+        {
+            string p = OperatingSystem.IsWindows() ? AllowedPaths[i].ToLowerInvariant().TrimEnd('\\') : AllowedPaths[i].TrimEnd('/');
+            if (path.StartsWith(p))
+                return true;
+        }
+
+        return false;
+    }
 }

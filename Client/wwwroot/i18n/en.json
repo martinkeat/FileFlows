@@ -678,7 +678,8 @@
         "FileServer": {
           "Description": "This allows for external processing nodes to download a file for processing without mapping.\n\nThis does expose your files over your network, so disable if not on a trusted network.",
           "Enabled": "Enabled",
-          "AllowList": "Allow List",
+          "AllowList": "Allowed Paths",
+          "AllowList-Placeholder": "If left empty, all but system paths will be allowed.",
           "AllowList-Help": "A new line separated list of paths allowed to be accessed by the exposed file server.\nThese are the locations that can be read/written to remotely.\nNote: All library paths are automatically allowed."
         },
         "License": {

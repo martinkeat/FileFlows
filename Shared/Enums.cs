@@ -294,7 +294,11 @@ public enum LicenseFlags
     /// <summary>
     /// Can use enterprise features
     /// </summary>
-    Enterprise = 128
+    Enterprise = 128,
+    /// <summary>
+    /// Can use the file server
+    /// </summary>
+    FileServer = 256
 }
 
 

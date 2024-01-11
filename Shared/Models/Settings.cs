@@ -101,9 +101,14 @@ public class Settings : FileFlowObject
     public bool LogEveryRequest { get; set; }
     
     /// <summary>
-    /// Gets or sets if the file service is disabled
+    /// Gets or sets if the file server is disabled
     /// </summary>
-    public bool FileServiceDisabled { get; set; }
+    public bool FileServerDisabled { get; set; }
+    
+    /// <summary>
+    /// Gets or sets the allowed paths for the file server
+    /// </summary>
+    public string[] FileServerAllowedPaths { get; set; }
 }
 
 /// <summary>

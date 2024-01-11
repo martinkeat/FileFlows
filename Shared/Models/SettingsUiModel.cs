@@ -72,12 +72,10 @@ public class SettingsUiModel:Settings
     /// Gets or sets if the database should be recreated if it already exists
     /// </summary>
     public bool RecreateDatabase { get; set; }
-
-    /// <summary>
-    /// Gets or sets if the file service is disabled
-    /// </summary>
-    public bool FileServiceDisabled { get; set; }
     
-    public string FileServerAllowList { get; set; }
+    /// <summary>
+    /// Gets or sets the file server all list
+    /// </summary>
+    public string FileServerAllowedPathsString { get; set; }
 
 }

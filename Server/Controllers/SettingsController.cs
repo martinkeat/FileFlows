@@ -92,6 +92,9 @@ public class SettingsController : Controller
         string json = JsonSerializer.Serialize(settings);
         var uiModel = JsonSerializer.Deserialize<SettingsUiModel>(json);
         SetLicenseFields(uiModel, license);
+        uiModel.FileServerAllowedPathsString = uiModel.FileServerAllowedPaths?.Any() == true
+            ? string.Join("\n", uiModel.FileServerAllowedPaths)
+            : string.Empty;
         
         string dbConnStr = AppSettings.Instance.DatabaseMigrateConnection?.EmptyAsNull() ?? AppSettings.Instance.DatabaseConnection;
         if (string.IsNullOrWhiteSpace(dbConnStr) || dbConnStr.ToLower().Contains("sqlite"))
@@ -174,7 +177,8 @@ public class SettingsController : Controller
             HideProcessingStartedNotifications = model.HideProcessingStartedNotifications,
             HideProcessingFinishedNotifications = model.HideProcessingFinishedNotifications,
             ProcessFileCheckInterval = model.ProcessFileCheckInterval,
-            FileServiceDisabled = model.FileServiceDisabled
+            FileServerDisabled = model.FileServerDisabled,
+            FileServerAllowedPaths = model.FileServerAllowedPathsString?.Split(new [] { "\r\n", "\r", "\n"}, StringSplitOptions.RemoveEmptyEntries)
         });
         // validate license it
         AppSettings.Instance.LicenseKey = model.LicenseKey?.Trim();
@@ -304,7 +308,7 @@ public class SettingsController : Controller
         cfg.Flows = new FlowService().GetAll();
         cfg.Libraries = new LibraryService().GetAll();
         cfg.Enterprise = LicenseHelper.IsLicensed(LicenseFlags.Enterprise);
-        cfg.AllowRemote = Instance.FileServiceDisabled == false;
+        cfg.AllowRemote = Instance.FileServerDisabled == false;
         cfg.PluginSettings = new PluginService().GetAllPluginSettings().Result;
         cfg.MaxNodes = LicenseHelper.IsLicensed() ? 250 : 30;
         cfg.KeepFailedFlowTempFiles = Instance.KeepFailedFlowTempFiles;
