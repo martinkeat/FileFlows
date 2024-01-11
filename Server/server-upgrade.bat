@@ -25,7 +25,7 @@ rmdir /q /s Update
 echo.
 echo Starting FileFlows Server
 cd Server
-start dotnet FileFlows.Server.dll
+start FileFlows.Server.exe
 cd .. 
 
 if exist server-upgrade.bat goto Done

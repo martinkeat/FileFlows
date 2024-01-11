@@ -35,7 +35,7 @@ GOTO Done
     
     echo.
     echo Starting FileFlows Node
-    start /D "%~dp0%Node" dotnet FileFlows.Node.dll
+    start /D "%~dp0%Node" FileFlows.Node.exe
     
     if exist node-upgrade.bat goto Done
     del node-upgrade.bat & exit
