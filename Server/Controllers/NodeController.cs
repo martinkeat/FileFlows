@@ -128,6 +128,7 @@ public class NodeController : Controller
                 internalNode = await service.Update(internalNode);
                 CheckLicensedNodes(internalNode.Uid, internalNode.Enabled);
                 
+                await RevisionIncrement();
                 return Ok(internalNode);
             }
             
@@ -140,6 +141,7 @@ public class NodeController : Controller
             node.Variables ??= new();
             node = await service.Update(node);
             CheckLicensedNodes(node.Uid, node.Enabled);
+            await RevisionIncrement();
             return Ok(node);
         }
         else
@@ -152,9 +154,17 @@ public class NodeController : Controller
             node = await service.Update(node);
             Logger.Instance.ILog("Updated external processing node: " + node.Name);
             CheckLicensedNodes(node.Uid, node.Enabled);
+            await RevisionIncrement();
             return Ok(node);
         }
     }
+    
+    /// <summary>
+    /// Increments the configuration revision
+    /// </summary>
+    /// <returns>an awaited task</returns>
+    private Task RevisionIncrement()
+        => new SettingsService().RevisionIncrement();
 
     /// <summary>
     /// Delete processing nodes from the system
