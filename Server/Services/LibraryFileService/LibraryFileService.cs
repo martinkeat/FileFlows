@@ -83,7 +83,23 @@ public partial class LibraryFileService : ILibraryFileService
     public Task<LibraryFile> Update(LibraryFile file)
     {
         if (file.Status == FileStatus.ProcessingFailed)
-            return Task.FromResult<LibraryFile>(GetByUid(file.Uid)); // handled by worker complete
+        {
+            var existing = GetByUid(file.Uid); // handled by worker complete
+            if (existing != null)
+            {
+                existing.Status = FileStatus.ProcessingFailed;
+                existing.ExecutedNodes =
+                    file.ExecutedNodes?.Any() == true ? file.ExecutedNodes : existing.ExecutedNodes;
+                existing.OriginalMetadata = file.OriginalMetadata?.Any() == true
+                    ? file.OriginalMetadata
+                    : existing.OriginalMetadata;
+                existing.FinalMetadata = file.FinalMetadata?.Any() == true
+                    ? file.FinalMetadata
+                    : existing.FinalMetadata;
+                file = existing;
+            }
+        }
+
         file.DateModified = DateTime.Now;
         file.ExecutedNodes ??= new ();
         file.OriginalMetadata ??= new ();
