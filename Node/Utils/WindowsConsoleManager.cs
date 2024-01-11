@@ -13,15 +13,8 @@ internal class WindowsConsoleManager
 
     public static void Hide()
     {
-        _ = Task.Run(async () =>
-        {
-            for (int i = 0; i < 5; i++)
-            {
-                var handle = GetConsoleWindow();
-                ShowWindow(handle, SW_HIDE);
-                await Task.Delay(250);
-            }
-        });
+        var handle = GetConsoleWindow();
+        ShowWindow(handle, SW_HIDE);
     }
     
     public static void Show()
