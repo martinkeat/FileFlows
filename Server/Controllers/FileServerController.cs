@@ -485,7 +485,7 @@ public class FileServerController : Controller
                 FileHelper.ChangeOwner(null, dirPath, false, true);
             }
 
-            string outFile = Path.Combine(dirPath, "_TEMP_" + fileInfo.Name);
+            string outFile = Path.Combine(dirPath, "_TEMP_" + fileInfo.Name + ".FFTEMP");
             log.AppendLine("Writing file to temporary filename: " + outFile);
 
             using (var fileStream = new FileStream(outFile, FileMode.Create))
