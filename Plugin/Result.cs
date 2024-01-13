@@ -106,4 +106,15 @@ public readonly struct Result<TValue>
         error = IsFailed ? _error : null;
         return IsFailed;
     }
+    
+    /// <summary>
+    /// If the result succeeded or not
+    /// </summary>
+    /// <param name="value">the value if passed, otherwise the default of TValue</param>
+    /// <returns>true if passed, false if did not fail</returns>
+    public bool Success(out TValue value)
+    {
+        value = IsFailed ? default : _value;
+        return IsFailed == false;
+    }
 }
