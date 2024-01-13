@@ -368,10 +368,10 @@ public class LocalFileService : IFileService
     private bool IsProtectedPath(string path)
     {
         if (FileHelper.IsSystemDirectory(path))
-            return false; // a system directory, no access
+            return true; // a system directory, no access
 
         if (AllowedPaths?.Any() != true)
-            return true; // no allowed paths configured, allow all
+            return false; // no allowed paths configured, allow all
 
         if (OperatingSystem.IsWindows())
             path = path.ToLowerInvariant();
@@ -380,9 +380,9 @@ public class LocalFileService : IFileService
         {
             string p = OperatingSystem.IsWindows() ? AllowedPaths[i].ToLowerInvariant().TrimEnd('\\') : AllowedPaths[i].TrimEnd('/');
             if (path.StartsWith(p))
-                return true;
+                return false;
         }
 
-        return false;
+        return true;
     }
 }
