@@ -496,7 +496,11 @@ public class FileServerController : Controller
             // move from temp after its uploaded
             log.AppendLine("Renaming temporary filename: " + outFile);
             var outFileInfo = new FileInfo(outFile);
-            outFileInfo.MoveTo(outFileInfo.FullName[6..^7], true); // remove the _TEMP and .FFTEMP
+            log.AppendLine("Temporary file exists: " + outFileInfo.Exists);
+            string rename = outFileInfo.FullName[6..^7]; // remove the _TEMP and .FFTEMP
+            log.AppendLine("Renaming to: " + rename);
+            outFileInfo.MoveTo(rename, true);
+            log.AppendLine("File renamed: " + rename);
 
             fileInfo = new FileInfo(path);
             if (tempDir && fileInfo.Directory.Exists == false)
