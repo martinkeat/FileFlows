@@ -218,7 +218,7 @@ public class Program
         {
             _fileService = args.IsServer ? new LocalFileService() : new MappedFileService(node);
         }
-        else if (args.IsServer || libfileService.ExistsOnServer(libFile.Uid).Result)
+        else if (args.IsServer || libfileService.ExistsOnServer(libFile.Uid).Result == false)
         {
             // doesnt exist
             LogInfo("Library file does not exist, deleting from library files: " + file.FullName);
