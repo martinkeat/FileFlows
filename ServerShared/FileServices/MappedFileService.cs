@@ -57,6 +57,8 @@ public class MappedFileService : IFileService
         string mapped = _node.Map(path);
         if (original != mapped)
             Logger?.DLog($"Path mapped '{original}' => '{mapped}'");
+        else
+            Logger?.DLog($"Path did not need mapping: {mapped}");
         return mapped;
     }
 

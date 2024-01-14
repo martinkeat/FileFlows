@@ -313,6 +313,7 @@ public class Program
         LogInfo("Start Working File: " + info.WorkingFile);
         info.LibraryFile.OriginalSize = info.InitialSize;
         LogInfo("Initial Size: " + info.InitialSize);
+        LogInfo("File Service:"  + _fileService.GetType().Name);
         
 
         var runner = new Runner(info, flow, node, args.WorkingDirectory);
