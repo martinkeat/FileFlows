@@ -4,6 +4,7 @@ using FileFlows.ServerShared.Services;
 using FileFlows.Shared.Helpers;
 using FileFlows.Shared.Models;
 using System.Net;
+using Esprima.Ast;
 using FileFlows.Plugin.Services;
 using FileFlows.ServerShared;
 using FileFlows.ServerShared.FileServices;
@@ -197,7 +198,8 @@ public class Program
             return null; // nothing to process
         }
 
-        string workingFile = node.Map(libFile.Name);
+        // string workingFile = node.Map(libFile.Name);
+        string workingFile = libFile.Name;
 
         var libfileService = LibraryFileService.Load();
         var lib = args.Config.Libraries.FirstOrDefault(x => x.Uid == libFile.Library.Uid);
@@ -211,55 +213,53 @@ public class Program
         FileSystemInfo file = lib.Folders ? new DirectoryInfo(workingFile) : new FileInfo(workingFile);
         bool fileExists = file.Exists; // set to variable so we can set this to false in debugging easily
         bool remoteFile = false;
-        if (fileExists == false)
+        IFileService _fileService;
+        if (fileExists)
         {
-            if(args.IsServer == false)
+            _fileService = args.IsServer ? new LocalFileService() : new MappedFileService(node);
+        }
+        else if (args.IsServer || libfileService.ExistsOnServer(libFile.Uid).Result)
+        {
+            // doesnt exist
+            LogInfo("Library file does not exist, deleting from library files: " + file.FullName);
+            libfileService.Delete(libFile.Uid).Wait();
+            return libFile.Status;
+        }
+        else
+        {
+            _fileService = new MappedFileService(node);
+            bool exists = lib.Folders
+                ? _fileService.DirectoryExists(workingFile)
+                : _fileService.FileExists(workingFile);
+            
+            if (exists == false)
             {
-                // check if the library file exists on the server, if it does its a mapping issue
-                bool exists = libfileService.ExistsOnServer(libFile.Uid).Result;
-                if (exists == true)
+                // need to try a remote
+                if (args.Config.AllowRemote == false)
                 {
-                    if (args.Config.AllowRemote == false)
-                    {
-                        LogError("Library file exists but is not accessible from node: " + file.FullName);
-                        libFile.Status = FileStatus.MappingIssue;
-                        libFile.ExecutedNodes = new List<ExecutedNode>();
-                        libfileService.Update(libFile).Wait();
-                        return libFile.Status;
-                    }
-                    
-                    // we must copy this file to the local server
-                    // var fileName = DownloadFile(libFile, Service.ServiceBaseUrl, args.WorkingDirectory);
-                    // if (string.IsNullOrEmpty(fileName))
-                    // {
-                    //     LogError("Library file failed to be downloaded remotely: " + file.FullName);
-                    //     libFile.Status = FileStatus.MappingIssue;
-                    //     libFile.ExecutedNodes = new List<ExecutedNode>();
-                    //     libfileService.Update(libFile).Wait();
-                    //     return libFile.Status;
-                    // }
+                    LogError("Library file exists but is not accessible from node: " + file.FullName);
+                    libFile.Status = FileStatus.MappingIssue;
+                    libFile.ExecutedNodes = new List<ExecutedNode>();
+                    libfileService.Update(libFile).Wait();
+                    return libFile.Status;
+                }
 
-                    //LogInfo("Downloaded file remotely to: " + fileName);
-                    remoteFile = true;
-                    // workingFile = fileName;
-                    // file = new FileInfo(workingFile);
-                }                    
-            }
-
-            if (remoteFile == false)
-            {
-                LogInfo("Library file does not exist, deleting from library files: " + file.FullName);
-                libfileService.Delete(libFile.Uid).Wait();
-                return libFile.Status;
+                if (lib.Folders)
+                {
+                    LogError("Library folder exists, but remote file server is not available for folders: " + file.FullName);
+                    libFile.Status = FileStatus.MappingIssue;
+                    libFile.ExecutedNodes = new List<ExecutedNode>();
+                    libfileService.Update(libFile).Wait();
+                    return libFile.Status;
+                }
+            
+                remoteFile = true;
+                _fileService = new RemoteFileService(Uid, Service.ServiceBaseUrl, args.WorkingDirectory, Logger,
+                    libFile.Name.Contains('/') ? '/' : '\\');
             }
         }
 
-        FileService.Instance = remoteFile
-            ? new RemoteFileService(Uid, Service.ServiceBaseUrl, args.WorkingDirectory, Logger,
-                libFile.Name.Contains('/') ? '/' : '\\')
-            : node.Uid == Globals.InternalNodeUid
-                ? new LocalFileService()
-                : new MappedFileService(node);
+        FileService.Instance = _fileService;
 
         var flow = args.Config.Flows.FirstOrDefault(x => x.Uid == (lib.Flow?.Uid ?? Guid.Empty));
         if (flow == null || flow.Uid == Guid.Empty)

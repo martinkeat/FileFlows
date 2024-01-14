@@ -10,6 +10,7 @@ namespace FileFlows.ServerShared.FileServices;
 public class RemoteFileService : IFileService
 {
     public char PathSeparator { get; init; }
+    public ReplaceVariablesDelegate ReplaceVariables { get; set; }
 
     private readonly Guid executorUid;
     private readonly string serverUrl;
@@ -39,9 +40,16 @@ public class RemoteFileService : IFileService
         return serverUrl + "/api/file-server/" + route;
     }
 
+    private string PreparePath(ref string path)
+    {
+        if (ReplaceVariables != null)
+            path = ReplaceVariables(path, true);
+        return path;
+    }
+
     public Result<string[]> GetFiles(string path, string searchPattern = "", bool recursive = false)
     {
-        if (FileIsLocal(path))
+        if (FileIsLocal(PreparePath(ref path)))
             return _localFileService.GetFiles(path, searchPattern, recursive);
         try
         {
@@ -61,7 +69,7 @@ public class RemoteFileService : IFileService
 
     public Result<string[]> GetDirectories(string path)
     {
-        if (FileIsLocal(path))
+        if (FileIsLocal(PreparePath(ref path)))
             return _localFileService.GetDirectories(path);
         try
         {
@@ -76,7 +84,7 @@ public class RemoteFileService : IFileService
 
     public Result<bool> DirectoryExists(string path)
     {
-        if (FileIsLocal(path))
+        if (FileIsLocal(PreparePath(ref path)))
             return _localFileService.DirectoryExists(path);
         try
         {
@@ -90,7 +98,7 @@ public class RemoteFileService : IFileService
     }
     public Result<bool> DirectoryDelete(string path, bool recursive = false)
     {
-        if (FileIsLocal(path))
+        if (FileIsLocal(PreparePath(ref path)))
             return _localFileService.DirectoryDelete(path, recursive);
         try
         {
@@ -109,14 +117,14 @@ public class RemoteFileService : IFileService
 
     public Result<bool> DirectoryMove(string path, string destination)
     {
-        if (FileIsLocal(path))
+        if (FileIsLocal(PreparePath(ref path)))
         {
-            if(FileIsLocal(destination))
+            if(FileIsLocal(PreparePath(ref destination)))
                 return _localFileService.DirectoryMove(path, destination);
             return Result<bool>.Fail("Cannot move temporary directory to remote host");
         }
         
-        if(FileIsLocal(destination) && FileIsLocal(path) == false)
+        if(FileIsLocal(PreparePath(ref destination)) && FileIsLocal(PreparePath(ref path)) == false)
             return Result<bool>.Fail("Cannot move remote directory to local host");
 
         try
@@ -136,7 +144,7 @@ public class RemoteFileService : IFileService
 
     public Result<bool> DirectoryCreate(string path)
     {
-        if (FileIsLocal(path))
+        if (FileIsLocal(PreparePath(ref path)))
             return _localFileService.DirectoryCreate(path);
         try
         {
@@ -151,7 +159,7 @@ public class RemoteFileService : IFileService
 
     public Result<bool> FileExists(string path)
     {
-        if (FileIsLocal(path))
+        if (FileIsLocal(PreparePath(ref path)))
             return _localFileService.FileExists(path);
         try
         {
@@ -173,7 +181,7 @@ public class RemoteFileService : IFileService
 
     public Result<string> GetLocalPath(string path)
     {
-        if (FileIsLocal(path))
+        if (FileIsLocal(PreparePath(ref path)))
             return path;
         string filename = Path.Combine(tempPath, FileHelper.GetShortFileName(path));
         if (File.Exists(filename))
@@ -186,7 +194,7 @@ public class RemoteFileService : IFileService
 
     public Result<bool> Touch(string path)
     {
-        if (FileIsLocal(path))
+        if (FileIsLocal(PreparePath(ref path)))
             return _localFileService.Touch(path);
         try
         {
@@ -201,7 +209,7 @@ public class RemoteFileService : IFileService
 
     public Result<FileInformation> FileInfo(string path)
     {
-        if (FileIsLocal(path))
+        if (FileIsLocal(PreparePath(ref path)))
             return _localFileService.FileInfo(path);
         try
         {
@@ -216,7 +224,7 @@ public class RemoteFileService : IFileService
 
     public Result<bool> FileDelete(string path)
     {
-        if (FileIsLocal(path))
+        if (FileIsLocal(PreparePath(ref path)))
             return _localFileService.FileDelete(path);
         try
         {
@@ -231,7 +239,7 @@ public class RemoteFileService : IFileService
 
     public Result<long> FileSize(string path)
     {
-        if (FileIsLocal(path))
+        if (FileIsLocal(PreparePath(ref path)))
             return _localFileService.FileSize(path);
         try
         {
@@ -246,7 +254,7 @@ public class RemoteFileService : IFileService
 
     public Result<DateTime> FileCreationTimeUtc(string path)
     {
-        if (FileIsLocal(path))
+        if (FileIsLocal(PreparePath(ref path)))
             return _localFileService.FileCreationTimeUtc(path);
         try
         {
@@ -261,7 +269,7 @@ public class RemoteFileService : IFileService
 
     public Result<DateTime> FileLastWriteTimeUtc(string path)
     {
-        if (FileIsLocal(path))
+        if (FileIsLocal(PreparePath(ref path)))
             return _localFileService.FileLastWriteTimeUtc(path);
         try
         {
@@ -276,9 +284,9 @@ public class RemoteFileService : IFileService
 
     public Result<bool> FileMove(string path, string destination, bool overwrite = true)
     {
-        if (FileIsLocal(path))
+        if (FileIsLocal(PreparePath(ref path)))
         {
-            if(FileIsLocal(destination))
+            if(FileIsLocal(PreparePath(ref destination)))
                 return _localFileService.FileMove(path, destination, overwrite);
             var result = new FileUploader(logger, serverUrl, executorUid).UploadFile(path, destination).Result;
             if (result.Success == false)
@@ -306,9 +314,9 @@ public class RemoteFileService : IFileService
 
     public Result<bool> FileCopy(string path, string destination, bool overwrite = true)
     {
-        if (FileIsLocal(path))
+        if (FileIsLocal(PreparePath(ref path)))
         {
-            if(FileIsLocal(destination))
+            if(FileIsLocal(PreparePath(ref destination)))
                 return _localFileService.FileCopy(path, destination, overwrite);
             var result = new FileUploader(logger, serverUrl, executorUid).UploadFile(path, destination).Result;
             if (result.Success == false)
@@ -316,7 +324,7 @@ public class RemoteFileService : IFileService
             return true;
         }
 
-        if (FileIsLocal(destination))
+        if (FileIsLocal(PreparePath(ref destination)))
         {
             // download the file
             var result = new FileDownloader(logger, serverUrl, executorUid).DownloadFile(path, destination).Result;
@@ -344,7 +352,7 @@ public class RemoteFileService : IFileService
 
     public Result<bool> FileAppendAllText(string path, string text)
     {
-        if (FileIsLocal(path))
+        if (FileIsLocal(PreparePath(ref path)))
             return _localFileService.FileAppendAllText(path, text);
         try
         {
@@ -363,7 +371,7 @@ public class RemoteFileService : IFileService
 
     public Result<bool> SetCreationTimeUtc(string path, DateTime date)
     {
-        if (FileIsLocal(path))
+        if (FileIsLocal(PreparePath(ref path)))
             return _localFileService.SetCreationTimeUtc(path, date);
         try
         {
@@ -382,7 +390,7 @@ public class RemoteFileService : IFileService
 
     public Result<bool> SetLastWriteTimeUtc(string path, DateTime date)
     {
-        if (FileIsLocal(path))
+        if (FileIsLocal(PreparePath(ref path)))
             return _localFileService.SetLastWriteTimeUtc(path, date);
         try
         {

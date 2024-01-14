@@ -417,7 +417,7 @@ public class Runner
         }
         else
         {
-            initialFile = Node.Map(Info.LibraryFile.Name);
+            initialFile = Info.LibraryFile.Name;
         }
         
         nodeParameters = new NodeParameters(initialFile, logger,
@@ -428,6 +428,11 @@ public class Runner
             IsRemote = Info.IsRemote,
             FileService = FileService.Instance
         };
+
+        // set the method to replace variables
+        // this way any path can have variables and will just automatically get replaced
+        FileService.Instance.ReplaceVariables = nodeParameters.ReplaceVariables;
+        
         nodeParameters.HasPluginActual = (name) =>
         {
             var normalizedSearchName = Regex.Replace(name.ToLower(), "[^a-z]", string.Empty);

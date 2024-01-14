@@ -149,6 +149,7 @@ public class FileServerController : Controller
         var result = _localFileService.DirectoryDelete(request.Path, request.Recursive);
         if (result.IsFailed)
             return StatusCode(500, result.Error);
+        
         return Ok(true);
     }
 

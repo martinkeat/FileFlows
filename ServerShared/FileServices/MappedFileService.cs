@@ -15,6 +15,15 @@ public class MappedFileService : IFileService
     /// </summary>
     public char PathSeparator { get; init; } = Path.DirectorySeparatorChar;
 
+    /// <summary>
+    /// Gets or sets a function for replacing variables in a string.
+    /// </summary>
+    /// <remarks>
+    /// The function takes a string input, a boolean indicating whether to strip missing variables,
+    /// and a boolean indicating whether to clean special characters.
+    /// </remarks>
+    public ReplaceVariablesDelegate ReplaceVariables { get; set; }
+
     private readonly IFileService _localFileService;
     private ProcessingNode _node;
 
@@ -34,7 +43,12 @@ public class MappedFileService : IFileService
     /// <param name="path">The path to be mapped.</param>
     /// <returns>The mapped path.</returns>
     private string Map(string path)
-        => _node.Map(path);
+    {
+        if(ReplaceVariables != null)
+            path = ReplaceVariables(path, true);
+        
+        return _node.Map(path);
+    }
 
     /// <summary>
     /// Gets the files in the specified directory with optional search pattern and recursion.

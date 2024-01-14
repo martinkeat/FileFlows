@@ -16,6 +16,15 @@ public class LocalFileService : IFileService
     /// Gets or sets the allowed paths the file service can access
     /// </summary>
     public string[] AllowedPaths { get; init; }
+    
+    /// <summary>
+    /// Gets or sets a function for replacing variables in a string.
+    /// </summary>
+    /// <remarks>
+    /// The function takes a string input, a boolean indicating whether to strip missing variables,
+    /// and a boolean indicating whether to clean special characters.
+    /// </remarks>
+    public ReplaceVariablesDelegate ReplaceVariables { get; set; }
 
     public Result<string[]> GetFiles(string path, string searchPattern = "", bool recursive = false)
     {
@@ -371,6 +380,9 @@ public class LocalFileService : IFileService
             path = path.Replace("/", "\\");
         else
             path = path.Replace("\\", "/");
+        
+        if(ReplaceVariables != null)
+            path = ReplaceVariables(path, true);
         
         if (FileHelper.IsSystemDirectory(path))
             return true; // a system directory, no access

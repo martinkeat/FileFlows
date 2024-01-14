@@ -27,6 +27,15 @@ public interface IFileService
     char PathSeparator { get; init; }
     
     /// <summary>
+    /// Gets or sets a function for replacing variables in a string.
+    /// </summary>
+    /// <remarks>
+    /// The function takes a string input, a boolean indicating whether to strip missing variables,
+    /// and a boolean indicating whether to clean special characters.
+    /// </remarks>
+    ReplaceVariablesDelegate ReplaceVariables { get; set; }
+    
+    /// <summary>
     /// Gets files from a directory
     /// </summary>
     /// <param name="path">the path of the directory</param>
@@ -166,3 +175,13 @@ public interface IFileService
     Result<bool> SetCreationTimeUtc(string path, DateTime date);
     Result<bool> SetLastWriteTimeUtc(string path, DateTime date);
 }
+
+
+/// <summary>
+/// Represents a delegate for the function that replaces variables in a string.
+/// </summary>
+/// <param name="input">The input string containing variables to be replaced.</param>
+/// <param name="stripMissing">A boolean indicating whether to strip missing variables.</param>
+/// <param name="cleanSpecialCharacters">A boolean indicating whether to clean special characters.</param>
+/// <returns>The string after replacing variables according to the specified conditions.</returns>
+public delegate string ReplaceVariablesDelegate(string input, bool stripMissing = false, bool cleanSpecialCharacters = false);
