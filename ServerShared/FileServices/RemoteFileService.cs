@@ -11,6 +11,7 @@ public class RemoteFileService : IFileService
 {
     public char PathSeparator { get; init; }
     public ReplaceVariablesDelegate ReplaceVariables { get; set; }
+    public ILogger? Logger { get; set; }
 
     private readonly Guid executorUid;
     private readonly string serverUrl;

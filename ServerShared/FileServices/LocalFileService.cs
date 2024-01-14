@@ -26,6 +26,11 @@ public class LocalFileService : IFileService
     /// </remarks>
     public ReplaceVariablesDelegate ReplaceVariables { get; set; }
 
+    /// <summary>
+    /// Gets or sets the logger used for logging
+    /// </summary>
+    public ILogger? Logger { get; set; }
+
     public Result<string[]> GetFiles(string path, string searchPattern = "", bool recursive = false)
     {
         if (IsProtectedPath(ref path))

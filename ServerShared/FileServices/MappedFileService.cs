@@ -24,6 +24,11 @@ public class MappedFileService : IFileService
     /// </remarks>
     public ReplaceVariablesDelegate ReplaceVariables { get; set; }
 
+    /// <summary>
+    /// Gets or sets the logger used for logging
+    /// </summary>
+    public ILogger? Logger { get; set; }
+
     private readonly IFileService _localFileService;
     private ProcessingNode _node;
 
@@ -31,6 +36,7 @@ public class MappedFileService : IFileService
     /// Initializes a new instance of the <see cref="MappedFileService"/> class with the specified <paramref name="node"/>.
     /// </summary>
     /// <param name="node">The processing node used for mapping file operations.</param>
+    /// <param name="logger">The logger used for logging</param>
     public MappedFileService(ProcessingNode node)
     {
         _localFileService = new LocalFileService();
@@ -46,8 +52,12 @@ public class MappedFileService : IFileService
     {
         if(ReplaceVariables != null)
             path = ReplaceVariables(path, true);
-        
-        return _node.Map(path);
+
+        string original = path;
+        string mapped = _node.Map(path);
+        if (original != mapped)
+            Logger?.DLog($"Path mapped '{original}' => '{mapped}'");
+        return mapped;
     }
 
     /// <summary>

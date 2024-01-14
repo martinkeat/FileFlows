@@ -36,6 +36,11 @@ public interface IFileService
     ReplaceVariablesDelegate ReplaceVariables { get; set; }
     
     /// <summary>
+    /// Gets or sets the logger used for logging
+    /// </summary>
+    ILogger? Logger { get; set; }
+    
+    /// <summary>
     /// Gets files from a directory
     /// </summary>
     /// <param name="path">the path of the directory</param>

@@ -432,6 +432,7 @@ public class Runner
         // set the method to replace variables
         // this way any path can have variables and will just automatically get replaced
         FileService.Instance.ReplaceVariables = nodeParameters.ReplaceVariables;
+        FileService.Instance.Logger = logger;
         
         nodeParameters.HasPluginActual = (name) =>
         {
