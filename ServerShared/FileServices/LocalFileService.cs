@@ -19,7 +19,7 @@ public class LocalFileService : IFileService
 
     public Result<string[]> GetFiles(string path, string searchPattern = "", bool recursive = false)
     {
-        if (IsProtectedPath(path))
+        if (IsProtectedPath(ref path))
             return Result<string[]>.Fail("Cannot access protected path: " + path);
         try
         {
@@ -34,7 +34,7 @@ public class LocalFileService : IFileService
 
     public Result<string[]> GetDirectories(string path)
     {
-        if (IsProtectedPath(path))
+        if (IsProtectedPath(ref path))
             return Result<string[]>.Fail("Cannot access protected path: " + path);
         try
         {
@@ -48,7 +48,7 @@ public class LocalFileService : IFileService
 
     public Result<bool> DirectoryExists(string path)
     {
-        if (IsProtectedPath(path))
+        if (IsProtectedPath(ref path))
             return Result<bool>.Fail("Cannot access protected path: " + path);
         try
         {
@@ -62,7 +62,7 @@ public class LocalFileService : IFileService
 
     public Result<bool> DirectoryDelete(string path, bool recursive = false)
     {
-        if (IsProtectedPath(path))
+        if (IsProtectedPath(ref path))
             return Result<bool>.Fail("Cannot access protected path: " + path);
         try
         {
@@ -77,9 +77,9 @@ public class LocalFileService : IFileService
 
     public Result<bool> DirectoryMove(string path, string destination)
     {
-        if (IsProtectedPath(path))
+        if (IsProtectedPath(ref path))
             return Result<bool>.Fail("Cannot access protected path: " + path);
-        if (IsProtectedPath(destination))
+        if (IsProtectedPath(ref destination))
             return Result<bool>.Fail("Cannot access protected path: " + destination);
         try
         {
@@ -94,7 +94,7 @@ public class LocalFileService : IFileService
 
     public Result<bool> DirectoryCreate(string path)
     {
-        if (IsProtectedPath(path))
+        if (IsProtectedPath(ref path))
             return Result<bool>.Fail("Cannot access protected path: " + path);
         try
         {
@@ -111,7 +111,7 @@ public class LocalFileService : IFileService
 
     public Result<bool> FileExists(string path)
     {
-        if (IsProtectedPath(path))
+        if (IsProtectedPath(ref path))
             return Result<bool>.Fail("Cannot access protected path: " + path);
         try
         {
@@ -125,7 +125,7 @@ public class LocalFileService : IFileService
 
     public Result<FileInformation> FileInfo(string path)
     {
-        if (IsProtectedPath(path))
+        if (IsProtectedPath(ref path))
             return Result<FileInformation>.Fail("Cannot access protected path: " + path);
         try
         {
@@ -152,7 +152,7 @@ public class LocalFileService : IFileService
 
     public Result<bool> FileDelete(string path)
     {
-        if (IsProtectedPath(path))
+        if (IsProtectedPath(ref path))
             return Result<bool>.Fail("Cannot access protected path: " + path);
         try
         {
@@ -169,7 +169,7 @@ public class LocalFileService : IFileService
 
     public Result<long> FileSize(string path)
     {
-        if (IsProtectedPath(path))
+        if (IsProtectedPath(ref path))
             return Result<long>.Fail("Cannot access protected path: " + path);
         try
         {
@@ -186,7 +186,7 @@ public class LocalFileService : IFileService
 
     public Result<DateTime> FileCreationTimeUtc(string path)
     {
-        if (IsProtectedPath(path))
+        if (IsProtectedPath(ref path))
             return Result<DateTime>.Fail("Cannot access protected path: " + path);
         try
         {
@@ -203,7 +203,7 @@ public class LocalFileService : IFileService
 
     public Result<DateTime> FileLastWriteTimeUtc(string path)
     {
-        if (IsProtectedPath(path))
+        if (IsProtectedPath(ref path))
             return Result<DateTime>.Fail("Cannot access protected path: " + path);
         try
         {
@@ -220,9 +220,9 @@ public class LocalFileService : IFileService
 
     public Result<bool> FileMove(string path, string destination, bool overwrite = true)
     {
-        if (IsProtectedPath(path))
+        if (IsProtectedPath(ref path))
             return Result<bool>.Fail("Cannot access protected path: " + path);
-        if (IsProtectedPath(destination))
+        if (IsProtectedPath(ref destination))
             return Result<bool>.Fail("Cannot access protected path: " + destination);
         try
         {
@@ -244,9 +244,9 @@ public class LocalFileService : IFileService
 
     public Result<bool> FileCopy(string path, string destination, bool overwrite = true)
     {
-        if (IsProtectedPath(path))
+        if (IsProtectedPath(ref path))
             return Result<bool>.Fail("Cannot access protected path: " + path);
-        if (IsProtectedPath(destination))
+        if (IsProtectedPath(ref destination))
             return Result<bool>.Fail("Cannot access protected path: " + destination);
         try
         {
@@ -269,7 +269,7 @@ public class LocalFileService : IFileService
 
     public Result<bool> FileAppendAllText(string path, string text)
     {
-        if (IsProtectedPath(path))
+        if (IsProtectedPath(ref path))
             return Result<bool>.Fail("Cannot access protected path: " + path);
         try
         {
@@ -294,7 +294,7 @@ public class LocalFileService : IFileService
 
     public Result<bool> Touch(string path)
     {
-        if (IsProtectedPath(path))
+        if (IsProtectedPath(ref path))
             return Result<bool>.Fail("Cannot access protected path: " + path);
         
         if (DirectoryExists(path).Is(true))
@@ -326,7 +326,7 @@ public class LocalFileService : IFileService
 
     public Result<bool> SetCreationTimeUtc(string path, DateTime date)
     {
-        if (IsProtectedPath(path))
+        if (IsProtectedPath(ref path))
             return Result<bool>.Fail("Cannot access protected path: " + path);
         try
         {
@@ -344,7 +344,7 @@ public class LocalFileService : IFileService
 
     public Result<bool> SetLastWriteTimeUtc(string path, DateTime date)
     {
-        if (IsProtectedPath(path))
+        if (IsProtectedPath(ref path))
             return Result<bool>.Fail("Cannot access protected path: " + path);
         try
         {
@@ -365,8 +365,13 @@ public class LocalFileService : IFileService
     /// </summary>
     /// <param name="path">the path to check</param>
     /// <returns>true if accessible, otherwise false</returns>
-    private bool IsProtectedPath(string path)
+    private bool IsProtectedPath(ref string path)
     {
+        if (OperatingSystem.IsWindows())
+            path = path.Replace("/", "\\");
+        else
+            path = path.Replace("\\", "/");
+        
         if (FileHelper.IsSystemDirectory(path))
             return true; // a system directory, no access
 
