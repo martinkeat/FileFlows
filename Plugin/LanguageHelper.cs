@@ -538,7 +538,7 @@ public class LanguageHelper
     public static string GetEnglishFor(string language)
     {     
         var lang = FindLanguage(language);
-        return lang.English?.EmptyAsNull() ?? language;
+        return lang?.English?.EmptyAsNull() ?? language;
     }
     
     /// <summary>
@@ -549,7 +549,7 @@ public class LanguageHelper
     public static string GetIso1Code(string language) 
     {
         var lang = FindLanguage(language);
-        return lang.Iso1?.EmptyAsNull() ?? language;
+        return lang?.Iso1?.EmptyAsNull() ?? language;
     }
     
     /// <summary>
@@ -560,7 +560,7 @@ public class LanguageHelper
     public static string GetIso2Code(string language) 
     {
         var lang = FindLanguage(language);
-        return lang.Iso2?.EmptyAsNull() ?? language;
+        return lang?.Iso2?.EmptyAsNull() ?? language;
     }
     
     class LanguageDefintion
