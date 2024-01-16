@@ -4,6 +4,7 @@ using FileFlows.Plugin;
 using FileFlows.ScriptExecution;
 using FileFlows.Server.Controllers;
 using FileFlows.Server.Helpers;
+using FileFlows.ServerShared.FileServices;
 using FileFlows.ServerShared.Services;
 using FileFlows.Shared.Helpers;
 using FileFlows.Shared.Models;
@@ -218,7 +219,7 @@ public class ScriptService:IScriptService
                 System.Text.Json.JsonSerializer.Serialize(x)));
         };
         executor.Variables = variables ?? new Dictionary<string, object>();
-        executor.AdditionalArguments.Add("Flow", new NodeParameters(null, Logger.Instance, false, null));
+        executor.AdditionalArguments.Add("Flow", new NodeParameters(null, Logger.Instance, false, null, fileService: new LocalFileService()));
         executor.AdditionalArguments.Add("PluginMethod", new Func<string, string, object[], object>((plugin, method, args) =>
             new ExpandoObject()
         ));

@@ -421,12 +421,11 @@ public class Runner
         }
         
         nodeParameters = new NodeParameters(initialFile, logger,
-            Info.IsDirectory, Info.LibraryPath)
+            Info.IsDirectory, Info.LibraryPath, fileService: FileService.Instance)
         {
             Enterprise = Info.Config.Enterprise,
             LibraryFileName = Info.LibraryFile.Name,
-            IsRemote = Info.IsRemote,
-            FileService = FileService.Instance
+            IsRemote = Info.IsRemote
         };
 
         // set the method to replace variables
@@ -726,14 +725,18 @@ public class Runner
                 else
                 {
                     nodeParameters.Logger?.DLog("output: " + output);
-                    if (output == -1)
+                    if (output == -1 && part.ErrorConnection == null)
                     {
                         // the execution failed                     
                         nodeParameters.Logger?.ELog("Flow Element returned error code: " + CurrentNode!.Name);
                         nodeParameters.Result = NodeResult.Failure;
                         return FileStatus.ProcessingFailed;
                     }
-                    var outputNode = part.OutputConnections?.Where(x => x.Output == output)?.FirstOrDefault();
+
+                    var outputNode = output == -1
+                        ? part.ErrorConnection
+                        : part.OutputConnections?.FirstOrDefault(x => x.Output == output);
+                    
                     if (outputNode == null)
                     {
                         nodeParameters.Logger?.DLog("Flow completed");

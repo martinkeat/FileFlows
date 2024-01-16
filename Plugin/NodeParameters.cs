@@ -255,13 +255,15 @@ public class NodeParameters
     /// <param name="logger">the logger used during execution</param>
     /// <param name="isDirectory">if this is executing against a directory instead of a file</param>
     /// <param name="libraryPath">the path of the library this file exists in</param>
-    public NodeParameters(string? filename, ILogger logger, bool isDirectory, string? libraryPath)
+    /// <param name="fileService">the FileService to user</param>
+    public NodeParameters(string? filename, ILogger logger, bool isDirectory, string? libraryPath, IFileService fileService)
     {
         Fake = string.IsNullOrEmpty(filename);
         this.IsDirectory = isDirectory;
         this.FileName = filename;
         this.LibraryPath = libraryPath;
         this.WorkingFile = filename;
+        this.FileService = fileService;
         if (Fake == false)
         {
             try
@@ -360,19 +362,21 @@ public class NodeParameters
             if (IsDirectory)
             {
                 var di = new DirectoryInfo(filename);
-                UpdateVariables(new Dictionary<string, object> {
+                UpdateVariables(new Dictionary<string, object>
+                {
                     { "folder.Name", di.Name ?? "" },
                     { "folder.FullName", di.FullName ?? "" }
                 });
-                if(initDone == false)
+                if (initDone == false)
                 {
                     initDone = true;
                     var diOriginal = new DirectoryInfo(this.FileName);
-                    UpdateVariables(new Dictionary<string, object> {
+                    UpdateVariables(new Dictionary<string, object>
+                    {
                         { "folder.Date", diOriginal.CreationTime },
                         { "folder.Date.Year", diOriginal.CreationTime.Year },
                         { "folder.Date.Month", diOriginal.CreationTime.Month },
-                        { "folder.Date.Day", diOriginal.CreationTime.Day},
+                        { "folder.Date.Day", diOriginal.CreationTime.Day },
 
                         { "folder.Orig.Name", diOriginal.Name ?? "" },
                         { "folder.Orig.FullName", diOriginal.FullName ?? "" },
@@ -386,7 +390,8 @@ public class NodeParameters
                 if (result.IsFailed)
                     return;
                 var fi = result.Value;
-                UpdateVariables(new Dictionary<string, object> {
+                UpdateVariables(new Dictionary<string, object>
+                {
                     { "ext", fi.Extension ?? "" },
                     { "file.Name", fi.Name ?? "" },
                     { "file.NameNoExtension", Path.GetFileNameWithoutExtension(fi.Name ?? "") },
@@ -398,14 +403,15 @@ public class NodeParameters
                     { "folder.FullName", fi.Directory ?? "" },
                 });
 
-                if(initDone == false)
+                if (initDone == false)
                 {
                     initDone = true;
                     var fiOrigResult = FileService.FileInfo(this.FileName);
                     if (fiOrigResult.IsFailed)
                         return;
                     var fiOriginal = fiOrigResult.Value;
-                    UpdateVariables(new Dictionary<string, object> {
+                    UpdateVariables(new Dictionary<string, object>
+                    {
                         { "file.Create", fiOriginal.CreationTime },
                         { "file.Create.Year", fiOriginal.CreationTime.Year },
                         { "file.Create.Month", fiOriginal.CreationTime.Month },
@@ -437,7 +443,10 @@ public class NodeParameters
                 }
             }
         }
-        catch (Exception) { }
+        catch (Exception ex)
+        {
+            Logger?.ELog("Failed to init file: " + ex.Message);
+        }
 
     }
 
