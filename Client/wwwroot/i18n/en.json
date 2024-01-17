@@ -395,7 +395,9 @@
         "DownloadsDirectory": "Downloads Directory",
         "DownloadsDirectory-Help": "A special directory where if a file that has been successfully processed is rediscovered in this folder, that file will automatically be reprocessed.\nThis is helpful if you re-download a file.",
         "MaxRunners": "Max Runners",
-        "MaxRunners-Help": "The maximum runners that can process files in this library at one time.\nSet to 0 for unlimited."
+        "MaxRunners-Help": "The maximum runners that can process files in this library at one time.\nSet to 0 for unlimited.",
+        "Extensions": "Extensions",
+        "Extensions-Help": "An optional list of extensions for files to include in this library.\nIf left blank, all files will be included, unless a filter or exclusion filter is defined on the `Advanced` tab."
       }
     },
     "LibraryFile": {

@@ -22,12 +22,19 @@ public partial class Libraries : ListPage<Guid, Library>
         efTemplate = null;
 
         var tabs = new Dictionary<string, List<ElementField>>();
-        var tabGeneral = await TabGeneral(library, flowOptions);
+        
+        ElementField efFolders = new ElementField
+        {
+            InputType = FormInputType.Switch,
+            Name = nameof(library.Folders)
+        };
+        
+        var tabGeneral = await TabGeneral(library, flowOptions, efFolders);
         tabs.Add("General", tabGeneral);
         tabs.Add("Schedule", TabSchedule(library));
         tabs.Add("Detection", TabDetection(library));
         tabs.Add("Scan", TabScan(library));
-        tabs.Add("Advanced", TabAdvanced(library));
+        tabs.Add("Advanced", TabAdvanced(library, efFolders));
         var result = await Editor.Open(new()
         {
             TypeName = "Pages.Library", Title = "Pages.Library.Title", Model = library, SaveCallback = Save, Tabs = tabs,
@@ -42,7 +49,7 @@ public partial class Libraries : ListPage<Guid, Library>
     }
 
 
-    private async Task<List<ElementField>> TabGeneral(Library library, IEnumerable<ListOption> flowOptions)
+    private async Task<List<ElementField>> TabGeneral(Library library, IEnumerable<ListOption> flowOptions, ElementField efFolders)
     {
         List<ElementField> fields = new List<ElementField>();
         if (library == null || library.Uid == Guid.Empty)
@@ -171,6 +178,16 @@ public partial class Libraries : ListPage<Guid, Library>
                 }
             });
         }
+        
+        fields.Add(new ElementField()
+        {
+            InputType = FormInputType.StringArray,
+            Name = nameof(library.Extensions),
+            Conditions = new List<Condition>
+            {
+                new (efFolders, library.Folders, value: false)
+            }
+        });
         fields.Add(new ElementField
         {
             InputType = FormInputType.Int,
@@ -212,7 +229,7 @@ public partial class Libraries : ListPage<Guid, Library>
         return fields;
     }
 
-    private List<ElementField> TabAdvanced(Library library)
+    private List<ElementField> TabAdvanced(Library library, ElementField efFolders)
     {
         List<ElementField> fields = new List<ElementField>();
         fields.Add(new ElementField
@@ -230,11 +247,6 @@ public partial class Libraries : ListPage<Guid, Library>
             InputType = FormInputType.Switch,
             Name = nameof(library.ExcludeHidden)
         });
-        ElementField efFolders = new ElementField
-        {
-            InputType = FormInputType.Switch,
-            Name = nameof(library.Folders)
-        };
         fields.Add(efFolders);
         fields.Add(new ElementField
         {

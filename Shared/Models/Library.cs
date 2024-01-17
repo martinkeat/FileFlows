@@ -18,6 +18,11 @@ public class Library : FileFlowObject
     public string Path { get; set; }
     
     /// <summary>
+    /// Gets or sets the extensions this library will process
+    /// </summary>
+    public List<string> Extensions { get; set; }
+    
+    /// <summary>
     /// Gets or sets the filter used to determine what files to add ot the library files
     /// </summary>
     public string Filter { get; set; }

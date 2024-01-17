@@ -542,8 +542,26 @@ public class WatchedLibrary:IDisposable
             }
             catch (Exception) { }
         }
-        // default to true
-        return true;
+
+        if (Library.Extensions?.Any() != true)
+        {
+            // default to true
+            return true;
+        }
+
+        foreach (var extension in Library.Extensions)
+        {
+            var ext = extension.ToLowerInvariant();
+            if (string.IsNullOrWhiteSpace(ext))
+                continue;
+            if (ext.StartsWith(".") == false)
+                ext = "." + ext;
+            if (input.ToLowerInvariant().EndsWith(ext))
+                return true;
+        }
+
+        // didnt match extensions
+        return false;
     }
 
     private void Watcher_Changed(object sender, FileSystemEventArgs e)
