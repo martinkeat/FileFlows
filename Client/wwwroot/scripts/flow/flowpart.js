@@ -75,10 +75,8 @@ window.ffFlowPart = {
                 divInput.classList.add('input');
                 divInput.classList.add('input-' + i);
                 divInput.addEventListener("onclick", function (event) {
-                    console.log('divInput click ' + i, part);
                 });
                 divInput.addEventListener("onmousedown", function (event) {
-                    console.log('divInput mouse down ' + i, part);
                     ffFlowLines.ioDown(event, true);
                 });
                 divInput.addEventListener("contextmenu", function (event) {
@@ -278,14 +276,17 @@ window.ffFlowPart = {
                 }
             }
             divOutputs.className = 'outputs outputs-' + Math.max(part.outputs, 1);
-            for (let i = 1; i <= part.outputs; i++) {
+            for (let i = 0; i <= part.outputs; i++) {
+                if(i === 0 && !part.inputs)
+                    continue;
                 let divOutput = document.createElement('div');
                 let divOutputInner = document.createElement('div');
+                let index = i === 0 ? -1 : i;
                 divOutput.appendChild(divOutputInner);
-                divOutput.setAttribute('id', part.uid + '-output-' + i);
+                divOutput.setAttribute('id', part.uid + '-output-' + index);
                 divOutput.setAttribute('x-output', i);
                 divOutput.classList.add('output');
-                divOutput.classList.add('output-' + i);
+                divOutput.classList.add('output-' + index);
                 ffFlowPart.attachOutputNodeEvents(divOutput);
                 divOutputs.appendChild(divOutput);
             }

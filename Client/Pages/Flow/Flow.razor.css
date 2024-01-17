@@ -335,7 +335,7 @@ canvas {
 ::deep .flow-part .name {
   flex-grow: 1;
   margin: auto 0.5rem;
-  padding: 0.5rem 0;
+  padding: 0.5rem 0.5rem 0.5rem 0;
 }
 ::deep .flow-part .draggable {
   position: absolute;
@@ -343,6 +343,27 @@ canvas {
   bottom: 0;
   left: 0;
   right: 0;
+  z-index: 4;
+}
+::deep .flow-part .error {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: -1rem;
+  display: inline-flex;
+  align-items: center;
+  width: 2rem;
+}
+::deep .flow-part .error-output {
+  width: 1rem;
+  height: 1rem;
+  margin: 0.5rem;
+  border-radius: 0.25rem;
+  background-color: var(--base);
+  border: solid 2px var(--error);
+}
+::deep .flow-part .error-output:hover {
+  cursor: crosshair;
 }
 ::deep .flow-part * {
   user-select: none;
@@ -434,67 +455,70 @@ canvas {
 ::deep .flow-part:not(.vertical).size-20 {
   height: calc(20 * 2rem);
 }
-::deep .flow-part.Logic:not(.selected) .icon-wrapper, ::deep .flow-part.Logic:not(.selected) .input > div, ::deep .flow-part.Logic:not(.selected) .output > div {
+::deep .flow-part.Logic:not(.selected) .icon-wrapper, ::deep .flow-part.Logic:not(.selected) .input > div, ::deep .flow-part.Logic:not(.selected) .output:not(.output--1) > div {
   border-color: var(--flow-logic) !important;
 }
-::deep .flow-part.Logic:not(.selected) .connected > div {
+::deep .flow-part.Logic:not(.selected) .connected:not(.output--1) > div {
   background-color: var(--flow-logic) !important;
 }
-::deep .flow-part.Input:not(.selected) .icon-wrapper, ::deep .flow-part.Input:not(.selected) .input > div, ::deep .flow-part.Input:not(.selected) .output > div {
+::deep .flow-part.Input:not(.selected) .icon-wrapper, ::deep .flow-part.Input:not(.selected) .input > div, ::deep .flow-part.Input:not(.selected) .output:not(.output--1) > div {
   border-color: var(--flow-input) !important;
 }
-::deep .flow-part.Input:not(.selected) .connected > div {
+::deep .flow-part.Input:not(.selected) .connected:not(.output--1) > div {
   background-color: var(--flow-input) !important;
 }
-::deep .flow-part.Output:not(.selected) .icon-wrapper, ::deep .flow-part.Output:not(.selected) .input > div, ::deep .flow-part.Output:not(.selected) .output > div {
+::deep .flow-part.Output:not(.selected) .icon-wrapper, ::deep .flow-part.Output:not(.selected) .input > div, ::deep .flow-part.Output:not(.selected) .output:not(.output--1) > div {
   border-color: var(--flow-output) !important;
 }
-::deep .flow-part.Output:not(.selected) .connected > div {
+::deep .flow-part.Output:not(.selected) .connected:not(.output--1) > div {
   background-color: var(--flow-output) !important;
 }
-::deep .flow-part.Process:not(.selected) .icon-wrapper, ::deep .flow-part.Process:not(.selected) .input > div, ::deep .flow-part.Process:not(.selected) .output > div {
+::deep .flow-part.Process:not(.selected) .icon-wrapper, ::deep .flow-part.Process:not(.selected) .input > div, ::deep .flow-part.Process:not(.selected) .output:not(.output--1) > div {
   border-color: var(--flow-process) !important;
 }
-::deep .flow-part.Process:not(.selected) .connected > div {
+::deep .flow-part.Process:not(.selected) .connected:not(.output--1) > div {
   background-color: var(--flow-process) !important;
 }
-::deep .flow-part.BuildStart:not(.selected) .icon-wrapper, ::deep .flow-part.BuildStart:not(.selected) .input > div, ::deep .flow-part.BuildStart:not(.selected) .output > div {
+::deep .flow-part.BuildStart:not(.selected) .icon-wrapper, ::deep .flow-part.BuildStart:not(.selected) .input > div, ::deep .flow-part.BuildStart:not(.selected) .output:not(.output--1) > div {
   border-color: var(--flow-build-start) !important;
 }
-::deep .flow-part.BuildStart:not(.selected) .connected > div {
+::deep .flow-part.BuildStart:not(.selected) .connected:not(.output--1) > div {
   background-color: var(--flow-build-start) !important;
 }
-::deep .flow-part.BuildEnd:not(.selected) .icon-wrapper, ::deep .flow-part.BuildEnd:not(.selected) .input > div, ::deep .flow-part.BuildEnd:not(.selected) .output > div {
+::deep .flow-part.BuildEnd:not(.selected) .icon-wrapper, ::deep .flow-part.BuildEnd:not(.selected) .input > div, ::deep .flow-part.BuildEnd:not(.selected) .output:not(.output--1) > div {
   border-color: var(--flow-build-end) !important;
 }
-::deep .flow-part.BuildEnd:not(.selected) .connected > div {
+::deep .flow-part.BuildEnd:not(.selected) .connected:not(.output--1) > div {
   background-color: var(--flow-build-end) !important;
 }
-::deep .flow-part.BuildPart:not(.selected) .icon-wrapper, ::deep .flow-part.BuildPart:not(.selected) .input > div, ::deep .flow-part.BuildPart:not(.selected) .output > div {
+::deep .flow-part.BuildPart:not(.selected) .icon-wrapper, ::deep .flow-part.BuildPart:not(.selected) .input > div, ::deep .flow-part.BuildPart:not(.selected) .output:not(.output--1) > div {
   border-color: var(--flow-build-part) !important;
 }
-::deep .flow-part.BuildPart:not(.selected) .connected > div {
+::deep .flow-part.BuildPart:not(.selected) .connected:not(.output--1) > div {
   background-color: var(--flow-build-part) !important;
 }
-::deep .flow-part.Communication:not(.selected) .icon-wrapper, ::deep .flow-part.Communication:not(.selected) .input > div, ::deep .flow-part.Communication:not(.selected) .output > div {
+::deep .flow-part.Communication:not(.selected) .icon-wrapper, ::deep .flow-part.Communication:not(.selected) .input > div, ::deep .flow-part.Communication:not(.selected) .output:not(.output--1) > div {
   border-color: var(--flow-communication) !important;
 }
-::deep .flow-part.Communication:not(.selected) .connected > div {
+::deep .flow-part.Communication:not(.selected) .connected:not(.output--1) > div {
   background-color: var(--flow-communication) !important;
 }
-::deep .flow-part.Failure:not(.selected) .icon-wrapper, ::deep .flow-part.Failure:not(.selected) .input > div, ::deep .flow-part.Failure:not(.selected) .output > div {
+::deep .flow-part.Failure:not(.selected) .icon-wrapper, ::deep .flow-part.Failure:not(.selected) .input > div, ::deep .flow-part.Failure:not(.selected) .output:not(.output--1) > div {
   border-color: var(--flow-failure) !important;
 }
-::deep .flow-part.Failure:not(.selected) .connected > div {
+::deep .flow-part.Failure:not(.selected) .connected:not(.output--1) > div {
   background-color: var(--flow-failure) !important;
 }
-::deep .flow-part.Script:not(.selected) .icon-wrapper, ::deep .flow-part.Script:not(.selected) .input > div, ::deep .flow-part.Script:not(.selected) .output > div {
+::deep .flow-part.Script:not(.selected) .icon-wrapper, ::deep .flow-part.Script:not(.selected) .input > div, ::deep .flow-part.Script:not(.selected) .output:not(.output--1) > div {
   border-color: var(--flow-script) !important;
 }
-::deep .flow-part.Script:not(.selected) .connected > div {
+::deep .flow-part.Script:not(.selected) .connected:not(.output--1) > div {
   background-color: var(--flow-script) !important;
 }
-::deep .flow-part.selected .icon-wrapper, ::deep .flow-part.selected .input > div, ::deep .flow-part.selected .output > div {
+::deep .flow-part .connected.output--1 > div {
+  background-color: var(--error) !important;
+}
+::deep .flow-part.selected .icon-wrapper, ::deep .flow-part.selected .input > div, ::deep .flow-part.selected .output:not(.output--1) > div {
   border-color: var(--accent) !important;
 }
 ::deep .flow-part.selected .connected > div {
@@ -530,8 +554,11 @@ canvas {
   width: unset;
   z-index: 2;
 }
-::deep .flow-part.vertical .outputs {
-  top: unset;
+::deep .flow-part.vertical .inputs {
+  z-index: 3;
+}
+::deep .flow-part.vertical .outputs .output {
+  bottom: -2rem;
 }
 
 ::deep .output > div:hover {
@@ -610,11 +637,19 @@ canvas {
 ::deep .flow-part .input, ::deep .flow-part .output {
   position: absolute;
 }
-::deep .flow-part .input, ::deep .flow-part .outputs-1 .output {
+::deep .flow-part .input, ::deep .flow-part .outputs-1 .output-1 {
   left: 45px;
 }
 ::deep .flow-part .outputs {
   bottom: 13px !important;
+}
+::deep .flow-part .output--1 {
+  right: -1rem;
+  left: unset !important;
+  top: 50%;
+}
+::deep .flow-part .output--1 > div {
+  border-color: var(--error) !important;
 }
 ::deep .flow-part .outputs-2 .output-1 {
   left: 15px;

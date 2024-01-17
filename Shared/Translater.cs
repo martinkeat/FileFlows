@@ -125,7 +125,7 @@ public class Translater
             return Language["Labels.Name"];
 
         string result = possibleKeys?.FirstOrDefault() ?? "";
-        if(supressWarnings == false && result.EndsWith(".UID") == false)
+        if(supressWarnings == false && result.EndsWith(".UID") == false && result.StartsWith("Flow.Parts.") == false)
             Logger.Instance.WLog("Failed to lookup key: " + result);
         result = result.Substring(result.LastIndexOf(".") + 1);
 

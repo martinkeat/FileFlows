@@ -12,6 +12,8 @@ class ffFlowLines {
     ioSelectedConnection = null;
     accentColor = null;
     lineColor = null;
+    errorColor = null;
+    errorDash = [3, 3];
     ioOffset = 14.5;
 
     reset() {
@@ -71,10 +73,13 @@ class ffFlowLines {
     ioMouseUp(event) {
         if (!this.ioNode)
             return;
+        
 
         let target = event.target.parentNode;
+        console.log('isMouseUp', target);
         let suitable = target?.classList?.contains(this.ioIsInput ? 'output' : 'input') === true;
         if (suitable) {
+            console.log('isMouseUp suitable');
             let input = this.isInput ? this.ioNode : target;
             let output = this.isInput ? target : this.ioNode;
             let outputId = output.getAttribute('id');
@@ -209,6 +214,11 @@ class ffFlowLines {
             destX += 2;
         }
         path.moveTo(srcX, srcY);
+        let isError = /--1$/.test(output?.id || '');
+        if(isError) {
+            path.lineTo(srcX + 40, srcY);
+            srcX += 40;            
+        }
 
         if (ffFlow.Vertical) {
             if (srcY < destY - 20) {
@@ -219,9 +229,13 @@ class ffFlowLines {
                 path.lineTo(destX, destY);
             }
             else {
-                path.lineTo(srcX, srcY + 20);
+                let diff = 0;
+                if(isError === false) {
+                    diff = 20;
+                    path.lineTo(srcX, srcY + 20);
+                }
                 let midX = (destX - srcX) / 2
-                path.lineTo(srcX + midX, srcY + 20);
+                path.lineTo(srcX + midX, srcY + diff);
                 path.lineTo(srcX + midX, destY - 20);
                 path.lineTo(destX, destY - 20);
                 path.lineTo(destX, destY);
@@ -237,8 +251,15 @@ class ffFlowLines {
         }
 
         context.lineWidth = 5;
-        context.strokeStyle = color || this.lineColor;
-        context.stroke(path);
+        context.strokeStyle = color || isError ? this.errorColor : this.lineColor;
+
+        if(isError) {
+            context.setLineDash(this.errorDash);
+            context.stroke(path);
+            context.setLineDash([]);
+        }else{
+            context.stroke(path);
+        }
 
         this.ioLines.push({ path: path, output: output, connection: connection });
 
@@ -250,6 +271,7 @@ class ffFlowLines {
 
         this.accentColor = this.colorFromCssClass('--accent');
         this.lineColor = this.colorFromCssClass('--color-darkest');
+        this.errorColor = this.colorFromCssClass('--error');
 
         let canvas = document.querySelector('canvas');
         // Listen for mouse moves
@@ -273,8 +295,15 @@ class ffFlowLines {
                     event.preventDefault();
                 }
                 else {
-                    ctx.strokeStyle = self.lineColor;
-                    ctx.stroke(line.path);
+                    let isError = /--1$/.test(line.output.id);
+                    ctx.strokeStyle = isError ? self.errorColor : self.lineColor;
+                    if(isError) {
+                        ctx.setLineDash(self.errorDash);
+                        ctx.stroke(line.path);
+                        ctx.setLineDash([]);
+                    }else{
+                        ctx.stroke(line.path);                        
+                    }
                 }
             }
             if (selectedLine) {

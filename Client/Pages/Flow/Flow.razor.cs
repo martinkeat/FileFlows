@@ -282,7 +282,7 @@ public partial class Flow : ComponentBase, IDisposable
             
             if (string.IsNullOrEmpty(p.Name) == false || string.IsNullOrEmpty(p?.FlowElementUid))
                 continue;
-            string type = p.FlowElementUid.Substring(p.FlowElementUid.LastIndexOf(".") + 1);
+            string type = p.FlowElementUid[(p.FlowElementUid.LastIndexOf(".", StringComparison.Ordinal) + 1)..];
             string name = Translater.Instant($"Flow.Parts.{type}.Label", suppressWarnings: true);
             if (name == "Label")
                 name = FlowHelper.FormatLabel(type);
@@ -292,9 +292,12 @@ public partial class Flow : ComponentBase, IDisposable
         this.Name = model.Name ?? "";
 
         var connections = new Dictionary<string, List<xFlowConnection>>();
-        foreach (var part in this.Parts.Where(x => x.OutputConnections?.Any() == true))
+        foreach (var part in this.Parts.Where(x => x.OutputConnections?.Any() == true || x.ErrorConnection != null))
         {
-            connections.Add(part.Uid.ToString(), part.OutputConnections);
+            var partConnections = part.OutputConnections ?? new ();
+            if(part.ErrorConnection != null)
+                partConnections.Add(part.ErrorConnection);
+            connections.Add(part.Uid.ToString(), partConnections);
         }
         await jsRuntime.InvokeVoidAsync("ffFlow.ioInitConnections", connections);
 
@@ -349,13 +352,13 @@ public partial class Flow : ComponentBase, IDisposable
         string prefix = string.Empty;
         if (key.Contains(".Outputs."))
         {
-            prefix = Translater.Instant("Labels.Output") + " " + key.Substring(key.LastIndexOf(".") + 1) + ": ";
+            prefix = Translater.Instant("Labels.Output", suppressWarnings: true) + " " + key.Substring(key.LastIndexOf(".", StringComparison.Ordinal) + 1) + ": ";
         }
 
         var dict = model?.Where(x => x.Value != null)?.ToDictionary(x => x.Key, x => x.Value)
                    ?? new();
 
-        string translated = Translater.Instant(key, dict);
+        string translated = Translater.Instant(key, dict, suppressWarnings: true);
         if (Regex.IsMatch(key, "^[\\d]+$"))
             return string.Empty;
         return prefix + translated;

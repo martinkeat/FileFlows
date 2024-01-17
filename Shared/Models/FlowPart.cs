@@ -60,6 +60,11 @@ public class FlowPart
     /// Gets or sets the output connections of this flow part
     /// </summary>
     public List<FlowConnection> OutputConnections { get; set; }
+    
+    /// <summary>
+    /// Gets or sets teh error connection to process if this flow element returns a -1
+    /// </summary>
+    public FlowConnection? ErrorConnection { get; set; }
 
     /// <summary>
     /// Gets or sets the type of the flow part

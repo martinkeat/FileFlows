@@ -38,8 +38,7 @@ window.ffFlow = {
         ffFlow.csharp = csharp;
         ffFlow.parts = parts;
         ffFlow.elements = elements;
-        ffFlow.infobox = null;
-        
+        ffFlow.infobox = null;        
         
         ffFlow.csharp.invokeMethodAsync("Translate", `Labels.Delete`, null).then(result => {
             ffFlow.lblDelete = result;
@@ -154,7 +153,7 @@ window.ffFlow = {
         for (let k in connections) { // iterating keys so use in
             for (let con of connections[k]) { // iterating values so use of
                 let id = k + '-output-' + con.output;
-
+                
                 let list = ffFlow.FlowLines.ioOutputConnections.get(id);
                 if (!list) {
                     ffFlow.FlowLines.ioOutputConnections.set(id, []);
@@ -162,7 +161,6 @@ window.ffFlow = {
                 }
                 list.push({ index: con.input, part: con.inputNode });
             }
-
         }
     },
 
@@ -241,12 +239,15 @@ window.ffFlow = {
     getModel: function () {
         let connections = this.FlowLines.ioOutputConnections;
 
-
         let connectionUids = [];
         for (let [outputPart, con] of connections) {
             connectionUids.push(outputPart);
             let partId = outputPart.substring(0, outputPart.indexOf('-output'));
-            let output = parseInt(outputPart.substring(outputPart.lastIndexOf('-') + 1), 10);
+            let outputStr = /[\-]{1,2}[\d]+$/.exec(outputPart);
+            if(!outputStr)
+                continue;
+            outputStr = outputStr[0].substring(1);
+            let output = parseInt(outputStr, 10);
             let part = this.parts.filter(x => x.uid === partId)[0];
             if (!part) {
                 console.warn('unable to find part: ', partId);
@@ -261,14 +262,25 @@ window.ffFlow = {
                 if (ffFlow.SingleOutputConnection) {
                     // remove any duplicates from the output
                     part.outputConnections = part.outputConnections.filter(x => x.output != output);
+                }                
+                
+                if(output === -1){
+                    part.errorConnection = 
+                    {
+                        input: input,
+                        output: output,
+                        inputNode: toPart
+                    };
+                    console.log('errorConnection: ' + part.errorConnection);
                 }
-
-                part.outputConnections.push(
-                {
-                    input: input,
-                    output: output,
-                    inputNode: toPart
-                });
+                else {
+                    part.outputConnections.push(
+                    {
+                        input: input,
+                        output: output,
+                        inputNode: toPart
+                    });
+                }
             }
         }
         // remove any no longer existing connections
@@ -417,6 +429,12 @@ window.ffFlow = {
             console.error("Failed to find element: " + part.flowElementUid);
             return;
         }
+        if(output === -1){
+            let outputNode = document.getElementById(part.uid + '-output-' + output);
+            if (outputNode)
+                outputNode.setAttribute('title', 'FAILED');
+            return;
+        }
         if(part.flowElementUid.startsWith('Script:'))
         {
             part.OutputLabels = {};
@@ -442,8 +460,8 @@ window.ffFlow = {
     initOutputHints(part) {
         if (!part || !part.outputs)
             return;
-        for (let i = 0; i < part.outputs; i++) {
-            ffFlow.setOutputHint(part, i + 1);
+        for (let i = 0; i <= part.outputs; i++) {
+            ffFlow.setOutputHint(part, i === 0 ? -1 : i);
         }
     },
     
@@ -498,7 +516,6 @@ window.ffFlow = {
         try {
             parts = JSON.parse(json);
         }catch(err) { return; }
-        console.log('parts', parts);
         for(let p of parts){
             if(!p.uid)
                 return; // not a valid item pasted in
@@ -512,8 +529,7 @@ window.ffFlow = {
             ffFlow.History.perform(new FlowActionAddNode(p));
         }
     },
-    
-    
+        
     contextMenu_Edit: function(part){
         if(!part)
             return;
