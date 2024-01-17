@@ -121,7 +121,7 @@ public class LanguageHelper
             new () {English = "Land Dayak languages",French = "dayak, langues",German = "Dajakisch",Iso2 = "day"},
             new () {English = "Delaware",French = "delaware",German = "Delaware-Sprache",Iso2 = "del"},
             new () {English = "Slave (Athapascan)",French = "esclave (athapascan)",German = "Slave-Sprache",Iso2 = "den"},
-            new () {English = "German",French = "allemand",German = "Deutsch",Iso2 = "deu",Iso1 = "de"},
+            new () {English = "German",French = "allemand",German = "Deutsch", Iso2 = "deu", Iso1 = "de", Aliases = new [] { "ger" }},
             new () {English = "Dogrib",French = "dogrib",German = "Dogrib-Sprache",Iso2 = "dgr"},
             new () {English = "Dinka",French = "dinka",German = "Dinka-Sprache",Iso2 = "din"},
             new () {English = "Divehi",French = "maldivien",German = "Maledivisch",Iso2 = "div",Iso1 = "dv"},
@@ -526,7 +526,22 @@ public class LanguageHelper
 
         var ll = language.ToLowerInvariant();
 
-        var lang = Languages.FirstOrDefault(x => x.Iso1 == ll || x.Iso2 == ll || x.English?.ToLowerInvariant() == ll || x.French?.ToLowerInvariant() == ll || x.German?.ToLowerInvariant() == ll);
+        var lang = Languages.FirstOrDefault(x =>
+        {
+            if (x.Iso1 == ll)
+                return true;
+            if (x.Iso2 == ll)
+                return true;
+            if(x.English?.ToLowerInvariant() == ll)
+                return true;
+            if (x.French?.ToLowerInvariant() == ll)
+                return true;
+            if (x.German?.ToLowerInvariant() == ll)
+                return true;
+            if (x.Aliases?.Contains(ll) == true)
+                return true;
+            return false;
+        });
         return lang;
     }
     
@@ -570,5 +585,7 @@ public class LanguageHelper
         public string German { get; set; }
         public string Iso1 { get; set; }
         public string Iso2 { get; set; }
+        
+        public string[] Aliases { get; set; }
     }
 }
