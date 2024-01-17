@@ -178,6 +178,8 @@ public partial class Libraries : ListPage<Guid, Library>
                 }
             });
         }
+        var fileInfo = new System.IO.FileInfo("");
+        var grandParent = fileInfo.Directory.Parent.FullName;
         
         fields.Add(new ElementField()
         {

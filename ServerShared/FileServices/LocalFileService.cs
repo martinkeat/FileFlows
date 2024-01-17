@@ -98,6 +98,7 @@ public class LocalFileService : IFileService
         try
         {
             Directory.Move(path, destination);
+            SetPermissions(destination);
             return true;
         }
         catch (Exception ex)
@@ -115,6 +116,7 @@ public class LocalFileService : IFileService
             var dirInfo = new DirectoryInfo(path);
             if (dirInfo.Exists == false)
                 dirInfo.Create();
+            SetPermissions(path);
             return true;
         }
         catch (Exception ex)
@@ -245,9 +247,13 @@ public class LocalFileService : IFileService
                 return Result<bool>.Fail("File does not exist");
             var destDir = new FileInfo(destination).Directory;
             if (destDir.Exists == false)
+            {
                 destDir.Create();
+                SetPermissions(destDir.FullName);
+            }
 
             fileInfo.MoveTo(destination, overwrite);
+            SetPermissions(destination);
             return true;
         }
         catch (Exception ex)
@@ -270,9 +276,13 @@ public class LocalFileService : IFileService
             
             var destDir = new FileInfo(destination).Directory;
             if (destDir.Exists == false)
+            {
                 destDir.Create();
-            
+                SetPermissions(destDir.FullName);
+            }
+
             fileInfo.CopyTo(destination, overwrite);
+            SetPermissions(destination);
             return true;
         }
         catch (Exception ex)
@@ -288,6 +298,7 @@ public class LocalFileService : IFileService
         try
         {
             File.AppendAllText(path, text);
+            SetPermissions(path);
             return true;
         }
         catch (Exception ex)
@@ -329,7 +340,11 @@ public class LocalFileService : IFileService
             if (File.Exists(path))
                 File.SetLastWriteTimeUtc(path, DateTime.UtcNow);
             else
+            {
                 File.Create(path);
+                SetPermissions(path);
+            }
+
             return true;
         }
         catch (Exception ex)
@@ -406,5 +421,21 @@ public class LocalFileService : IFileService
         }
 
         return true;
+    }
+
+    private void SetPermissions(string path)
+    {
+        if ((File.Exists(path) == false && Directory.Exists(path) == false))
+            return;
+        if (OperatingSystem.IsLinux())
+        {
+            // Set read and write permissions for everyone on the file
+            var chmod666 = UnixFileMode.OtherRead | UnixFileMode.OtherWrite |
+                                    UnixFileMode.GroupRead | UnixFileMode.GroupWrite |
+                                    UnixFileMode.UserRead | UnixFileMode.UserWrite;
+            File.SetUnixFileMode(path, chmod666);
+            Logger?.ILog("Permission set on file: " + path);
+        }
+
     }
 }
