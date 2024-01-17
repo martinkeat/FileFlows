@@ -875,10 +875,8 @@ public class NodeParameters
     /// <returns>the safe filename</returns>
     public string GetSafeName(string fullFileName)
     {
-        var dest = new FileInfo(fullFileName);
-
-        string destName = dest.Name;
-        string destDir = dest?.DirectoryName ?? "";
+        string destName = FileHelper.GetShortFileName(fullFileName);
+        string destDir = FileHelper.GetDirectory(fullFileName);
 
         // replace these here to avoid double spaces in name
         if (Path.GetInvalidFileNameChars().Contains(':'))
