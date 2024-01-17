@@ -15,7 +15,7 @@ public abstract class ScriptTest
     protected ExecuteResult ExecuteScript(string code, Dictionary<string, object> parameters)
     {
         var logger = new TestLogger();
-        NodeParameters args = new (null, logger, false, null);
+        NodeParameters args = new (null, logger, false, null, null);
         
         string epParams = string.Join(", ", parameters.Keys.ToArray());
         string entryPoint = $"var scriptResult = Script({epParams});\nexport const result = scriptResult;";
