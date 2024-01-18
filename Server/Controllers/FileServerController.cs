@@ -484,7 +484,7 @@ public class FileServerController : Controller
                 dirPath += " [TEMP]";
                 log.AppendLine("Creating temp directory: " + dirPath);
                 new DirectoryInfo(dirPath).Create();
-                _localFileService.SetPermissions(dirPath);
+                _localFileService.SetPermissions(dirPath, logMethod: (string m) => log.AppendLine(m));
             }
 
             string outFile = Path.Combine(dirPath, "_TEMP_" + fileInfo.Name + ".FFTEMP");
