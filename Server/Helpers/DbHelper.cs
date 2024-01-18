@@ -179,7 +179,8 @@ public class DbHelper
     /// <param name="andWhere">and where clause</param>
     /// <param name="args">arguments for where clause</param>
     /// <typeparam name="T">the type to delete</typeparam>
-    public static Task Delete<T>(string andWhere = "", params object[] args) => Manager.Delete<T>(andWhere, args);
+    public static Task Delete<T>(string andWhere = "", params object[] args) 
+        => Manager.Delete<T>(andWhere, args);
 
     /// <summary>
     /// Executes SQL against the database
@@ -187,7 +188,8 @@ public class DbHelper
     /// <param name="sql">the SQL to execute</param>
     /// <param name="args">arguments for where clause</param>
     /// <returns>the rows effected</returns>
-    internal static Task<int> Execute(string sql = "", params object[] args) => Manager.Execute(sql, args);
+    internal static Task<int> Execute(string sql = "", params object[] args) 
+        => Manager.Execute(sql, args);
     
     /// <summary>
     /// Logs a message to the database
@@ -195,19 +197,23 @@ public class DbHelper
     /// <param name="clientUid">The UID of the client, use Guid.Empty for the server</param>
     /// <param name="type">the type of log message</param>
     /// <param name="message">the message to log</param>
-    public static Task Log(Guid clientUid, LogType type, string message) => Manager.Log(clientUid, type, message);
+    public static Task Log(Guid clientUid, LogType type, string message) 
+        => Manager.Log(clientUid, type, message);
+    
     /// <summary>
     /// Prune old logs from the database
     /// </summary>
     /// <param name="maxLogs">the maximum number of log messages to keep</param>
-    public static Task PruneOldLogs(int maxLogs) => Manager.PruneOldLogs(maxLogs);
+    public static Task PruneOldLogs(int maxLogs) 
+        => Manager.PruneOldLogs(maxLogs);
 
     /// <summary>
     /// Searches the log using the given filter
     /// </summary>
     /// <param name="filter">the search filter</param>
     /// <returns>the messages found in the log</returns>
-    public static Task<IEnumerable<DbLogMessage>> SearchLog(LogSearchModel filter) => Manager.SearchLog(filter);
+    public static Task<IEnumerable<DbLogMessage>> SearchLog(LogSearchModel filter) 
+        => Manager.SearchLog(filter);
     
     /// <summary>
     /// Gets the failure flow for a particular library
@@ -226,19 +232,19 @@ public class DbHelper
     public static Task<T> GetByName<T>(string name) where T : FileFlowObject, new()
         => Manager.GetByName<T>(name);
    
-    
     /// <summary>
     /// Records a statistic
     /// </summary>
     /// <param name="statistic">the statistic to record</param>
-    public static Task RecordStatistic(Statistic statistic) => Manager.RecordStatistic(statistic);
+    public static Task RecordStatistic(Statistic statistic)
+        => Manager.RecordStatistic(statistic);
     
-
     /// <summary>
     /// Gets statistics by name
     /// </summary>
     /// <returns>the matching statistics</returns>
-    public static Task<IEnumerable<Statistic>> GetStatisticsByName(string name) => Manager.GetStatisticsByName(name);
+    public static Task<IEnumerable<Statistic>> GetStatisticsByName(string name)
+        => Manager.GetStatisticsByName(name);
     
     /// <summary>
     /// Checks if the database has any of the type

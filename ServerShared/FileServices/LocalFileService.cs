@@ -25,6 +25,11 @@ public class LocalFileService : IFileService
     /// and a boolean indicating whether to clean special characters.
     /// </remarks>
     public ReplaceVariablesDelegate ReplaceVariables { get; set; }
+    
+    /// <summary>
+    /// Gets or sets the permissions to use for files
+    /// </summary>
+    public int? Permissions { get; set; }
 
     /// <summary>
     /// Gets or sets the logger used for logging
@@ -425,16 +430,22 @@ public class LocalFileService : IFileService
 
     private void SetPermissions(string path)
     {
+        if (Permissions == null || Permissions < 1)
+            return;
+        
         if ((File.Exists(path) == false && Directory.Exists(path) == false))
             return;
         if (OperatingSystem.IsLinux())
         {
-            // Set read and write permissions for everyone on the file
-            var chmod666 = UnixFileMode.OtherRead | UnixFileMode.OtherWrite |
-                                    UnixFileMode.GroupRead | UnixFileMode.GroupWrite |
-                                    UnixFileMode.UserRead | UnixFileMode.UserWrite;
-            File.SetUnixFileMode(path, chmod666);
-            Logger?.ILog("Permission set on file: " + path);
+            var filePermissions = FileHelper.ConvertLinuxPermissionsToUnixFileMode(Permissions.Value);
+            if (filePermissions == UnixFileMode.None)
+            {
+                Logger?.ILog("Invalid file permissions: " + Permissions.Value);
+                return;
+            }
+            
+            File.SetUnixFileMode(path, filePermissions);
+            Logger?.ILog($"Permission [{filePermissions}] set on file: " + path);
         }
 
     }

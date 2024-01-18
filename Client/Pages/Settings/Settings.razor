@@ -67,8 +67,11 @@
                         <p style="white-space: pre-wrap">@lblFileServerDescription</p>
                         <hr />
                         <InputSwitch @bind-Value="@Model.FileServerDisabled" Inverse="true" Label="Pages.Settings.Fields.FileServer.Enabled" />
-
-                        <InputTextArea @bind-Value="@Model.FileServerAllowedPathsString" Label="Pages.Settings.Fields.FileServer.AllowList" />
+                        @if (App.Instance.FileFlowsSystem.IsLinux)
+                        {
+                            <InputNumber @bind-Value="@Model.FileServerFilePermissions" Label="Pages.Settings.Fields.FileServer.FilePermissions" Disabled="Model.FileServerDisabled" Max="777" />
+                        }
+                        <InputTextArea @bind-Value="@Model.FileServerAllowedPathsString" Label="Pages.Settings.Fields.FileServer.AllowList" Disabled="Model.FileServerDisabled" />
                     </FlowTab>
                     <FlowTab Title="@lblDatabase" Visible="@ShowExternalDatabase">
                         <p class="box info">@lblDbDescription</p>

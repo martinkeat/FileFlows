@@ -485,4 +485,60 @@ public class FileHelper
         return combinedPath;
     }
 
+    /// <summary>
+    /// Converts Linux permission values to UnixFileMode enum.
+    /// </summary>
+    /// <param name="linuxPermissions">Linux permission value (e.g., 775, 777, 666, 700).</param>
+    /// <returns>UnixFileMode enum value representing the input Linux permissions.</returns>
+    public static UnixFileMode ConvertLinuxPermissionsToUnixFileMode(int linuxPermissions)
+    { 
+        const int maxPermissionValue = 777;
+
+        // Ensure the Linux permission value is within the valid range.
+        if (linuxPermissions < 0 || linuxPermissions > maxPermissionValue)
+        {
+            return UnixFileMode.None;
+        }
+
+        // Convert to string, pad with zeros and take the last 3 characters
+        string permissionString = linuxPermissions.ToString().PadLeft(3, '0').Substring(0, 3);
+
+        UnixFileMode result = UnixFileMode.None;
+
+        // Process each character in the string
+        for (int i = 0; i < permissionString.Length; i++)
+        {
+            char permissionChar = permissionString[i];
+
+            // Check if it can do read/write/execute
+            bool canRead = permissionChar == '4' || permissionChar == '5' || permissionChar == '6' || permissionChar == '7';
+            bool canWrite = permissionChar == '2' || permissionChar == '3' || permissionChar == '6' || permissionChar == '7';
+            bool canExecute = permissionChar == '1' || permissionChar == '3' || permissionChar == '5' || permissionChar == '7';
+
+            // Set corresponding flags based on position
+            if (canRead)
+            {
+                if (i % 3 == 0) result |= UnixFileMode.UserRead;
+                else if (i % 3 == 1) result |= UnixFileMode.GroupRead;
+                else if (i % 3 == 2) result |= UnixFileMode.OtherRead;
+            }
+
+            if (canWrite)
+            {
+                if (i % 3 == 0) result |= UnixFileMode.UserWrite;
+                else if (i % 3 == 1) result |= UnixFileMode.GroupWrite;
+                else if (i % 3 == 2) result |= UnixFileMode.OtherWrite;
+            }
+
+            if (canExecute)
+            {
+                if (i % 3 == 0) result |= UnixFileMode.UserExecute;
+                else if (i % 3 == 1) result |= UnixFileMode.GroupExecute;
+                else if (i % 3 == 2) result |= UnixFileMode.OtherExecute;
+            }
+        }
+
+        return result;
+    }
+
 }

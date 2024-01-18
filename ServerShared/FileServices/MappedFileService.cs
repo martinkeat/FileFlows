@@ -1,6 +1,7 @@
 using FileFlows.Plugin;
 using FileFlows.Plugin.Models;
 using FileFlows.Plugin.Services;
+using FileFlows.ServerShared.Services;
 using FileFlows.Shared.Models;
 
 namespace FileFlows.ServerShared.FileServices;
@@ -36,10 +37,15 @@ public class MappedFileService : IFileService
     /// Initializes a new instance of the <see cref="MappedFileService"/> class with the specified <paramref name="node"/>.
     /// </summary>
     /// <param name="node">The processing node used for mapping file operations.</param>
-    /// <param name="logger">The logger used for logging</param>
     public MappedFileService(ProcessingNode node)
     {
-        _localFileService = new LocalFileService();
+        int permissions = SettingsService.Load().Get().Result.FileServerFilePermissions ?? 0;
+        if (permissions < 1)
+            permissions = 666;
+        _localFileService = new LocalFileService()
+        {
+            Permissions = permissions
+        };
         _node = node;
     }
 

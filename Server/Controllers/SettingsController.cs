@@ -26,6 +26,10 @@ public class SettingsController : Controller
     public FileFlowsStatus GetFileFlowsStatus()
     {
         FileFlowsStatus status = new();
+        status.IsWindows = OperatingSystem.IsWindows();
+        status.IsLinux = OperatingSystem.IsLinux();
+        status.IsMacOS = OperatingSystem.IsMacOS();
+        status.IsDocker = Globals.IsDocker;
         
         var license = LicenseHelper.GetLicense();
         if (license?.Status == LicenseStatus.Valid)
@@ -178,6 +182,7 @@ public class SettingsController : Controller
             HideProcessingFinishedNotifications = model.HideProcessingFinishedNotifications,
             ProcessFileCheckInterval = model.ProcessFileCheckInterval,
             FileServerDisabled = model.FileServerDisabled,
+            FileServerFilePermissions = model.FileServerFilePermissions,
             FileServerAllowedPaths = model.FileServerAllowedPathsString?.Split(new [] { "\r\n", "\r", "\n"}, StringSplitOptions.RemoveEmptyEntries)
         });
         // validate license it

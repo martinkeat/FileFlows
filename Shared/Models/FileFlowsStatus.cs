@@ -54,6 +54,23 @@ public class FileFlowsStatus
     /// Gets or sets if the user has a enterprise license
     /// </summary>
     public bool LicenseEnterprise { get; set; }
+
+    /// <summary>
+    /// Gets or sets if this is a windows based system
+    /// </summary>
+    public bool IsWindows { get; set; }
+    /// <summary>
+    /// Gets or sets if this is a windows based system
+    /// </summary>
+    public bool IsLinux { get; set; }
+    /// <summary>
+    /// Gets or sets if this is a windows based system
+    /// </summary>
+    public bool IsMacOS { get; set; }
+    /// <summary>
+    /// Gets or sets if this is a windows based system
+    /// </summary>
+    public bool IsDocker { get; set; }
 }
 
 /// <summary>
