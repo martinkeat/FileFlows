@@ -127,7 +127,7 @@ public abstract class UpdaterWorker : Worker
                 var psi = new ProcessStartInfo(updateScript);
                 psi.ArgumentList.Add(Process.GetCurrentProcess().Id.ToString());
                 psi.WorkingDirectory = fi.DirectoryName;
-                psi.UseShellExecute = true;
+                psi.UseShellExecute = false;
                 psi.CreateNoWindow = true;
                 Process.Start(psi);
             }
