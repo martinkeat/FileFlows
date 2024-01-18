@@ -428,25 +428,35 @@ public class LocalFileService : IFileService
         return true;
     }
 
-    public void SetPermissions(string path, int? permissions = null)
+    public void SetPermissions(string path, int? permissions = null, Action<string> logMethod = null)
     {
+        logMethod ??= (string message) => Logger?.ILog(message);
+        
         permissions = permissions != null && permissions > 0 ? permissions : Permissions;
         if (permissions == null || permissions < 1)
+        {
+            logMethod("SetPermissions: No permissions given to set");
             return;
+        }
         
+
         if ((File.Exists(path) == false && Directory.Exists(path) == false))
+        {
+            logMethod("SetPermissions: File doesnt existing, skipping");
             return;
+        }
+
         if (OperatingSystem.IsLinux())
         {
             var filePermissions = FileHelper.ConvertLinuxPermissionsToUnixFileMode(permissions.Value);
             if (filePermissions == UnixFileMode.None)
             {
-                Logger?.ILog("Invalid file permissions: " + permissions.Value);
+                logMethod("SetPermissions: Invalid file permissions: " + permissions.Value);
                 return;
             }
             
             File.SetUnixFileMode(path, filePermissions);
-            Logger?.ILog($"Permission [{filePermissions}] set on file: " + path);
+            logMethod($"SetPermissions: Permission [{filePermissions}] set on file: " + path);
         }
 
     }

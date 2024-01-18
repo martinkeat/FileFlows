@@ -514,7 +514,7 @@ public class FileServerController : Controller
             {
                 log.AppendLine("Moving temp directory to final location: " + fileInfo.DirectoryName);
                 Directory.Move(dirPath, fileInfo.DirectoryName);
-                _localFileService.SetPermissions(dirPath);
+                _localFileService.SetPermissions(dirPath, logMethod: (string m) => log.AppendLine(m));
             }
 
 
@@ -528,7 +528,7 @@ public class FileServerController : Controller
                 }
             }
 
-            _localFileService.SetPermissions(path);
+            _localFileService.SetPermissions(path, logMethod: (string m) => log.AppendLine(m));
 
             log.AppendLine("FileServer: Uploaded successfully: " + path);
             return Ok(log.ToString());
