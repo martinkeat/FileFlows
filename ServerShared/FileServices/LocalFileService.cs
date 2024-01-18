@@ -445,9 +445,15 @@ public class LocalFileService : IFileService
         
         StringLogger stringLogger = new StringLogger();
 
-        FileHelper.SetPermissions(stringLogger, path, file: new FileInfo(path).Exists,
+        bool isFile = new FileInfo(path).Exists;
+
+        FileHelper.SetPermissions(stringLogger, path, file: isFile,
             permissions: permissions.Value.ToString("D3"));
+        
+        FileHelper.ChangeOwner(stringLogger, path, file: isFile);
+        
         logMethod(stringLogger.ToString());
+        
         return;
         
 
