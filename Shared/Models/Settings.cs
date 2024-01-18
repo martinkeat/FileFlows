@@ -109,7 +109,7 @@ public class Settings : FileFlowObject
     /// Gets or sets the file permissions to set on the file/folders
     /// Only used on Unix based systems
     /// </summary>
-    public int? FileServerFilePermissions { get; set; }
+    public int FileServerFilePermissions { get; set; }
     
     /// <summary>
     /// Gets or sets the allowed paths for the file server

@@ -13,6 +13,11 @@ public partial class InputNumber<TItem> : Input<TItem>
 
 
     [Parameter] public bool AllowFloat { get; set; }
+    
+    /// <summary>
+    /// Gets or sets if 0 is shown as empty
+    /// </summary>
+    [Parameter] public bool ZeroAsEmpty { get; set; }
 
     [Parameter]
     public TItem Min { get => _Min; set => _Min = value; }
@@ -37,7 +42,10 @@ public partial class InputNumber<TItem> : Input<TItem>
 
     private async Task ChangeValue(ChangeEventArgs e)
     {
-        if (double.TryParse(e.Value?.ToString() ?? "", out double value))
+        string strValue = e.Value?.ToString() ?? string.Empty;
+        if (string.IsNullOrWhiteSpace(strValue) && ZeroAsEmpty)
+            strValue = "0";
+        if (double.TryParse(strValue, out double value))
         {
             if (value > int.MaxValue)
                 value = int.MaxValue;

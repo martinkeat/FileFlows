@@ -434,10 +434,7 @@ public class LocalFileService : IFileService
         
         permissions = permissions != null && permissions > 0 ? permissions : Permissions;
         if (permissions == null || permissions < 1)
-        {
-            logMethod("SetPermissions: No permissions given to set");
-            return;
-        }
+            permissions = 666;
         
 
         if ((File.Exists(path) == false && Directory.Exists(path) == false))

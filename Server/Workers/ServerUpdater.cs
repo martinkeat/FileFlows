@@ -137,7 +137,7 @@ public class ServerUpdater : UpdaterWorker
         if (File.Exists(file))
         {
             string size = FileSizeFormatter.Format(new FileInfo(file).Length);
-            Logger.Instance.ILog($"{UpdaterName}: Update already downloaded: {file} ({size}");
+            Logger.Instance.ILog($"{UpdaterName}: Update already downloaded: {file} ({size})");
             return file;
         }
 

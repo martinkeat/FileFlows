@@ -69,7 +69,7 @@
                         <InputSwitch @bind-Value="@Model.FileServerDisabled" Inverse="true" Label="Pages.Settings.Fields.FileServer.Enabled" />
                         @if (App.Instance.FileFlowsSystem.IsLinux)
                         {
-                            <InputNumber @bind-Value="@Model.FileServerFilePermissions" Label="Pages.Settings.Fields.FileServer.FilePermissions" Disabled="Model.FileServerDisabled" Max="777" />
+                            <InputNumber @bind-Value="@Model.FileServerFilePermissions" Label="Pages.Settings.Fields.FileServer.FilePermissions" Disabled="Model.FileServerDisabled" Max="777" ZeroAsEmpty="true" />
                         }
                         <InputTextArea @bind-Value="@Model.FileServerAllowedPathsString" Label="Pages.Settings.Fields.FileServer.AllowList" Disabled="Model.FileServerDisabled" />
                     </FlowTab>
