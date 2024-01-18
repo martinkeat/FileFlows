@@ -191,8 +191,9 @@ public class FileHelper
     /// <param name="recursive">True to apply permissions recursively to all items within a directory; otherwise, false.</param>
     /// <param name="file">True if the provided path is a file; otherwise, false (assumed to be a directory).</param>
     /// <returns>True if setting permissions succeeds; otherwise, false.</returns>
-    public static bool SetPermissions(ILogger logger, string filePath, bool recursive = true, bool file = false)
+    public static bool SetPermissions(ILogger logger, string filePath, bool recursive = true, bool file = false, string permissions = null)
     {
+        permissions = permissions?.EmptyAsNull() ?? Permissions?.EmptyAsNull() ?? "777";
         if (DontSetPermissions)
         {
             logger?.ILog("SetPermissions is turned off, skipping");
@@ -221,7 +222,7 @@ public class FileHelper
             recursive = false;
         }
 
-        string cmd = $"chmod{(recursive ? " -R" : "")} {Permissions?.EmptyAsNull() ?? "777"} {EscapePathForLinux(filePath)}";
+        string cmd = $"chmod{(recursive ? " -R" : "")} {permissions} {EscapePathForLinux(filePath)}";
 
         try
         {
@@ -240,7 +241,11 @@ public class FileHelper
                 process.WaitForExit();
 
                 if (process.ExitCode == 0)
+                {
+                    logger?.ILog($"Permissions [{permissions}] set on file: {filePath}");
                     return true;
+                }
+
                 logger?.ELog("Failed setting permissions:" + process.StartInfo.FileName, process.StartInfo.Arguments + Environment.NewLine + output);
                 if (string.IsNullOrWhiteSpace(error) == false)
                     logger?.ELog("Error output:" + output);

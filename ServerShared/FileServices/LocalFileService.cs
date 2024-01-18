@@ -445,6 +445,14 @@ public class LocalFileService : IFileService
             logMethod("SetPermissions: File doesnt existing, skipping");
             return;
         }
+        
+        StringLogger stringLogger = new StringLogger();
+
+        FileHelper.SetPermissions(stringLogger, path, file: new FileInfo(path).Exists,
+            permissions: permissions.Value.ToString("D3"));
+        logMethod(stringLogger.ToString());
+        return;
+        
 
         if (OperatingSystem.IsLinux())
         {
