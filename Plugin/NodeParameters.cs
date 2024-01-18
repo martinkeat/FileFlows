@@ -390,9 +390,12 @@ public class NodeParameters
                 if (result.IsFailed)
                     return;
                 var fi = result.Value;
+                var ext = fi.Extension ?? string.Empty;
+                if (string.IsNullOrWhiteSpace(ext) == false && ext.StartsWith(".") == false)
+                    ext = "." + ext;
                 UpdateVariables(new Dictionary<string, object>
                 {
-                    { "ext", fi.Extension ?? "" },
+                    { "ext", ext },
                     { "file.Name", fi.Name ?? "" },
                     { "file.NameNoExtension", Path.GetFileNameWithoutExtension(fi.Name ?? "") },
                     { "file.FullName", fi.FullName ?? "" },
