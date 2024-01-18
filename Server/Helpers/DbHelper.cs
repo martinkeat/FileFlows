@@ -32,8 +32,13 @@ public class DbHelper
             string logConnection = Regex.Replace(connstring, "(?<=(Password=))[^;]+(;|$)", "#PASSWORD#");
             Logger.Instance.ILog("Initializing Database: " + logConnection);
         }
+        else
+        {
+            Logger.Instance.ILog("Initializing Database with no connection string");
+        }
 
         Manager = DbManager.GetManager(connstring);
+        Logger.Instance.ILog("Got DB Manager: " + (Manager != null));
         return Manager.CreateDb();
     }
 

@@ -58,10 +58,17 @@ public abstract class DbManager
         connectionString ??= SqliteDbManager.GetConnetionString(SqliteDbFile);
 
         if (connectionString.Contains(".sqlite"))
+        {
+            Logger.Instance.ILog("Getting Sqlite DB Manager");
             return new SqliteDbManager(connectionString);
+        }
 
         if (connectionString.Contains(";Uid="))
+        {
+            Logger.Instance.ILog("Getting MySQL DB Manager");
             return new MySqlDbManager(connectionString);
+        }
+        Logger.Instance.ILog("Unknown database");
 
         //return new SqlServerDbManager(connectionString);
         throw new Exception("Unknown database: " + connectionString);

@@ -248,6 +248,7 @@ public class Program
             }
         }
             
+        Logger.Instance.ILog("About to initialize Database");
         // initialize the database
         if (DbHelper.Initialize().Result == false)
         {
