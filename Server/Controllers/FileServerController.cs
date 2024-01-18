@@ -484,7 +484,7 @@ public class FileServerController : Controller
                 dirPath += " [TEMP]";
                 log.AppendLine("Creating temp directory: " + dirPath);
                 new DirectoryInfo(dirPath).Create();
-                FileHelper.ChangeOwner(null, dirPath, false, true);
+                _localFileService.SetPermissions(dirPath);
             }
 
             string outFile = Path.Combine(dirPath, "_TEMP_" + fileInfo.Name + ".FFTEMP");
@@ -514,6 +514,7 @@ public class FileServerController : Controller
             {
                 log.AppendLine("Moving temp directory to final location: " + fileInfo.DirectoryName);
                 Directory.Move(dirPath, fileInfo.DirectoryName);
+                _localFileService.SetPermissions(dirPath);
             }
 
 
