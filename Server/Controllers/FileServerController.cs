@@ -41,7 +41,7 @@ public class FileServerController : Controller
         _localFileService = new LocalFileService()
         {
             AllowedPaths = allowedPaths,
-            Permissions = settings.FileServerFilePermissions < 1 ? 775 : settings.FileServerFilePermissions
+            Permissions = settings.FileServerFilePermissions < 1 ? 777 : settings.FileServerFilePermissions
         };
     }
 
