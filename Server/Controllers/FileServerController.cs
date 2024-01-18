@@ -40,7 +40,8 @@ public class FileServerController : Controller
         Logger.Instance.DLog("Allowed File Server Paths: \n" + string.Join("\n", allowedPaths));
         _localFileService = new LocalFileService()
         {
-            AllowedPaths = allowedPaths
+            AllowedPaths = allowedPaths,
+            Permissions = settings.FileServerFilePermissions
         };
     }
 
@@ -526,16 +527,7 @@ public class FileServerController : Controller
                 }
             }
 
-            if (OperatingSystem.IsLinux())
-            {
-                log.AppendLine("Setting Unix File Permissions");
-                // System.IO.File.SetUnixFileMode(path, UnixFileMode.UserRead | UnixFileMode.UserWrite |
-                //                                      UnixFileMode.GroupRead | UnixFileMode.GroupWrite | 
-                //                                      UnixFileMode.OtherRead | UnixFileMode.OtherWrite);
-                var logger = new StringLogger();
-                FileHelper.ChangeOwner(logger, path, false, true);
-                log.AppendLine(logger.ToString());
-            }
+            _localFileService.SetPermissions(path);
 
             log.AppendLine("FileServer: Uploaded successfully: " + path);
             return Ok(log.ToString());

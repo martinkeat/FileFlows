@@ -428,19 +428,20 @@ public class LocalFileService : IFileService
         return true;
     }
 
-    private void SetPermissions(string path)
+    public void SetPermissions(string path, int? permissions = null)
     {
-        if (Permissions == null || Permissions < 1)
+        permissions = permissions != null && permissions > 0 ? permissions : Permissions;
+        if (permissions == null || permissions < 1)
             return;
         
         if ((File.Exists(path) == false && Directory.Exists(path) == false))
             return;
         if (OperatingSystem.IsLinux())
         {
-            var filePermissions = FileHelper.ConvertLinuxPermissionsToUnixFileMode(Permissions.Value);
+            var filePermissions = FileHelper.ConvertLinuxPermissionsToUnixFileMode(permissions.Value);
             if (filePermissions == UnixFileMode.None)
             {
-                Logger?.ILog("Invalid file permissions: " + Permissions.Value);
+                Logger?.ILog("Invalid file permissions: " + permissions.Value);
                 return;
             }
             
