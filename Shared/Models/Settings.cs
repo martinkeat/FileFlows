@@ -112,6 +112,11 @@ public class Settings : FileFlowObject
     public int FileServerFilePermissions { get; set; }
     
     /// <summary>
+    /// Gets or sets the owner group to use
+    /// </summary>
+    public string FileServerOwnerGroup { get; set; }
+    
+    /// <summary>
     /// Gets or sets the allowed paths for the file server
     /// </summary>
     public string[] FileServerAllowedPaths { get; set; }

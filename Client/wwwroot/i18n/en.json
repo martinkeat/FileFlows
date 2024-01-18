@@ -681,8 +681,11 @@
           "Description": "This allows for external processing nodes to download a file for processing without mapping.\n\nThis does expose your files over your network, so disable if not on a trusted network.",
           "Enabled": "Enabled",
           "FilePermissions":"File Permissions",
-          "FilePermissions-Placeholder": "775",
+          "FilePermissions-Placeholder": "777",
           "FilePermissions-Help": "Optional permissions to give to created or modified files or folders.",
+          "OwnerGroup": "Owner Group",
+          "OwnerGroup-Placeholder": "users:nobody",
+          "OwnerGroup-Help": "Optional owner:group to use to change the owner for created or modified files or folders",
           "AllowList": "Allowed Paths",
           "AllowList-Placeholder": "If left empty, all but system paths will be allowed.",
           "AllowList-Help": "A new line separated list of paths allowed to be accessed by the exposed file server.\nThese are the locations that can be read/written to remotely.\nNote: All library paths are automatically allowed."

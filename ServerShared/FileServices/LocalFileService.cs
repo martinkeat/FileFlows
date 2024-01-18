@@ -30,6 +30,11 @@ public class LocalFileService : IFileService
     /// Gets or sets the permissions to use for files
     /// </summary>
     public int? Permissions { get; set; }
+    
+    /// <summary>
+    /// Gets or sets the owner:group to use for files
+    /// </summary>
+    public string OwnerGroup { get; set; }
 
     /// <summary>
     /// Gets or sets the logger used for logging
@@ -450,7 +455,7 @@ public class LocalFileService : IFileService
         FileHelper.SetPermissions(stringLogger, path, file: isFile,
             permissions: permissions.Value.ToString("D3"));
         
-        FileHelper.ChangeOwner(stringLogger, path, file: isFile);
+        FileHelper.ChangeOwner(stringLogger, path, file: isFile, ownerGroup: OwnerGroup);
         
         logMethod(stringLogger.ToString());
         

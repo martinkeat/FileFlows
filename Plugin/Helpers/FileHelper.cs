@@ -112,9 +112,9 @@ public class FileHelper
     /// <param name="filePath">The path to the file or directory.</param>
     /// <param name="recursive">True to change ownership recursively for all items within a directory; otherwise, false.</param>
     /// <param name="file">True if the provided path is a file; otherwise, false (assumed to be a directory).</param>
+    /// <param name="ownerGroup">Optional owner:group to use, if not passed in the defaults will be used</param>
     /// <returns>True if changing ownership succeeds; otherwise, false.</returns>
-
-    public static bool ChangeOwner(ILogger logger, string filePath, bool recursive = true, bool file = false)
+    public static bool ChangeOwner(ILogger logger, string filePath, bool recursive = true, bool file = false, string ownerGroup = null)
     {
         if (DontChangeOwner)
         {
@@ -145,10 +145,14 @@ public class FileHelper
             recursive = false;
         }
 
-        string puid = Environment.GetEnvironmentVariable("PUID")?.EmptyAsNull() ?? "nobody";
-        string pgid = Environment.GetEnvironmentVariable("PGID")?.EmptyAsNull() ?? "users";
+        if (string.IsNullOrWhiteSpace(ownerGroup))
+        {
+            string puid = Environment.GetEnvironmentVariable("PUID")?.EmptyAsNull() ?? "nobody";
+            string pgid = Environment.GetEnvironmentVariable("PGID")?.EmptyAsNull() ?? "users";
+            ownerGroup = $"{puid}:{pgid}";
+        }
 
-        string cmd = $"chown{(recursive ? " -R" : "")} {puid}:{pgid} {EscapePathForLinux(filePath)}";
+        string cmd = $"chown{(recursive ? " -R" : "")} {ownerGroup} {EscapePathForLinux(filePath)}";
         if (log)
             logger?.ILog("Change owner command: " + cmd);
 

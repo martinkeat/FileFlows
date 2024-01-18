@@ -182,6 +182,7 @@ public class SettingsController : Controller
             HideProcessingFinishedNotifications = model.HideProcessingFinishedNotifications,
             ProcessFileCheckInterval = model.ProcessFileCheckInterval,
             FileServerDisabled = model.FileServerDisabled,
+            FileServerOwnerGroup = model.FileServerOwnerGroup,
             FileServerFilePermissions = model.FileServerFilePermissions,
             FileServerAllowedPaths = model.FileServerAllowedPathsString?.Split(new [] { "\r\n", "\r", "\n"}, StringSplitOptions.RemoveEmptyEntries)
         });

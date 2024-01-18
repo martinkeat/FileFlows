@@ -70,6 +70,7 @@
                         @if (App.Instance.FileFlowsSystem.IsLinux)
                         {
                             <InputNumber @bind-Value="@Model.FileServerFilePermissions" Label="Pages.Settings.Fields.FileServer.FilePermissions" Disabled="Model.FileServerDisabled" Max="777" ZeroAsEmpty="true" />
+                            <InputText @bind-Value="@Model.FileServerOwnerGroup" Label="Pages.Settings.Fields.FileServer.OwnerGroup" Disabled="Model.FileServerDisabled" />
                         }
                         <InputTextArea @bind-Value="@Model.FileServerAllowedPathsString" Label="Pages.Settings.Fields.FileServer.AllowList" Disabled="Model.FileServerDisabled" />
                     </FlowTab>
