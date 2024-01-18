@@ -56,7 +56,7 @@ public class PluginController : Controller
                 Elements = includeElements ? plugin.Elements : null
             };
             var package = packages.FirstOrDefault(x => x.Name.ToLower().Replace(" ", "") == plugin.Name.ToLower().Replace(" ", ""));
-            pim.LatestVersion = package?.Version ?? "";
+            pim.LatestVersion = VersionHelper.VersionDateString(package?.Version ?? string.Empty);
             pims.Add(pim);
 
             foreach (var ele in plugin.Elements)
