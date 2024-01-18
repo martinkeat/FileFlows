@@ -681,7 +681,7 @@
           "Description": "This allows for external processing nodes to download a file for processing without mapping.\n\nThis does expose your files over your network, so disable if not on a trusted network.",
           "Enabled": "Enabled",
           "FilePermissions":"File Permissions",
-          "FilePermissions-Placeholder": "666",
+          "FilePermissions-Placeholder": "775",
           "FilePermissions-Help": "Optional permissions to give to created or modified files or folders.",
           "AllowList": "Allowed Paths",
           "AllowList-Placeholder": "If left empty, all but system paths will be allowed.",
