@@ -330,9 +330,7 @@ public class HttpHelper
                     return true;
                 if (url.StartsWith(serviceBaseUrl))
                     return true;
-                if (url.StartsWith("https://192.168"))
-                    return true;
-                if (httpRequestMessage.RequestUri.ToString().StartsWith("https://localhost"))
+                if (url.StartsWith("https://192.168") || url.StartsWith("https://localhost"))
                     return true;
                 return cert.Verify();
             };
