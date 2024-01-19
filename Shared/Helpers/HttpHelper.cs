@@ -314,10 +314,10 @@ public class HttpHelper
     /// <returns>a HttpClient</returns>
     public static HttpClient GetDefaultHttpHelper(string serviceBaseUrl)
     {
-        #if(!DEBUG)
-        if (Environment.GetEnvironmentVariable("HTTPS") != "1")
-            return new HttpClient();
-        #endif
+        // #if(!DEBUG)
+        // if (Environment.GetEnvironmentVariable("HTTPS") != "1")
+        //     return new HttpClient();
+        // #endif
         
         var handler = new HttpClientHandler();
         handler.ClientCertificateOptions = ClientCertificateOption.Manual;
@@ -326,7 +326,6 @@ public class HttpHelper
             {
                 string url = httpRequestMessage.RequestUri.ToString();
                 Shared.Logger.Instance?.ILog("Checking URL: " + url);
-                Console.WriteLine("Checking URL: " + url);
                 if (string.IsNullOrEmpty(serviceBaseUrl))
                     return true;
                 if (url.StartsWith(serviceBaseUrl))
@@ -335,8 +334,7 @@ public class HttpHelper
                     return true;
                 if (httpRequestMessage.RequestUri.ToString().StartsWith("https://localhost"))
                     return true;
-                //return cert.Verify();
-                return true;
+                return cert.Verify();
             };
         return new HttpClient(handler);
     }
