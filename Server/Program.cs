@@ -99,22 +99,8 @@ public class Program
             WriteLogHeader(args);
 
             CleanDefaultTempDirectory();
-
             
-            // create new client, this can be used by upgrade scripts, so do this before preparing database
-            if (Environment.GetEnvironmentVariable("IGNORE_CERT_ERRORS") == "1")
-            {
-                // Configure HttpClient with a handler that ignores SSL certificate errors
-                var handler = new HttpClientHandler
-                {
-                    ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => true
-                };
-                HttpHelper.Client = new HttpClient(handler);
-            }
-            else
-            {
-                HttpHelper.Client = HttpHelper.GetDefaultHttpHelper(string.Empty);
-            }
+            HttpHelper.Client = HttpHelper.GetDefaultHttpHelper(string.Empty);
 
             CheckLicense();
 

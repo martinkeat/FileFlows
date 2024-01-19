@@ -318,15 +318,18 @@ public class HttpHelper
         if (Environment.GetEnvironmentVariable("HTTPS") != "1")
             return new HttpClient();
         #endif
+        
         var handler = new HttpClientHandler();
         handler.ClientCertificateOptions = ClientCertificateOption.Manual;
         handler.ServerCertificateCustomValidationCallback = 
             (httpRequestMessage, cert, cetChain, policyErrors) =>
             {
+                string url = httpRequestMessage.RequestUri.ToString();
                 if (string.IsNullOrEmpty(serviceBaseUrl))
                     return true;
-                if (httpRequestMessage.RequestUri.ToString()
-                    .StartsWith(serviceBaseUrl))
+                if (url.StartsWith(serviceBaseUrl))
+                    return true;
+                if (url.StartsWith("https://192.168"))
                     return true;
                 if (httpRequestMessage.RequestUri.ToString().StartsWith("https://localhost"))
                     return true;
