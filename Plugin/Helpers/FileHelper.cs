@@ -422,7 +422,7 @@ public class FileHelper
             string[] linuxSystemDirs =
             {
                 "/bin", "/boot", "/dev", "/etc", "/lib", "/lib64",
-                "/opt", "/proc", "/root", "/run", "/sbin", "/srv", "/sys",
+                "/opt", "/proc", "/run", "/sbin", "/srv", "/sys",
                 "/usr", "/var"
             };
 
