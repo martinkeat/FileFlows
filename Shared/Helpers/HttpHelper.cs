@@ -326,6 +326,7 @@ public class HttpHelper
             {
                 string url = httpRequestMessage.RequestUri.ToString();
                 Shared.Logger.Instance?.ILog("Checking URL: " + url);
+                Console.WriteLine("Checking URL: " + url);
                 if (string.IsNullOrEmpty(serviceBaseUrl))
                     return true;
                 if (url.StartsWith(serviceBaseUrl))
@@ -334,7 +335,8 @@ public class HttpHelper
                     return true;
                 if (httpRequestMessage.RequestUri.ToString().StartsWith("https://localhost"))
                     return true;
-                return cert.Verify();
+                //return cert.Verify();
+                return true;
             };
         return new HttpClient(handler);
     }
