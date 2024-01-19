@@ -1,20 +1,12 @@
 @echo off
 
-rem Check if the script is already in upgrade mode
-if "%FF_UPGRADE_MODE%"=="1" goto :RunUpdate
-
-rem Set the environment variable to indicate upgrade mode
-set "FF_UPGRADE_MODE=1"
+IF "%1"=="UPDATE" GOTO RunUpdate
 copy server-upgrade.bat ..\
 cd ..
-start server-upgrade.bat %1 & exit
+start server-upgrade.bat "UPDATE" %1 & exit
 GOTO Done
 
 :RunUpdate
-
-rem Reset the environment variable to avoid issues in future runs
-set "FF_UPGRADE_MODE="
-
 timeout /t 3
 echo Stopping FileFlows Server if running
 taskkill /PID %2
