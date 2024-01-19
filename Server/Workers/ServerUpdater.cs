@@ -205,6 +205,8 @@ public class ServerUpdater : UpdaterWorker
         }
         catch (Exception ex)
         {
+            while(ex.InnerException != null)
+                ex = ex.InnerException;
             Logger.Instance.ELog($"{nameof(ServerUpdater)}: Failed checking online version: " + ex.Message);
             return (false, new Version(0, 0, 0, 0));
         }

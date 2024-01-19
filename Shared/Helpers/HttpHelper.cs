@@ -325,6 +325,7 @@ public class HttpHelper
             (httpRequestMessage, cert, cetChain, policyErrors) =>
             {
                 string url = httpRequestMessage.RequestUri.ToString();
+                Shared.Logger.Instance?.ILog("Checking URL: " + url);
                 if (string.IsNullOrEmpty(serviceBaseUrl))
                     return true;
                 if (url.StartsWith(serviceBaseUrl))
