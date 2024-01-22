@@ -514,8 +514,8 @@ public class Runner
             var statService = StatisticService.Load();
             statService.Record(name, value);
         };
-        
-        LogHeader(nodeParameters, Info.ConfigDirectory, Flow);
+
+        LogHeader(nodeParameters, Info.ConfigDirectory, Flow, Node);
         DownloadPlugins();
         DownloadScripts();
 
@@ -574,7 +574,8 @@ public class Runner
     /// <param name="nodeParameters">the node parameters</param>
     /// <param name="configDirectory">the directory of the configuration</param>
     /// <param name="flow">the flow being executed</param>
-    private static void LogHeader(NodeParameters nodeParameters, string configDirectory, Flow flow)
+    /// <param name="node">the node executing this flow</param>
+    private static void LogHeader(NodeParameters nodeParameters, string configDirectory, Flow flow, ProcessingNode node)
     {
         nodeParameters.Logger!.ILog("Version: " + Globals.Version);
         if (Globals.IsDocker)
@@ -588,6 +589,8 @@ public class Runner
 
         nodeParameters.Logger!.ILog("File: " + nodeParameters.FileName);
         nodeParameters.Logger!.ILog("Executing Flow: " + flow.Name);
+        nodeParameters.Logger!.ILog("File Service: " + FileService.Instance.GetType().Name);
+        nodeParameters.Logger!.ILog("Processing Node: " + node.Name);
 
         var dir = Path.Combine(configDirectory, "Plugins");
         if (Directory.Exists(dir))

@@ -174,15 +174,15 @@ public class FileHelper
 
                 if (process.ExitCode == 0)
                     return SetPermissions(logger, filePath, file: file);
-                logger?.ELog("Failed changing owner:" + process.StartInfo.FileName, process.StartInfo.Arguments + Environment.NewLine + output);
+                logger?.WLog("Failed changing owner:" + process.StartInfo.FileName, process.StartInfo.Arguments + Environment.NewLine + output);
                 if (string.IsNullOrWhiteSpace(error) == false)
-                    logger?.ELog("Error output:" + output);
+                    logger?.WLog("Error output:" + output);
                 return false;
             }
         }
         catch (Exception ex)
         {
-            logger?.ELog("Failed changing owner: " + filePath + " => " + ex.Message);
+            logger?.WLog("Failed changing owner: " + filePath + " => " + ex.Message);
             return false;
         }
     }
@@ -214,6 +214,11 @@ public class FileHelper
 
         if (file == false)
         {
+            if (Directory.Exists(filePath) == false)
+            {
+                logger?.WLog("Directory does not exist, cannot set permissions: " + filePath);
+                return false;
+            }
             if (filePath.EndsWith(Path.DirectorySeparatorChar) == false)
                 filePath += Path.DirectorySeparatorChar;
             if(log)
@@ -221,6 +226,11 @@ public class FileHelper
         }
         else
         {
+            if (File.Exists(filePath) == false)
+            {
+                logger?.WLog("File does not exist, cannot set permissions: " + filePath);
+                return false;
+            }
             if (log)
                 logger?.ILog("Setting permissions on file: " + filePath);
             recursive = false;
@@ -250,7 +260,7 @@ public class FileHelper
                     return true;
                 }
 
-                logger?.ELog("Failed setting permissions:" + process.StartInfo.FileName, process.StartInfo.Arguments + Environment.NewLine + output);
+                logger?.ELog("Failed setting permissions: " + process.StartInfo.FileName, process.StartInfo.Arguments + Environment.NewLine + output);
                 if (string.IsNullOrWhiteSpace(error) == false)
                     logger?.ELog("Error output:" + output);
                 return false;

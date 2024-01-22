@@ -590,6 +590,7 @@ public class NodeParameters
             Logger?.ELog("Failed to move file: " + result.Error);
             return false;
         }
+        Logger?.ILog("File moved to: " + destination);
         this.WorkingFile = destination;
         try
         {

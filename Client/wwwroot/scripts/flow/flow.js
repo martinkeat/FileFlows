@@ -238,6 +238,9 @@ window.ffFlow = {
 
     getModel: function () {
         let connections = this.FlowLines.ioOutputConnections;
+        
+        // remove existing error Connections 
+        this.parts.forEach(x => x.errorConnection = null);
 
         let connectionUids = [];
         for (let [outputPart, con] of connections) {
@@ -264,14 +267,14 @@ window.ffFlow = {
                     part.outputConnections = part.outputConnections.filter(x => x.output != output);
                 }                
                 
-                if(output === -1){
+                if(output === -1)
+                {
                     part.errorConnection = 
                     {
                         input: input,
                         output: output,
                         inputNode: toPart
                     };
-                    console.log('errorConnection: ' + part.errorConnection);
                 }
                 else {
                     part.outputConnections.push(
