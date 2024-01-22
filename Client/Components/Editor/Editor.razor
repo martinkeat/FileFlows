@@ -9,7 +9,7 @@
     @if (FlowElementEditor)
     {
         <div class="flow-element-editor-overlay background-overlay"></div>
-        <div class="flow-element-editor editor-wrapper">
+        <div class="flow-element-editor editor-wrapper @(Maximised ? "maximised" : "")">
             <div class="editor">
                 <ViContainer Title="@Title" Icon="@Icon" FullWidth=@true AlwaysShowTitle=@true Maximise=true OnMaximised=@OnMaximised>
                     <Head>

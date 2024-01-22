@@ -23,6 +23,17 @@
 }
 .flow-element-editor {
   z-index:4;
+  &.maximised {
+    left: 0;
+    right: 0;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    .editor {
+      width: 100%;
+    }
+  }
+  
   .editor {
     position:unset;
     top:unset;

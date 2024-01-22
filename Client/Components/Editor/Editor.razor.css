@@ -20,6 +20,16 @@
 .flow-element-editor {
   z-index: 4;
 }
+.flow-element-editor.maximised {
+  left: 0;
+  right: 0;
+  position: fixed;
+  top: 0;
+  bottom: 0;
+}
+.flow-element-editor.maximised .editor {
+  width: 100%;
+}
 .flow-element-editor .editor {
   position: unset;
   top: unset;
