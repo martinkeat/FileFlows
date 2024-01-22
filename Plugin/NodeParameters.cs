@@ -431,7 +431,7 @@ public class NodeParameters
                         { "file.Orig.FullName", fiOriginal.FullName ?? string.Empty },
                         { "file.Orig.Size", fiOriginal.Length },
 
-                        { "folder.Orig.Name", FileHelper.GetDirectoryName(fiOriginal.Directory) ?? string.Empty },
+                        { "folder.Orig.Name", FileHelper.GetDirectoryName(fiOriginal.FullName) ?? string.Empty },
                         { "folder.Orig.FullName", fiOriginal.Directory ?? "" }
                     });
 
