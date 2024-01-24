@@ -28,6 +28,17 @@ public class FileDownloader
     private readonly Guid executorUid;
     
     /// <summary>
+    /// Represents a delegate that defines the signature for handling progress events.
+    /// </summary>
+    /// <param name="percent">The progress percentage.</param>
+    public delegate void OnProgressDelegate(int percent);
+
+    /// <summary>
+    /// Event that is triggered to notify subscribers about the progress, using the <see cref="OnProgressDelegate"/> delegate.
+    /// </summary>
+    public event OnProgressDelegate OnProgress;
+    
+    /// <summary>
     /// Constructs an instance of the file downloader
     /// </summary>
     /// <param name="logger">the logger to use in the file downloader</param>
@@ -116,6 +127,7 @@ public class FileDownloader
             int bytesRead;
             long bytesReadTotal = 0;
             int percent = 0;
+            OnProgress?.Invoke(0);
             while ((bytesRead = await contentStream.ReadAsync(buffer, 0, buffer.Length)) > 0)
             {
                 await fileStream.WriteAsync(buffer, 0, bytesRead);
@@ -126,8 +138,10 @@ public class FileDownloader
                 {
                     percent = iPercent;
                     logger.ILog($"Download Percentage: {percent} %");
+                    OnProgress?.Invoke(iPercent);
                 }
             }
+            OnProgress?.Invoke(100);
 
             var timeTaken = DateTime.Now.Subtract(start);
             var size = new FileInfo(destinationPath).Length;

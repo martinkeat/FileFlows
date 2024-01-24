@@ -87,7 +87,12 @@ public class Runner
     private string DownloadFile(ILogger logger, LibraryFile libFile, string serverUrl, string tempPath)
     {
         string filename = Path.Combine(tempPath, new FileInfo(libFile.Name).Name);
-        var result = new FileDownloader(logger, serverUrl, Program.Uid).DownloadFile(libFile.Name, filename).Result;
+        var downloader = new FileDownloader(logger, serverUrl, Program.Uid);
+        downloader.OnProgress += (int percent) =>
+        {
+            RecordAdditionalInfo("Progress", percent + "%", new TimeSpan(0, 1, 0));
+        };
+        var result = downloader.DownloadFile(libFile.Name, filename).Result;
         if (result.IsFailed)
         {
             logger.ELog("Failed to remotely download file: " + result.Error);
@@ -513,25 +518,7 @@ public class Runner
         var statService = StatisticService.Load();
         nodeParameters.StatisticRecorder = (name, value) =>
             statService.Record(name, value);
-        nodeParameters.AdditionalInfoRecorder = (name, value, expiry) =>
-        {
-            if (value == null)
-            {
-                if (Info.AdditionalInfos.ContainsKey(name) == false)
-                    return; // nothing to do
-
-                Info.AdditionalInfos.Remove(name);
-            }
-            else
-            {
-                Info.AdditionalInfos[name] = new()
-                {
-                    Value = value,
-                    Expiry = expiry ?? new TimeSpan(0, 1, 0)
-                };
-            }
-            SendUpdate(Info);
-        };
+        nodeParameters.AdditionalInfoRecorder = RecordAdditionalInfo;
 
         LogHeader(nodeParameters, Program.ConfigDirectory, Flow, Node);
         DownloadPlugins();
@@ -1014,5 +1001,25 @@ public class Runner
             // Handle any exceptions that occurred during the process execution
             args.Logger.WLog("Failed detecting FFmpeg version: " + ex.Message);
         }
+    }
+
+    private void RecordAdditionalInfo(string name, object value, TimeSpan? expiry)
+    {
+        if (value == null)
+        {
+            if (Info.AdditionalInfos.ContainsKey(name) == false)
+                return; // nothing to do
+
+            Info.AdditionalInfos.Remove(name);
+        }
+        else
+        {
+            Info.AdditionalInfos[name] = new()
+            {
+                Value = value,
+                Expiry = expiry ?? new TimeSpan(0, 1, 0)
+            };
+        }
+        SendUpdate(Info);
     }
 }
