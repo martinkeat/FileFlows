@@ -299,6 +299,7 @@ public class Runner
         Info.AdditionalInfos.Clear(); // clear current additional info, may need to change this in the future
         Info.CurrentPartName = partName;
         Info.CurrentPart = step;
+        Info.CurrentPartPercent = 0;
         try
         {
             _ = SendUpdate(Info, waitMilliseconds: 1000);
@@ -351,7 +352,7 @@ public class Runner
 
         try
         {
-            if(waitMilliseconds != 1000) // 1000 is the delay for finishing
+            if(waitMilliseconds != 1000) // 1000 is the delay for finishing / step changes
                 await Task.Delay(500);
             LastUpdate = DateTime.Now;
             var service = FlowRunnerService.Load();

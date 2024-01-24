@@ -51,36 +51,53 @@ public class ClientServiceManager
         => _hubContext.Clients.All.SendAsync("Toast", new { Type = type, Message = message });
 
     /// <summary>
+    /// A semaphore to ensure only one update is set at a time
+    /// </summary>
+    private SemaphoreSlim UpdateSemaphore = new SemaphoreSlim(1);
+    
+    /// <summary>
     /// Update executes
     /// </summary>
     /// <param name="executors">the executors</param>
-    public void UpdateExecutors(Dictionary<Guid, FlowExecutorInfo> executors)
+    public async Task UpdateExecutors(Dictionary<Guid, FlowExecutorInfo> executors)
     {
-        Dictionary<Guid, FlowExecutorInfoMinified> minified = new();
-        
-        foreach (var executor in executors)
+        if (await UpdateSemaphore.WaitAsync(50) == false)
+            return;
+
+        try
         {
-            minified[executor.Key] = new()
+            Dictionary<Guid, FlowExecutorInfoMinified> minified = new();
+
+            foreach (var executor in executors)
             {
-                Uid = executor.Key,
-                LibraryName = executor.Value.Library.Name,
-                LibraryFileUid = executor.Value.LibraryFile.Uid,
-                LibraryFileName = executor.Value.LibraryFile.Name,
-                RelativeFile = executor.Value.RelativeFile,
-                NodeName = executor.Value.NodeName,
-                CurrentPartName = executor.Value.CurrentPartName,
-                StartedAt = executor.Value.StartedAt,
-                CurrentPart = executor.Value.CurrentPart,
-                TotalParts = executor.Value.TotalParts,
-                CurrentPartPercent = executor.Value.CurrentPartPercent,
-                Additional = executor.Value.AdditionalInfos.Where(x => x.Value.Expired == false)
-                    .Select(x => new object[]
+                minified[executor.Key] = new()
                 {
-                    x.Key, x.Value.Value
-                }).ToArray()
-            };
+                    Uid = executor.Key,
+                    LibraryName = executor.Value.Library.Name,
+                    LibraryFileUid = executor.Value.LibraryFile.Uid,
+                    LibraryFileName = executor.Value.LibraryFile.Name,
+                    RelativeFile = executor.Value.RelativeFile,
+                    NodeName = executor.Value.NodeName,
+                    CurrentPartName = executor.Value.CurrentPartName,
+                    StartedAt = executor.Value.StartedAt,
+                    CurrentPart = executor.Value.CurrentPart,
+                    TotalParts = executor.Value.TotalParts,
+                    CurrentPartPercent = executor.Value.CurrentPartPercent,
+                    Additional = executor.Value.AdditionalInfos.Where(x => x.Value.Expired == false)
+                        .Select(x => new object[]
+                        {
+                            x.Key, x.Value.Value
+                        }).ToArray()
+                };
+            }
+
+            await _hubContext.Clients.All.SendAsync("UpdateExecutors", minified);
+            await Task.Delay(500); // creates a 500 ms delay between messages to the client
         }
-        _hubContext.Clients.All.SendAsync("UpdateExecutors", minified);
+        finally
+        {
+            UpdateSemaphore.Release();
+        }
     }
 
     /// <summary>
