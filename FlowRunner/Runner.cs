@@ -90,7 +90,6 @@ public class Runner
         var downloader = new FileDownloader(logger, serverUrl, Program.Uid);
         downloader.OnProgress += (percent) =>
         {
-            logger.ILog("Runner OnProgress Percent: " + percent);
             RecordAdditionalInfo("Progress", percent + "%", new TimeSpan(0, 1, 0));
             UpdatePartPercentage(percent);
         };
@@ -412,10 +411,19 @@ public class Runner
     /// <param name="logger">the logger used to log messages</param>
     private void RunActual(FlowLogger logger)
     {
-        string initialFile;
+        string initialFile = null;
+        int additionalPartsForTotal = 0;
         if (Info.IsRemote)
         {
-            initialFile = DownloadFile(logger, Info.LibraryFile, Service.ServiceBaseUrl, WorkingDir);
+            if (Program.Config.AllowRemote)
+            {
+                Info.TotalParts = Flow.Parts.Count + 1;
+                Info.CurrentPart = 0;
+                Info.CurrentPartName = "Downloading";
+                initialFile = DownloadFile(logger, Info.LibraryFile, Service.ServiceBaseUrl, WorkingDir);
+                additionalPartsForTotal = 1;
+            }
+
             if (string.IsNullOrEmpty(initialFile))
             {
                 Info.LibraryFile.Status = FileStatus.MappingIssue;
@@ -526,7 +534,7 @@ public class Runner
         DownloadPlugins();
         DownloadScripts();
 
-        var status = ExecuteFlow(Flow, runFlows);
+        var status = ExecuteFlow(Flow, runFlows, additionalFlowParts: additionalPartsForTotal);
         SetStatus(status);
         if(status == FileStatus.ProcessingFailed && Canceled == false)
         {
@@ -623,7 +631,7 @@ public class Runner
         LogFFmpegVersion(nodeParameters);
     }
 
-    private FileStatus ExecuteFlow(Flow flow, List<Guid> runFlows, bool failure = false)
+    private FileStatus ExecuteFlow(Flow flow, List<Guid> runFlows, bool failure = false, int additionalFlowParts = 0)
     { 
         int count = 0;
         ObjectReference? gotoFlow = null;
@@ -642,7 +650,7 @@ public class Runner
             return FileStatus.ProcessingFailed;
         }
 
-        int step = 0;
+        int step = additionalFlowParts;
         StepChanged(step, part.Name);
 
         // need to clear this in case the file is being reprocessed
