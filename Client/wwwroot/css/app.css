@@ -1125,8 +1125,8 @@ hr {
   flex-direction: row;
 }
 .widget .runner .lv .l {
-  width: 4rem;
-  min-width: 4rem;
+  width: 6rem;
+  min-width: 6rem;
   overflow: hidden;
   text-overflow: ellipsis;
   opacity: 0.6;
@@ -1155,6 +1155,17 @@ hr {
 .widget .runner .buttons .btn {
   transform: scale(0.9);
   width: 5rem;
+}
+.widget.chart-108 .content {
+  height: calc(100% - 2.75rem);
+  font-size: 3rem;
+  display: flex;
+  justify-content: center;
+}
+.widget.chart-108 .content div {
+  height: 100%;
+  display: flex;
+  align-items: center;
 }
 
 .vi-container.fix-width {

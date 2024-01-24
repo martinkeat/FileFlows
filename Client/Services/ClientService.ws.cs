@@ -34,7 +34,7 @@ public partial class ClientService
     /// <summary>
     /// Event raised when the executors have bene updated
     /// </summary>
-    public event Action<List<FlowExecutorInfo>> ExecutorsUpdated;
+    public event Action<List<FlowExecutorInfoMinified>> ExecutorsUpdated;
 
     /// <summary>
     /// Event raised when the system is paused/unpaused
@@ -79,7 +79,7 @@ public partial class ClientService
                 };
 
                 _hubConnection.On<ToastData>("Toast", HandleToast);
-                _hubConnection.On<Dictionary<Guid, FlowExecutorInfo>>("UpdateExecutors", UpdateExecutors);
+                _hubConnection.On<Dictionary<Guid, FlowExecutorInfoMinified>>("UpdateExecutors", UpdateExecutors);
                 _hubConnection.On<List<LibraryStatus>>("UpdateFileStatus", UpdateFileStatus);
                 _hubConnection.On<LibraryFile>("StartProcessing", StartProcessing);
                 _hubConnection.On<LibraryFile>("FinishProcessing", FinishProcessing);
@@ -127,7 +127,7 @@ public partial class ClientService
     /// Called when the executors have changed
     /// </summary>
     /// <param name="executors">the executors</param>
-    private void UpdateExecutors(Dictionary<Guid, FlowExecutorInfo> executors)
+    private void UpdateExecutors(Dictionary<Guid, FlowExecutorInfoMinified> executors)
     {   
         var cacheEntryOptions = new MemoryCacheEntryOptions().SetSize(1);
         cacheEntryOptions.SetPriority(CacheItemPriority.High);

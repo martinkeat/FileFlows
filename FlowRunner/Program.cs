@@ -22,6 +22,16 @@ public class Program
     public static Guid Uid { get; private set; }
 
     public static FlowLogger Logger;
+    
+    /// <summary>
+    /// Gets or sets the configuration that is currently being executed
+    /// </summary>
+    public static ConfigurationRevision Config { get; set; }
+    
+    /// <summary>
+    /// Gets or sets the directory where the configuration is saved
+    /// </summary>
+    public static string ConfigDirectory { get; set; }
 
     /// <summary>
     /// Main entry point for the flow runner
@@ -286,12 +296,12 @@ public class Program
 
         libFile.ProcessingStarted = DateTime.Now;
         libfileService.Update(libFile).Wait();
+        Config = args.Config;
+        ConfigDirectory = args.ConfigDirectory;
 
         var info = new FlowExecutorInfo
         {
             Uid = Program.Uid,
-            Config = args.Config,
-            ConfigDirectory = args.ConfigDirectory,
             LibraryFile = libFile,
             //Log = String.Empty,
             NodeUid = node.Uid,
@@ -308,7 +318,8 @@ public class Program
             IsDirectory = lib.Folders,
             LibraryPath = lib.Path, 
             Fingerprint = lib.UseFingerprinting,
-            InitialSize = lib.Folders ? GetDirectorySize(workingFile) : FileService.Instance.FileSize(workingFile).ValueOrDefault
+            InitialSize = lib.Folders ? GetDirectorySize(workingFile) : FileService.Instance.FileSize(workingFile).ValueOrDefault,
+            AdditionalInfos = new ()
         };
         LogInfo("Start Working File: " + info.WorkingFile);
         info.LibraryFile.OriginalSize = info.InitialSize;

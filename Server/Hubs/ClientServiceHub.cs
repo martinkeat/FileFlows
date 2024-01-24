@@ -56,7 +56,31 @@ public class ClientServiceManager
     /// <param name="executors">the executors</param>
     public void UpdateExecutors(Dictionary<Guid, FlowExecutorInfo> executors)
     {
-        _hubContext.Clients.All.SendAsync("UpdateExecutors", executors);
+        Dictionary<Guid, FlowExecutorInfoMinified> minified = new();
+        
+        foreach (var executor in executors)
+        {
+            minified[executor.Key] = new()
+            {
+                Uid = executor.Key,
+                LibraryName = executor.Value.Library.Name,
+                LibraryFileUid = executor.Value.LibraryFile.Uid,
+                LibraryFileName = executor.Value.LibraryFile.Name,
+                RelativeFile = executor.Value.RelativeFile,
+                NodeName = executor.Value.NodeName,
+                CurrentPartName = executor.Value.CurrentPartName,
+                StartedAt = executor.Value.StartedAt,
+                CurrentPart = executor.Value.CurrentPart,
+                TotalParts = executor.Value.TotalParts,
+                CurrentPartPercent = executor.Value.CurrentPartPercent,
+                Additional = executor.Value.AdditionalInfos.Where(x => x.Value.Expired == false)
+                    .Select(x => new object[]
+                {
+                    x.Key, x.Value.Value
+                }).ToArray()
+            };
+        }
+        _hubContext.Clients.All.SendAsync("UpdateExecutors", minified);
     }
 
     /// <summary>

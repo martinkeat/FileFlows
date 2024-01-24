@@ -290,6 +290,7 @@ public class Runner
     /// <param name="partName">the step part name</param>
     private void StepChanged(int step, string partName)
     {
+        Info.AdditionalInfos.Clear(); // clear current additional info, may need to change this in the future
         Info.CurrentPartName = partName;
         Info.CurrentPart = step;
         try
@@ -423,7 +424,7 @@ public class Runner
         nodeParameters = new NodeParameters(initialFile, logger,
             Info.IsDirectory, Info.LibraryPath, fileService: FileService.Instance)
         {
-            Enterprise = Info.Config.Enterprise,
+            Enterprise = Program.Config.Enterprise,
             LibraryFileName = Info.LibraryFile.Name,
             IsRemote = Info.IsRemote
         };
@@ -436,7 +437,7 @@ public class Runner
         nodeParameters.HasPluginActual = (name) =>
         {
             var normalizedSearchName = Regex.Replace(name.ToLower(), "[^a-z]", string.Empty);
-            return Info.Config.PluginNames?.Any(x =>
+            return Program.Config.PluginNames?.Any(x =>
                 Regex.Replace(x.ToLower(), "[^a-z]", string.Empty) == normalizedSearchName) == true;
         };
         nodeParameters.UploadFile = (string source, string destination) =>
@@ -461,11 +462,11 @@ public class Runner
         nodeParameters.PathUnMapper = (path) => Node.UnMap(path);
         nodeParameters.ScriptExecutor = new ScriptExecutor()
         {
-            SharedDirectory = Path.Combine(Info.ConfigDirectory, "Scripts", "Shared"),
+            SharedDirectory = Path.Combine(Program.ConfigDirectory, "Scripts", "Shared"),
             FileFlowsUrl = Service.ServiceBaseUrl,
             PluginMethodInvoker = PluginMethodInvoker
         };
-        foreach (var variable in Info.Config.Variables)
+        foreach (var variable in Program.Config.Variables)
         {
             object value = variable.Value;
             if (variable.Value?.Trim()?.ToLowerInvariant() == "true")
@@ -497,7 +498,7 @@ public class Runner
         nodeParameters.Result = NodeResult.Success;
         nodeParameters.GetToolPathActual = (name) =>
         {
-            var variable = Info.Config.Variables.Where(x => x.Key.ToLowerInvariant() == name.ToLowerInvariant())
+            var variable = Program.Config.Variables.Where(x => x.Key.ToLowerInvariant() == name.ToLowerInvariant())
                 .Select(x => x.Value).FirstOrDefault();
             if (string.IsNullOrWhiteSpace(variable))
                 return variable;
@@ -506,16 +507,33 @@ public class Runner
         nodeParameters.GetPluginSettingsJson = (pluginSettingsType) =>
         {
             string? json = null;
-            Info.Config.PluginSettings?.TryGetValue(pluginSettingsType, out json);
+            Program.Config.PluginSettings?.TryGetValue(pluginSettingsType, out json);
             return json;
         };
+        var statService = StatisticService.Load();
         nodeParameters.StatisticRecorder = (name, value) =>
-        {
-            var statService = StatisticService.Load();
             statService.Record(name, value);
+        nodeParameters.AdditionalInfoRecorder = (name, value, expiry) =>
+        {
+            if (value == null)
+            {
+                if (Info.AdditionalInfos.ContainsKey(name) == false)
+                    return; // nothing to do
+
+                Info.AdditionalInfos.Remove(name);
+            }
+            else
+            {
+                Info.AdditionalInfos[name] = new()
+                {
+                    Value = value,
+                    Expiry = expiry ?? new TimeSpan(0, 1, 0)
+                };
+            }
+            SendUpdate(Info);
         };
 
-        LogHeader(nodeParameters, Info.ConfigDirectory, Flow, Node);
+        LogHeader(nodeParameters, Program.ConfigDirectory, Flow, Node);
         DownloadPlugins();
         DownloadScripts();
 
@@ -525,7 +543,7 @@ public class Runner
         {
             // try run FailureFlow
             var failureFlow =
-                Info.Config.Flows?.FirstOrDefault(x => x.Type == FlowType.Failure && x.Default && x.Enabled);
+                Program.Config.Flows?.FirstOrDefault(x => x.Type == FlowType.Failure && x.Default && x.Enabled);
             if (failureFlow != null)
             {
                 nodeParameters.UpdateVariables(new Dictionary<string, object>
@@ -642,7 +660,7 @@ public class Runner
         //if(failure == false)
         //    Info.LibraryFile.ExecutedNodes = new List<ExecutedNode>();
        
-        while (count++ < Math.Max(25, Info.Config.MaxNodes))
+        while (count++ < Math.Max(25, Program.Config.MaxNodes))
         {
             if (CancellationToken.IsCancellationRequested || Canceled)
             {
@@ -700,7 +718,7 @@ public class Runner
 
                 if (gotoFlow != null)
                 {
-                    var newFlow = Info.Config.Flows.FirstOrDefault(x => x.Uid == gotoFlow.Uid);
+                    var newFlow = Program.Config.Flows.FirstOrDefault(x => x.Uid == gotoFlow.Uid);
                     if (newFlow == null)
                     {
                         nodeParameters.Logger?.ELog("Unable goto flow with UID:" + gotoFlow.Uid + " (" + gotoFlow.Name + ")");
@@ -789,13 +807,13 @@ public class Runner
             Directory.CreateDirectory(nodeParameters.TempPath);
         
         DirectoryHelper.CopyDirectory(
-            Path.Combine(Info.ConfigDirectory, "Scripts"),
+            Path.Combine(Program.ConfigDirectory, "Scripts"),
             Path.Combine(nodeParameters.TempPath, "Scripts"));
     }
     
     private void DownloadPlugins()
     {
-        var dir = Path.Combine(Info.ConfigDirectory, "Plugins");
+        var dir = Path.Combine(Program.ConfigDirectory, "Plugins");
         if (Directory.Exists(dir) == false)
             return;
         foreach (var sub in new DirectoryInfo(dir).GetDirectories())
@@ -906,7 +924,7 @@ public class Runner
     {
         if (scriptName.EndsWith(".js") == false)
             scriptName += ".js";
-        var file = new FileInfo(Path.Combine(Info.ConfigDirectory, "Scripts", "Flow", scriptName));
+        var file = new FileInfo(Path.Combine(Program.ConfigDirectory, "Scripts", "Flow", scriptName));
         if (file.Exists == false)
             return string.Empty;
         return File.ReadAllText(file.FullName);

@@ -97,6 +97,11 @@ public class NodeParameters
     /// Gets or sets the action that records statistics
     /// </summary>
     public Action<string, object>? StatisticRecorder { get; set; }
+    
+    /// <summary>
+    /// Gets or sets the action that records additional info
+    /// </summary>
+    public Action<string, object, TimeSpan?>? AdditionalInfoRecorder { get; set; }
 
     /// <summary>
     /// Gets or sets the function responsible for getting plugin settings JSON configuration
@@ -1070,6 +1075,13 @@ public class NodeParameters
     /// <param name="name">the name of the statistic</param>
     /// <param name="value">the value of the statistic</param>
     public void RecordStatistic(string name, object value) => StatisticRecorder?.Invoke(name, value);
+    
+    /// <summary>
+    /// Records a memory statistics that is not saved anywhere and will expire
+    /// </summary>
+    /// <param name="name">the name of the statistic</param>
+    /// <param name="value">the value of the statistic</param>
+    public void RecordAdditionalInfo(string name, object value, TimeSpan? expiry) => AdditionalInfoRecorder?.Invoke(name, value, expiry);
 }
 
 

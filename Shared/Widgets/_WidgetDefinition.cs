@@ -132,7 +132,16 @@ public enum WidgetType
     /// </summary>
     BellCurve = 107,
     /// <summary>
+    /// Counter
+    /// </summary>
+    Counter = 108,
+    /// <summary>
+    /// Key Value Table
+    /// </summary>
+    KeyValueTable = 109,
+    /// <summary>
     /// Nvidia Chart
     /// </summary>
     Nvidia = 121
+    
 }

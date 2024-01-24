@@ -15,7 +15,7 @@ public class StatisticService : IStatisticService
     /// <returns>a task to await</returns>
     public Task Record(string name, object value) =>
         Record(new Statistic { Name = name, Value = value });
-    
+
     /// <summary>
     /// Records a statistic
     /// </summary>

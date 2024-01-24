@@ -183,18 +183,21 @@ class Runner {
     constructor(parent, csharp, runner) {
         this.uid = runner.uid;
         this.eleChartId = `runner-${this.uid}-chart`;
-        this.libraryFile = runner.libraryFile;
-        this.library = runner.library;
+        this.libraryFileUid = runner.libraryFileUid;
+        this.relativeFile = runner.relativeFile;
+        this.libraryFileName = runner.libraryFileName;
         this.csharp = csharp;
         this.createElement(parent);
 
         this.eleChart = document.getElementById(this.eleChartId);
+        this.infoElement = this.element.querySelector('.info');
         this.infoElements = {
             file: this.element.querySelector(".info-file"),
             node: this.element.querySelector(".info-node"),
             library: this.element.querySelector(".info-library"),
             step: this.element.querySelector(".info-step"),
             time: this.element.querySelector(".info-time"),
+            fps: this.element.querySelector(".info-fps"),
         };
     }
 
@@ -202,7 +205,7 @@ class Runner {
      * Event handler for log button click
      */
     logClicked = () => {
-        this.csharp.invokeMethodAsync("OpenFileViewer", this.libraryFile.uid);
+        this.csharp.invokeMethodAsync("OpenFileViewer", this.libraryFileUid);
     };
 
     /**
@@ -212,8 +215,8 @@ class Runner {
         this.csharp.invokeMethodAsync(
             "CancelRunner",
             this.uid,
-            this.libraryFile.uid,
-            this.libraryFile.name
+            this.libraryFileUid,
+            this.relativeFile
         );
     };
 
@@ -241,12 +244,29 @@ class Runner {
         const step = this.humanizeStepName(runner.currentPartName);
         const time = this.timeDiff(Date.parse(runner.startedAt), Date.now());
 
-        this.infoElements.file.textContent = runner.libraryFile?.name || "";
+        this.infoElements.file.textContent = runner.relativeFile || "";
         this.infoElements.node.textContent = runner.nodeName || "";
-        this.infoElements.library.textContent = runner.library?.name || "";
+        this.infoElements.library.textContent = runner.libraryName || "";
         this.infoElements.step.textContent = step || "";
         this.infoElements.time.textContent = time || "";
+        
+        // remove the additional elements
+        let elementsToRemove = this.infoElement.querySelectorAll('.lv.additional');
+        elementsToRemove.forEach(function(element) {
+            element.remove();
+        });
+        for(let additional of runner.additional)
+        {
+            this.addAdditional(additional[0], additional[1]);
+        }
     };
+    
+    addAdditional(label, value) {
+        let div = document.createElement('div');
+        div.className = 'lv additional';
+        div.innerHTML = `<span class="l">${label}</span><span class="v">${value}</span>`
+        this.infoElement.appendChild(div);
+    }
 
     /**
      * Creates the HTML elements for the runner
@@ -283,8 +303,8 @@ class Runner {
         </div>
       </div>
       <div class="buttons">
-        <button class="btn btn-log" onclick="logClicked">Info</button>
-        <button class="btn btn-cancel" onclick="cancelClicked">Cancel</button>
+        <button class="btn btn-log">Info</button>
+        <button class="btn btn-cancel">Cancel</button>
       </div>
     `;
 

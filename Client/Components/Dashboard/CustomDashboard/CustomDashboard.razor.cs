@@ -86,7 +86,7 @@ public partial class CustomDashboard : IDisposable
     /// Called when the client service executors get an update
     /// </summary>
     /// <param name="data">the update data</param>
-    private void ClientServiceOnExecutorsUpdated(List<FlowExecutorInfo> data)
+    private void ClientServiceOnExecutorsUpdated(List<FlowExecutorInfoMinified> data)
     {
         if(JsCallbacks.TryGetValue("FlowExecutorInfo", out Action<object> callback))
             callback.Invoke(data);
