@@ -1048,6 +1048,9 @@ public class Runner
         }
         else
         {
+            if (value is TimeSpan ts)
+                value = HumanizeTimeSpan(ts);
+            
             Info.AdditionalInfos[name] = new()
             {
                 Value = value,
