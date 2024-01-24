@@ -88,10 +88,11 @@ public class Runner
     {
         string filename = Path.Combine(tempPath, new FileInfo(libFile.Name).Name);
         var downloader = new FileDownloader(logger, serverUrl, Program.Uid);
-        downloader.OnProgress += (percent, eta) =>
+        downloader.OnProgress += (percent, eta, speed) =>
         {
             Info.CurrentPartPercent = percent;
-            RecordAdditionalInfo("Progress", percent + "%", new TimeSpan(0, 1, 0));;
+            RecordAdditionalInfo("Progress", percent + "%", new TimeSpan(0, 1, 0));
+            RecordAdditionalInfo("Speed", speed, new TimeSpan(0, 1, 0));
             RecordAdditionalInfo("ETA", eta == null ? null : Plugin.Helpers.TimeHelper.ToHumanReadableString(eta.Value), new TimeSpan(0, 1, 0));
         };
         var result = downloader.DownloadFile(libFile.Name, filename).Result;

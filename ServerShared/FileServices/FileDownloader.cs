@@ -31,7 +31,9 @@ public class FileDownloader
     /// Represents a delegate that defines the signature for handling progress events.
     /// </summary>
     /// <param name="percent">The progress percentage.</param>
-    public delegate void OnProgressDelegate(int percent, TimeSpan? eta);
+    /// <param name="eta">The estimate time to completion.</param>
+    /// <param name="speed">The speed of the download.</param>
+    public delegate void OnProgressDelegate(int percent, TimeSpan? eta, string speed);
 
     /// <summary>
     /// Event that is triggered to notify subscribers about the progress, using the <see cref="OnProgressDelegate"/> delegate.
@@ -132,17 +134,25 @@ public class FileDownloader
             DateTime startTime = DateTime.Now;
             TimeSpan elapsed;
             TimeSpan eta;
+            double speed = 0; // Download speed in bytes per second
             
-            OnProgress?.Invoke(0, null);
+            OnProgress?.Invoke(0, null, null);
             while ((bytesRead = await contentStream.ReadAsync(buffer, 0, buffer.Length)) > 0)
             {
                 await fileStream.WriteAsync(buffer, 0, bytesRead);
                 bytesReadTotal += bytesRead;
-                // Calculate ETA
+                
+                // Calculate elapsed time and download speed
                 elapsed = DateTime.Now - startTime;
                 double bytesPerSecond = bytesReadTotal / elapsed.TotalSeconds;
+                speed = bytesPerSecond;
+                
+                // Calculate ETA
                 double remainingSeconds = (fileSize - bytesReadTotal) / bytesPerSecond;
                 eta = TimeSpan.FromSeconds(remainingSeconds);
+                
+                // Convert speed to a human-readable format (e.g., KBps or MBps)
+                string speedString = FormatSpeed(speed);
                 
                 float percentage = bytesReadTotal * 100f / fileSize;
                 int iPercent = Math.Clamp((int)Math.Round(percentage), 0, 100);
@@ -150,10 +160,10 @@ public class FileDownloader
                 {
                     percent = iPercent;
                     logger.ILog($"Download Percentage: {percent} %");
-                    OnProgress?.Invoke(iPercent, eta);
+                    OnProgress?.Invoke(iPercent, eta, speedString);
                 }
             }
-            OnProgress?.Invoke(100, null);
+            OnProgress?.Invoke(100, null, null);
 
             var timeTaken = DateTime.Now.Subtract(start);
             var size = new FileInfo(destinationPath).Length;
@@ -261,5 +271,19 @@ public class FileDownloader
         {
             return 0;
         }
+    }
+    
+    /// <summary>
+    /// Formats the download speed in bytes per second into a human-readable string.
+    /// </summary>
+    /// <param name="bytesPerSecond">The download speed in bytes per second.</param>
+    /// <returns>A human-readable representation of the download speed.</returns>
+    private static string FormatSpeed(double bytesPerSecond)
+    {
+        if (bytesPerSecond >= 1024 * 1024)
+            return $"{(bytesPerSecond / (1024 * 1024)):F2} Mbps";
+        if (bytesPerSecond >= 1024)
+            return $"{(bytesPerSecond / 1024):F2} KBps";
+        return $"{bytesPerSecond:F2} Bps";
     }
 }
