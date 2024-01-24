@@ -92,7 +92,7 @@ public class Runner
         {
             Info.CurrentPartPercent = percent;
             RecordAdditionalInfo("Progress", percent + "%", new TimeSpan(0, 1, 0));;
-            RecordAdditionalInfo("ETA", eta == null ? null : HumanizeTimeSpan(eta.Value), new TimeSpan(0, 1, 0));
+            RecordAdditionalInfo("ETA", eta == null ? null : Plugin.Helpers.TimeHelper.ToHumanReadableString(eta.Value), new TimeSpan(0, 1, 0));
         };
         var result = downloader.DownloadFile(libFile.Name, filename).Result;
         if (result.IsFailed)
@@ -102,32 +102,6 @@ public class Runner
         }
 
         return filename;
-    }
-    
-    /// <summary>
-    /// Converts a <see cref="TimeSpan"/> into a human-readable string.
-    /// </summary>
-    /// <param name="timeSpan">The <see cref="TimeSpan"/> to be converted.</param>
-    /// <returns>A human-readable representation of the <see cref="TimeSpan"/>.</returns>
-    private static string HumanizeTimeSpan(TimeSpan timeSpan)
-    {
-        if (timeSpan.TotalDays >= 1)
-            return $"{(int)timeSpan.TotalDays} day{((int)timeSpan.TotalDays != 1 ? "s" : "")}";
-
-        if (timeSpan.TotalHours >= 1)
-        {
-            // If more than an hour, format as h:mm:ss
-            return $"{(int)timeSpan.TotalHours}:{timeSpan.Minutes:D2}:{timeSpan.Seconds:D2}";
-        }
-
-        if (timeSpan.TotalMinutes >= 1)
-        {
-            // If more than a minute, format as m:ss
-            return $"{(int)timeSpan.TotalMinutes}:{timeSpan.Seconds:D2}";
-        }
-
-        // Otherwise, format as seconds
-        return $"{(int)timeSpan.TotalSeconds} seconds";
     }
 
     /// <summary>
