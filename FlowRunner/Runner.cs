@@ -301,7 +301,7 @@ public class Runner
         Info.CurrentPart = step;
         try
         {
-            SendUpdate(Info, waitMilliseconds: 1000);
+            _ = SendUpdate(Info, waitMilliseconds: 1000);
         }
         catch (Exception ex) 
         { 
@@ -316,17 +316,10 @@ public class Runner
     /// <param name="percentage">the percentage</param>
     private void UpdatePartPercentage(float percentage)
     {
-        float diff = Math.Abs(Info.CurrentPartPercent - percentage);
-        if (diff < 0.1)
-            return; // so small no need to tell server about update;
-        if (LastUpdate > DateTime.Now.AddSeconds(-2))
-            return; // limit updates to one every 2 seconds
-
         Info.CurrentPartPercent = percentage;
-
         try
         {
-            SendUpdate(Info);
+            _ = SendUpdate(Info);
         }
         catch (Exception)
         {
@@ -348,19 +341,21 @@ public class Runner
     /// </summary>
     /// <param name="info">the information to send to the server</param>
     /// <param name="waitMilliseconds">how long to wait to send, if takes longer than this, it wont be sent</param>
-    private void SendUpdate(FlowExecutorInfo info, int waitMilliseconds = 50)
+    private async Task SendUpdate(FlowExecutorInfo info, int waitMilliseconds = 50)
     {
-        if (UpdateSemaphore.Wait(waitMilliseconds) == false)
+        if (await UpdateSemaphore.WaitAsync(waitMilliseconds) == false)
         {
-            Program.Logger.DLog("Failed to wait for SendUpdate semaphore");
+            // Program.Logger.DLog("Failed to wait for SendUpdate semaphore");
             return;
         }
 
         try
         {
+            if(waitMilliseconds != 1000) // 1000 is the delay for finishing
+                await Task.Delay(500);
             LastUpdate = DateTime.Now;
             var service = FlowRunnerService.Load();
-            service.Update(info);
+            await service.Update(info);
         }
         catch (Exception)
         {
@@ -392,7 +387,7 @@ public class Runner
             try
             {
                 CalculateFinalSize();
-                SendUpdate(Info, waitMilliseconds: 1000);
+                SendUpdate(Info, waitMilliseconds: 1000).Wait();
                 Program.Logger?.DLog("Set final status to: " + status);
                 return;
             }
@@ -428,7 +423,7 @@ public class Runner
             if (string.IsNullOrEmpty(initialFile))
             {
                 Info.LibraryFile.Status = FileStatus.MappingIssue;
-                SendUpdate(Info, waitMilliseconds: 1000);
+                SendUpdate(Info, waitMilliseconds: 1000).Wait();
                 return;
             }
         }
@@ -1031,6 +1026,6 @@ public class Runner
                 Expiry = expiry ?? new TimeSpan(0, 1, 0)
             };
         }
-        SendUpdate(Info);
+        _ = SendUpdate(Info);
     }
 }
