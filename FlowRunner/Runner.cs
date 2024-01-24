@@ -90,8 +90,8 @@ public class Runner
         var downloader = new FileDownloader(logger, serverUrl, Program.Uid);
         downloader.OnProgress += (percent) =>
         {
+            Info.CurrentPartPercent = percent;
             RecordAdditionalInfo("Progress", percent + "%", new TimeSpan(0, 1, 0));
-            UpdatePartPercentage(percent);
         };
         var result = downloader.DownloadFile(libFile.Name, filename).Result;
         if (result.IsFailed)
