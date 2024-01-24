@@ -418,8 +418,9 @@ public class Runner
             if (Program.Config.AllowRemote)
             {
                 Info.TotalParts = Flow.Parts.Count + 1;
-                Info.CurrentPart = 0;
+                Info.CurrentPart = 1;
                 Info.CurrentPartName = "Downloading";
+                logger.ILog("Downloading Parts: " + Info.TotalParts);
                 initialFile = DownloadFile(logger, Info.LibraryFile, Service.ServiceBaseUrl, WorkingDir);
                 additionalPartsForTotal = 1;
             }
