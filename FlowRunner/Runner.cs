@@ -1049,7 +1049,7 @@ public class Runner
         else
         {
             if (value is TimeSpan ts)
-                value = HumanizeTimeSpan(ts);
+                value = Plugin.Helpers.TimeHelper.ToHumanReadableString(ts);
             
             Info.AdditionalInfos[name] = new()
             {
