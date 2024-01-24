@@ -31,7 +31,7 @@ public class FileDownloader
     /// Represents a delegate that defines the signature for handling progress events.
     /// </summary>
     /// <param name="percent">The progress percentage.</param>
-    public delegate void OnProgressDelegate(int percent);
+    public delegate void OnProgressDelegate(int percent, TimeSpan? eta);
 
     /// <summary>
     /// Event that is triggered to notify subscribers about the progress, using the <see cref="OnProgressDelegate"/> delegate.
@@ -127,21 +127,33 @@ public class FileDownloader
             int bytesRead;
             long bytesReadTotal = 0;
             int percent = 0;
-            OnProgress?.Invoke(0);
+            
+            // Calculate ETA variables
+            DateTime startTime = DateTime.Now;
+            TimeSpan elapsed;
+            TimeSpan eta;
+            
+            OnProgress?.Invoke(0, null);
             while ((bytesRead = await contentStream.ReadAsync(buffer, 0, buffer.Length)) > 0)
             {
                 await fileStream.WriteAsync(buffer, 0, bytesRead);
                 bytesReadTotal += bytesRead;
+                // Calculate ETA
+                elapsed = DateTime.Now - startTime;
+                double bytesPerSecond = bytesReadTotal / elapsed.TotalSeconds;
+                double remainingSeconds = (fileSize - bytesReadTotal) / bytesPerSecond;
+                eta = TimeSpan.FromSeconds(remainingSeconds);
+                
                 float percentage = bytesReadTotal * 100f / fileSize;
                 int iPercent = Math.Clamp((int)Math.Round(percentage), 0, 100);
                 if (iPercent != percent)
                 {
                     percent = iPercent;
                     logger.ILog($"Download Percentage: {percent} %");
-                    OnProgress?.Invoke(iPercent);
+                    OnProgress?.Invoke(iPercent, eta);
                 }
             }
-            OnProgress?.Invoke(100);
+            OnProgress?.Invoke(100, null);
 
             var timeTaken = DateTime.Now.Subtract(start);
             var size = new FileInfo(destinationPath).Length;
