@@ -364,20 +364,34 @@ public class FileHelper
 
         return string.Join(separator.ToString(), parts[..^1]); // Using array index to remove the last element (filename)
     }
-    
+
     /// <summary>
     /// Retrieves the extension from the given path.
     /// </summary>
     /// <param name="path">The path from which to extract the extension.</param>
     /// <returns>The extension from the given path without the '.' character; an empty string if no extension is found.</returns>
     public static string GetExtension(string path)
+        => Path.GetExtension(path) ?? string.Empty;
+    
+    /// <summary>
+    /// Changes the extension of a file name to the specified new extension.
+    /// </summary>
+    /// <param name="fileName">The original file name.</param>
+    /// <param name="newExtension">The new extension to be applied.</param>
+    /// <returns>A new string with the updated file extension.</returns>
+    /// <exception cref="ArgumentNullException">Thrown if <paramref name="fileName"/> is null.</exception>
+    public static string ChangeExtension(string fileName, string newExtension)
     {
-        string extension = Path.GetExtension(path);
+        if (fileName == null)
+            throw new ArgumentNullException(nameof(fileName));
 
-        if (string.IsNullOrEmpty(extension) || extension == ".")
-            return string.Empty;
+        string adjustedExtension = newExtension[0] == '.' ? newExtension : "." + newExtension;
 
-        return extension.TrimStart('.'); // Removing the '.' character from the extension
+        int lastDotIndex = fileName.LastIndexOf('.');
+
+        if (lastDotIndex >= 0)
+            return fileName[..(lastDotIndex + 1)] + adjustedExtension;
+        return fileName + adjustedExtension;
     }
     
     /// <summary>
