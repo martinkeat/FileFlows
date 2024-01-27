@@ -9,6 +9,8 @@
 @use 'table';
 @use 'toast';
 
+$mobile_width: 850px;
+
 @font-face {
     font-family: 'Montserrat';
     src: url("webfonts/Montserrat-VariableFont_wght.ttf") format("truetype-variations"); 
@@ -183,7 +185,7 @@ button {
     }
 }
 
-@media screen and (max-width:850px) {
+@media screen and (max-width:$mobile_width) {
     .update-available {
         display:none !important;
     }
@@ -407,7 +409,7 @@ input[type=file]{
     }
 }
 
-@media screen and (min-width: 850px) {
+@media screen and (min-width: $mobile_width) {
     .dashboard:not(.nav-item) {
         > div {
             margin: unset;
@@ -417,6 +419,23 @@ input[type=file]{
         grid-template-columns:repeat(auto-fill, minmax(36rem, 1fr));
         grid-gap: 1rem;
         grid-auto-rows: 1fr;
+    }
+}
+@media screen and (max-width: ($mobile_width - 0.001px)){
+    .runner {
+        flex-direction: column !important;
+        height:unset !important;
+        .chart {
+            width:100% !important;
+            max-width: 100% !important;
+        }
+        .info {
+            display:unset !important;
+            margin-bottom:2.75rem !important;
+        }
+        .buttons {
+            bottom: 0 !important;
+        }
     }
 }
 
@@ -550,7 +569,7 @@ input[type=file]{
         grid-template-columns: repeat(2, 1fr);
         &.runners-1 {
             grid-template-columns: 1fr;
-        }       
+        }
         
         &.runners-1, &.runners-2, &.runners-3 {
             .runner {
@@ -690,13 +709,13 @@ input[type=file]{
 
 /** step pointer start */
 
-@media screen and (max-width:850px){
+@media screen and (max-width:$mobile_width){
     .not-configured-pointer {
         display:none;
     }    
 }
 
-@media screen and (min-width:850px) {
+@media screen and (min-width:$mobile_width) {
     .page.collapsed
     {
         .not-configured-pointer {
@@ -1074,7 +1093,7 @@ input[type=file]{
     }
 }
 
-@media screen and (max-width:850px) {    
+@media screen and (max-width:$mobile_width) {    
     .dashboard.grid-stack {
         display:flex;
         flex-direction: column;

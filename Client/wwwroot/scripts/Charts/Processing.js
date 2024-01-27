@@ -152,7 +152,7 @@ export class Processing extends FFChart
             running.push(worker.uid);
             if(!this.runners[worker.uid]) {
                 // new, create it
-                this.runners[worker.uid] = new Runner(chartDiv, this.csharp, worker);
+                this.runners[worker.uid] = new Runner(chartDiv, this.csharp, worker, data.length);
             }
             this.runners[worker.uid].update({data: worker, totalRunners: data.length});
         }
@@ -179,8 +179,9 @@ class Runner {
      * @param {HTMLElement} parent - The parent element to attach this new runner to
      * @param {Object} csharp - The csharp instance to call csharp methods
      * @param {Object} runner - The runner being executed
+     * @param {number} totalRunners - The total number of runners
      */
-    constructor(parent, csharp, runner) {
+    constructor(parent, csharp, runner, totalRunners) {
         this.uid = runner.uid;
         this.eleChartId = `runner-${this.uid}-chart`;
         this.libraryFileUid = runner.libraryFileUid;
@@ -188,7 +189,6 @@ class Runner {
         this.libraryFileName = runner.libraryFileName;
         this.csharp = csharp;
         this.createElement(parent);
-
         this.eleChart = document.getElementById(this.eleChartId);
         this.infoElement = this.element.querySelector('.info');
         this.infoElements = {
@@ -199,6 +199,13 @@ class Runner {
             time: this.element.querySelector(".info-time"),
             fps: this.element.querySelector(".info-fps"),
         };
+        
+        this.chart = this.createRadialBar({
+            totalParts: runner.totalParts,
+            currentPart: runner.currentPart,
+            currentPartPercent: runner.currentPartPercent,
+            totalRunners: totalRunners,
+        });
     }
 
     /**
@@ -323,6 +330,66 @@ class Runner {
      * Creates or updates the radial bar chart for the runner
      * @param {Object} options - Chart options
      */
+    createRadialBar(options) {
+        const { totalParts, currentPart, currentPartPercent, totalRunners } = options;
+
+        const overall = totalParts === 0 ? 100 : (currentPart / totalParts) * 100;
+        const chartOptions = {
+            chart: {
+                id: this.eleChartId,
+                height: totalRunners > 3 ? "200px" : "190px",
+                type: "radialBar",
+                foreColor: "var(--color)",
+            },
+            plotOptions: {
+                radialBar: {
+                    hollow: {
+                        margin: 5,
+                        size: "48%",
+                        background: "transparent",
+                    },
+                    track: {
+                        background: "#333",
+                    },
+                    startAngle: -135,
+                    endAngle: 135,
+                    stroke: {
+                        lineCap: "round",
+                    },
+                    dataLabels: {
+                        total: {
+                            show: true,
+                            label: currentPartPercent ? `${currentPartPercent.toFixed(1)} %` : "Overall",
+                            fontSize: "0.8rem",
+                            formatter: (val) => parseFloat("" + overall).toFixed(1) + " %",
+                        },
+                        value: {
+                            show: true,
+                            fontSize: "0.7rem",
+                            formatter: (val) => +(parseFloat(val).toFixed(1)) + " %",
+                        },
+                    },
+                },
+            },
+            colors: ["#2b8fb3", "#c30471"],
+            series: [overall],
+            labels: ["Overall"],
+        };
+
+        if (currentPartPercent > 0) {
+            chartOptions.series.push(currentPartPercent);
+            chartOptions.labels.push("Current");
+        }
+
+        let chart = new ApexCharts(this.eleChart, chartOptions);
+        chart.render();
+        return chart;
+    }
+
+    /**
+     * Creates or updates the radial bar chart for the runner
+     * @param {Object} options - Chart options
+     */
     createOrUpdateRadialBar(options) {
         const { totalParts, currentPart, currentPartPercent, totalRunners } = options;
 
@@ -374,20 +441,12 @@ class Runner {
             chartOptions.labels.push("Current");
         }
 
-        let updated = false;
-
-        if (this.eleChart.querySelector(".apexcharts-canvas")) {
-            try {
-                ApexCharts.exec(this.eleChartId, "updateOptions", chartOptions, false, false);
-                updated = true;
-            } catch (err) {}
-        }
-
-        if (!updated && this.eleChart) {
-            new ApexCharts(this.eleChart, chartOptions).render();
-        }
+        //try {
+        this.chart.updateOptions(chartOptions, false, false);
+        //    ApexCharts.exec(this.eleChartId, "updateOptions", chartOptions, false, false);
+        //} catch (err) {}
     }
-
+    
     /**
      * Gets the time difference between two dates
      * @param {number} start - The start date

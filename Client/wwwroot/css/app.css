@@ -945,6 +945,23 @@ hr {
     margin: unset;
   }
 }
+@media screen and (max-width: 849.999px) {
+  .runner {
+    flex-direction: column !important;
+    height: unset !important;
+  }
+  .runner .chart {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  .runner .info {
+    display: unset !important;
+    margin-bottom: 2.75rem !important;
+  }
+  .runner .buttons {
+    bottom: 0 !important;
+  }
+}
 .dashboard.readonly .fa-trash {
   display: none !important;
 }
