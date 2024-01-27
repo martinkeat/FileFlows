@@ -492,6 +492,10 @@ class Runner {
      * Disposes of the runner by removing its HTML element
      */
     dispose() {
+        if(this.chart) {
+            this.chart.destroy();
+            this.chart = null;
+        }
         this.element.remove();
     }
 }
