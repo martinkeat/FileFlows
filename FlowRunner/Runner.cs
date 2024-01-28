@@ -483,6 +483,8 @@ public class Runner
         foreach (var variable in Program.Config.Variables)
         {
             object value = variable.Value;
+            if (value == null)
+                continue;
             if (variable.Value?.Trim()?.ToLowerInvariant() == "true")
                 value = true;
             else if (variable.Value?.Trim()?.ToLowerInvariant() == "false")
