@@ -84,8 +84,6 @@ public class ExecuteArgs
     /// Gets or sets the timeout in seconds of the process
     /// </summary>
     public int Timeout { get; set; }
-    
-
     /// <summary>
     /// When silent, nothing will be logged
     /// </summary>

@@ -670,13 +670,22 @@ public class FlowWorker : Worker
             }
         }
 
+        var variables = config.Variables;
+        if (node.Variables?.Any() == true)
+        {
+            foreach (var v in node.Variables)
+            {
+                variables[v.Key] = v.Value;
+            }
+        }
+
         string json = System.Text.Json.JsonSerializer.Serialize(new
         {
             config.Revision,
             config.MaxNodes,
             config.Enterprise,
             config.AllowRemote,
-            config.Variables,
+            variables,
             config.Libraries,
             config.PluginNames,
             config.PluginSettings,

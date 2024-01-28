@@ -628,6 +628,11 @@ public class Runner
         }
 
         LogFFmpegVersion(nodeParameters);
+
+        foreach (var v in nodeParameters.Variables)
+        {
+            nodeParameters.Logger!.ILog($"Variables['{v.Key}'] = {v.Value}");
+        }
     }
 
     private FileStatus ExecuteFlow(Flow flow, List<Guid> runFlows, bool failure = false, int additionalFlowParts = 0)
