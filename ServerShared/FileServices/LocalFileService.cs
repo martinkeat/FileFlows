@@ -163,7 +163,7 @@ public class LocalFileService : IFileService
                 CreationTimeUtc = fileInfo.CreationTimeUtc,
                 LastWriteTime = fileInfo.LastWriteTime,
                 LastWriteTimeUtc = fileInfo.LastWriteTimeUtc,
-                Extension = fileInfo.Extension.TrimStart('.'),
+                Extension = fileInfo.Extension,
                 Name = fileInfo.Name,
                 FullName = fileInfo.FullName,
                 Length = fileInfo.Length,

@@ -395,14 +395,11 @@ public class NodeParameters
                 if (result.IsFailed)
                     return;
                 var fi = result.Value;
-                var ext = fi.Extension ?? string.Empty;
-                if (string.IsNullOrWhiteSpace(ext) == false && ext.StartsWith(".") == false)
-                    ext = "." + ext;
                 UpdateVariables(new Dictionary<string, object>
                 {
-                    { "ext", ext },
+                    { "ext", fi.Extension },
                     { "file.Name", fi.Name ?? "" },
-                    { "file.NameNoExtension", Path.GetFileNameWithoutExtension(fi.Name ?? "") },
+                    { "file.NameNoExtension", fi.Extension .TrimStart('.') },
                     { "file.FullName", fi.FullName ?? "" },
                     { "file.Extension", fi.Extension ?? "" },
                     { "file.Size", fi.Length },
@@ -432,7 +429,7 @@ public class NodeParameters
 
                         { "file.Orig.Extension", fiOriginal.Extension ?? string.Empty },
                         { "file.Orig.FileName", fiOriginal.Name ?? string.Empty },
-                        { "file.Orig.FileNameNoExtension", Path.GetFileNameWithoutExtension(fiOriginal.Name ?? "") },
+                        { "file.Orig.FileNameNoExtension", fiOriginal.Extension?.TrimStart('.') ?? string.Empty },
                         { "file.Orig.FullName", fiOriginal.FullName ?? string.Empty },
                         { "file.Orig.Size", fiOriginal.Length },
 
