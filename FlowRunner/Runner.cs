@@ -633,6 +633,10 @@ public class Runner
 
         foreach (var v in nodeParameters.Variables)
         {
+            if (v.Key.StartsWith("file.") || v.Key.StartsWith("folder.") || v.Key == "ext" || v.Key.Contains(".Url") ||
+                v.Key.Contains("Key"))
+                continue;
+            
             nodeParameters.Logger!.ILog($"Variables['{v.Key}'] = {v.Value}");
         }
     }

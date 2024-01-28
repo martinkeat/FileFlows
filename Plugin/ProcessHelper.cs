@@ -247,9 +247,10 @@ public class ProcessHelper
                 // Reads the output stream first and then waits because deadlocks are possible
                 process.BeginOutputReadLine();
                 process.BeginErrorReadLine();
+                var timeoutMilliseconds = args.Timeout * 1000;
 
                 // Creates task to wait for process exit using timeout
-                var waitForExit = WaitForExitAsync(process, args.Timeout);
+                var waitForExit = WaitForExitAsync(process, timeoutMilliseconds);
 
                 // Create task to wait for process exit and closing all output streams
                 var processTask = Task.WhenAll(waitForExit, outputCloseEvent.Task, errorCloseEvent.Task);
@@ -257,7 +258,7 @@ public class ProcessHelper
                 // Waits process completion and then checks it was not completed by timeout
                 if (
                     (
-                        (args.Timeout > 0 && await Task.WhenAny(Task.Delay(args.Timeout), processTask) == processTask) ||
+                        (args.Timeout > 0 && await Task.WhenAny(Task.Delay(timeoutMilliseconds), processTask) == processTask) ||
                         (args.Timeout == 0 && await Task.WhenAny(processTask) == processTask)
                     )
                      && waitForExit.Result)
@@ -359,12 +360,12 @@ public class ProcessHelper
     /// Waits for a process to exit
     /// </summary>
     /// <param name="process">the process to wait for</param>
-    /// <param name="timeout">how long to wait before failing</param>
+    /// <param name="timeoutMilliseconds">how long to wait before failing</param>
     /// <returns>if the process completed before the timeout</returns>
-    private static Task<bool> WaitForExitAsync(Process process, int timeout)
+    private static Task<bool> WaitForExitAsync(Process process, int timeoutMilliseconds)
     {
-        if (timeout > 0)
-            return Task.Run(() => process.WaitForExit(timeout));
+        if (timeoutMilliseconds > 0)
+            return Task.Run(() => process.WaitForExit(timeoutMilliseconds));
         return Task.Run(() =>
         {
             process.WaitForExit();
