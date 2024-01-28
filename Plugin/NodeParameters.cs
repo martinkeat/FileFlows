@@ -453,7 +453,7 @@ public class NodeParameters
         }
         catch (Exception ex)
         {
-            Logger?.ELog("Failed to init file: " + ex.Message);
+            Logger?.ELog("Failed to init file: " + ex.Message + Environment.NewLine + ex.StackTrace);
         }
 
     }
