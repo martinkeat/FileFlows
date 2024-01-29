@@ -26,6 +26,10 @@ public abstract class WidgetDefinition
             return new Encoders();
         if (uid == Decoders.WD_UID)
             return new Decoders();
+        if (uid == Decoders.WD_UID)
+            return new Decoders();
+        if (uid == DecoderParameters.WD_UID)
+            return new DecoderParameters();
         if (uid == ComicFormats.WD_UID)
             return new ComicFormats();
         if (uid == ComicPages.WD_UID)
@@ -141,6 +145,10 @@ public enum WidgetType
     /// Key Value Table
     /// </summary>
     KeyValueTable = 109,
+    /// <summary>
+    /// Table that shows the totals
+    /// </summary>
+    TotalsTable = 110,
     /// <summary>
     /// Nvidia Chart
     /// </summary>

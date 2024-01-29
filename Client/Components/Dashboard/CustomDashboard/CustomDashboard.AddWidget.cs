@@ -213,7 +213,18 @@ public partial class CustomDashboard
                 }
             });
         }
-
+        if (DoesntHaveWidget(FileFlows.Shared.Widgets.DecoderParameters.WD_UID))
+        {
+            fields.Add(new ElementField
+            {
+                InputType = FormInputType.Widget,
+                Name = nameof(FileFlows.Shared.Widgets.DecoderParameters),
+                Parameters = new Dictionary<string, object>
+                {
+                    { nameof(InputWidget.Type), WidgetType.TotalsTable }
+                }
+            });
+        }
         if (DoesntHaveWidget(FileFlows.Shared.Widgets.ProcessingTimes.WD_UID))
         {
             fields.Add(new ElementField
@@ -378,6 +389,9 @@ public partial class CustomDashboard
                                 break;
                             case nameof(Decoders):
                                 newWidgets.Add(CreateNewWidgetModel(Decoders.WD_UID, 6, 2));
+                                break;
+                            case nameof(DecoderParameters):
+                                newWidgets.Add(CreateNewWidgetModel(DecoderParameters.WD_UID, 6, 2));
                                 break;
                             case nameof(ProcessingTimes):
                                 newWidgets.Add(CreateNewWidgetModel(ProcessingTimes.WD_UID, 6, 2));
