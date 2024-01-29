@@ -285,6 +285,9 @@ public class ProcessHelper
                     {
                         // Kill hung process
                         process.Kill();
+                        result.StandardError = errorBuilder.ToString();
+                        result.StandardOutput = outputBuilder.ToString();  
+                        result.Output = result.StandardOutput?.EmptyAsNull() ?? result.StandardError;
                     }
                     catch
                     {
