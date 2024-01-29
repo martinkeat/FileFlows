@@ -91,7 +91,7 @@ public class LanguageHelper
             new () {English = "Chibcha",French = "chibcha",German = "Chibcha-Sprachen",Iso2 = "chb"},
             new () {English = "Chechen",French = "tch\u00E9tch\u00E8ne",German = "Tschetschenisch",Iso2 = "che",Iso1 = "ce"},
             new () {English = "Chagatai",French = "djaghata\u00EF",German = "Tschagataisch",Iso2 = "chg"},
-            new () {English = "Chinese",French = "chinois",German = "Chinesisch",Iso2 = "zho",Iso1 = "zh"},
+            new () {English = "Chinese",French = "chinois", German = "Chinesisch",Iso2 = "zho",Iso1 = "zh", Aliases = new [] { "chi"}},
             new () {English = "Chuukese",French = "chuuk",German = "Trukesisch",Iso2 = "chk"},
             new () {English = "Mari",French = "mari",German = "Tscheremissisch",Iso2 = "chm"},
             new () {English = "Chinook jargon",French = "chinook, jargon",German = "Chinook-Jargon",Iso2 = "chn"},
