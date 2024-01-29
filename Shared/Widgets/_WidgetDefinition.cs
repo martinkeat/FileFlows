@@ -1,7 +1,5 @@
 namespace FileFlows.Shared.Widgets;
 
-
-
 /// <summary>
 /// Widget definition, these are the different types of Widgets in the system
 /// </summary>
@@ -24,6 +22,10 @@ public abstract class WidgetDefinition
             return new AudioCodecs();
         if (uid == Codecs.WD_UID)
             return new Codecs();
+        if (uid == Encoders.WD_UID)
+            return new Encoders();
+        if (uid == Decoders.WD_UID)
+            return new Decoders();
         if (uid == ComicFormats.WD_UID)
             return new ComicFormats();
         if (uid == ComicPages.WD_UID)

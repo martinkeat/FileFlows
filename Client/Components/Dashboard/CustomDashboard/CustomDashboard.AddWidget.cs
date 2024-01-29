@@ -1,3 +1,4 @@
+using System.Text;
 using System.Text.Json;
 using FileFlows.Client.Components.Inputs;
 using FileFlows.Plugin;
@@ -188,6 +189,30 @@ public partial class CustomDashboard
                 }
             });
         }
+        if (DoesntHaveWidget(FileFlows.Shared.Widgets.Encoders.WD_UID))
+        {
+            fields.Add(new ElementField
+            {
+                InputType = FormInputType.Widget,
+                Name = nameof(FileFlows.Shared.Widgets.Encoders),
+                Parameters = new Dictionary<string, object>
+                {
+                    { nameof(InputWidget.Type), WidgetType.TreeMap }
+                }
+            });
+        }
+        if (DoesntHaveWidget(FileFlows.Shared.Widgets.Decoders.WD_UID))
+        {
+            fields.Add(new ElementField
+            {
+                InputType = FormInputType.Widget,
+                Name = nameof(FileFlows.Shared.Widgets.Decoders),
+                Parameters = new Dictionary<string, object>
+                {
+                    { nameof(InputWidget.Type), WidgetType.TreeMap }
+                }
+            });
+        }
 
         if (DoesntHaveWidget(FileFlows.Shared.Widgets.ProcessingTimes.WD_UID))
         {
@@ -347,6 +372,12 @@ public partial class CustomDashboard
                                 break;
                             case nameof(AudioCodecs):
                                 newWidgets.Add(CreateNewWidgetModel(AudioCodecs.WD_UID, 6, 2));
+                                break;
+                            case nameof(Encoders):
+                                newWidgets.Add(CreateNewWidgetModel(Encoders.WD_UID, 6, 2));
+                                break;
+                            case nameof(Decoders):
+                                newWidgets.Add(CreateNewWidgetModel(Decoders.WD_UID, 6, 2));
                                 break;
                             case nameof(ProcessingTimes):
                                 newWidgets.Add(CreateNewWidgetModel(ProcessingTimes.WD_UID, 6, 2));
