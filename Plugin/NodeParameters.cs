@@ -359,7 +359,7 @@ public class NodeParameters
     /// Initializes a file ane updates the variables to that file information
     /// </summary>
     /// <param name="filename">the name of the file to initialize</param>
-    private void InitFile(string filename)
+    public void InitFile(string filename)
     {
         if (Fake) return;
         try
@@ -399,7 +399,7 @@ public class NodeParameters
                 {
                     { "ext", fi.Extension },
                     { "file.Name", fi.Name ?? "" },
-                    { "file.NameNoExtension", fi.Extension .TrimStart('.') },
+                    { "file.NameNoExtension", string.IsNullOrEmpty(fi.Extension) == false ? fi.Name[..^(fi.Extension.Length)] : fi.Name ?? string.Empty },
                     { "file.FullName", fi.FullName ?? "" },
                     { "file.Extension", fi.Extension ?? "" },
                     { "file.Size", fi.Length },
@@ -429,7 +429,9 @@ public class NodeParameters
 
                         { "file.Orig.Extension", fiOriginal.Extension ?? string.Empty },
                         { "file.Orig.FileName", fiOriginal.Name ?? string.Empty },
-                        { "file.Orig.FileNameNoExtension", fiOriginal.Extension?.TrimStart('.') ?? string.Empty },
+                        { "file.Orig.Name", fiOriginal.Name ?? string.Empty },
+                        { "file.Orig.FileNameNoExtension",  string.IsNullOrEmpty(fiOriginal.Extension) == false ? fiOriginal.Name[..^(fi.Extension.Length)] : fiOriginal.Name ?? string.Empty },
+                        { "file.Orig.NameNoExtension",  string.IsNullOrEmpty(fiOriginal.Extension) == false ? fiOriginal.Name[..^(fi.Extension.Length)] : fiOriginal.Name ?? string.Empty },
                         { "file.Orig.FullName", fiOriginal.FullName ?? string.Empty },
                         { "file.Orig.Size", fiOriginal.Length },
 
