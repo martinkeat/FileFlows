@@ -23,7 +23,7 @@ public class Encoders:WidgetDefinition
     /// <summary>
     /// Gets the Icon
     /// </summary>
-    public override string Icon => "fas fa-video";
+    public override string Icon => "fas fa-file-video";
 
     /// <summary>
     /// Gets the Name

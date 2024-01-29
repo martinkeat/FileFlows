@@ -23,12 +23,12 @@ public class Decoders:WidgetDefinition
     /// <summary>
     /// Gets the Icon
     /// </summary>
-    public override string Icon => "fas fa-video";
+    public override string Icon => "fas fa-atom";
 
     /// <summary>
     /// Gets the Name
     /// </summary>
-    public override string Name => "Encoders";
+    public override string Name => "Decoders";
 
     /// <summary>
     /// Gets the type of Widget
