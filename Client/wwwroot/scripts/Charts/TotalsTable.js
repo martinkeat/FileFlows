@@ -109,17 +109,13 @@ export class TotalsTable extends FFChart
         table.appendChild(tbody);
         for(let item of data)
         {
+            console.log('item', item);
             let tr = document.createElement('tr');
             tbody.appendChild(tr);
 
-            let tdRelativePath = document.createElement('td');
-            tdRelativePath.innerText = item.RelativePath;
-            tdRelativePath.style.wordBreak = 'break-word';
-            tr.appendChild(tdRelativePath);
-
             let tdLabel = document.createElement('td');
             tr.appendChild(tdLabel);
-            tdLabel.innerText = item.Label;
+            tdLabel.innerText = item.Key;
 
             let tdTotal = document.createElement('td');
             tdTotal.style.width = '6rem';

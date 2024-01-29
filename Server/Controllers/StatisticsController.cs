@@ -29,6 +29,14 @@ public class StatisticsController : Controller
         => new StatisticService().GetStatisticsByName(name);
 
     /// <summary>
+    /// Gets statistics totaled by their name
+    /// </summary>
+    /// <returns>the matching statistics</returns>
+    [HttpGet("totals-by-name/{name}")]
+    public Task<Dictionary<string, int>> GetTotalsByName([FromRoute] string name)
+        => new StatisticService().GetTotalsByName(name);
+    
+    /// <summary>
     /// Clears statistics for
     /// </summary>
     /// <param name="name">[Optional] the name of the statistic to clear</param>

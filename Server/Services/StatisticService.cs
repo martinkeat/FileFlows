@@ -33,7 +33,29 @@ public class StatisticService : IStatisticService
     /// <returns>the matching statistics</returns>
     public Task<IEnumerable<Statistic>> GetStatisticsByName(string name)
         => DbHelper.GetStatisticsByName(name);
-    
+
+    /// <summary>
+    /// Gets statistics totaled by their name
+    /// </summary>
+    /// <returns>the matching statistics</returns>
+    public async Task<Dictionary<string, int>> GetTotalsByName( string name)
+    {
+        var stats = await DbHelper.GetStatisticsByName(name);
+        var groupedStats = stats.GroupBy(stat => stat.Value.ToString());
+
+        // Create a dictionary to store the counts
+        var resultDictionary = new Dictionary<string, int>();
+
+        // Iterate through the grouped stats and count the occurrences
+        foreach (var group in groupedStats)
+        {
+            // group.Key is the unique value, group.Count() is the count
+            resultDictionary.Add(group.Key, group.Count());
+        }
+
+        return resultDictionary;
+    }
+
     /// <summary>
     /// Clears statistics
     /// </summary>
