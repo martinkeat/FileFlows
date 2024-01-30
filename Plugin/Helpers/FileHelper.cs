@@ -390,7 +390,7 @@ public class FileHelper
         int lastDotIndex = fileName.LastIndexOf('.');
 
         if (lastDotIndex >= 0)
-            return fileName[..(lastDotIndex + 1)] + adjustedExtension;
+            return fileName[..lastDotIndex] + adjustedExtension;
         return fileName + adjustedExtension;
     }
     
