@@ -55,30 +55,35 @@ public class StatisticService : IStatisticService
 
         return resultDictionary;
     }
-
     /// <summary>
-    /// Clears statistics
+    /// Clears DbStatistics based on specified conditions.
     /// </summary>
-    /// <param name="name">[Optional] the name of the statistic to clear</param>
-    /// <param name="before">[Optional] the date of the statistic to clear</param>
-    /// <returns>the response</returns>
-    public void Clear(string? name = null, DateTime? before = null)
+    /// <param name="name">Optional. The name for which DbStatistics should be cleared.</param>
+    /// <param name="before">Optional. The date before which DbStatistics should be cleared.</param>
+    /// <param name="after">Optional. The date after which DbStatistics should be cleared.</param>
+    public void Clear(string? name = null, DateTime? before = null, DateTime? after = null)
     {
-        if (string.IsNullOrWhiteSpace(name) && string.IsNullOrWhiteSpace(name))
+        if (string.IsNullOrWhiteSpace(name) && before == null && after == null)
         {
-            Logger.Instance.ILog($"Deleting ALL DbStatistics");
-            DbHelper.Execute("delete from DbStatistic");
-            return;
+            Logger.Instance.ILog("Deleting ALL DbStatistics");
+            DbHelper.Execute("DELETE FROM DbStatistic");
         }
-
-        if (string.IsNullOrWhiteSpace(name))
+        else
         {
-            Logger.Instance.ILog($"Deleting DbStatistics before '{before.Value}'");
-            DbHelper.Execute("delete from DbStatistic where LogDate < @0", before.Value);
-            return;
-        }
+            string whereClause = "";
 
-        Logger.Instance.ILog($"Deleting DbStatistics for '{name}' before '{before.Value}'");
-        DbHelper.Execute("delete from DbStatistic where LogDate < @0 and Name = @1 ", before.Value, name);
+            if (before != null)
+                whereClause += " LogDate < @0";
+
+            if (after != null)
+                whereClause += (string.IsNullOrWhiteSpace(whereClause) ? "" : " AND") + " LogDate > @1";
+
+            if (string.IsNullOrWhiteSpace(name) == false)
+                whereClause += (string.IsNullOrWhiteSpace(whereClause) ? "" : " AND") + " Name = @2";
+
+            Logger.Instance.ILog(
+                $"Deleting DbStatistics{(!string.IsNullOrWhiteSpace(whereClause) ? $" with conditions: {whereClause}" : "")}");
+            DbHelper.Execute($"DELETE FROM DbStatistic WHERE{whereClause}", before, after, name);
+        }
     }
 }

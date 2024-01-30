@@ -39,15 +39,16 @@ public class StatisticsController : Controller
     /// <summary>
     /// Clears statistics for
     /// </summary>
-    /// <param name="name">[Optional] the name of the statistic to clear</param>
-    /// <param name="before">[Optional] the date of the statistic to clear</param>
+    /// <param name="name">Optional. The name for which DbStatistics should be cleared.</param>
+    /// <param name="before">Optional. The date before which DbStatistics should be cleared.</param>
+    /// <param name="after">Optional. The date after which DbStatistics should be cleared.</param>
     /// <returns>the response</returns>
     [HttpPost("clear")]
-    public IActionResult Clear([FromQuery] string? name = null, DateTime? before = null)
+    public IActionResult Clear([FromQuery] string? name = null, DateTime? before = null, DateTime? after = null)
     {
         try
         {
-            new StatisticService().Clear(name, before);
+            new StatisticService().Clear(name, before, after);
             return Ok();
         }
         catch (Exception)
