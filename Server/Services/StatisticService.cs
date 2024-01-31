@@ -53,6 +53,10 @@ public class StatisticService : IStatisticService
             resultDictionary.Add(group.Key, group.Count());
         }
 
+        // Order the dictionary by count in descending order
+        resultDictionary = resultDictionary.OrderByDescending(kv => kv.Value)
+            .ToDictionary(kv => kv.Key, kv => kv.Value);
+
         return resultDictionary;
     }
     /// <summary>
