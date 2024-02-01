@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
 using System.Threading.Tasks;
+using FileFlows.Plugin;
 
 namespace FileFlows.Client.Components.Inputs;
 
@@ -22,6 +23,12 @@ public partial class InputKeyValue : Input<List<KeyValuePair<string, string>>>
     /// </summary>
     /// <returns>true if the input gained focus, otherwise false</returns>
     public override bool Focus() => FocusUid();
+    
+    /// <summary>
+    /// Gets or sets options that can appear in the key/value list as the key
+    /// </summary>
+    [Parameter]
+    public List<ListOption> Options { get; set; }
 
     /// <summary>
     /// The data for the input
@@ -31,6 +38,7 @@ public partial class InputKeyValue : Input<List<KeyValuePair<string, string>>>
     private string DuplicateKey = null; // one time we do want null....
 
     private string lblKey, lblValue;
+    private bool HasOptions;
 
     /// <summary>
     /// Initializes the component
@@ -45,7 +53,9 @@ public partial class InputKeyValue : Input<List<KeyValuePair<string, string>>>
 
         this.Data = Value.Select(x => new KeyValue {  Key = x.Key, Value = x.Value }).ToList();
         if(Field != null)
-            this.Field.ValueChanged += FieldOnValueChanged; 
+            this.Field.ValueChanged += FieldOnValueChanged;
+
+        HasOptions = Options?.Any() == true;
     }
 
     private void FieldOnValueChanged(object sender, object value)
@@ -152,6 +162,8 @@ public partial class InputKeyValue : Input<List<KeyValuePair<string, string>>>
     /// <returns>true if there are duplicates, otherwise false</returns>
     private bool CheckForDuplicates()
     {
+        if (HasOptions)
+            return true; // dont care about duplicates using dropdown
         DuplicateKey = this.Data?.GroupBy(x => x.Key, x => x)?.FirstOrDefault(x => x.Count() > 1)?.Select(x => x.Key)?.FirstOrDefault();
         if (DuplicateKey != null)
         {
@@ -164,6 +176,15 @@ public partial class InputKeyValue : Input<List<KeyValuePair<string, string>>>
         return true;
     }
 
+    private void UpdateKeyValue(ChangeEventArgs e, KeyValue kv)
+    {
+        kv.Key = e.Value?.ToString();
+    }
+
+    private void UpdateNewKey(ChangeEventArgs e)
+    {
+        NewKey = e.Value?.ToString();
+    }
     /// <summary>
     /// A key value
     /// </summary>

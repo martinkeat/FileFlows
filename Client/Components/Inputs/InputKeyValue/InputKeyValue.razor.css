@@ -1,4 +1,4 @@
-﻿.input-keyvalue-wrapper {
+.input-keyvalue-wrapper {
   width: 100%;
   display: flex;
   flex-wrap: wrap;
@@ -29,3 +29,29 @@ th {
   font-weight: unset;
   color: rgba(var(--color-rgb), 0.7);
 }
+
+select {
+  width: 100%;
+  min-width: 10rem;
+  max-width: 40rem;
+  background-color: var(--input-background) !important;
+  color: var(--color) !important;
+  height: 2.1875rem;
+  line-height: 1.5;
+  font-size: 1rem;
+  border-color: transparent;
+}
+select:focus {
+  outline: 1px solid var(--accent);
+}
+select.select-one {
+  color: rgba(var(--color-rgb), 0.3) !important;
+}
+select option:not(.select-one) {
+  color: var(--color) !important;
+}
+select option:checked {
+  background-color: rgba(var(--accent-rgb), 0.3);
+}
+
+/*# sourceMappingURL=InputKeyValue.razor.css.map */

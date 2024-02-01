@@ -90,6 +90,24 @@ public class FormHelper
                 }
             }
 
+            if(attribute is KeyValueAttribute keyvalue)
+            {
+                // get the options
+                if(string.IsNullOrWhiteSpace(keyvalue.OptionsProperty) == false)
+                {
+                    var chkPropertyValue = GetStaticProperty(type, keyvalue.OptionsProperty);
+                    if(chkPropertyValue != null)
+                    {
+                        try
+                        {
+                            ef.Parameters ??= new Dictionary<string, object>();
+                            if(ef.Parameters.ContainsKey("Options") == false && chkPropertyValue is List<ListOption> options)
+                                ef.Parameters.Add("Options", options);
+                        }                                
+                        catch (Exception){}
+                    }
+                }
+            }
             if (model.ContainsKey(prop.Name) == false)
             {
                 var dValue = prop.GetCustomAttributes(typeof(DefaultValueAttribute), false).FirstOrDefault() as DefaultValueAttribute;

@@ -16,7 +16,19 @@
                 {
                     <tr class="@(kv.Key == DuplicateKey ? "invalid" : "")">
                         <td>
-                            <input type="text" @bind-value="kv.Key" @onblur="OnBlur" />
+                            @if (HasOptions)
+                            {
+                                <select id="@Uid" value="@kv.Key" @onchange="((e) => UpdateKeyValue(e, kv))">
+                                    @foreach(var opt in Options)
+                                    {
+                                        <option value="@Options.IndexOf(opt)">@opt.Label</option>
+                                    }
+                                </select>
+                            }
+                            else
+                            {
+                                <input type="text" @bind-value="kv.Key" @onblur="OnBlur"/>
+                            }
                         </td>
                         <td>
                             <input type="text" @bind-value="kv.Value" @onblur="OnBlur" />
@@ -28,7 +40,19 @@
                 }
                 <tr>
                     <td>
-                        <input id="@Uid" type="text" @bind-value="NewKey" />
+                        @if (HasOptions)
+                        {
+                            <select id="@Uid" value="@NewKey" @onchange="UpdateNewKey">
+                                @foreach(var opt in Options)
+                                {
+                                    <option value="@Options.IndexOf(opt)">@opt.Label</option>
+                                }
+                            </select>
+                        }
+                        else
+                        {
+                            <input id="@Uid" type="text" @bind-value="NewKey"/>
+                        }
                     </td>
                     <td>
                         <input type="text" @bind-value="NewValue" @onblur="Add" />
@@ -39,6 +63,5 @@
                 </tr>
             </tbody>
         </table>
-        
     </div>
 </InputWrapper>

@@ -1,3 +1,5 @@
+using System.Text.RegularExpressions;
+
 namespace FileFlows.Plugin;
 
 /// <summary>
@@ -576,6 +578,49 @@ public class LanguageHelper
     {
         var lang = FindLanguage(language);
         return lang?.Iso2?.EmptyAsNull() ?? language;
+    }
+    
+    /// <summary>
+    /// Tests if two languages are the same
+    /// </summary>
+    /// <param name="langOne">the first language</param>
+    /// <param name="langTwo">the second language</param>
+    /// <returns>true if matches, otherwise false</returns>
+    public static bool AreSame(string langOne, string langTwo)
+    {
+        if (string.IsNullOrWhiteSpace(langTwo))
+            return false;
+        if (string.IsNullOrWhiteSpace(langOne))
+            return false;
+        if (langTwo.ToLowerInvariant().Contains(langOne.ToLowerInvariant()))
+            return true;
+        try
+        {
+            if (GetIso2Code(langOne) == GetIso2Code(langTwo))
+                return true;
+        }
+        catch (Exception)
+        {
+        }
+
+        try
+        {
+            if (GetIso1Code(langOne) == GetIso1Code(langTwo))
+                return true;
+        }
+        catch (Exception)
+        {
+        }
+
+        try
+        {
+            var rgx = new Regex(langTwo, RegexOptions.IgnoreCase);
+            return rgx.IsMatch(langOne);
+        }
+        catch (Exception)
+        {
+            return false;
+        }
     }
     
     class LanguageDefintion
