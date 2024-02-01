@@ -64,6 +64,10 @@ public partial class InputKeyValue : Input<List<KeyValuePair<string, string>>>
             return;
         if(value is List<KeyValuePair<string,string>> kvps == false)
             return;
+
+        if (Options?.Any() == true && Data.Count == kvps.Count)
+            return;
+        
         bool differences = false;
         foreach (var kvp in kvps)
         {
@@ -177,14 +181,10 @@ public partial class InputKeyValue : Input<List<KeyValuePair<string, string>>>
     }
 
     private void UpdateKeyValue(ChangeEventArgs e, KeyValue kv)
-    {
-        kv.Key = e.Value?.ToString();
-    }
-
-    private void UpdateNewKey(ChangeEventArgs e)
-    {
-        NewKey = e.Value?.ToString();
-    }
+        => kv.Key = e.Value?.ToString();
+    private void UpdateNewKey(ChangeEventArgs e) 
+        => NewKey= e.Value?.ToString();
+    
     /// <summary>
     /// A key value
     /// </summary>

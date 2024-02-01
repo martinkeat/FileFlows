@@ -21,7 +21,7 @@
                                 <select id="@Uid" value="@kv.Key" @onchange="((e) => UpdateKeyValue(e, kv))">
                                     @foreach(var opt in Options)
                                     {
-                                        <option value="@Options.IndexOf(opt)">@opt.Label</option>
+                                        <option value="@opt.Value">@opt.Label</option>
                                     }
                                 </select>
                             }
@@ -45,7 +45,7 @@
                             <select id="@Uid" value="@NewKey" @onchange="UpdateNewKey">
                                 @foreach(var opt in Options)
                                 {
-                                    <option value="@Options.IndexOf(opt)">@opt.Label</option>
+                                    <option value="@opt.Value">@opt.Label</option>
                                 }
                             </select>
                         }
