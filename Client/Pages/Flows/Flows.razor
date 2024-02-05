@@ -18,8 +18,7 @@
 FileFlows will search for the 'Default' Failure Flow to use if a flow fails, if not found then processing will immediately stop.
     </div>
 }
-    
-    <FlowTable @ref="Table" Data="@(SelectedType == FlowType.Failure ? DataFailure : DataStandard)" TItem="FlowListModel" Selection="SelectionMode.Multiple"
+    <FlowTable @ref="Table" Data="@(SelectedType == FlowType.Failure ? DataFailure : SelectedType == FlowType.SubFlow ? DataSubFlows : DataStandard)" TItem="FlowListModel" Selection="SelectionMode.Multiple"
             DoubleClick="@OnDoubleClick" TableIdentifier=@TableIdentifier>
             <ToolBar>            
                 <FlowTableButton Clicked=Add Icon="fas fa-plus" Label="Labels.Add" />

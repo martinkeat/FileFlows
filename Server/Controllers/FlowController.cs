@@ -328,14 +328,14 @@ public class FlowController : Controller
     {
         if (uid != Guid.Empty)
         {
-
             var flow = new FlowService().GetByUid(uid);
             if (flow == null)
                 return flow;
 
-            var elements = await GetElements();
+            var elements = await GetElements(uid);
 
             var scripts = (await new ScriptController().GetAll()).Select(x => x.Name).ToList();
+            var flows = (await new FlowService().GetAllAsync()).ToDictionary(x => x.Uid.ToString(), x => x.Name);
             foreach (var p in flow.Parts)
             {
                 if (p.Type == FlowElementType.Script && string.IsNullOrWhiteSpace(p.Name))
@@ -346,6 +346,14 @@ public class FlowController : Controller
                         p.Name = feName;
                     else
                         p.Name = "Missing Script";
+                }
+                else if (p.Type == FlowElementType.SubFlow && string.IsNullOrWhiteSpace(p.Name))
+                {
+                    string feName = p.FlowElementUid[8..]; // remove SubFlow:
+                    if (flows.TryGetValue(feName, out string? subflow) && string.IsNullOrWhiteSpace(subflow) == false)
+                        p.Name = subflow;
+                    else
+                        p.Name = "Missing Sub Flow";
                 }
 
                 if (p.FlowElementUid.EndsWith("." + p.Name))
@@ -377,7 +385,7 @@ public class FlowController : Controller
             }
 
             // try find basic node
-            var elements = await GetElements();
+            var elements = await GetElements(uid);
             var info = elements.Where(x => x.Uid == "FileFlows.BasicNodes.File.InputFile").FirstOrDefault();
             if (info != null && string.IsNullOrEmpty(info.Name) == false)
             {
@@ -402,17 +410,20 @@ public class FlowController : Controller
     /// <summary>
     /// Gets all nodes in the system
     /// </summary>
+    /// <param name="flowUid">the UID of the flow to get elements for</param>
+    /// <param name="type">the type of flow to get flow elements for</param>
     /// <returns>Returns a list of all the nodes in the system</returns>
     [HttpGet("elements")]
-    public Task<FlowElement[]> GetElements(FlowType type = FlowType.Standard)
-        => GetFlowElements(type);
+    public Task<FlowElement[]> GetElements([FromQuery] Guid flowUid, [FromQuery]FlowType type = FlowType.Standard)
+        => GetFlowElements(flowUid, type);
 
     /// <summary>
     /// Get all available flow elements in the system
     /// </summary>
+    /// <param name="flowUid">the UID of the flow to get elements for</param>
     /// <param name="type">the type of flow to get flow elements for</param>
     /// <returns>all the flow elements</returns>
-    internal static async Task<FlowElement[]> GetFlowElements(FlowType? type = null)
+    internal static async Task<FlowElement[]> GetFlowElements( Guid flowUid, FlowType? type = null)
     {
         var plugins = await new PluginController().GetAll(includeElements: true);
         var results = plugins.Where(x => x.Enabled && x.Elements != null).SelectMany(x => x.Elements)?.Where(x =>
@@ -429,8 +440,25 @@ public class FlowController : Controller
                 return false;
             }
 
+            if (type == FlowType.SubFlow)
+            {
+                if (x.Name.EndsWith("GotoFlow"))
+                    return false; // don't allow gotos inside a sub flow
+            }
+
             return true;
         })?.ToList();
+
+        if (type == FlowType.SubFlow)
+            results.InsertRange(0, GetSubFLowFlowElements());
+        
+        if (type == FlowType.Standard || type == FlowType.SubFlow)
+        {
+            var subflows = new FlowService().GetAll().Where(x => x.Type == FlowType.SubFlow && x.Uid != flowUid)
+                .OrderBy(x => x.Name)
+                .Select(SubFlowToElement);
+            results.AddRange(subflows);
+        }
 
         // get scripts 
         var scripts = (await new ScriptService().GetAll())?
@@ -498,6 +526,86 @@ public class FlowController : Controller
         }
     }
 
+    /// <summary>
+    /// Gets the output flow element used by sub flows
+    /// </summary>
+    /// <returns>the output flow element</returns>
+    private static FlowElement[] GetSubFLowFlowElements()
+    {
+        FlowElement eleInput = new FlowElement();
+        eleInput.Name = "Sub Flow Input";
+        eleInput.Uid = $"SubFlowInput";
+        eleInput.Icon = "fas fa-long-arrow-alt-down";
+        eleInput.Outputs = 1;
+        eleInput.Description = "Sub Flow Input";
+        eleInput.Group = "Sub Flow";
+        eleInput.Model = new ExpandoObject()!;
+        eleInput.Type = FlowElementType.Input;
+        
+        FlowElement eleOutput = new FlowElement();
+        eleOutput.Name = "Sub Flow Output";
+        eleOutput.Uid = $"SubFlowOutput";
+        eleOutput.Icon = "fas fa-sign-out-alt";
+        eleOutput.Inputs = 1;
+        eleOutput.Description = "Sub Flow Output";
+        IDictionary<string, object> model = new ExpandoObject()!;
+        model.Add("Output", 1);
+        eleOutput.Fields = new List<ElementField>()
+        {
+            new()
+            {
+                InputType = FormInputType.Int,
+                Name = "Output",
+                Description = "Output",
+            }
+        };
+        eleOutput.Group = "Sub Flow";
+        eleOutput.Type = FlowElementType.Output;
+        eleOutput.Model = model as ExpandoObject;
+        
+        return new[] { eleInput, eleOutput };
+    }
+    
+    
+    /// <summary>
+    /// Converts a sub flow to a flow element to be used in flow editor
+    /// </summary>
+    /// <returns>the flow element</returns>
+    private static FlowElement SubFlowToElement(Flow flow)
+    {
+        if (flow.Type != FlowType.SubFlow)
+            return null;
+        
+        FlowElement ele = new FlowElement();
+        ele.Name = flow.Name;
+        ele.Uid = $"SubFlow:" + flow.Uid;
+        ele.Icon = "fas fa-subway";
+        ele.Inputs = 1;
+        ele.Outputs = flow.Properties.Outputs;
+        ele.Description = flow.Properties.Description;
+        IDictionary<string, object> model = new ExpandoObject()!;
+        model.Add("Output", 1);
+        ele.Fields = new List<ElementField>();
+        foreach(var field  in flow.Properties.Fields)
+        {
+            if (string.IsNullOrWhiteSpace(field.Name))
+                continue;
+            
+            model.Add(field.Name, field.DefaultValue);
+            var f = new ElementField()
+            {
+                InputType = FormInputType.Int,
+                Name = field.Name,
+                Description = field.Description
+            };
+            ele.Fields.Add(f);
+        };
+        ele.Group = "Sub Flows";
+        ele.Type = FlowElementType.SubFlow;
+        ele.Model = model as ExpandoObject;
+        return ele;
+    }
+    
     /// <summary>
     /// Saves a flow
     /// </summary>
@@ -662,7 +770,7 @@ public class FlowController : Controller
         }
 
         //p.FlowElementUid == FileFlows.VideoNodes.DetectBlackBars
-        var flowElements = await GetElements((FlowType)(-1));
+        var flowElements = await GetElements(Guid.Empty, (FlowType)(-1));
         flowElements ??= new FlowElement[] { };
         var dictFlowElements = flowElements.ToDictionary(x => x.Uid, x => x);
 

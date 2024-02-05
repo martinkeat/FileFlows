@@ -193,6 +193,9 @@ canvas {
     &.Output {
         border-color:var(--flow-output);
     }
+    &.SubFlow {
+        border-color:var(--flow-subflow);
+    }
     &.Process {
         border-color:var(--flow-process);
     }
@@ -250,6 +253,9 @@ canvas {
 
     &.Output .icon-wrapper {
         border-color: var(--flow-output);
+    }
+    &.SubFlow .icon-wrapper {
+        border-color: var(--flow-subflow);
     }
 
     &.Process .icon-wrapper {
@@ -466,6 +472,16 @@ canvas {
         }
     }
 
+    &.SubFlow:not(.selected) {
+        .icon-wrapper, .input > div, .output:not(.output--1) > div {
+            border-color: var(--flow-subflow) !important;
+        }
+
+        .connected:not(.output--1) > div {
+            background-color: var(--flow-subflow) !important;
+        }
+    }
+    
     &.Process:not(.selected) {
         .icon-wrapper, .input > div, .output:not(.output--1) > div {
             border-color: var(--flow-process) !important;
@@ -915,4 +931,13 @@ canvas {
             left:275px;
         }
     }
+}
+
+.ctx-mn-newtab
+{
+    margin-left: 1rem;
+    margin-right: 0;
+    padding-right: 0;
+    font-size: 0.8rem;
+    opacity: 0.65;
 }

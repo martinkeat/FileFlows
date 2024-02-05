@@ -15,6 +15,10 @@ a, span {
     }
 }
 
+
 .pre-text{
     white-space:pre-wrap;
+}
+.markdown ::deep p:last-child {
+    margin-bottom:0;
 }

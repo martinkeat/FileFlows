@@ -50,6 +50,8 @@ window.ffFlowPart = {
                 div.classList.add('Communication');
             else if (part.type == 9)
                 div.classList.add('Script');
+            else if (part.type == 10)
+                div.classList.add('SubFlow');
         }
 
         var mc = new Hammer.Manager(div);

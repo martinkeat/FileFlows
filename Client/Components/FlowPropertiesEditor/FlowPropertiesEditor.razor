@@ -14,11 +14,21 @@
         
         <FlowTabs>
             <FlowTab Title="General">
-                <InputTextArea @bind-Value="@Flow.Properties.Description" Label="Pages.Flows.Fields.Description"></InputTextArea>
-                <InputText @bind-Value="@Flow.Properties.Author" Label="Pages.Flows.Fields.Author"></InputText>
-                <InputArray @bind-Value="@Flow.Properties.Tags" Label="Pages.Flow.Fields.Tags" />
-                <InputText @bind-Value="@Flow.Properties.MinimumVersion" Label="Pages.Flow.Fields.MinimumVersion" />
-                <InputKeyValue @bind-Value="@FlowVariables" Label="Pages.Flow.Fields.Variables" />
+                @if (Flow.Type != FlowType.SubFlow)
+                {
+                    <InputTextArea @bind-Value="@Flow.Properties.Description" Label="Pages.Flow.Fields.Description"></InputTextArea>
+                    <InputText @bind-Value="@Flow.Properties.Author" Label="Pages.Flow.Fields.Author"></InputText>
+                    <InputArray @bind-Value="@Flow.Properties.Tags" Label="Pages.Flow.Fields.Tags"/>
+                    <InputText @bind-Value="@Flow.Properties.MinimumVersion" Label="Pages.Flow.Fields.MinimumVersion"/>
+                    <InputKeyValue @bind-Value="@FlowVariables" Label="Pages.Flow.Fields.Variables" />
+                }
+                else
+                {
+                    <InputTextLabel Label=@lblSubFlowHelp Value=@lblSubFlowHelp HideLabel=@true Pre="true" Formatter="Markdown"></InputTextLabel>
+                    <hr />
+                    <InputTextArea @bind-Value="@Flow.Properties.Description" Label="Pages.Flow.Fields.SubFlowDescription"></InputTextArea>
+                    <InputNumber TItem="int" @bind-Value="@Flow.Properties.Outputs" Label="Pages.Flow.Fields.Outputs"></InputNumber>
+                }
             </FlowTab>
             <FlowTab Title="Fields">
                 <div class="field-wrapper">
@@ -92,7 +102,7 @@
                                         }
                                         else if (Editing.Type == FlowFieldType.Number)
                                         {
-                                            <InputNumber TItem="Int32" @bind-Value="@DefaultValueNumber" Label="Pages.Flow.Fields.Field.Required"></InputNumber>
+                                            <InputNumber TItem="Int32" @bind-Value="@DefaultValueNumber" Label="Pages.Flow.Fields.Field.Default"></InputNumber>
                                         }
                                         else if (Editing.Type == FlowFieldType.Select)
                                         {

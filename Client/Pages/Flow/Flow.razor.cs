@@ -38,7 +38,7 @@ public partial class Flow : ComponentBase, IDisposable
     /// </summary>
     private FlowPropertiesEditor PropertiesEditor { get; set; }
 
-    private string lblObsoleteMessage, lblEdit, lblHelp, lblDelete, lblCopy, lblPaste, lblRedo, lblUndo, lblAdd, lblProperties;
+    private string lblObsoleteMessage, lblEdit, lblHelp, lblDelete, lblCopy, lblPaste, lblRedo, lblUndo, lblAdd, lblProperties, lblEditSubFlow;
     private string SelectedElement;
 
     private int _Zoom = 100;
@@ -120,6 +120,7 @@ public partial class Flow : ComponentBase, IDisposable
         lblHelp = Translater.Instant("Labels.Help");
         lblProperties = Translater.Instant("Labels.Properties");
         lblObsoleteMessage = Translater.Instant("Labels.ObsoleteConfirm.Message");
+        lblEditSubFlow = Translater.Instant("Labels.EditSubFlow");
 
 
         NavigationCheck = async () =>
@@ -184,7 +185,7 @@ public partial class Flow : ComponentBase, IDisposable
             _FlowType = flow.Type;
             
             this.txtFilter = string.Empty;
-            await LoadFlowElements();
+            await LoadFlowElements(flow.Uid);
             await InitModel(flow);
 
             var dotNetObjRef = DotNetObjectReference.Create(this);
@@ -192,6 +193,9 @@ public partial class Flow : ComponentBase, IDisposable
 
             await WaitForRender();
             await jsRuntime.InvokeVoidAsync("ffFlow.redrawLines");
+            
+            if(flow.Type == FlowType.SubFlow)
+                PropertiesEditor.Show();
 
         }
         finally
@@ -201,9 +205,9 @@ public partial class Flow : ComponentBase, IDisposable
         }
     }
 
-    private async Task LoadFlowElements()
+    private async Task LoadFlowElements(Guid modelUid)
     {
-        var elementsResult = await GetElements(API_URL + "/elements?type=" + (int)_FlowType);
+        var elementsResult = await GetElements(API_URL + "/elements?type=" + (int)_FlowType + "&flowUid=" + modelUid);
         if (elementsResult.Success == false)
             return;
         
@@ -492,6 +496,11 @@ public partial class Flow : ComponentBase, IDisposable
             typeName = "Script";
             typeDisplayName = part.FlowElementUid[7..]; // 7 to remove Script:
         }
+        else if (part.Type == FlowElementType.SubFlow)
+        {
+            typeName = "SubFlow";
+            typeDisplayName = part.FlowElementUid[8..]; // 8 to remove SubFlow:
+        }
         else
         {
             typeName = part.FlowElementUid[(part.FlowElementUid.LastIndexOf(".") + 1)..];
@@ -512,7 +521,7 @@ public partial class Flow : ComponentBase, IDisposable
             InputType = FormInputType.Text
         });
 
-        if (PropertiesEditor.Visible)
+        if (PropertiesEditor.Visible && part.Type != FlowElementType.Output) // output is for sub flow outputs, we dont want to show the UID
         {
             fields.Insert(0, new ElementField
             {
@@ -595,10 +604,8 @@ public partial class Flow : ComponentBase, IDisposable
                                 }
 
                             }
-                            if (field.Parameters.ContainsKey("Options"))
-                                field.Parameters["Options"] = flowOptions;
-                            else
-                                field.Parameters.Add("Options", flowOptions);
+
+                            field.Parameters["Options"] = flowOptions;
                         }
                         else if (optp == "VARIABLE_LIST")
                         {
@@ -621,10 +628,8 @@ public partial class Flow : ComponentBase, IDisposable
                                 }
 
                             }
-                            if (field.Parameters.ContainsKey("Options"))
-                                field.Parameters["Options"] = variableOptions;
-                            else
-                                field.Parameters.Add("Options", variableOptions);
+
+                            field.Parameters["Options"] = variableOptions;
                         }
                     }
                 }
@@ -794,6 +799,13 @@ public partial class Flow : ComponentBase, IDisposable
             return;
         await jsRuntime.InvokeVoidAsync("ffFlow.contextMenu_Edit", item);
     }
+    private async Task EditSubFlow()
+    {
+        var item = this.SelectedParts?.FirstOrDefault();
+        if (item == null || item.Type != FlowElementType.SubFlow)
+            return;
+        await jsRuntime.InvokeVoidAsync("ffFlow.contextMenu_EditSubFlow", item);
+    }
 
     private void Copy() => jsRuntime.InvokeVoidAsync("ffFlow.contextMenu_Copy", SelectedParts);
     private void Paste() => jsRuntime.InvokeVoidAsync("ffFlow.contextMenu_Paste");
@@ -848,7 +860,7 @@ public partial class Flow : ComponentBase, IDisposable
         if (result == false)
             return; // no new scripts downloaded
 
-        await LoadFlowElements();
+        await LoadFlowElements(Model?.Uid ?? Guid.Empty);
     }
 
 } 

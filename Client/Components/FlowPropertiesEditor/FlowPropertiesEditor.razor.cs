@@ -24,7 +24,7 @@ public partial class FlowPropertiesEditor
     [Parameter] public Flow Flow { get; set; }
 
     private FlowField Editing;
-    protected string lblClose, lblHelp, lblTitle;
+    protected string lblClose, lblHelp, lblTitle, lblSubFlowHelp;
     
     /// <summary>
     /// Gets or sets if this is visible
@@ -54,6 +54,7 @@ public partial class FlowPropertiesEditor
         lblTitle = Translater.Instant("Pages.Flow.Labels.FlowProperties");
         lblClose = Translater.Instant("Labels.Close");
         lblHelp = Translater.Instant("Labels.Help");
+        lblSubFlowHelp  = Translater.Instant("Pages.Flow.Labels.SubFlowHelp");
         _FlowVariables = Flow.Properties.Variables?.Select(x => new KeyValuePair<string, string>(x.Key, x.Value.ToString()))
             ?.ToList() ?? new ();
         foreach (var field in Flow.Properties.Fields)

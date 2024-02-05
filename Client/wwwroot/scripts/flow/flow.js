@@ -540,6 +540,16 @@ window.ffFlow = {
         ffFlowPart.editFlowPart(part.uid);
     },
 
+    contextMenu_EditSubFlow: function(part){
+        if(!part)
+            return;
+        let currentUrl = window.location.href;
+        let baseUrl = currentUrl.substring(0, currentUrl.lastIndexOf('/'));
+        console.log('part', part);
+        let newUrl = baseUrl + '/' + part.flowElementUid.substring(8);
+        window.open(newUrl, '_blank');
+    },
+    
     contextMenu_Copy: function(parts) {
         let json = JSON.stringify(parts);
         navigator.clipboard.writeText(json);

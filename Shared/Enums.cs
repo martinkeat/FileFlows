@@ -70,7 +70,11 @@ public enum FlowType
     /// <summary>
     /// A special flow that is executed when a flow fails during execution
     /// </summary>
-    Failure = 1
+    Failure = 1,
+    /// <summary>
+    /// A special flow can be used with-in other flows but cannot be executed by itself
+    /// </summary>
+    SubFlow = 2
 }
 
 

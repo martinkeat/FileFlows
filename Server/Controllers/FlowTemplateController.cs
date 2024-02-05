@@ -29,6 +29,8 @@ public class FlowTemplateController : Controller
     [HttpGet]
     public async Task<List<FlowTemplateModel>> GetAll([FromQuery] FlowType type = FlowType.Standard)
     {
+        if (type == FlowType.SubFlow)
+            return SubFlows();
         if (Templates == null || FetchedAt < DateTime.Now.AddMinutes(-10))
             await RefreshTemplates();
         var plugins = new PluginService().GetAll().Where(x => x.Enabled)
@@ -44,6 +46,24 @@ public class FlowTemplateController : Controller
             .Where(x => x.Type == type)
             .ToList();
         return results;
+    }
+
+    private List<FlowTemplateModel> SubFlows()
+    {
+        return new List<FlowTemplateModel>()
+        {
+            new FlowTemplateModel()
+            {
+                Path = "subflow",
+                Name = "Blank Sub Flow",
+                Description = "A blank sub flow",
+                Author = "FileFlows",
+                Tags = new List<string>() { "Basic"},
+                Revision = 1,
+                Type = FlowType.SubFlow,
+                MinimumVersion = "24.02.1.999"
+            }
+        };
     }
 
     private List<FlowTemplateModel> LocalFlows()
@@ -78,7 +98,35 @@ public class FlowTemplateController : Controller
     public async Task<IActionResult> FetchTemplate([FromBody] FlowTemplateModel model)
     {
         string json;
-        if (model.Path.StartsWith("local:"))
+        if (model.Path == "subflow")
+        {
+            json = @"{
+    ""Name"": ""Subflow"",
+    ""Type"": 2,
+    ""Revision"": 1,
+    ""Properties"": {
+      ""Author"": ""FileFlows"",
+      ""Fields"": [],
+      ""Variables"": {}
+    },
+    ""Parts"": [
+      {
+        ""Uid"": ""c0807c25-7d23-44d0-8a40-2485a265c75b"",
+        ""Name"": """",
+        ""FlowElementUid"": ""FileFlows.BasicNodes.File.InputFile"",
+        ""xPos"": 450,
+        ""yPos"": 50,
+        ""Icon"": ""far fa-file"",
+        ""Label"": """",
+        ""Inputs"": 0,
+        ""Outputs"": 1,
+        ""OutputConnections"": [],
+        ""Type"": 0
+      }
+    ]
+  }";
+        }
+        else if (model.Path.StartsWith("local:"))
         {
             var uid = Guid.Parse(model.Path[6..]);
             var tFlow = new FlowService().GetByUid(uid);
@@ -178,107 +226,7 @@ public class FlowTemplateController : Controller
 
         return safeFilename;
     }
-
-
-    private (bool Success, FlowTemplate? Template, Flow Flow) GetFlowTemplate(Dictionary<string, FlowElement> parts, string json)
-    {
-        try
-        {
-            if (json.StartsWith("//"))
-            {
-                json = string.Join("\n", json.Split('\n').Skip(1)).Trim();
-            }
-
-            for (int i = 1; i < 50; i++)
-            {
-                Guid oldUid = new Guid("00000000-0000-0000-0000-0000000000" + (i < 10 ? "0" : "") + i);
-                Guid newUid = Guid.NewGuid();
-                json = json.Replace(oldUid.ToString(), newUid.ToString());
-            }
-
-            json = TemplateHelper.ReplaceWindowsPathIfWindows(json);
-            FlowTemplate jst = JsonSerializer.Deserialize<FlowTemplate>(json, new JsonSerializerOptions
-            {
-                AllowTrailingCommas = true,
-                PropertyNameCaseInsensitive = true
-            });
-
-            if (jst == null)
-                return (false, null, null);
-
-            try
-            {
-
-                List<FlowPart> flowParts = new ();
-                int y = DEFAULT_YPOS;
-                bool invalid = false;
-                foreach (var jsPart in jst.Parts)
-                {
-                    if (jsPart.Node == null || parts.ContainsKey(jsPart.Node) == false)
-                    {
-                        invalid = true;
-                        break;
-                    }
-
-                    var element = parts[jsPart.Node];
-
-                    flowParts.Add(new FlowPart
-                    {
-                        yPos = jsPart.yPos ?? y,
-                        xPos = jsPart.xPos ?? DEFAULT_XPOS,
-                        FlowElementUid = element.Uid,
-                        Outputs = jsPart.Outputs ?? element.Outputs,
-                        Inputs = element.Inputs,
-                        Type = element.Type,
-                        Name = jsPart.Name ?? string.Empty,
-                        Uid = jsPart.Uid,
-                        Icon = element.Icon,
-                        Model = jsPart.Model,
-                        OutputConnections = jsPart.Connections?.Select(x => new FlowConnection
-                        {
-                            Input = x.Input,
-                            Output = x.Output,
-                            InputNode = x.Node
-                        }).ToList() ?? new List<FlowConnection>()
-                    });
-                    y += 150;
-                }
-
-                if (invalid)
-                    return (false, null, null);
-
-                var flow = new Flow()
-                {
-                    Template = jst.Name,
-                    Name = jst.Name,
-                    Type = jst.Type,
-                    Uid = Guid.Empty,
-                    Parts = flowParts,
-                    Enabled = true,
-                    Properties = new ()
-                    {
-                        Author = jst.Author,
-                        Description = jst.Description
-                    }
-                };
-
-                return (true, jst, flow);
-            }
-            catch (Exception ex)
-            {
-                Logger.Instance.ELog("Template: " + jst.Name);
-                Logger.Instance.ELog("Error reading template: " + ex.Message + Environment.NewLine +
-                                     ex.StackTrace);
-            }
-
-        }
-        catch (Exception ex)
-        {
-            Logger.Instance.ELog("Error reading template: " + ex.Message + Environment.NewLine + ex.StackTrace);
-        }
-        return (false, null, null);
-    }
-
+    
     /// <summary>
     /// Converts flow fields to template fields
     /// </summary>

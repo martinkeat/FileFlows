@@ -28,6 +28,7 @@ public partial class Flows : ListPage<Guid, FlowListModel>
     private FlowSkyBox<FlowType> Skybox;
 
     private List<FlowListModel> DataStandard = new();
+    private List<FlowListModel> DataSubFlows = new();
     private List<FlowListModel> DataFailure = new();
     private FlowType SelectedType = FlowType.Standard;
 
@@ -64,7 +65,6 @@ public partial class Flows : ListPage<Guid, FlowListModel>
             App.Instance.NewFlowTemplate = flowTemplateModel.Flow;
             NavigationManager.NavigateTo("flows/" + Guid.Empty);
             return;
-
         }
         
         Logger.Instance.ILog("flowTemplateModel: " , flowTemplateModel);
@@ -174,6 +174,7 @@ public partial class Flows : ListPage<Guid, FlowListModel>
     {
         this.DataFailure = this.Data.Where(x => x.Type == FlowType.Failure).ToList();
         this.DataStandard = this.Data.Where(x => x.Type == FlowType.Standard).ToList();
+        this.DataSubFlows = this.Data.Where(x => x.Type == FlowType.SubFlow).ToList();
         this.Skybox.SetItems(new List<FlowSkyBoxItem<FlowType>>()
         {
             new ()
@@ -183,6 +184,13 @@ public partial class Flows : ListPage<Guid, FlowListModel>
                 Count = this.DataStandard.Count,
                 Value = FlowType.Standard
             },
+            App.Instance.FileFlowsSystem?.LicenseWebhooks == true ? new ()
+            {
+                Name = "Sub Flows",
+                Icon = "fas fa-subway",
+                Count = this.DataSubFlows.Count,
+                Value = FlowType.SubFlow
+            } : null,
             new ()
             {
                 Name = "Failure Flows",
@@ -190,7 +198,7 @@ public partial class Flows : ListPage<Guid, FlowListModel>
                 Count = this.DataFailure.Count,
                 Value = FlowType.Failure
             }
-        }, this.SelectedType);
+        }.Where(x => x != null).ToList(), this.SelectedType);
     }
 
     private void SetSelected(FlowSkyBoxItem<FlowType> item)

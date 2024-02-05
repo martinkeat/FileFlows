@@ -11,7 +11,8 @@ public enum FlowElementType
     BuildPart,
     Failure,
     Communication,
-    Script
+    Script,
+    SubFlow
 }
 
 /// <summary>

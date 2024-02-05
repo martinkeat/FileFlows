@@ -1,4 +1,4 @@
-﻿a, span {
+a, span {
   display: block;
   margin: 0.4rem auto auto;
   color: rgba(var(--color-rgb), 0.7);
@@ -15,3 +15,9 @@ a .fa-clipboard, span .fa-clipboard {
 .pre-text {
   white-space: pre-wrap;
 }
+
+.markdown ::deep p:last-child {
+  margin-bottom: 0;
+}
+
+/*# sourceMappingURL=InputTextLabel.razor.css.map */

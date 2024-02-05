@@ -180,6 +180,9 @@ canvas {
 ::deep .flow-part.Output, .flow-element.Output {
   border-color: var(--flow-output);
 }
+::deep .flow-part.SubFlow, .flow-element.SubFlow {
+  border-color: var(--flow-subflow);
+}
 ::deep .flow-part.Process, .flow-element.Process {
   border-color: var(--flow-process);
 }
@@ -234,6 +237,9 @@ canvas {
 }
 .flow-element.Output .icon-wrapper {
   border-color: var(--flow-output);
+}
+.flow-element.SubFlow .icon-wrapper {
+  border-color: var(--flow-subflow);
 }
 .flow-element.Process .icon-wrapper {
   border-color: var(--flow-process);
@@ -472,6 +478,12 @@ canvas {
 }
 ::deep .flow-part.Output:not(.selected) .connected:not(.output--1) > div {
   background-color: var(--flow-output) !important;
+}
+::deep .flow-part.SubFlow:not(.selected) .icon-wrapper, ::deep .flow-part.SubFlow:not(.selected) .input > div, ::deep .flow-part.SubFlow:not(.selected) .output:not(.output--1) > div {
+  border-color: var(--flow-subflow) !important;
+}
+::deep .flow-part.SubFlow:not(.selected) .connected:not(.output--1) > div {
+  background-color: var(--flow-subflow) !important;
 }
 ::deep .flow-part.Process:not(.selected) .icon-wrapper, ::deep .flow-part.Process:not(.selected) .input > div, ::deep .flow-part.Process:not(.selected) .output:not(.output--1) > div {
   border-color: var(--flow-process) !important;
@@ -833,6 +845,14 @@ canvas {
 }
 ::deep .flow-part .outputs-10 .output-10 {
   left: 275px;
+}
+
+.ctx-mn-newtab {
+  margin-left: 1rem;
+  margin-right: 0;
+  padding-right: 0;
+  font-size: 0.8rem;
+  opacity: 0.65;
 }
 
 /*# sourceMappingURL=Flow.razor.css.map */

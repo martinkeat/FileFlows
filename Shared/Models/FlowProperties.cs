@@ -28,6 +28,11 @@ public class FlowProperties
     /// Gets or sets tags for this flow
     /// </summary>
     public string[] Tags { get; set; }
+    
+    /// <summary>
+    /// Gets or sets the number of outputs, only used for subflows
+    /// </summary>
+    public int Outputs { get; set; }
 
     /// <summary>
     /// Gets or sets the fields

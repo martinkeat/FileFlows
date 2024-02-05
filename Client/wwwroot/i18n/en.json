@@ -19,6 +19,7 @@
     "None": "None",
     "Add": "Add",
     "Edit": "Edit",
+    "EditSubFlow": "Edit Sub Flow",
     "Next": "Next",
     "Remove":"Remove",
     "Copy":"Copy",
@@ -262,7 +263,8 @@
       "Title": "Flow",
       "Labels": {
         "EditFlow": "Flow: {Name}",
-        "FlowProperties": "Flow Properties"
+        "FlowProperties": "Flow Properties",
+        "SubFlowHelp": "To add input fields to a sub flow so you can pass in custom parameters to this sub flow, create these on the `Fields` tab.\n\nA sub flow must have a single `Input` which can be any valid input flow elements, e.g. `Input File`, `Video File` etc."
       },
       "Messages": {
         "Close": "Are you sure you want to close and discard all changes?"
@@ -274,8 +276,12 @@
         "VariablesKey": "Name",
         "VariablesValue": "Value",
         "Description": "The description of this flow template.",
+        "SubFlowDescription": "Description",
+        "SubFlowDescription-Placeholder": "The description of this sub flow which will be shown when selecting this sub flow in a flow.",
         "Author": "Author",
         "Author-Help": "Optionally specify the author of this flow.",
+        "Outputs": "Outputs",
+        "Outputs-Help": "The number of outputs this sub flow has.  This is the number of outputs that will be available when using this sub flow in another flow",
         "Field": {            
           "Description": "An optional description to be shown with this field.  This can be help text for the field.",
           "FlowElementField": "Element Field",
