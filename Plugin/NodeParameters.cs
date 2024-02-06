@@ -280,7 +280,7 @@ public class NodeParameters
         this.RelativeFile = string.Empty;
         this.TempPath = string.Empty;
         this.Logger = logger;
-        InitFile(filename);
+        //InitFile(filename);
         this.Process = new ProcessHelper(logger, this.Fake);
     }
 

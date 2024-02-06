@@ -227,7 +227,7 @@ public partial class Editor : InputRegister, IDisposable
             this.lblSaving = lblSave;
         }
 
-        this.EditorDescription = Translater.Instant(args.TypeName + ".Description");
+        this.EditorDescription = Translater.TranslateIfNeeded(args.Description?.EmptyAsNull() ?? (args.TypeName + ".Description"));
         
         BuildFieldsRenderFragment();
         
@@ -683,6 +683,10 @@ public class EditorOpenArgs
     /// Gets or sets the title of the editor
     /// </summary>
     public string Title { get; set; }
+    /// <summary>
+    /// Gets or sets the description to show, if not set, editor will try to find a description using the TypeName
+    /// </summary>
+    public string Description { get; set; }
     /// <summary>
     /// Gets or sets the main fields to show in the editor
     /// </summary>

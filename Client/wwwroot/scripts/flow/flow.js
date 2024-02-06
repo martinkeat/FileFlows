@@ -438,7 +438,7 @@ window.ffFlow = {
                 outputNode.setAttribute('title', 'FAILED');
             return;
         }
-        if(part.flowElementUid.startsWith('Script:'))
+        if(part.flowElementUid.startsWith('Script:') || part.flowElementUid.startsWith('SubFlow:'))
         {
             part.OutputLabels = {};
             for(let i=0; i<element.outputLabels.length;i++)

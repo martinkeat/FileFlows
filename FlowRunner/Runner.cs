@@ -1,13 +1,12 @@
-﻿using System.Diagnostics;
-using FileFlows.Server;
-using FileFlows.ServerShared;
+﻿using FileFlows.ServerShared;
 using FileFlows.ServerShared.Helpers;
 using FileFlows.Plugin;
 using FileFlows.ServerShared.Services;
 using FileFlows.Shared;
 using FileFlows.Shared.Models;
-using System.Reflection;
 using System.Text.RegularExpressions;
+using FileFlows.FlowRunner.Helpers;
+using FileFlows.FlowRunner.RunnerFlowElements;
 using FileFlows.Plugin.Services;
 using FileFlows.ServerShared.FileServices;
 
@@ -19,12 +18,24 @@ namespace FileFlows.FlowRunner;
 /// </summary>
 public class Runner
 {
-    private FlowExecutorInfo Info;
-    private Flow Flow;
+    internal FlowExecutorInfo Info { get; private set; }
+     private Flow Flow;
     private ProcessingNode Node;
-    private CancellationTokenSource CancellationToken = new CancellationTokenSource();
-    private bool Canceled = false;
+    internal readonly CancellationTokenSource CancellationToken = new CancellationTokenSource();
+    internal bool Canceled { get; private set; }
     private string WorkingDir;
+
+    /// <summary>
+    /// The number of flow elements that currently have been executed
+    /// </summary>
+    private int ExecutedSteps = 0;
+
+    /// <summary>
+    /// The number of flow elements that have been executed and that count towards the total allowed
+    /// We dont count steps like startup, enter sub flow, sub flow output etc
+    /// </summary>
+    private int ExecutedStepsCountedTowardsTotal = 0;
+    
     //private string ScriptDir, ScriptSharedDir, ScriptFlowDir;
 
     /// <summary>
@@ -62,7 +73,7 @@ public class Runner
     /// <param name="output">the output after executing the flow node</param>
     /// <param name="duration">how long it took to execution</param>
     /// <param name="part">the flow node part</param>
-    private void RecordNodeExecution(string nodeName, string nodeUid, int output, TimeSpan duration, FlowPart part)
+    internal void RecordNodeExecution(string nodeName, string nodeUid, int output, TimeSpan duration, FlowPart part)
     {
         if (Info.LibraryFile == null)
             return;
@@ -77,33 +88,6 @@ public class Runner
         });
     }
 
-    /// <summary>
-    /// Downloads a file from the specified server URL and saves it to the temporary path.
-    /// </summary>
-    /// <param name="libFile">The LibraryFile object representing the file to download.</param>
-    /// <param name="serverUrl">The URL of the server where the file is located.</param>
-    /// <param name="tempPath">The temporary path where the downloaded file will be saved.</param>
-    /// <returns>The full path of the downloaded file if successful, otherwise an empty string.</returns>
-    private string DownloadFile(ILogger logger, LibraryFile libFile, string serverUrl, string tempPath)
-    {
-        string filename = Path.Combine(tempPath, new FileInfo(libFile.Name).Name);
-        var downloader = new FileDownloader(logger, serverUrl, Program.Uid);
-        downloader.OnProgress += (percent, eta, speed) =>
-        {
-            Info.CurrentPartPercent = percent;
-            RecordAdditionalInfo("Progress", percent + "%", new TimeSpan(0, 1, 0));
-            RecordAdditionalInfo("Speed", speed, new TimeSpan(0, 1, 0));
-            RecordAdditionalInfo("ETA", eta == null ? null : Plugin.Helpers.TimeHelper.ToHumanReadableString(eta.Value), new TimeSpan(0, 1, 0));
-        };
-        var result = downloader.DownloadFile(libFile.Name, filename).Result;
-        if (result.IsFailed)
-        {
-            logger.ELog("Failed to remotely download file: " + result.Error);
-            return string.Empty;
-        }
-
-        return filename;
-    }
 
     /// <summary>
     /// Starts the flow runner processing
@@ -224,8 +208,7 @@ public class Runner
         // calculates the final finger print
         if (string.IsNullOrWhiteSpace(Info.LibraryFile.OutputPath) == false)
         {
-            Info.LibraryFile.FinalFingerprint =
-                FileFlows.ServerShared.Helpers.FileHelper.CalculateFingerprint(Info.LibraryFile.OutputPath);
+            Info.LibraryFile.FinalFingerprint = FileHelper.CalculateFingerprint(Info.LibraryFile.OutputPath);
         }
 
         await Complete(log);
@@ -294,13 +277,20 @@ public class Runner
     /// <summary>
     /// Called when the current flow step changes, ie it moves to a different node to execute
     /// </summary>
-    /// <param name="step">the step index</param>
     /// <param name="partName">the step part name</param>
-    private void StepChanged(int step, string partName)
+    /// <param name="dontCountTowardsTotal">if this step should not count towards the total number of steps allowed</param>
+    internal Result<bool> StepChanged(string partName, bool dontCountTowardsTotal = false)
     {
+        ++ExecutedSteps;
+        if (dontCountTowardsTotal == false)
+            ++ExecutedStepsCountedTowardsTotal;
+        
+        if (ExecutedStepsCountedTowardsTotal > Program.Config.MaxNodes)
+             return Result<bool>.Fail("Exceeded maximum number of flow elements to process");
+
         Info.AdditionalInfos.Clear(); // clear current additional info, may need to change this in the future
         Info.CurrentPartName = partName;
-        Info.CurrentPart = step;
+        Info.CurrentPart = ExecutedSteps;
         Info.CurrentPartPercent = 0;
         try
         {
@@ -309,8 +299,10 @@ public class Runner
         catch (Exception ex) 
         { 
             // silently fail, not a big deal, just incremental progress update
-            Program.Logger.WLog("Failed to record step change: " + step + " : " + partName);
+            Program.Logger.WLog("Failed to record step change: " + ExecutedSteps + " : " + partName);
         }
+
+        return true;
     }
 
     /// <summary>
@@ -409,33 +401,33 @@ public class Runner
     /// <param name="logger">the logger used to log messages</param>
     private void RunActual(FlowLogger logger)
     {
-        string initialFile = null;
-        int additionalPartsForTotal = 0;
-        if (Info.IsRemote)
-        {
-            if (Program.Config.AllowRemote)
-            {
-                Info.TotalParts = Flow.Parts.Count + 1;
-                Info.CurrentPart = 1;
-                Info.CurrentPartName = "Downloading";
-                logger.ILog("Downloading Parts: " + Info.TotalParts);
-                initialFile = DownloadFile(logger, Info.LibraryFile, Service.ServiceBaseUrl, WorkingDir);
-                additionalPartsForTotal = 1;
-            }
-
-            if (string.IsNullOrEmpty(initialFile))
-            {
-                Info.LibraryFile.Status = FileStatus.MappingIssue;
-                SendUpdate(Info, waitMilliseconds: 1000).Wait();
-                return;
-            }
-        }
-        else
-        {
-            initialFile = Info.LibraryFile.Name;
-        }
+        // string initialFile = null;
+        // int additionalPartsForTotal = 0;
+        // if (Info.IsRemote)
+        // {
+        //     if (Program.Config.AllowRemote)
+        //     {
+        //         Info.TotalParts = Flow.Parts.Count + 1;
+        //         Info.CurrentPart = 1;
+        //         Info.CurrentPartName = "Downloading";
+        //         logger.ILog("Downloading Parts: " + Info.TotalParts);
+        //         initialFile = DownloadFile(logger, Info.LibraryFile, Service.ServiceBaseUrl, WorkingDir);
+        //         additionalPartsForTotal = 1;
+        //     }
+        //
+        //     if (string.IsNullOrEmpty(initialFile))
+        //     {
+        //         Info.LibraryFile.Status = FileStatus.MappingIssue;
+        //         SendUpdate(Info, waitMilliseconds: 1000).Wait();
+        //         return;
+        //     }
+        // }
+        // else
+        // {
+        //     initialFile = Info.LibraryFile.Name;
+        // }
         
-        nodeParameters = new NodeParameters(initialFile, logger,
+        nodeParameters = new NodeParameters(Info.LibraryFile.Name, logger,
             Info.IsDirectory, Info.LibraryPath, fileService: FileService.Instance)
         {
             Enterprise = Program.Config.Enterprise,
@@ -478,7 +470,8 @@ public class Runner
         {
             SharedDirectory = Path.Combine(Program.ConfigDirectory, "Scripts", "Shared"),
             FileFlowsUrl = Service.ServiceBaseUrl,
-            PluginMethodInvoker = PluginMethodInvoker
+            PluginMethodInvoker = (plugin, method, methodArgs) 
+                => Helpers.PluginHelper.PluginMethodInvoker(nodeParameters, plugin, method, methodArgs)
         };
         foreach (var variable in Program.Config.Variables)
         {
@@ -495,14 +488,11 @@ public class Runner
             nodeParameters.Variables.TryAdd(variable.Key, value);
         }
 
-        LoadFlowVariables(Flow.Properties?.Variables);
         
         Plugin.Helpers.FileHelper.DontChangeOwner = Node.DontChangeOwner;
         Plugin.Helpers.FileHelper.DontSetPermissions = Node.DontSetPermissions;
         Plugin.Helpers.FileHelper.Permissions = Node.Permissions;
 
-        List<Guid> runFlows = new List<Guid>();
-        runFlows.Add(Flow.Uid);
 
         nodeParameters.RunnerUid = Info.Uid;
         nodeParameters.TempPath = WorkingDir;
@@ -531,498 +521,25 @@ public class Runner
             statService.Record(name, value);
         nodeParameters.AdditionalInfoRecorder = RecordAdditionalInfo;
 
-        LogHeader(nodeParameters, Program.ConfigDirectory, Flow, Node);
-        DownloadPlugins();
-        DownloadScripts();
+        var flow = FlowHelper.GetStartupFlow(Info.IsRemote, Flow);
 
-        var status = ExecuteFlow(Flow, runFlows, additionalFlowParts: additionalPartsForTotal);
-        SetStatus(status);
-        if(status == FileStatus.ProcessingFailed && Canceled == false)
+        var subFlowExecutor = new FlowFlowElement()
         {
-            // try run FailureFlow
-            var failureFlow =
-                Program.Config.Flows?.FirstOrDefault(x => x.Type == FlowType.Failure && x.Default && x.Enabled);
-            if (failureFlow != null)
-            {
-                nodeParameters.UpdateVariables(new Dictionary<string, object>
-                {
-                    { "FailedNode", CurrentNode?.Name },
-                    { "FlowName", Flow.Name }
-                });
-                ExecuteFlow(failureFlow, runFlows, failure: true);
-            }
-        }
-    }
-
-    /// <summary>
-    /// Loads flow variables into the node parameters variables
-    /// </summary>
-    /// <param name="flowVariables">the variables</param>
-    private void LoadFlowVariables(Dictionary<string, object> flowVariables)
-    {
-        if (flowVariables?.Any() != true)
-            return;
-        
-        foreach (var variable in flowVariables)
-        {
-            object value = variable.Value;
-            if (value is JsonElement je)
-            {
-                if (je.ValueKind == JsonValueKind.False)
-                    value = false;
-                else if (je.ValueKind == JsonValueKind.True)
-                    value = true;
-                else if (je.ValueKind == JsonValueKind.Number)
-                    value = je.GetInt32();
-                else if (je.ValueKind == JsonValueKind.String)
-                    value = je.GetString() ?? string.Empty;
-                else
-                    continue; // bad type
-            }
-            this.nodeParameters.Variables[variable.Key] = value;
-        }
-
-    }
-
-    /// <summary>
-    /// Logs the version info for all plugins etc
-    /// </summary>
-    /// <param name="nodeParameters">the node parameters</param>
-    /// <param name="configDirectory">the directory of the configuration</param>
-    /// <param name="flow">the flow being executed</param>
-    /// <param name="node">the node executing this flow</param>
-    private static void LogHeader(NodeParameters nodeParameters, string configDirectory, Flow flow, ProcessingNode node)
-    {
-        nodeParameters.Logger!.ILog("Version: " + Globals.Version);
-        if (Globals.IsDocker)
-            nodeParameters.Logger!.ILog("Platform: Docker" + (Globals.IsArm ? " (ARM)" : string.Empty));
-        else if (Globals.IsLinux)
-            nodeParameters.Logger!.ILog("Platform: Linux" + (Globals.IsArm ? " (ARM)" : string.Empty));
-        else if (Globals.IsWindows)
-            nodeParameters.Logger!.ILog("Platform: Windows" + (Globals.IsArm ? " (ARM)" : string.Empty));
-        else if (Globals.IsMac)
-            nodeParameters.Logger!.ILog("Platform: Mac" + (Globals.IsArm ? " (ARM)" : string.Empty));
-
-        nodeParameters.Logger!.ILog("File: " + nodeParameters.FileName);
-        nodeParameters.Logger!.ILog("Executing Flow: " + flow.Name);
-        nodeParameters.Logger!.ILog("File Service: " + FileService.Instance.GetType().Name);
-        nodeParameters.Logger!.ILog("Processing Node: " + node.Name);
-
-        var dir = Path.Combine(configDirectory, "Plugins");
-        if (Directory.Exists(dir))
-        {
-            foreach (var dll in new DirectoryInfo(dir).GetFiles("*.dll", SearchOption.AllDirectories))
-            {
-                try
-                {
-                    string version = string.Empty;
-                    var versionInfo = FileVersionInfo.GetVersionInfo(dll.FullName);
-                    if (versionInfo.CompanyName != "FileFlows")
-                        continue;
-                    version = versionInfo.FileVersion?.EmptyAsNull() ?? versionInfo.ProductVersion ?? string.Empty;
-                    nodeParameters.Logger!.ILog("Plugin: " + dll.Name + " version " +
-                                                (version?.EmptyAsNull() ?? "unknown"));
-                }
-                catch (Exception)
-                {
-                }
-            }
-        }
-
-        LogFFmpegVersion(nodeParameters);
-
-        foreach (var v in nodeParameters.Variables)
-        {
-            if (v.Key.StartsWith("file.") || v.Key.StartsWith("folder.") || v.Key == "ext" || v.Key.Contains(".Url") ||
-                v.Key.Contains("Key"))
-                continue;
-            
-            nodeParameters.Logger!.ILog($"Variables['{v.Key}'] = {v.Value}");
-        }
-    }
-
-    private FileStatus ExecuteFlow(Flow flow, List<Guid> runFlows, bool failure = false, int additionalFlowParts = 0)
-    { 
-        int count = 0;
-        ObjectReference? gotoFlow = null;
-        nodeParameters.GotoFlow = (flow) =>
-        {
-            if (runFlows.Contains(flow.Uid))
-                throw new Exception($"Flow '{flow.Uid}' ['{flow.Name}'] has already been executed, cannot link to existing flow as this could cause an infinite loop.");
-            gotoFlow = flow;
+            Flow = flow,
+            Runner = this
         };
 
-        // find the first node
-        var part = flow.Parts.FirstOrDefault(x => x.Inputs == 0);
-        if (part == null)
-        {
-            nodeParameters.Logger!.ELog("Failed to find Input node");
-            return FileStatus.ProcessingFailed;
-        }
-
-        int step = additionalFlowParts;
-        StepChanged(step, part.Name);
-
-        // need to clear this in case the file is being reprocessed
-        //if(failure == false)
-        //    Info.LibraryFile.ExecutedNodes = new List<ExecutedNode>();
-       
-        while (count++ < Math.Max(25, Program.Config.MaxNodes))
-        {
-            if (CancellationToken.IsCancellationRequested || Canceled)
-            {
-                nodeParameters.Logger?.WLog("Flow was canceled");
-                nodeParameters.Result = NodeResult.Failure;
-                return FileStatus.ProcessingFailed;
-            }
-            if (part == null)
-            {
-                nodeParameters.Logger?.WLog("Flow part was null");
-                nodeParameters.Result = NodeResult.Failure;
-                return FileStatus.ProcessingFailed;
-            }
-
-            DateTime nodeStartTime = DateTime.Now;
-            try
-            {
-
-                CurrentNode = LoadNode(part!);
-
-                if (CurrentNode == null)
-                {
-                    // happens when canceled or when the node failed to load
-                    if(part.Name == "FileFlows.VideoNodes.VideoFile")
-                        nodeParameters.Logger?.ELog("Video Nodes Plugin missing, download the from the Plugins page");
-                    else
-                        nodeParameters.Logger?.ELog("Failed to load node: " + part.Name);                    
-                    nodeParameters.Result = NodeResult.Failure;
-                    return FileStatus.ProcessingFailed;
-                }
-                ++step;
-                StepChanged(step, CurrentNode.Name);
-
-                nodeParameters.Logger?.ILog(new string('=', 70));
-                nodeParameters.Logger?.ILog($"Executing Node {(Info.LibraryFile.ExecutedNodes.Count + 1)}: {part.Label?.EmptyAsNull() ?? part.Name?.EmptyAsNull() ?? CurrentNode.Name} [{CurrentNode.GetType().FullName}]");
-                nodeParameters.Logger?.ILog(new string('=', 70));
-                nodeParameters.Logger?.ILog("Working File: " + nodeParameters.WorkingFile);
-
-                gotoFlow = null; // clear it, in case this node requests going to a different flow
-                
-                nodeStartTime = DateTime.Now;
-                int output = 0;
-                try
-                {
-                    if (CurrentNode.PreExecute(nodeParameters) == false)
-                        throw new Exception("PreExecute failed");
-                    output = CurrentNode.Execute(nodeParameters);
-                    RecordNodeFinish(nodeStartTime, output);
-                }
-                catch(Exception)
-                {
-                    output = -1;
-                    throw;
-                }
-
-                if (gotoFlow != null)
-                {
-                    var newFlow = Program.Config.Flows.FirstOrDefault(x => x.Uid == gotoFlow.Uid);
-                    if (newFlow == null)
-                    {
-                        nodeParameters.Logger?.ELog("Unable goto flow with UID:" + gotoFlow.Uid + " (" + gotoFlow.Name + ")");
-                        nodeParameters.Result = NodeResult.Failure;
-                        return FileStatus.ProcessingFailed;
-                    }
-                    flow = newFlow;
-
-                    nodeParameters.Logger?.ILog("Changing flows to: " + newFlow.Name);
-                    this.Flow = newFlow;
-                    runFlows.Add(gotoFlow.Uid);
-
-                    // find the first node
-                    part = flow.Parts.Where(x => x.Inputs == 0).FirstOrDefault();
-                    if (part == null)
-                    {
-                        nodeParameters.Logger!.ELog("Failed to find Input node");
-                        return FileStatus.ProcessingFailed;
-                    }
-                    // update the flow properties if there are any
-                    LoadFlowVariables(flow.Properties?.Variables);
-                    Info.TotalParts = flow.Parts.Count;
-                    step = 0;
-                }
-                else
-                {
-                    nodeParameters.Logger?.DLog("output: " + output);
-                    if (output == -1 && part.ErrorConnection == null)
-                    {
-                        // the execution failed                     
-                        nodeParameters.Logger?.ELog("Flow Element returned error code: " + CurrentNode!.Name);
-                        nodeParameters.Result = NodeResult.Failure;
-                        return FileStatus.ProcessingFailed;
-                    }
-
-                    var outputNode = output == -1
-                        ? part.ErrorConnection
-                        : part.OutputConnections?.FirstOrDefault(x => x.Output == output);
-                    
-                    if (outputNode == null)
-                    {
-                        nodeParameters.Logger?.DLog("Flow completed");
-                        // flow has completed
-                        nodeParameters.Result = NodeResult.Success;
-                        nodeParameters.Logger?.DLog("File status set to processed");
-                        return FileStatus.Processed;
-                    }
-
-                    var newPart = outputNode == null ? null : flow.Parts.Where(x => x.Uid == outputNode.InputNode).FirstOrDefault();
-                    if (newPart == null)
-                    {
-                        // couldn't find the connection, maybe bad data, but flow has now finished
-                        nodeParameters.Logger?.WLog("Couldn't find output node, flow completed: " + outputNode?.Output);
-                        return FileStatus.Processed;
-                    }
-
-                    part = newPart;
-                }
-            }
-            catch (Exception ex)
-            {
-                nodeParameters.Result = NodeResult.Failure;
-                nodeParameters.Logger?.ELog("Execution error: " + ex.Message + Environment.NewLine + ex.StackTrace);
-                Program.Logger?.ELog("Execution error: " + ex.Message + Environment.NewLine + ex.StackTrace);
-                RecordNodeFinish(nodeStartTime, -1);
-                return FileStatus.ProcessingFailed;
-            }
-        }
-        nodeParameters.Logger?.ELog("Too many nodes in flow, processing aborted");
-        return FileStatus.ProcessingFailed;
-
-        void RecordNodeFinish(DateTime nodeStartTime, int output)
-        {
-            TimeSpan executionTime = DateTime.Now.Subtract(nodeStartTime);
-            if(failure == false)
-                RecordNodeExecution(part.Label?.EmptyAsNull() ?? part.Name?.EmptyAsNull() ?? CurrentNode.Name, part.FlowElementUid, output, executionTime, part);
-            nodeParameters.Logger?.ILog("Node execution time: " + executionTime);
-            nodeParameters.Logger?.ILog("Node output: " + output);
-            nodeParameters.Logger?.ILog(new string('=', 70));
-        }
-    }
-
-    private void DownloadScripts()
-    {
-        if (Directory.Exists(nodeParameters.TempPath) == false)
-            Directory.CreateDirectory(nodeParameters.TempPath);
-        
-        DirectoryHelper.CopyDirectory(
-            Path.Combine(Program.ConfigDirectory, "Scripts"),
-            Path.Combine(nodeParameters.TempPath, "Scripts"));
+        int result = subFlowExecutor.Execute(nodeParameters);
+        if(result == RunnerCodes.Completed)
+            SetStatus(FileStatus.Processed);
+        else if(result is RunnerCodes.Failure or RunnerCodes.TerminalExit)
+            SetStatus(FileStatus.ProcessingFailed);
+        else if(result == RunnerCodes.RunCanceled)
+            SetStatus(FileStatus.ProcessingFailed); // do we need this?
+        else if(result == RunnerCodes.MappingIssue)
+            SetStatus(FileStatus.MappingIssue); 
     }
     
-    private void DownloadPlugins()
-    {
-        var dir = Path.Combine(Program.ConfigDirectory, "Plugins");
-        if (Directory.Exists(dir) == false)
-            return;
-        foreach (var sub in new DirectoryInfo(dir).GetDirectories())
-        {
-            string dest = Path.Combine(nodeParameters.TempPath, sub.Name);
-            DirectoryHelper.CopyDirectory(sub.FullName, dest);
-        }
-    }
-
-    private Type? GetNodeType(string fullName)
-    {
-        foreach (var dll in new DirectoryInfo(WorkingDir).GetFiles("*.dll", SearchOption.AllDirectories))
-        {
-            try
-            {
-                //var assembly = Context.LoadFromAssemblyPath(dll.FullName);
-                var assembly = Assembly.LoadFrom(dll.FullName);
-                var types = assembly.GetTypes();
-                var pluginType = types.FirstOrDefault(x => x.IsAbstract == false && x.FullName == fullName);
-                if (pluginType != null)
-                    return pluginType;
-            }
-            catch (Exception ex)
-            {
-                Program.Logger.WLog("Failed to load assembly: " + dll.FullName + " > " + ex.Message);
-            }
-        }
-        return null;
-    }
-
-    private Node LoadNode(FlowPart part)
-    {
-        if (part.Type == FlowElementType.Script)
-        {
-            // special type
-            var nodeScript = new ScriptNode();
-            nodeScript.Model = part.Model;
-            string scriptName = part.FlowElementUid[7..]; // 7 to remove "Scripts." 
-            nodeScript.Code = GetScriptCode(scriptName);
-            if (string.IsNullOrEmpty(nodeScript.Code))
-                throw new Exception("Script not found");
-            
-            if(string.IsNullOrWhiteSpace(part.Name))
-                part.Name = scriptName;
-            return nodeScript;
-        }
-        
-        var nt = GetNodeType(part.FlowElementUid);
-        if (nt == null)
-        {
-            //throw new Exception("Failed to load Node: " + part.FlowElementUid);
-            //return new Node();
-            return null;
-        }
-
-        var node = Activator.CreateInstance(nt);
-        if(node == null)
-            return default;
-        var properties = nt.GetProperties(BindingFlags.Instance | BindingFlags.Public);
-        if (part.Model is IDictionary<string, object> dict)
-        {
-            foreach (var k in dict.Keys)
-            {
-                try
-                {
-                    if (k == "Name")
-                        continue; // this is just the display name in the flow UI
-                    var prop = properties.FirstOrDefault(x => x.Name == k);
-                    if (prop == null)
-                        continue;
-
-                    if (dict[k] == null)
-                        continue;
-
-                    var value = Converter.ConvertObject(prop.PropertyType, dict[k]);
-                    if (value != null)
-                        prop.SetValue(node, value);
-                }
-                catch (Exception ex)
-                {
-                    Program.Logger?.ELog("Failed setting property: " + ex.Message + Environment.NewLine + ex.StackTrace);
-                    Program.Logger?.ELog("Type: " + nt.Name + ", Property: " + k);
-                }
-            }
-        }
-        
-        // load any values that have been set by properties
-        foreach (var prop in properties)
-        {
-            string strongName = part.Name + "." + prop.Name;
-            if (nodeParameters.Variables.TryGetValue(strongName, out object varValue) == false)
-                continue;
-            
-            var value = Converter.ConvertObject(prop.PropertyType, varValue);
-            if (value != null)
-                prop.SetValue(node, value);
-        }
-        return (Node)node;
-
-    }
-
-    /// <summary>
-    /// Loads the code for a script
-    /// </summary>
-    /// <param name="scriptName">the name of the script</param>
-    /// <returns>the code of the script</returns>
-    private string GetScriptCode(string scriptName)
-    {
-        if (scriptName.EndsWith(".js") == false)
-            scriptName += ".js";
-        var file = new FileInfo(Path.Combine(Program.ConfigDirectory, "Scripts", "Flow", scriptName));
-        if (file.Exists == false)
-            return string.Empty;
-        return File.ReadAllText(file.FullName);
-    }
-
-    private object PluginMethodInvoker(string plugin, string method, object[] args)
-    {
-        var dll = new DirectoryInfo(WorkingDir).GetFiles(plugin + ".dll", SearchOption.AllDirectories).FirstOrDefault();
-        if (dll == null)
-        {
-            Program.Logger.ELog("Failed to locate plugin: " + plugin);
-            return null;
-        }
-
-        try
-        {
-            //var assembly = Context.LoadFromAssemblyPath(dll.FullName);
-            var assembly = Assembly.LoadFrom(dll.FullName);
-            var type = assembly.GetTypes().FirstOrDefault(x => x.Name == "StaticMethods");
-            if (type == null)
-            {
-                Program.Logger.ELog("No static methods found in plugin: " + plugin);
-                return null;
-            }
-
-            var methodInfo = type.GetMethod(method, BindingFlags.Public | BindingFlags.Static);
-            if (methodInfo == null)
-            {
-                Program.Logger.ELog($"Method not found in plugin: {plugin}.{method}");
-                return null;
-            }
-
-            var result = methodInfo.Invoke(null, new[]
-            {
-                nodeParameters
-            }.Union(args ?? new object[] { }).ToArray());
-            return result;
-        }
-        catch (Exception ex)
-        {
-            Program.Logger.ELog($"Error executing plugin method [{plugin}.{method}]: " + ex.Message);
-            return null;
-        }
-    }
-
-    private static void LogFFmpegVersion(NodeParameters args)
-    {
-        string ffmpeg = args.GetToolPath("FFmpeg")?.Trim() ?? string.Empty;
-        if (string.IsNullOrEmpty(ffmpeg))
-        {
-            args.Logger.ILog("FFmpeg Version: Not configured");
-            return; // no FFmpeg
-        }
-
-        try
-        {
-            Process process = new Process();
-            process.StartInfo.FileName = ffmpeg;
-            process.StartInfo.Arguments = "-version";
-            process.StartInfo.UseShellExecute = false;
-            process.StartInfo.RedirectStandardOutput = true;
-            process.StartInfo.CreateNoWindow = true;
-
-            process.Start();
-            string output = process.StandardOutput.ReadToEnd();
-            process.WaitForExit();
-
-            if (string.IsNullOrEmpty(output))
-            {
-                args.Logger.ELog("Failed detecting FFmpeg version");
-                return;
-
-            }
-            // Split the output into lines
-            var line = output.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries).First();
-            
-            
-            string pattern = @"ffmpeg\s+version\s+(.*?)(?:\s+Copyright|$)";
-            Regex regex = new Regex(pattern);
-            Match match = regex.Match(line);
-            var version = match.Success ? match.Groups[1].Value.Trim() : line;
-            
-            args.Logger.ILog("FFmpeg: " + version);
-        }
-        catch (Exception ex)
-        {
-            // Handle any exceptions that occurred during the process execution
-            args.Logger.WLog("Failed detecting FFmpeg version: " + ex.Message);
-        }
-    }
-
     private void RecordAdditionalInfo(string name, object value, TimeSpan? expiry)
     {
         if (value == null)

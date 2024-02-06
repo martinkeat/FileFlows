@@ -60,7 +60,6 @@ public partial class Flow : ComponentBase, IDisposable
     [Inject]
     private IJSRuntime jsRuntime { get; set; }
     private bool IsSaving { get; set; }
-    private bool IsExecuting { get; set; }
 
     private ff Model { get; set; }
 
@@ -315,14 +314,19 @@ public partial class Flow : ComponentBase, IDisposable
     {
         var element = this.Available.FirstOrDefault(x => x.Uid == uid);
         string name;
-        if (element.Type == FlowElementType.Script)
+        if (element.Type is FlowElementType.Script or FlowElementType.SubFlow)
         {
             // special type
             name = element.Name;
         }
+        else if(element.Uid.StartsWith("SubFlowOutput"))
+        {
+            // sub flow element, keep its name
+            name = element.Name;
+        }
         else
         {
-            string type = element.Uid.Substring(element.Uid.LastIndexOf(".") + 1);
+            string type = element.Uid[(element.Uid.LastIndexOf(".", StringComparison.Ordinal) + 1)..];
             name = Translater.Instant($"Flow.Parts.{type}.Label", suppressWarnings: true);
             if (name == "Label")
                 name = FlowHelper.FormatLabel(type);
@@ -491,6 +495,7 @@ public partial class Flow : ComponentBase, IDisposable
 
         string typeName;
         string typeDisplayName;
+        string typeDescription = null; // should leave blank for most things, editor will look it up, for for sub flows etc, use description from that
         if (part.Type == FlowElementType.Script)
         {
             typeName = "Script";
@@ -499,11 +504,13 @@ public partial class Flow : ComponentBase, IDisposable
         else if (part.Type == FlowElementType.SubFlow)
         {
             typeName = "SubFlow";
-            typeDisplayName = part.FlowElementUid[8..]; // 8 to remove SubFlow:
+            var fe = Available.FirstOrDefault(x => part.FlowElementUid == x.Uid);
+            typeDisplayName = fe?.Name?.EmptyAsNull() ?? part.Name?.EmptyAsNull() ?? "Sub Flow";
+            typeDescription = fe?.Description;
         }
         else
         {
-            typeName = part.FlowElementUid[(part.FlowElementUid.LastIndexOf(".") + 1)..];
+            typeName = part.FlowElementUid[(part.FlowElementUid.LastIndexOf(".", StringComparison.Ordinal) + 1)..];
             typeDisplayName = Translater.TranslateIfHasTranslation($"Flow.Parts.{typeName}.Label", FlowHelper.FormatLabel(typeName));
         }
 
@@ -547,6 +554,10 @@ public partial class Flow : ComponentBase, IDisposable
         // so the user can update the name
         if (model is IDictionary<string, object> dict)
         {
+            foreach (var key in dict.Keys)
+            {
+                Console.WriteLine($"Model['{key}'] = " + dict[key]);
+            }
             dict["Name"] = part.Name ?? string.Empty;
         }
 
@@ -643,7 +654,7 @@ public partial class Flow : ComponentBase, IDisposable
         EditorVariables = variables;
         var newModelTask = Editor.Open(new()
         {
-            TypeName = "Flow.Parts." + typeName, Title = title, Fields = fields, Model = model,
+            TypeName = "Flow.Parts." + typeName, Title = title, Fields = fields, Model = model, Description = typeDescription,
             Large = fields.Count > 1, HelpUrl = flowElement.HelpUrl,
             SaveCallback = isFunctionNode ? FunctionSaveCallback : null
         });           

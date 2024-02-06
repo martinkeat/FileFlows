@@ -16,18 +16,18 @@
             <FlowTab Title="General">
                 @if (Flow.Type != FlowType.SubFlow)
                 {
-                    <InputTextArea @bind-Value="@Flow.Properties.Description" Label="Pages.Flow.Fields.Description"></InputTextArea>
-                    <InputText @bind-Value="@Flow.Properties.Author" Label="Pages.Flow.Fields.Author"></InputText>
+                    <InputTextArea @bind-Value="@Flow.Properties.Description" Label="Pages.Flow.Fields.Description" />
+                    <InputText @bind-Value="@Flow.Properties.Author" Label="Pages.Flow.Fields.Author" />
                     <InputArray @bind-Value="@Flow.Properties.Tags" Label="Pages.Flow.Fields.Tags"/>
                     <InputText @bind-Value="@Flow.Properties.MinimumVersion" Label="Pages.Flow.Fields.MinimumVersion"/>
                     <InputKeyValue @bind-Value="@FlowVariables" Label="Pages.Flow.Fields.Variables" />
                 }
                 else
                 {
-                    <InputTextLabel Label=@lblSubFlowHelp Value=@lblSubFlowHelp HideLabel=@true Pre="true" Formatter="Markdown"></InputTextLabel>
+                    <InputTextLabel Label=@lblSubFlowHelp Value=@lblSubFlowHelp HideLabel=@true Pre="true" Formatter="Markdown" />
                     <hr />
-                    <InputTextArea @bind-Value="@Flow.Properties.Description" Label="Pages.Flow.Fields.SubFlowDescription"></InputTextArea>
-                    <InputNumber TItem="int" @bind-Value="@Flow.Properties.Outputs" Label="Pages.Flow.Fields.Outputs"></InputNumber>
+                    <InputTextArea @bind-Value="@Flow.Properties.Description" Label="Pages.Flow.Fields.SubFlowDescription" />
+                    <InputKeyValueInt @bind-Value="@Flow.Properties.Outputs" Label="Pages.Flow.Fields.Outputs" />
                 }
             </FlowTab>
             <FlowTab Title="Fields">
@@ -57,7 +57,15 @@
                                                 <option value=@FlowFieldType.Boolean>Boolean</option>
                                                 <option value=@FlowFieldType.Directory>Directory</option>
                                                 <option value=@FlowFieldType.Select>Select</option>
-                                                <option value=@FlowFieldType.OutputPath>Output Path</option>
+                                                @if (Flow.Type != FlowType.SubFlow)
+                                                {
+                                                    <option value=@FlowFieldType.OutputPath>Output Path</option>
+                                                }
+                                                else
+                                                {
+                                                    // just haven't done this for flow templates yet, but will
+                                                    <option value=@FlowFieldType.Slider>Slider</option>
+                                                }
                                             </select>
                                         </div>
                                     </div>
@@ -103,6 +111,12 @@
                                         else if (Editing.Type == FlowFieldType.Number)
                                         {
                                             <InputNumber TItem="Int32" @bind-Value="@DefaultValueNumber" Label="Pages.Flow.Fields.Field.Default"></InputNumber>
+                                        }
+                                        else if (Editing.Type == FlowFieldType.Slider)
+                                        {
+                                            <InputNumber TItem="Int32" @bind-Value="@DefaultValueNumber" Label="Pages.Flow.Fields.Field.Default"></InputNumber>
+                                            <InputNumber TItem="Int32" @bind-Value="@IntMinValue" Label="Pages.Flow.Fields.Field.Minimum"></InputNumber>
+                                            <InputNumber TItem="Int32" @bind-Value="@IntMaxValue" Label="Pages.Flow.Fields.Field.Maximum"></InputNumber>
                                         }
                                         else if (Editing.Type == FlowFieldType.Select)
                                         {

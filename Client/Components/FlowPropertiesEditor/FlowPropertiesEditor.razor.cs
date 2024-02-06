@@ -192,4 +192,28 @@ public partial class FlowPropertiesEditor
                 Editing.DefaultValue = value;
         } 
     }
+    /// <summary>
+    /// Gets or sets the int minimum
+    /// </summary>
+    public int IntMinValue
+    {
+        get => Editing.IntMinimum;
+        set
+        {
+            if (Editing?.Type == FlowFieldType.Number || Editing?.Type == FlowFieldType.Slider)
+                Editing.IntMinimum = value;
+        } 
+    }
+    /// <summary>
+    /// Gets or sets the int maximum
+    /// </summary>
+    public int IntMaxValue
+    {
+        get => Editing.IntMaximum;
+        set
+        {
+            if (Editing?.Type == FlowFieldType.Number || Editing?.Type == FlowFieldType.Slider)
+                Editing.IntMaximum = value;
+        } 
+    }
 }

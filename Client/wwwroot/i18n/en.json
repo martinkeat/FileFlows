@@ -281,6 +281,8 @@
         "Author": "Author",
         "Author-Help": "Optionally specify the author of this flow.",
         "Outputs": "Outputs",
+        "OutputsKey": "Output",
+        "OutputsValue": "Description",
         "Outputs-Help": "The number of outputs this sub flow has.  This is the number of outputs that will be available when using this sub flow in another flow",
         "Field": {            
           "Description": "An optional description to be shown with this field.  This can be help text for the field.",
@@ -289,6 +291,8 @@
           "Required": "Required",
           "Required-Help": "If this value is required and must be set.",
           "Default": "Default",
+          "Minimum": "Minimum",
+          "Maximum": "Maximum",
           "Options": "Options",
           "DeleteIfEmpty": "Delete If Empty",
           "DeleteIfEmpty-Help": "If any values are added here and the  user selects 'Delete Original' the folder will also be deleted if no file matching any of these regular expressions match.",

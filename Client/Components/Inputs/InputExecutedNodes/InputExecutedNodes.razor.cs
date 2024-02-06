@@ -83,11 +83,11 @@ public partial class InputExecutedNodes: Input<IEnumerable<ExecutedNode>>
         if (string.IsNullOrEmpty(node.NodeName))
             return FormatNodeUid(node.NodeUid);
         
-        string nodeUid = Regex.Match(node.NodeUid.Substring(node.NodeUid.LastIndexOf(".") + 1), "[a-zA-Z0-9]+").Value.ToLower();
+        string nodeUid = Regex.Match(node.NodeUid.Substring(node.NodeUid.LastIndexOf(".", StringComparison.Ordinal) + 1), "[a-zA-Z0-9]+").Value.ToLower();
         string nodeName = Regex.Match(node.NodeName ?? string.Empty, "[a-zA-Z0-9]+").Value.ToLower();
 
-        if (string.IsNullOrEmpty(node.NodeName) || nodeUid == nodeName)
-            return FormatNodeUid(node.NodeUid);
+        //if (string.IsNullOrEmpty(node.NodeName) || nodeUid == nodeName)
+        //    return FormatNodeUid(node.NodeUid);
         
         return node.NodeName;
     }

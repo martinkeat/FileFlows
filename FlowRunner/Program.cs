@@ -8,6 +8,7 @@ using Esprima.Ast;
 using FileFlows.Plugin.Services;
 using FileFlows.ServerShared;
 using FileFlows.ServerShared.FileServices;
+using Node = FileFlows.Plugin.Node;
 
 namespace FileFlows.FlowRunner;
 
@@ -32,6 +33,16 @@ public class Program
     /// Gets or sets the directory where the configuration is saved
     /// </summary>
     public static string ConfigDirectory { get; set; }
+    
+    /// <summary>
+    /// Gets or sets the working directory
+    /// </summary>
+    public static string WorkingDirectory { get; set; }
+    
+    /// <summary>
+    /// Gets or sets the processing node this is running on
+    /// </summary>
+    public static ProcessingNode ProcessingNode { get; set; }
 
     /// <summary>
     /// Main entry point for the flow runner
@@ -114,6 +125,7 @@ public class Program
             LogInfo("Docker: " + Globals.IsDocker);
 
             string workingDir = Path.Combine(tempPath, "Runner-" + uid);
+            Program.WorkingDirectory = workingDir;
             LogInfo("Working Directory: " + workingDir);
             try
             {
@@ -186,6 +198,7 @@ public class Program
             if (node == null)
                 throw new Exception("Failed to load node!!!!");
             LogInfo("Node SignalrUrl: " + node.SignalrUrl);
+            Program.ProcessingNode = node;
         }
         catch (Exception ex)
         {

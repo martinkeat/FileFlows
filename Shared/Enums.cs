@@ -334,5 +334,9 @@ public enum FlowFieldType
     /// <summary>
     /// Special output path field
     /// </summary>
-    OutputPath = 5
+    OutputPath = 5,
+    /// <summary>
+    /// A slider, integer
+    /// </summary>
+    Slider = 6,
 }

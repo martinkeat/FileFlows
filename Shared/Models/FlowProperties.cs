@@ -30,9 +30,9 @@ public class FlowProperties
     public string[] Tags { get; set; }
     
     /// <summary>
-    /// Gets or sets the number of outputs, only used for subflows
+    /// Gets or sets the outputs, only used for sub flows
     /// </summary>
-    public int Outputs { get; set; }
+    public List<KeyValuePair<int, string>> Outputs { get; set; }
 
     /// <summary>
     /// Gets or sets the fields
@@ -87,6 +87,16 @@ public class FlowField
     /// Gets or sets the default value
     /// </summary>
     public object DefaultValue { get; set; }
+    
+    /// <summary>
+    /// Gets or sets the minimum value for int values
+    /// </summary>
+    public int IntMinimum { get; set; }
+    /// <summary>
+    /// Gets or sets the maximum value for int values
+    /// </summary>
+    public int IntMaximum { get; set; }
+    
     /// <summary>
     /// Gets or sets if this property is only shown if the If condition matches
     /// </summary>

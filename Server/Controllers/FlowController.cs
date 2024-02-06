@@ -9,6 +9,7 @@ using System.Text.Json.Serialization;
 using FileFlows.ScriptExecution;
 using FileFlows.Server.Services;
 using Logger = FileFlows.Shared.Logger;
+using Range = FileFlows.Shared.Validators.Range;
 
 namespace FileFlows.Server.Controllers;
 /// <summary>
@@ -450,7 +451,7 @@ public class FlowController : Controller
         })?.ToList();
 
         if (type == FlowType.SubFlow)
-            results.InsertRange(0, GetSubFLowFlowElements());
+            results.InsertRange(0, GetSubFlowFlowElements());
         
         if (type == FlowType.Standard || type == FlowType.SubFlow)
         {
@@ -530,8 +531,10 @@ public class FlowController : Controller
     /// Gets the output flow element used by sub flows
     /// </summary>
     /// <returns>the output flow element</returns>
-    private static FlowElement[] GetSubFLowFlowElements()
+    private static List<FlowElement> GetSubFlowFlowElements()
     {
+        List<FlowElement> elements = new();
+            
         FlowElement eleInput = new FlowElement();
         eleInput.Name = "Sub Flow Input";
         eleInput.Uid = $"SubFlowInput";
@@ -541,7 +544,26 @@ public class FlowController : Controller
         eleInput.Group = "Sub Flow";
         eleInput.Model = new ExpandoObject()!;
         eleInput.Type = FlowElementType.Input;
-        
+        elements.Add(eleInput);
+
+        for (int i = 1; i <= 5; i++)
+        {
+            FlowElement eleNumOutput = new FlowElement();
+            eleNumOutput.Name = "Sub Flow Output " + i;
+            eleNumOutput.Uid = $"SubFlowOutput" + i;
+            eleNumOutput.Icon = "fas fa-sign-out-alt";
+            eleNumOutput.Inputs = 1;
+            eleNumOutput.NoEditorOnAdd = true;
+            eleNumOutput.Description = "Sub Flow Output " + i;
+            IDictionary<string, object> enoModel = new ExpandoObject()!;
+            enoModel.Add("Output", i);
+            eleNumOutput.Group = "Sub Flow";
+            eleNumOutput.Type = FlowElementType.Output;
+            eleNumOutput.Model = enoModel as ExpandoObject;
+            
+            elements.Add(eleNumOutput);
+        }
+
         FlowElement eleOutput = new FlowElement();
         eleOutput.Name = "Sub Flow Output";
         eleOutput.Uid = $"SubFlowOutput";
@@ -562,8 +584,9 @@ public class FlowController : Controller
         eleOutput.Group = "Sub Flow";
         eleOutput.Type = FlowElementType.Output;
         eleOutput.Model = model as ExpandoObject;
-        
-        return new[] { eleInput, eleOutput };
+        elements.Add(eleOutput);
+
+        return elements;
     }
     
     
@@ -581,8 +604,10 @@ public class FlowController : Controller
         ele.Uid = $"SubFlow:" + flow.Uid;
         ele.Icon = "fas fa-subway";
         ele.Inputs = 1;
-        ele.Outputs = flow.Properties.Outputs;
+        ele.Outputs = flow.Properties.Outputs?.Count ?? 0;
+        ele.OutputLabels = flow.Properties.Outputs?.Select(x => x.Value)?.ToList() ?? new ();
         ele.Description = flow.Properties.Description;
+        ele.NoEditorOnAdd = flow.Properties?.Fields?.Any() != true;
         IDictionary<string, object> model = new ExpandoObject()!;
         model.Add("Output", 1);
         ele.Fields = new List<ElementField>();
@@ -591,13 +616,43 @@ public class FlowController : Controller
             if (string.IsNullOrWhiteSpace(field.Name))
                 continue;
             
-            model.Add(field.Name, field.DefaultValue);
             var f = new ElementField()
             {
-                InputType = FormInputType.Int,
                 Name = field.Name,
                 Description = field.Description
             };
+            
+            f.InputType = field.Type switch
+            {
+                FlowFieldType.Boolean => FormInputType.Switch,
+                FlowFieldType.Number => FormInputType.Int,
+                FlowFieldType.Slider => FormInputType.Slider,
+                FlowFieldType.Select => FormInputType.Select,
+                FlowFieldType.Directory => FormInputType.Folder,
+                FlowFieldType.String => FormInputType.TextVariable,
+                _ => throw new ArgumentOutOfRangeException()
+            };
+
+            if (field.Type == FlowFieldType.Number || field.Type == FlowFieldType.Slider)
+            {
+                if (field.IntMaximum > field.IntMinimum)
+                {
+                    f.Validators ??= new();
+                    f.Validators.Add(new Range { Minimum = field.IntMinimum, Maximum = field.IntMaximum });
+                }
+            }
+
+            // var defaultValue = field.Type switch
+            // {
+            //     FlowFieldType.Boolean => field.DefaultValue as bool? ?? false,
+            //     FlowFieldType.Number => field.DefaultValue as int? ?? 0,
+            //     FlowFieldType.Slider => field.DefaultValue as int? ?? 0,
+            //     FlowFieldType.Directory => field.DefaultValue as string ?? string.Empty,
+            //     FlowFieldType.String => field.DefaultValue as string ?? string.Empty,
+            //     _ => field.DefaultValue
+            // };
+            model.Add(field.Name, field.DefaultValue );
+            
             ele.Fields.Add(f);
         };
         ele.Group = "Sub Flows";

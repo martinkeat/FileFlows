@@ -101,7 +101,7 @@ public class FlowTemplateController : Controller
         if (model.Path == "subflow")
         {
             json = @"{
-    ""Name"": ""Subflow"",
+    ""Name"": ""Sub Flow"",
     ""Type"": 2,
     ""Revision"": 1,
     ""Properties"": {
@@ -113,10 +113,10 @@ public class FlowTemplateController : Controller
       {
         ""Uid"": ""c0807c25-7d23-44d0-8a40-2485a265c75b"",
         ""Name"": """",
-        ""FlowElementUid"": ""FileFlows.BasicNodes.File.InputFile"",
+        ""FlowElementUid"": ""SubFlowInput"",
         ""xPos"": 450,
         ""yPos"": 50,
-        ""Icon"": ""far fa-file"",
+        ""Icon"": ""fas fa-long-arrow-alt-down"",
         ""Label"": """",
         ""Inputs"": 0,
         ""Outputs"": 1,

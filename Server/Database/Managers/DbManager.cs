@@ -6,6 +6,7 @@ using FileFlows.Plugin;
 using FileFlows.Server.Controllers;
 using FileFlows.Server.Helpers;
 using FileFlows.Shared.Attributes;
+using FileFlows.Shared.Json;
 using FileFlows.Shared.Models;
 using NPoco;
 
@@ -763,9 +764,14 @@ public abstract class DbManager
 
         var serializerOptions = new JsonSerializerOptions
         {
-            Converters = { new BoolConverter(), new Shared.Json.ValidatorConverter(), new DataConverter() }
+            Converters =
+            {
+                new BoolConverter(), 
+                new Shared.Json.ValidatorConverter(), 
+                new DataConverter()
+            }
         };
-
+        
         // need to case obj to (ViObject) here so the DataConverter is used
 #pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
         T result = JsonSerializer.Deserialize<T>(dbObject.Data, serializerOptions);
