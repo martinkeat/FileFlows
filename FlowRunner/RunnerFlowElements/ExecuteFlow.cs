@@ -1,5 +1,6 @@
 using FileFlows.FlowRunner.Helpers;
 using FileFlows.Plugin;
+using FileFlows.ServerShared;
 using FileFlows.Shared;
 using FileFlows.Shared.Models;
 
@@ -64,14 +65,18 @@ public class ExecuteFlow : Node
         LoadPropertiesInVariables(args);
         LoadFlowVariables(args, Flow.Properties?.Variables);
 
+        int COMPLETED_OUTPUT = RunnerCodes.Completed;
+
         if (Flow.Type == FlowType.Failure)
         {
+            COMPLETED_OUTPUT = RunnerCodes.Failure;
             args.UpdateVariables(new Dictionary<string, object>
             {
                 { "FailedNode", Runner.Info.LibraryFile.ExecutedNodes.Last()?.NodeName },
-                { "FlowName", Flow.Name }
+                { "FlowName", Runner.ExecutedFlows.LastOrDefault()?.Name ?? Flow.Name }
             });
         }
+        Runner.ExecutedFlows.Add(Flow);
        
         // find the first node
         var part = Flow.Parts.FirstOrDefault(x => x.Inputs == 0);
@@ -147,10 +152,9 @@ public class ExecuteFlow : Node
                 }
 
                 args.Logger?.ILog(new string('=', 70));
-                args.Logger?.ILog($"Executing Node {(Runner.Info.LibraryFile.ExecutedNodes.Count + 1)}: {part.Label?.EmptyAsNull() ?? part.Name?.EmptyAsNull() ?? currentFlowElement.Name} [{currentFlowElement.GetType().FullName}]");
+                args.Logger?.ILog($"Executing Flow Element {(Runner.Info.LibraryFile.ExecutedNodes.Count + 1)}: {part.Label?.EmptyAsNull() ?? part.Name?.EmptyAsNull() ?? currentFlowElement.Name} [{currentFlowElement.GetType().FullName}]");
                 args.Logger?.ILog(new string('=', 70));
                 args.Logger?.ILog("Working File: " + args.WorkingFile);
-
                 
                 nodeStartTime = DateTime.Now;
 
@@ -181,7 +185,7 @@ public class ExecuteFlow : Node
                 {
                     args.Logger?.ILog($"Flow '{Flow.Name}' completed");
                     // flow has completed
-                    return RunnerCodes.Completed;
+                    return COMPLETED_OUTPUT;
                 }
                 
                 var newPart = Flow.Parts.FirstOrDefault(x => x.Uid == outputNode.InputNode);
@@ -269,6 +273,15 @@ public class ExecuteFlow : Node
         {
             feName = (part.Label?.EmptyAsNull() ?? part.Name)!;
             feElementUid = "FlowEnd";
+        }
+        else if (part.FlowElementUid == Globals.FlowFailureInputUid)
+        {
+            // this is the input for a Failure Flow
+            // in this case we want to record the name of the failure flow as the feName
+            var failureFlow =
+                Program.Config.Flows?.FirstOrDefault(x => x is { Type: FlowType.Failure, Default: true });
+            if (failureFlow != null)
+                feName = failureFlow.Name;
         }
 
         Runner.RecordNodeExecution(feName, feElementUid, output, executionTime, part, FlowDepthLevel + depthAdjustment);

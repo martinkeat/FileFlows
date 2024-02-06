@@ -68,10 +68,9 @@ public class FlowHelper
         flow.Parts.Add(partSubFlow);
         
         
-        // conenect the failure flow up to these so any sub flow will trigger a failure flow
-        // try run FailureFlow
+        // connect the failure flow up to these so any sub flow will trigger a failure flow
         var failureFlow =
-            Program.Config.Flows?.FirstOrDefault(x => x.Type == FlowType.Failure && x.Default && x.Enabled);
+            Program.Config.Flows?.FirstOrDefault(x => x is { Type: FlowType.Failure, Default: true });
         if (failureFlow != null)
         {
             FlowPart fpFailure = new()

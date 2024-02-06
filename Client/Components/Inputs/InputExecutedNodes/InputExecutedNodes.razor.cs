@@ -135,7 +135,9 @@ public partial class InputExecutedNodes: Input<IEnumerable<ExecutedNode>>
         this.Maximised = false;
         ++index;
         var lines  = LogLines;
-        int startIndex = lines.FindIndex(x => x.IndexOf($"Executing Node {index}:") > 0);
+        int startIndex = lines.FindIndex(x =>
+            x.IndexOf($"Executing Flow Element {index}:", StringComparison.Ordinal) > 0 ||
+            x.IndexOf($"Executing Node {index}:", StringComparison.Ordinal) > 0);
         if (startIndex < 1)
         {
             Toast.ShowWarning(lblLogPartialNotAvailable);
@@ -146,7 +148,7 @@ public partial class InputExecutedNodes: Input<IEnumerable<ExecutedNode>>
 
         var remainingLindex = lines.Skip(startIndex + 3).ToList();
 
-        int endIndex = remainingLindex.FindIndex(x => x.IndexOf("======================================================================") > 0);
+        int endIndex = remainingLindex.FindIndex(x => x.IndexOf("======================================================================", StringComparison.Ordinal) > 0);
 
         string sublog;
         if (endIndex > -1)

@@ -19,9 +19,13 @@ public class StartupFlowElement : Node
     /// <returns>the next output</returns>
     public override int Execute(NodeParameters args)
     {
+        // now we can initialize the file safely
+        args.InitFile(args.WorkingFile);
+        
         LogHeader(args, Program.ConfigDirectory, Program.ProcessingNode);
         Helpers.RunPreparationHelper.DownloadPlugins();
         Helpers.RunPreparationHelper.DownloadScripts();
+        
 
         return 1;
     }
@@ -76,8 +80,8 @@ public class StartupFlowElement : Node
 
         foreach (var v in nodeParameters.Variables)
         {
-            if (v.Key.StartsWith("file.") || v.Key.StartsWith("folder.") || v.Key == "ext" || v.Key.Contains(".Url") ||
-                v.Key.Contains("Key"))
+            //if (v.Key.StartsWith("file.") || v.Key.StartsWith("folder.") || v.Key == "ext" ||  
+            if ( v.Key.Contains(".Url") || v.Key.Contains("Key"))
                 continue;
             
             nodeParameters.Logger!.ILog($"Variables['{v.Key}'] = {v.Value}");

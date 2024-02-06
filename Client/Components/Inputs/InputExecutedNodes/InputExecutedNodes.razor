@@ -31,9 +31,10 @@
 
                     bool depthStart = currentDepth < nextDepth;
                     bool depthEnd = currentDepth < previousDepth;
+                    bool isFailureFlowInput = item.NodeUid == "FileFlows.BasicNodes.FlowFailure";
                     
                     <tr class="@(item.Output == -1 ? "output-error" : item.Output == 0 ? "output-exit" : "")
-@(depthStart ? "depth-start": string.Empty) @(depthEnd ? "depth-end": string.Empty)">
+@(depthStart ? "depth-start": string.Empty) @(depthEnd ? "depth-end": string.Empty) @(isFailureFlowInput ? "failure-flow-input" : string.Empty)">
                         <td class="name">@FormatNodeName(item)</td>
                         <td class="node">@FormatNodeUid(item.NodeUid)</td>
                         @if (item.NodeUid == "FlowStart")

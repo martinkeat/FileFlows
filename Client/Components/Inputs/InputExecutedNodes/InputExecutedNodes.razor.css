@@ -16,6 +16,9 @@
   color: var(--success);
   font-weight: bold;
 }
+.flowtable .failure-flow-input td {
+  color: var(orange);
+}
 .flowtable .depth-start td, .flowtable .depth-end td {
   color: var(--yellow);
 }

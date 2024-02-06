@@ -19,11 +19,13 @@ namespace FileFlows.FlowRunner;
 public class Runner
 {
     internal FlowExecutorInfo Info { get; private set; }
-     private Flow Flow;
+    private Flow Flow;
     private ProcessingNode Node;
     internal readonly CancellationTokenSource CancellationToken = new CancellationTokenSource();
     internal bool Canceled { get; private set; }
     private string WorkingDir;
+
+    internal readonly List<Flow> ExecutedFlows = new();
 
     /// <summary>
     /// The number of flow elements that currently have been executed
