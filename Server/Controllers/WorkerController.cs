@@ -240,8 +240,11 @@ public class WorkerController : Controller
         
         if (info.LibraryFile != null)
         {
-            var libfileService = new LibraryFileService();
-            var libFile = libfileService.GetByUid(info.LibraryFile.Uid);
+            var libFileService = new LibraryFileService();
+            var libFile = libFileService.GetByUid(info.LibraryFile.Uid);
+            var originalStatus = libFile.Status;
+            if(info.LibraryFile != libFile)
+                ObjectHelper.CopyProperties(info.LibraryFile, libFile);
             
             if (libFile.Status != FileStatus.Processing)
             {
@@ -249,20 +252,18 @@ public class WorkerController : Controller
                     $"Updating non-processing library file [{info.LibraryFile.Status}]: {info.LibraryFile.Name}");
             }
 
-            if (libFile.Status == FileStatus.Unprocessed)
+            if (originalStatus == FileStatus.Unprocessed)
             {
-                libFile.Status = info.LibraryFile.Status;
                 // this can happen if the server is restarted but the node is still processing, update the status
-                await libfileService.Update(libFile);
+                await libFileService.Update(libFile);
             }
-            if (libFile.Status == FileStatus.ProcessingFailed || info.LibraryFile.Status == FileStatus.Processed)
+            if (originalStatus == FileStatus.ProcessingFailed || info.LibraryFile.Status == FileStatus.Processed)
             {
                 lock (Executors)
                 {
                     CompletedExecutors.Append(info.Uid);
-                    if (Executors.ContainsKey(info.Uid))
-                        Executors.Remove(info.Uid);
-                    ClientServiceManager.Instance.UpdateExecutors(Executors);
+                    Executors.Remove(info.Uid);
+                    _ = ClientServiceManager.Instance.UpdateExecutors(Executors);
                     return;
                 }
             }
@@ -279,7 +280,7 @@ public class WorkerController : Controller
             //else // this is causing a finished executors to stick around.
             //    Executors.Add(info.Uid, info);
         }
-        ClientServiceManager.Instance.UpdateExecutors(Executors);
+        await ClientServiceManager.Instance.UpdateExecutors(Executors);
     }
 
     /// <summary>

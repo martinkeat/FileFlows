@@ -350,7 +350,7 @@ public class Runner
     /// </summary>
     /// <param name="info">the information to send to the server</param>
     /// <param name="waitMilliseconds">how long to wait to send, if takes longer than this, it wont be sent</param>
-    private async Task SendUpdate(FlowExecutorInfo info, int waitMilliseconds = 50)
+    private async Task SendUpdate(FlowExecutorInfo info, int waitMilliseconds = 100)
     {
         if (await UpdateSemaphore.WaitAsync(waitMilliseconds) == false)
         {

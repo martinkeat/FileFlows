@@ -59,7 +59,7 @@ public class ExecuteFlow : Node
         // add this flows parts to the total
         Runner.Info.TotalParts += Flow.Parts.Count;
         
-        if (Flow.Parts?.FirstOrDefault()?.FlowElementUid?.EndsWith("." + nameof(StartupFlowElement)) == true)
+        if (Flow.Parts?.FirstOrDefault()?.FlowElementUid?.EndsWith("." + nameof(Startup)) == true)
             FlowDepthLevel = -1; // special case for startup flow, set depth to -1 so first flow is at 0
         
         LoadPropertiesInVariables(args);
@@ -232,9 +232,9 @@ public class ExecuteFlow : Node
     {
         if (part.FlowElementUid.EndsWith("." + nameof(ExecuteFlow)))
             return true;
-        if (part.FlowElementUid.EndsWith("." + nameof(StartupFlowElement)))
+        if (part.FlowElementUid.EndsWith("." + nameof(Startup)))
             return true;
-        if (part.FlowElementUid.EndsWith("." + nameof(FileDownloaderFlowElement)))
+        if (part.FlowElementUid.EndsWith("." + nameof(FileDownloader)))
             return true;
         if (part.FlowElementUid.EndsWith(nameof(SubFlowInput)))
             return true;
@@ -286,6 +286,10 @@ public class ExecuteFlow : Node
                 feName = failureFlow.Name;
             // so the failure elements appear 'beneath this one'
             depthAdjustment = -1;
+        }
+        else if (part.Type == FlowElementType.Script)
+        {
+            feName = "Script: " + feName;
         }
 
         Runner.RecordNodeExecution(feName, feElementUid, output, executionTime, part, FlowDepthLevel + depthAdjustment);

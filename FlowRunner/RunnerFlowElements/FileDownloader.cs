@@ -7,7 +7,7 @@ namespace FileFlows.FlowRunner.RunnerFlowElements;
 /// <summary>
 /// Flow element that downloads the file from the remote server
 /// </summary>
-public class FileDownloaderFlowElement : Node
+public class FileDownloader : Node
 {
     /// <summary>
     /// Executes the flow element
@@ -17,7 +17,7 @@ public class FileDownloaderFlowElement : Node
     public override int Execute(NodeParameters args)
     {
         string dest = Path.Combine(args.TempPath, new FileInfo(args.LibraryFileName).Name);
-        var downloader = new FileDownloader(args.Logger, Service.ServiceBaseUrl, Program.Uid);
+        var downloader = new ServerShared.FileServices.FileDownloader(args.Logger, Service.ServiceBaseUrl, Program.Uid);
         downloader.OnProgress += (percent, eta, speed) =>
         {
             args.PartPercentageUpdate(percent);

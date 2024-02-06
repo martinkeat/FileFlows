@@ -30,7 +30,7 @@ public class FlowHelper
         var partStartup = new FlowPart()
         {
             Uid = Guid.NewGuid(),
-            FlowElementUid = typeof(StartupFlowElement).FullName,
+            FlowElementUid = typeof(Startup).FullName,
             Name = "Startup",
             OutputConnections = new List<FlowConnection>(),
             Outputs = 1
@@ -42,7 +42,7 @@ public class FlowHelper
             var partDownload = new FlowPart()
             {
                 Uid = Guid.NewGuid(),
-                FlowElementUid = typeof(FileDownloaderFlowElement).FullName,
+                FlowElementUid = typeof(FileDownloader).FullName,
                 Name = "Downloading...",
                 OutputConnections = new List<FlowConnection>(),
                 Inputs = 1,
@@ -272,12 +272,12 @@ public class FlowHelper
     internal static Type? GetFlowElementType(string fullName)
     {
         // special checks for our internal flow elements
-        if (fullName.EndsWith("." + nameof(FileDownloaderFlowElement)))
-            return typeof(FileDownloaderFlowElement);
+        if (fullName.EndsWith("." + nameof(FileDownloader)))
+            return typeof(FileDownloader);
         if (fullName.EndsWith("." + nameof(ExecuteFlow)))
             return typeof(ExecuteFlow);
-        if (fullName.EndsWith("." + nameof(StartupFlowElement)))
-            return typeof(StartupFlowElement);
+        if (fullName.EndsWith("." + nameof(Startup)))
+            return typeof(Startup);
         if (fullName.EndsWith(nameof(SubFlowInput)))
             return typeof(SubFlowInput);
         if (fullName.EndsWith(nameof(SubFlowOutput)) || fullName.StartsWith(nameof(SubFlowOutput)))

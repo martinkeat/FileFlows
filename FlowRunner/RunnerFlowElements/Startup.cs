@@ -10,7 +10,7 @@ namespace FileFlows.FlowRunner.RunnerFlowElements;
 /// <summary>
 /// Startup of a run, downloads scripts, plugins etc
 /// </summary>
-public class StartupFlowElement : Node
+public class Startup : Node
 {
     /// <summary>
     /// Executes the startup of a flow
@@ -36,9 +36,8 @@ public class StartupFlowElement : Node
     /// </summary>
     /// <param name="nodeParameters">the node parameters</param>
     /// <param name="configDirectory">the directory of the configuration</param>
-    /// <param name="flow">the flow being executed</param>
     /// <param name="node">the node executing this flow</param>
-    private static void LogHeader(NodeParameters nodeParameters, string configDirectory, ProcessingNode node) //, Flow flow)
+    private static void LogHeader(NodeParameters nodeParameters, string configDirectory, ProcessingNode node)
     {
         nodeParameters.Logger!.ILog("Version: " + Globals.Version);
         if (Globals.IsDocker)
