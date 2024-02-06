@@ -163,6 +163,7 @@ public class FlowController : Controller
                     MinimumVersion = flow.Properties.MinimumVersion?.EmptyAsNull(),
                     flow.Properties.Fields,
                     flow.Properties.Variables,
+                    flow.Properties.Outputs
                 },
                 flow.Parts
             }, new JsonSerializerOptions
