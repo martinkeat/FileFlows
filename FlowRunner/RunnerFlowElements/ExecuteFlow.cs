@@ -149,6 +149,8 @@ public class ExecuteFlow : Node
                 {
                     sub.Runner = Runner;
                     sub.FlowDepthLevel = FlowDepthLevel + 1;
+                    if (sub.Flow.Type == FlowType.Failure)
+                        sub.FlowDepthLevel = 1;
                 }
 
                 args.Logger?.ILog(new string('=', 70));
@@ -158,8 +160,9 @@ public class ExecuteFlow : Node
                 
                 nodeStartTime = DateTime.Now;
 
-                // clear the failure reason
-                args.FailureReason = null;
+                // clear the failure reason, if this isn't a failure flow, if it is, we already have the reason for failure
+                if(Flow.Type != FlowType.Failure &&  part.FlowElementUid?.EndsWith("." + nameof(ExecuteFlow)) == false)
+                    args.FailureReason = null;
                 
                 if (currentFlowElement.PreExecute(args) == false)
                     throw new Exception("PreExecute failed");
@@ -169,7 +172,6 @@ public class ExecuteFlow : Node
                 
                 RecordFlowElementFinish(args, nodeStartTime, output, part, currentFlowElement);
                 
-                args.Logger?.DLog("output: " + output);
                 if (output == RunnerCodes.Failure && part.ErrorConnection == null)
                 {
                     // the execution failed                     
@@ -282,6 +284,8 @@ public class ExecuteFlow : Node
                 Program.Config.Flows?.FirstOrDefault(x => x is { Type: FlowType.Failure, Default: true });
             if (failureFlow != null)
                 feName = failureFlow.Name;
+            // so the failure elements appear 'beneath this one'
+            depthAdjustment = -1;
         }
 
         Runner.RecordNodeExecution(feName, feElementUid, output, executionTime, part, FlowDepthLevel + depthAdjustment);
