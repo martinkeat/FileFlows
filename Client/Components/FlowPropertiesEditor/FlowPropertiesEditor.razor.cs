@@ -216,4 +216,13 @@ public partial class FlowPropertiesEditor
                 Editing.IntMaximum = value;
         } 
     }
+
+    /// <summary>
+    /// Gets or sets if the value input should be inversed
+    /// </summary>
+    public bool Inverse
+    {
+        get => Editing.Inverse;
+        set => Editing.Inverse = value;
+    }
 }

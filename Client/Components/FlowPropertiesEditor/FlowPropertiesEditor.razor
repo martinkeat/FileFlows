@@ -117,6 +117,7 @@
                                             <InputNumber TItem="Int32" @bind-Value="@DefaultValueNumber" Label="Pages.Flow.Fields.Field.Default"></InputNumber>
                                             <InputNumber TItem="Int32" @bind-Value="@IntMinValue" Label="Pages.Flow.Fields.Field.Minimum"></InputNumber>
                                             <InputNumber TItem="Int32" @bind-Value="@IntMaxValue" Label="Pages.Flow.Fields.Field.Maximum"></InputNumber>
+                                            <InputSwitch @bind-Value="@Inverse" Label="Pages.Flow.Fields.Field.Inverse"></InputSwitch>
                                         }
                                         else if (Editing.Type == FlowFieldType.Select)
                                         {

@@ -293,6 +293,8 @@
           "Default": "Default",
           "Minimum": "Minimum",
           "Maximum": "Maximum",
+          "Inverse": "Inverse",
+          "Inverse-Help": "If the slider values should be inversed with lower values shown on the right.",
           "Options": "Options",
           "DeleteIfEmpty": "Delete If Empty",
           "DeleteIfEmpty-Help": "If any values are added here and the  user selects 'Delete Original' the folder will also be deleted if no file matching any of these regular expressions match.",

@@ -611,7 +611,7 @@ public class FlowController : Controller
         IDictionary<string, object> model = new ExpandoObject()!;
         model.Add("Output", 1);
         ele.Fields = new List<ElementField>();
-        foreach(var field  in flow.Properties.Fields)
+        foreach(var field in flow.Properties.Fields)
         {
             if (string.IsNullOrWhiteSpace(field.Name))
                 continue;
@@ -639,6 +639,12 @@ public class FlowController : Controller
                 {
                     f.Validators ??= new();
                     f.Validators.Add(new Range { Minimum = field.IntMinimum, Maximum = field.IntMaximum });
+                }
+
+                if (field.Type is FlowFieldType.Slider)
+                {
+                    f.Parameters ??= new();
+                    f.Parameters[nameof(field.Inverse)] = field.Inverse;
                 }
             }
 

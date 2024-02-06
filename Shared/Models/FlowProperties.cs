@@ -96,6 +96,11 @@ public class FlowField
     /// Gets or sets the maximum value for int values
     /// </summary>
     public int IntMaximum { get; set; }
+
+    /// <summary>
+    /// Gets or sets if the value input should be inversed
+    /// </summary>
+    public bool Inverse { get; set; }
     
     /// <summary>
     /// Gets or sets if this property is only shown if the If condition matches
