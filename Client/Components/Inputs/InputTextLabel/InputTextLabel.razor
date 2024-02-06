@@ -1,7 +1,7 @@
 @namespace FileFlows.Client.Components.Inputs
 @inherits Input<object>
 
-<InputWrapper Input="@this" NoSpacing=@true>
+<InputWrapper Input="@this" NoSpacing=@true Error="Error">
     @if (Link)
     {
         <a href="@StringValue" rel="noreferrer" target="_blank">@StringValue</a>

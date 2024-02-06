@@ -212,9 +212,10 @@
             break;
         case FormInputType.TextLabel:
             {
+                var error = GetParameter<bool>(field, nameof(InputTextLabel.Error));
                 if (field.ReadOnlyValue is string strValue)
                 {
-                    <InputTextLabel Label="@label" Value="@strValue" HideLabel=@hideLabel Help=@field.HelpText />
+                    <InputTextLabel Label="@label" Value="@strValue" HideLabel=@hideLabel Help=@field.HelpText Error="@error" />
                 }
                 else
                 {
@@ -222,7 +223,7 @@
                     var pre = GetParameter<bool>(field, nameof(InputTextLabel.Pre));
                     var link = GetParameter<bool>(field, nameof(InputTextLabel.Link));
                     var formatter = GetParameter<string>(field, nameof(InputTextLabel.Formatter));
-                    <InputTextLabel Field=@field Label="@label" Value="@oValue" HideLabel=@hideLabel
+                    <InputTextLabel Field=@field Label="@label" Value="@oValue" HideLabel=@hideLabel Error="@error"
                                     Pre=@pre Link=@link Formatter="@formatter" Help=@field.HelpText/>
                 }
             }

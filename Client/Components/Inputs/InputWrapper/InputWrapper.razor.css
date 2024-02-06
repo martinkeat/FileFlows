@@ -29,6 +29,11 @@
   flex-grow: 1;
 }
 
+.error-input .input-label {
+  font-weight: bold;
+  color: var(--error);
+}
+
 .input-label {
   width: 14rem;
   min-width: 14rem;

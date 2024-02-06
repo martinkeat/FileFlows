@@ -83,6 +83,7 @@ CREATE TABLE LibraryFile
 
     -- output
     OutputPath          VARCHAR(1024)      COLLATE utf8_unicode_ci      NOT NULL,
+    FailureReason       VARCHAR(512)       COLLATE utf8_unicode_ci      NOT NULL,
     NoLongerExistsAfterProcessing          boolean                      not null,
 
     -- json data

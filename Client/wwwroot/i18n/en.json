@@ -431,6 +431,7 @@
         "Flow": "Flow",
         "ProcessingTime": "Processing Time",
         "OutputPath": "Output Path",
+        "FailureReason": "Failure Reason",
         "ExecutedNodes": "Executed Nodes",
         "Node": "Processing Node",
         "FinalMetadata": "Final Metadata",

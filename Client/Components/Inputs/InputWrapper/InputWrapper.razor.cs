@@ -21,6 +21,11 @@ namespace FileFlows.Client.Components.Inputs
         [Inject] IClipboardService ClipboardService { get; set; }   
 
         [Parameter] public RenderFragment ChildContent { get; set; }
+        
+        /// <summary>
+        /// Gets or sets if this is an error input
+        /// </summary>
+        [Parameter] public bool Error { get; set; }
 
         private string HelpHtml = string.Empty;
         private string CurrentHelpText;

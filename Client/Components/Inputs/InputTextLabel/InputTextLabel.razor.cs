@@ -7,6 +7,11 @@ namespace FileFlows.Client.Components.Inputs
         [Parameter] public bool Pre { get; set; }
         [Parameter] public bool Link { get; set; }
         [Parameter] public string Formatter { get; set; }
+        
+        /// <summary>
+        /// Gets or sets if this is an error label
+        /// </summary>
+        [Parameter] public bool Error { get; set; }
 
         private bool isHtml = false;
         

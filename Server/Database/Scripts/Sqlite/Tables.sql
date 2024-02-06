@@ -73,6 +73,7 @@ CREATE TABLE LibraryFile
 
     -- output
     OutputPath          VARCHAR(1024)      NOT NULL,
+    FailureReason       VARCHAR(512)       NOT NULL,
     NoLongerExistsAfterProcessing          boolean                      not null,
 
     -- json data

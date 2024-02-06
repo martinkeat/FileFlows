@@ -23,6 +23,11 @@ public class LibraryFile : FileFlowObject
     /// Gets or sets the path of the final output file
     /// </summary>
     public string OutputPath { get; set; }
+    
+    /// <summary>
+    /// Gets or sets the reason this file failed, if it failed
+    /// </summary>
+    public string FailureReason { get; set; }
 
     /// <summary>
     /// Gets or sets the flow that executed this file

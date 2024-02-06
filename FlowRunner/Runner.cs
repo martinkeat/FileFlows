@@ -384,6 +384,8 @@ public class Runner
         else if(status == FileStatus.ProcessingFailed)
         {
             Info.LibraryFile.ProcessingEnded = DateTime.Now;
+            if (string.IsNullOrWhiteSpace(nodeParameters.FailureReason) == false)
+                Info.LibraryFile.FailureReason = nodeParameters.FailureReason;
         }
         do
         {

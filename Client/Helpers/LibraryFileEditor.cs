@@ -71,7 +71,7 @@ public class LibraryFileEditor
 
             tabs.Add("Log", new List<ElementField>
             {
-                new ElementField
+                new ()
                 {
                     InputType = FormInputType.LogView,
                     Name = "Log",
@@ -234,8 +234,22 @@ public class LibraryFileEditor
         fields.Add(new ElementField
         {
             InputType = FormInputType.TextLabel,
-            Name = nameof(item.Status)
+            Name = nameof(item.Status),
+            ReadOnlyValue = Translater.Instant("Enums.FileStatus." + item.Status)
         });
+
+        if (string.IsNullOrWhiteSpace(item.FailureReason) == false && item.Status == FileStatus.ProcessingFailed)
+        {
+            fields.Add(new ElementField
+            {
+                InputType = FormInputType.TextLabel,
+                Name = nameof(item.FailureReason),
+                Parameters = new Dictionary<string, object>
+                {
+                    { nameof(InputTextLabel.Error), true }
+                }
+            });
+        }
 
         if(item.ExecutedNodes?.Any() == true)
         {

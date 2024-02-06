@@ -9,7 +9,12 @@
     bool invalid = string.IsNullOrEmpty(Input?.ErrorMessage) == false;
 
 }
-<div x-id="@Input?.Field?.Name" class="row @(NoSpacing ? "mt-0" : "") @(invalid ? "error" : "") @(Input?.Field?.FlexGrow == true ? "flex-grow" : "") @(Input?.HideLabel == true ? "hide-label" : "") @(Input?.Disabled == true ? "disabled" : "")">
+<div x-id="@Input?.Field?.Name" class="row @(NoSpacing ? "mt-0" : "") @(invalid ? "error" : "") 
+@(Input?.Field?.FlexGrow == true ? "flex-grow" : "") 
+@(Input?.HideLabel == true ? "hide-label" : "") 
+@(Input?.Disabled == true ? "disabled" : "")
+@(Error ? "error-input" : "")
+">
     @if (Input?.HideLabel != true && Input?.Field?.HideLabel != true)
     {
         <div class="input-label">
