@@ -56,10 +56,6 @@ public class FlowHelper
                 InputNode = partDownload.Uid
             });
         }
-        else
-        {
-            // a flow element that ensures the file exists, otherwise exit with mapping issue
-        }
 
         var partSubFlow = CreateSubFlowPart(initialFlow);
 
@@ -74,17 +70,33 @@ public class FlowHelper
         
         // conenect the failure flow up to these so any sub flow will trigger a failure flow
         // try run FailureFlow
-        // var failureFlow =
-        //     Program.Config.Flows?.FirstOrDefault(x => x.Type == FlowType.Failure && x.Default && x.Enabled);
-        // if (failureFlow != null)
-        // {
-        //     nodeParameters.UpdateVariables(new Dictionary<string, object>
-        //     {
-        //         { "FailedNode", CurrentNode?.Name },
-        //         { "FlowName", Flow.Name }
-        //     });
-        //     ExecuteFlow(failureFlow, runFlows, failure: true);
-        // }
+        var failureFlow =
+            Program.Config.Flows?.FirstOrDefault(x => x.Type == FlowType.Failure && x.Default && x.Enabled);
+        if (failureFlow != null)
+        {
+            FlowPart fpFailure = new()
+            {
+                Uid = Guid.NewGuid(), // flow.Uid,
+                FlowElementUid = typeof(ExecuteFlow).FullName,
+                Name = failureFlow.Name,
+                Inputs = 1,
+                OutputConnections = new List<FlowConnection>(),
+                Model = ((Func<ExpandoObject>)(() =>
+                {
+                    dynamic expandoObject = new ExpandoObject();
+                    expandoObject.Flow = failureFlow;
+                    return expandoObject;
+                }))()
+                
+            };
+            flow.Parts.Add(fpFailure);
+            partSubFlow.ErrorConnection = new()
+            {
+                Output = -1,
+                Input = 1,
+                InputNode = fpFailure.Uid
+            };
+        }
 
         return flow;
     }

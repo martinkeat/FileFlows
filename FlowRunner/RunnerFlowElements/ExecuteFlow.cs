@@ -1,3 +1,4 @@
+using FileFlows.FlowRunner.Helpers;
 using FileFlows.Plugin;
 using FileFlows.Shared;
 using FileFlows.Shared.Models;
@@ -62,6 +63,15 @@ public class ExecuteFlow : Node
         
         LoadPropertiesInVariables(args);
         LoadFlowVariables(args, Flow.Properties?.Variables);
+
+        if (Flow.Type == FlowType.Failure)
+        {
+            args.UpdateVariables(new Dictionary<string, object>
+            {
+                { "FailedNode", Runner.Info.LibraryFile.ExecutedNodes.Last()?.NodeName },
+                { "FlowName", Flow.Name }
+            });
+        }
        
         // find the first node
         var part = Flow.Parts.FirstOrDefault(x => x.Inputs == 0);
@@ -96,7 +106,7 @@ public class ExecuteFlow : Node
             Node? currentFlowElement = null;
             try
             {
-                var lfeResult = Helpers.FlowHelper.LoadFlowElement(part, args.Variables);
+                var lfeResult = FlowHelper.LoadFlowElement(part, args.Variables);
                 if(lfeResult.Failed(out string lfeError) || lfeResult.Value == null)
                 {
                     if(string.IsNullOrWhiteSpace(lfeError) == false)
@@ -108,11 +118,13 @@ public class ExecuteFlow : Node
                         : "Failed to load flow element: " + part.Name +
                           "\nEnsure you have the required plugins installed.";
 
+                    Runner.CurrentFlowElement = null;
                     args.Logger?.ELog(args.FailureReason);
                     return RunnerCodes.Failure;
                 }
 
                 currentFlowElement = lfeResult.Value;
+                Runner.CurrentFlowElement = currentFlowElement;
 
                 if (currentFlowElement is SubFlowOutput subOutput)
                     return subOutput.Output;
@@ -148,7 +160,7 @@ public class ExecuteFlow : Node
                 if (currentFlowElement.PreExecute(args) == false)
                     throw new Exception("PreExecute failed");
                 int output = currentFlowElement.Execute(args);
-                if (output == RunnerCodes.TerminalExit)
+                if (output is RunnerCodes.TerminalExit or RunnerCodes.RunCanceled)
                     return output; // just finish this, the flow element that caused the terminal exit already was recorded
                 
                 RecordFlowElementFinish(args, nodeStartTime, output, part, currentFlowElement);

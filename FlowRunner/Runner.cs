@@ -63,7 +63,10 @@ public class Runner
     public event FlowCompleted OnFlowCompleted;
     private NodeParameters nodeParameters;
 
-    private Node CurrentNode;
+    /// <summary>
+    /// Gets or sets the current executing flow element
+    /// </summary>
+    internal Node CurrentFlowElement { get; set; }
 
     /// <summary>
     /// Records the execution of a flow node
@@ -193,8 +196,9 @@ public class Runner
         CancellationToken.Cancel();
         nodeParameters?.Cancel();
         Canceled = true;
-        if (CurrentNode != null)
-            CurrentNode.Cancel().Wait();
+        if (CurrentFlowElement != null)
+            CurrentFlowElement.Cancel().Wait();
+        Info.LibraryFile.FailureReason = "Flow was canceled";
     }
 
     /// <summary>

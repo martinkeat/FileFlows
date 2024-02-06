@@ -260,7 +260,9 @@ public class Program
                 // need to try a remote
                 if (args.Config.AllowRemote == false)
                 {
-                    LogError("Library file exists but is not accessible from node: " + file.FullName);
+                    libFile.FailureReason =
+                        "Library file exists but is not accessible from node: " + file.FullName;
+                    LogError(libFile.FailureReason);
                     libFile.Status = FileStatus.MappingIssue;
                     libFile.ExecutedNodes = new List<ExecutedNode>();
                     libfileService.Update(libFile).Wait();
@@ -269,8 +271,10 @@ public class Program
 
                 if (lib.Folders)
                 {
-                    LogError("Library folder exists, but remote file server is not available for folders: " + file.FullName);
                     libFile.Status = FileStatus.MappingIssue;
+                    libFile.FailureReason =
+                        "Library folder exists, but remote file server is not available for folders: " + file.FullName;
+                    LogError(libFile.FailureReason);
                     libFile.ExecutedNodes = new List<ExecutedNode>();
                     libfileService.Update(libFile).Wait();
                     return libFile.Status;
