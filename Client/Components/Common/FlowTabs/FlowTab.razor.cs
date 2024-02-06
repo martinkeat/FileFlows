@@ -1,47 +1,71 @@
-﻿namespace FileFlows.Client.Components.Common
+﻿using Microsoft.AspNetCore.Components;
+namespace FileFlows.Client.Components.Common;
+
+
+/// <summary>
+/// Represents a tab within a collection of tabs.
+/// </summary>
+public partial class FlowTab:ComponentBase
 {
-    using Microsoft.AspNetCore.Components;
+    /// <summary>
+    /// Gets or sets the <see cref="FlowTabs"/> component containing this tab.
+    /// </summary>
+    [CascadingParameter] FlowTabs Tabs { get; set; }
 
-    public partial class FlowTab:ComponentBase
+    private bool _Visible = true;
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the tab is visible.
+    /// </summary>
+    [Parameter] public bool Visible
     {
-        [CascadingParameter] FlowTabs Tabs { get; set; }
-
-        private bool _Visible = true;
-
-        [Parameter]
-        public bool Visible
+        get => _Visible;
+        set
         {
-            get => _Visible;
-            set
-            {
-                if(_Visible == value)
-                    return;
-                _Visible = value;
-                Tabs?.TabVisibilityChanged();
-                this.StateHasChanged();
-            }
+            if(_Visible == value)
+                return;
+            _Visible = value;
+            Tabs?.TabVisibilityChanged();
+            this.StateHasChanged();
         }
-
-        private string _Title;
-
-        [Parameter]
-        public string Title
-        {
-            get => _Title;
-            set
-            {
-                _Title = Translater.TranslateIfNeeded(value);
-            }
-        }
-
-        [Parameter]
-        public RenderFragment ChildContent { get; set; }
-
-        protected override void OnInitialized()
-        {
-            Tabs.AddTab(this);
-        }
-
-        private bool IsActive() => this.Tabs.ActiveTab == this;
     }
+
+    private string _Title;
+
+    /// <summary>
+    /// Gets or sets the title of the tab.
+    /// </summary>
+    [Parameter] public string Title
+    {
+        get => _Title;
+        set
+        {
+            _Title = Translater.TranslateIfNeeded(value);
+        }
+    }
+    
+    /// <summary>
+    /// Gets or sets the icon associated with the tab.
+    /// </summary>
+    [Parameter] public string Icon { get; set; }
+
+    /// <summary>
+    /// Gets or sets the content of the tab.
+    /// </summary>
+    [Parameter] public RenderFragment ChildContent { get; set; }
+
+
+    /// <summary>
+    /// Initializes the tab when it is first rendered.
+    /// </summary>
+    protected override void OnInitialized()
+    {
+        Tabs.AddTab(this);
+    }
+    
+    /// <summary>
+    /// Determines whether the current tab is active.
+    /// </summary>
+    /// <returns><c>true</c> if the current tab is active; otherwise, <c>false</c>.</returns>
+    private bool IsActive() => this.Tabs.ActiveTab == this;
 }

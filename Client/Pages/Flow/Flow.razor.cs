@@ -38,7 +38,9 @@ public partial class Flow : ComponentBase, IDisposable
     /// </summary>
     private FlowPropertiesEditor PropertiesEditor { get; set; }
 
-    private string lblObsoleteMessage, lblEdit, lblHelp, lblDelete, lblCopy, lblPaste, lblRedo, lblUndo, lblAdd, lblProperties, lblEditSubFlow;
+    private string lblObsoleteMessage, lblEdit, lblHelp, lblDelete, lblCopy, lblPaste, lblRedo, lblUndo, lblAdd, 
+        lblProperties, lblEditSubFlow, lblPlugins, lblScripts, lblSubFlows;
+    
     private string SelectedElement;
 
     private int _Zoom = 100;
@@ -120,7 +122,9 @@ public partial class Flow : ComponentBase, IDisposable
         lblProperties = Translater.Instant("Labels.Properties");
         lblObsoleteMessage = Translater.Instant("Labels.ObsoleteConfirm.Message");
         lblEditSubFlow = Translater.Instant("Labels.EditSubFlow");
-
+        lblPlugins = Translater.Instant("Labels.Plugins");
+        lblScripts = Translater.Instant("Labels.Scripts");
+        lblSubFlows = Translater.Instant("Labels.SubFlows");
 
         NavigationCheck = async () =>
         {
