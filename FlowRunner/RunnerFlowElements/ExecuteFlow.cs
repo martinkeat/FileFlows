@@ -3,6 +3,7 @@ using FileFlows.Plugin;
 using FileFlows.ServerShared;
 using FileFlows.Shared;
 using FileFlows.Shared.Models;
+using Humanizer;
 
 namespace FileFlows.FlowRunner.RunnerFlowElements;
 
@@ -138,7 +139,7 @@ public class ExecuteFlow : Node
                     part.Name = Flow.Name; // entering this flow
                     
                 
-                if (Runner.StepChanged(part.Name, DontCountStep(part)).Failed(out var stepChangeError))
+                if (Runner.StepChanged(GetStepName(part), DontCountStep(part)).Failed(out var stepChangeError))
                 {
                     args.FailureReason = stepChangeError;
                     args.Logger?.ELog(stepChangeError);
@@ -221,6 +222,24 @@ public class ExecuteFlow : Node
         args.FailureReason = "Too many flow elements in flow, processing aborted.";
         args.Logger?.ELog(args.FailureReason);
         return RunnerCodes.TerminalExit;
+    }
+
+    /// <summary>
+    /// Gets the step name for the current part
+    /// </summary>
+    /// <param name="part">the part</param>
+    /// <returns>the step name</returns>
+    private string GetStepName(FlowPart part)
+    {
+        if (string.IsNullOrWhiteSpace(part.Name) == false)
+            return part.Name;
+        int lastIndex = part.FlowElementUid.LastIndexOf(".", StringComparison.InvariantCulture);
+        if (lastIndex > 0)
+            return part.FlowElementUid[(lastIndex + 1)..].Humanize();
+        lastIndex = part.FlowElementUid.LastIndexOf(":", StringComparison.InvariantCulture);
+        if (lastIndex > 0)
+            return part.FlowElementUid[(lastIndex + 1)..];
+        return part.FlowElementUid;
     }
 
     /// <summary>
