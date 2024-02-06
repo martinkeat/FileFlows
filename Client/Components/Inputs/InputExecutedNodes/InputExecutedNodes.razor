@@ -19,20 +19,52 @@
             </tr>
             </thead>
             <tbody>
-            @foreach(var item in Value)
-            {
-                <tr class="@(item.Output == -1 ? "output-error" : item.Output == 0 ? "output-exit" : "")">
-                    <td class="name">@FormatNodeName(item)</td>
-                    <td class="node">@FormatNodeUid(item.NodeUid)</td>
-                    <td class="time">@item.ProcessingTime</td>
-                    <td class="output">@item.Output</td>
-                    @if (string.IsNullOrEmpty(Log) == false)
-                    {
-                        <td class="view-log">
-                            <i class="fas fa-file-alt" @onclick="() => OpenLog(item)" title="@lblViewLog"></i>
-                        </td>
-                    }
-                </tr>
+            @{
+                var collection = Value.ToArray();
+                bool hasLog = string.IsNullOrEmpty(Log) == false;
+                for(int i=0;i<collection.Length;i++)
+                {
+                    var item = collection[i];
+                    int previousDepth = Math.Max(i > 0 ? collection[i - 1].Depth : item.Depth, 0);
+                    int nextDepth = Math.Max(i < collection.Length - 1 ? collection[i + 1].Depth : item.Depth, 0);
+                    int currentDepth = Math.Max(item.Depth, 0);
+
+                    bool depthStart = currentDepth < nextDepth;
+                    bool depthEnd = currentDepth < previousDepth;
+                    
+                    <tr class="@(item.Output == -1 ? "output-error" : item.Output == 0 ? "output-exit" : "")
+@(depthStart ? "depth-start": string.Empty) @(depthEnd ? "depth-end": string.Empty)">
+                        <td class="name">@FormatNodeName(item)</td>
+                        <td class="node">@FormatNodeUid(item.NodeUid)</td>
+                        @if (item.NodeUid == "FlowStart")
+                        {
+                            <td class="time"></td>
+                            <td class="output"></td>
+                            @if (hasLog)
+                            {
+                                <td class="view-log">
+                                    <i class="fas fa-file-alt" @onclick="() => OpenLog(item)" title="@lblViewLog"></i>
+                                </td>
+                            }
+                        }
+                        else
+                        {
+                            <td class="time">@item.ProcessingTime</td>
+                            <td class="output">
+                                @item.Output
+                            </td>
+                            @if (hasLog)
+                            {
+                                <td class="view-log">
+                                    @if (item.NodeUid != "FlowEnd")
+                                    {
+                                        <i class="fas fa-file-alt" @onclick="() => OpenLog(item)" title="@lblViewLog"></i>
+                                    }
+                                </td>
+                            }
+                        }
+                    </tr>
+                }
             }
             </tbody>
         </table>

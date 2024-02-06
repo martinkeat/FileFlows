@@ -342,6 +342,11 @@ public class ExecutedNode
     /// Gets or sets the output from this node
     /// </summary>
     public int Output { get; set; }
+    
+    /// <summary>
+    /// Gets or sets the flow depth this flow element was executed in 
+    /// </summary>
+    public int Depth { get; set; }
 }
 
 /// <summary>

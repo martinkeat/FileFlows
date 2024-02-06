@@ -98,7 +98,7 @@ public class FlowHelper
         => new ()
         {
             Uid = Guid.NewGuid(), // flow.Uid,
-            FlowElementUid = typeof(FlowFlowElement).FullName,
+            FlowElementUid = typeof(ExecuteFlow).FullName,
             Name = flow.Name,
             Inputs = 1,
             OutputConnections = new List<FlowConnection>(),
@@ -149,7 +149,7 @@ public class FlowHelper
             if(gotoFlow == null)
                 return Result<Node>.Fail("Failed to locate Flow defined in the GotoFlow flow element.");
 
-            return new FlowFlowElement()
+            return new ExecuteFlow()
             {
                 Flow = gotoFlow
             };
@@ -161,7 +161,7 @@ public class FlowHelper
             var subFlow = Program.Config.Flows.FirstOrDefault(x => x.Uid.ToString() == sUid);
             if (subFlow == null)
                 return Result<Node>.Fail($"Failed to locate sub flow '{sUid}'.");
-            return new FlowFlowElement
+            return new ExecuteFlow
             {
                 Flow = subFlow,
                 Properties = part.Model as IDictionary<string, object>,
@@ -186,6 +186,7 @@ public class FlowHelper
 
         if (node is SubFlowOutput sfOutput && Regex.IsMatch(part.Name, @"[\d]$") && int.TryParse(part.Name[^1..], out int sfOutputValue))
         {
+            // special case for a SubFlowOutput[1-9], these are special flow elements from the UI that shorthand a SubFlowOutput 
             sfOutput.Output = sfOutputValue;
             return sfOutput;
         }
@@ -222,7 +223,9 @@ public class FlowHelper
         foreach (var prop in properties)
         {
             string strongName = part.Name + "." + prop.Name;
-            if (variables.TryGetValue(strongName, out object varValue) == false)
+            object varValue;
+            if (variables.TryGetValue(part.Uid + "." + prop.Name, out varValue) == false 
+                    && variables.TryGetValue(strongName, out varValue) == false)
                 continue;
             
             var value = Converter.ConvertObject(prop.PropertyType, varValue);
@@ -260,8 +263,8 @@ public class FlowHelper
         // special checks for our internal flow elements
         if (fullName.EndsWith("." + nameof(FileDownloaderFlowElement)))
             return typeof(FileDownloaderFlowElement);
-        if (fullName.EndsWith("." + nameof(FlowFlowElement)))
-            return typeof(FlowFlowElement);
+        if (fullName.EndsWith("." + nameof(ExecuteFlow)))
+            return typeof(ExecuteFlow);
         if (fullName.EndsWith("." + nameof(StartupFlowElement)))
             return typeof(StartupFlowElement);
         if (fullName.EndsWith(nameof(SubFlowInput)))

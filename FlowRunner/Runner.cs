@@ -73,7 +73,8 @@ public class Runner
     /// <param name="output">the output after executing the flow node</param>
     /// <param name="duration">how long it took to execution</param>
     /// <param name="part">the flow node part</param>
-    internal void RecordNodeExecution(string nodeName, string nodeUid, int output, TimeSpan duration, FlowPart part)
+    /// <param name="flowDepth">the depth of the executed flow</param>
+    internal void RecordNodeExecution(string nodeName, string nodeUid, int output, TimeSpan duration, FlowPart part, int flowDepth)
     {
         if (Info.LibraryFile == null)
             return;
@@ -85,6 +86,7 @@ public class Runner
             NodeUid = part.Type == FlowElementType.Script ? "ScriptNode" : nodeUid,
             Output = output,
             ProcessingTime = duration,
+            Depth = flowDepth,
         });
     }
 
@@ -523,7 +525,7 @@ public class Runner
 
         var flow = FlowHelper.GetStartupFlow(Info.IsRemote, Flow);
 
-        var subFlowExecutor = new FlowFlowElement()
+        var subFlowExecutor = new ExecuteFlow()
         {
             Flow = flow,
             Runner = this

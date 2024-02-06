@@ -7,7 +7,7 @@ namespace FileFlows.FlowRunner.RunnerFlowElements;
 /// <summary>
 /// Executes a flow
 /// </summary>
-public class FlowFlowElement : Node
+public class ExecuteFlow : Node
 {
     /// <summary>
     /// Gets or sets the flow to execute
@@ -28,11 +28,6 @@ public class FlowFlowElement : Node
     /// Gets or sets the properties for this sub flow that were entered into the fields from the user
     /// </summary>
     public IDictionary<string, object> Properties { get; set; }
-
-    // Unicode character for vertical line
-    const char verticalLine = '\u2514'; 
-    // Unicode character for horizontal line
-    const char horizontalLine = '\u2500'; 
 
     /// <summary>
     /// Loads this flows properties into the variables
@@ -129,17 +124,10 @@ public class FlowFlowElement : Node
                     return RunnerCodes.TerminalExit; // this is a terminal exit, cannot continue
                 }
 
-                if (currentFlowElement is FlowFlowElement sub)
+                if (currentFlowElement is ExecuteFlow sub)
                 {
                     sub.Runner = Runner;
                     sub.FlowDepthLevel = FlowDepthLevel + 1;
-                    //if (sub.FlowPartPrefix == null)
-                    // {
-                    //     if (string.IsNullOrWhiteSpace(this.FlowPartPrefix))
-                    //         sub.FlowPartPrefix = string.Empty + verticalLine + horizontalLine + " ";
-                    //     else
-                    //         sub.FlowPartPrefix = this.FlowPartPrefix.Trim() + horizontalLine + " ";
-                    // }
                 }
 
                 args.Logger?.ILog(new string('=', 70));
@@ -213,7 +201,7 @@ public class FlowFlowElement : Node
     /// <returns>true if the flow part does NOT count towards total</returns>
     private bool DontCountStep(FlowPart part)
     {
-        if (part.FlowElementUid.EndsWith("." + nameof(FlowFlowElement)))
+        if (part.FlowElementUid.EndsWith("." + nameof(ExecuteFlow)))
             return true;
         if (part.FlowElementUid.EndsWith("." + nameof(StartupFlowElement)))
             return true;
@@ -239,7 +227,7 @@ public class FlowFlowElement : Node
     void RecordFlowElementFinish(NodeParameters args, DateTime startTime, int output, FlowPart part, Node flowElement)
     {
         if (part.FlowElementUid?.EndsWith(nameof(SubFlowOutput)) == true ||
-            part.FlowElementUid?.EndsWith("." + nameof(FlowFlowElement)) == true)
+            part.FlowElementUid?.EndsWith("." + nameof(ExecuteFlow)) == true)
             return; // we dont record this output, the flow element that called the flow will record this for us
         
         TimeSpan executionTime = DateTime.Now.Subtract(startTime);
@@ -251,34 +239,21 @@ public class FlowFlowElement : Node
         {
             // record this as the sub flow
             depthAdjustment = -1;
-            feName = Flow.Name + " Start";
-            feElementUid = "Flow";
-            output = 0; // special case, we want this to be green
+            feName = Flow.Name;
+            feElementUid = "FlowStart";
         }
         else if (part.FlowElementUid.StartsWith("SubFlow:"))
         {
-            feName = (part.Label?.EmptyAsNull() ?? part.Name) + " End";
-            feElementUid = "Flow";
+            feName = (part.Label?.EmptyAsNull() ?? part.Name)!;
+            feElementUid = "FlowEnd";
         }
 
-        Runner.RecordNodeExecution(GetFlowPartPrefix(depthAdjustment) + feName, feElementUid, output, executionTime, part);
+        Runner.RecordNodeExecution(feName, feElementUid, output, executionTime, part, FlowDepthLevel + depthAdjustment);
         args.Logger?.ILog("Flow Element execution time: " + executionTime);
         args.Logger?.ILog("Flow Element output: " + output);
         args.Logger?.ILog(new string('=', 70));
     }
 
-    private string GetFlowPartPrefix(int depthAdjustment = 0)
-    {
-        int depth = FlowDepthLevel + depthAdjustment;
-        if (depth < 1)
-            return string.Empty;
-        var prefix = string.Empty + verticalLine + horizontalLine;
-        for (int i = 1; i < depth; i++)
-            prefix += horizontalLine.ToString() + horizontalLine;
-        
-        return prefix + " ";
-
-    }
     
     /// <summary>
     /// Loads flow variables into the node parameters variables

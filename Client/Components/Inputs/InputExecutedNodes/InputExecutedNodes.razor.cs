@@ -26,6 +26,11 @@ public partial class InputExecutedNodes: Input<IEnumerable<ExecutedNode>>
     private bool InitializeResizer = false;
     private string ResizerUid;
 
+    // Unicode character for vertical line
+    const char verticalLine = '\u2514'; 
+    // Unicode character for horizontal line
+    const char horizontalLine = '\u2500'; 
+
     private List<string> _LogLines;
     private List<string> LogLines
     {
@@ -80,8 +85,10 @@ public partial class InputExecutedNodes: Input<IEnumerable<ExecutedNode>>
     
     private string FormatNodeName(ExecutedNode node)
     {
+        string prefix = GetFlowPartPrefix(node.Depth);
+        
         if (string.IsNullOrEmpty(node.NodeName))
-            return FormatNodeUid(node.NodeUid);
+            return prefix + FormatNodeUid(node.NodeUid);
         
         string nodeUid = Regex.Match(node.NodeUid.Substring(node.NodeUid.LastIndexOf(".", StringComparison.Ordinal) + 1), "[a-zA-Z0-9]+").Value.ToLower();
         string nodeName = Regex.Match(node.NodeName ?? string.Empty, "[a-zA-Z0-9]+").Value.ToLower();
@@ -89,7 +96,25 @@ public partial class InputExecutedNodes: Input<IEnumerable<ExecutedNode>>
         //if (string.IsNullOrEmpty(node.NodeName) || nodeUid == nodeName)
         //    return FormatNodeUid(node.NodeUid);
         
-        return node.NodeName;
+        return prefix + node.NodeName;
+    }
+    
+    
+    /// <summary>
+    /// Gets the prefix to show in front of the executed flow element
+    /// </summary>
+    /// <param name="depth">the depth the flow element was executed in</param>
+    /// <returns>the prefix to show</returns>
+    private string GetFlowPartPrefix(int depth)
+    {
+        if (depth < 1)
+            return string.Empty;
+        var prefix = string.Empty + verticalLine + horizontalLine;
+        for (int i = 1; i < depth; i++)
+            prefix += horizontalLine.ToString() + horizontalLine;
+        
+        return prefix + " ";
+
     }
 
     private void ClosePartialLog()
