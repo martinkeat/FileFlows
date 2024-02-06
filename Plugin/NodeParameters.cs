@@ -72,6 +72,12 @@ public class NodeParameters
     /// Gets or sets the result of the flow
     /// </summary>
     public NodeResult Result { get; set; } = NodeResult.Success;
+    
+    /// <summary>
+    /// Gets or sets why the current executing flow element failed
+    /// This is cleared whenever a new flow element starts execution 
+    /// </summary>
+    public string FailureReason { get; set; }
 
     /// <summary>
     /// Gets or sets the parameters used in the flow execution

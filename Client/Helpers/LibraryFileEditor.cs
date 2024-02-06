@@ -248,7 +248,7 @@ public class LibraryFileEditor
                     { nameof(InputExecutedNodes.HideLabel), true },
                 }
             };
-            if(item.Status != FileStatus.Processing)
+            //if(item.Status != FileStatus.Processing)
                 flowParts.Parameters.Add(nameof(InputExecutedNodes.Log), item.Log);
             fields.Add(flowParts);
         }

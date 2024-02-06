@@ -88,6 +88,8 @@ public class Runner
             ProcessingTime = duration,
             Depth = flowDepth,
         });
+
+        _ = SendUpdate(Info);
     }
 
 
@@ -145,11 +147,15 @@ public class Runner
                 finished = true;
                 task.Wait();
 
-                if (Info.LibraryFile?.Status == FileStatus.Processing)
-                    Info.LibraryFile.Status = FileStatus.ProcessingFailed;
-
                 nodeParameters?.Logger?.ELog("Error in runner: " + ex.Message + Environment.NewLine + ex.StackTrace);
-                throw;
+                
+                if (string.IsNullOrWhiteSpace(nodeParameters.FailureReason))
+                    nodeParameters.FailureReason = "Error in runner: " + ex.Message;
+                if (Info.LibraryFile?.Status == FileStatus.Processing)
+                    SetStatus(FileStatus.ProcessingFailed);
+                    //Info.LibraryFile.Status = FileStatus.ProcessingFailed;
+
+                //throw;
             }
             finally
             {
@@ -489,12 +495,10 @@ public class Runner
             
             nodeParameters.Variables.TryAdd(variable.Key, value);
         }
-
         
         Plugin.Helpers.FileHelper.DontChangeOwner = Node.DontChangeOwner;
         Plugin.Helpers.FileHelper.DontSetPermissions = Node.DontSetPermissions;
         Plugin.Helpers.FileHelper.Permissions = Node.Permissions;
-
 
         nodeParameters.RunnerUid = Info.Uid;
         nodeParameters.TempPath = WorkingDir;
@@ -525,21 +529,27 @@ public class Runner
 
         var flow = FlowHelper.GetStartupFlow(Info.IsRemote, Flow);
 
-        var subFlowExecutor = new ExecuteFlow()
+        var flowExecutor = new ExecuteFlow()
         {
             Flow = flow,
             Runner = this
         };
 
-        int result = subFlowExecutor.Execute(nodeParameters);
+        int result = flowExecutor.Execute(nodeParameters);
+        
         if(result == RunnerCodes.Completed)
             SetStatus(FileStatus.Processed);
         else if(result is RunnerCodes.Failure or RunnerCodes.TerminalExit)
             SetStatus(FileStatus.ProcessingFailed);
         else if(result == RunnerCodes.RunCanceled)
-            SetStatus(FileStatus.ProcessingFailed); // do we need this?
+            SetStatus(FileStatus.ProcessingFailed);
         else if(result == RunnerCodes.MappingIssue)
-            SetStatus(FileStatus.MappingIssue); 
+            SetStatus(FileStatus.MappingIssue);
+        else
+        {
+            nodeParameters.Logger.WLog("Safety caught flow execution unexpected result code: " + result);
+            SetStatus(FileStatus.ProcessingFailed); // safety catch, shouldn't happen
+        }
     }
     
     private void RecordAdditionalInfo(string name, object value, TimeSpan? expiry)

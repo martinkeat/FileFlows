@@ -58,6 +58,25 @@ public partial class LibraryFileService
         var file = await GetNextLibraryFile(node, workerUid);
         if(file == null)
             return NextFileResult(NextLibraryFileStatus.NoFile, file);
+    
+        #region reset the file for processing
+        try
+        {
+            // try to delete a log file for this library file if one already exists (in case the flow was cancelled and now its being re-run)                
+            LibraryFileLogHelper.DeleteLogs(file.Uid);
+        }
+        catch (Exception)
+        {
+        }
+
+        file.FinalSize = 0;
+        file.OutputPath = string.Empty;
+        file.ExecutedNodes = new();
+        file.FinalMetadata = new();
+        file.OriginalMetadata= new();
+        await ResetFileInfoForProcessing(file.Uid);
+        #endregion
+        
         return NextFileResult(NextLibraryFileStatus.Success, file);
     }
     

@@ -27,28 +27,15 @@ public class LibraryFileController : Controller //ControllerStore<LibraryFile>
     public async Task<NextLibraryFileResult> GetNext([FromBody] NextLibraryFileArgs args)
     {
         var service = new LibraryFileService();
+        // var node = new NodeService().GetByUid(args.NodeUid);
+        // var result = await service.GetNextLibraryFile(node, args.WorkerUid);
         var result = await service.GetNext(args.NodeName, args.NodeUid, args.NodeVersion, args.WorkerUid);
         if (result == null)
             return result;
-
-        if (result.File != null)
-        {
-            try
-            {
-                // try to delete a log file for this library file if one already exists (in case the flow was cancelled and now its being re-run)                
-                LibraryFileLogHelper.DeleteLogs(result.File.Uid);
-            }
-            catch (Exception)
-            {
-            }
-
-            result.File.FinalSize = 0;
-            result.File.OutputPath = string.Empty;
-            result.File.ExecutedNodes = new();
-            result.File.FinalMetadata = new();
-            result.File.OriginalMetadata= new();
-            await service.ResetFileInfoForProcessing(result.File.Uid);
-        }
+        
+        // don't add any logic here to clear the file etc.  
+        // the internal processing node bypasses this call and call the service directly (as does debug testing)
+        // only remote processing nodes make this call
 
         Logger.Instance.ILog($"GetNextFile for ['{args.NodeName}']({args.NodeUid}): {result.Status}");
         return result;

@@ -101,11 +101,14 @@ public class ExecuteFlow : Node
                 {
                     if(string.IsNullOrWhiteSpace(lfeError) == false)
                         args.Logger?.ELog(lfeError);
+                    
                     // happens when canceled or when the node failed to load
-                    if(part.Name == "FileFlows.VideoNodes.VideoFile")
-                        args.Logger?.ELog("Video Nodes Plugin missing, download the from the Plugins page");
-                    else
-                        args.Logger?.ELog("Failed to load flow element: " + part.Name + "\nEnsure you have the required plugins installed.");       
+                    args.FailureReason = part.Name == "FileFlows.VideoNodes.VideoFile"
+                        ? "Video Nodes Plugin missing, download the from the Plugins page"
+                        : "Failed to load flow element: " + part.Name +
+                          "\nEnsure you have the required plugins installed.";
+
+                    args.Logger?.ELog(args.FailureReason);
                     return RunnerCodes.Failure;
                 }
 
@@ -120,6 +123,7 @@ public class ExecuteFlow : Node
                 
                 if (Runner.StepChanged(part.Name, DontCountStep(part)).Failed(out var stepChangeError))
                 {
+                    args.FailureReason = stepChangeError;
                     args.Logger?.ELog(stepChangeError);
                     return RunnerCodes.TerminalExit; // this is a terminal exit, cannot continue
                 }
@@ -137,6 +141,9 @@ public class ExecuteFlow : Node
 
                 
                 nodeStartTime = DateTime.Now;
+
+                // clear the failure reason
+                args.FailureReason = null;
                 
                 if (currentFlowElement.PreExecute(args) == false)
                     throw new Exception("PreExecute failed");
@@ -181,6 +188,9 @@ public class ExecuteFlow : Node
             }
             catch (Exception ex)
             {
+                if (string.IsNullOrWhiteSpace(args.FailureReason))
+                    args.FailureReason = ex.Message;
+                
                 args.Result = NodeResult.Failure;
                 args.Logger?.ELog("Execution error: " + ex.Message + Environment.NewLine + ex.StackTrace);
                 Program.Logger?.ELog("Execution error: " + ex.Message + Environment.NewLine + ex.StackTrace);
@@ -189,8 +199,9 @@ public class ExecuteFlow : Node
                 return RunnerCodes.Failure;
             }
         }
-        
-        args.Logger?.ELog("Too many nodes in flow, processing aborted");
+
+        args.FailureReason = "Too many flow elements in flow, processing aborted.";
+        args.Logger?.ELog(args.FailureReason);
         return RunnerCodes.TerminalExit;
     }
 
