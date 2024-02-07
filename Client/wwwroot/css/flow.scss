@@ -1,3 +1,38 @@
+@mixin flowStyles($flowType, $borderColor, $backgroundColor) {
+  &.#{$flowType}:not(.selected) {
+    .icon-wrapper, .input > div, .output:not(.output--1) > div {
+      border-color: $borderColor !important;
+    }
+
+    .connected:not(.output--1) > div {
+      background-color: $backgroundColor !important;
+    }
+  }
+}
+
+@mixin flowIOStyles($bottom) {
+  position: absolute;
+  top: -1rem;
+  bottom: $bottom;
+  left: 2.25rem;
+  right: 0;
+  width: unset;
+  z-index: 2;
+  .input, .output {
+    position: absolute;
+  }
+}
+@mixin outputs($num, $left, $spacing) {
+  .outputs-#{$num} {
+    @for $j from 1 through $num {
+      .output-#{$j} {
+        left: ($j - 1) * $spacing + $left;
+      }
+    }
+  }
+}
+
+
 .flow-part {
   &.selected {
     border-color:var(--accent) !important;
@@ -15,59 +50,32 @@
   text-overflow: ellipsis;
   position: relative;
   padding-left: 2.25rem;
-
+  
   .icon-wrapper {
     width: 2rem;
-    min-width:2rem;
+    min-width: 2rem;
     border-right: solid 3px;
     margin-right: 0.25rem;
     position: absolute;
     top: 0;
     bottom: 0;
     left: 0;
+
     .icon {
-      padding-top:3px;
+      padding-top: 3px;
       display: inline-block;
       vertical-align: middle;
     }
   }
 
-  &.Logic .icon-wrapper {
-    border-color: var(--flow-logic);
+  // Loop through different flow types and set their border color
+  @each $flowType in Logic, Input, Output, SubFlow, Process, BuildStart, BuildEnd, BuildPart, Communication, Failure, Script {
+    &.#{$flowType} .icon-wrapper {
+      border-color: var(--flow-#{to-lower-case($flowType)});
+    }
   }
-
-  &.Input .icon-wrapper {
-    border-color: var(--flow-input);
-  }
-
-  &.Output .icon-wrapper {
-    border-color: var(--flow-output);
-  }
-  &.SubFlow .icon-wrapper {
-    border-color: var(--flow-subflow);
-  }
-
-  &.Process .icon-wrapper {
-    border-color: var(--flow-process);
-  }
-  &.BuildEnd .icon-wrapper {
-    border-color: var(--flow-build-end);
-  }
-  &.BuildStart .icon-wrapper {
-    border-color: var(--flow-build-start);
-  }
-  &.BuildPart .icon-wrapper {
-    border-color: var(--flow-build-part);
-  }
-  &.Communication .icon-wrapper {
-    border-color: var(--flow-communication);
-  }
-  &.Failure .icon-wrapper {
-    border-color: var(--flow-failure);
-  }
-  &.Script .icon-wrapper {
-    border-color: var(--flow-script);
-  }
+  
+  
   .label {
     flex-grow: 1;
   }
@@ -93,6 +101,8 @@
   display: flex;
   flex-direction: row;
   outline: unset !important;
+  min-height: 4rem;
+  position: relative;
 
   .icon-wrapper {
     width: 2rem;
@@ -148,149 +158,36 @@
     user-select: none;
   }
 
-  &.vertical {
-    min-height: 4rem;
 
-    &.size-1, &.size-2, &.size-3 {
-      width: 12rem;
-    }
+  &.size-1, &.size-2, &.size-3 {
+    width: 12rem;
+  }
 
-    @for $i from 4 through 8 {
-      &.size-#{$i} {
-        width: calc(12rem + #{$i}rem);
-      }
-    }
-
-    &.size-9 {
-      width: calc(12rem + 11rem);
-    }
-
-    &.size-10 {
-      width: calc(12rem + 13rem);
+  @for $i from 4 through 8 {
+    &.size-#{$i} {
+      width: calc(12rem + #{$i}rem);
     }
   }
 
-  &:not(.vertical) {
-    &.size-1 {
-      height: 2.5rem;
-    }
-
-    @for $i from 2 through 20 {
-      &.size-#{$i} {
-        height: calc(#{$i} * 2rem);
-      }
-    }
+  &.size-9 {
+    width: calc(12rem + 11rem);
   }
 
-  &.Logic:not(.selected) {
-    .icon-wrapper, .input > div, .output:not(.output--1) > div {
-      border-color: var(--flow-logic) !important;
-    }
-
-    .connected:not(.output--1) > div {
-      background-color: var(--flow-logic) !important;
-    }
+  &.size-10 {
+    width: calc(12rem + 13rem);
   }
 
-  &.Input:not(.selected) {
-    .icon-wrapper, .input > div, .output:not(.output--1) > div {
-      border-color: var(--flow-input) !important;
-    }
-
-    .connected:not(.output--1) > div {
-      background-color: var(--flow-input) !important;
-    }
-  }
-
-  &.Output:not(.selected) {
-    .icon-wrapper, .input > div, .output:not(.output--1) > div {
-      border-color: var(--flow-output) !important;
-    }
-
-    .connected:not(.output--1) > div {
-      background-color: var(--flow-output) !important;
-    }
-  }
-
-  &.SubFlow:not(.selected) {
-    .icon-wrapper, .input > div, .output:not(.output--1) > div {
-      border-color: var(--flow-subflow) !important;
-    }
-
-    .connected:not(.output--1) > div {
-      background-color: var(--flow-subflow) !important;
-    }
-  }
-
-  &.Process:not(.selected) {
-    .icon-wrapper, .input > div, .output:not(.output--1) > div {
-      border-color: var(--flow-process) !important;
-    }
-
-    .connected:not(.output--1) > div {
-      background-color: var(--flow-process) !important;
-    }
-  }
-
-  &.BuildStart:not(.selected) {
-    .icon-wrapper, .input > div, .output:not(.output--1) > div {
-      border-color: var(--flow-build-start) !important;
-    }
-
-    .connected:not(.output--1) > div {
-      background-color: var(--flow-build-start) !important;
-    }
-  }
-
-  &.BuildEnd:not(.selected) {
-    .icon-wrapper, .input > div, .output:not(.output--1) > div {
-      border-color: var(--flow-build-end) !important;
-    }
-
-    .connected:not(.output--1) > div {
-      background-color: var(--flow-build-end) !important;
-    }
-  }
-
-  &.BuildPart:not(.selected) {
-    .icon-wrapper, .input > div, .output:not(.output--1) > div {
-      border-color: var(--flow-build-part) !important;
-    }
-
-    .connected:not(.output--1) > div {
-      background-color: var(--flow-build-part) !important;
-    }
-  }
-
-  &.Communication:not(.selected) {
-    .icon-wrapper, .input > div, .output:not(.output--1) > div {
-      border-color: var(--flow-communication) !important;
-    }
-
-    .connected:not(.output--1) > div {
-      background-color: var(--flow-communication) !important;
-    }
-  }
-
-  &.Failure:not(.selected) {
-    .icon-wrapper, .input > div, .output:not(.output--1) > div {
-      border-color: var(--flow-failure) !important;
-    }
-
-    .connected:not(.output--1) > div {
-      background-color: var(--flow-failure) !important;
-    }
-  }
-
-  &.Script:not(.selected) {
-    .icon-wrapper, .input > div, .output:not(.output--1) > div {
-      border-color: var(--flow-script) !important;
-    }
-
-    .connected:not(.output--1) > div {
-      background-color: var(--flow-script) !important;
-    }
-  }
+  @include flowStyles(Logic, var(--flow-logic), var(--flow-logic));
+  @include flowStyles(Input, var(--flow-input), var(--flow-input));
+  @include flowStyles(Output, var(--flow-output), var(--flow-output));
+  @include flowStyles(SubFlow, var(--flow-subflow), var(--flow-subflow));
+  @include flowStyles(Process, var(--flow-process), var(--flow-process));
+  @include flowStyles(BuildStart, var(--flow-build-start), var(--flow-build-start));
+  @include flowStyles(BuildEnd, var(--flow-build-end), var(--flow-build-end));
+  @include flowStyles(BuildPart, var(--flow-build-part), var(--flow-build-part));
+  @include flowStyles(Communication, var(--flow-communication), var(--flow-communication));
+  @include flowStyles(Failure, var(--flow-failure), var(--flow-failure));
+  @include flowStyles(Script, var(--flow-script), var(--flow-script));
 
   .connected.output--1 > div {
     background-color: var(--error) !important;
@@ -307,19 +204,25 @@
   }
 
   .inputs {
-    left: -0.65rem;
+    @include flowIOStyles(0);
+    z-index: 3;
+    left:calc(1rem + 1px);
+    display: flex;
+    justify-content: center;
+    .input {
+      left:unset;
+    }
   }
 
   .outputs {
     right: -0.65rem;
+    @include flowIOStyles(unset);
+    .output {
+      bottom: -2rem;
+    }
   }
 
-
   .inputs, .outputs {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-
     .input, .output {
       margin: auto;
 
@@ -333,258 +236,32 @@
       }
     }
   }
-
-  &.vertical {
-    .inputs, .outputs {
-      top: -1rem;
-      bottom: unset;
-      left: 30px;
-      right: 0;
-      width: unset;
-      z-index: 2;
-    }
-
-    .inputs {
-      z-index: 3;
-    }
-
-
-    .outputs {
-      // top: unset;
-      .output {
-        bottom: -2rem;
-      }
-    }
-  }
-}
-
-.flow-part {
-  position:relative;
-  .input, .output {
-    position:absolute;
-  }
-  .input, .outputs-1 .output-1 {
-    left:45px;
+  
+  .outputs-1 .output-1 {
+    left: 45px;
   }
   .outputs {
     bottom: 13px !important;
   }
-
   .output--1 {
     right: -1rem;
-    left:unset !important;
+    left: unset !important;
     top: 50%;
     > div {
-      border-color:var(--error) !important;
+      border-color: var(--error) !important;
     }
   }
-
-
-  .outputs-2 {
-    .output-1 {
-      left:15px;
-    }
-    .output-2 {
-      left:75px;
-    }
-  }
-  .outputs-3 {
-    .output-1 {
-      left:5px;
-    }
-    .output-2 {
-      left:45px;
-    }
-    .output-3 {
-      left:85px;
-    }
-  }
-  &.size-4 .input {
-    left:75px;
-  }
-  .outputs-4 {
-    .output-1 {
-      left:5px;
-    }
-    .output-2 {
-      left:55px;
-    }
-    .output-3 {
-      left:105px;
-    }
-    .output-4 {
-      left:155px;
-    }
-  }
-  &.size-5 .input {
-    left:85px;
-  }
-  .outputs-5 {
-    .output-1 {
-      left:5px;
-    }
-    .output-2 {
-      left:45px;
-    }
-    .output-3 {
-      left:85px;
-    }
-    .output-4 {
-      left:125px;
-    }
-    .output-5 {
-      left:165px;
-    }
-  }
-  &.size-6 .input {
-    left:95px;
-  }
-  .outputs-6 {
-    .output-1 {
-      left:15px;
-    }
-    .output-2 {
-      left:45px;
-    }
-    .output-3 {
-      left:75px;
-    }
-    .output-4 {
-      left:115px;
-    }
-    .output-5 {
-      left:145px;
-    }
-    .output-6 {
-      left:175px;
-    }
-  }
-  &.size-7 .input {
-    left:105px;
-  }
-  .outputs-7 {
-    .output-1 {
-      left:5px;
-    }
-    .output-2 {
-      left:35px;
-    }
-    .output-3 {
-      left:65px;
-    }
-    .output-4 {
-      left:95px;
-    }
-    .output-5 {
-      left:125px;
-    }
-    .output-6 {
-      left:155px;
-    }
-    .output-7 {
-      left:185px;
-    }
-  }
-  &.size-8 .input {
-    left:105px;
-  }
-  .outputs-8 {
-    .output-1 {
-      left:5px;
-    }
-    .output-2 {
-      left:35px;
-    }
-    .output-3 {
-      left:65px;
-    }
-    .output-4 {
-      left:95px;
-    }
-    .output-5 {
-      left:125px;
-    }
-    .output-6 {
-      left:155px;
-    }
-    .output-7 {
-      left:185px;
-    }
-    .output-8 {
-      left:215px;
-    }
-  }
-
-  &.size-9 .input {
-    left:125px;
-  }
-  .outputs-9 {
-    .output-1 {
-      left:5px;
-    }
-    .output-2 {
-      left:35px;
-    }
-    .output-3 {
-      left:65px;
-    }
-    .output-4 {
-      left:95px;
-    }
-    .output-5 {
-      left:125px;
-    }
-    .output-6 {
-      left:155px;
-    }
-    .output-7 {
-      left:185px;
-    }
-    .output-8 {
-      left:215px;
-    }
-    .output-9 {
-      left:245px;
-    }
-  }
-
-  &.size-10 .input {
-    left:135px;
-  }
-  .outputs-10 {
-    .output-1 {
-      left:5px;
-    }
-    .output-2 {
-      left:35px;
-    }
-    .output-3 {
-      left:65px;
-    }
-    .output-4 {
-      left:95px;
-    }
-    .output-5 {
-      left:125px;
-    }
-    .output-6 {
-      left:155px;
-    }
-    .output-7 {
-      left:185px;
-    }
-    .output-8 {
-      left:215px;
-    }
-    .output-9 {
-      left:245px;
-    }
-    .output-10 {
-      left:275px;
-    }
-  }
+  
+  @include outputs(2, 15px, 60px);
+  @include outputs(3, 5px, 40px);
+  @include outputs(4, 5px, 50px);
+  @include outputs(5, 5px, 40px);
+  @include outputs(6, 15px, 30px);
+  @include outputs(7, 5px, 30px);
+  @include outputs(8, 5px, 30px);
+  @include outputs(9, 5px, 30px);
+  @include outputs(10, 5px, 30px);
 }
-
 
 .flow-part, .flow-element {
   text-align: center;
@@ -592,38 +269,13 @@
   min-width:12rem;
   border:solid 2px transparent;
   background: var(--base);
-  &.Logic {
-    border-color:var(--flow-logic);
-  }
-  &.Input {
-    border-color:var(--flow-input);
-  }
-  &.Output {
-    border-color:var(--flow-output);
-  }
-  &.SubFlow {
-    border-color:var(--flow-subflow);
-  }
-  &.Process {
-    border-color:var(--flow-process);
-  }
-  &.BuildPart {
-    border-color:var(--flow-build-part);
-  }
-  &.BuildStart {
-    border-color:var(--flow-build-start);
-  }
-  &.BuildEnd {
-    border-color:var(--flow-build-end);
-  }
-  &.Communication {
-    border-color:var(--flow-communication);
-  }
-  &.Failure {
-    border-color:var(--flow-failure);
-  }
-  &.Script {
-    border-color:var(--flow-script);
+  
+  $flowTypes: Logic, Input, Output, SubFlow, Process, BuildPart, BuildStart, BuildEnd, Communication, Failure, Script;
+
+  @each $flowType in $flowTypes {
+    &.#{$flowType} {
+      border-color: var(--flow-#{to-lower-case($flowType)});
+    }
   }
 }
 

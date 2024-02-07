@@ -602,14 +602,14 @@ a.btn {
 .flow-element.Process .icon-wrapper {
   border-color: var(--flow-process);
 }
-.flow-element.BuildEnd .icon-wrapper {
-  border-color: var(--flow-build-end);
-}
 .flow-element.BuildStart .icon-wrapper {
-  border-color: var(--flow-build-start);
+  border-color: var(--flow-buildstart);
+}
+.flow-element.BuildEnd .icon-wrapper {
+  border-color: var(--flow-buildend);
 }
 .flow-element.BuildPart .icon-wrapper {
-  border-color: var(--flow-build-part);
+  border-color: var(--flow-buildpart);
 }
 .flow-element.Communication .icon-wrapper {
   border-color: var(--flow-communication);
@@ -640,6 +640,8 @@ a.btn {
   display: flex;
   flex-direction: row;
   outline: unset !important;
+  min-height: 4rem;
+  position: relative;
 }
 .flow-part .icon-wrapper {
   width: 2rem;
@@ -687,92 +689,29 @@ a.btn {
 .flow-part * {
   user-select: none;
 }
-.flow-part.vertical {
-  min-height: 4rem;
-}
-.flow-part.vertical.size-1, .flow-part.vertical.size-2, .flow-part.vertical.size-3 {
+.flow-part.size-1, .flow-part.size-2, .flow-part.size-3 {
   width: 12rem;
 }
-.flow-part.vertical.size-4 {
+.flow-part.size-4 {
   width: calc(12rem + 4rem);
 }
-.flow-part.vertical.size-5 {
+.flow-part.size-5 {
   width: calc(12rem + 5rem);
 }
-.flow-part.vertical.size-6 {
+.flow-part.size-6 {
   width: calc(12rem + 6rem);
 }
-.flow-part.vertical.size-7 {
+.flow-part.size-7 {
   width: calc(12rem + 7rem);
 }
-.flow-part.vertical.size-8 {
+.flow-part.size-8 {
   width: calc(12rem + 8rem);
 }
-.flow-part.vertical.size-9 {
+.flow-part.size-9 {
   width: 23rem;
 }
-.flow-part.vertical.size-10 {
+.flow-part.size-10 {
   width: 25rem;
-}
-.flow-part:not(.vertical).size-1 {
-  height: 2.5rem;
-}
-.flow-part:not(.vertical).size-2 {
-  height: calc(2 * 2rem);
-}
-.flow-part:not(.vertical).size-3 {
-  height: calc(3 * 2rem);
-}
-.flow-part:not(.vertical).size-4 {
-  height: calc(4 * 2rem);
-}
-.flow-part:not(.vertical).size-5 {
-  height: calc(5 * 2rem);
-}
-.flow-part:not(.vertical).size-6 {
-  height: calc(6 * 2rem);
-}
-.flow-part:not(.vertical).size-7 {
-  height: calc(7 * 2rem);
-}
-.flow-part:not(.vertical).size-8 {
-  height: calc(8 * 2rem);
-}
-.flow-part:not(.vertical).size-9 {
-  height: calc(9 * 2rem);
-}
-.flow-part:not(.vertical).size-10 {
-  height: calc(10 * 2rem);
-}
-.flow-part:not(.vertical).size-11 {
-  height: calc(11 * 2rem);
-}
-.flow-part:not(.vertical).size-12 {
-  height: calc(12 * 2rem);
-}
-.flow-part:not(.vertical).size-13 {
-  height: calc(13 * 2rem);
-}
-.flow-part:not(.vertical).size-14 {
-  height: calc(14 * 2rem);
-}
-.flow-part:not(.vertical).size-15 {
-  height: calc(15 * 2rem);
-}
-.flow-part:not(.vertical).size-16 {
-  height: calc(16 * 2rem);
-}
-.flow-part:not(.vertical).size-17 {
-  height: calc(17 * 2rem);
-}
-.flow-part:not(.vertical).size-18 {
-  height: calc(18 * 2rem);
-}
-.flow-part:not(.vertical).size-19 {
-  height: calc(19 * 2rem);
-}
-.flow-part:not(.vertical).size-20 {
-  height: calc(20 * 2rem);
 }
 .flow-part.Logic:not(.selected) .icon-wrapper, .flow-part.Logic:not(.selected) .input > div, .flow-part.Logic:not(.selected) .output:not(.output--1) > div {
   border-color: var(--flow-logic) !important;
@@ -850,15 +789,39 @@ a.btn {
   background-color: var(--accent) !important;
 }
 .flow-part .inputs {
-  left: -0.65rem;
+  position: absolute;
+  top: -1rem;
+  bottom: 0;
+  left: 2.25rem;
+  right: 0;
+  width: unset;
+  z-index: 2;
+  z-index: 3;
+  left: calc(1rem + 1px);
+  display: flex;
+  justify-content: center;
+}
+.flow-part .inputs .input, .flow-part .inputs .output {
+  position: absolute;
+}
+.flow-part .inputs .input {
+  left: unset;
 }
 .flow-part .outputs {
   right: -0.65rem;
-}
-.flow-part .inputs, .flow-part .outputs {
   position: absolute;
-  top: 0;
-  bottom: 0;
+  top: -1rem;
+  bottom: unset;
+  left: 2.25rem;
+  right: 0;
+  width: unset;
+  z-index: 2;
+}
+.flow-part .outputs .input, .flow-part .outputs .output {
+  position: absolute;
+}
+.flow-part .outputs .output {
+  bottom: -2rem;
 }
 .flow-part .inputs .input, .flow-part .inputs .output, .flow-part .outputs .input, .flow-part .outputs .output {
   margin: auto;
@@ -871,28 +834,7 @@ a.btn {
   background-color: var(--base);
   border: solid 2px;
 }
-.flow-part.vertical .inputs, .flow-part.vertical .outputs {
-  top: -1rem;
-  bottom: unset;
-  left: 30px;
-  right: 0;
-  width: unset;
-  z-index: 2;
-}
-.flow-part.vertical .inputs {
-  z-index: 3;
-}
-.flow-part.vertical .outputs .output {
-  bottom: -2rem;
-}
-
-.flow-part {
-  position: relative;
-}
-.flow-part .input, .flow-part .output {
-  position: absolute;
-}
-.flow-part .input, .flow-part .outputs-1 .output-1 {
+.flow-part .outputs-1 .output-1 {
   left: 45px;
 }
 .flow-part .outputs {
@@ -921,9 +863,6 @@ a.btn {
 .flow-part .outputs-3 .output-3 {
   left: 85px;
 }
-.flow-part.size-4 .input {
-  left: 75px;
-}
 .flow-part .outputs-4 .output-1 {
   left: 5px;
 }
@@ -935,9 +874,6 @@ a.btn {
 }
 .flow-part .outputs-4 .output-4 {
   left: 155px;
-}
-.flow-part.size-5 .input {
-  left: 85px;
 }
 .flow-part .outputs-5 .output-1 {
   left: 5px;
@@ -954,9 +890,6 @@ a.btn {
 .flow-part .outputs-5 .output-5 {
   left: 165px;
 }
-.flow-part.size-6 .input {
-  left: 95px;
-}
 .flow-part .outputs-6 .output-1 {
   left: 15px;
 }
@@ -967,16 +900,13 @@ a.btn {
   left: 75px;
 }
 .flow-part .outputs-6 .output-4 {
-  left: 115px;
+  left: 105px;
 }
 .flow-part .outputs-6 .output-5 {
-  left: 145px;
+  left: 135px;
 }
 .flow-part .outputs-6 .output-6 {
-  left: 175px;
-}
-.flow-part.size-7 .input {
-  left: 105px;
+  left: 165px;
 }
 .flow-part .outputs-7 .output-1 {
   left: 5px;
@@ -998,9 +928,6 @@ a.btn {
 }
 .flow-part .outputs-7 .output-7 {
   left: 185px;
-}
-.flow-part.size-8 .input {
-  left: 105px;
 }
 .flow-part .outputs-8 .output-1 {
   left: 5px;
@@ -1025,9 +952,6 @@ a.btn {
 }
 .flow-part .outputs-8 .output-8 {
   left: 215px;
-}
-.flow-part.size-9 .input {
-  left: 125px;
 }
 .flow-part .outputs-9 .output-1 {
   left: 5px;
@@ -1055,9 +979,6 @@ a.btn {
 }
 .flow-part .outputs-9 .output-9 {
   left: 245px;
-}
-.flow-part.size-10 .input {
-  left: 135px;
 }
 .flow-part .outputs-10 .output-1 {
   left: 5px;
@@ -1113,13 +1034,13 @@ a.btn {
   border-color: var(--flow-process);
 }
 .flow-part.BuildPart, .flow-element.BuildPart {
-  border-color: var(--flow-build-part);
+  border-color: var(--flow-buildpart);
 }
 .flow-part.BuildStart, .flow-element.BuildStart {
-  border-color: var(--flow-build-start);
+  border-color: var(--flow-buildstart);
 }
 .flow-part.BuildEnd, .flow-element.BuildEnd {
-  border-color: var(--flow-build-end);
+  border-color: var(--flow-buildend);
 }
 .flow-part.Communication, .flow-element.Communication {
   border-color: var(--flow-communication);
