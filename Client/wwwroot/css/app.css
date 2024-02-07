@@ -556,11 +556,109 @@ a.btn {
   opacity: 1;
 }
 
-.flow-part.selected {
-  border-color: var(--accent) !important;
-  background-image: linear-gradient(rgba(var(--accent-rgb), 0.3), rgba(var(--accent-rgb), 0.3)) !important;
-  background-color: unset;
-  box-shadow: 0 3px 10px rgba(var(--accent-rgb), 0.1);
+.flow-part, .flow-element {
+  --border-radius: 0;
+  --border-width: 1px;
+  border: solid var(--border-width);
+  text-align: center;
+  background: var(--base);
+}
+.flow-part.Logic, .flow-element.Logic {
+  border-color: var(--flow-logic);
+}
+.flow-part.Logic .icon-wrapper:before, .flow-element.Logic .icon-wrapper:before {
+  background: var(--flow-logic);
+}
+.flow-part.Input, .flow-element.Input {
+  border-color: var(--flow-input);
+}
+.flow-part.Input .icon-wrapper:before, .flow-element.Input .icon-wrapper:before {
+  background: var(--flow-input);
+}
+.flow-part.Output, .flow-element.Output {
+  border-color: var(--flow-output);
+}
+.flow-part.Output .icon-wrapper:before, .flow-element.Output .icon-wrapper:before {
+  background: var(--flow-output);
+}
+.flow-part.SubFlow, .flow-element.SubFlow {
+  border-color: var(--flow-subflow);
+}
+.flow-part.SubFlow .icon-wrapper:before, .flow-element.SubFlow .icon-wrapper:before {
+  background: var(--flow-subflow);
+}
+.flow-part.Process, .flow-element.Process {
+  border-color: var(--flow-process);
+}
+.flow-part.Process .icon-wrapper:before, .flow-element.Process .icon-wrapper:before {
+  background: var(--flow-process);
+}
+.flow-part.BuildPart, .flow-element.BuildPart {
+  border-color: var(--flow-buildpart);
+}
+.flow-part.BuildPart .icon-wrapper:before, .flow-element.BuildPart .icon-wrapper:before {
+  background: var(--flow-buildpart);
+}
+.flow-part.BuildStart, .flow-element.BuildStart {
+  border-color: var(--flow-buildstart);
+}
+.flow-part.BuildStart .icon-wrapper:before, .flow-element.BuildStart .icon-wrapper:before {
+  background: var(--flow-buildstart);
+}
+.flow-part.BuildEnd, .flow-element.BuildEnd {
+  border-color: var(--flow-buildend);
+}
+.flow-part.BuildEnd .icon-wrapper:before, .flow-element.BuildEnd .icon-wrapper:before {
+  background: var(--flow-buildend);
+}
+.flow-part.Communication, .flow-element.Communication {
+  border-color: var(--flow-communication);
+}
+.flow-part.Communication .icon-wrapper:before, .flow-element.Communication .icon-wrapper:before {
+  background: var(--flow-communication);
+}
+.flow-part.Failure, .flow-element.Failure {
+  border-color: var(--flow-failure);
+}
+.flow-part.Failure .icon-wrapper:before, .flow-element.Failure .icon-wrapper:before {
+  background: var(--flow-failure);
+}
+.flow-part.Script, .flow-element.Script {
+  border-color: var(--flow-script);
+}
+.flow-part.Script .icon-wrapper:before, .flow-element.Script .icon-wrapper:before {
+  background: var(--flow-script);
+}
+.flow-part.selected .icon-wrapper:before, .flow-element.selected .icon-wrapper:before {
+  background: unset !important;
+}
+.flow-part .icon-wrapper, .flow-element .icon-wrapper {
+  border-right: solid var(--border-width);
+  width: 30px;
+  min-width: 30px;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.flow-part .icon-wrapper:before, .flow-element .icon-wrapper:before {
+  content: " ";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  z-index: 1;
+  opacity: 0.25;
+}
+.flow-part .icon-wrapper .icon, .flow-element .icon-wrapper .icon {
+  z-index: 2;
+  padding-top: 3px;
+  display: inline-block;
+  vertical-align: middle;
 }
 
 .flow-element {
@@ -571,21 +669,6 @@ a.btn {
   text-overflow: ellipsis;
   position: relative;
   padding-left: 2.25rem;
-}
-.flow-element .icon-wrapper {
-  width: 2rem;
-  min-width: 2rem;
-  border-right: solid 3px;
-  margin-right: 0.25rem;
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-}
-.flow-element .icon-wrapper .icon {
-  padding-top: 3px;
-  display: inline-block;
-  vertical-align: middle;
 }
 .flow-element.Logic .icon-wrapper {
   border-color: var(--flow-logic);
@@ -636,27 +719,1583 @@ a.btn {
   content: "\f00d";
 }
 
+.flow-part.size-1.height-1 {
+  height: 60px;
+  width: 170px;
+}
+.flow-part.size-1.height-1 .output {
+  bottom: -5px;
+}
+.flow-part.size-1.height-1 .output--1 {
+  right: -5px;
+  top: 25px;
+  bottom: unset;
+}
+.flow-part.size-1.height-1 .output-1 {
+  left: 85px;
+  color: red;
+}
+.flow-part.size-1.height-1 .input {
+  left: 85px;
+  top: -5px;
+}
+
+.flow-part.size-1.height-2 {
+  height: 60px;
+  width: 170px;
+}
+.flow-part.size-1.height-2 .output {
+  bottom: -5px;
+}
+.flow-part.size-1.height-2 .output--1 {
+  right: -5px;
+  top: 25px;
+  bottom: unset;
+}
+.flow-part.size-1.height-2 .output-1 {
+  left: 85px;
+  color: red;
+}
+.flow-part.size-1.height-2 .input {
+  left: 85px;
+  top: -5px;
+}
+
+.flow-part.size-1.height-3 {
+  height: 80px;
+  width: 170px;
+}
+.flow-part.size-1.height-3 .output {
+  bottom: -5px;
+}
+.flow-part.size-1.height-3 .output--1 {
+  right: -5px;
+  top: 35px;
+  bottom: unset;
+}
+.flow-part.size-1.height-3 .output-1 {
+  left: 85px;
+  color: red;
+}
+.flow-part.size-1.height-3 .input {
+  left: 85px;
+  top: -5px;
+}
+
+.flow-part.size-1.height-4 {
+  height: 100px;
+  width: 170px;
+}
+.flow-part.size-1.height-4 .output {
+  bottom: -5px;
+}
+.flow-part.size-1.height-4 .output--1 {
+  right: -5px;
+  top: 45px;
+  bottom: unset;
+}
+.flow-part.size-1.height-4 .output-1 {
+  left: 85px;
+  color: red;
+}
+.flow-part.size-1.height-4 .input {
+  left: 85px;
+  top: -5px;
+}
+
+.flow-part.size-2.height-1 {
+  height: 60px;
+  width: 170px;
+}
+.flow-part.size-2.height-1 .output {
+  bottom: -5px;
+}
+.flow-part.size-2.height-1 .output--1 {
+  right: -5px;
+  top: 25px;
+  bottom: unset;
+}
+.flow-part.size-2.height-1 .output-1 {
+  left: 45px;
+  color: green;
+}
+.flow-part.size-2.height-1 .output-2 {
+  left: 125px;
+  color: green;
+}
+.flow-part.size-2.height-1 .input {
+  left: 85px;
+  top: -5px;
+}
+
+.flow-part.size-2.height-2 {
+  height: 60px;
+  width: 170px;
+}
+.flow-part.size-2.height-2 .output {
+  bottom: -5px;
+}
+.flow-part.size-2.height-2 .output--1 {
+  right: -5px;
+  top: 25px;
+  bottom: unset;
+}
+.flow-part.size-2.height-2 .output-1 {
+  left: 45px;
+  color: green;
+}
+.flow-part.size-2.height-2 .output-2 {
+  left: 125px;
+  color: green;
+}
+.flow-part.size-2.height-2 .input {
+  left: 85px;
+  top: -5px;
+}
+
+.flow-part.size-2.height-3 {
+  height: 80px;
+  width: 170px;
+}
+.flow-part.size-2.height-3 .output {
+  bottom: -5px;
+}
+.flow-part.size-2.height-3 .output--1 {
+  right: -5px;
+  top: 35px;
+  bottom: unset;
+}
+.flow-part.size-2.height-3 .output-1 {
+  left: 45px;
+  color: green;
+}
+.flow-part.size-2.height-3 .output-2 {
+  left: 125px;
+  color: green;
+}
+.flow-part.size-2.height-3 .input {
+  left: 85px;
+  top: -5px;
+}
+
+.flow-part.size-2.height-4 {
+  height: 100px;
+  width: 170px;
+}
+.flow-part.size-2.height-4 .output {
+  bottom: -5px;
+}
+.flow-part.size-2.height-4 .output--1 {
+  right: -5px;
+  top: 45px;
+  bottom: unset;
+}
+.flow-part.size-2.height-4 .output-1 {
+  left: 45px;
+  color: green;
+}
+.flow-part.size-2.height-4 .output-2 {
+  left: 125px;
+  color: green;
+}
+.flow-part.size-2.height-4 .input {
+  left: 85px;
+  top: -5px;
+}
+
+.flow-part.size-3.height-1 {
+  height: 60px;
+  width: 170px;
+}
+.flow-part.size-3.height-1 .output {
+  bottom: -5px;
+}
+.flow-part.size-3.height-1 .output--1 {
+  right: -5px;
+  top: 25px;
+  bottom: unset;
+}
+.flow-part.size-3.height-1 .output-1 {
+  left: 45px;
+  color: pink;
+}
+.flow-part.size-3.height-1 .output-2 {
+  left: 85px;
+  color: pink;
+}
+.flow-part.size-3.height-1 .output-3 {
+  left: 125px;
+  color: pink;
+}
+.flow-part.size-3.height-1 .input {
+  left: 85px;
+  top: -5px;
+}
+
+.flow-part.size-3.height-2 {
+  height: 60px;
+  width: 170px;
+}
+.flow-part.size-3.height-2 .output {
+  bottom: -5px;
+}
+.flow-part.size-3.height-2 .output--1 {
+  right: -5px;
+  top: 25px;
+  bottom: unset;
+}
+.flow-part.size-3.height-2 .output-1 {
+  left: 45px;
+  color: pink;
+}
+.flow-part.size-3.height-2 .output-2 {
+  left: 85px;
+  color: pink;
+}
+.flow-part.size-3.height-2 .output-3 {
+  left: 125px;
+  color: pink;
+}
+.flow-part.size-3.height-2 .input {
+  left: 85px;
+  top: -5px;
+}
+
+.flow-part.size-3.height-3 {
+  height: 80px;
+  width: 170px;
+}
+.flow-part.size-3.height-3 .output {
+  bottom: -5px;
+}
+.flow-part.size-3.height-3 .output--1 {
+  right: -5px;
+  top: 35px;
+  bottom: unset;
+}
+.flow-part.size-3.height-3 .output-1 {
+  left: 45px;
+  color: pink;
+}
+.flow-part.size-3.height-3 .output-2 {
+  left: 85px;
+  color: pink;
+}
+.flow-part.size-3.height-3 .output-3 {
+  left: 125px;
+  color: pink;
+}
+.flow-part.size-3.height-3 .input {
+  left: 85px;
+  top: -5px;
+}
+
+.flow-part.size-3.height-4 {
+  height: 100px;
+  width: 170px;
+}
+.flow-part.size-3.height-4 .output {
+  bottom: -5px;
+}
+.flow-part.size-3.height-4 .output--1 {
+  right: -5px;
+  top: 45px;
+  bottom: unset;
+}
+.flow-part.size-3.height-4 .output-1 {
+  left: 45px;
+  color: pink;
+}
+.flow-part.size-3.height-4 .output-2 {
+  left: 85px;
+  color: pink;
+}
+.flow-part.size-3.height-4 .output-3 {
+  left: 125px;
+  color: pink;
+}
+.flow-part.size-3.height-4 .input {
+  left: 85px;
+  top: -5px;
+}
+
+.flow-part.size-4.height-1 {
+  height: 60px;
+  width: 180px;
+}
+.flow-part.size-4.height-1 .output {
+  bottom: -5px;
+}
+.flow-part.size-4.height-1 .output--1 {
+  right: -5px;
+  top: 25px;
+  bottom: unset;
+}
+.flow-part.size-4.height-1 .output-1 {
+  left: 45px;
+  color: pink;
+}
+.flow-part.size-4.height-1 .output-2 {
+  left: 75px;
+  color: pink;
+}
+.flow-part.size-4.height-1 .output-3 {
+  left: 105px;
+  color: pink;
+}
+.flow-part.size-4.height-1 .output-4 {
+  left: 135px;
+  color: pink;
+}
+.flow-part.size-4.height-1 .input {
+  left: 90px;
+  top: -5px;
+}
+
+.flow-part.size-4.height-2 {
+  height: 60px;
+  width: 180px;
+}
+.flow-part.size-4.height-2 .output {
+  bottom: -5px;
+}
+.flow-part.size-4.height-2 .output--1 {
+  right: -5px;
+  top: 25px;
+  bottom: unset;
+}
+.flow-part.size-4.height-2 .output-1 {
+  left: 45px;
+  color: pink;
+}
+.flow-part.size-4.height-2 .output-2 {
+  left: 75px;
+  color: pink;
+}
+.flow-part.size-4.height-2 .output-3 {
+  left: 105px;
+  color: pink;
+}
+.flow-part.size-4.height-2 .output-4 {
+  left: 135px;
+  color: pink;
+}
+.flow-part.size-4.height-2 .input {
+  left: 90px;
+  top: -5px;
+}
+
+.flow-part.size-4.height-3 {
+  height: 80px;
+  width: 180px;
+}
+.flow-part.size-4.height-3 .output {
+  bottom: -5px;
+}
+.flow-part.size-4.height-3 .output--1 {
+  right: -5px;
+  top: 35px;
+  bottom: unset;
+}
+.flow-part.size-4.height-3 .output-1 {
+  left: 45px;
+  color: pink;
+}
+.flow-part.size-4.height-3 .output-2 {
+  left: 75px;
+  color: pink;
+}
+.flow-part.size-4.height-3 .output-3 {
+  left: 105px;
+  color: pink;
+}
+.flow-part.size-4.height-3 .output-4 {
+  left: 135px;
+  color: pink;
+}
+.flow-part.size-4.height-3 .input {
+  left: 90px;
+  top: -5px;
+}
+
+.flow-part.size-4.height-4 {
+  height: 100px;
+  width: 180px;
+}
+.flow-part.size-4.height-4 .output {
+  bottom: -5px;
+}
+.flow-part.size-4.height-4 .output--1 {
+  right: -5px;
+  top: 45px;
+  bottom: unset;
+}
+.flow-part.size-4.height-4 .output-1 {
+  left: 45px;
+  color: pink;
+}
+.flow-part.size-4.height-4 .output-2 {
+  left: 75px;
+  color: pink;
+}
+.flow-part.size-4.height-4 .output-3 {
+  left: 105px;
+  color: pink;
+}
+.flow-part.size-4.height-4 .output-4 {
+  left: 135px;
+  color: pink;
+}
+.flow-part.size-4.height-4 .input {
+  left: 90px;
+  top: -5px;
+}
+
+.flow-part.size-5.height-1 {
+  height: 60px;
+  width: 210px;
+}
+.flow-part.size-5.height-1 .output {
+  bottom: -5px;
+}
+.flow-part.size-5.height-1 .output--1 {
+  right: -5px;
+  top: 25px;
+  bottom: unset;
+}
+.flow-part.size-5.height-1 .output-1 {
+  left: 45px;
+  color: pink;
+}
+.flow-part.size-5.height-1 .output-2 {
+  left: 75px;
+  color: pink;
+}
+.flow-part.size-5.height-1 .output-3 {
+  left: 105px;
+  color: pink;
+}
+.flow-part.size-5.height-1 .output-4 {
+  left: 135px;
+  color: pink;
+}
+.flow-part.size-5.height-1 .output-5 {
+  left: 165px;
+  color: pink;
+}
+.flow-part.size-5.height-1 .input {
+  left: 105px;
+  top: -5px;
+}
+
+.flow-part.size-5.height-2 {
+  height: 60px;
+  width: 210px;
+}
+.flow-part.size-5.height-2 .output {
+  bottom: -5px;
+}
+.flow-part.size-5.height-2 .output--1 {
+  right: -5px;
+  top: 25px;
+  bottom: unset;
+}
+.flow-part.size-5.height-2 .output-1 {
+  left: 45px;
+  color: pink;
+}
+.flow-part.size-5.height-2 .output-2 {
+  left: 75px;
+  color: pink;
+}
+.flow-part.size-5.height-2 .output-3 {
+  left: 105px;
+  color: pink;
+}
+.flow-part.size-5.height-2 .output-4 {
+  left: 135px;
+  color: pink;
+}
+.flow-part.size-5.height-2 .output-5 {
+  left: 165px;
+  color: pink;
+}
+.flow-part.size-5.height-2 .input {
+  left: 105px;
+  top: -5px;
+}
+
+.flow-part.size-5.height-3 {
+  height: 80px;
+  width: 210px;
+}
+.flow-part.size-5.height-3 .output {
+  bottom: -5px;
+}
+.flow-part.size-5.height-3 .output--1 {
+  right: -5px;
+  top: 35px;
+  bottom: unset;
+}
+.flow-part.size-5.height-3 .output-1 {
+  left: 45px;
+  color: pink;
+}
+.flow-part.size-5.height-3 .output-2 {
+  left: 75px;
+  color: pink;
+}
+.flow-part.size-5.height-3 .output-3 {
+  left: 105px;
+  color: pink;
+}
+.flow-part.size-5.height-3 .output-4 {
+  left: 135px;
+  color: pink;
+}
+.flow-part.size-5.height-3 .output-5 {
+  left: 165px;
+  color: pink;
+}
+.flow-part.size-5.height-3 .input {
+  left: 105px;
+  top: -5px;
+}
+
+.flow-part.size-5.height-4 {
+  height: 100px;
+  width: 210px;
+}
+.flow-part.size-5.height-4 .output {
+  bottom: -5px;
+}
+.flow-part.size-5.height-4 .output--1 {
+  right: -5px;
+  top: 45px;
+  bottom: unset;
+}
+.flow-part.size-5.height-4 .output-1 {
+  left: 45px;
+  color: pink;
+}
+.flow-part.size-5.height-4 .output-2 {
+  left: 75px;
+  color: pink;
+}
+.flow-part.size-5.height-4 .output-3 {
+  left: 105px;
+  color: pink;
+}
+.flow-part.size-5.height-4 .output-4 {
+  left: 135px;
+  color: pink;
+}
+.flow-part.size-5.height-4 .output-5 {
+  left: 165px;
+  color: pink;
+}
+.flow-part.size-5.height-4 .input {
+  left: 105px;
+  top: -5px;
+}
+
+.flow-part.size-6.height-1 {
+  height: 60px;
+  width: 190px;
+}
+.flow-part.size-6.height-1 .output {
+  bottom: -5px;
+}
+.flow-part.size-6.height-1 .output--1 {
+  right: -5px;
+  top: 25px;
+  bottom: unset;
+}
+.flow-part.size-6.height-1 .output-1 {
+  left: 45px;
+  color: pink;
+}
+.flow-part.size-6.height-1 .output-2 {
+  left: 65px;
+  color: pink;
+}
+.flow-part.size-6.height-1 .output-3 {
+  left: 85px;
+  color: pink;
+}
+.flow-part.size-6.height-1 .output-4 {
+  left: 105px;
+  color: pink;
+}
+.flow-part.size-6.height-1 .output-5 {
+  left: 125px;
+  color: pink;
+}
+.flow-part.size-6.height-1 .output-6 {
+  left: 145px;
+  color: pink;
+}
+.flow-part.size-6.height-1 .input {
+  left: 95px;
+  top: -5px;
+}
+
+.flow-part.size-6.height-2 {
+  height: 60px;
+  width: 190px;
+}
+.flow-part.size-6.height-2 .output {
+  bottom: -5px;
+}
+.flow-part.size-6.height-2 .output--1 {
+  right: -5px;
+  top: 25px;
+  bottom: unset;
+}
+.flow-part.size-6.height-2 .output-1 {
+  left: 45px;
+  color: pink;
+}
+.flow-part.size-6.height-2 .output-2 {
+  left: 65px;
+  color: pink;
+}
+.flow-part.size-6.height-2 .output-3 {
+  left: 85px;
+  color: pink;
+}
+.flow-part.size-6.height-2 .output-4 {
+  left: 105px;
+  color: pink;
+}
+.flow-part.size-6.height-2 .output-5 {
+  left: 125px;
+  color: pink;
+}
+.flow-part.size-6.height-2 .output-6 {
+  left: 145px;
+  color: pink;
+}
+.flow-part.size-6.height-2 .input {
+  left: 95px;
+  top: -5px;
+}
+
+.flow-part.size-6.height-3 {
+  height: 80px;
+  width: 190px;
+}
+.flow-part.size-6.height-3 .output {
+  bottom: -5px;
+}
+.flow-part.size-6.height-3 .output--1 {
+  right: -5px;
+  top: 35px;
+  bottom: unset;
+}
+.flow-part.size-6.height-3 .output-1 {
+  left: 45px;
+  color: pink;
+}
+.flow-part.size-6.height-3 .output-2 {
+  left: 65px;
+  color: pink;
+}
+.flow-part.size-6.height-3 .output-3 {
+  left: 85px;
+  color: pink;
+}
+.flow-part.size-6.height-3 .output-4 {
+  left: 105px;
+  color: pink;
+}
+.flow-part.size-6.height-3 .output-5 {
+  left: 125px;
+  color: pink;
+}
+.flow-part.size-6.height-3 .output-6 {
+  left: 145px;
+  color: pink;
+}
+.flow-part.size-6.height-3 .input {
+  left: 95px;
+  top: -5px;
+}
+
+.flow-part.size-6.height-4 {
+  height: 100px;
+  width: 190px;
+}
+.flow-part.size-6.height-4 .output {
+  bottom: -5px;
+}
+.flow-part.size-6.height-4 .output--1 {
+  right: -5px;
+  top: 45px;
+  bottom: unset;
+}
+.flow-part.size-6.height-4 .output-1 {
+  left: 45px;
+  color: pink;
+}
+.flow-part.size-6.height-4 .output-2 {
+  left: 65px;
+  color: pink;
+}
+.flow-part.size-6.height-4 .output-3 {
+  left: 85px;
+  color: pink;
+}
+.flow-part.size-6.height-4 .output-4 {
+  left: 105px;
+  color: pink;
+}
+.flow-part.size-6.height-4 .output-5 {
+  left: 125px;
+  color: pink;
+}
+.flow-part.size-6.height-4 .output-6 {
+  left: 145px;
+  color: pink;
+}
+.flow-part.size-6.height-4 .input {
+  left: 95px;
+  top: -5px;
+}
+
+.flow-part.size-7.height-1 {
+  height: 60px;
+  width: 210px;
+}
+.flow-part.size-7.height-1 .output {
+  bottom: -5px;
+}
+.flow-part.size-7.height-1 .output--1 {
+  right: -5px;
+  top: 25px;
+  bottom: unset;
+}
+.flow-part.size-7.height-1 .output-1 {
+  left: 45px;
+  color: pink;
+}
+.flow-part.size-7.height-1 .output-2 {
+  left: 65px;
+  color: pink;
+}
+.flow-part.size-7.height-1 .output-3 {
+  left: 85px;
+  color: pink;
+}
+.flow-part.size-7.height-1 .output-4 {
+  left: 105px;
+  color: pink;
+}
+.flow-part.size-7.height-1 .output-5 {
+  left: 125px;
+  color: pink;
+}
+.flow-part.size-7.height-1 .output-6 {
+  left: 145px;
+  color: pink;
+}
+.flow-part.size-7.height-1 .output-7 {
+  left: 165px;
+  color: pink;
+}
+.flow-part.size-7.height-1 .input {
+  left: 105px;
+  top: -5px;
+}
+
+.flow-part.size-7.height-2 {
+  height: 60px;
+  width: 210px;
+}
+.flow-part.size-7.height-2 .output {
+  bottom: -5px;
+}
+.flow-part.size-7.height-2 .output--1 {
+  right: -5px;
+  top: 25px;
+  bottom: unset;
+}
+.flow-part.size-7.height-2 .output-1 {
+  left: 45px;
+  color: pink;
+}
+.flow-part.size-7.height-2 .output-2 {
+  left: 65px;
+  color: pink;
+}
+.flow-part.size-7.height-2 .output-3 {
+  left: 85px;
+  color: pink;
+}
+.flow-part.size-7.height-2 .output-4 {
+  left: 105px;
+  color: pink;
+}
+.flow-part.size-7.height-2 .output-5 {
+  left: 125px;
+  color: pink;
+}
+.flow-part.size-7.height-2 .output-6 {
+  left: 145px;
+  color: pink;
+}
+.flow-part.size-7.height-2 .output-7 {
+  left: 165px;
+  color: pink;
+}
+.flow-part.size-7.height-2 .input {
+  left: 105px;
+  top: -5px;
+}
+
+.flow-part.size-7.height-3 {
+  height: 80px;
+  width: 210px;
+}
+.flow-part.size-7.height-3 .output {
+  bottom: -5px;
+}
+.flow-part.size-7.height-3 .output--1 {
+  right: -5px;
+  top: 35px;
+  bottom: unset;
+}
+.flow-part.size-7.height-3 .output-1 {
+  left: 45px;
+  color: pink;
+}
+.flow-part.size-7.height-3 .output-2 {
+  left: 65px;
+  color: pink;
+}
+.flow-part.size-7.height-3 .output-3 {
+  left: 85px;
+  color: pink;
+}
+.flow-part.size-7.height-3 .output-4 {
+  left: 105px;
+  color: pink;
+}
+.flow-part.size-7.height-3 .output-5 {
+  left: 125px;
+  color: pink;
+}
+.flow-part.size-7.height-3 .output-6 {
+  left: 145px;
+  color: pink;
+}
+.flow-part.size-7.height-3 .output-7 {
+  left: 165px;
+  color: pink;
+}
+.flow-part.size-7.height-3 .input {
+  left: 105px;
+  top: -5px;
+}
+
+.flow-part.size-7.height-4 {
+  height: 100px;
+  width: 210px;
+}
+.flow-part.size-7.height-4 .output {
+  bottom: -5px;
+}
+.flow-part.size-7.height-4 .output--1 {
+  right: -5px;
+  top: 45px;
+  bottom: unset;
+}
+.flow-part.size-7.height-4 .output-1 {
+  left: 45px;
+  color: pink;
+}
+.flow-part.size-7.height-4 .output-2 {
+  left: 65px;
+  color: pink;
+}
+.flow-part.size-7.height-4 .output-3 {
+  left: 85px;
+  color: pink;
+}
+.flow-part.size-7.height-4 .output-4 {
+  left: 105px;
+  color: pink;
+}
+.flow-part.size-7.height-4 .output-5 {
+  left: 125px;
+  color: pink;
+}
+.flow-part.size-7.height-4 .output-6 {
+  left: 145px;
+  color: pink;
+}
+.flow-part.size-7.height-4 .output-7 {
+  left: 165px;
+  color: pink;
+}
+.flow-part.size-7.height-4 .input {
+  left: 105px;
+  top: -5px;
+}
+
+.flow-part.size-8.height-1 {
+  height: 60px;
+  width: 230px;
+}
+.flow-part.size-8.height-1 .output {
+  bottom: -5px;
+}
+.flow-part.size-8.height-1 .output--1 {
+  right: -5px;
+  top: 25px;
+  bottom: unset;
+}
+.flow-part.size-8.height-1 .output-1 {
+  left: 45px;
+  color: pink;
+}
+.flow-part.size-8.height-1 .output-2 {
+  left: 65px;
+  color: pink;
+}
+.flow-part.size-8.height-1 .output-3 {
+  left: 85px;
+  color: pink;
+}
+.flow-part.size-8.height-1 .output-4 {
+  left: 105px;
+  color: pink;
+}
+.flow-part.size-8.height-1 .output-5 {
+  left: 125px;
+  color: pink;
+}
+.flow-part.size-8.height-1 .output-6 {
+  left: 145px;
+  color: pink;
+}
+.flow-part.size-8.height-1 .output-7 {
+  left: 165px;
+  color: pink;
+}
+.flow-part.size-8.height-1 .output-8 {
+  left: 185px;
+  color: pink;
+}
+.flow-part.size-8.height-1 .input {
+  left: 115px;
+  top: -5px;
+}
+
+.flow-part.size-8.height-2 {
+  height: 60px;
+  width: 230px;
+}
+.flow-part.size-8.height-2 .output {
+  bottom: -5px;
+}
+.flow-part.size-8.height-2 .output--1 {
+  right: -5px;
+  top: 25px;
+  bottom: unset;
+}
+.flow-part.size-8.height-2 .output-1 {
+  left: 45px;
+  color: pink;
+}
+.flow-part.size-8.height-2 .output-2 {
+  left: 65px;
+  color: pink;
+}
+.flow-part.size-8.height-2 .output-3 {
+  left: 85px;
+  color: pink;
+}
+.flow-part.size-8.height-2 .output-4 {
+  left: 105px;
+  color: pink;
+}
+.flow-part.size-8.height-2 .output-5 {
+  left: 125px;
+  color: pink;
+}
+.flow-part.size-8.height-2 .output-6 {
+  left: 145px;
+  color: pink;
+}
+.flow-part.size-8.height-2 .output-7 {
+  left: 165px;
+  color: pink;
+}
+.flow-part.size-8.height-2 .output-8 {
+  left: 185px;
+  color: pink;
+}
+.flow-part.size-8.height-2 .input {
+  left: 115px;
+  top: -5px;
+}
+
+.flow-part.size-8.height-3 {
+  height: 80px;
+  width: 230px;
+}
+.flow-part.size-8.height-3 .output {
+  bottom: -5px;
+}
+.flow-part.size-8.height-3 .output--1 {
+  right: -5px;
+  top: 35px;
+  bottom: unset;
+}
+.flow-part.size-8.height-3 .output-1 {
+  left: 45px;
+  color: pink;
+}
+.flow-part.size-8.height-3 .output-2 {
+  left: 65px;
+  color: pink;
+}
+.flow-part.size-8.height-3 .output-3 {
+  left: 85px;
+  color: pink;
+}
+.flow-part.size-8.height-3 .output-4 {
+  left: 105px;
+  color: pink;
+}
+.flow-part.size-8.height-3 .output-5 {
+  left: 125px;
+  color: pink;
+}
+.flow-part.size-8.height-3 .output-6 {
+  left: 145px;
+  color: pink;
+}
+.flow-part.size-8.height-3 .output-7 {
+  left: 165px;
+  color: pink;
+}
+.flow-part.size-8.height-3 .output-8 {
+  left: 185px;
+  color: pink;
+}
+.flow-part.size-8.height-3 .input {
+  left: 115px;
+  top: -5px;
+}
+
+.flow-part.size-8.height-4 {
+  height: 100px;
+  width: 230px;
+}
+.flow-part.size-8.height-4 .output {
+  bottom: -5px;
+}
+.flow-part.size-8.height-4 .output--1 {
+  right: -5px;
+  top: 45px;
+  bottom: unset;
+}
+.flow-part.size-8.height-4 .output-1 {
+  left: 45px;
+  color: pink;
+}
+.flow-part.size-8.height-4 .output-2 {
+  left: 65px;
+  color: pink;
+}
+.flow-part.size-8.height-4 .output-3 {
+  left: 85px;
+  color: pink;
+}
+.flow-part.size-8.height-4 .output-4 {
+  left: 105px;
+  color: pink;
+}
+.flow-part.size-8.height-4 .output-5 {
+  left: 125px;
+  color: pink;
+}
+.flow-part.size-8.height-4 .output-6 {
+  left: 145px;
+  color: pink;
+}
+.flow-part.size-8.height-4 .output-7 {
+  left: 165px;
+  color: pink;
+}
+.flow-part.size-8.height-4 .output-8 {
+  left: 185px;
+  color: pink;
+}
+.flow-part.size-8.height-4 .input {
+  left: 115px;
+  top: -5px;
+}
+
+.flow-part.size-9.height-1 {
+  height: 60px;
+  width: 250px;
+}
+.flow-part.size-9.height-1 .output {
+  bottom: -5px;
+}
+.flow-part.size-9.height-1 .output--1 {
+  right: -5px;
+  top: 25px;
+  bottom: unset;
+}
+.flow-part.size-9.height-1 .output-1 {
+  left: 45px;
+  color: pink;
+}
+.flow-part.size-9.height-1 .output-2 {
+  left: 65px;
+  color: pink;
+}
+.flow-part.size-9.height-1 .output-3 {
+  left: 85px;
+  color: pink;
+}
+.flow-part.size-9.height-1 .output-4 {
+  left: 105px;
+  color: pink;
+}
+.flow-part.size-9.height-1 .output-5 {
+  left: 125px;
+  color: pink;
+}
+.flow-part.size-9.height-1 .output-6 {
+  left: 145px;
+  color: pink;
+}
+.flow-part.size-9.height-1 .output-7 {
+  left: 165px;
+  color: pink;
+}
+.flow-part.size-9.height-1 .output-8 {
+  left: 185px;
+  color: pink;
+}
+.flow-part.size-9.height-1 .output-9 {
+  left: 205px;
+  color: pink;
+}
+.flow-part.size-9.height-1 .input {
+  left: 125px;
+  top: -5px;
+}
+
+.flow-part.size-9.height-2 {
+  height: 60px;
+  width: 250px;
+}
+.flow-part.size-9.height-2 .output {
+  bottom: -5px;
+}
+.flow-part.size-9.height-2 .output--1 {
+  right: -5px;
+  top: 25px;
+  bottom: unset;
+}
+.flow-part.size-9.height-2 .output-1 {
+  left: 45px;
+  color: pink;
+}
+.flow-part.size-9.height-2 .output-2 {
+  left: 65px;
+  color: pink;
+}
+.flow-part.size-9.height-2 .output-3 {
+  left: 85px;
+  color: pink;
+}
+.flow-part.size-9.height-2 .output-4 {
+  left: 105px;
+  color: pink;
+}
+.flow-part.size-9.height-2 .output-5 {
+  left: 125px;
+  color: pink;
+}
+.flow-part.size-9.height-2 .output-6 {
+  left: 145px;
+  color: pink;
+}
+.flow-part.size-9.height-2 .output-7 {
+  left: 165px;
+  color: pink;
+}
+.flow-part.size-9.height-2 .output-8 {
+  left: 185px;
+  color: pink;
+}
+.flow-part.size-9.height-2 .output-9 {
+  left: 205px;
+  color: pink;
+}
+.flow-part.size-9.height-2 .input {
+  left: 125px;
+  top: -5px;
+}
+
+.flow-part.size-9.height-3 {
+  height: 80px;
+  width: 250px;
+}
+.flow-part.size-9.height-3 .output {
+  bottom: -5px;
+}
+.flow-part.size-9.height-3 .output--1 {
+  right: -5px;
+  top: 35px;
+  bottom: unset;
+}
+.flow-part.size-9.height-3 .output-1 {
+  left: 45px;
+  color: pink;
+}
+.flow-part.size-9.height-3 .output-2 {
+  left: 65px;
+  color: pink;
+}
+.flow-part.size-9.height-3 .output-3 {
+  left: 85px;
+  color: pink;
+}
+.flow-part.size-9.height-3 .output-4 {
+  left: 105px;
+  color: pink;
+}
+.flow-part.size-9.height-3 .output-5 {
+  left: 125px;
+  color: pink;
+}
+.flow-part.size-9.height-3 .output-6 {
+  left: 145px;
+  color: pink;
+}
+.flow-part.size-9.height-3 .output-7 {
+  left: 165px;
+  color: pink;
+}
+.flow-part.size-9.height-3 .output-8 {
+  left: 185px;
+  color: pink;
+}
+.flow-part.size-9.height-3 .output-9 {
+  left: 205px;
+  color: pink;
+}
+.flow-part.size-9.height-3 .input {
+  left: 125px;
+  top: -5px;
+}
+
+.flow-part.size-9.height-4 {
+  height: 100px;
+  width: 250px;
+}
+.flow-part.size-9.height-4 .output {
+  bottom: -5px;
+}
+.flow-part.size-9.height-4 .output--1 {
+  right: -5px;
+  top: 45px;
+  bottom: unset;
+}
+.flow-part.size-9.height-4 .output-1 {
+  left: 45px;
+  color: pink;
+}
+.flow-part.size-9.height-4 .output-2 {
+  left: 65px;
+  color: pink;
+}
+.flow-part.size-9.height-4 .output-3 {
+  left: 85px;
+  color: pink;
+}
+.flow-part.size-9.height-4 .output-4 {
+  left: 105px;
+  color: pink;
+}
+.flow-part.size-9.height-4 .output-5 {
+  left: 125px;
+  color: pink;
+}
+.flow-part.size-9.height-4 .output-6 {
+  left: 145px;
+  color: pink;
+}
+.flow-part.size-9.height-4 .output-7 {
+  left: 165px;
+  color: pink;
+}
+.flow-part.size-9.height-4 .output-8 {
+  left: 185px;
+  color: pink;
+}
+.flow-part.size-9.height-4 .output-9 {
+  left: 205px;
+  color: pink;
+}
+.flow-part.size-9.height-4 .input {
+  left: 125px;
+  top: -5px;
+}
+
+.flow-part.size-10.height-1 {
+  height: 60px;
+  width: 270px;
+}
+.flow-part.size-10.height-1 .output {
+  bottom: -5px;
+}
+.flow-part.size-10.height-1 .output--1 {
+  right: -5px;
+  top: 25px;
+  bottom: unset;
+}
+.flow-part.size-10.height-1 .output-1 {
+  left: 45px;
+  color: pink;
+}
+.flow-part.size-10.height-1 .output-2 {
+  left: 65px;
+  color: pink;
+}
+.flow-part.size-10.height-1 .output-3 {
+  left: 85px;
+  color: pink;
+}
+.flow-part.size-10.height-1 .output-4 {
+  left: 105px;
+  color: pink;
+}
+.flow-part.size-10.height-1 .output-5 {
+  left: 125px;
+  color: pink;
+}
+.flow-part.size-10.height-1 .output-6 {
+  left: 145px;
+  color: pink;
+}
+.flow-part.size-10.height-1 .output-7 {
+  left: 165px;
+  color: pink;
+}
+.flow-part.size-10.height-1 .output-8 {
+  left: 185px;
+  color: pink;
+}
+.flow-part.size-10.height-1 .output-9 {
+  left: 205px;
+  color: pink;
+}
+.flow-part.size-10.height-1 .output-10 {
+  left: 225px;
+  color: pink;
+}
+.flow-part.size-10.height-1 .input {
+  left: 135px;
+  top: -5px;
+}
+
+.flow-part.size-10.height-2 {
+  height: 60px;
+  width: 270px;
+}
+.flow-part.size-10.height-2 .output {
+  bottom: -5px;
+}
+.flow-part.size-10.height-2 .output--1 {
+  right: -5px;
+  top: 25px;
+  bottom: unset;
+}
+.flow-part.size-10.height-2 .output-1 {
+  left: 45px;
+  color: pink;
+}
+.flow-part.size-10.height-2 .output-2 {
+  left: 65px;
+  color: pink;
+}
+.flow-part.size-10.height-2 .output-3 {
+  left: 85px;
+  color: pink;
+}
+.flow-part.size-10.height-2 .output-4 {
+  left: 105px;
+  color: pink;
+}
+.flow-part.size-10.height-2 .output-5 {
+  left: 125px;
+  color: pink;
+}
+.flow-part.size-10.height-2 .output-6 {
+  left: 145px;
+  color: pink;
+}
+.flow-part.size-10.height-2 .output-7 {
+  left: 165px;
+  color: pink;
+}
+.flow-part.size-10.height-2 .output-8 {
+  left: 185px;
+  color: pink;
+}
+.flow-part.size-10.height-2 .output-9 {
+  left: 205px;
+  color: pink;
+}
+.flow-part.size-10.height-2 .output-10 {
+  left: 225px;
+  color: pink;
+}
+.flow-part.size-10.height-2 .input {
+  left: 135px;
+  top: -5px;
+}
+
+.flow-part.size-10.height-3 {
+  height: 80px;
+  width: 270px;
+}
+.flow-part.size-10.height-3 .output {
+  bottom: -5px;
+}
+.flow-part.size-10.height-3 .output--1 {
+  right: -5px;
+  top: 35px;
+  bottom: unset;
+}
+.flow-part.size-10.height-3 .output-1 {
+  left: 45px;
+  color: pink;
+}
+.flow-part.size-10.height-3 .output-2 {
+  left: 65px;
+  color: pink;
+}
+.flow-part.size-10.height-3 .output-3 {
+  left: 85px;
+  color: pink;
+}
+.flow-part.size-10.height-3 .output-4 {
+  left: 105px;
+  color: pink;
+}
+.flow-part.size-10.height-3 .output-5 {
+  left: 125px;
+  color: pink;
+}
+.flow-part.size-10.height-3 .output-6 {
+  left: 145px;
+  color: pink;
+}
+.flow-part.size-10.height-3 .output-7 {
+  left: 165px;
+  color: pink;
+}
+.flow-part.size-10.height-3 .output-8 {
+  left: 185px;
+  color: pink;
+}
+.flow-part.size-10.height-3 .output-9 {
+  left: 205px;
+  color: pink;
+}
+.flow-part.size-10.height-3 .output-10 {
+  left: 225px;
+  color: pink;
+}
+.flow-part.size-10.height-3 .input {
+  left: 135px;
+  top: -5px;
+}
+
+.flow-part.size-10.height-4 {
+  height: 100px;
+  width: 270px;
+}
+.flow-part.size-10.height-4 .output {
+  bottom: -5px;
+}
+.flow-part.size-10.height-4 .output--1 {
+  right: -5px;
+  top: 45px;
+  bottom: unset;
+}
+.flow-part.size-10.height-4 .output-1 {
+  left: 45px;
+  color: pink;
+}
+.flow-part.size-10.height-4 .output-2 {
+  left: 65px;
+  color: pink;
+}
+.flow-part.size-10.height-4 .output-3 {
+  left: 85px;
+  color: pink;
+}
+.flow-part.size-10.height-4 .output-4 {
+  left: 105px;
+  color: pink;
+}
+.flow-part.size-10.height-4 .output-5 {
+  left: 125px;
+  color: pink;
+}
+.flow-part.size-10.height-4 .output-6 {
+  left: 145px;
+  color: pink;
+}
+.flow-part.size-10.height-4 .output-7 {
+  left: 165px;
+  color: pink;
+}
+.flow-part.size-10.height-4 .output-8 {
+  left: 185px;
+  color: pink;
+}
+.flow-part.size-10.height-4 .output-9 {
+  left: 205px;
+  color: pink;
+}
+.flow-part.size-10.height-4 .output-10 {
+  left: 225px;
+  color: pink;
+}
+.flow-part.size-10.height-4 .input {
+  left: 135px;
+  top: -5px;
+}
+
 .flow-part {
   display: flex;
   flex-direction: row;
   outline: unset !important;
-  min-height: 4rem;
   position: relative;
 }
-.flow-part .icon-wrapper {
-  width: 2rem;
-  min-width: 2rem;
-  border-right: solid 3px;
-  margin: 0;
-  display: flex;
-}
-.flow-part .icon-wrapper .icon {
-  margin: auto;
+.flow-part.selected {
+  border-color: var(--accent) !important;
+  background-image: linear-gradient(rgba(var(--accent-rgb), 0.3), rgba(var(--accent-rgb), 0.3)) !important;
+  background-color: unset;
+  box-shadow: 0 3px 10px rgba(var(--accent-rgb), 0.1);
 }
 .flow-part .name {
   flex-grow: 1;
-  margin: auto 0.5rem;
-  padding: 0.5rem 0.5rem 0.5rem 0;
+  padding: 5px;
+  margin-left: 30px;
+  align-self: center;
 }
 .flow-part .draggable {
   position: absolute;
@@ -666,121 +2305,152 @@ a.btn {
   right: 0;
   z-index: 4;
 }
-.flow-part .error {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  right: -1rem;
-  display: inline-flex;
-  align-items: center;
-  width: 2rem;
-}
-.flow-part .error-output {
-  width: 1rem;
-  height: 1rem;
-  margin: 0.5rem;
-  border-radius: 0.25rem;
-  background-color: var(--base);
-  border: solid 2px var(--error);
-}
-.flow-part .error-output:hover {
-  cursor: crosshair;
-}
 .flow-part * {
   user-select: none;
-}
-.flow-part.size-1, .flow-part.size-2, .flow-part.size-3 {
-  width: 12rem;
-}
-.flow-part.size-4 {
-  width: calc(12rem + 4rem);
-}
-.flow-part.size-5 {
-  width: calc(12rem + 5rem);
-}
-.flow-part.size-6 {
-  width: calc(12rem + 6rem);
-}
-.flow-part.size-7 {
-  width: calc(12rem + 7rem);
-}
-.flow-part.size-8 {
-  width: calc(12rem + 8rem);
-}
-.flow-part.size-9 {
-  width: 23rem;
-}
-.flow-part.size-10 {
-  width: 25rem;
 }
 .flow-part.Logic:not(.selected) .icon-wrapper, .flow-part.Logic:not(.selected) .input > div, .flow-part.Logic:not(.selected) .output:not(.output--1) > div {
   border-color: var(--flow-logic) !important;
 }
-.flow-part.Logic:not(.selected) .connected:not(.output--1) > div {
-  background-color: var(--flow-logic) !important;
+.flow-part.Logic:not(.selected) .connected:not(.output--1) > div:before {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  right: 3px;
+  bottom: 3px;
+  background: var(--flow-logic);
 }
 .flow-part.Input:not(.selected) .icon-wrapper, .flow-part.Input:not(.selected) .input > div, .flow-part.Input:not(.selected) .output:not(.output--1) > div {
   border-color: var(--flow-input) !important;
 }
-.flow-part.Input:not(.selected) .connected:not(.output--1) > div {
-  background-color: var(--flow-input) !important;
+.flow-part.Input:not(.selected) .connected:not(.output--1) > div:before {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  right: 3px;
+  bottom: 3px;
+  background: var(--flow-input);
 }
 .flow-part.Output:not(.selected) .icon-wrapper, .flow-part.Output:not(.selected) .input > div, .flow-part.Output:not(.selected) .output:not(.output--1) > div {
   border-color: var(--flow-output) !important;
 }
-.flow-part.Output:not(.selected) .connected:not(.output--1) > div {
-  background-color: var(--flow-output) !important;
+.flow-part.Output:not(.selected) .connected:not(.output--1) > div:before {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  right: 3px;
+  bottom: 3px;
+  background: var(--flow-output);
 }
 .flow-part.SubFlow:not(.selected) .icon-wrapper, .flow-part.SubFlow:not(.selected) .input > div, .flow-part.SubFlow:not(.selected) .output:not(.output--1) > div {
   border-color: var(--flow-subflow) !important;
 }
-.flow-part.SubFlow:not(.selected) .connected:not(.output--1) > div {
-  background-color: var(--flow-subflow) !important;
+.flow-part.SubFlow:not(.selected) .connected:not(.output--1) > div:before {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  right: 3px;
+  bottom: 3px;
+  background: var(--flow-subflow);
 }
 .flow-part.Process:not(.selected) .icon-wrapper, .flow-part.Process:not(.selected) .input > div, .flow-part.Process:not(.selected) .output:not(.output--1) > div {
   border-color: var(--flow-process) !important;
 }
-.flow-part.Process:not(.selected) .connected:not(.output--1) > div {
-  background-color: var(--flow-process) !important;
+.flow-part.Process:not(.selected) .connected:not(.output--1) > div:before {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  right: 3px;
+  bottom: 3px;
+  background: var(--flow-process);
 }
 .flow-part.BuildStart:not(.selected) .icon-wrapper, .flow-part.BuildStart:not(.selected) .input > div, .flow-part.BuildStart:not(.selected) .output:not(.output--1) > div {
   border-color: var(--flow-buildstart) !important;
 }
-.flow-part.BuildStart:not(.selected) .connected:not(.output--1) > div {
-  background-color: var(--flow-buildstart) !important;
+.flow-part.BuildStart:not(.selected) .connected:not(.output--1) > div:before {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  right: 3px;
+  bottom: 3px;
+  background: var(--flow-buildstart);
 }
 .flow-part.BuildEnd:not(.selected) .icon-wrapper, .flow-part.BuildEnd:not(.selected) .input > div, .flow-part.BuildEnd:not(.selected) .output:not(.output--1) > div {
   border-color: var(--flow-buildend) !important;
 }
-.flow-part.BuildEnd:not(.selected) .connected:not(.output--1) > div {
-  background-color: var(--flow-buildend) !important;
+.flow-part.BuildEnd:not(.selected) .connected:not(.output--1) > div:before {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  right: 3px;
+  bottom: 3px;
+  background: var(--flow-buildend);
 }
 .flow-part.BuildPart:not(.selected) .icon-wrapper, .flow-part.BuildPart:not(.selected) .input > div, .flow-part.BuildPart:not(.selected) .output:not(.output--1) > div {
   border-color: var(--flow-buildpart) !important;
 }
-.flow-part.BuildPart:not(.selected) .connected:not(.output--1) > div {
-  background-color: var(--flow-buildpart) !important;
+.flow-part.BuildPart:not(.selected) .connected:not(.output--1) > div:before {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  right: 3px;
+  bottom: 3px;
+  background: var(--flow-buildpart);
 }
 .flow-part.Communication:not(.selected) .icon-wrapper, .flow-part.Communication:not(.selected) .input > div, .flow-part.Communication:not(.selected) .output:not(.output--1) > div {
   border-color: var(--flow-communication) !important;
 }
-.flow-part.Communication:not(.selected) .connected:not(.output--1) > div {
-  background-color: var(--flow-communication) !important;
+.flow-part.Communication:not(.selected) .connected:not(.output--1) > div:before {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  right: 3px;
+  bottom: 3px;
+  background: var(--flow-communication);
 }
 .flow-part.Failure:not(.selected) .icon-wrapper, .flow-part.Failure:not(.selected) .input > div, .flow-part.Failure:not(.selected) .output:not(.output--1) > div {
   border-color: var(--flow-failure) !important;
 }
-.flow-part.Failure:not(.selected) .connected:not(.output--1) > div {
-  background-color: var(--flow-failure) !important;
+.flow-part.Failure:not(.selected) .connected:not(.output--1) > div:before {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  right: 3px;
+  bottom: 3px;
+  background: var(--flow-failure);
 }
 .flow-part.Script:not(.selected) .icon-wrapper, .flow-part.Script:not(.selected) .input > div, .flow-part.Script:not(.selected) .output:not(.output--1) > div {
   border-color: var(--flow-script) !important;
 }
-.flow-part.Script:not(.selected) .connected:not(.output--1) > div {
-  background-color: var(--flow-script) !important;
+.flow-part.Script:not(.selected) .connected:not(.output--1) > div:before {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  right: 3px;
+  bottom: 3px;
+  background: var(--flow-script);
 }
-.flow-part .connected.output--1 > div {
-  background-color: var(--error) !important;
+.flow-part .input, .flow-part .output {
+  position: absolute;
+}
+.flow-part .connected.output--1 > div:before {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  right: 3px;
+  bottom: 3px;
+  background: var(--error);
 }
 .flow-part.selected .icon-wrapper, .flow-part.selected .input > div, .flow-part.selected .output:not(.output--1) > div {
   border-color: var(--accent) !important;
@@ -788,268 +2458,15 @@ a.btn {
 .flow-part.selected .connected > div {
   background-color: var(--accent) !important;
 }
-.flow-part .inputs {
-  position: absolute;
-  top: -1rem;
-  bottom: 0;
-  left: 2.25rem;
-  right: 0;
-  width: unset;
-  z-index: 2;
-  z-index: 3;
-  left: calc(1rem + 1px);
-  display: flex;
-  justify-content: center;
-}
-.flow-part .inputs .input, .flow-part .inputs .output {
-  position: absolute;
-}
-.flow-part .inputs .input {
-  left: unset;
-}
-.flow-part .outputs {
-  right: -0.65rem;
-  position: absolute;
-  top: -1rem;
-  bottom: unset;
-  left: 2.25rem;
-  right: 0;
-  width: unset;
-  z-index: 2;
-}
-.flow-part .outputs .input, .flow-part .outputs .output {
-  position: absolute;
-}
-.flow-part .outputs .output {
-  bottom: -2rem;
-}
-.flow-part .inputs .input, .flow-part .inputs .output, .flow-part .outputs .input, .flow-part .outputs .output {
-  margin: auto;
-}
-.flow-part .inputs .input > div, .flow-part .inputs .output > div, .flow-part .outputs .input > div, .flow-part .outputs .output > div {
-  width: 1rem;
-  height: 1rem;
-  margin: 0.5rem;
-  border-radius: 0.25rem;
+.flow-part .input > div, .flow-part .output > div {
+  width: 10px;
+  height: 10px;
+  border-radius: var(--border-radius);
   background-color: var(--base);
-  border: solid 2px;
-}
-.flow-part .outputs-1 .output-1 {
-  left: 45px;
-}
-.flow-part .outputs {
-  bottom: 13px !important;
-}
-.flow-part .output--1 {
-  right: -1rem;
-  left: unset !important;
-  top: 50%;
+  border: solid var(--border-width);
 }
 .flow-part .output--1 > div {
   border-color: var(--error) !important;
-}
-.flow-part .outputs-2 .output-1 {
-  left: 5px;
-}
-.flow-part .outputs-2 .output-2 {
-  left: 95px;
-}
-.flow-part .outputs-3 .output-1 {
-  left: 5px;
-}
-.flow-part .outputs-3 .output-2 {
-  left: 50px;
-}
-.flow-part .outputs-3 .output-3 {
-  left: 95px;
-}
-.flow-part .outputs-4 .output-1 {
-  left: 5px;
-}
-.flow-part .outputs-4 .output-2 {
-  left: 55px;
-}
-.flow-part .outputs-4 .output-3 {
-  left: 105px;
-}
-.flow-part .outputs-4 .output-4 {
-  left: 155px;
-}
-.flow-part .outputs-5 .output-1 {
-  left: 5px;
-}
-.flow-part .outputs-5 .output-2 {
-  left: 45px;
-}
-.flow-part .outputs-5 .output-3 {
-  left: 85px;
-}
-.flow-part .outputs-5 .output-4 {
-  left: 125px;
-}
-.flow-part .outputs-5 .output-5 {
-  left: 165px;
-}
-.flow-part .outputs-6 .output-1 {
-  left: 15px;
-}
-.flow-part .outputs-6 .output-2 {
-  left: 45px;
-}
-.flow-part .outputs-6 .output-3 {
-  left: 75px;
-}
-.flow-part .outputs-6 .output-4 {
-  left: 105px;
-}
-.flow-part .outputs-6 .output-5 {
-  left: 135px;
-}
-.flow-part .outputs-6 .output-6 {
-  left: 165px;
-}
-.flow-part .outputs-7 .output-1 {
-  left: 5px;
-}
-.flow-part .outputs-7 .output-2 {
-  left: 35px;
-}
-.flow-part .outputs-7 .output-3 {
-  left: 65px;
-}
-.flow-part .outputs-7 .output-4 {
-  left: 95px;
-}
-.flow-part .outputs-7 .output-5 {
-  left: 125px;
-}
-.flow-part .outputs-7 .output-6 {
-  left: 155px;
-}
-.flow-part .outputs-7 .output-7 {
-  left: 185px;
-}
-.flow-part .outputs-8 .output-1 {
-  left: 5px;
-}
-.flow-part .outputs-8 .output-2 {
-  left: 35px;
-}
-.flow-part .outputs-8 .output-3 {
-  left: 65px;
-}
-.flow-part .outputs-8 .output-4 {
-  left: 95px;
-}
-.flow-part .outputs-8 .output-5 {
-  left: 125px;
-}
-.flow-part .outputs-8 .output-6 {
-  left: 155px;
-}
-.flow-part .outputs-8 .output-7 {
-  left: 185px;
-}
-.flow-part .outputs-8 .output-8 {
-  left: 215px;
-}
-.flow-part .outputs-9 .output-1 {
-  left: 5px;
-}
-.flow-part .outputs-9 .output-2 {
-  left: 35px;
-}
-.flow-part .outputs-9 .output-3 {
-  left: 65px;
-}
-.flow-part .outputs-9 .output-4 {
-  left: 95px;
-}
-.flow-part .outputs-9 .output-5 {
-  left: 125px;
-}
-.flow-part .outputs-9 .output-6 {
-  left: 155px;
-}
-.flow-part .outputs-9 .output-7 {
-  left: 185px;
-}
-.flow-part .outputs-9 .output-8 {
-  left: 215px;
-}
-.flow-part .outputs-9 .output-9 {
-  left: 245px;
-}
-.flow-part .outputs-10 .output-1 {
-  left: 5px;
-}
-.flow-part .outputs-10 .output-2 {
-  left: 35px;
-}
-.flow-part .outputs-10 .output-3 {
-  left: 65px;
-}
-.flow-part .outputs-10 .output-4 {
-  left: 95px;
-}
-.flow-part .outputs-10 .output-5 {
-  left: 125px;
-}
-.flow-part .outputs-10 .output-6 {
-  left: 155px;
-}
-.flow-part .outputs-10 .output-7 {
-  left: 185px;
-}
-.flow-part .outputs-10 .output-8 {
-  left: 215px;
-}
-.flow-part .outputs-10 .output-9 {
-  left: 245px;
-}
-.flow-part .outputs-10 .output-10 {
-  left: 275px;
-}
-
-.flow-part, .flow-element {
-  text-align: center;
-  border-radius: 0.5rem;
-  min-width: 12rem;
-  border: solid 2px transparent;
-  background: var(--base);
-}
-.flow-part.Logic, .flow-element.Logic {
-  border-color: var(--flow-logic);
-}
-.flow-part.Input, .flow-element.Input {
-  border-color: var(--flow-input);
-}
-.flow-part.Output, .flow-element.Output {
-  border-color: var(--flow-output);
-}
-.flow-part.SubFlow, .flow-element.SubFlow {
-  border-color: var(--flow-subflow);
-}
-.flow-part.Process, .flow-element.Process {
-  border-color: var(--flow-process);
-}
-.flow-part.BuildPart, .flow-element.BuildPart {
-  border-color: var(--flow-buildpart);
-}
-.flow-part.BuildStart, .flow-element.BuildStart {
-  border-color: var(--flow-buildstart);
-}
-.flow-part.BuildEnd, .flow-element.BuildEnd {
-  border-color: var(--flow-buildend);
-}
-.flow-part.Communication, .flow-element.Communication {
-  border-color: var(--flow-communication);
-}
-.flow-part.Failure, .flow-element.Failure {
-  border-color: var(--flow-failure);
-}
-.flow-part.Script, .flow-element.Script {
-  border-color: var(--flow-script);
 }
 
 .ribbon {

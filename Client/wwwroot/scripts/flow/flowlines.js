@@ -1,4 +1,5 @@
 class ffFlowLines {
+    lineWidth = 1;
     ioNode = null;
     ioSelected = null;
     ioIsInput = null;
@@ -13,7 +14,7 @@ class ffFlowLines {
     accentColor = null;
     lineColor = null;
     errorColor = null;
-    errorDash = [3, 3];
+    errorDash = [2, 2];
     ioOffset = 14.5;
 
     reset() {
@@ -76,10 +77,8 @@ class ffFlowLines {
         
 
         let target = event.target.parentNode;
-        console.log('isMouseUp', target);
         let suitable = target?.classList?.contains(this.ioIsInput ? 'output' : 'input') === true;
         if (suitable) {
-            console.log('isMouseUp suitable');
             let input = this.isInput ? this.ioNode : target;
             let output = this.isInput ? target : this.ioNode;
             let outputId = output.getAttribute('id');
@@ -130,6 +129,7 @@ class ffFlowLines {
             this.ioContext = canvas.getContext('2d');
         }
         this.ioContext.clearRect(0, 0, canvas.width, canvas.height);
+        this.redrawGrid(canvas);
 
         for (let output of outputs) {
             let connections = this.ioOutputConnections.get(output.getAttribute('id'));
@@ -214,43 +214,38 @@ class ffFlowLines {
             destX += 2;
         }
         path.moveTo(srcX, srcY);
+        let linePoints = [[srcX, srcY]];
+        let addLinePoint = (_x, _y) => {
+            linePoints.push([_x,_y]);
+            path.lineTo(_x,_y);
+        };
         let isError = /--1$/.test(output?.id || '');
         if(isError) {
-            path.lineTo(srcX + 40, srcY);
+            addLinePoint(srcX + 40, srcY);
             srcX += 40;            
         }
 
-        if (ffFlow.Vertical) {
-            if (srcY < destY - 20) {
-                // draw stepped line
-                let mid = destY + (srcY - destY) / 2;
-                path.lineTo(srcX, mid);
-                path.lineTo(destX, mid);
-                path.lineTo(destX, destY);
+        if (srcY < destY - 20) {
+            // draw stepped line
+            let mid = destY + (srcY - destY) / 2;
+            addLinePoint(srcX, mid);
+            addLinePoint(destX, mid);
+            addLinePoint(destX, destY);
+        }
+        else {
+            let diff = 0;
+            if(isError === false) {
+                diff = 20;
+                addLinePoint(srcX, srcY + 20);
             }
-            else {
-                let diff = 0;
-                if(isError === false) {
-                    diff = 20;
-                    path.lineTo(srcX, srcY + 20);
-                }
-                let midX = (destX - srcX) / 2
-                path.lineTo(srcX + midX, srcY + diff);
-                path.lineTo(srcX + midX, destY - 20);
-                path.lineTo(destX, destY - 20);
-                path.lineTo(destX, destY);
-            }
-        } else {
-            if (Math.abs(destY - srcY) <= 50) {
-                path.lineTo(destX, destY);
-            } else {
-                path.bezierCurveTo(srcX + 50, srcY + 50,
-                    destX - 50, destY - 50,
-                    destX, destY);
-            }
+            let midX = (destX - srcX) / 2
+            addLinePoint(srcX + midX, srcY + diff);
+            addLinePoint(srcX + midX, destY - 20);
+            addLinePoint(destX, destY - 20);
+            addLinePoint(destX, destY);
         }
 
-        context.lineWidth = 5;
+        context.lineWidth = this.lineWidth;
         context.strokeStyle = color || isError ? this.errorColor : this.lineColor;
 
         if(isError) {
@@ -261,7 +256,7 @@ class ffFlowLines {
             context.stroke(path);
         }
 
-        this.ioLines.push({ path: path, output: output, connection: connection });
+        this.ioLines.push({ path: path, output: output, connection: connection, linePoints: linePoints });
 
     };
 
@@ -271,7 +266,7 @@ class ffFlowLines {
 
         this.accentColor = this.colorFromCssClass('--accent');
         this.lineColor = this.colorFromCssClass('--color-darkest');
-        this.errorColor = this.colorFromCssClass('--error');
+        this.errorColor = '#ff6060'; //this.colorFromCssClass('--errr');
 
         let canvas = document.querySelector('canvas');
         // Listen for mouse moves
@@ -283,7 +278,9 @@ class ffFlowLines {
             let selectedLine = null;
             for (let line of self.ioLines) {
                 // Check whether point is inside ellipse's stroke
-                if (!selectedLine && ctx.isPointInStroke(line.path, event.offsetX, event.offsetY)) {
+                if (!selectedLine && self.isClickNearLine(ctx, line.linePoints, event)) 
+                    // ctx.isPointInStroke(line.path, event.offsetX, event.offsetY)) {
+                { 
                     selectedLine = line;
                     self.ioSelectedConnection = line;
                     let output = line.output.parentNode.parentNode.getAttribute('id');
@@ -306,6 +303,7 @@ class ffFlowLines {
                     }
                 }
             }
+            ffFlow.redrawLines();
             if (selectedLine) {
                 ctx.strokeStyle = self.accentColor;
                 ctx.stroke(selectedLine.path);
@@ -321,6 +319,32 @@ class ffFlowLines {
         return this.ioCanvas;
     }
 
+    isClickNearLine(ctx, line, event, tolerance = 5) {
+        const x = event.offsetX / (ffFlow.Zoom / 100);
+        const y = event.offsetY / (ffFlow.Zoom / 100);
+
+        // Iterate through each pair of points (line segment):
+        for (let i = 0; i < line.length - 1; i++) {
+            const [x1, y1] = line[i];
+            const [x2, y2] = line[i + 1];
+
+            // Calculate the distance from the point to the segment:
+            const dx = x2 - x1;
+            const dy = y2 - y1;
+            const lengthSquared = dx * dx + dy * dy;
+            const t = Math.max(0, Math.min(1, ((x - x1) * dx + (y - y1) * dy) / lengthSquared));
+            const nearestX = x1 + t * dx;
+            const nearestY = y1 + t * dy;
+            const distanceSquared = (x - nearestX) * (x - nearestX) + (y - nearestY) * (y - nearestY);
+
+            // Check if the squared distance is within the tolerance squared:
+            if (distanceSquared <= tolerance * tolerance) {
+                return true; // Click is near this segment of the line
+            }
+        }
+
+        return false; // Click is not near any segment of the line
+    }
     deleteConnection() {
         if (!this.ioSelectedConnection)
             return;
@@ -346,5 +370,29 @@ class ffFlowLines {
         color = getComputedStyle(tmp).getPropertyValue("color");
         document.body.removeChild(tmp);
         return color;
+    }
+
+    redrawGrid(canvas) {
+        const ctx = this.ioContext;
+        const gridSize = 10; // Spacing between grid lines
+
+
+// Draw vertical grid lines
+        for (let x = 0; x <= canvas.width; x += gridSize) {
+            ctx.beginPath();
+            ctx.moveTo(x, 0);
+            ctx.lineTo(x, canvas.height);
+            ctx.strokeStyle = x % 50 === 0 ? '#282828' : '#202020'; // Grid line color
+            ctx.stroke();
+        }
+
+// Draw horizontal grid lines
+        for (let y = 0; y <= canvas.height; y += gridSize) {
+            ctx.beginPath();
+            ctx.moveTo(0, y);
+            ctx.lineTo(canvas.width, y);
+            ctx.strokeStyle = y % 50 === 0 ? '#282828' : '#202020'; // Grid line color
+            ctx.stroke();
+        }
     }
 }

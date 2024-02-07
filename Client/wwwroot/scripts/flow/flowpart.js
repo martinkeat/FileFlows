@@ -176,8 +176,8 @@ window.ffFlowPart = {
 
     setPartName: function (part) {
         try {
-            let divName = document.getElementById(part.uid);
-            divName = divName.querySelector('.name');
+            let div = document.getElementById(part.uid);
+            let divName = div.querySelector('.name');
             if (!divName) 
                 return;
             let name = part.name;
@@ -188,9 +188,42 @@ window.ffFlowPart = {
 
             part.displayName = name;
             divName.innerHTML = name;
+
+            let lines = this.getLineCount(name, part.outputs);
+            div.classList.add('height-' + lines);
         } catch (err) {
             console.error(err);
         }
+    },
+    
+    getLineCount(text, outputs) {
+        let width = Math.max(outputs, 3)  * 30; // unit is 10px
+        let div = document.createElement('div');
+        div.style.width = width + 'px';
+        div.innerText = text;
+        // get number of lines needed for div
+        div.style.fontSize = '1rem';
+        div.style.lineHeight = '1rem';
+
+        // Append the temporary div to the body (this is necessary to measure its height accurately)
+        document.body.appendChild(div);
+
+        // Get the height of the temporary div
+        let height = div.clientHeight;
+
+        // Remove the temporary div from the body
+        document.body.removeChild(div);
+
+        // Calculate the number of lines based on the height and line height
+        let numberOfLines = Math.ceil(height / 30);
+        console.log(text + ', height: ' +  height + ', lines: ' + numberOfLines);
+        return numberOfLines;
+        
+        
+        // let lineLength = Math.max(20, div.querySelectorAll('.output').length * 3);
+        // console.log('line length: ' + lineLength);
+        // let lines = Math.round(name.length / lineLength);
+        // lines = Math.min(lines, 3) + 1;
     },
 
     deleteFlowPart: function (uid) 
