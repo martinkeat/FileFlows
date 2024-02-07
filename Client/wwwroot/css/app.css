@@ -723,6 +723,10 @@ a.btn {
   height: 60px;
   width: 170px;
 }
+.flow-part.size-1.height-1 .name {
+  height: 16.8px;
+  -webkit-line-clamp: 1;
+}
 .flow-part.size-1.height-1 .output {
   bottom: -5px;
 }
@@ -743,6 +747,10 @@ a.btn {
 .flow-part.size-1.height-2 {
   height: 60px;
   width: 170px;
+}
+.flow-part.size-1.height-2 .name {
+  height: 33.6px;
+  -webkit-line-clamp: 2;
 }
 .flow-part.size-1.height-2 .output {
   bottom: -5px;
@@ -765,6 +773,10 @@ a.btn {
   height: 80px;
   width: 170px;
 }
+.flow-part.size-1.height-3 .name {
+  height: 50.4px;
+  -webkit-line-clamp: 3;
+}
 .flow-part.size-1.height-3 .output {
   bottom: -5px;
 }
@@ -785,6 +797,10 @@ a.btn {
 .flow-part.size-1.height-4 {
   height: 100px;
   width: 170px;
+}
+.flow-part.size-1.height-4 .name {
+  height: 67.2px;
+  -webkit-line-clamp: 4;
 }
 .flow-part.size-1.height-4 .output {
   bottom: -5px;
@@ -807,6 +823,10 @@ a.btn {
   height: 60px;
   width: 170px;
 }
+.flow-part.size-2.height-1 .name {
+  height: 16.8px;
+  -webkit-line-clamp: 1;
+}
 .flow-part.size-2.height-1 .output {
   bottom: -5px;
 }
@@ -817,11 +837,9 @@ a.btn {
 }
 .flow-part.size-2.height-1 .output-1 {
   left: 45px;
-  color: green;
 }
 .flow-part.size-2.height-1 .output-2 {
   left: 125px;
-  color: green;
 }
 .flow-part.size-2.height-1 .input {
   left: 85px;
@@ -831,6 +849,10 @@ a.btn {
 .flow-part.size-2.height-2 {
   height: 60px;
   width: 170px;
+}
+.flow-part.size-2.height-2 .name {
+  height: 33.6px;
+  -webkit-line-clamp: 2;
 }
 .flow-part.size-2.height-2 .output {
   bottom: -5px;
@@ -842,11 +864,9 @@ a.btn {
 }
 .flow-part.size-2.height-2 .output-1 {
   left: 45px;
-  color: green;
 }
 .flow-part.size-2.height-2 .output-2 {
   left: 125px;
-  color: green;
 }
 .flow-part.size-2.height-2 .input {
   left: 85px;
@@ -856,6 +876,10 @@ a.btn {
 .flow-part.size-2.height-3 {
   height: 80px;
   width: 170px;
+}
+.flow-part.size-2.height-3 .name {
+  height: 50.4px;
+  -webkit-line-clamp: 3;
 }
 .flow-part.size-2.height-3 .output {
   bottom: -5px;
@@ -867,11 +891,9 @@ a.btn {
 }
 .flow-part.size-2.height-3 .output-1 {
   left: 45px;
-  color: green;
 }
 .flow-part.size-2.height-3 .output-2 {
   left: 125px;
-  color: green;
 }
 .flow-part.size-2.height-3 .input {
   left: 85px;
@@ -881,6 +903,10 @@ a.btn {
 .flow-part.size-2.height-4 {
   height: 100px;
   width: 170px;
+}
+.flow-part.size-2.height-4 .name {
+  height: 67.2px;
+  -webkit-line-clamp: 4;
 }
 .flow-part.size-2.height-4 .output {
   bottom: -5px;
@@ -892,11 +918,9 @@ a.btn {
 }
 .flow-part.size-2.height-4 .output-1 {
   left: 45px;
-  color: green;
 }
 .flow-part.size-2.height-4 .output-2 {
   left: 125px;
-  color: green;
 }
 .flow-part.size-2.height-4 .input {
   left: 85px;
@@ -906,6 +930,10 @@ a.btn {
 .flow-part.size-3.height-1 {
   height: 60px;
   width: 170px;
+}
+.flow-part.size-3.height-1 .name {
+  height: 16.8px;
+  -webkit-line-clamp: 1;
 }
 .flow-part.size-3.height-1 .output {
   bottom: -5px;
@@ -917,15 +945,12 @@ a.btn {
 }
 .flow-part.size-3.height-1 .output-1 {
   left: 45px;
-  color: pink;
 }
 .flow-part.size-3.height-1 .output-2 {
   left: 85px;
-  color: pink;
 }
 .flow-part.size-3.height-1 .output-3 {
   left: 125px;
-  color: pink;
 }
 .flow-part.size-3.height-1 .input {
   left: 85px;
@@ -935,6 +960,10 @@ a.btn {
 .flow-part.size-3.height-2 {
   height: 60px;
   width: 170px;
+}
+.flow-part.size-3.height-2 .name {
+  height: 33.6px;
+  -webkit-line-clamp: 2;
 }
 .flow-part.size-3.height-2 .output {
   bottom: -5px;
@@ -946,15 +975,12 @@ a.btn {
 }
 .flow-part.size-3.height-2 .output-1 {
   left: 45px;
-  color: pink;
 }
 .flow-part.size-3.height-2 .output-2 {
   left: 85px;
-  color: pink;
 }
 .flow-part.size-3.height-2 .output-3 {
   left: 125px;
-  color: pink;
 }
 .flow-part.size-3.height-2 .input {
   left: 85px;
@@ -964,6 +990,10 @@ a.btn {
 .flow-part.size-3.height-3 {
   height: 80px;
   width: 170px;
+}
+.flow-part.size-3.height-3 .name {
+  height: 50.4px;
+  -webkit-line-clamp: 3;
 }
 .flow-part.size-3.height-3 .output {
   bottom: -5px;
@@ -975,15 +1005,12 @@ a.btn {
 }
 .flow-part.size-3.height-3 .output-1 {
   left: 45px;
-  color: pink;
 }
 .flow-part.size-3.height-3 .output-2 {
   left: 85px;
-  color: pink;
 }
 .flow-part.size-3.height-3 .output-3 {
   left: 125px;
-  color: pink;
 }
 .flow-part.size-3.height-3 .input {
   left: 85px;
@@ -993,6 +1020,10 @@ a.btn {
 .flow-part.size-3.height-4 {
   height: 100px;
   width: 170px;
+}
+.flow-part.size-3.height-4 .name {
+  height: 67.2px;
+  -webkit-line-clamp: 4;
 }
 .flow-part.size-3.height-4 .output {
   bottom: -5px;
@@ -1004,15 +1035,12 @@ a.btn {
 }
 .flow-part.size-3.height-4 .output-1 {
   left: 45px;
-  color: pink;
 }
 .flow-part.size-3.height-4 .output-2 {
   left: 85px;
-  color: pink;
 }
 .flow-part.size-3.height-4 .output-3 {
   left: 125px;
-  color: pink;
 }
 .flow-part.size-3.height-4 .input {
   left: 85px;
@@ -1022,6 +1050,10 @@ a.btn {
 .flow-part.size-4.height-1 {
   height: 60px;
   width: 180px;
+}
+.flow-part.size-4.height-1 .name {
+  height: 16.8px;
+  -webkit-line-clamp: 1;
 }
 .flow-part.size-4.height-1 .output {
   bottom: -5px;
@@ -1033,19 +1065,15 @@ a.btn {
 }
 .flow-part.size-4.height-1 .output-1 {
   left: 45px;
-  color: pink;
 }
 .flow-part.size-4.height-1 .output-2 {
   left: 75px;
-  color: pink;
 }
 .flow-part.size-4.height-1 .output-3 {
   left: 105px;
-  color: pink;
 }
 .flow-part.size-4.height-1 .output-4 {
   left: 135px;
-  color: pink;
 }
 .flow-part.size-4.height-1 .input {
   left: 90px;
@@ -1055,6 +1083,10 @@ a.btn {
 .flow-part.size-4.height-2 {
   height: 60px;
   width: 180px;
+}
+.flow-part.size-4.height-2 .name {
+  height: 33.6px;
+  -webkit-line-clamp: 2;
 }
 .flow-part.size-4.height-2 .output {
   bottom: -5px;
@@ -1066,19 +1098,15 @@ a.btn {
 }
 .flow-part.size-4.height-2 .output-1 {
   left: 45px;
-  color: pink;
 }
 .flow-part.size-4.height-2 .output-2 {
   left: 75px;
-  color: pink;
 }
 .flow-part.size-4.height-2 .output-3 {
   left: 105px;
-  color: pink;
 }
 .flow-part.size-4.height-2 .output-4 {
   left: 135px;
-  color: pink;
 }
 .flow-part.size-4.height-2 .input {
   left: 90px;
@@ -1088,6 +1116,10 @@ a.btn {
 .flow-part.size-4.height-3 {
   height: 80px;
   width: 180px;
+}
+.flow-part.size-4.height-3 .name {
+  height: 50.4px;
+  -webkit-line-clamp: 3;
 }
 .flow-part.size-4.height-3 .output {
   bottom: -5px;
@@ -1099,19 +1131,15 @@ a.btn {
 }
 .flow-part.size-4.height-3 .output-1 {
   left: 45px;
-  color: pink;
 }
 .flow-part.size-4.height-3 .output-2 {
   left: 75px;
-  color: pink;
 }
 .flow-part.size-4.height-3 .output-3 {
   left: 105px;
-  color: pink;
 }
 .flow-part.size-4.height-3 .output-4 {
   left: 135px;
-  color: pink;
 }
 .flow-part.size-4.height-3 .input {
   left: 90px;
@@ -1121,6 +1149,10 @@ a.btn {
 .flow-part.size-4.height-4 {
   height: 100px;
   width: 180px;
+}
+.flow-part.size-4.height-4 .name {
+  height: 67.2px;
+  -webkit-line-clamp: 4;
 }
 .flow-part.size-4.height-4 .output {
   bottom: -5px;
@@ -1132,19 +1164,15 @@ a.btn {
 }
 .flow-part.size-4.height-4 .output-1 {
   left: 45px;
-  color: pink;
 }
 .flow-part.size-4.height-4 .output-2 {
   left: 75px;
-  color: pink;
 }
 .flow-part.size-4.height-4 .output-3 {
   left: 105px;
-  color: pink;
 }
 .flow-part.size-4.height-4 .output-4 {
   left: 135px;
-  color: pink;
 }
 .flow-part.size-4.height-4 .input {
   left: 90px;
@@ -1154,6 +1182,10 @@ a.btn {
 .flow-part.size-5.height-1 {
   height: 60px;
   width: 210px;
+}
+.flow-part.size-5.height-1 .name {
+  height: 16.8px;
+  -webkit-line-clamp: 1;
 }
 .flow-part.size-5.height-1 .output {
   bottom: -5px;
@@ -1165,23 +1197,18 @@ a.btn {
 }
 .flow-part.size-5.height-1 .output-1 {
   left: 45px;
-  color: pink;
 }
 .flow-part.size-5.height-1 .output-2 {
   left: 75px;
-  color: pink;
 }
 .flow-part.size-5.height-1 .output-3 {
   left: 105px;
-  color: pink;
 }
 .flow-part.size-5.height-1 .output-4 {
   left: 135px;
-  color: pink;
 }
 .flow-part.size-5.height-1 .output-5 {
   left: 165px;
-  color: pink;
 }
 .flow-part.size-5.height-1 .input {
   left: 105px;
@@ -1191,6 +1218,10 @@ a.btn {
 .flow-part.size-5.height-2 {
   height: 60px;
   width: 210px;
+}
+.flow-part.size-5.height-2 .name {
+  height: 33.6px;
+  -webkit-line-clamp: 2;
 }
 .flow-part.size-5.height-2 .output {
   bottom: -5px;
@@ -1202,23 +1233,18 @@ a.btn {
 }
 .flow-part.size-5.height-2 .output-1 {
   left: 45px;
-  color: pink;
 }
 .flow-part.size-5.height-2 .output-2 {
   left: 75px;
-  color: pink;
 }
 .flow-part.size-5.height-2 .output-3 {
   left: 105px;
-  color: pink;
 }
 .flow-part.size-5.height-2 .output-4 {
   left: 135px;
-  color: pink;
 }
 .flow-part.size-5.height-2 .output-5 {
   left: 165px;
-  color: pink;
 }
 .flow-part.size-5.height-2 .input {
   left: 105px;
@@ -1228,6 +1254,10 @@ a.btn {
 .flow-part.size-5.height-3 {
   height: 80px;
   width: 210px;
+}
+.flow-part.size-5.height-3 .name {
+  height: 50.4px;
+  -webkit-line-clamp: 3;
 }
 .flow-part.size-5.height-3 .output {
   bottom: -5px;
@@ -1239,23 +1269,18 @@ a.btn {
 }
 .flow-part.size-5.height-3 .output-1 {
   left: 45px;
-  color: pink;
 }
 .flow-part.size-5.height-3 .output-2 {
   left: 75px;
-  color: pink;
 }
 .flow-part.size-5.height-3 .output-3 {
   left: 105px;
-  color: pink;
 }
 .flow-part.size-5.height-3 .output-4 {
   left: 135px;
-  color: pink;
 }
 .flow-part.size-5.height-3 .output-5 {
   left: 165px;
-  color: pink;
 }
 .flow-part.size-5.height-3 .input {
   left: 105px;
@@ -1265,6 +1290,10 @@ a.btn {
 .flow-part.size-5.height-4 {
   height: 100px;
   width: 210px;
+}
+.flow-part.size-5.height-4 .name {
+  height: 67.2px;
+  -webkit-line-clamp: 4;
 }
 .flow-part.size-5.height-4 .output {
   bottom: -5px;
@@ -1276,23 +1305,18 @@ a.btn {
 }
 .flow-part.size-5.height-4 .output-1 {
   left: 45px;
-  color: pink;
 }
 .flow-part.size-5.height-4 .output-2 {
   left: 75px;
-  color: pink;
 }
 .flow-part.size-5.height-4 .output-3 {
   left: 105px;
-  color: pink;
 }
 .flow-part.size-5.height-4 .output-4 {
   left: 135px;
-  color: pink;
 }
 .flow-part.size-5.height-4 .output-5 {
   left: 165px;
-  color: pink;
 }
 .flow-part.size-5.height-4 .input {
   left: 105px;
@@ -1302,6 +1326,10 @@ a.btn {
 .flow-part.size-6.height-1 {
   height: 60px;
   width: 190px;
+}
+.flow-part.size-6.height-1 .name {
+  height: 16.8px;
+  -webkit-line-clamp: 1;
 }
 .flow-part.size-6.height-1 .output {
   bottom: -5px;
@@ -1313,27 +1341,21 @@ a.btn {
 }
 .flow-part.size-6.height-1 .output-1 {
   left: 45px;
-  color: pink;
 }
 .flow-part.size-6.height-1 .output-2 {
   left: 65px;
-  color: pink;
 }
 .flow-part.size-6.height-1 .output-3 {
   left: 85px;
-  color: pink;
 }
 .flow-part.size-6.height-1 .output-4 {
   left: 105px;
-  color: pink;
 }
 .flow-part.size-6.height-1 .output-5 {
   left: 125px;
-  color: pink;
 }
 .flow-part.size-6.height-1 .output-6 {
   left: 145px;
-  color: pink;
 }
 .flow-part.size-6.height-1 .input {
   left: 95px;
@@ -1343,6 +1365,10 @@ a.btn {
 .flow-part.size-6.height-2 {
   height: 60px;
   width: 190px;
+}
+.flow-part.size-6.height-2 .name {
+  height: 33.6px;
+  -webkit-line-clamp: 2;
 }
 .flow-part.size-6.height-2 .output {
   bottom: -5px;
@@ -1354,27 +1380,21 @@ a.btn {
 }
 .flow-part.size-6.height-2 .output-1 {
   left: 45px;
-  color: pink;
 }
 .flow-part.size-6.height-2 .output-2 {
   left: 65px;
-  color: pink;
 }
 .flow-part.size-6.height-2 .output-3 {
   left: 85px;
-  color: pink;
 }
 .flow-part.size-6.height-2 .output-4 {
   left: 105px;
-  color: pink;
 }
 .flow-part.size-6.height-2 .output-5 {
   left: 125px;
-  color: pink;
 }
 .flow-part.size-6.height-2 .output-6 {
   left: 145px;
-  color: pink;
 }
 .flow-part.size-6.height-2 .input {
   left: 95px;
@@ -1384,6 +1404,10 @@ a.btn {
 .flow-part.size-6.height-3 {
   height: 80px;
   width: 190px;
+}
+.flow-part.size-6.height-3 .name {
+  height: 50.4px;
+  -webkit-line-clamp: 3;
 }
 .flow-part.size-6.height-3 .output {
   bottom: -5px;
@@ -1395,27 +1419,21 @@ a.btn {
 }
 .flow-part.size-6.height-3 .output-1 {
   left: 45px;
-  color: pink;
 }
 .flow-part.size-6.height-3 .output-2 {
   left: 65px;
-  color: pink;
 }
 .flow-part.size-6.height-3 .output-3 {
   left: 85px;
-  color: pink;
 }
 .flow-part.size-6.height-3 .output-4 {
   left: 105px;
-  color: pink;
 }
 .flow-part.size-6.height-3 .output-5 {
   left: 125px;
-  color: pink;
 }
 .flow-part.size-6.height-3 .output-6 {
   left: 145px;
-  color: pink;
 }
 .flow-part.size-6.height-3 .input {
   left: 95px;
@@ -1425,6 +1443,10 @@ a.btn {
 .flow-part.size-6.height-4 {
   height: 100px;
   width: 190px;
+}
+.flow-part.size-6.height-4 .name {
+  height: 67.2px;
+  -webkit-line-clamp: 4;
 }
 .flow-part.size-6.height-4 .output {
   bottom: -5px;
@@ -1436,27 +1458,21 @@ a.btn {
 }
 .flow-part.size-6.height-4 .output-1 {
   left: 45px;
-  color: pink;
 }
 .flow-part.size-6.height-4 .output-2 {
   left: 65px;
-  color: pink;
 }
 .flow-part.size-6.height-4 .output-3 {
   left: 85px;
-  color: pink;
 }
 .flow-part.size-6.height-4 .output-4 {
   left: 105px;
-  color: pink;
 }
 .flow-part.size-6.height-4 .output-5 {
   left: 125px;
-  color: pink;
 }
 .flow-part.size-6.height-4 .output-6 {
   left: 145px;
-  color: pink;
 }
 .flow-part.size-6.height-4 .input {
   left: 95px;
@@ -1466,6 +1482,10 @@ a.btn {
 .flow-part.size-7.height-1 {
   height: 60px;
   width: 210px;
+}
+.flow-part.size-7.height-1 .name {
+  height: 16.8px;
+  -webkit-line-clamp: 1;
 }
 .flow-part.size-7.height-1 .output {
   bottom: -5px;
@@ -1477,31 +1497,24 @@ a.btn {
 }
 .flow-part.size-7.height-1 .output-1 {
   left: 45px;
-  color: pink;
 }
 .flow-part.size-7.height-1 .output-2 {
   left: 65px;
-  color: pink;
 }
 .flow-part.size-7.height-1 .output-3 {
   left: 85px;
-  color: pink;
 }
 .flow-part.size-7.height-1 .output-4 {
   left: 105px;
-  color: pink;
 }
 .flow-part.size-7.height-1 .output-5 {
   left: 125px;
-  color: pink;
 }
 .flow-part.size-7.height-1 .output-6 {
   left: 145px;
-  color: pink;
 }
 .flow-part.size-7.height-1 .output-7 {
   left: 165px;
-  color: pink;
 }
 .flow-part.size-7.height-1 .input {
   left: 105px;
@@ -1511,6 +1524,10 @@ a.btn {
 .flow-part.size-7.height-2 {
   height: 60px;
   width: 210px;
+}
+.flow-part.size-7.height-2 .name {
+  height: 33.6px;
+  -webkit-line-clamp: 2;
 }
 .flow-part.size-7.height-2 .output {
   bottom: -5px;
@@ -1522,31 +1539,24 @@ a.btn {
 }
 .flow-part.size-7.height-2 .output-1 {
   left: 45px;
-  color: pink;
 }
 .flow-part.size-7.height-2 .output-2 {
   left: 65px;
-  color: pink;
 }
 .flow-part.size-7.height-2 .output-3 {
   left: 85px;
-  color: pink;
 }
 .flow-part.size-7.height-2 .output-4 {
   left: 105px;
-  color: pink;
 }
 .flow-part.size-7.height-2 .output-5 {
   left: 125px;
-  color: pink;
 }
 .flow-part.size-7.height-2 .output-6 {
   left: 145px;
-  color: pink;
 }
 .flow-part.size-7.height-2 .output-7 {
   left: 165px;
-  color: pink;
 }
 .flow-part.size-7.height-2 .input {
   left: 105px;
@@ -1556,6 +1566,10 @@ a.btn {
 .flow-part.size-7.height-3 {
   height: 80px;
   width: 210px;
+}
+.flow-part.size-7.height-3 .name {
+  height: 50.4px;
+  -webkit-line-clamp: 3;
 }
 .flow-part.size-7.height-3 .output {
   bottom: -5px;
@@ -1567,31 +1581,24 @@ a.btn {
 }
 .flow-part.size-7.height-3 .output-1 {
   left: 45px;
-  color: pink;
 }
 .flow-part.size-7.height-3 .output-2 {
   left: 65px;
-  color: pink;
 }
 .flow-part.size-7.height-3 .output-3 {
   left: 85px;
-  color: pink;
 }
 .flow-part.size-7.height-3 .output-4 {
   left: 105px;
-  color: pink;
 }
 .flow-part.size-7.height-3 .output-5 {
   left: 125px;
-  color: pink;
 }
 .flow-part.size-7.height-3 .output-6 {
   left: 145px;
-  color: pink;
 }
 .flow-part.size-7.height-3 .output-7 {
   left: 165px;
-  color: pink;
 }
 .flow-part.size-7.height-3 .input {
   left: 105px;
@@ -1601,6 +1608,10 @@ a.btn {
 .flow-part.size-7.height-4 {
   height: 100px;
   width: 210px;
+}
+.flow-part.size-7.height-4 .name {
+  height: 67.2px;
+  -webkit-line-clamp: 4;
 }
 .flow-part.size-7.height-4 .output {
   bottom: -5px;
@@ -1612,31 +1623,24 @@ a.btn {
 }
 .flow-part.size-7.height-4 .output-1 {
   left: 45px;
-  color: pink;
 }
 .flow-part.size-7.height-4 .output-2 {
   left: 65px;
-  color: pink;
 }
 .flow-part.size-7.height-4 .output-3 {
   left: 85px;
-  color: pink;
 }
 .flow-part.size-7.height-4 .output-4 {
   left: 105px;
-  color: pink;
 }
 .flow-part.size-7.height-4 .output-5 {
   left: 125px;
-  color: pink;
 }
 .flow-part.size-7.height-4 .output-6 {
   left: 145px;
-  color: pink;
 }
 .flow-part.size-7.height-4 .output-7 {
   left: 165px;
-  color: pink;
 }
 .flow-part.size-7.height-4 .input {
   left: 105px;
@@ -1646,6 +1650,10 @@ a.btn {
 .flow-part.size-8.height-1 {
   height: 60px;
   width: 230px;
+}
+.flow-part.size-8.height-1 .name {
+  height: 16.8px;
+  -webkit-line-clamp: 1;
 }
 .flow-part.size-8.height-1 .output {
   bottom: -5px;
@@ -1657,35 +1665,27 @@ a.btn {
 }
 .flow-part.size-8.height-1 .output-1 {
   left: 45px;
-  color: pink;
 }
 .flow-part.size-8.height-1 .output-2 {
   left: 65px;
-  color: pink;
 }
 .flow-part.size-8.height-1 .output-3 {
   left: 85px;
-  color: pink;
 }
 .flow-part.size-8.height-1 .output-4 {
   left: 105px;
-  color: pink;
 }
 .flow-part.size-8.height-1 .output-5 {
   left: 125px;
-  color: pink;
 }
 .flow-part.size-8.height-1 .output-6 {
   left: 145px;
-  color: pink;
 }
 .flow-part.size-8.height-1 .output-7 {
   left: 165px;
-  color: pink;
 }
 .flow-part.size-8.height-1 .output-8 {
   left: 185px;
-  color: pink;
 }
 .flow-part.size-8.height-1 .input {
   left: 115px;
@@ -1695,6 +1695,10 @@ a.btn {
 .flow-part.size-8.height-2 {
   height: 60px;
   width: 230px;
+}
+.flow-part.size-8.height-2 .name {
+  height: 33.6px;
+  -webkit-line-clamp: 2;
 }
 .flow-part.size-8.height-2 .output {
   bottom: -5px;
@@ -1706,35 +1710,27 @@ a.btn {
 }
 .flow-part.size-8.height-2 .output-1 {
   left: 45px;
-  color: pink;
 }
 .flow-part.size-8.height-2 .output-2 {
   left: 65px;
-  color: pink;
 }
 .flow-part.size-8.height-2 .output-3 {
   left: 85px;
-  color: pink;
 }
 .flow-part.size-8.height-2 .output-4 {
   left: 105px;
-  color: pink;
 }
 .flow-part.size-8.height-2 .output-5 {
   left: 125px;
-  color: pink;
 }
 .flow-part.size-8.height-2 .output-6 {
   left: 145px;
-  color: pink;
 }
 .flow-part.size-8.height-2 .output-7 {
   left: 165px;
-  color: pink;
 }
 .flow-part.size-8.height-2 .output-8 {
   left: 185px;
-  color: pink;
 }
 .flow-part.size-8.height-2 .input {
   left: 115px;
@@ -1744,6 +1740,10 @@ a.btn {
 .flow-part.size-8.height-3 {
   height: 80px;
   width: 230px;
+}
+.flow-part.size-8.height-3 .name {
+  height: 50.4px;
+  -webkit-line-clamp: 3;
 }
 .flow-part.size-8.height-3 .output {
   bottom: -5px;
@@ -1755,35 +1755,27 @@ a.btn {
 }
 .flow-part.size-8.height-3 .output-1 {
   left: 45px;
-  color: pink;
 }
 .flow-part.size-8.height-3 .output-2 {
   left: 65px;
-  color: pink;
 }
 .flow-part.size-8.height-3 .output-3 {
   left: 85px;
-  color: pink;
 }
 .flow-part.size-8.height-3 .output-4 {
   left: 105px;
-  color: pink;
 }
 .flow-part.size-8.height-3 .output-5 {
   left: 125px;
-  color: pink;
 }
 .flow-part.size-8.height-3 .output-6 {
   left: 145px;
-  color: pink;
 }
 .flow-part.size-8.height-3 .output-7 {
   left: 165px;
-  color: pink;
 }
 .flow-part.size-8.height-3 .output-8 {
   left: 185px;
-  color: pink;
 }
 .flow-part.size-8.height-3 .input {
   left: 115px;
@@ -1793,6 +1785,10 @@ a.btn {
 .flow-part.size-8.height-4 {
   height: 100px;
   width: 230px;
+}
+.flow-part.size-8.height-4 .name {
+  height: 67.2px;
+  -webkit-line-clamp: 4;
 }
 .flow-part.size-8.height-4 .output {
   bottom: -5px;
@@ -1804,35 +1800,27 @@ a.btn {
 }
 .flow-part.size-8.height-4 .output-1 {
   left: 45px;
-  color: pink;
 }
 .flow-part.size-8.height-4 .output-2 {
   left: 65px;
-  color: pink;
 }
 .flow-part.size-8.height-4 .output-3 {
   left: 85px;
-  color: pink;
 }
 .flow-part.size-8.height-4 .output-4 {
   left: 105px;
-  color: pink;
 }
 .flow-part.size-8.height-4 .output-5 {
   left: 125px;
-  color: pink;
 }
 .flow-part.size-8.height-4 .output-6 {
   left: 145px;
-  color: pink;
 }
 .flow-part.size-8.height-4 .output-7 {
   left: 165px;
-  color: pink;
 }
 .flow-part.size-8.height-4 .output-8 {
   left: 185px;
-  color: pink;
 }
 .flow-part.size-8.height-4 .input {
   left: 115px;
@@ -1842,6 +1830,10 @@ a.btn {
 .flow-part.size-9.height-1 {
   height: 60px;
   width: 250px;
+}
+.flow-part.size-9.height-1 .name {
+  height: 16.8px;
+  -webkit-line-clamp: 1;
 }
 .flow-part.size-9.height-1 .output {
   bottom: -5px;
@@ -1853,39 +1845,30 @@ a.btn {
 }
 .flow-part.size-9.height-1 .output-1 {
   left: 45px;
-  color: pink;
 }
 .flow-part.size-9.height-1 .output-2 {
   left: 65px;
-  color: pink;
 }
 .flow-part.size-9.height-1 .output-3 {
   left: 85px;
-  color: pink;
 }
 .flow-part.size-9.height-1 .output-4 {
   left: 105px;
-  color: pink;
 }
 .flow-part.size-9.height-1 .output-5 {
   left: 125px;
-  color: pink;
 }
 .flow-part.size-9.height-1 .output-6 {
   left: 145px;
-  color: pink;
 }
 .flow-part.size-9.height-1 .output-7 {
   left: 165px;
-  color: pink;
 }
 .flow-part.size-9.height-1 .output-8 {
   left: 185px;
-  color: pink;
 }
 .flow-part.size-9.height-1 .output-9 {
   left: 205px;
-  color: pink;
 }
 .flow-part.size-9.height-1 .input {
   left: 125px;
@@ -1895,6 +1878,10 @@ a.btn {
 .flow-part.size-9.height-2 {
   height: 60px;
   width: 250px;
+}
+.flow-part.size-9.height-2 .name {
+  height: 33.6px;
+  -webkit-line-clamp: 2;
 }
 .flow-part.size-9.height-2 .output {
   bottom: -5px;
@@ -1906,39 +1893,30 @@ a.btn {
 }
 .flow-part.size-9.height-2 .output-1 {
   left: 45px;
-  color: pink;
 }
 .flow-part.size-9.height-2 .output-2 {
   left: 65px;
-  color: pink;
 }
 .flow-part.size-9.height-2 .output-3 {
   left: 85px;
-  color: pink;
 }
 .flow-part.size-9.height-2 .output-4 {
   left: 105px;
-  color: pink;
 }
 .flow-part.size-9.height-2 .output-5 {
   left: 125px;
-  color: pink;
 }
 .flow-part.size-9.height-2 .output-6 {
   left: 145px;
-  color: pink;
 }
 .flow-part.size-9.height-2 .output-7 {
   left: 165px;
-  color: pink;
 }
 .flow-part.size-9.height-2 .output-8 {
   left: 185px;
-  color: pink;
 }
 .flow-part.size-9.height-2 .output-9 {
   left: 205px;
-  color: pink;
 }
 .flow-part.size-9.height-2 .input {
   left: 125px;
@@ -1948,6 +1926,10 @@ a.btn {
 .flow-part.size-9.height-3 {
   height: 80px;
   width: 250px;
+}
+.flow-part.size-9.height-3 .name {
+  height: 50.4px;
+  -webkit-line-clamp: 3;
 }
 .flow-part.size-9.height-3 .output {
   bottom: -5px;
@@ -1959,39 +1941,30 @@ a.btn {
 }
 .flow-part.size-9.height-3 .output-1 {
   left: 45px;
-  color: pink;
 }
 .flow-part.size-9.height-3 .output-2 {
   left: 65px;
-  color: pink;
 }
 .flow-part.size-9.height-3 .output-3 {
   left: 85px;
-  color: pink;
 }
 .flow-part.size-9.height-3 .output-4 {
   left: 105px;
-  color: pink;
 }
 .flow-part.size-9.height-3 .output-5 {
   left: 125px;
-  color: pink;
 }
 .flow-part.size-9.height-3 .output-6 {
   left: 145px;
-  color: pink;
 }
 .flow-part.size-9.height-3 .output-7 {
   left: 165px;
-  color: pink;
 }
 .flow-part.size-9.height-3 .output-8 {
   left: 185px;
-  color: pink;
 }
 .flow-part.size-9.height-3 .output-9 {
   left: 205px;
-  color: pink;
 }
 .flow-part.size-9.height-3 .input {
   left: 125px;
@@ -2001,6 +1974,10 @@ a.btn {
 .flow-part.size-9.height-4 {
   height: 100px;
   width: 250px;
+}
+.flow-part.size-9.height-4 .name {
+  height: 67.2px;
+  -webkit-line-clamp: 4;
 }
 .flow-part.size-9.height-4 .output {
   bottom: -5px;
@@ -2012,39 +1989,30 @@ a.btn {
 }
 .flow-part.size-9.height-4 .output-1 {
   left: 45px;
-  color: pink;
 }
 .flow-part.size-9.height-4 .output-2 {
   left: 65px;
-  color: pink;
 }
 .flow-part.size-9.height-4 .output-3 {
   left: 85px;
-  color: pink;
 }
 .flow-part.size-9.height-4 .output-4 {
   left: 105px;
-  color: pink;
 }
 .flow-part.size-9.height-4 .output-5 {
   left: 125px;
-  color: pink;
 }
 .flow-part.size-9.height-4 .output-6 {
   left: 145px;
-  color: pink;
 }
 .flow-part.size-9.height-4 .output-7 {
   left: 165px;
-  color: pink;
 }
 .flow-part.size-9.height-4 .output-8 {
   left: 185px;
-  color: pink;
 }
 .flow-part.size-9.height-4 .output-9 {
   left: 205px;
-  color: pink;
 }
 .flow-part.size-9.height-4 .input {
   left: 125px;
@@ -2054,6 +2022,10 @@ a.btn {
 .flow-part.size-10.height-1 {
   height: 60px;
   width: 270px;
+}
+.flow-part.size-10.height-1 .name {
+  height: 16.8px;
+  -webkit-line-clamp: 1;
 }
 .flow-part.size-10.height-1 .output {
   bottom: -5px;
@@ -2065,43 +2037,33 @@ a.btn {
 }
 .flow-part.size-10.height-1 .output-1 {
   left: 45px;
-  color: pink;
 }
 .flow-part.size-10.height-1 .output-2 {
   left: 65px;
-  color: pink;
 }
 .flow-part.size-10.height-1 .output-3 {
   left: 85px;
-  color: pink;
 }
 .flow-part.size-10.height-1 .output-4 {
   left: 105px;
-  color: pink;
 }
 .flow-part.size-10.height-1 .output-5 {
   left: 125px;
-  color: pink;
 }
 .flow-part.size-10.height-1 .output-6 {
   left: 145px;
-  color: pink;
 }
 .flow-part.size-10.height-1 .output-7 {
   left: 165px;
-  color: pink;
 }
 .flow-part.size-10.height-1 .output-8 {
   left: 185px;
-  color: pink;
 }
 .flow-part.size-10.height-1 .output-9 {
   left: 205px;
-  color: pink;
 }
 .flow-part.size-10.height-1 .output-10 {
   left: 225px;
-  color: pink;
 }
 .flow-part.size-10.height-1 .input {
   left: 135px;
@@ -2111,6 +2073,10 @@ a.btn {
 .flow-part.size-10.height-2 {
   height: 60px;
   width: 270px;
+}
+.flow-part.size-10.height-2 .name {
+  height: 33.6px;
+  -webkit-line-clamp: 2;
 }
 .flow-part.size-10.height-2 .output {
   bottom: -5px;
@@ -2122,43 +2088,33 @@ a.btn {
 }
 .flow-part.size-10.height-2 .output-1 {
   left: 45px;
-  color: pink;
 }
 .flow-part.size-10.height-2 .output-2 {
   left: 65px;
-  color: pink;
 }
 .flow-part.size-10.height-2 .output-3 {
   left: 85px;
-  color: pink;
 }
 .flow-part.size-10.height-2 .output-4 {
   left: 105px;
-  color: pink;
 }
 .flow-part.size-10.height-2 .output-5 {
   left: 125px;
-  color: pink;
 }
 .flow-part.size-10.height-2 .output-6 {
   left: 145px;
-  color: pink;
 }
 .flow-part.size-10.height-2 .output-7 {
   left: 165px;
-  color: pink;
 }
 .flow-part.size-10.height-2 .output-8 {
   left: 185px;
-  color: pink;
 }
 .flow-part.size-10.height-2 .output-9 {
   left: 205px;
-  color: pink;
 }
 .flow-part.size-10.height-2 .output-10 {
   left: 225px;
-  color: pink;
 }
 .flow-part.size-10.height-2 .input {
   left: 135px;
@@ -2168,6 +2124,10 @@ a.btn {
 .flow-part.size-10.height-3 {
   height: 80px;
   width: 270px;
+}
+.flow-part.size-10.height-3 .name {
+  height: 50.4px;
+  -webkit-line-clamp: 3;
 }
 .flow-part.size-10.height-3 .output {
   bottom: -5px;
@@ -2179,43 +2139,33 @@ a.btn {
 }
 .flow-part.size-10.height-3 .output-1 {
   left: 45px;
-  color: pink;
 }
 .flow-part.size-10.height-3 .output-2 {
   left: 65px;
-  color: pink;
 }
 .flow-part.size-10.height-3 .output-3 {
   left: 85px;
-  color: pink;
 }
 .flow-part.size-10.height-3 .output-4 {
   left: 105px;
-  color: pink;
 }
 .flow-part.size-10.height-3 .output-5 {
   left: 125px;
-  color: pink;
 }
 .flow-part.size-10.height-3 .output-6 {
   left: 145px;
-  color: pink;
 }
 .flow-part.size-10.height-3 .output-7 {
   left: 165px;
-  color: pink;
 }
 .flow-part.size-10.height-3 .output-8 {
   left: 185px;
-  color: pink;
 }
 .flow-part.size-10.height-3 .output-9 {
   left: 205px;
-  color: pink;
 }
 .flow-part.size-10.height-3 .output-10 {
   left: 225px;
-  color: pink;
 }
 .flow-part.size-10.height-3 .input {
   left: 135px;
@@ -2225,6 +2175,10 @@ a.btn {
 .flow-part.size-10.height-4 {
   height: 100px;
   width: 270px;
+}
+.flow-part.size-10.height-4 .name {
+  height: 67.2px;
+  -webkit-line-clamp: 4;
 }
 .flow-part.size-10.height-4 .output {
   bottom: -5px;
@@ -2236,43 +2190,33 @@ a.btn {
 }
 .flow-part.size-10.height-4 .output-1 {
   left: 45px;
-  color: pink;
 }
 .flow-part.size-10.height-4 .output-2 {
   left: 65px;
-  color: pink;
 }
 .flow-part.size-10.height-4 .output-3 {
   left: 85px;
-  color: pink;
 }
 .flow-part.size-10.height-4 .output-4 {
   left: 105px;
-  color: pink;
 }
 .flow-part.size-10.height-4 .output-5 {
   left: 125px;
-  color: pink;
 }
 .flow-part.size-10.height-4 .output-6 {
   left: 145px;
-  color: pink;
 }
 .flow-part.size-10.height-4 .output-7 {
   left: 165px;
-  color: pink;
 }
 .flow-part.size-10.height-4 .output-8 {
   left: 185px;
-  color: pink;
 }
 .flow-part.size-10.height-4 .output-9 {
   left: 205px;
-  color: pink;
 }
 .flow-part.size-10.height-4 .output-10 {
   left: 225px;
-  color: pink;
 }
 .flow-part.size-10.height-4 .input {
   left: 135px;
@@ -2293,9 +2237,15 @@ a.btn {
 }
 .flow-part .name {
   flex-grow: 1;
-  padding: 5px;
+  padding: 0 5px;
   margin-left: 30px;
   align-self: center;
+  overflow: hidden;
+  line-height: 16.8px;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  white-space: normal;
 }
 .flow-part .draggable {
   position: absolute;

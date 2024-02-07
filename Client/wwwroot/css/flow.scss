@@ -2,6 +2,8 @@ $flowTypes: Logic, Input, Output, SubFlow, Process, BuildPart, BuildStart, Build
 $ioSize: 10px;
 $unit: 10px;
 $ioFirst: 5 * $unit;
+$fontSize: 14px;
+$lineHeight: $fontSize * 1.2;
 
 @mixin flowStyles($flowType, $borderColor, $backgroundColor) {
   &.#{$flowType}:not(.selected) {
@@ -47,6 +49,10 @@ $ioFirst: 5 * $unit;
   .flow-part.size-#{$outputs}.height-#{$height} {
     $actualHeight:max($height * 2 * $unit + (2 * $unit), 6 * $unit);
     height: $actualHeight;
+    .name {
+      height:$height * $lineHeight;
+      -webkit-line-clamp: $height;
+    }
     .output {
       bottom:-$unit / 2;
     }
@@ -68,11 +74,9 @@ $ioFirst: 5 * $unit;
       width: $width;
       .output-1 {
         left: $center - $oSpacing;
-        color:green;
       }
       .output-2 {
         left: $center + $oSpacing;
-        color:green;        
       }
     } @else {
       // Default styles for other cases
@@ -80,7 +84,6 @@ $ioFirst: 5 * $unit;
         .output-#{$i}
         {
           left: $pad + (($i - 1) * $oSpacing);
-          color:pink;
           $finalOutput: $pad + (($i - 1) * $oSpacing);
         }
       }
@@ -209,9 +212,15 @@ $ioFirst: 5 * $unit;
 
   .name {
     flex-grow: 1;
-    padding: $unit / 2;
+    padding: 0 ($unit / 2);
     margin-left: 3 * $unit;
     align-self: center;
+    overflow:hidden;
+    line-height:$lineHeight;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    white-space: normal;
   }
 
   .draggable {

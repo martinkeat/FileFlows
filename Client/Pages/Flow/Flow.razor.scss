@@ -135,27 +135,13 @@ canvas {
     }
 
     .info-box {
-        &::before {
-            background: rgba(var(--accent-rgb), 0.3);
-            content: ' ';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            border-top-right-radius: 54px;
-            z-index: -1;
-        }
-
         position: fixed;
         bottom: 10px;
         left: 250px;
-        padding: 4px 20px 4px 8px;
-        border-top: solid 3px var(--accent);
-        border-right: solid 3px var(--accent);
-        border-top-right-radius: 54px;
+        right: calc(20rem + 6px);
+        padding: 0.5rem;
+        border-top: solid 2px var(--border-color);
         background: var(--base);
-        max-width: min(60rem, calc(90% - 250px - 21vw));
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;

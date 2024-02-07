@@ -196,14 +196,34 @@ window.ffFlowPart = {
         }
     },
     
+    getNameWidth(outputs) {
+        const unit = 10;
+        const pad = 4.5 * unit;
+        let oSpacing;
+    
+        if (outputs < 4) {
+            oSpacing = 4 * unit;
+        } else if (outputs < 6) {
+            oSpacing = 3 * unit;
+        } else {
+            oSpacing = 4 * unit / 2;
+        }
+    
+        let width = pad + (oSpacing * Math.max(2, outputs)) + pad;
+        width -= 3 * unit; // remove the left icon    
+        return width;
+    },
+    
     getLineCount(text, outputs) {
-        let width = Math.max(outputs, 3)  * 30; // unit is 10px
+        let width = this.getNameWidth(outputs);
         let div = document.createElement('div');
         div.style.width = width + 'px';
         div.innerText = text;
         // get number of lines needed for div
-        div.style.fontSize = '1rem';
-        div.style.lineHeight = '1rem';
+        let fontSize = 14;
+        let lineHeight = fontSize * 1.2;
+        div.style.fontSize = fontSize + 'px';
+        div.style.lineHeight = lineHeight + 'px';
 
         // Append the temporary div to the body (this is necessary to measure its height accurately)
         document.body.appendChild(div);
@@ -215,9 +235,9 @@ window.ffFlowPart = {
         document.body.removeChild(div);
 
         // Calculate the number of lines based on the height and line height
-        let numberOfLines = Math.ceil(height / 30);
+        let numberOfLines = Math.round(height / lineHeight);
         console.log(text + ', height: ' +  height + ', lines: ' + numberOfLines);
-        return numberOfLines;
+        return Math.min(3, numberOfLines); // 3 line limit
         
         
         // let lineLength = Math.max(20, div.querySelectorAll('.output').length * 3);
@@ -228,7 +248,6 @@ window.ffFlowPart = {
 
     deleteFlowPart: function (uid) 
     {
-        console.log("deleting flow part");
         ffFlow.History.perform(new FlowActionDelete(uid));
     },
 
@@ -238,7 +257,6 @@ window.ffFlowPart = {
             return;
 
         ffFlow.csharp.invokeMethodAsync("Edit", part, deleteOnCancel === true).then(result => {
-            console.log('edit result', result);
             if (!result || !result.model) {
                 if (deleteOnCancel === true) {
                     ffFlowPart.deleteFlowPart(uid);
@@ -283,13 +301,11 @@ window.ffFlowPart = {
         if (!part)
             part = ffFlow.parts.filter(x => x.uid === uid)[0];
         if (!part) {
-            console.log('part not found', uid);
             return;
         }
         if (!div) {
             div = document.getElementById(uid);
             if (!div) {
-                console.log('div not found', uid);
                 return;
             }
         }

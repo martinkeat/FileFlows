@@ -419,7 +419,8 @@ window.ffFlow = {
             if (!element)
                 return;
             ffFlow.csharp.invokeMethodAsync("Translate", `Flow.Parts.${element.name}.Description`, part.model).then(result => {
-                part.displayDescription = ffFlow.lblNode + ': ' + (result === 'Description' || !result ? part.displayName : result);
+                //part.displayDescription = ffFlow.lblNode + ': ' + (result === 'Description' || !result ? part.displayName : result);
+                part.displayDescription = (result === 'Description' || !result ? part.displayName : result);
                 ffFlow.setInfo(part.displayDescription, 'Node');
             });
         } else {

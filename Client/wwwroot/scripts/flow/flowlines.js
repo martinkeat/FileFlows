@@ -191,7 +191,7 @@ class ffFlowLines {
         let destX = (destBounds.left - canvasBounds.left) + this.ioOffset;
         let destY = (destBounds.top - canvasBounds.top) + this.ioOffset;
 
-        // elimates any pixel off issues now the grid snaps to 10px
+        // eliminates any pixel off issues now the grid snaps to 10px
         srcX = Math.round(srcX / 10) * 10 - 10;
         srcY = Math.round(srcY / 10) * 10 - 10;
         destX = Math.round(destX / 10) * 10 - 10;
@@ -361,7 +361,7 @@ class ffFlowLines {
 
 
     colorFromCssClass(variable) {
-        var tmp = document.createElement("div"), color;
+        let tmp = document.createElement("div"), color;
         tmp.style.cssText = "position:fixed;left:-100px;top:-100px;width:1px;height:1px";
         if (variable.startsWith('--'))
             tmp.style.color = "var(" + variable + ")";
@@ -378,7 +378,7 @@ class ffFlowLines {
         const gridSize = 10; // Spacing between grid lines
 
 
-// Draw vertical grid lines
+        // Draw vertical grid lines
         for (let x = 0; x <= canvas.width; x += gridSize) {
             ctx.beginPath();
             ctx.moveTo(x, 0);
@@ -387,7 +387,7 @@ class ffFlowLines {
             ctx.stroke();
         }
 
-// Draw horizontal grid lines
+        // Draw horizontal grid lines
         for (let y = 0; y <= canvas.height; y += gridSize) {
             ctx.beginPath();
             ctx.moveTo(0, y);
