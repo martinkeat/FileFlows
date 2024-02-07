@@ -5,6 +5,20 @@
     flex-grow:1;
 }
 
+.flow-tabs.contain-tabs {
+    max-height: 100%;
+    overflow: auto;
+    height:100%;
+
+    .flow-tabs-content {
+        overflow: auto;
+        height:100%;
+    }
+    .flow-tab-buttons {
+        margin-bottom:0.5rem;
+    }
+}
+
 .flow-tab-buttons {
     display: flex;
     flex-direction: row;
@@ -59,3 +73,4 @@
 .flow-tabs-content {
     flex-grow: 1;
 }
+

@@ -1,7 +1,7 @@
 ﻿@using Humanizer
 @namespace FileFlows.Client.Components.Common
 
-<div class="flow-tabs">
+<div class="flow-tabs @(ContainTabs ? "contain-tabs" : string.Empty)">
 
     <div class="flow-tab-buttons @(TitleOnlyOnActive ? "title-only-on-active" : string.Empty)">
         @foreach(var tab in Tabs)

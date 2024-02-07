@@ -1,0 +1,72 @@
+.group {
+  padding: 0.25rem 0;
+  margin: 0.5rem;
+  text-align: center;
+}
+
+.flow-element + .group {
+  border-top: 1px solid var(--border-color);
+  margin-top: 1.25rem;
+}
+
+.flow-elements {
+  width: 20vw;
+  min-width: 12rem;
+  max-width: 18rem;
+  max-height: 100%;
+  overflow: hidden;
+  border-left: 1px solid var(--border-color);
+}
+.flow-elements .flow-elements-filter {
+  margin: 0 0.5rem;
+  padding: 0.5rem 0;
+  border-bottom: solid 1px var(--border-color);
+  position: relative;
+}
+.flow-elements .flow-elements-filter input {
+  width: 100%;
+}
+.flow-elements .flow-elements-filter .fas {
+  position: absolute;
+  right: 0.5rem;
+  top: 1.1rem;
+  font-size: 0.8rem;
+  color: rgba(var(--color-rgb), 0.5);
+}
+.flow-elements ul {
+  flex-grow: 1;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+}
+.flow-elements .flow-element.selected {
+  border-color: var(--accent) !important;
+  background: rgba(var(--accent-rgb), 0.3) !important;
+}
+.flow-elements .flow-element.selected .icon-wrapper {
+  border-color: var(--accent) !important;
+}
+
+.flow-elements-tab-inner {
+  position: relative;
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.flow-elements-tab-inner .flow-elements-top {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+}
+.flow-elements-tab-inner .flow-elements-top + #flow-elements-available {
+  margin-top: 3rem;
+}
+.flow-elements-tab-inner #flow-elements-available {
+  overflow: auto;
+  height: 100%;
+}
+
+/*# sourceMappingURL=FlowElementList.razor.css.map */

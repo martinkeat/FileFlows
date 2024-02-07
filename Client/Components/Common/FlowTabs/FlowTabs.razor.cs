@@ -17,7 +17,13 @@ public partial class FlowTabs : ComponentBase
     /// <summary>
     /// Gets or sets if the title should only be shown on the active tab
     /// </summary>
-    [Parameter]public bool TitleOnlyOnActive { get; set; }
+    [Parameter] public bool TitleOnlyOnActive { get; set; }
+    
+    /// <summary>
+    /// Gets or sets if the tabs should be contained with contain-tabs css
+    /// Used by the flow editor to contain the flow parts
+    /// </summary>
+    [Parameter] public bool ContainTabs { get; set; }
 
     /// <summary>
     /// Represents a collection of tabs.

@@ -25,6 +25,9 @@ public partial class Flow : ComponentBase, IDisposable
     [CascadingParameter] Blocker Blocker { get; set; }
     [Inject] IHotKeysService HotKeyService { get; set; }
     private ffElement[] Available { get; set; }
+    private ffElement[] AvailablePlugins { get; set; }
+    private ffElement[] AvailableScripts { get; set; }
+    private ffElement[] AvailableSubFlows { get; set; }
     private ffElement[] Filtered { get; set; }
     private List<ffPart> Parts { get; set; } = new List<ffPart>();
 
@@ -94,12 +97,17 @@ public partial class Flow : ComponentBase, IDisposable
         set
         {
             _txtFilter = value ?? string.Empty;
-            string filter = value.Trim().Replace(" ", "").ToLower();
+            string filter = _txtFilter.Trim().Replace(" ", "").ToLower();
+            if (AvailablePlugins == null)
+                return;
+            
             if (filter == string.Empty)
-                Filtered = Available;
+                Filtered = AvailablePlugins;
             else
             {
-                Filtered = Available.Where(x => x.Name.ToLower().Replace(" ", "").Contains(filter) || x.Group.ToLower().Replace(" ", "").Contains(filter)).ToArray();
+                Filtered = AvailablePlugins
+                    .Where(x => x.Name.ToLower().Replace(" ", "").Contains(filter) || x.Group.ToLower().Replace(" ", "").Contains(filter))
+                    .ToArray();
             }
         }
     }
@@ -215,6 +223,11 @@ public partial class Flow : ComponentBase, IDisposable
             return;
         
         Available = elementsResult.Data;
+        AvailablePlugins = Available.Where(x => x.Type is not FlowElementType.Script and not FlowElementType.SubFlow)
+            .ToArray();
+        AvailableScripts = Available.Where(x => x.Type is FlowElementType.Script).ToArray();
+        AvailableSubFlows = Available.Where(x => x.Type is FlowElementType.SubFlow).ToArray();
+        
         txtFilter = "" + txtFilter;
     }
 
