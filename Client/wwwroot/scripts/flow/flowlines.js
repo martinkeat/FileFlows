@@ -190,12 +190,13 @@ class ffFlowLines {
         let srcY = (srcBounds.top - canvasBounds.top) + this.ioOffset;
         let destX = (destBounds.left - canvasBounds.left) + this.ioOffset;
         let destY = (destBounds.top - canvasBounds.top) + this.ioOffset;
-        
+
         // elimates any pixel off issues now the grid snaps to 10px
-        srcX = Math.round(srcX / 10) * 10;
-        srcY = Math.round(srcY / 10) * 10;
-        destX = Math.round(destX / 10) * 10;
-        destY = Math.round(destY / 10) * 10;
+        srcX = Math.round(srcX / 10) * 10 - 10;
+        srcY = Math.round(srcY / 10) * 10 - 10;
+        destX = Math.round(destX / 10) * 10 - 10;
+        destY = Math.round(destY / 10) * 10 - 10;
+        
         
         this.drawLineToPoint({ srcX, srcY, destX, destY, output, connection });
     };
