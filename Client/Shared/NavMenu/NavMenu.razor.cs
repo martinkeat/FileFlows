@@ -141,8 +141,17 @@ public partial class NavMenu : IDisposable
         try
         {
             string currentRoute = NavigationManager.Uri.Substring(NavigationManager.BaseUri.Length);
-            Active = MenuItems.SelectMany(x => x.Items).Where(x => x.Url == currentRoute).FirstOrDefault() ??
-                     MenuItems[0].Items.First();
+            Active = MenuItems.SelectMany(x => x.Items).FirstOrDefault(x => x.Url == currentRoute);
+            if (Active == null)
+            {
+                if (currentRoute.Contains("flows/"))
+                {
+                    // flow editor
+                    Active = MenuItems.SelectMany(x => x.Items).FirstOrDefault(x => x.Url == "/flows");
+                }
+                
+                Active ??= MenuItems[0].Items.First();
+            }
         }
         catch (Exception)
         {
