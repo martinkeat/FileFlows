@@ -44,8 +44,6 @@ public partial class Flow : ComponentBase, IDisposable
     private string lblObsoleteMessage, lblEdit, lblHelp, lblDelete, lblCopy, lblPaste, lblRedo, lblUndo, lblAdd, 
         lblProperties, lblEditSubFlow, lblPlugins, lblScripts, lblSubFlows;
     
-    private string SelectedElement;
-
     private int _Zoom = 100;
     private int Zoom
     {
@@ -169,11 +167,6 @@ public partial class Flow : ComponentBase, IDisposable
         NavigationService.UnRegisterNavigationCallback(NavigationCheck);
     }
 
-    private void SelectPart(string uid)
-    {
-        if (App.Instance.IsMobile)
-            SelectedElement = uid;
-    }
 
     private async Task Init()
     {
@@ -223,10 +216,20 @@ public partial class Flow : ComponentBase, IDisposable
             return;
         
         Available = elementsResult.Data;
-        AvailablePlugins = Available.Where(x => x.Type is not FlowElementType.Script and not FlowElementType.SubFlow)
+        AvailablePlugins = Available.Where(x => x.Type is not FlowElementType.Script and not FlowElementType.SubFlow 
+                                                && x.Uid.Contains(".Conditions.") == false
+                                                && x.Uid.Contains(".Templating.") == false)
             .ToArray();
         AvailableScripts = Available.Where(x => x.Type is FlowElementType.Script).ToArray();
-        AvailableSubFlows = Available.Where(x => x.Type is FlowElementType.SubFlow).ToArray();
+        AvailableSubFlows = Available.Where(x => x.Type == FlowElementType.SubFlow || x.Uid.Contains(".Conditions.") || x.Uid.Contains(".Templating."))
+            .Select(x =>
+            {
+                if (x.Type == FlowElementType.SubFlow)
+                    x.Group = "_" + x.Group;
+                return x;
+            })
+            .ToArray();
+
         
         txtFilter = "" + txtFilter;
     }
@@ -269,6 +272,12 @@ public partial class Flow : ComponentBase, IDisposable
             return;
         }
         await NavigationService.NavigateTo("flows");
+    }
+
+    void CloseElements()
+    {
+        ElementsVisible = false;
+        StateHasChanged();
     }
 
     protected override void OnAfterRender(bool firstRender)
@@ -709,8 +718,6 @@ public partial class Flow : ComponentBase, IDisposable
     private void ShowElementsOnClick()
     {
         ElementsVisible = !ElementsVisible;
-        if (ElementsVisible)
-            SelectedElement = null; // clear the selected item
     }
 
     private async Task<bool> FunctionSaveCallback(ExpandoObject model)
@@ -842,9 +849,9 @@ public partial class Flow : ComponentBase, IDisposable
     private void Redo() => jsRuntime.InvokeVoidAsync("ffFlow.History.redo");
     private void DeleteItems() => jsRuntime.InvokeVoidAsync("ffFlow.contextMenu_Delete", SelectedParts);
 
-    private void AddSelectedElement()
+    private void AddSelectedElement(string uid)
     {
-        jsRuntime.InvokeVoidAsync("ffFlow.addElementActual", new object[] { this.SelectedElement, 100, 100});
+        jsRuntime.InvokeVoidAsync("ffFlow.addElementActual", new object[] { uid, 100, 100});
         this.ElementsVisible = false;
     } 
     
@@ -888,7 +895,12 @@ public partial class Flow : ComponentBase, IDisposable
         if (result == false)
             return; // no new scripts downloaded
 
+        // force clearing them to update the list
+        AvailableScripts = null;
+        StateHasChanged();
+
         await LoadFlowElements(Model?.Uid ?? Guid.Empty);
+        StateHasChanged();
     }
 
 } 

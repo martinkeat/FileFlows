@@ -1,3 +1,10 @@
+.flow-elements-tab-inner {
+  --flow-elements-middle-mt: 3rem;
+}
+.flow-elements-tab-inner.mobile-view {
+  --flow-elements-middle-mt: 5.5rem;
+}
+
 .group {
   padding: .25rem 0;
   margin: .5rem;
@@ -21,6 +28,7 @@
     padding: 0.5rem 0;
     border-bottom: solid 1px var(--border-color);
     position: relative;
+    flex-grow:1;
 
     input {
       width: 100%;
@@ -35,8 +43,7 @@
     }
   }
 
-
-  ul {
+  .ul {
     flex-grow:1;
     list-style: none;
     margin: 0;
@@ -59,19 +66,91 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  .flow-elements-top {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
+}
+
+
+.flow-elements-top {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+
+  + .flow-elements-middle {
+    margin-top: var(--flow-elements-middle-mt);
   }
-  .flow-elements-top + #flow-elements-available {
-    margin-top: 3rem;
+}
+
+
+.mobile-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-gap: 1rem;
+  margin: 0 0.5rem;
+}
+
+.flow-elements-middle
+{
+  overflow:auto;
+  height:100%;
+}
+
+.flow-elements-bottom{
+  margin:1rem;
+  align-self: center;
+}
+
+.ul {
+  .group-title 
+  { 
+    i, .count {
+      display: none;
+    }
+  }
+}
+
+// Define styles for the accordion
+.accordion {
+  max-height: 100%;
+  user-select: none;
+  .group {
+    border: 1px solid var(--border-color);
+    background: rgba(var(--input-background-rgb), 0.25);
+
+    .group-title {
+      cursor: pointer;
+      position: relative;
+      i {
+        position: absolute;
+        left: 0.5rem;
+        top: 0.35rem;
+      }
+      .count {
+        background: var(--base);
+        font-size: 0.75rem;
+        padding: 0.15rem 0.35rem 0;
+        border-radius: 1rem;
+        font-weight: bold;
+        border: solid 1px var(--info);
+        position: absolute;
+        right: 0.25rem;
+      }
+    }
+
+    .group-items {
+      display: block;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease; /* Add transition for smooth animation */
+    }
   }
 
-  #flow-elements-available
-  {
-    overflow:auto;
-    height:100%;
+  .group.collapsed .group-items {
+    max-height: 0; /* Collapse the group contents */
+  }
+
+  .group.expanded .group-items {
+    max-height: 1000px; /* Expand the group contents to a large enough value */
   }
 }

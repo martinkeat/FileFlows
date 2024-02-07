@@ -1,64 +1,95 @@
 @using FileFlows.Plugin
 @namespace FileFlows.Client.Components
 
-<div class="flow-elements-tab-inner">
+<div class="flow-elements-tab-inner @(App.Instance.IsMobile ? "mobile-view" : string.Empty)">
     <div class="flow-elements-top">
+        @if (App.Instance.IsMobile)
+        {
+            <div class="mobile-buttons">
+                <button class="add-button" disabled="@string.IsNullOrEmpty(SelectedElement)" @onclick="(() => AddSelectedElement(SelectedElement))">
+                   @lblAdd
+                </button>
+                <button @onclick="() => Close()">@lblClose</button>
+            </div>
+        }
         <div class="flow-elements-filter">
             <input @ref="eleFilter" type="text" @bind-value="txtFilter" @bind-value:event="oninput" autocomplete="off" placeholder="@lblFilter" @onkeydown="FilterKeyDown"/>
             <i class="fas fa-search"></i>
         </div>
     </div>
-    <ul id="flow-elements-available">
-        @if (Filtered != null)
-        {
-            var groups = Filtered.GroupBy(x => x.Group).ToArray();
-            @foreach (var grp in groups)
+    <div class="flow-elements-middle">
+            @if (Filtered != null)
             {
-                if (groups.Length > 1)
-                {
-                    <li class="group">@Helpers.FlowHelper.FormatLabel(grp.Key)</li>
-                }
+                var groups = Filtered.GroupBy(x => x.Group).ToArray();
+                bool accordion = groups.Length > 1; //string.IsNullOrWhiteSpace(txtFilter) && groups.Length > 1;
+                <div class="@(accordion ? "accordion" : "ul")">
+                    @foreach (var grp in groups.OrderBy(x => x.Key))
+                    {
+                        bool expanded = grp.Key == SelectedGroup;
+                        string mostCommonFlowType = grp.GroupBy(x => x.Type)
+                            .OrderByDescending(g => g.Count())
+                            .Select(g => g.Key.ToString().ToLower())
+                            .FirstOrDefault();
+                        
+                        <div class="group @(expanded ? "expanded" : "collapsed")">
+                            <div class="group-title" @onclick="() => SelectGroup(grp.Key)">
+                                @Helpers.FlowHelper.FormatLabel(grp.Key.Replace("Nodes", string.Empty))
+                                <span class="count" style="border-color:var(--flow-@(mostCommonFlowType)">@grp.Count()</span>
+                                <i class="@(expanded ? "fas fa-caret-up" : "fas fa-caret-down")" />
+                            </div>
+                            <div class="group-items">
+                                @foreach (var ele in grp.OrderBy(x => x.Type == FlowElementType.Script ? x.Name : string.Empty)
+                                              .ThenBy(x =>
+                                              {
+                                                  if (grp.Key != "FfmpegBuilderNodes")
+                                                      return (int)x.Type;
+                                                  if (x.Type == FlowElementType.BuildStart)
+                                                      return 1;
+                                                  if (x.Type == FlowElementType.BuildEnd)
+                                                      return 2;
+                                                  if (x.Type == FlowElementType.BuildPart)
+                                                      return 3;
+                                                  return 100 + (int)x.Type;
+                                              }).ThenBy(x => x.DisplayName[(x.DisplayName.IndexOf(":", StringComparison.Ordinal) + 1)..]))
+                                {
+                                    <div id="@ele.Uid" draggable="true" class="flow-element draggable @ele.Type 
+                                    @(ele.Obsolete ? "obsolete" : "") @(ele.Enterprise ? "enterprise" : "")
+                                     @(App.Instance.IsMobile && SelectedElement == ele.Uid ? "selected" : "") "
+                                        ondragstart="ffFlow.Mouse.dragElementStart(event)" @onclick="@(() => SelectPart(ele.Uid))">
+                                        <div class="icon-wrapper"><span class="icon @ele.Icon"></span></div>
+                                        @((ele.Type == FlowElementType.Script) ? ele.Name : ele.DisplayName[(ele.DisplayName.IndexOf(":", StringComparison.Ordinal) + 1)..])
 
-                foreach (var ele in grp.OrderBy(x => x.Type == FlowElementType.Script ? x.Name : string.Empty)
-                             .ThenBy(x =>
-                             {
-                                 if (grp.Key != "FfmpegBuilderNodes")
-                                     return (int)x.Type;
-                                 if (x.Type == FlowElementType.BuildStart)
-                                     return 1;
-                                 if (x.Type == FlowElementType.BuildEnd)
-                                     return 2;
-                                 if (x.Type == FlowElementType.BuildPart)
-                                     return 3;
-                                 return 100 + (int)x.Type;
-                             }).ThenBy(x => x.DisplayName.Substring(x.DisplayName.IndexOf(":", StringComparison.Ordinal) + 1)))
-                {
-                    <li id="@ele.Uid" draggable="true" class="flow-element draggable @ele.Type 
-                            @(ele.Obsolete ? "obsolete" : "") @(ele.Enterprise ? "enterprise" : "")
-                             @(App.Instance.IsMobile && SelectedElement == ele.Uid ? "selected" : "") "
-                       ondragstart="ffFlow.Mouse.dragElementStart(event)" @onclick="@(() => SelectPart(ele.Uid))">
-                        <div class="icon-wrapper"><span class="icon @ele.Icon"></span></div>
-                        @((ele.Type == FlowElementType.Script) ? ele.Name : ele.DisplayName[(ele.DisplayName.IndexOf(":", StringComparison.Ordinal) + 1)..])
+                                        @{
+                                            string ribbonTT = "";
+                                            if (ele.Obsolete)
+                                            {
+                                                ribbonTT = ele.ObsoleteMessage?.EmptyAsNull() ?? lblObsoleteMessage;
+                                            }
+                                            else if (ele.Enterprise)
+                                            {
+                                                ribbonTT = "Enterprise Flow Element";
+                                            }
+                                        }
 
-                        @{
-                            string ribbonTT = "";
-                            if (ele.Obsolete)
-                            {
-                                ribbonTT = ele.ObsoleteMessage?.EmptyAsNull() ?? lblObsoleteMessage;
-                            }
-                            else if (ele.Enterprise)
-                            {
-                                ribbonTT = "Enterprise Flow Element";
-                            }
-                        }
-
-                        <div class="ribbon" title="@ribbonTT">
-                            <div class="ribbon-content">
+                                        <div class="ribbon" title="@ribbonTT">
+                                            <div class="ribbon-content">
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
                             </div>
                         </div>
-                    </li>
-                }
+                    }
+                </div>
             }
-        }
-    </ul>
+    </div>
+    @if (OpenScriptBrowser != null)
+    {
+        <div class="flow-elements-bottom">
+            <button class="btn" @onclick="() => OpenScriptBrowser()">
+                <i class="fas fa-scroll" ></i>
+                Open Script Browser
+            </button>
+        </div>
+    }
 </div>

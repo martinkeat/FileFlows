@@ -11,17 +11,24 @@ public partial class FlowElementList : ComponentBase
 {
     private string txtFilter;
     private ElementReference eleFilter;
-    private string lblObsoleteMessage, lblFilter;
+    private string lblObsoleteMessage, lblFilter, lblAdd, lblClose;
     /// <summary>
     /// The selected item, used for mobile view so can add an element
     /// </summary>
     private string SelectedElement;
+
+    /// <summary>
+    /// The selected group for the accordion view
+    /// </summary>
+    private string SelectedGroup;
 
     /// <inheritdoc />
     protected override void OnInitialized()
     {
         lblFilter = Translater.Instant("Labels.FilterPlaceholder");
         lblObsoleteMessage = Translater.Instant("Labels.ObsoleteConfirm.Message");
+        lblAdd = Translater.Instant("Labels.Add");
+        lblClose = Translater.Instant("Labels.Close");
         ApplyFilter();
     }
 
@@ -35,7 +42,22 @@ public partial class FlowElementList : ComponentBase
     /// Gets or sets the filtered items to display in the list.
     /// </summary>
     private IEnumerable<ffElement> Filtered { get; set; }
+    
+    /// <summary>
+    /// Gets or sets the event to open the script browser
+    /// </summary>
+    [Parameter] public Action OpenScriptBrowser { get; set; }
 
+    
+    /// <summary>
+    /// Gets or sets the event to close the element list when viewed on mobile
+    /// </summary>
+    [Parameter] public Action Close { get; set; }
+    
+    /// <summary>
+    /// Gets or sets the event that handles adding a selected item when viewed on mobile
+    /// </summary>
+    [Parameter] public Action<string> AddSelectedElement { get; set; }
 
     /// <summary>
     /// Handles the key down event for filtering.
@@ -78,4 +100,7 @@ public partial class FlowElementList : ComponentBase
         if (App.Instance.IsMobile)
             SelectedElement = uid;
     }
+
+    private void SelectGroup(string group)
+        => SelectedGroup = SelectedGroup == group ? null : group;
 }

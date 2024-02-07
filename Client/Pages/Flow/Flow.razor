@@ -29,12 +29,6 @@
                         @lblSave
                     }
                 </button>
-            }else if (App.Instance.IsMobile)
-            {
-                <button class="add-button" disabled="@string.IsNullOrEmpty(SelectedElement)" @onclick="() => AddSelectedElement()">
-                    @lblAdd
-                </button>
-                
             }
             <button @onclick="() => Close()">@lblClose</button>
         </Head>
@@ -48,25 +42,25 @@
             <div class="flow-elements">
                 <FlowTabs TitleOnlyOnActive="true" ContainTabs="true">
                     <FlowTab Icon="fas fa-puzzle-piece" Title="@lblPlugins">
-                        @* <div class="flow-script-browser"> *@
-                        @*     <i class="fas fa-scroll" title="Script Repository" @onclick="() => OpenScriptBrowser()"></i> *@
-                        @*     <i class="fas fa-plus"></i> *@
-                        @* </div> *@
                         @if (AvailablePlugins?.Any() == true)
                         {
-                            <FlowElementList Items="@AvailablePlugins"/>
+                            <FlowElementList Items="@AvailablePlugins" 
+                                             AddSelectedElement="AddSelectedElement" Close="@CloseElements" />
                         }
                     </FlowTab>
                     <FlowTab Icon="fas fa-scroll" Title="@lblScripts">
-                        @if (AvailableScripts?.Any() == true)
+                        @if (AvailableScripts != null)
                         {
-                            <FlowElementList Items="@AvailableScripts"/>
+                            <FlowElementList Items="@AvailableScripts" 
+                                             AddSelectedElement="AddSelectedElement" Close="@CloseElements"
+                                             OpenScriptBrowser="@(() => _ = OpenScriptBrowser())" />
                         }
                     </FlowTab>
                     @if (AvailableSubFlows?.Any() == true)
                     {
                         <FlowTab Icon="fas fa-subway" Title="@lblSubFlows">
-                            <FlowElementList Items="@AvailableSubFlows"/>
+                            <FlowElementList Items="@AvailableSubFlows" 
+                                             AddSelectedElement="AddSelectedElement" Close="@CloseElements" />
                         </FlowTab>
                     }
                 </FlowTabs>

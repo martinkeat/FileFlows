@@ -1,3 +1,11 @@
+.flow-elements-tab-inner {
+  --flow-elements-middle-mt: 3rem;
+}
+
+.flow-elements-tab-inner.mobile-view {
+  --flow-elements-middle-mt: 5.5rem;
+}
+
 .group {
   padding: 0.25rem 0;
   margin: 0.5rem;
@@ -22,6 +30,7 @@
   padding: 0.5rem 0;
   border-bottom: solid 1px var(--border-color);
   position: relative;
+  flex-grow: 1;
 }
 .flow-elements .flow-elements-filter input {
   width: 100%;
@@ -33,7 +42,7 @@
   font-size: 0.8rem;
   color: rgba(var(--color-rgb), 0.5);
 }
-.flow-elements ul {
+.flow-elements .ul {
   flex-grow: 1;
   list-style: none;
   margin: 0;
@@ -55,18 +64,78 @@
   display: flex;
   flex-direction: column;
 }
-.flow-elements-tab-inner .flow-elements-top {
+
+.flow-elements-top {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
+  display: flex;
+  flex-direction: column;
 }
-.flow-elements-tab-inner .flow-elements-top + #flow-elements-available {
-  margin-top: 3rem;
+.flow-elements-top + .flow-elements-middle {
+  margin-top: var(--flow-elements-middle-mt);
 }
-.flow-elements-tab-inner #flow-elements-available {
+
+.mobile-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-gap: 1rem;
+  margin: 0 0.5rem;
+}
+
+.flow-elements-middle {
   overflow: auto;
   height: 100%;
+}
+
+.flow-elements-bottom {
+  margin: 1rem;
+  align-self: center;
+}
+
+.ul .group-title i, .ul .group-title .count {
+  display: none;
+}
+
+.accordion {
+  max-height: 100%;
+  user-select: none;
+}
+.accordion .group {
+  border: 1px solid var(--border-color);
+  background: rgba(var(--input-background-rgb), 0.25);
+}
+.accordion .group .group-title {
+  cursor: pointer;
+  position: relative;
+}
+.accordion .group .group-title i {
+  position: absolute;
+  left: 0.5rem;
+  top: 0.35rem;
+}
+.accordion .group .group-title .count {
+  background: var(--base);
+  font-size: 0.75rem;
+  padding: 0.15rem 0.35rem 0;
+  border-radius: 1rem;
+  font-weight: bold;
+  border: solid 1px var(--info);
+  position: absolute;
+  right: 0.25rem;
+}
+.accordion .group .group-items {
+  display: block;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease; /* Add transition for smooth animation */
+}
+.accordion .group.collapsed .group-items {
+  max-height: 0; /* Collapse the group contents */
+}
+.accordion .group.expanded .group-items {
+  max-height: 1000px; /* Expand the group contents to a large enough value */
 }
 
 /*# sourceMappingURL=FlowElementList.razor.css.map */
