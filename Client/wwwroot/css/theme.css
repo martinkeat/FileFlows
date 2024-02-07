@@ -25,9 +25,9 @@ body {
   --flow-output: var(--green);
   --flow-subflow: var(--green);
   --flow-process: var(--cyan);
-  --flow-build-start: var(--teal);
-  --flow-build-end: var(--teal);
-  --flow-build-part: var(--blue);
+  --flow-buildstart: var(--teal);
+  --flow-buildend: var(--teal);
+  --flow-buildpart: var(--blue);
   --flow-communication: var(--yellow);
   --flow-failure: var(--error);
   --flow-script:#c14242;

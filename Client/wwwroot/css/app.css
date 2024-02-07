@@ -602,14 +602,14 @@ a.btn {
 .flow-element.Process .icon-wrapper {
   border-color: var(--flow-process);
 }
+.flow-element.BuildPart .icon-wrapper {
+  border-color: var(--flow-buildpart);
+}
 .flow-element.BuildStart .icon-wrapper {
   border-color: var(--flow-buildstart);
 }
 .flow-element.BuildEnd .icon-wrapper {
   border-color: var(--flow-buildend);
-}
-.flow-element.BuildPart .icon-wrapper {
-  border-color: var(--flow-buildpart);
 }
 .flow-element.Communication .icon-wrapper {
   border-color: var(--flow-communication);
@@ -744,22 +744,22 @@ a.btn {
   background-color: var(--flow-process) !important;
 }
 .flow-part.BuildStart:not(.selected) .icon-wrapper, .flow-part.BuildStart:not(.selected) .input > div, .flow-part.BuildStart:not(.selected) .output:not(.output--1) > div {
-  border-color: var(--flow-build-start) !important;
+  border-color: var(--flow-buildstart) !important;
 }
 .flow-part.BuildStart:not(.selected) .connected:not(.output--1) > div {
-  background-color: var(--flow-build-start) !important;
+  background-color: var(--flow-buildstart) !important;
 }
 .flow-part.BuildEnd:not(.selected) .icon-wrapper, .flow-part.BuildEnd:not(.selected) .input > div, .flow-part.BuildEnd:not(.selected) .output:not(.output--1) > div {
-  border-color: var(--flow-build-end) !important;
+  border-color: var(--flow-buildend) !important;
 }
 .flow-part.BuildEnd:not(.selected) .connected:not(.output--1) > div {
-  background-color: var(--flow-build-end) !important;
+  background-color: var(--flow-buildend) !important;
 }
 .flow-part.BuildPart:not(.selected) .icon-wrapper, .flow-part.BuildPart:not(.selected) .input > div, .flow-part.BuildPart:not(.selected) .output:not(.output--1) > div {
-  border-color: var(--flow-build-part) !important;
+  border-color: var(--flow-buildpart) !important;
 }
 .flow-part.BuildPart:not(.selected) .connected:not(.output--1) > div {
-  background-color: var(--flow-build-part) !important;
+  background-color: var(--flow-buildpart) !important;
 }
 .flow-part.Communication:not(.selected) .icon-wrapper, .flow-part.Communication:not(.selected) .input > div, .flow-part.Communication:not(.selected) .output:not(.output--1) > div {
   border-color: var(--flow-communication) !important;
@@ -849,19 +849,19 @@ a.btn {
   border-color: var(--error) !important;
 }
 .flow-part .outputs-2 .output-1 {
-  left: 15px;
+  left: 5px;
 }
 .flow-part .outputs-2 .output-2 {
-  left: 75px;
+  left: 95px;
 }
 .flow-part .outputs-3 .output-1 {
   left: 5px;
 }
 .flow-part .outputs-3 .output-2 {
-  left: 45px;
+  left: 50px;
 }
 .flow-part .outputs-3 .output-3 {
-  left: 85px;
+  left: 95px;
 }
 .flow-part .outputs-4 .output-1 {
   left: 5px;

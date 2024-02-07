@@ -1,3 +1,5 @@
+$flowTypes: Logic, Input, Output, SubFlow, Process, BuildPart, BuildStart, BuildEnd, Communication, Failure, Script;
+
 @mixin flowStyles($flowType, $borderColor, $backgroundColor) {
   &.#{$flowType}:not(.selected) {
     .icon-wrapper, .input > div, .output:not(.output--1) > div {
@@ -22,6 +24,7 @@
     position: absolute;
   }
 }
+
 @mixin outputs($num, $left, $spacing) {
   .outputs-#{$num} {
     @for $j from 1 through $num {
@@ -32,10 +35,9 @@
   }
 }
 
-
 .flow-part {
   &.selected {
-    border-color:var(--accent) !important;
+    border-color: var(--accent) !important;
     background-image: linear-gradient(rgba(var(--accent-rgb), 0.3), rgba(var(--accent-rgb), 0.3)) !important;
     background-color: unset;
     box-shadow: 0 3px 10px rgba(var(--accent-rgb), 0.1);
@@ -50,7 +52,7 @@
   text-overflow: ellipsis;
   position: relative;
   padding-left: 2.25rem;
-  
+
   .icon-wrapper {
     width: 2rem;
     min-width: 2rem;
@@ -69,21 +71,19 @@
   }
 
   // Loop through different flow types and set their border color
-  @each $flowType in Logic, Input, Output, SubFlow, Process, BuildStart, BuildEnd, BuildPart, Communication, Failure, Script {
+  @each $flowType in $flowTypes {
     &.#{$flowType} .icon-wrapper {
       border-color: var(--flow-#{to-lower-case($flowType)});
     }
   }
-  
-  
+
   .label {
     flex-grow: 1;
   }
 
   &.obsolete, &.enterprise {
-    .ribbon
-    {
-      display:unset;
+    .ribbon {
+      display: unset;
     }
     .ribbon-content::before {
       font-style: normal;
@@ -158,7 +158,6 @@
     user-select: none;
   }
 
-
   &.size-1, &.size-2, &.size-3 {
     width: 12rem;
   }
@@ -182,9 +181,9 @@
   @include flowStyles(Output, var(--flow-output), var(--flow-output));
   @include flowStyles(SubFlow, var(--flow-subflow), var(--flow-subflow));
   @include flowStyles(Process, var(--flow-process), var(--flow-process));
-  @include flowStyles(BuildStart, var(--flow-build-start), var(--flow-build-start));
-  @include flowStyles(BuildEnd, var(--flow-build-end), var(--flow-build-end));
-  @include flowStyles(BuildPart, var(--flow-build-part), var(--flow-build-part));
+  @include flowStyles(BuildStart, var(--flow-buildstart), var(--flow-buildstart));
+  @include flowStyles(BuildEnd, var(--flow-buildend), var(--flow-buildend));
+  @include flowStyles(BuildPart, var(--flow-buildpart), var(--flow-buildpart));
   @include flowStyles(Communication, var(--flow-communication), var(--flow-communication));
   @include flowStyles(Failure, var(--flow-failure), var(--flow-failure));
   @include flowStyles(Script, var(--flow-script), var(--flow-script));
@@ -206,11 +205,11 @@
   .inputs {
     @include flowIOStyles(0);
     z-index: 3;
-    left:calc(1rem + 1px);
+    left: calc(1rem + 1px);
     display: flex;
     justify-content: center;
     .input {
-      left:unset;
+      left: unset;
     }
   }
 
@@ -236,10 +235,9 @@
       }
     }
   }
-  
-  .outputs-1 .output-1 {
-    left: 45px;
-  }
+
+  // Outputs mixin for different output numbers
+  @include outputs(1, 45px, 0);
   .outputs {
     bottom: 13px !important;
   }
@@ -251,9 +249,9 @@
       border-color: var(--error) !important;
     }
   }
-  
-  @include outputs(2, 15px, 60px);
-  @include outputs(3, 5px, 40px);
+
+  @include outputs(2, 5px, 90px);
+  @include outputs(3, 5px, 45px);
   @include outputs(4, 5px, 50px);
   @include outputs(5, 5px, 40px);
   @include outputs(6, 15px, 30px);
@@ -266,11 +264,10 @@
 .flow-part, .flow-element {
   text-align: center;
   border-radius: 0.5rem;
-  min-width:12rem;
-  border:solid 2px transparent;
+  min-width: 12rem;
+  border: solid 2px transparent;
   background: var(--base);
-  
-  $flowTypes: Logic, Input, Output, SubFlow, Process, BuildPart, BuildStart, BuildEnd, Communication, Failure, Script;
+
 
   @each $flowType in $flowTypes {
     &.#{$flowType} {
@@ -285,11 +282,11 @@
   top: -3px;
 
   filter: drop-shadow(2px 3px 2px rgba(black, 0.5));
-  display:none;
+  display: none;
 
   > .ribbon-content {
     color: white;
-    font-size: .75rem;
+    font-size: 0.75rem;
     text-align: center;
     font-weight: 400;
     background: #a90101 linear-gradient(45deg, rgba(black, 0) 0%, rgba(white, 0.25) 100%);
@@ -305,9 +302,7 @@
   > .ribbon-content {
     background: #12a901 linear-gradient(45deg, rgba(black, 0) 0%, rgba(white, 0.25) 100%);
     &::before {
-      content:'\f19c';
+      content: '\f19c';
     }
   }
 }
-
-
