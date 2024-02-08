@@ -77,7 +77,7 @@ class ffFlowLines {
         
 
         let target = event.target.parentNode;
-        let suitable = target?.classList?.contains(this.ioIsInput ? 'output' : 'input') === true;
+        let suitable = target?.classList?.contains(this.ioIsInput ? 'output' : 'input') === true;        
         if (suitable) {
             let input = this.isInput ? this.ioNode : target;
             let output = this.isInput ? target : this.ioNode;
@@ -105,8 +105,6 @@ class ffFlowLines {
                 }
                 else
                     connections.push({ index: index, part: part });
-
-                this.drawLine(input, output);
             }
         }
 
@@ -150,8 +148,6 @@ class ffFlowLines {
             return;
         let canvas = this.getCanvas();
         let canvasBounds = canvas.getBoundingClientRect();
-
-
         
         let x1 = window.ffFlow.Mouse.initialX;
         let y1 = window.ffFlow.Mouse.initialY;
@@ -177,9 +173,9 @@ class ffFlowLines {
 
         let src = output;
         let dest = input;
-        if (output.classList.contains('connected') == false)
+        if (output.classList.contains('connected') === false)
             output.classList.add('connected');
-        if (input.classList.contains('connected') == false)
+        if (input.classList.contains('connected') === false)
             input.classList.add('connected');
         let srcBounds = src.getBoundingClientRect();
         let destBounds = dest.getBoundingClientRect();

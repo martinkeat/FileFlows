@@ -222,12 +222,6 @@ public partial class Flow : ComponentBase, IDisposable
             .ToArray();
         AvailableScripts = Available.Where(x => x.Type is FlowElementType.Script).ToArray();
         AvailableSubFlows = Available.Where(x => x.Type == FlowElementType.SubFlow || x.Uid.Contains(".Conditions.") || x.Uid.Contains(".Templating."))
-            .Select(x =>
-            {
-                if (x.Type == FlowElementType.SubFlow)
-                    x.Group = "_" + x.Group;
-                return x;
-            })
             .ToArray();
 
         

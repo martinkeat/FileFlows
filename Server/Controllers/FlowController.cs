@@ -488,6 +488,13 @@ public class FlowController : Controller
             ele.Name = script.Name;
             ele.Uid = $"Script:{script.Name}";
             ele.Icon = "fas fa-scroll";
+            
+            int index = script.Name.IndexOf(" - ", StringComparison.InvariantCulture);
+            if (index > 0)
+                ele.Group = ele.Name[..(index)];
+            else
+                ele.Group = "Scripts";
+            
             ele.Inputs = 1;
             ele.Description = sm.Description;
             ele.OutputLabels = sm.Outputs.Select(x => x.Description).ToList();
@@ -515,7 +522,6 @@ public class FlowController : Controller
                 });
                 return ef;
             }).ToList();
-            ele.Group = "Scripts";
             ele.Type = FlowElementType.Script;
             ele.Outputs = sm.Outputs.Count;
             ele.Model = model as ExpandoObject;

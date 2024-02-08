@@ -23,7 +23,8 @@
                 var groups = Filtered.GroupBy(x => x.Group).ToArray();
                 bool accordion = groups.Length > 1; //string.IsNullOrWhiteSpace(txtFilter) && groups.Length > 1;
                 <div class="@(accordion ? "accordion" : "ul")">
-                    @foreach (var grp in groups.OrderBy(x => x.Key))
+                    @foreach (var grp in groups.OrderByDescending(x => x.Key == DefaultGroup)
+                                  .ThenBy(x => x.Key))
                     {
                         bool expanded = grp.Key == SelectedGroup;
                         string mostCommonFlowType = grp.GroupBy(x => x.Type)
@@ -38,8 +39,8 @@
                                 <i class="@(expanded ? "fas fa-caret-up" : "fas fa-caret-down")" />
                             </div>
                             <div class="group-items">
-                                @foreach (var ele in grp.OrderBy(x => x.Type == FlowElementType.Script ? x.Name : string.Empty)
-                                              .ThenBy(x =>
+                                @foreach (var ele in grp
+                                              .OrderBy(x =>
                                               {
                                                   if (grp.Key != "FfmpegBuilderNodes")
                                                       return (int)x.Type;
@@ -57,7 +58,7 @@
                                      @(App.Instance.IsMobile && SelectedElement == ele.Uid ? "selected" : "") "
                                         ondragstart="ffFlow.Mouse.dragElementStart(event)" @onclick="@(() => SelectPart(ele.Uid))">
                                         <div class="icon-wrapper"><span class="icon @ele.Icon"></span></div>
-                                        @((ele.Type == FlowElementType.Script) ? ele.Name : ele.DisplayName[(ele.DisplayName.IndexOf(":", StringComparison.Ordinal) + 1)..])
+                                        @((ele.Type == FlowElementType.Script) ? FormatName(ele) : ele.DisplayName[(ele.DisplayName.IndexOf(":", StringComparison.Ordinal) + 1)..])
 
                                         @{
                                             string ribbonTT = "";

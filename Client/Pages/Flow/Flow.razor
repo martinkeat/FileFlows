@@ -44,7 +44,7 @@
                     <FlowTab Icon="fas fa-puzzle-piece" Title="@lblPlugins">
                         @if (AvailablePlugins?.Any() == true)
                         {
-                            <FlowElementList Items="@AvailablePlugins" 
+                            <FlowElementList Items="@AvailablePlugins"  DefaultGroup="File"
                                              AddSelectedElement="AddSelectedElement" Close="@CloseElements" />
                         }
                     </FlowTab>
@@ -59,7 +59,7 @@
                     @if (AvailableSubFlows?.Any() == true)
                     {
                         <FlowTab Icon="fas fa-subway" Title="@lblSubFlows">
-                            <FlowElementList Items="@AvailableSubFlows" 
+                            <FlowElementList Items="@AvailableSubFlows" DefaultGroup="Sub Flows"
                                              AddSelectedElement="AddSelectedElement" Close="@CloseElements" />
                         </FlowTab>
                     }

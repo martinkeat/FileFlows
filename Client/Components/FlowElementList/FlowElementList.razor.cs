@@ -1,5 +1,7 @@
+using FileFlows.Plugin;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
+using Microsoft.AspNetCore.Connections.Features;
 using ffElement = FileFlows.Shared.Models.FlowElement;
 
 namespace FileFlows.Client.Components;
@@ -21,6 +23,11 @@ public partial class FlowElementList : ComponentBase
     /// The selected group for the accordion view
     /// </summary>
     private string SelectedGroup;
+    
+    /// <summary>
+    /// Gets or sets the default selected group
+    /// </summary>
+    [Parameter] public string DefaultGroup { get; set; }
 
     /// <inheritdoc />
     protected override void OnInitialized()
@@ -29,6 +36,15 @@ public partial class FlowElementList : ComponentBase
         lblObsoleteMessage = Translater.Instant("Labels.ObsoleteConfirm.Message");
         lblAdd = Translater.Instant("Labels.Add");
         lblClose = Translater.Instant("Labels.Close");
+
+        SelectedGroup = DefaultGroup;
+        if (Items?.Any() == true)
+        {
+            foreach (var item in Items)
+            {
+                FixItem(item);
+            }
+        }
         ApplyFilter();
     }
 
@@ -103,4 +119,23 @@ public partial class FlowElementList : ComponentBase
 
     private void SelectGroup(string group)
         => SelectedGroup = SelectedGroup == group ? null : group;
+
+    private void FixItem(FlowElement x)
+    {
+        if (x.Type != FlowElementType.Script)
+            return;
+        
+        // get the group name from the script name, eg 'File - Older Than', becomes 'File' Group and name 'Older Than'
+        int index = x.Name.IndexOf(" - ", StringComparison.InvariantCulture);
+        if (index < 0)
+            return;
+        x.Group = x.Name[..(index)];
+    }
+
+    private object FormatName(ffElement ele)
+    {
+        if (ele.Name.StartsWith(ele.Group + " - "))
+            return ele.Name[(ele.Group.Length + 3)..];
+        return ele.Name;
+    }
 }

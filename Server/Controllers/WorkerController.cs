@@ -243,8 +243,24 @@ public class WorkerController : Controller
             var libFileService = new LibraryFileService();
             var libFile = libFileService.GetByUid(info.LibraryFile.Uid);
             var originalStatus = libFile.Status;
-            if(info.LibraryFile != libFile)
-                ObjectHelper.CopyProperties(info.LibraryFile, libFile);
+            if (info.LibraryFile != libFile)
+                ObjectHelper.CopyProperties(info.LibraryFile, libFile,
+                    nameof(LibraryFile.OriginalSize),
+                    nameof(LibraryFile.Fingerprint),
+                    nameof(LibraryFile.Library),
+                    nameof(LibraryFile.Duplicate),
+                    nameof(LibraryFile.Node), // set when runner grabs the file
+                    nameof(LibraryFile.CreationTime),
+                    nameof(LibraryFile.DuplicateName),
+                    nameof(LibraryFile.HoldUntil),
+                    nameof(LibraryFile.IsDirectory),
+                    nameof(LibraryFile.LibraryName),
+                    nameof(LibraryFile.LibraryUid),
+                    nameof(LibraryFile.NodeName),
+                    nameof(LibraryFile.NodeUid),
+                    nameof(LibraryFile.RelativePath),
+                    nameof(LibraryFile.Name),
+                    nameof(LibraryFile.Uid));
             
             if (libFile.Status != FileStatus.Processing)
             {
