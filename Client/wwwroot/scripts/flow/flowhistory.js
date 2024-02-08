@@ -1,20 +1,27 @@
 class ffFlowHistory {
-    history = [];
-    redoActions = [];
+    
+    constructor(ffFlow)
+    {
+        this.ffFlow = ffFlow;
+        this.history = [];
+        this.redoActions = [];        
+    }
     
     perform(action){
+        console.log('history perform', action);
         // doing new action, anything past the current point we will clear
         this.redoActions = [];
         this.history.push(action);
-        action.perform();        
+        action.perform(this.ffFlow);        
     }
     
     redo() {
         if(this.redoActions.length === 0)
             return; // nothing to redo
         let action = this.redoActions.splice(this.redoActions.length - 1, 1)[0];
+        console.log('history redo', action);
         this.history.push(action);
-        action.perform();
+        action.perform(this.ffFlow);
     }
     
     undo(){
@@ -22,8 +29,9 @@ class ffFlowHistory {
             return;
         }
         let action = this.history.pop();
+        console.log('history undo', action);
         this.redoActions.push(action);
-        action.undo();
+        action.undo(this.ffFlow);
     }    
 }
 
@@ -44,15 +52,15 @@ class FlowActionMove {
         this.originalYPos = originalYPos;        
     }
     
-    perform() {
-        this.moveTo(this.xPos, this.yPos);
+    perform(ffFlow) {
+        this.moveTo(ffFlow, this.xPos, this.yPos);
     }
     
-    undo(){
-        this.moveTo(this.originalXPos, this.originalYPos);
+    undo(ffFlow){
+        this.moveTo(ffFlow, this.originalXPos, this.originalYPos);
     }
     
-    moveTo(x, y){
+    moveTo(ffFlow, x, y){
         let element = document.getElementById(this.elementId);
         if(!element)
             return;
@@ -72,7 +80,7 @@ class FlowActionDelete {
     ioOutputConnections;
     ffFlowPart;
     
-    constructor(uid) {
+    constructor(ffFlow, uid) {
         this.uid = uid;
         let element = document.getElementById(uid);
         this.parent = element.parentNode;
@@ -86,10 +94,10 @@ class FlowActionDelete {
         }
     }
 
-    perform() {
+    perform(ffFlow) {
         var div = document.getElementById(this.uid);
         if (div) {
-            ffFlowPart.flowPartElements = ffFlowPart.flowPartElements.filter(x => x !== div);
+            ffFlow.ffFlowPart.flowPartElements = ffFlow.ffFlowPart.flowPartElements.filter(x => x !== div);
             div.remove();
         }
 
@@ -106,7 +114,7 @@ class FlowActionDelete {
         ffFlow.redrawLines();
     }
 
-    undo(){        
+    undo(ffFlow){        
         if(this.ffFlowPart)
             ffFlow.parts.push(this.ffFlowPart);
         
@@ -117,8 +125,8 @@ class FlowActionDelete {
         newPart.classList.remove('selected');
         this.parent.appendChild(newPart);
         div.remove();
-        ffFlowPart.flowPartElements.push(newPart);
-        ffFlowPart.attachEventListeners({part: this.ffFlowPart, allEvents: true});
+        ffFlow.ffFlowPart.flowPartElements.push(newPart);
+        ffFlow.ffFlowPart.attachEventListeners({part: this.ffFlowPart, allEvents: true});
 
         // recreate the connections
         ffFlow.FlowLines.ioOutputConnections[this.uid] = this.ioOutputConnections;
@@ -133,21 +141,21 @@ class FlowActionConnection {
     previousConnection;
     connection;
 
-    constructor(outputNodeUid, connection) {
+    constructor(ffFlow, outputNodeUid, connection) {
         this.outputNodeUid = outputNodeUid;
         this.connection = connection;
         this.previousConnection = ffFlow.FlowLines.ioOutputConnections.get(this.outputNodeUid);
     }
 
-    perform() {
-        this.connect(this.connection);
+    perform(ffFlow) {
+        this.connect(ffFlow, this.connection);
     }
 
-    undo(){
-        this.connect(this.previousConnection);
+    undo(ffFlow){
+        this.connect(ffFlow, this.previousConnection);
     }
     
-    connect(connection){
+    connect(ffFlow, connection){
         if(connection)
             ffFlow.FlowLines.ioOutputConnections.set(this.outputNodeUid, connection);
         else
@@ -165,16 +173,16 @@ class FlowActionAddNode {
         this.part = part;
     }
 
-    perform() {
-        ffFlowPart.addFlowPart(this.part);
+    perform(ffFlow) {
+        ffFlow.ffFlowPart.addFlowPart(this.part);
         ffFlow.parts.push(this.part);
     }
 
-    undo()
+    undo(ffFlow)
     {
-        var div = document.getElementById(this.part.uid);
+        let div = document.getElementById(this.part.uid);
         if (div) {
-            ffFlowPart.flowPartElements = ffFlowPart.flowPartElements.filter(x => x !== div);
+            ffFlow.ffFlowPart.flowPartElements = ffFlow.ffFlowPart.flowPartElements.filter(x => x !== div);
             div.remove();
         }
 

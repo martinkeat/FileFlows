@@ -74,6 +74,11 @@ public partial class FlowElementList : ComponentBase
     /// Gets or sets the event that handles adding a selected item when viewed on mobile
     /// </summary>
     [Parameter] public Action<string> AddSelectedElement { get; set; }
+    
+    /// <summary>
+    /// Gets or sets the event callback for the drag start event.
+    /// </summary>
+    [Parameter] public EventCallback<(DragEventArgs, FlowElement)> OnDragStart { get; set; }
 
     /// <summary>
     /// Handles the key down event for filtering.
@@ -116,6 +121,9 @@ public partial class FlowElementList : ComponentBase
         if (App.Instance.IsMobile)
             SelectedElement = uid;
     }
+
+    protected void DragStart(DragEventArgs e, FlowElement element)
+        => _ = OnDragStart.InvokeAsync((e, element));
 
     private void SelectGroup(string group)
         => SelectedGroup = SelectedGroup == group ? null : group;

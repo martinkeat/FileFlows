@@ -1,21 +1,26 @@
 class ffFlowLines {
-    lineWidth = 1;
-    ioNode = null;
-    ioSelected = null;
-    ioIsInput = null;
-    ioContext = null;
-    ioSourceBounds = null;
-    ioCanvasBounds = null;
-    ioOutputConnections = new Map();
-    ioLines = [];
-    FlowContainer = null;
-    ioCanvas = null;
-    ioSelectedConnection = null;
-    accentColor = null;
-    lineColor = null;
-    errorColor = null;
-    errorDash = [2, 2];
-    ioOffset = 14.5;
+    
+    constructor(ffFlow) 
+    {
+        this.ffFlow = ffFlow;
+        this.lineWidth = 1;
+        this.ioNode = null;
+        this.ioSelected = null;
+        this.ioIsInput = null;
+        this.ioContext = null;
+        this.ioSourceBounds = null;
+        this.ioCanvasBounds = null;
+        this.ioOutputConnections = new Map();
+        this.ioLines = [];
+        this.FlowContainer = null;
+        this.ioCanvas = null;
+        this.ioSelectedConnection = null;
+        this.accentColor = null;
+        this.lineColor = null;
+        this.errorColor = null;
+        this.errorDash = [2, 2];
+        this.ioOffset = 14.5;
+    }
 
     reset() {
 
@@ -62,8 +67,8 @@ class ffFlowLines {
         if (!this.ioNode)
             return;
 
-        let destX = ffFlow.translateCoord(event.clientX, true) - this.ioCanvasBounds.left;
-        let destY = ffFlow.translateCoord(event.clientY, true) - this.ioCanvasBounds.top;
+        let destX = this.ffFlow.translateCoord(event.clientX, true) - this.ioCanvasBounds.left;
+        let destY = this.ffFlow.translateCoord(event.clientY, true) - this.ioCanvasBounds.top;
         this.redrawLines();
         let overInput = !!document.querySelector('.inputs > div > div:hover');
 
@@ -99,9 +104,10 @@ class ffFlowLines {
             let existing = connections.filter(x => x.index == index && x.part == part);
             if (!existing || existing.length === 0) {
 
-                if (ffFlow.SingleOutputConnection) {
+                if (this.ffFlow.SingleOutputConnection) {
                     connections = [{ index: index, part: part }];
-                    ffFlow.History.perform(new FlowActionConnection(outputId, connections));
+                    console.log('this.ffFlow', this.ffFlow);
+                    this.ffFlow.History.perform(new FlowActionConnection(this.ffFlow, outputId, connections));
                 }
                 else
                     connections.push({ index: index, part: part });
@@ -117,7 +123,7 @@ class ffFlowLines {
     };
 
     redrawLines() {
-        ffFlow.selectConnection();
+        this.ffFlow.selectConnection();
         this.ioLines = [];
         let outputs = document.querySelectorAll('.flow-part .output');
         for (let o of document.querySelectorAll('.flow-part .output, .flow-part .input'))
@@ -144,20 +150,20 @@ class ffFlowLines {
     };
     
     drawDottedSelection(context){
-        if(window.ffFlow.Mouse.canvasSelecting !== true)
+        if(this.ffFlow.Mouse.canvasSelecting !== true)
             return;
         let canvas = this.getCanvas();
         let canvasBounds = canvas.getBoundingClientRect();
         
-        let x1 = window.ffFlow.Mouse.initialX;
-        let y1 = window.ffFlow.Mouse.initialY;
-        let x2 = window.ffFlow.Mouse.currentX;
-        let y2 = window.ffFlow.Mouse.currentY;
+        let x1 = this.ffFlow.Mouse.initialX;
+        let y1 = this.ffFlow.Mouse.initialY;
+        let x2 = this.ffFlow.Mouse.currentX;
+        let y2 = this.ffFlow.Mouse.currentY;
         
-        x1 = ffFlow.translateCoord(x1, true);
-        x2 = ffFlow.translateCoord(x2, true);
-        y1 = ffFlow.translateCoord(y1, true);
-        y2 = ffFlow.translateCoord(y2, true);
+        x1 = this.ffFlow.translateCoord(x1, true);
+        x2 = this.ffFlow.translateCoord(x2, true);
+        y1 = this.ffFlow.translateCoord(y1, true);
+        y2 = this.ffFlow.translateCoord(y2, true);
         
         x1 -= canvasBounds.left;
         y1 -= canvasBounds.top;
@@ -206,7 +212,7 @@ class ffFlowLines {
         const context = this.ioContext;
 
         const path = new Path2D();
-        if (ffFlow.Vertical) {
+        if (this.ffFlow.Vertical) {
             srcX += 2;
             destX += 2;
         }
@@ -268,7 +274,7 @@ class ffFlowLines {
         let canvas = document.querySelector('canvas');
         // Listen for mouse moves
         let self = this;
-        canvas.addEventListener('mousedown', function (event) {
+        canvas.addEventListener('mousedown',  (event) => {
             let ctx = self.ioContext;
             self.ioSelectedConnection = null;
             let clearNode = true;
@@ -282,7 +288,7 @@ class ffFlowLines {
                     self.ioSelectedConnection = line;
                     let output = line.output.parentNode.parentNode.getAttribute('id');
                     let outputNode = line.output.getAttribute('x-output');
-                    ffFlow.selectConnection(output, outputNode);
+                    this.ffFlow.selectConnection(output, outputNode);
                     clearNode = false;
                     event.stopImmediatePropagation();
                     event.stopPropagation();
@@ -300,13 +306,13 @@ class ffFlowLines {
                     }
                 }
             }
-            ffFlow.redrawLines();
+            this.ffFlow.redrawLines();
             if (selectedLine) {
                 ctx.strokeStyle = self.accentColor;
                 ctx.stroke(selectedLine.path);
             }
             if (clearNode)
-                ffFlow.selectConnection();
+                this.ffFlow.selectConnection();
         });
         canvas.addEventListener('keydown', function (event) {
             if (event.code === 'Delete') 
@@ -317,8 +323,8 @@ class ffFlowLines {
     }
 
     isClickNearLine(ctx, line, event, tolerance = 5) {
-        const x = event.offsetX / (ffFlow.Zoom / 100);
-        const y = event.offsetY / (ffFlow.Zoom / 100);
+        const x = event.offsetX / (this.ffFlow.Zoom / 100);
+        const y = event.offsetY / (this.ffFlow.Zoom / 100);
 
         // Iterate through each pair of points (line segment):
         for (let i = 0; i < line.length - 1; i++) {
@@ -346,13 +352,12 @@ class ffFlowLines {
         if (!this.ioSelectedConnection)
             return;
 
-        console.log('delete connection!');
-        ffFlow.selectConnection();
+        this.ffFlow.selectConnection();
 
         let selected = this.ioSelectedConnection;
         let outputNodeUid = selected.output.getAttribute('id');
         
-        ffFlow.History.perform(new FlowActionConnection(outputNodeUid));
+        this.ffFlow.History.perform(new FlowActionConnection(this.ffFlow, outputNodeUid));
     }
 
 

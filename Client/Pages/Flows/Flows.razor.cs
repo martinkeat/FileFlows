@@ -35,12 +35,12 @@ public partial class Flows : ListPage<Guid, FlowListModel>
     public override string FetchUrl => ApiUrl + "/list-all";
 
 
-    async Task Enable(bool enabled, ffFlow flow)
+    async Task Enable(bool enabled, ffFlow flowWrapper)
     {
         Blocker.Show();
         try
         {
-            await HttpHelper.Put<ffFlow>($"{ApiUrl}/state/{flow.Uid}?enable={enabled}");
+            await HttpHelper.Put<ffFlow>($"{ApiUrl}/state/{flowWrapper.Uid}?enable={enabled}");
         }
         finally
         {

@@ -89,6 +89,11 @@ public partial class Flow : ComponentBase, IDisposable
 
     private Func<Task<bool>> NavigationCheck;
 
+    /// <summary>
+    /// The reference to the ffFlow object created in javasscript
+    /// </summary>
+    private ffFlowWrapper ffFlow;
+
     public string txtFilter
     {
         get => _txtFilter;
@@ -174,6 +179,11 @@ public partial class Flow : ComponentBase, IDisposable
         this.StateHasChanged();
         try
         {
+            ffFlow = await ffFlowWrapper.Create(jsRuntime);
+            ffFlow.OnAddElement = AddElement;
+            ffFlow.OnOpenContextMenu = OpenContextMenu;
+            ffFlow.OnEdit = Edit;
+            
             FileFlows.Shared.Models.Flow flow;
             if (Uid == Guid.Empty && App.Instance.NewFlowTemplate != null)
             {
@@ -187,20 +197,24 @@ public partial class Flow : ComponentBase, IDisposable
             }
 
             _FlowType = flow.Type;
-            
+
             this.txtFilter = string.Empty;
             await LoadFlowElements(flow.Uid);
             await InitModel(flow);
 
-            var dotNetObjRef = DotNetObjectReference.Create(this);
-            await jsRuntime.InvokeVoidAsync("ffFlow.init", new object[] { "flow-parts", dotNetObjRef, this.Parts, Available });
+            await ffFlow.init("flow-parts", Parts, Available);
 
             await WaitForRender();
-            await jsRuntime.InvokeVoidAsync("ffFlow.redrawLines");
+            await ffFlow.redrawLines();
             
-            if(flow.Type == FlowType.SubFlow)
+
+            if (flow.Type == FlowType.SubFlow)
                 PropertiesEditor.Show();
 
+        }
+        catch (Exception ex)
+        {
+            throw;
         }
         finally
         {
@@ -322,14 +336,10 @@ public partial class Flow : ComponentBase, IDisposable
                 partConnections.Add(part.ErrorConnection);
             connections.Add(part.Uid.ToString(), partConnections);
         }
-        await jsRuntime.InvokeVoidAsync("ffFlow.ioInitConnections", connections);
 
+        await ffFlow.ioInitConnections(connections);
     }
 
-    [JSInvokable]
-    public async Task<string> NewGuid() => Guid.NewGuid().ToString();
-
-    [JSInvokable]
     public async Task<object> AddElement(string uid)
     {
         var element = this.Available.FirstOrDefault(x => x.Uid == uid);
@@ -374,27 +384,10 @@ public partial class Flow : ComponentBase, IDisposable
         return new { element, uid = Guid.NewGuid() };
     }
 
-    [JSInvokable]
-    public string Translate(string key, ExpandoObject model)
-    {
-        string prefix = string.Empty;
-        if (key.Contains(".Outputs."))
-        {
-            prefix = Translater.Instant("Labels.Output", suppressWarnings: true) + " " + key.Substring(key.LastIndexOf(".", StringComparison.Ordinal) + 1) + ": ";
-        }
-
-        var dict = model?.Where(x => x.Value != null)?.ToDictionary(x => x.Key, x => x.Value)
-                   ?? new();
-
-        string translated = Translater.Instant(key, dict, suppressWarnings: true);
-        if (Regex.IsMatch(key, "^[\\d]+$"))
-            return string.Empty;
-        return prefix + translated;
-    }
 
     private async Task ZoomChanged(int zoom)
     {
-        await jsRuntime.InvokeVoidAsync("ffFlow.zoom", new object[] { zoom });
+        await ffFlow.zoom(zoom);
     }
 
     private async Task Save()
@@ -403,7 +396,7 @@ public partial class Flow : ComponentBase, IDisposable
         this.IsSaving = true;
         try
         {
-            var parts = await jsRuntime.InvokeAsync<List<FileFlows.Shared.Models.FlowPart>>("ffFlow.getModel");
+            var parts = await ffFlow.getModel();
 
             Model ??= new ff();
             Model.Name = this.Name;
@@ -458,7 +451,6 @@ public partial class Flow : ComponentBase, IDisposable
 
 
     private List<FlowPart> SelectedParts;
-    [JSInvokable]
     public async Task OpenContextMenu(OpenContextMenuArgs args)
     {
         SelectedParts = args.Parts ?? new();
@@ -478,12 +470,12 @@ public partial class Flow : ComponentBase, IDisposable
         if (this.Filtered.Length != 1)
             return;
         var item = this.Filtered[0];
-        await jsRuntime.InvokeVoidAsync("ffFlow.insertElement", item.Uid);
+        await ffFlow.insertElement(item.Uid);
         this.txtFilter = String.Empty;
     }
 
     private Dictionary<string, object> EditorVariables;
-    [JSInvokable]
+    
     public async Task<object> Edit(ffPart part, bool isNew = false)
     {
         // get flow variables that we can pass onto the form
@@ -491,7 +483,7 @@ public partial class Flow : ComponentBase, IDisposable
         Dictionary<string, object> variables = new Dictionary<string, object>();
         try
         {
-            var parts = await jsRuntime.InvokeAsync<List<FlowPart>>("ffFlow.getModel");
+            var parts = await ffFlow.getModel();
             var variablesResult = await GetVariables(API_URL + "/" + part.Uid + "/variables?isNew=" + isNew, parts);
             if (variablesResult.Success)
                 variables = variablesResult.Data;
@@ -690,7 +682,7 @@ public partial class Flow : ComponentBase, IDisposable
         finally
         {
             EditorOpen = false;
-            await jsRuntime.InvokeVoidAsync("ffFlowPart.focusElement", part.Uid.ToString());
+            await ffFlow.focusElement(part.Uid.ToString());
         }
         if (newModelTask.IsCanceled == false)
         {
@@ -826,26 +818,26 @@ public partial class Flow : ComponentBase, IDisposable
         var item = this.SelectedParts?.FirstOrDefault();
         if (item == null)
             return;
-        await jsRuntime.InvokeVoidAsync("ffFlow.contextMenu_Edit", item);
+        await ffFlow.contextMenu("Edit", item);
     }
     private async Task EditSubFlow()
     {
         var item = this.SelectedParts?.FirstOrDefault();
         if (item == null || item.Type != FlowElementType.SubFlow)
             return;
-        await jsRuntime.InvokeVoidAsync("ffFlow.contextMenu_EditSubFlow", item);
+        await ffFlow.contextMenu("EditSubFlow", item);
     }
 
-    private void Copy() => jsRuntime.InvokeVoidAsync("ffFlow.contextMenu_Copy", SelectedParts);
-    private void Paste() => jsRuntime.InvokeVoidAsync("ffFlow.contextMenu_Paste");
-    private void Add() => jsRuntime.InvokeVoidAsync("ffFlow.contextMenu_Add");
-    private void Undo() => jsRuntime.InvokeVoidAsync("ffFlow.History.undo");
-    private void Redo() => jsRuntime.InvokeVoidAsync("ffFlow.History.redo");
-    private void DeleteItems() => jsRuntime.InvokeVoidAsync("ffFlow.contextMenu_Delete", SelectedParts);
+    private void Copy() => _ = ffFlow.contextMenu("Copy", SelectedParts);
+    private void Paste() => _ = ffFlow.contextMenu("Paste");
+    private void Add() => _ = ffFlow.contextMenu("Add");
+    private void Undo() => _ = ffFlow.undo();
+    private void Redo() => _ = ffFlow.redo();
+    private void DeleteItems() => _ = ffFlow.contextMenu("Delete", SelectedParts);
 
     private void AddSelectedElement(string uid)
     {
-        jsRuntime.InvokeVoidAsync("ffFlow.addElementActual", new object[] { uid, 100, 100});
+        _ = ffFlow.addElementActual(uid, 100, 100);
         this.ElementsVisible = false;
     } 
     
@@ -897,4 +889,6 @@ public partial class Flow : ComponentBase, IDisposable
         StateHasChanged();
     }
 
+    private void HandleDragStart((DragEventArgs args, FlowElement element) args)
+        => _ = ffFlow.dragElementStart(args.element.Uid);
 } 

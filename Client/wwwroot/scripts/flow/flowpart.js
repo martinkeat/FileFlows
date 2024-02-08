@@ -1,25 +1,28 @@
-window.ffFlowPart = {
+class ffFlowPart
+{
+    constructor(ffFlow) {
+        this.ffFlow = ffFlow;
+        this.flowPartElements = [];
+    }
 
-    flowPartElements: [],
+    reset() {
+        this.flowPartElements = [];
+    }
 
-    reset: function () {
-        ffFlowPart.flowPartElements = [];
-    },
-
-    unselectAll: function () {
-        for (let ele of ffFlowPart.flowPartElements) 
+    unselectAll() {
+        for (let ele of this.flowPartElements) 
             ele.classList.remove('selected');
-    },
+    }
 
-    focusElement: function (uid) {
+    focusElement(uid) {
         let ele = document.getElementById(uid);
         if (ele)
             ele.focus();
-    },
+    }
 
-    addFlowPart: function (part) {
+    addFlowPart(part) {
         let div = document.createElement('div');
-        ffFlowPart.flowPartElements.push(div);
+        this.flowPartElements.push(div);
         div.setAttribute('id', part.uid);
         div.style.position = 'absolute';
         let xPos = Math.floor(part.xPos / 10) * 10;
@@ -27,7 +30,7 @@ window.ffFlowPart = {
         div.style.left = xPos + 'px';
         div.style.top = yPos + 'px';
         div.classList.add('flow-part');
-        if (ffFlow.Vertical)
+        if (this.ffFlow.Vertical)
             div.classList.add('vertical');
         if (typeof (part.type) === 'number') {
             if (part.type === 0)
@@ -57,12 +60,12 @@ window.ffFlowPart = {
         var mc = new Hammer.Manager(div);
         mc.add( new Hammer.Tap({ event: 'doubletap', taps: 2 }) );
         mc.on("doubletap", (ev) => {
-            ffFlowPart.editFlowPart(part.uid, false);
+            this.editFlowPart(part.uid, false);
         });
         div.classList.add('size-' + Math.max(part.inputs, part.outputs));
 
         div.setAttribute('tabIndex', -1);
-        ffFlowPart.attachEventListeners({part: part, div: div});
+        this.attachEventListeners({part: part, div: div});
 
         if (part.inputs > 0) {
             let divInputs = document.createElement('div');
@@ -103,78 +106,78 @@ window.ffFlowPart = {
         let divName = document.createElement('div');
         divName.classList.add('name');
         div.appendChild(divName);
-        ffFlowPart.updateOutputNodes(part.uid, part, div);
+        this.updateOutputNodes(part.uid, part, div);
 
         let divDraggable = document.createElement('div');
         divDraggable.classList.add('draggable');
-        divDraggable.addEventListener("contextmenu", (e) => { ffFlow.contextMenu(e, part); return false; }, false);
+        divDraggable.addEventListener("contextmenu", (e) => { this.ffFlow.contextMenu(e, part); return false; }, false);
 
         div.appendChild(divDraggable);
 
         let flowParts = document.getElementById('flow-parts');
         flowParts.appendChild(div);
 
-        ffFlowPart.setPartName(part);
-        ffFlow.initOutputHints(part);
-    },
+        this.setPartName(part);
+        this.ffFlow.initOutputHints(part);
+    }
     
-    attachEventListeners: function(args){
+    attachEventListeners(args){
         let part = args.part;
         let div = args.div;
         let allEvents = args.allEvents;
         if(!div)
             div = document.getElementById(part.uid);
-
-        div.addEventListener("click", function (event) {
+        
+        div.addEventListener("click", (event) => {
             event.stopImmediatePropagation();
             event.preventDefault();
-            ffFlowPart.unselectAll();
+            this.unselectAll();
             div.classList.add('selected');
-            ffFlow.SelectedParts = [part];
-            ffFlow.selectNode(part);
+            this.ffFlow.SelectedParts = [part];
+            this.ffFlow.selectNode(part);
         });
-        div.addEventListener("dblclick", function (event) {
+        div.addEventListener("dblclick", (event) => {
             event.stopImmediatePropagation();
             event.preventDefault();
-            ffFlow.setInfo(part.Name, 'Node');
-            ffFlowPart.editFlowPart(part.uid);
+            this.ffFlow.setInfo(part.Name, 'Node');
+            this.editFlowPart(part.uid);
         });
-        div.addEventListener("keydown", function (event) {
+        div.addEventListener("keydown", (event) => {
             if (event.code === 'Delete' || event.code === 'Backspace') {
-                ffFlowPart.deleteFlowPart(part.uid);
+                this.deleteFlowPart(part.uid);
                 event.stopImmediatePropagation();
                 event.preventDefault();
             }
             else if (event.code === 'Enter') {
-                ffFlowPart.editFlowPart(part.uid);
+                this.editFlowPart(part.uid);
                 event.stopImmediatePropagation();
                 event.preventDefault();
             }
         });
-        div.addEventListener("contextmenu", function (event) {
+        div.addEventListener("contextmenu", (event) => {
             event.preventDefault();
             return false;
         });
         if(allEvents){
             for(let output of div.querySelectorAll('.output div')){
-                ffFlowPart.attachOutputNodeEvents(output);
+                this.attachOutputNodeEvents(output);
             }
         }
-    },
+    }
     
-    attachOutputNodeEvents: function(divOutput) {
-        divOutput.addEventListener("click", function (event) {            
+    attachOutputNodeEvents(divOutput) {
+        divOutput.addEventListener("click", (event) => {            
             event.stopImmediatePropagation();
             event.preventDefault();
         });
-        divOutput.addEventListener("mousedown", function (event) {
+        divOutput.addEventListener("mousedown", (event) => {
             event.stopImmediatePropagation();
             event.preventDefault();
-            ffFlow.FlowLines.ioDown(event, false);
+            this.ffFlow.FlowLines.ioDown(event, false);
         });
-    },
-
-    setPartName: function (part) {
+    }
+    
+    setPartName(part) {
         try {
             let div = document.getElementById(part.uid);
             let divName = div.querySelector('.name');
@@ -194,7 +197,7 @@ window.ffFlowPart = {
         } catch (err) {
             console.error(err);
         }
-    },
+    }
     
     getNameWidth(outputs) {
         const unit = 10;
@@ -212,7 +215,7 @@ window.ffFlowPart = {
         let width = pad + (oSpacing * Math.max(2, outputs)) + pad;
         width -= 3 * unit; // remove the left icon    
         return width;
-    },
+    }
     
     getLineCount(text, outputs) {
         let width = this.getNameWidth(outputs);
@@ -244,22 +247,22 @@ window.ffFlowPart = {
         // console.log('line length: ' + lineLength);
         // let lines = Math.round(name.length / lineLength);
         // lines = Math.min(lines, 3) + 1;
-    },
+    }
 
-    deleteFlowPart: function (uid) 
+    deleteFlowPart(uid) 
     {
-        ffFlow.History.perform(new FlowActionDelete(uid));
-    },
+        this.ffFlow.History.perform(new FlowActionDelete(this.ffFlow, uid));
+    }
 
-    editFlowPart: function (uid, deleteOnCancel) {
-        let part = ffFlow.parts.filter(x => x.uid === uid)[0];
+    editFlowPart(uid, deleteOnCancel) {
+        let part = this.ffFlow.parts.filter(x => x.uid === uid)[0];
         if (!part)
             return;
 
-        ffFlow.csharp.invokeMethodAsync("Edit", part, deleteOnCancel === true).then(result => {
+        this.ffFlow.csharp.invokeMethodAsync("Edit", part, deleteOnCancel === true).then(result => {
             if (!result || !result.model) {
                 if (deleteOnCancel === true) {
-                    ffFlowPart.deleteFlowPart(uid);
+                    this.deleteFlowPart(uid);
                 }
                 return; // editor was canceled
             }
@@ -268,38 +271,38 @@ window.ffFlowPart = {
                 delete result.model.Name;
             } else if (result.model.Name === '') {
                 part.name = '';
-                let dn = ffFlowPart.getNodeName(part.flowElementUid);
+                let dn = this.getNodeName(part.flowElementUid);
                 if (dn) 
                     part.label = dn;
                 delete result.model.Name;
             }
             part.model = result.model;
 
-            ffFlowPart.setPartName(part);
+            this.setPartName(part);
 
             if (result.outputs >= 0) {
                 part.outputs = result.outputs;
                 // have to update any connections in case they are no long available
-                ffFlowPart.updateOutputNodes(part.uid, part);
-                ffFlow.redrawLines();
+                this.updateOutputNodes(part.uid, part);
+                this.ffFlow.redrawLines();
             }
-            ffFlow.initOutputHints(part);
-            ffFlow.redrawLines();
+            this.ffFlow.initOutputHints(part);
+            this.ffFlow.redrawLines();
 
         });
-    },
+    }
 
-    getNodeName: function (elementUid) {
-        let node = ffFlow.elements.filter(x => x.uid === elementUid)[0];
+    getNodeName(elementUid) {
+        let node = this.ffFlow.elements.filter(x => x.uid === elementUid)[0];
         if (node)
             return node.displayName;
         return '';
-    },
+    }
 
 
-    updateOutputNodes: function (uid, part, div) {
+    updateOutputNodes(uid, part, div) {
         if (!part)
-            part = ffFlow.parts.filter(x => x.uid === uid)[0];
+            part = this.ffFlow.parts.filter(x => x.uid === uid)[0];
         if (!part) {
             return;
         }
@@ -338,7 +341,7 @@ window.ffFlowPart = {
                 divOutput.setAttribute('x-output', i);
                 divOutput.classList.add('output');
                 divOutput.classList.add('output-' + index);
-                ffFlowPart.attachOutputNodeEvents(divOutput);
+                this.attachOutputNodeEvents(divOutput);
                 divOutputs.appendChild(divOutput);
             }
         } else if (divOutputs) {
@@ -347,7 +350,7 @@ window.ffFlowPart = {
 
         // delete any connections
         for (let i = part.outputs + 1; i < 100; i++) {
-            ffFlow.FlowLines.ioOutputConnections.delete(part.uid + '-output-' + i);
+            this.ffFlow.FlowLines.ioOutputConnections.delete(part.uid + '-output-' + i);
         }
     }
 

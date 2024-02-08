@@ -44,14 +44,14 @@
                     <FlowTab Icon="fas fa-puzzle-piece" Title="@lblPlugins">
                         @if (AvailablePlugins?.Any() == true)
                         {
-                            <FlowElementList Items="@AvailablePlugins"  DefaultGroup="File"
+                            <FlowElementList Items="@AvailablePlugins" DefaultGroup="File" OnDragStart="@HandleDragStart"
                                              AddSelectedElement="AddSelectedElement" Close="@CloseElements" />
                         }
                     </FlowTab>
                     <FlowTab Icon="fas fa-scroll" Title="@lblScripts">
                         @if (AvailableScripts != null)
                         {
-                            <FlowElementList Items="@AvailableScripts" 
+                            <FlowElementList Items="@AvailableScripts" OnDragStart="@HandleDragStart"
                                              AddSelectedElement="AddSelectedElement" Close="@CloseElements"
                                              OpenScriptBrowser="@(() => _ = OpenScriptBrowser())" />
                         }
@@ -59,7 +59,7 @@
                     @if (AvailableSubFlows?.Any() == true)
                     {
                         <FlowTab Icon="fas fa-subway" Title="@lblSubFlows">
-                            <FlowElementList Items="@AvailableSubFlows" DefaultGroup="Sub Flows"
+                            <FlowElementList Items="@AvailableSubFlows" DefaultGroup="Sub Flows" OnDragStart="@HandleDragStart"
                                              AddSelectedElement="AddSelectedElement" Close="@CloseElements" />
                         </FlowTab>
                     }
