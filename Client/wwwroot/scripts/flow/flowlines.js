@@ -12,20 +12,19 @@ class ffFlowLines {
         this.ioCanvasBounds = null;
         this.ioOutputConnections = new Map();
         this.ioLines = [];
-        this.FlowContainer = null;
-        this.ioCanvas = null;
         this.ioSelectedConnection = null;
         this.accentColor = null;
         this.lineColor = null;
         this.errorColor = null;
         this.errorDash = [2, 2];
         this.ioOffset = 14.5;
+        this.initCanvas();
     }
 
     reset() {
 
-        if (this.FlowContainer != null && this.FlowContainer.classList.contains('drawing-line') === true)
-            this.FlowContainer.classList.remove('drawing-line');
+        if (this.ffFlow.eleFlowParts.classList.contains('drawing-line') === true)
+            this.ffFlow.eleFlowParts.classList.remove('drawing-line');
         this.ioNode = null;
         this.ioSelected = null;
         this.ioIsInput = null;
@@ -34,22 +33,18 @@ class ffFlowLines {
         this.ioCanvasBounds = null;
         this.ioLines = [];
         this.ioOutputConnections = new Map();
-        this.ioCanvas = null;
         this.ioSelectedConnection = null;
     }
 
     ioDown(event, isInput) {
         this.ioNode = event.target.parentNode;
-        if (!this.FlowContainer)
-            this.FlowContainer = document.getElementById('flow-parts');
 
-        if (this.FlowContainer != null && this.FlowContainer.classList.contains('drawing-line') === false)
-            this.FlowContainer.classList.add('drawing-line');
+        if (this.ffFlow.eleFlowParts.classList.contains('drawing-line') === false)
+            this.ffFlow.eleFlowParts.classList.add('drawing-line');
         this.ioSelected = this.ioNode.parentNode.parentNode;
         this.ioIsInput = isInput;
 
-        let canvas = document.querySelector('canvas');
-        this.ioCanvasBounds = canvas.getBoundingClientRect();
+        this.ioCanvasBounds = this.ffFlow.canvas.getBoundingClientRect();
         var srcBounds = this.ioNode.getBoundingClientRect();
         let srcX = (srcBounds.left - this.ioCanvasBounds.left) + this.ioOffset;
         srcX = Math.round(srcX / 10) * 10;
@@ -70,7 +65,7 @@ class ffFlowLines {
         let destX = this.ffFlow.translateCoord(event.clientX, true) - this.ioCanvasBounds.left;
         let destY = this.ffFlow.translateCoord(event.clientY, true) - this.ioCanvasBounds.top;
         this.redrawLines();
-        let overInput = !!document.querySelector('.inputs > div > div:hover');
+        let overInput = !!this.ffFlow.eleFlowParts.querySelector('.inputs > div > div:hover');
 
         this.drawLineToPoint({ srcX: this.ioSourceBounds.left, srcY:this.ioSourceBounds.top, destX, destY, color: overInput ? '#ff0090' : null });
     };
@@ -114,8 +109,8 @@ class ffFlowLines {
             }
         }
 
-        if (this.FlowContainer != null && this.FlowContainer.classList.contains('drawing-line') === true)
-            this.FlowContainer.classList.remove('drawing-line');
+        if (this.ffFlow.eleFlowParts.classList.contains('drawing-line') === true)
+            this.ffFlow.eleFlowParts.classList.remove('drawing-line');
 
         this.ioNode = null;
         this.ioSelected = null;
@@ -125,10 +120,10 @@ class ffFlowLines {
     redrawLines() {
         this.ffFlow.selectConnection();
         this.ioLines = [];
-        let outputs = document.querySelectorAll('.flow-part .output');
-        for (let o of document.querySelectorAll('.flow-part .output, .flow-part .input'))
+        let outputs = this.ffFlow.eleFlowParts.querySelectorAll('.flow-part .output');
+        for (let o of this.ffFlow.eleFlowParts.querySelectorAll('.flow-part .output, .flow-part .input'))
             o.classList.remove('connected');
-        let canvas = this.getCanvas();
+        let canvas = this.ffFlow.canvas;
         if (!this.ioContext) {
             this.ioContext = canvas.getContext('2d');
         }
@@ -152,7 +147,7 @@ class ffFlowLines {
     drawDottedSelection(context){
         if(this.ffFlow.Mouse.canvasSelecting !== true)
             return;
-        let canvas = this.getCanvas();
+        let canvas = this.ffFlow.canvas;
         let canvasBounds = canvas.getBoundingClientRect();
         
         let x1 = this.ffFlow.Mouse.initialX;
@@ -186,7 +181,7 @@ class ffFlowLines {
         let srcBounds = src.getBoundingClientRect();
         let destBounds = dest.getBoundingClientRect();
 
-        let canvas = this.getCanvas();
+        let canvas = this.ffFlow.canvas;
         let canvasBounds = canvas.getBoundingClientRect();
         let srcX = (srcBounds.left - canvasBounds.left) + this.ioOffset;
         let srcY = (srcBounds.top - canvasBounds.top) + this.ioOffset;
@@ -205,17 +200,17 @@ class ffFlowLines {
 
     drawLineToPoint({ srcX, srcY, destX, destY, output, connection, color }) {
         if (!this.ioContext) {
-            let canvas = this.getCanvas();
-            this.ioContext = canvas.getContext('2d');
+            this.ioContext = this.ffFlow.canvas.getContext('2d');
         }
 
         const context = this.ioContext;
 
         const path = new Path2D();
-        if (this.ffFlow.Vertical) {
-            srcX += 2;
-            destX += 2;
-        }
+
+        // add some spacing for some reason
+        srcX += 2;
+        destX += 2;
+        
         path.moveTo(srcX, srcY);
         let linePoints = [[srcX, srcY]];
         let addLinePoint = (_x, _y) => {
@@ -263,18 +258,14 @@ class ffFlowLines {
 
     };
 
-    getCanvas() {
-        if (this.ioCanvas)
-            return this.ioCanvas;
-
+    initCanvas() {
         this.accentColor = this.colorFromCssClass('--accent');
         this.lineColor = this.colorFromCssClass('--color-darkest');
         this.errorColor = '#ff6060'; //this.colorFromCssClass('--errr');
 
-        let canvas = document.querySelector('canvas');
         // Listen for mouse moves
         let self = this;
-        canvas.addEventListener('mousedown',  (event) => {
+        this.ffFlow.canvas.addEventListener('mousedown',  (event) => {
             let ctx = self.ioContext;
             self.ioSelectedConnection = null;
             let clearNode = true;
@@ -314,12 +305,10 @@ class ffFlowLines {
             if (clearNode)
                 this.ffFlow.selectConnection();
         });
-        canvas.addEventListener('keydown', function (event) {
+        this.ffFlow.canvas.addEventListener('keydown', function (event) {
             if (event.code === 'Delete') 
                 self.deleteConnection();            
         });
-        this.ioCanvas = canvas;
-        return this.ioCanvas;
     }
 
     isClickNearLine(ctx, line, event, tolerance = 5) {

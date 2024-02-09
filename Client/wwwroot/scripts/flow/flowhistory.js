@@ -9,6 +9,7 @@ class ffFlowHistory {
     
     perform(action){
         console.log('history perform', action);
+        this.ffFlow.markDirty();
         // doing new action, anything past the current point we will clear
         this.redoActions = [];
         this.history.push(action);

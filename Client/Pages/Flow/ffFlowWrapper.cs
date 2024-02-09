@@ -3,6 +3,7 @@ using System.Text.RegularExpressions;
 using BlazorMonaco;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.JSInterop;
+using NPoco;
 using ffElement = FileFlows.Shared.Models.FlowElement;
 using xFlowConnection = FileFlows.Shared.Models.FlowConnection;
 using ffPart = FileFlows.Shared.Models.FlowPart;
@@ -25,6 +26,7 @@ public class ffFlowWrapper
     public Func<Flow.OpenContextMenuArgs, Task> OnOpenContextMenu { get; set; }
     
     public Func<ffPart, bool, Task<object>> OnEdit { get; set; }
+    public Action OnMarkDirty { get; set; }
 
     
     private ffFlowWrapper(IJSRuntime jsRuntime)
@@ -33,11 +35,11 @@ public class ffFlowWrapper
         
     }
 
-    public static async Task<ffFlowWrapper> Create(IJSRuntime jsRuntime)
+    public static async Task<ffFlowWrapper> Create(IJSRuntime jsRuntime, Guid flowUid)
     {
         var instance = new ffFlowWrapper(jsRuntime);
         var dotNetObjRef = DotNetObjectReference.Create(instance);
-        instance.jsffFlow = await jsRuntime.InvokeAsync<IJSObjectReference>("createffFlow", dotNetObjRef);
+        instance.jsffFlow = await jsRuntime.InvokeAsync<IJSObjectReference>("createffFlow", dotNetObjRef, flowUid);
         return instance;
     }
     
@@ -47,8 +49,14 @@ public class ffFlowWrapper
             await jsffFlow.InvokeVoidAsync("ioInitConnections",  connections);
     }
 
-    public async Task init(string flowParts, List<FlowPart> parts, FlowElement[] available)
-        => await jsffFlow.InvokeVoidAsync("init", new object [] { "flow-parts", parts, available });
+    public async Task init(List<FlowPart> parts, FlowElement[] available)
+        => await jsffFlow.InvokeVoidAsync("init",  parts, available);
+
+    public async Task setVisibility(bool show)
+        => await jsffFlow.InvokeVoidAsync("setVisibility", show);
+    
+    public async Task dispose()
+        => await jsffFlow.InvokeVoidAsync("dispose");
 
     public async Task redrawLines()
         => await jsffFlow.InvokeVoidAsync("redrawLines");
@@ -79,6 +87,9 @@ public class ffFlowWrapper
     public async Task dragElementStart(string uid)
         => await jsffFlow.InvokeVoidAsync("Mouse.dragElementStart", uid);
 
+    public async Task focusName()
+        => await jsffFlow.InvokeVoidAsync("focusName");
+
 
     [JSInvokable]
     public string NewGuid() => Guid.NewGuid().ToString();
@@ -94,7 +105,10 @@ public class ffFlowWrapper
     [JSInvokable]
     public async Task<object> Edit(ffPart part, bool isNew = false)
         => await OnEdit(part, isNew);
-    
+
+    [JSInvokable]
+    public void MarkDirty()
+        => OnMarkDirty();
     
     [JSInvokable]
     public string Translate(string key, ExpandoObject model)

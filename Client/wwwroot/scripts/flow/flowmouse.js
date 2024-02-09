@@ -25,6 +25,7 @@ class ffFlowMouse {
     }
 
     dragElementStart(uid) {
+        console.log('dragElementStart', uid);
         this.draggingElementUid = uid;
         event.dataTransfer.setData("text", uid);
         event.dataTransfer.effectAllowed = "copy";
@@ -64,7 +65,7 @@ class ffFlowMouse {
         if (this.ffFlow.active && this.dragItem) {
             this.initialX = this.currentX;
             this.initialY = this.currentY;
-            for(let part of document.querySelectorAll('.flow-part.selected')) {
+            for(let part of this.ffFlow.eleFlowParts.querySelectorAll('.flow-part.selected')) {
                 part.style.transform = '';
                 let originalXPos = parseInt(part.style.left, 10);
                 let originalYPos = parseInt(part.style.top, 10);
@@ -140,7 +141,7 @@ class ffFlowMouse {
             this.yOffset = this.currentY;
             if(this.ffFlow.active) 
             {
-                for(let part of document.querySelectorAll('.flow-part.selected')) 
+                for(let part of this.ffFlow.eleFlowParts.querySelectorAll('.flow-part.selected')) 
                 {
                     this.setTranslate(this.currentX, this.currentY, part);
                 }

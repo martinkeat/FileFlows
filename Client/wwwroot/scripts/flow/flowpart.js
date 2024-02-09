@@ -57,7 +57,7 @@ class ffFlowPart
                 div.classList.add('SubFlow');
         }
 
-        var mc = new Hammer.Manager(div);
+        let mc = new Hammer.Manager(div);
         mc.add( new Hammer.Tap({ event: 'doubletap', taps: 2 }) );
         mc.on("doubletap", (ev) => {
             this.editFlowPart(part.uid, false);
@@ -114,8 +114,7 @@ class ffFlowPart
 
         div.appendChild(divDraggable);
 
-        let flowParts = document.getElementById('flow-parts');
-        flowParts.appendChild(div);
+        this.ffFlow.eleFlowParts.appendChild(div);
 
         this.setPartName(part);
         this.ffFlow.initOutputHints(part);

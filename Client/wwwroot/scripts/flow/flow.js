@@ -1,13 +1,21 @@
 
-window.createffFlow = function(csharp) {
-    return new ffFlow(csharp);
+window.createffFlow = function(csharp, uid) {
+    let div = document.createElement('div');
+    div.className = 'flow-parts';
+    div.setAttribute('id', `flow-parts-${uid}`);
+    div.innerHTML = '<canvas width="8000" height="4000" tabindex="1" oncontextmenu="return false"></canvas>';    
+    document.querySelector('.flows-tabs-contents').appendChild(div);
+    return new ffFlow(csharp, div, uid);
 };
 class ffFlow 
 {
-    constructor(csharp)
+    constructor(csharp, eleFlowParts, uid)
     {
-        this.active= false;
         this.csharp= csharp;
+        this.eleFlowParts= eleFlowParts;
+        this.uid = uid;
+        this.canvas = eleFlowParts.querySelector('canvas');
+        this.active= false;
         this.parts= [];
         this.elements= [];
         this.SelectedParts= [];
@@ -16,7 +24,6 @@ class ffFlow
         this.lblDelete= 'Delete';
         this.lblNode= 'Node';
         this.Zoom=100;
-        this.eleFlowParts= null;
         this.infobox = null;
         this.infoboxSpan = null;
         this.infoSelectedType = '';
@@ -24,6 +31,26 @@ class ffFlow
         this.ffFlowPart = new ffFlowPart(this);
         this.Mouse = new ffFlowMouse(this);
         this.History= new ffFlowHistory(this);
+    }
+    
+    dispose() {
+        this.eleFlowParts.remove();
+    }
+    
+    focusName(){
+        setTimeout(() =>{
+            let txtName = document.getElementById(`flow-${this.uid}-name`);
+            if(txtName)
+                txtName.focus();
+        }, 50);
+    }
+
+    setVisibility(show){
+        this.eleFlowParts.classList.remove('show')
+        if(show) {
+            this.eleFlowParts.classList.add('show');
+            this.redrawLines();
+        }
     }
 
     reset() {
@@ -33,10 +60,11 @@ class ffFlow
         this.Mouse.reset();
     }
 
+    markDirty() {
+        this.csharp.invokeMethodAsync("MarkDirty");
+    }
+
     zoom(percent) {
-        if (this.eleFlowParts == null) {
-            this.eleFlowParts = document.querySelector('.flow-parts');
-        }
         this.Zoom = percent;
         this.eleFlowParts.style.zoom = percent / 100;
     }
@@ -46,7 +74,7 @@ class ffFlow
         this.ffFlowPart.unselectAll();
     }
     
-    init(container, parts, elements) {
+    init(parts, elements) {
         this.parts = parts;
         this.elements = elements;
         this.infobox = null;        
@@ -58,19 +86,9 @@ class ffFlow
         this.csharp.invokeMethodAsync("Translate", `Labels.Node`, null).then(result => {
             this.lblNode = result;
         });
-
-        if (typeof (container) === 'string') {
-            let c = document.getElementById(container);
-            if (!c)
-                c = document.querySelector(container);
-            if (!c) {
-                console.warn("Failed to locate container:", container);
-                return;
-            }
-            container = c;
-        }
         
-        let mc = new Hammer.Manager(container);
+        console.log('this.eleFlowParts', this.eleFlowParts);
+        let mc = new Hammer.Manager(this.eleFlowParts);
         let pinch = new Hammer.Pinch();
         let press = new Hammer.Press({
             time: 1000,
@@ -94,21 +112,21 @@ class ffFlow
             ev.preventDefault();
         })
 
-        container.addEventListener("keydown", (e) => this.onKeyDown(e), false);
-        // container.addEventListener("touchstart", (e) => this.Mouse.dragStart(e), false);
-        // container.addEventListener("touchend", (e) => this.Mouse.dragEnd(e), false);
-        // container.addEventListener("touchmove", (e) => this.Mouse.drag(e), false);
-        container.addEventListener("mousedown", (e) => e.button === 0 && this.Mouse.dragStart(e), false);
-        container.addEventListener("mouseup", (e) => this.Mouse.dragEnd(e), false);
-        container.addEventListener("mousemove", (e) => this.Mouse.drag(e), false);
+        this.eleFlowParts.addEventListener("keydown", (e) => this.onKeyDown(e), false);
+        // this.eleFlowParts.addEventListener("touchstart", (e) => this.Mouse.dragStart(e), false);
+        // this.eleFlowParts.addEventListener("touchend", (e) => this.Mouse.dragEnd(e), false);
+        // this.eleFlowParts.addEventListener("touchmove", (e) => this.Mouse.drag(e), false);
+        this.eleFlowParts.addEventListener("mousedown", (e) => e.button === 0 && this.Mouse.dragStart(e), false);
+        this.eleFlowParts.addEventListener("mouseup", (e) => this.Mouse.dragEnd(e), false);
+        this.eleFlowParts.addEventListener("mousemove", (e) => this.Mouse.drag(e), false);
 
-        container.addEventListener("mouseup", (e) => this.FlowLines.ioMouseUp(e), false);
-        container.addEventListener("mousemove", (e) => this.FlowLines.ioMouseMove(e), false);
-        container.addEventListener("click", (e) => { this.unSelect() }, false);
-        container.addEventListener("dragover", (e) => { this.drop(e, false) }, false);
-        container.addEventListener("drop", (e) => { this.drop(e, true) }, false);
+        this.eleFlowParts.addEventListener("mouseup", (e) => this.FlowLines.ioMouseUp(e), false);
+        this.eleFlowParts.addEventListener("mousemove", (e) => this.FlowLines.ioMouseMove(e), false);
+        this.eleFlowParts.addEventListener("click", (e) => { this.unSelect() }, false);
+        this.eleFlowParts.addEventListener("dragover", (e) => { this.drop(e, false) }, false);
+        this.eleFlowParts.addEventListener("drop", (e) => { this.drop(e, true) }, false);
 
-        container.addEventListener("contextmenu", (e) => { e.preventDefault(); e.stopPropagation(); this.contextMenu(e); return false; }, false);
+        this.eleFlowParts.addEventListener("contextmenu", (e) => { e.preventDefault(); e.stopPropagation(); this.contextMenu(e); return false; }, false);
 
 
         // bind these to this so the `this` in these methods are this object and not document
@@ -121,15 +139,13 @@ class ffFlow
         document.addEventListener('paste', this.PasteEventListener);
 
 
-        let canvas = document.querySelector('canvas');
-
         let width = this.Vertical ? (document.body.clientWidth * 1.5) : window.screen.availWidth
         let height = this.Vertical ? (document.body.clientHeight * 2) : window.screen.availHeight;
 
-        canvas.height = height;
-        canvas.width = width;
-        canvas.style.width = canvas.width + 'px';
-        canvas.style.height = canvas.height + 'px';
+        this.canvas.height = height;
+        this.canvas.width = width;
+        this.canvas.style.width = this.canvas.width + 'px';
+        this.canvas.style.height = this.canvas.height + 'px';
 
         for (let p of parts) {
             try {
@@ -183,6 +199,7 @@ class ffFlow
      * Called from C# code to insert a new element to the flow
      */
     insertElement(uid) {
+        console.log('insertElement', uid);
         this.drop(null, true, uid);
     }
 
@@ -198,8 +215,11 @@ class ffFlow
             yPos = this.translateCoord(event.clientY) - bounds.top - 20;
         } else {
         }
-        if (!uid)
+        if (!uid) {
+            console.log('this.Mouse.draggingElementUid', this.Mouse.draggingElementUid);
             uid = this.Mouse.draggingElementUid;
+        }
+        console.log('drop', uid);
         this.addElementActual(uid, xPos, yPos);
     }
     
@@ -369,7 +389,7 @@ class ffFlow
                 box.appendChild(this.infoboxSpan);
 
 
-                document.getElementById('flow-parts').appendChild(box);
+                this.eleFlowParts.appendChild(box);
                 this.infobox = box;
             }
             this.infobox.style.display = '';
@@ -385,13 +405,11 @@ class ffFlow
         }
         
         if(this.SelectedParts?.length) {
-            console.log('Unselecting parts!');
             this.unSelect();
             this.redrawLines();
             
             // this is un-focuses a node so if the user presses delete, that node is not deleted
-            let canvas = document.querySelector('canvas');
-            canvas.focus();
+            this.canvas.focus();
         }
 
         let part = this.getPart(outputNode);
@@ -512,17 +530,7 @@ class ffFlow
     }
 
     async PasteEventListener(e, json) {
-        let eleFlowParts = document.getElementById('flow-parts');
-        if(!eleFlowParts)
-            return; // not on flow page, dont consume paste
-
         if(!json) {
-            let active = document.activeElement;
-            if (active) {
-                let flowParts = active.closest('.flow-parts');
-                if (!flowParts)
-                    return; // flowparts/canvas does not have focus, do not listen to this event
-            }
             json = (e?.clipboardData || window.clipboardData)?.getData('text');
         }
         if(!json)
@@ -548,7 +556,7 @@ class ffFlow
         
     contextMenu_Edit(part){
         if(!part)
-            return;
+            return;        
         this.setInfo(part.Name, 'Node');
         this.ffFlowPart.editFlowPart(part.uid);
     }

@@ -10,41 +10,18 @@
 
 .flow-elements {
   width: 20rem;
+  padding-top: 0.75rem;
 }
 
 .flow-container {
   display: flex;
   flex-direction: row-reverse;
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  top: 0;
-  background: rgba(var(--color-rgb), 0.03);
-}
-
-.flow-name {
   flex-grow: 1;
-  margin-left: 0.5rem;
-  background: transparent !important;
-  border-bottom: solid 1px var(--accent) !important;
-}
-.flow-name:focus {
-  outline: unset !important;
+  background: rgba(var(--color-rgb), 0.03);
+  position: relative;
 }
 
 @media screen and (max-width: 849.99px) {
-  #flow-zoomer {
-    display: none;
-  }
-  .flow-name {
-    background: var(--base) !important;
-    left: 0rem;
-    position: fixed;
-    right: 16.5rem;
-    top: 0;
-    padding-top: 1rem;
-  }
   .elements-hidden .flow-elements {
     display: none;
   }
@@ -91,22 +68,6 @@
     z-index: 2;
   }
 }
-canvas {
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  outline: none;
-}
-
-.flow-parts {
-  background: var(--darkest);
-  flex-grow: 1;
-  position: relative;
-  overflow: auto;
-}
-
 .group {
   padding: 0.25rem 0;
   margin: 0.5rem;
@@ -150,27 +111,6 @@ canvas {
     max-width: 70%;
   }
 }
-#flow-zoomer {
-  position: fixed;
-  top: 3.5rem;
-  left: 250px;
-  background: var(--base);
-  padding: 0.5rem 0;
-  width: 16rem;
-  overflow: hidden;
-  border-bottom-right-radius: 1rem;
-}
-#flow-zoomer ::deep .slider-wrapper {
-  transform: scale(0.75);
-  position: relative;
-  left: -1rem;
-  width: 18rem;
-  white-space: nowrap;
-}
-
-.flow-container.has-collapsed-menu #flow-zoomer {
-  left: 3.5rem;
-}
 .flow-container.has-collapsed-menu ::deep .info-box {
   left: calc(3.5rem + 3px);
 }
@@ -181,6 +121,185 @@ canvas {
   padding-right: 0;
   font-size: 0.8rem;
   opacity: 0.65;
+}
+
+.flows-tabs {
+  display: flex;
+  flex-direction: column;
+  left: 0;
+  position: absolute;
+  right: 20rem;
+  bottom: 0;
+  height: 100vh;
+  top: 0;
+  overflow: hidden;
+}
+.flows-tabs .flows-tabs-top {
+  display: flex;
+  flex-direction: row;
+  border-bottom: solid 1px var(--input-background);
+}
+.flows-tabs .flows-tabs-buttons {
+  display: flex;
+  flex-direction: row;
+  padding: 0.75rem 1.5rem 0 1.5rem;
+  flex-grow: 1;
+  overflow: hidden;
+}
+.flows-tabs .flow-controls {
+  width: fit-content;
+}
+.flows-tabs .flow-controls #flow-zoomer {
+  width: 3rem;
+  /* Transition for smooth width change on hover */
+  transition: width 0.2s ease-in-out;
+}
+.flows-tabs .flow-controls #flow-zoomer:hover {
+  width: 16rem; /* Width on hover */
+}
+.flows-tabs .flow-controls #flow-zoomer:hover ::deep .slider-wrapper {
+  /* Show additional content on hover by adjusting content alignment */
+  justify-content: flex-start; /* Align content to the left */
+}
+.flows-tabs .flow-controls #flow-zoomer:hover ::deep .slider-wrapper .value {
+  min-width: unset;
+}
+.flows-tabs .flow-controls #flow-zoomer ::deep .slider-wrapper {
+  padding: 0.5rem 0;
+  overflow: hidden;
+  transform: scale(0.85);
+  position: relative;
+  left: -1rem;
+  white-space: nowrap;
+  top: 0.5rem;
+  /* Styling for the content inside the #flow-zoomer element */
+  display: flex; /* Arrange content horizontally */
+  justify-content: flex-end; /* Align content to the right */
+}
+.flows-tabs .flow-controls #flow-zoomer ::deep .slider-wrapper .value {
+  padding: 0 1rem;
+  min-width: 4rem;
+}
+.flows-tabs .flows-tab-button {
+  width: 8rem;
+  overflow-x: hidden;
+  text-overflow: ellipsis;
+  border-color: var(--input-background) !important;
+  position: relative;
+  bottom: -1px;
+  margin-right: 0.25rem;
+  display: flex;
+  align-items: center;
+  height: 2.1875rem;
+  font-weight: normal;
+  outline: none !important;
+  line-height: initial;
+  box-shadow: none;
+  border-radius: unset !important;
+  font-size: 0.8rem !important;
+  text-transform: uppercase;
+  border: solid 1px var(--accent);
+  background-color: transparent;
+  color: var(--color);
+  overflow: hidden;
+}
+.flows-tabs .flows-tab-button:hover {
+  background-image: linear-gradient(rgba(var(--accent-rgb), 0.3), rgba(var(--accent-rgb), 0.3)) !important;
+}
+.flows-tabs .flows-tab-button:hover {
+  border-color: var(--accent) !important;
+}
+.flows-tabs .flows-tab-button .flow-name {
+  flex-grow: 1;
+  user-select: none;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  padding-left: 0.5rem;
+}
+.flows-tabs .flows-tab-button.new-flow {
+  width: 2rem;
+  min-width: 2rem;
+}
+.flows-tabs .flows-tab-button .actions {
+  width: fit-content;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  margin-left: 0.5rem;
+}
+.flows-tabs .flows-tab-button .actions i {
+  margin: 0;
+  width: 1.25rem;
+}
+.flows-tabs .flows-tab-button .actions button {
+  border: none !important;
+  background: transparent !important;
+  opacity: 0.7;
+  padding: 0 0.25rem 0 0;
+}
+.flows-tabs .flows-tab-button .actions button:hover {
+  opacity: 1;
+}
+.flows-tabs .flows-tab-button .actions button.disabled {
+  color: var(--warning);
+  opacity: 0.85;
+}
+.flows-tabs .flows-tab-button.active {
+  border-color: var(--accent) !important;
+  border-bottom: 1px solid var(--base) !important;
+  width: fit-content;
+  background: var(--input-background) !important;
+}
+.flows-tabs .flows-tab-button.active input[type=text] {
+  height: 100%;
+  font-size: 1rem;
+  width: fit-content;
+  outline: none;
+}
+.flows-tabs .flows-tab-button:not(.active) {
+  white-space: nowrap;
+  width: fit-content;
+  max-width: 20rem;
+  background: transparent !important;
+}
+.flows-tabs .flows-tabs-contents {
+  flex-grow: 1;
+  position: relative;
+  overflow: hidden;
+}
+.flows-tabs .flows-tabs-contents .flows-tab {
+  overflow: auto;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: 0;
+}
+.flows-tabs .flows-tabs-contents .flows-tab:not(.active) {
+  display: none;
+}
+
+::deep .flow-parts {
+  display: none;
+  flex-grow: 1;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow: scroll;
+}
+::deep .flow-parts.show {
+  display: unset;
+}
+::deep .flow-parts canvas {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  outline: none;
 }
 
 /*# sourceMappingURL=Flow.razor.css.map */
