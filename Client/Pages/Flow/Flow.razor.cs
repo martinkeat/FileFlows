@@ -263,55 +263,6 @@ public partial class Flow : ComponentBase, IDisposable
             _ = editor.ffFlow.zoom(zoom);
     }
     
-    //
-    // private async Task Save()
-    // {
-    //     this.Blocker.Show(lblSaving);
-    //     this.IsSaving = true;
-    //     try
-    //     {
-    //         var parts = await ffFlow.getModel();
-    //
-    //         Model ??= new ff();
-    //         Model.Name = this.Name;
-    //         // ensure there are no duplicates and no rogue connections
-    //         Guid[] nodeUids = parts.Select(x => x.Uid).ToArray();
-    //         foreach (var p in parts)
-    //         {
-    //             p.OutputConnections = p.OutputConnections
-    //                                   ?.Where(x => nodeUids.Contains(x.InputNode))
-    //                                   ?.GroupBy(x => x.Output).Select(x => x.First())
-    //                                   ?.ToList();
-    //         }
-    //         Model.Parts = parts;
-    //         var result = await HttpHelper.Put<ff>(API_URL, Model);
-    //         if (result.Success)
-    //         {
-    //             if ((App.Instance.FileFlowsSystem.ConfigurationStatus & ConfigurationStatus.Flows) !=
-    //                 ConfigurationStatus.Flows)
-    //             {
-    //                 // refresh the app configuration status
-    //                 await App.Instance.LoadAppInfo();
-    //             }
-    //
-    //             Model = result.Data;
-    //             IsDirty = false;
-    //         }
-    //         else
-    //         {
-    //             Toast.ShowError(
-    //                 result.Success || string.IsNullOrEmpty(result.Body) ? Translater.Instant($"ErrorMessages.UnexpectedError") : Translater.TranslateIfNeeded(result.Body),
-    //                 duration: 60_000
-    //             );
-    //         }
-    //     }
-    //     finally
-    //     {
-    //         this.IsSaving = false;
-    //         this.Blocker.Hide();
-    //     }
-    // }
-
     private async Task<RequestResult<Dictionary<string, object>>> GetVariables(string url, List<FileFlows.Shared.Models.FlowPart> parts)
     {
 #if (DEMO)
@@ -322,23 +273,6 @@ public partial class Flow : ComponentBase, IDisposable
         return await HttpHelper.Post<Dictionary<string, object>>(url, parts);
 #endif
     }
-
-
-    // private async Task FilterKeyDown(KeyboardEventArgs e)
-    // {
-    //     if (e.Key == "Escape")
-    //     {
-    //         this.txtFilter = String.Empty;
-    //         return;
-    //     }
-    //     if (e.Key != "Enter")
-    //         return;
-    //     if (this.Filtered.Length != 1)
-    //         return;
-    //     var item = this.Filtered[0];
-    //     await ffFlow.insertElement(item.Uid);
-    //     this.txtFilter = String.Empty;
-    // }
 
     private Dictionary<string, object> EditorVariables;
     
@@ -796,6 +730,35 @@ public partial class Flow : ComponentBase, IDisposable
 
     private async Task SaveEditor(FlowEditor editor)
     {
-        
+        this.Blocker.Show(lblSaving);
+        this.IsSaving = true;
+        try
+        {
+            var model = await editor.GetModel();
+            var result = await HttpHelper.Put<ff>(API_URL, model);
+            if (result.Success)
+            {
+                if ((App.Instance.FileFlowsSystem.ConfigurationStatus & ConfigurationStatus.Flows) !=
+                    ConfigurationStatus.Flows)
+                {
+                    // refresh the app configuration status
+                    await App.Instance.LoadAppInfo();
+                }
+
+                editor.UpdateModel(result.Data, clean: true);
+            }
+            else
+            {
+                Toast.ShowError(
+                    result.Success || string.IsNullOrEmpty(result.Body) ? Translater.Instant($"ErrorMessages.UnexpectedError") : Translater.TranslateIfNeeded(result.Body),
+                    duration: 60_000
+                );
+            }
+        }
+        finally
+        {
+            this.IsSaving = false;
+            this.Blocker.Hide();
+        }
     }
 } 

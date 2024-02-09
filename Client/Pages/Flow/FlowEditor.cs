@@ -1,3 +1,4 @@
+using System.Collections;
 using BlazorContextMenu;
 using FileFlows.Client.Components;
 using FileFlows.Client.Components.Dialogs;
@@ -220,4 +221,36 @@ public class FlowEditor : IDisposable
 
     public void Dispose()
         => _ = ffFlow.dispose();
+
+    /// <summary>
+    /// Gets the complete Flow model with the elements etc
+    /// </summary>
+    /// <returns>the complete Flow model</returns>
+    public async Task<ff> GetModel()
+    {
+        Flow.Parts  = await ffFlow.getModel();
+        // ensure there are no duplicates and no rogue connections
+        Guid[] nodeUids = Flow.Parts.Select(x => x.Uid).ToArray();
+        foreach (var p in  Flow.Parts)
+        {
+            p.OutputConnections = p.OutputConnections
+                ?.Where(x => nodeUids.Contains(x.InputNode))
+                ?.GroupBy(x => x.Output).Select(x => x.First())
+                ?.ToList();
+        }
+        return Flow;
+    }
+
+    /// <summary>
+    /// Updates the model bound to this flow editor
+    /// </summary>
+    /// <param name="updatedModel">the updated model</param>
+    /// <param name="clean">if the editor should be marked as clean</param>
+    public void UpdateModel(ff updatedModel, bool clean = false)
+    {
+        if (clean)
+            this.IsDirty = false;
+
+        this.Flow = updatedModel;
+    }
 } 
