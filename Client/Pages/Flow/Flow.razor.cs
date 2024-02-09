@@ -55,6 +55,12 @@ public partial class Flow : ComponentBase, IDisposable
 
     private string lblEdit, lblHelp, lblDelete, lblCopy, lblPaste, lblRedo, lblUndo, lblAdd, 
         lblProperties, lblEditSubFlow, lblPlugins, lblScripts, lblSubFlows;
+
+
+    /// <summary>
+    /// The default group to show for the `Plugins` flow elements
+    /// </summary>
+    private string PluginsDefaultGroup;
     
     private int _Zoom = 100;
     private int Zoom
@@ -208,7 +214,9 @@ public partial class Flow : ComponentBase, IDisposable
 
         await WaitForRender(); // ensures these lists exist or not
 
-        eleListPlugins?.SetItems(AvailablePlugins);
+        PluginsDefaultGroup = ActiveFlow?.Flow?.Type == FlowType.SubFlow ? "Sub Flow" : "File";
+
+        eleListPlugins?.SetItems(AvailablePlugins, PluginsDefaultGroup);
         eleListScripts?.SetItems(AvailableScripts);
         eleListSubFlows?.SetItems(AvailableSubFlows);
     }

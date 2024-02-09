@@ -12,7 +12,7 @@
         <div class="flow-elements">
             <FlowTabs TitleOnlyOnActive="true" ContainTabs="true">
                 <FlowTab Icon="fas fa-puzzle-piece" Title="@lblPlugins" Visible="@(AvailablePlugins?.Any() == true)">
-                    <FlowElementList @ref="eleListPlugins" Items="@AvailablePlugins" DefaultGroup="File" OnDragStart="@HandleDragStart"
+                    <FlowElementList @ref="eleListPlugins" Items="@AvailablePlugins" DefaultGroup="@PluginsDefaultGroup" OnDragStart="@HandleDragStart"
                                      AddSelectedElement="AddSelectedElement" Close="@CloseElements" />
                 </FlowTab>
                 <FlowTab Icon="fas fa-scroll" Title="@lblScripts" Visible="@(AvailableScripts != null)">

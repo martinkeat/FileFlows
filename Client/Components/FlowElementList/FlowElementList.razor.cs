@@ -139,8 +139,11 @@ public partial class FlowElementList : ComponentBase
         return ele.Name;
     }
 
-    public void SetItems(IEnumerable<ffElement> items)
+    public void SetItems(IEnumerable<ffElement> items, string newDefaultGroup = "notset")
     {
+        if (newDefaultGroup != "notset")
+            DefaultGroup = newDefaultGroup;
+        
         SelectedGroup = DefaultGroup;
         this.Items = Items;
         if (Items?.Any() == true)
