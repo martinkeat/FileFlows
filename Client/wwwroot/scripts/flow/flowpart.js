@@ -23,7 +23,7 @@ class ffFlowPart
     addFlowPart(part) {
         let div = document.createElement('div');
         this.flowPartElements.push(div);
-        div.setAttribute('id', part.uid);
+        div.setAttribute('x-uid', part.uid);
         div.style.position = 'absolute';
         let xPos = Math.floor(part.xPos / 10) * 10;
         let yPos = Math.floor(part.yPos / 10) * 10;
@@ -35,25 +35,25 @@ class ffFlowPart
         if (typeof (part.type) === 'number') {
             if (part.type === 0)
                 div.classList.add('Input');
-            else if (part.type == 1)
+            else if (part.type === 1)
                 div.classList.add('Output');
-            else if (part.type == 2)
+            else if (part.type === 2)
                 div.classList.add('Process');
-            else if (part.type == 3)
+            else if (part.type === 3)
                 div.classList.add('Logic');
-            else if (part.type == 4)
+            else if (part.type === 4)
                 div.classList.add('BuildStart');
-            else if (part.type == 5)
+            else if (part.type === 5)
                 div.classList.add('BuildEnd');
-            else if (part.type == 6)
+            else if (part.type === 6)
                 div.classList.add('BuildPart');
-            else if (part.type == 7)
+            else if (part.type === 7)
                 div.classList.add('Failure');
-            else if (part.type == 8)
+            else if (part.type === 8)
                 div.classList.add('Communication');
-            else if (part.type == 9)
+            else if (part.type === 9)
                 div.classList.add('Script');
-            else if (part.type == 10)
+            else if (part.type === 10)
                 div.classList.add('SubFlow');
         }
 
@@ -75,7 +75,7 @@ class ffFlowPart
                 let divInput = document.createElement('div');
                 let divInputInner = document.createElement('div');
                 divInput.appendChild(divInputInner);
-                divInput.setAttribute('id', part.uid + '-input-' + i);
+                divInput.setAttribute('x-uid', part.uid + '-input-' + i);
                 divInput.setAttribute('x-input', i);
                 divInput.classList.add('input');
                 divInput.classList.add('input-' + i);
@@ -125,7 +125,7 @@ class ffFlowPart
         let div = args.div;
         let allEvents = args.allEvents;
         if(!div)
-            div = document.getElementById(part.uid);
+            div = this.ffFlow.getFlowPart(part.uid);
         
         div.addEventListener("click", (event) => {
             event.stopImmediatePropagation();
@@ -178,7 +178,7 @@ class ffFlowPart
     
     setPartName(part) {
         try {
-            let div = document.getElementById(part.uid);
+            let div = this.ffFlow.getFlowPart(part.uid);
             let divName = div.querySelector('.name');
             if (!divName) 
                 return;
@@ -306,7 +306,7 @@ class ffFlowPart
             return;
         }
         if (!div) {
-            div = document.getElementById(uid);
+            div = this.ffFlow.getFlowPart(uid);
             if (!div) {
                 return;
             }
@@ -336,7 +336,7 @@ class ffFlowPart
                 let divOutputInner = document.createElement('div');
                 let index = i === 0 ? -1 : i;
                 divOutput.appendChild(divOutputInner);
-                divOutput.setAttribute('id', part.uid + '-output-' + index);
+                divOutput.setAttribute('x-uid', part.uid + '-output-' + index);
                 divOutput.setAttribute('x-output', i);
                 divOutput.classList.add('output');
                 divOutput.classList.add('output-' + index);

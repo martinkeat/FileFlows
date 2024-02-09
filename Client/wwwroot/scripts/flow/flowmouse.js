@@ -41,7 +41,7 @@ class ffFlowMouse {
         }
 
         if (e.target.classList.contains('draggable') === true) {
-            var part = this.ffFlow.parts.find(x => x.uid === e.target.parentNode.id);
+            var part = this.ffFlow.parts.find(x => x.uid === e.target.parentNode.getAttribute('x-uid'));
             let selected = this.ffFlow.SelectedParts.indexOf(part) >= 0;
             if (selected !== true)
             {
@@ -75,7 +75,7 @@ class ffFlowMouse {
                 let partTop = parseInt(part.style.top, 10);
                 let xPos = partLeft + transCurX;
                 let yPos = partTop + transCurY;
-                if(xPos != originalXPos || yPos != originalYPos)
+                if(xPos !== originalXPos || yPos !== originalYPos)
                     this.ffFlow.History.perform(new FlowActionMove(part, xPos, yPos, originalXPos, originalYPos));
             }
             //this.ffFlow.redrawLines();
@@ -99,7 +99,7 @@ class ffFlowMouse {
                 if(Math.abs(selectedBounds.width + selectedBounds.height) > 10) {
 
                     for (let p of this.ffFlow.parts) {
-                        var ele = document.getElementById(p.uid);
+                        let ele = this.ffFlow.getFlowPart(p.uid);
                         if (!ele)
                             continue;
                         let eleBounds = ele.getBoundingClientRect();

@@ -45,7 +45,7 @@ class ffFlowLines {
         this.ioIsInput = isInput;
 
         this.ioCanvasBounds = this.ffFlow.canvas.getBoundingClientRect();
-        var srcBounds = this.ioNode.getBoundingClientRect();
+        let srcBounds = this.ioNode.getBoundingClientRect();
         let srcX = (srcBounds.left - this.ioCanvasBounds.left) + this.ioOffset;
         srcX = Math.round(srcX / 10) * 10;
         let srcY = (srcBounds.top - this.ioCanvasBounds.top) + this.ioOffset;
@@ -81,7 +81,7 @@ class ffFlowLines {
         if (suitable) {
             let input = this.isInput ? this.ioNode : target;
             let output = this.isInput ? target : this.ioNode;
-            let outputId = output.getAttribute('id');
+            let outputId = output.getAttribute('x-uid');
 
             if (input.classList.contains('connected') === false)
                 input.classList.add('connected');
@@ -95,7 +95,7 @@ class ffFlowLines {
             }
             let index = parseInt(input.getAttribute('x-input'), 10);
 
-            let part = input.parentNode.parentNode.getAttribute('id');
+            let part = input.parentNode.parentNode.getAttribute('x-uid');
             let existing = connections.filter(x => x.index == index && x.part == part);
             if (!existing || existing.length === 0) {
 
@@ -131,11 +131,12 @@ class ffFlowLines {
         this.redrawGrid(canvas);
 
         for (let output of outputs) {
-            let connections = this.ioOutputConnections.get(output.getAttribute('id'));
+            let outputUid = output.getAttribute('x-uid');
+            let connections = this.ioOutputConnections.get(outputUid);
             if (!connections)
                 continue;
             for (let input of connections) {
-                let inputEle = document.getElementById(input.part + '-input-' + input.index);
+                let inputEle = this.ffFlow.getFlowPartInput(input.part, input.index);
                 if (!inputEle)
                     continue;
                 this.drawLine(inputEle, output, input);
@@ -277,7 +278,7 @@ class ffFlowLines {
                 { 
                     selectedLine = line;
                     self.ioSelectedConnection = line;
-                    let output = line.output.parentNode.parentNode.getAttribute('id');
+                    let output = line.output.parentNode.parentNode.getAttribute('x-uid');
                     let outputNode = line.output.getAttribute('x-output');
                     this.ffFlow.selectConnection(output, outputNode);
                     clearNode = false;
@@ -344,7 +345,7 @@ class ffFlowLines {
         this.ffFlow.selectConnection();
 
         let selected = this.ioSelectedConnection;
-        let outputNodeUid = selected.output.getAttribute('id');
+        let outputNodeUid = selected.output.getAttribute('x-uid');
         
         this.ffFlow.History.perform(new FlowActionConnection(this.ffFlow, outputNodeUid));
     }

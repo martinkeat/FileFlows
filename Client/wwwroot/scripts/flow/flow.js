@@ -17,7 +17,7 @@ class ffFlow
         this.canvas = eleFlowParts.querySelector('canvas');
         this.active= false;
         this.parts= [];
-        this.elements= [];
+        this.elements = [];
         this.SelectedParts= [];
         this.SingleOutputConnection= true;
         this.Vertical= true;
@@ -36,10 +36,10 @@ class ffFlow
     dispose() {
         this.eleFlowParts.remove();
     }
-    
+
     focusName(){
         setTimeout(() =>{
-            let txtName = document.getElementById(`flow-${this.uid}-name`);
+            let txtName = document.querySelector(`#flow-${this.uid}-name`);
             if(txtName)
                 txtName.focus();
         }, 50);
@@ -76,6 +76,7 @@ class ffFlow
     
     init(parts, elements) {
         this.parts = parts;
+        console.log('init elements', elements);
         this.elements = elements;
         this.infobox = null;        
         
@@ -337,7 +338,7 @@ class ffFlow
 
         // update the part positions
         for (let p of this.parts) {
-            var div = document.getElementById(p.uid);
+            let div = this.getFlowPart(p.uid);
             if (!div)
                 continue;
             p.xPos = parseInt(div.style.left, 10);
@@ -348,11 +349,15 @@ class ffFlow
     }
 
     getElement(uid) {
-        return this.elements.filter(x => x.uid == uid)[0];
+        let result = this.elements.filter(x => x.uid === uid)[0];
+        if(result)
+            return result;
+        console.log('unable to get: ', uid);
+        console.log(this.elements);
     }
 
     getPart(partUid) {
-        return this.parts.filter(x => x.uid == partUid)[0];
+        return this.parts.filter(x => x.uid === partUid)[0];
     };
 
     setInfo(message, type) {
@@ -436,7 +441,7 @@ class ffFlow
         }
         this.SelectedParts = [part];
         
-        var ele = document.getElementById(part.uid);
+        let ele = this.getFlowPart(part.uid);
         if(ele)
         {
             ele.classList.remove('selected');
@@ -464,7 +469,7 @@ class ffFlow
             return;
         }
         if(output === -1){
-            let outputNode = document.getElementById(part.uid + '-output-' + output);
+            let outputNode = this.getFlowPartOutput(part.uid, output);
             if (outputNode)
                 outputNode.setAttribute('title', 'FAILED');
             return;
@@ -475,7 +480,7 @@ class ffFlow
             for(let i=0; i<element.outputLabels.length;i++)
             {
                 part.OutputLabels[(i + 1)] = 'Output ' + (i + 1) + ': ' + element.outputLabels[i];
-                let outputNode = document.getElementById(part.uid + '-output-' + (i + 1));
+                let outputNode = this.getFlowPartOutput(part.uid, (i + 1));
                 if (outputNode)
                     outputNode.setAttribute('title', part.OutputLabels[(i + 1)]);                 
             }
@@ -485,7 +490,7 @@ class ffFlow
             this.csharp.invokeMethodAsync("Translate", `Flow.Parts.${element.name}.Outputs.${output}`, part.model).then(result => {
                 if (!part.OutputLabels) part.OutputLabels = {};
                 part.OutputLabels[output] = result;
-                let outputNode = document.getElementById(part.uid + '-output-' + output);
+                let outputNode = this.getFlowPartOutput(part.uid, output);
                 if (outputNode)
                     outputNode.setAttribute('title', result);
             });
@@ -511,7 +516,7 @@ class ffFlow
     }
     
     CopyEventListener(e){
-        let eleFlowParts = document.getElementById('flow-parts');
+        let eleFlowParts = document.querySelector('.flow-parts.show');
         if(!eleFlowParts)
             return; // not on flow page, dont consume copy
 
@@ -589,5 +594,34 @@ class ffFlow
         let ele = document.getElementById('show-elements')
         if(ele)
             ele.click();
+    }
+
+    /**
+     * Gets the flow part element from its UID
+     * @param uid {String} the uid of the flow part to get
+     * @returns {HTMLElement} the HTML element
+     */
+    getFlowPart(uid){
+        return this.eleFlowParts.querySelector(`div[x-uid='${uid}']`);
+    }
+
+    /**
+     * Gets the flow part out from its UID and output number
+     * @param uid {String} the uid of the flow part to get
+     * @param output {int} the output number
+     * @returns {HTMLElement} the HTML element of the output
+     */
+    getFlowPartOutput(uid, output){
+        return this.eleFlowParts.querySelector(`div[x-uid='${uid}'] div[x-output='${output}']`);
+    }
+
+    /**
+     * Gets the flow part out from its UID and input number
+     * @param uid {String} the uid of the flow part to get
+     * @param input {int} the input number
+     * @returns {HTMLElement} the HTML element of the output
+     */
+    getFlowPartInput(uid, input){
+        return this.eleFlowParts.querySelector(`div[x-uid='${uid}'] div[x-input='${input}']`);
     }
 }

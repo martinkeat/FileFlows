@@ -37,15 +37,7 @@ public partial class FlowElementList : ComponentBase
         lblAdd = Translater.Instant("Labels.Add");
         lblClose = Translater.Instant("Labels.Close");
 
-        SelectedGroup = DefaultGroup;
-        if (Items?.Any() == true)
-        {
-            foreach (var item in Items)
-            {
-                FixItem(item);
-            }
-        }
-        ApplyFilter();
+        SetItems(Items);
     }
 
     /// <summary>
@@ -145,5 +137,21 @@ public partial class FlowElementList : ComponentBase
         if (ele.Name.StartsWith(ele.Group + " - "))
             return ele.Name[(ele.Group.Length + 3)..];
         return ele.Name;
+    }
+
+    public void SetItems(IEnumerable<ffElement> items)
+    {
+        SelectedGroup = DefaultGroup;
+        this.Items = Items;
+        if (Items?.Any() == true)
+        {
+            foreach (var item in Items)
+            {
+                FixItem(item);
+            }
+        }
+
+        ApplyFilter();
+        StateHasChanged();
     }
 }

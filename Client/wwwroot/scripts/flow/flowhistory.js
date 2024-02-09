@@ -45,8 +45,8 @@ class FlowActionMove {
     
     constructor(element, xPos, yPos, originalXPos, originalYPos) {
         // store the Id of the element, and not the actual element
-        // incase the element is deleted then restored
-        this.elementId = element.getAttribute('id');
+        // in case the element is deleted then restored
+        this.elementId = element.getAttribute('x-uid');
         this.xPos = xPos;
         this.yPos = yPos;
         this.originalXPos = originalXPos;
@@ -62,7 +62,7 @@ class FlowActionMove {
     }
     
     moveTo(ffFlow, x, y){
-        let element = document.getElementById(this.elementId);
+        let element = ffFlow.getFlowPart(this.elementId);
         if(!element)
             return;
         element.style.transform = '';
@@ -83,7 +83,7 @@ class FlowActionDelete {
     
     constructor(ffFlow, uid) {
         this.uid = uid;
-        let element = document.getElementById(uid);
+        let element = ffFlow.getFlowPart(uid);
         this.parent = element.parentNode;
         this.html = element.outerHTML;
         this.ioOutputConnections = ffFlow.FlowLines.ioOutputConnections[this.uid];
@@ -96,7 +96,7 @@ class FlowActionDelete {
     }
 
     perform(ffFlow) {
-        var div = document.getElementById(this.uid);
+        let div = ffFlow.getFlowPart(this.uid);
         if (div) {
             ffFlow.ffFlowPart.flowPartElements = ffFlow.ffFlowPart.flowPartElements.filter(x => x !== div);
             div.remove();
@@ -181,7 +181,7 @@ class FlowActionAddNode {
 
     undo(ffFlow)
     {
-        let div = document.getElementById(this.part.uid);
+        let div = ffFlow.getFlowPart(this.part.uid);
         if (div) {
             ffFlow.ffFlowPart.flowPartElements = ffFlow.ffFlowPart.flowPartElements.filter(x => x !== div);
             div.remove();

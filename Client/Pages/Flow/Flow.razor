@@ -4,135 +4,84 @@
 @using FileFlows.Plugin
 
 <div class="flow-wrapper">
-    @* <PageView FullWidth=@true title="@Title" > *@
-        @* <HeadLeft> *@
-        @*     @if (App.Instance.IsMobile == false) *@
-        @*     { *@
-        @*         <input class="flow-name" type="text" @bind-value="@Name" autocomplete="off" placeholder="@lblName"/> *@
-        @*     } *@
-        @* </HeadLeft> *@
-        @* *@
-        @* <Head> *@
-        @*     @if (ElementsVisible == false || App.Instance.IsMobile == false) *@
-        @*     { *@
-        @*         // this goes in the save button *@
-        @*         // @onclick="() => Save()" 
-        @*         if (App.Instance.IsMobile) *@
-        @*         { *@
-        @*             <input class="flow-name" type="text" @bind-value="@Name" autocomplete="off" placeholder="@lblName"/> *@
-        @*         } *@
-        @*         <button class="save-button"> *@
-        @*             @if (IsSaving) *@
-        @*             { *@
-        @*                 @lblSaving *@
-        @*             } *@
-        @*             else *@
-        @*             { *@
-        @*                 @lblSave *@
-        @*             } *@
-        @*         </button> *@
-        @*     } *@
-        @*     <button @onclick="() => Close()">@lblClose</button> *@
-        @* </Head> *@
-
-        @* <Body> *@
-        <div class="flow-container @(App.Instance.NavMenuCollapsed ? "has-collapsed-menu" : "") @(App.Instance.IsMobile ? (ElementsVisible ? "elements-visible" : "elements-hidden") : "")">
-            @if (App.Instance.IsMobile)
-            {
-                <i id="show-elements" class="show-elements fas fa-sitemap" @onclick="ShowElementsOnClick"></i>
-            }
-            <div class="flow-elements">
-                <FlowTabs TitleOnlyOnActive="true" ContainTabs="true">
-                    <FlowTab Icon="fas fa-puzzle-piece" Title="@lblPlugins">
-                        @if (AvailablePlugins?.Any() == true)
-                        {
-                            <FlowElementList Items="@AvailablePlugins" DefaultGroup="File" OnDragStart="@HandleDragStart"
-                                             AddSelectedElement="AddSelectedElement" Close="@CloseElements" />
-                        }
-                    </FlowTab>
-                    <FlowTab Icon="fas fa-scroll" Title="@lblScripts">
-                        @if (AvailableScripts != null)
-                        {
-                            <FlowElementList Items="@AvailableScripts" OnDragStart="@HandleDragStart"
-                                             AddSelectedElement="AddSelectedElement" Close="@CloseElements"
-                                             OpenScriptBrowser="@(() => _ = OpenScriptBrowser())" />
-                        }
-                    </FlowTab>
-                    @if (AvailableSubFlows?.Any() == true)
+    <div class="flow-container @(App.Instance.NavMenuCollapsed ? "has-collapsed-menu" : "") @(App.Instance.IsMobile ? (ElementsVisible ? "elements-visible" : "elements-hidden") : "")">
+        @if (App.Instance.IsMobile)
+        {
+            <i id="show-elements" class="show-elements fas fa-sitemap" @onclick="ShowElementsOnClick"></i>
+        }
+        <div class="flow-elements">
+            <FlowTabs TitleOnlyOnActive="true" ContainTabs="true">
+                <FlowTab Icon="fas fa-puzzle-piece" Title="@lblPlugins" Visible="@(AvailablePlugins?.Any() == true)">
+                    <FlowElementList @ref="eleListPlugins" Items="@AvailablePlugins" DefaultGroup="File" OnDragStart="@HandleDragStart"
+                                     AddSelectedElement="AddSelectedElement" Close="@CloseElements" />
+                </FlowTab>
+                <FlowTab Icon="fas fa-scroll" Title="@lblScripts" Visible="@(AvailableScripts != null)">
+                    <FlowElementList @ref="eleListScripts"  Items="@AvailableScripts" OnDragStart="@HandleDragStart"
+                                     AddSelectedElement="AddSelectedElement" Close="@CloseElements"
+                                     OpenScriptBrowser="@(() => _ = OpenScriptBrowser())" />
+                </FlowTab>
+                <FlowTab Icon="fas fa-subway" Title="@lblSubFlows" Visible="@(AvailableSubFlows?.Any() == true)">
+                    <FlowElementList @ref="eleListSubFlows"  Items="@AvailableSubFlows" DefaultGroup="Sub Flows" OnDragStart="@HandleDragStart"
+                                     AddSelectedElement="AddSelectedElement" Close="@CloseElements" />
+                </FlowTab>
+            </FlowTabs>
+        </div>
+        <div class="flows-tabs">
+            <div class="flows-tabs-top">
+                <div class="flows-tabs-buttons">
+                    @foreach (var flowEditor in OpenedFlows)
                     {
-                        <FlowTab Icon="fas fa-subway" Title="@lblSubFlows">
-                            <FlowElementList Items="@AvailableSubFlows" DefaultGroup="Sub Flows" OnDragStart="@HandleDragStart"
-                                             AddSelectedElement="AddSelectedElement" Close="@CloseElements" />
-                        </FlowTab>
-                    }
-                </FlowTabs>
-            </div>
-            <div class="flows-tabs">
-                <div class="flows-tabs-top">
-                    <div class="flows-tabs-buttons">
-                        @foreach (var flowEditor in OpenedFlows)
-                        {
-                            bool active = flowEditor == ActiveFlow;
-                            <div class="flows-tab-button @(active ? "active" : "") @(flowEditor.IsDirty ? "dirty" : "")">
-                                @if (active)
+                        bool active = flowEditor == ActiveFlow;
+                        <div class="flows-tab-button @(active ? "active" : "") @(flowEditor.IsDirty ? "dirty" : "")">
+                            @if (active)
+                            {
+                                <span class="flow-name">
+                                    <input type="text" @bind-value="@flowEditor.Flow.Name" id="flow-@flowEditor.Flow.Uid-name"/>
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="flow-name" @onclick="() => ActivateFlow(flowEditor)">
+                                    @flowEditor.Flow.Name
+                                </span>
+                            }
+                            <div class="actions">
+                                @if (flowEditor.IsDirty)
                                 {
-                                    <span class="flow-name">
-                                        <input type="text" @bind-value="@flowEditor.Flow.Name" id="flow-@flowEditor.Flow.Uid-name"/>
-                                    </span>
-                                }
-                                else
-                                {
-                                    <span class="flow-name" @onclick="() => ActivateFlow(flowEditor)">
-                                        @flowEditor.Flow.Name
-                                    </span>
-                                }
-                                <div class="actions">
-                                    @if (flowEditor.IsDirty)
+                                    @if (active)
                                     {
-                                        @if (active)
-                                        {
-                                            <button @onclick="() => SaveEditor(flowEditor)">
-                                                <i class="icon-dirty fas fa-save" title="@lblSave"/>
-                                            </button>
-                                        }
-                                        else
-                                        {
-                                            <button @onclick="() => ActivateFlow(flowEditor)" class="disabled">
-                                                <i class="icon-dirty fas fa-save" title="@lblUnsavedChanges"/>
-                                            </button>
-                                        }
+                                        <button @onclick="() => SaveEditor(flowEditor)">
+                                            <i class="icon-dirty fas fa-save" title="@lblSave"/>
+                                        </button>
                                     }
-                                    <button @onclick="() => CloseEditor(flowEditor)">
-                                        <i class="fas fa-times" title="@lblClose"/>
-                                    </button>
-                                </div>
+                                    else
+                                    {
+                                        <button @onclick="() => ActivateFlow(flowEditor)" class="disabled">
+                                            <i class="icon-dirty fas fa-save" title="@lblUnsavedChanges"/>
+                                        </button>
+                                    }
+                                }
+                                <button @onclick="() => CloseEditor(flowEditor)">
+                                    <i class="fas fa-times" title="@lblClose"/>
+                                </button>
                             </div>
-                        }
-                        <button class="flows-tab-button new-flow" @onclick="() => NewFlow()">
-                            <i class="fas fa-plus"/>
-                        </button>
-                    </div>
-
-                    <div class="flow-controls">
-                        <div id="flow-zoomer">
-                            <FlowSlider Min="50" Max="100" Prefix="Zoom:" Suffix="%" @bind-Value="@Zoom"/>
                         </div>
+                    }
+                    <button class="flows-tab-button new-flow" @onclick="() => AddFlow()">
+                        <i class="fas fa-plus"/>
+                    </button>
+                </div>
+
+                <div class="flow-controls">
+                    <div id="flow-zoomer">
+                        <FlowSlider Min="50" Max="100" Prefix="Zoom:" Suffix="%" @bind-Value="@Zoom"/>
                     </div>
                 </div>
-                <div class="flows-tabs-contents">
-                    @* <CascadingValue IsFixed="true" Value="this"> *@
-                    @*     @foreach (var flow in OpenedFlows) *@
-                    @*     { *@
-                    @*         <div class="flows-tab @(ActiveFlow == flow ? "active" :"")"> *@
-                    @*             <FlowEditor Flow="flow"/> *@
-                    @*         </div> *@
-                    @*     } *@
-                    @* </CascadingValue> *@
-                </div>
+            </div>
+            <div class="flows-tabs-contents">
             </div>
         </div>
-    @*     </Body> *@
-    @* </PageView> *@
+    </div>
 
     <Editor @ref="Editor" FlowElementEditor=@true></Editor>
 
@@ -141,6 +90,12 @@
         <FlowPropertiesEditor @ref="PropertiesEditor" Flow="@ActiveFlow?.Flow"/>
     }
 </div>
+
+
+<FileFlows.Client.Components.Dialogs.FlowTemplatePicker @ref=TemplatePicker />
+
+<NewFlowEditor @ref=AddEditor />
+
 <ContextMenu Id="FlowContextMenu-Single">
     @if (ActiveFlow?.SelectedParts?.FirstOrDefault()?.Type == FlowElementType.SubFlow)
     {

@@ -318,25 +318,31 @@
     }
 }
 
-::deep .flow-parts {
-    display:none;
-    flex-grow:1;
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    overflow: scroll;
-
-    &.show {
-        display: unset;
+::deep {
+    .flow-tabs.contain-tabs {
+        height: calc(100vh - 1rem);
     }
-    canvas {
-        position:absolute;
-        top:0;
-        right:0;
-        bottom:0;
-        left:0;
-        outline:none;
+    .flow-parts {
+        display: none;
+        flex-grow: 1;
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        overflow: scroll;
+
+        &.show {
+            display: unset;
+        }
+
+        canvas {
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            outline: none;
+        }
     }
 }

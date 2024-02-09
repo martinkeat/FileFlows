@@ -416,7 +416,7 @@ public class FlowController : Controller
     /// <param name="type">the type of flow to get flow elements for</param>
     /// <returns>Returns a list of all the nodes in the system</returns>
     [HttpGet("elements")]
-    public Task<FlowElement[]> GetElements([FromQuery] Guid flowUid, [FromQuery]FlowType type = FlowType.Standard)
+    public Task<FlowElement[]> GetElements([FromQuery] Guid flowUid, [FromQuery]FlowType? type = null)
         => GetFlowElements(flowUid, type);
 
     /// <summary>
@@ -451,10 +451,10 @@ public class FlowController : Controller
             return true;
         })?.ToList();
 
-        if (type == FlowType.SubFlow)
+        if (type == FlowType.SubFlow || type == null || (int)type == -1)
             results.InsertRange(0, GetSubFlowFlowElements());
         
-        if (type == FlowType.Standard || type == FlowType.SubFlow)
+        if (type == FlowType.Standard || type == FlowType.SubFlow || type == null || (int)type == -1)
         {
             var subflows = new FlowService().GetAll().Where(x => x.Type == FlowType.SubFlow && x.Uid != flowUid)
                 .OrderBy(x => x.Name)

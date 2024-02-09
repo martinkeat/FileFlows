@@ -27,25 +27,37 @@ public class FlowTemplateController : Controller
     /// <param name="type">the type of templates to get</param>
     /// <returns>all the flow templates</returns>
     [HttpGet]
-    public async Task<List<FlowTemplateModel>> GetAll([FromQuery] FlowType type = FlowType.Standard)
+    public async Task<List<FlowTemplateModel>> GetAll([FromQuery] FlowType? type)
     {
-        if (type == FlowType.SubFlow)
-            return SubFlows();
+        List<FlowTemplateModel> templates = new();
         if (Templates == null || FetchedAt < DateTime.Now.AddMinutes(-10))
             await RefreshTemplates();
-        var plugins = new PluginService().GetAll().Where(x => x.Enabled)
-            .Select(x => x.Name.Replace(" ", string.Empty).ToLowerInvariant().Replace("nodes", string.Empty))
-            .ToList();
-        foreach (var template in Templates)
+        FlowType any = (FlowType)(-1);
+        if (type == null)
+            type = any;
+        if (type == any || type != FlowType.SubFlow)
         {
-            template.MissingDependencies = template.Plugins.Where(pl =>
-                plugins.Contains(pl.ToLowerInvariant().Replace(" ", string.Empty).Replace("nodes", string.Empty)) == false)
+            var plugins = new PluginService().GetAll().Where(x => x.Enabled)
+                .Select(x => x.Name.Replace(" ", string.Empty).ToLowerInvariant().Replace("nodes", string.Empty))
                 .ToList();
+            foreach (var template in Templates)
+            {
+                template.MissingDependencies = template.Plugins.Where(pl =>
+                        plugins.Contains(
+                            pl.ToLowerInvariant().Replace(" ", string.Empty).Replace("nodes", string.Empty)) == false)
+                    .ToList();
+            }
+
+            var results = (Templates ?? new()).Union(LocalFlows())
+                .Where(x => x.Type == type || type == any)
+                .ToList();
+            templates.AddRange(results);
         }
-        var results = (Templates ?? new()).Union(LocalFlows())
-            .Where(x => x.Type == type)
-            .ToList();
-        return results;
+
+        if (type == any || type == FlowType.SubFlow)
+            templates.AddRange(SubFlows());
+        
+        return templates;
     }
 
     private List<FlowTemplateModel> SubFlows()

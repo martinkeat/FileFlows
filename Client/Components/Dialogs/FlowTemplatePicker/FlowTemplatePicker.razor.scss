@@ -37,12 +37,11 @@
   }
   .filter {
     background:var(--input-background);
-    width:16rem;
-    margin-top: 0.7rem;
+    width:12rem;
+    margin-top: 0.8rem;
     font-size: 0.95rem;
-    border-radius: 0.5rem !important;
     border:solid 1px transparent;
-    padding: 0.5rem;
+    padding: 0.25rem;
     flex-direction: row;
     display: flex;
     height: fit-content;

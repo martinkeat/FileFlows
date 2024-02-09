@@ -4,7 +4,6 @@ using FileFlows.Client.Helpers;
 using ffPart = FileFlows.Shared.Models.FlowPart;
 using ffElement = FileFlows.Shared.Models.FlowElement;
 using ff = FileFlows.Shared.Models.Flow;
-using xFlowConnection = FileFlows.Shared.Models.FlowConnection;
 using Microsoft.JSInterop;
 using FileFlows.Client.Components.Dialogs;
 using System.Text.Json;
@@ -12,13 +11,11 @@ using FileFlows.Plugin;
 using System.Text.RegularExpressions;
 using BlazorContextMenu;
 using Microsoft.AspNetCore.Components.Web;
-using Microsoft.Extensions.Logging;
 
 namespace FileFlows.Client.Pages;
 
 public partial class Flow : ComponentBase, IDisposable
 {
-    //[CascadingParameter] public Editor Editor { get; set; }
     public Editor Editor { get; set; }
     [Parameter] public System.Guid Uid { get; set; }
     [Inject] INavigationService NavigationService { get; set; }
@@ -29,6 +26,11 @@ public partial class Flow : ComponentBase, IDisposable
     private ffElement[] AvailablePlugins { get; set; }
     private ffElement[] AvailableScripts { get; set; }
     private ffElement[] AvailableSubFlows { get; set; }
+
+    /// <summary>
+    /// The flow element lists
+    /// </summary>
+    private FlowElementList eleListPlugins, eleListScripts, eleListSubFlows;
 
     public readonly List<FlowEditor> OpenedFlows = new();
     private FlowEditor ActiveFlow;
@@ -42,6 +44,14 @@ public partial class Flow : ComponentBase, IDisposable
     /// Gets or sets the properties editor
     /// </summary>
     private FlowPropertiesEditor PropertiesEditor { get; set; }
+    /// <summary>
+    /// The flow template picker instance
+    /// </summary>
+    private FlowTemplatePicker TemplatePicker;
+    /// <summary>
+    /// The Add editor instance
+    /// </summary>
+    private NewFlowEditor AddEditor;
 
     private string lblEdit, lblHelp, lblDelete, lblCopy, lblPaste, lblRedo, lblUndo, lblAdd, 
         lblProperties, lblEditSubFlow, lblPlugins, lblScripts, lblSubFlows;
@@ -65,21 +75,15 @@ public partial class Flow : ComponentBase, IDisposable
     [Inject] public IJSRuntime jsRuntime { get; set; }
     private bool IsSaving { get; set; }
 
-    private string Title { get; set; }
-
     private bool EditorOpen = false;
-
-    private string Name { get; set; }
 
     const string API_URL = "/api/flow";
 
-    private string lblName, lblSave, lblSaving, lblClose, lblUnsavedChanges;
+    private string lblSave, lblSaving, lblClose, lblUnsavedChanges;
 
     private bool _needsRendering = false;
 
     private bool ElementsVisible = false;
-
-    private string lblFilter;
 
     private FlowType _FlowType;
 
@@ -87,11 +91,9 @@ public partial class Flow : ComponentBase, IDisposable
 
     protected override void OnInitialized()
     {
-        lblName = Translater.Instant("Labels.Name");
         lblSave = Translater.Instant("Labels.Save");
         lblClose = Translater.Instant("Labels.Close");
         lblSaving = Translater.Instant("Labels.Saving");
-        lblFilter = Translater.Instant("Labels.FilterPlaceholder");
         lblAdd = Translater.Instant("Labels.Add");
         lblEdit = Translater.Instant("Labels.Edit");
         lblCopy = Translater.Instant("Labels.Copy");
@@ -111,7 +113,7 @@ public partial class Flow : ComponentBase, IDisposable
         {
             if (OpenedFlows?.Any(x => x.IsDirty) == true)
             {
-                bool result = await Confirm.Show(lblClose, $"Pages.{nameof(Flow)}.Messages.Close");
+                bool result = await Confirm.Show(lblUnsavedChanges, $"Pages.{nameof(Flow)}.Messages.Close");
                 if (result == false)
                     return false;
             }
@@ -191,19 +193,75 @@ public partial class Flow : ComponentBase, IDisposable
 
     private async Task LoadFlowElements(Guid modelUid)
     {
-        var elementsResult = await GetElements(API_URL + "/elements?type=" + (int)_FlowType + "&flowUid=" + modelUid);
+        var elementsResult =
+            await GetElements(API_URL + "/elements"); //"?type=" + (int)_FlowType + "&flowUid=" + modelUid);
         if (elementsResult.Success == false)
             return;
-        
+
         Available = elementsResult.Data;
+    }
+
+    private async Task UpdateFlowElementLists()
+    {
+        if (eleListPlugins == null)
+            return; // not initialized yet, no need to do this, the first render will contain the correct data
+
+        await WaitForRender(); // ensures these lists exist or not
+
+        eleListPlugins?.SetItems(AvailablePlugins);
+        eleListScripts?.SetItems(AvailableScripts);
+        eleListSubFlows?.SetItems(AvailableSubFlows);
+    }
+    
+    private async Task InitializeFlowElements()
+    {
+        ff flow = ActiveFlow?.Flow;
+        if (flow == null)
+        {
+            AvailablePlugins = new ffElement[] { };
+            AvailableScripts = new ffElement[] { };
+            AvailableSubFlows = new ffElement[] { };
+            await UpdateFlowElementLists();
+            return;
+        }
+        
+        
         AvailablePlugins = Available.Where(x => x.Type is not FlowElementType.Script and not FlowElementType.SubFlow 
                                                 && x.Uid.Contains(".Conditions.") == false
                                                 && x.Uid.Contains(".Templating.") == false)
-            .ToArray();
-        AvailableScripts = Available.Where(x => x.Type is FlowElementType.Script).ToArray();
-        AvailableSubFlows = Available.Where(x => x.Type == FlowElementType.SubFlow || x.Uid.Contains(".Conditions.") || x.Uid.Contains(".Templating."))
-            .ToArray();
+            .Where(x =>
+            {
+                if (flow.Type == FlowType.Failure)
+                {
+                    if (x.FailureNode == false)
+                        return false;
+                }
+                else if (x.Type == FlowElementType.Failure)
+                {
+                    return false;
+                }
 
+                if (flow.Type == FlowType.SubFlow)
+                {
+                    if (x.Name.EndsWith("GotoFlow"))
+                        return false; // don't allow gotos inside a sub flow
+                }
+                return true;
+            })
+            .ToArray();
+        
+        AvailableScripts = Available.Where(x => x.Type is FlowElementType.Script).ToArray();
+
+        if (flow.Type == FlowType.Failure)
+            AvailableSubFlows = new ffElement[] { };
+        else
+            AvailableSubFlows = Available.Where(x =>
+                    x.Uid != ("SubFlow:" + flow.Uid) &&
+                    (x.Type == FlowElementType.SubFlow || x.Uid.Contains(".Conditions.") ||
+                     x.Uid.Contains(".Templating.")))
+                .ToArray();
+        
+        await UpdateFlowElementLists();
     }
 
     private void OpenProperties()
@@ -690,18 +748,6 @@ public partial class Flow : ComponentBase, IDisposable
     private void HandleDragStart((DragEventArgs args, FlowElement element) args)
         => ActiveFlow?.ffFlow?.dragElementStart(args.element.Uid);
 
-    private async Task NewFlow()
-    {
-        ff flow = new ff();
-        flow.Name = "New Flow";
-        FlowEditor editor = new FlowEditor(this, flow);
-        await editor.Initialize();
-        OpenedFlows.Add(editor);
-        ActivateFlow(editor);
-        if(this.Zoom != 100)
-            _ = editor.ffFlow.zoom(this.Zoom);
-        editor.ffFlow.focusName();
-    }
 
     private void ActivateFlow(FlowEditor flow)
     {
@@ -711,6 +757,9 @@ public partial class Flow : ComponentBase, IDisposable
         foreach (var other in OpenedFlows)
             other.SetVisibility(other == flow);
         ActiveFlow = flow;
+        
+        _ = InitializeFlowElements();
+        //StateHasChanged();
     }
 
 
@@ -761,4 +810,54 @@ public partial class Flow : ComponentBase, IDisposable
             this.Blocker.Hide();
         }
     }
+
+
+    private async Task AddNewFlow(ff flow, bool isDirty)
+    {
+        if (flow.Uid == Guid.Empty)
+            flow.Uid = Guid.NewGuid();
+        
+        FlowEditor editor = new FlowEditor(this, flow);
+        editor.IsDirty = isDirty;
+        await editor.Initialize();
+        OpenedFlows.Add(editor);
+        ActivateFlow(editor);
+        if(this.Zoom != 100)
+            _ = editor.ffFlow.zoom(this.Zoom);
+        await editor.ffFlow.focusName();
+    }
+    
+    private async void AddFlow()
+    {
+        var flowTemplateModel = await TemplatePicker.Show((FlowType)(-1));
+        if (flowTemplateModel == null)
+            return; // twas canceled
+        if (flowTemplateModel.Fields?.Any() != true)
+        {
+            // nothing extra to fill in, go to the flow editor, typically this if basic flows
+            await AddNewFlow(flowTemplateModel.Flow, isDirty: true);
+            return;
+        }
+        
+        Logger.Instance.ILog("flowTemplateModel: " , flowTemplateModel);
+        var newFlow = await AddEditor.Show(flowTemplateModel);
+        if (newFlow == null)
+            return; // was canceled
+        
+        if (newFlow.Uid != Guid.Empty)
+        {
+            if ((App.Instance.FileFlowsSystem.ConfigurationStatus & ConfigurationStatus.Flows) != ConfigurationStatus.Flows)
+            {
+                // refresh the app configuration status
+                await App.Instance.LoadAppInfo();
+            }
+            await AddNewFlow(newFlow, isDirty: false);
+        }
+        else
+        {
+            // edit it
+            await AddNewFlow(newFlow, isDirty: true);
+        }
+    }
+
 } 

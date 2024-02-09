@@ -280,6 +280,9 @@
   display: none;
 }
 
+::deep .flow-tabs.contain-tabs {
+  height: calc(100vh - 1rem);
+}
 ::deep .flow-parts {
   display: none;
   flex-grow: 1;
