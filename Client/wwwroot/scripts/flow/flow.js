@@ -20,7 +20,6 @@ class ffFlow
         this.elements = [];
         this.SelectedParts= [];
         this.SingleOutputConnection= true;
-        this.Vertical= true;
         this.lblDelete= 'Delete';
         this.lblNode= 'Node';
         this.Zoom=100;
@@ -76,7 +75,6 @@ class ffFlow
     
     init(parts, elements) {
         this.parts = parts;
-        console.log('init elements', elements);
         this.elements = elements;
         this.infobox = null;        
         
@@ -88,7 +86,6 @@ class ffFlow
             this.lblNode = result;
         });
         
-        console.log('this.eleFlowParts', this.eleFlowParts);
         let mc = new Hammer.Manager(this.eleFlowParts);
         let pinch = new Hammer.Pinch();
         let press = new Hammer.Press({
@@ -140,8 +137,8 @@ class ffFlow
         document.addEventListener('paste', this.PasteEventListener);
 
 
-        let width = this.Vertical ? (document.body.clientWidth * 1.5) : window.screen.availWidth
-        let height = this.Vertical ? (document.body.clientHeight * 2) : window.screen.availHeight;
+        let width = document.body.clientWidth * 2;
+        let height = document.body.clientHeight * 2;
 
         this.canvas.height = height;
         this.canvas.width = width;

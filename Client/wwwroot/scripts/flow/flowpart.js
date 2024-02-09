@@ -30,8 +30,6 @@ class ffFlowPart
         div.style.left = xPos + 'px';
         div.style.top = yPos + 'px';
         div.classList.add('flow-part');
-        if (this.ffFlow.Vertical)
-            div.classList.add('vertical');
         if (typeof (part.type) === 'number') {
             if (part.type === 0)
                 div.classList.add('Input');
