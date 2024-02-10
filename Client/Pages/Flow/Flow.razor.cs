@@ -792,7 +792,7 @@ public partial class Flow : ComponentBase, IDisposable
         if (editor.IsDirty && await Confirm.Show(lblClose, $"Pages.{nameof(Flow)}.Messages.Close") == false)
             return;
         
-        int index = Math.Min(0, OpenedFlows.IndexOf(editor) - 1);
+        int index = Math.Max(0, OpenedFlows.IndexOf(editor) - 1);
         OpenedFlows.Remove(editor);
         editor.Dispose();
         ActivateFlow(OpenedFlows.Any() ? OpenedFlows[index] : null);
