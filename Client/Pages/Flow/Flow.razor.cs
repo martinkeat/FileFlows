@@ -209,12 +209,13 @@ public partial class Flow : ComponentBase, IDisposable
 
     private async Task UpdateFlowElementLists()
     {
+        PluginsDefaultGroup = ActiveFlow?.Flow?.Type == FlowType.SubFlow ? "Sub Flow" : "File";
+        
         if (eleListPlugins == null)
             return; // not initialized yet, no need to do this, the first render will contain the correct data
 
         await WaitForRender(); // ensures these lists exist or not
 
-        PluginsDefaultGroup = ActiveFlow?.Flow?.Type == FlowType.SubFlow ? "Sub Flow" : "File";
 
         eleListPlugins?.SetItems(AvailablePlugins, PluginsDefaultGroup);
         eleListScripts?.SetItems(AvailableScripts);

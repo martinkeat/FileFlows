@@ -150,7 +150,9 @@
     max-height: 0; /* Collapse the group contents */
   }
 
-  .group.expanded .group-items {
-    max-height: 1000px; /* Expand the group contents to a large enough value */
+  @for $i from 1 through 100 {
+    .group.expanded .group-items-#{$i} {
+      max-height: 40px * $i; 
+    }
   }
 }

@@ -38,7 +38,7 @@
                                 <span class="count" style="border-color:var(--flow-@(mostCommonFlowType)">@grp.Count()</span>
                                 <i class="@(expanded ? "fas fa-caret-up" : "fas fa-caret-down")" />
                             </div>
-                            <div class="group-items">
+                            <div class="group-items group-items-@grp.Count()">
                                 @foreach (var ele in grp
                                               .OrderBy(x =>
                                               {

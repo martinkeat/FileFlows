@@ -530,8 +530,32 @@ class ffFlow
         }
         e?.preventDefault();
     }
+    
+    hasFocus() {
+        if(this.eleFlowParts.classList.contains('show') === false)
+            return false;
+        let focusedElement = document.activeElement;        
+        while (focusedElement) {
+            console.log('focusedElement', focusedElement);
+            if (focusedElement.classList &&
+                (
+                    focusedElement.classList.contains('flow-properties') || 
+                    focusedElement.classList.contains('editor')
+                )
+            ) {
+                return false;
+            }
+            focusedElement = focusedElement.parentElement;
+        }
+        return true;
+    }
 
     async PasteEventListener(e, json) {
+        console.log('paste event!');
+        if(this.hasFocus() === false)
+            return; // not in focus
+        console.log('paste event in focus!');
+        
         if(!json) {
             json = (e?.clipboardData || window.clipboardData)?.getData('text');
         }
