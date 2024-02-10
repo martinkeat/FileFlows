@@ -152,9 +152,25 @@ public class FlowHelper
             if (part.Model is IDictionary<string, object> dictModel == false)
                 return Result<Node>.Fail("Failed to load model for GotoFlow flow element.");
 
-            if (dictModel.TryGetValue("Flow", out object oFlow) == false || oFlow == null ||
-                oFlow is ObjectReference orFlow == false)
+            if (dictModel.TryGetValue("Flow", out object oFlow) == false || oFlow == null)
                 return Result<Node>.Fail("Failed to get flow from GotoFlow model.");
+
+            ObjectReference? orFlow;
+            string json = JsonSerializer.Serialize(oFlow);
+            try
+            {
+                orFlow = JsonSerializer.Deserialize<ObjectReference>(json,new JsonSerializerOptions()
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+            }
+            catch (Exception)
+            {
+                return Result<Node>.Fail("Failed to load GotoFlow model from: " + json);
+            }
+            if(orFlow == null)
+                return Result<Node>.Fail("Failed to load GotoFlow model from: " + json);
+
 
             var gotoFlow = Program.Config.Flows.FirstOrDefault(x => x.Uid == orFlow.Uid);
             if(gotoFlow == null)

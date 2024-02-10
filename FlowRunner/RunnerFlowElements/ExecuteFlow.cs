@@ -121,7 +121,7 @@ public class ExecuteFlow : Node
                     // happens when canceled or when the node failed to load
                     args.FailureReason = part.Name == "FileFlows.VideoNodes.VideoFile"
                         ? "Video Nodes Plugin missing, download the from the Plugins page"
-                        : "Failed to load flow element: " + part.Name +
+                        : lfeError?.EmptyAsNull() ?? "Failed to load flow element: " + part.Name +
                           "\nEnsure you have the required plugins installed.";
 
                     Runner.CurrentFlowElement = null;
