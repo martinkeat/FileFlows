@@ -14,23 +14,26 @@
     <span class="name">@Template.Name</span>
     <span class="description">@Template.Description</span>
 
-    <div class="extra-info">
-        <div class="plugins-and-scripts">
-            <div class="plugins">
-                @foreach (var plugin in Plugins.OrderBy(x => x))
-                {
-                    <span class="plugin">@plugin</span>
-                }
-            </div>
-            @if (Scripts.Any())
-            {
-                <div class="scripts">
-                    @foreach (var script in Scripts.OrderBy(x => x))
+    @if (Plugins?.Any() == true || Scripts?.Any() == true)
+    {
+        <div class="extra-info">
+            <div class="plugins-and-scripts">
+                <div class="plugins">
+                    @foreach (var plugin in Plugins.OrderBy(x => x))
                     {
-                        <span class="script">@script</span>
+                        <span class="plugin">@plugin</span>
                     }
                 </div>
-            }
+                @if (Scripts.Any())
+                {
+                    <div class="scripts">
+                        @foreach (var script in Scripts.OrderBy(x => x))
+                        {
+                            <span class="script">@script</span>
+                        }
+                    </div>
+                }
+            </div>
         </div>
-    </div>
+    }
 </div>

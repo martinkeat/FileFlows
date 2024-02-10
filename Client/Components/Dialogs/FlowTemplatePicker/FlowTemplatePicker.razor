@@ -59,6 +59,7 @@
         </div>
         </Body>
         <Footer>
+            <button @onclick=@Open class="btn-open" disabled="@(Selected?.Path?.StartsWith("local:") != true)">@lblOpen</button>
             <button @onclick=@New disabled="@(Selected == null)">@lblNext &gt;</button>
             <button @onclick=@Cancel>@lblCancel</button>
         </Footer>

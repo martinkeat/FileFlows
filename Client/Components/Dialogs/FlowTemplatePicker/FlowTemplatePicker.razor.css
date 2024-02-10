@@ -64,4 +64,8 @@
   text-align: center;
 }
 
+.btn-open {
+  float: left;
+}
+
 /*# sourceMappingURL=FlowTemplatePicker.razor.css.map */

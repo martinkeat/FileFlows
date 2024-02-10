@@ -19,8 +19,8 @@ public partial class Flows : ListPage<Guid, FlowListModel>
     /// </summary>
     [Inject] public IJSRuntime jsRuntime { get; set; }
 
-    private FlowTemplatePicker TemplatePicker;
-    private NewFlowEditor AddEditor;
+    // private FlowTemplatePicker TemplatePicker;
+    // private NewFlowEditor AddEditor;
     private string TableIdentifier => "Flows-" + this.SelectedType;
 
     public override string ApiUrl => "/api/flow";
@@ -50,44 +50,44 @@ public partial class Flows : ListPage<Guid, FlowListModel>
 
     private async void Add()
     {
-        if (TemplatePicker == null)
+        //if (TemplatePicker == null)
         {
             NavigationManager.NavigateTo("flows/" + Guid.Empty);
             return;
         }
-
-        var flowTemplateModel = await TemplatePicker.Show(SelectedType);
-        if (flowTemplateModel == null)
-            return; // twas canceled
-        if (flowTemplateModel.Fields?.Any() != true)
-        {
-            // nothing extra to fill in, go to the flow editor, typically this if basic flows
-            App.Instance.NewFlowTemplate = flowTemplateModel.Flow;
-            NavigationManager.NavigateTo("flows/" + Guid.Empty);
-            return;
-        }
-        
-        Logger.Instance.ILog("flowTemplateModel: " , flowTemplateModel);
-        var newFlow = await AddEditor.Show(flowTemplateModel);
-        if (newFlow == null)
-            return; // was canceled
-        
-        if (newFlow.Uid != Guid.Empty)
-        {
-            if ((App.Instance.FileFlowsSystem.ConfigurationStatus & ConfigurationStatus.Flows) != ConfigurationStatus.Flows)
-            {
-                // refresh the app configuration status
-                await App.Instance.LoadAppInfo();
-            }
-            // was saved, refresh list
-            await this.Refresh();
-        }
-        else
-        {
-            // edit it
-            App.Instance.NewFlowTemplate = newFlow;
-            NavigationManager.NavigateTo("flows/" + Guid.Empty);
-        }
+        //
+        // var flowTemplateModel = await TemplatePicker.Show(SelectedType);
+        // if (flowTemplateModel == null)
+        //     return; // twas canceled
+        // if (flowTemplateModel.Fields?.Any() != true)
+        // {
+        //     // nothing extra to fill in, go to the flow editor, typically this if basic flows
+        //     App.Instance.NewFlowTemplate = flowTemplateModel.Flow;
+        //     NavigationManager.NavigateTo("flows/" + Guid.Empty);
+        //     return;
+        // }
+        //
+        // Logger.Instance.ILog("flowTemplateModel: " , flowTemplateModel);
+        // var newFlow = await AddEditor.Show(flowTemplateModel);
+        // if (newFlow == null)
+        //     return; // was canceled
+        //
+        // if (newFlow.Uid != Guid.Empty)
+        // {
+        //     if ((App.Instance.FileFlowsSystem.ConfigurationStatus & ConfigurationStatus.Flows) != ConfigurationStatus.Flows)
+        //     {
+        //         // refresh the app configuration status
+        //         await App.Instance.LoadAppInfo();
+        //     }
+        //     // was saved, refresh list
+        //     await this.Refresh();
+        // }
+        // else
+        // {
+        //     // edit it
+        //     App.Instance.NewFlowTemplate = newFlow;
+        //     NavigationManager.NavigateTo("flows/" + Guid.Empty);
+        // }
     }
 
     public override async Task<bool> Edit(FlowListModel item)

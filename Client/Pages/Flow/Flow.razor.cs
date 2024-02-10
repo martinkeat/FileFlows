@@ -91,8 +91,6 @@ public partial class Flow : ComponentBase, IDisposable
 
     private bool ElementsVisible = false;
 
-    private FlowType _FlowType;
-
     private Func<Task<bool>> NavigationCheck;
 
     protected override void OnInitialized()
@@ -153,37 +151,19 @@ public partial class Flow : ComponentBase, IDisposable
 
     private async Task Init()
     {
-        this.Blocker.Show();
-        this.StateHasChanged();
+        Blocker.Show();
+        StateHasChanged();
         try
         {
+            await LoadFlowElements();
             
-            ff flow;
-            if (Uid == Guid.Empty && App.Instance.NewFlowTemplate != null)
+            if (Uid == Guid.Empty)
             {
-                flow = App.Instance.NewFlowTemplate;
-                App.Instance.NewFlowTemplate = null;
-            }
-            else
-            {
-                var modelResult = await GetModel(API_URL + "/" + Uid.ToString());
-                flow = (modelResult.Success ? modelResult.Data : null) ?? new ff() { Parts = new List<ffPart>() };
+                AddFlow(newOnly: true);
+                return;
             }
 
-
-
-            _FlowType = flow.Type;
-
-            await LoadFlowElements(flow.Uid);
-
-            var fEditor = new FlowEditor(this, flow);
-            await fEditor.Initialize();
-            OpenedFlows.Add(fEditor);
-            ActivateFlow(fEditor);
-            
-            
-            if (flow.Type == FlowType.SubFlow)
-                PropertiesEditor.Show();
+            await OpenFlowInNewTab(Uid);
 
         }
         catch (Exception ex)
@@ -192,12 +172,31 @@ public partial class Flow : ComponentBase, IDisposable
         }
         finally
         {
-            this.Blocker.Hide();
-            this.StateHasChanged();
+            Blocker.Hide();
+            StateHasChanged();
         }
     }
 
-    private async Task LoadFlowElements(Guid modelUid)
+    private async Task OpenFlowInNewTab(Guid uid)
+    {
+        if (OpenedFlows.Any(x => x.Flow.Uid == uid) == true)
+        {
+            Toast.ShowWarning("Pages.Flow.Messages.FlowAlreadyOpened");
+            return;
+        }
+        var modelResult = await GetModel(API_URL + "/" + uid);
+        ff flow = (modelResult.Success ? modelResult.Data : null) ?? new ff { Parts = new List<ffPart>() };
+
+        var fEditor = new FlowEditor(this, flow);
+        await fEditor.Initialize();
+        OpenedFlows.Add(fEditor);
+        ActivateFlow(fEditor);
+            
+        if (flow.Type == FlowType.SubFlow)
+            PropertiesEditor.Show();
+    }
+
+    private async Task LoadFlowElements()
     {
         var elementsResult =
             await GetElements(API_URL + "/elements"); //"?type=" + (int)_FlowType + "&flowUid=" + modelUid);
@@ -232,7 +231,6 @@ public partial class Flow : ComponentBase, IDisposable
             await UpdateFlowElementLists();
             return;
         }
-        
         
         AvailablePlugins = Available.Where(x => x.Type is not FlowElementType.Script and not FlowElementType.SubFlow 
                                                 && x.Uid.Contains(".Conditions.") == false
@@ -276,21 +274,10 @@ public partial class Flow : ComponentBase, IDisposable
         => PropertiesEditor.Show();
 
     private async Task<RequestResult<ff>> GetModel(string url)
-    {
-#if (DEMO)
-        string json = "{\"Enabled\":true,\"Parts\":[{\"Uid\":\"10c99731-370d-41b6-b400-08d003e6e843\",\"Name\":\"\",\"FlowElementUid\":\"FileFlows.VideoNodes.VideoFile\",\"xPos\":411,\"yPos\":18,\"Icon\":\"fas fa-video\",\"Inputs\":0,\"Outputs\":1,\"OutputConnections\":[{\"Input\":1,\"Output\":1,\"InputNode\":\"38e28c04-4ce7-4bcf-90f3-79ed0796f347\"}],\"Type\":0,\"Model\":{}},{\"Uid\":\"3121dcae-bfb8-4c37-8871-27618b29beb4\",\"Name\":\"\",\"FlowElementUid\":\"FileFlows.VideoNodes.Video_H265_AC3\",\"xPos\":403,\"yPos\":310,\"Icon\":\"far fa-file-video\",\"Inputs\":1,\"Outputs\":2,\"OutputConnections\":[{\"Input\":1,\"Output\":1,\"InputNode\":\"7363e1d1-2cc3-444c-b970-a508e7ef3d42\"},{\"Input\":1,\"Output\":2,\"InputNode\":\"7363e1d1-2cc3-444c-b970-a508e7ef3d42\"}],\"Type\":2,\"Model\":{\"Language\":\"eng\",\"Crf\":21,\"NvidiaEncoding\":true,\"Threads\":0,\"Name\":\"\",\"NormalizeAudio\":false}},{\"Uid\":\"7363e1d1-2cc3-444c-b970-a508e7ef3d42\",\"Name\":\"\",\"FlowElementUid\":\"FileFlows.BasicNodes.File.MoveFile\",\"xPos\":404,\"yPos\":489,\"Icon\":\"fas fa-file-export\",\"Inputs\":1,\"Outputs\":1,\"OutputConnections\":[{\"Input\":1,\"Output\":1,\"InputNode\":\"bc8f30c0-a72e-47a4-94fc-7543206705b9\"}],\"Type\":2,\"Model\":{\"DestinationPath\":\"/media/downloads/converted/tv\",\"MoveFolder\":true,\"DeleteOriginal\":true}},{\"Uid\":\"38e28c04-4ce7-4bcf-90f3-79ed0796f347\",\"Name\":\"\",\"FlowElementUid\":\"FileFlows.VideoNodes.DetectBlackBars\",\"xPos\":411,\"yPos\":144,\"Icon\":\"fas fa-film\",\"Inputs\":1,\"Outputs\":2,\"OutputConnections\":[{\"Input\":1,\"Output\":1,\"InputNode\":\"3121dcae-bfb8-4c37-8871-27618b29beb4\"},{\"Input\":1,\"Output\":2,\"InputNode\":\"3121dcae-bfb8-4c37-8871-27618b29beb4\"}],\"Type\":3,\"Model\":{}},{\"Uid\":\"bc8f30c0-a72e-47a4-94fc-7543206705b9\",\"Name\":\"\",\"FlowElementUid\":\"FileFlows.BasicNodes.File.DeleteSourceDirectory\",\"xPos\":404,\"yPos\":638,\"Icon\":\"far fa-trash-alt\",\"Inputs\":1,\"Outputs\":2,\"OutputConnections\":null,\"Type\":2,\"Model\":{\"IfEmpty\":true,\"IncludePatterns\":[\"mkv\",\"mp4\",\"divx\",\"avi\"]}}]}";
-
-        var result = System.Text.Json.JsonSerializer.Deserialize<ff>(json);
-        return new RequestResult<ff> { Success = true, Data = result };
-#else
-        return await HttpHelper.Get<ff>(url);
-#endif
-    }
+        => await HttpHelper.Get<ff>(url);
 
     private async Task<RequestResult<ffElement[]>> GetElements(string url)
-    {
-        return await HttpHelper.Get<ffElement[]>(url);
-    }
+        => await HttpHelper.Get<ffElement[]>(url);
 
     private async Task WaitForRender()
     {
@@ -328,17 +315,10 @@ public partial class Flow : ComponentBase, IDisposable
         foreach (var editor in OpenedFlows)
             _ = editor.ffFlow.zoom(zoom);
     }
-    
-    private async Task<RequestResult<Dictionary<string, object>>> GetVariables(string url, List<FileFlows.Shared.Models.FlowPart> parts)
-    {
-#if (DEMO)
-        string json = "{\"ext\":\".mkv\",\"fileName\":\"Filename\",\"fileSize\":1000,\"fileOrigExt\":\".mkv\",\"fileOrigFileName\":\"OriginalFile\",\"folderName\":\"FolderName\",\"folderFullName\":\"/folder/subfolder\",\"folderOrigName\":\"FolderOriginalName\",\"folderOrigFullName\":\"/originalFolder/subfolder\",\"viVideoCodec\":\"hevc\",\"viAudioCodec\":\"ac3\",\"viAudioCodecs\":\"ac3,aac\",\"viAudioLanguage\":\"eng\",\"viAudioLanguages\":\"eng, mao\",\"viResolution\":\"1080p\"}";
-        var dict = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(json);
-        return new RequestResult<Dictionary<string, object>> { Success = true, Data = dict };
-#else
-        return await HttpHelper.Post<Dictionary<string, object>>(url, parts);
-#endif
-    }
+
+    private async Task<RequestResult<Dictionary<string, object>>> GetVariables(string url,
+        List<FileFlows.Shared.Models.FlowPart> parts)
+        => await HttpHelper.Post<Dictionary<string, object>>(url, parts);
 
     private Dictionary<string, object> EditorVariables;
     
@@ -749,7 +729,7 @@ public partial class Flow : ComponentBase, IDisposable
         AvailableScripts = null;
         StateHasChanged();
 
-        await LoadFlowElements(ActiveFlow?.Flow?.Uid ?? Guid.Empty);
+        await LoadFlowElements();
         StateHasChanged();
     }
 
@@ -835,11 +815,28 @@ public partial class Flow : ComponentBase, IDisposable
         await editor.ffFlow.focusName();
     }
     
-    private async void AddFlow()
+    /// <summary>
+    /// Shows the add flow wizard
+    /// </summary>
+    /// <param name="newOnly">if only new options should be shown and no open existing</param>
+    private async void AddFlow(bool newOnly = false)
     {
-        var flowTemplateModel = await TemplatePicker.Show((FlowType)(-1));
-        if (flowTemplateModel == null)
+        var result  = await TemplatePicker.Show((FlowType)(-1));
+        if(result == null || result.Result == FlowTemplatePickerResult.ResultCode.Cancel)
             return; // twas canceled
+        if (result.Result == FlowTemplatePickerResult.ResultCode.Open)
+        {
+            if (result.Uid != null)
+            {
+                Blocker.Show();
+                await OpenFlowInNewTab(result.Uid.Value);
+                Blocker.Hide();
+            }
+
+            return;
+        }
+
+        var flowTemplateModel = result.Model;
         if (flowTemplateModel.Fields?.Any() != true)
         {
             // nothing extra to fill in, go to the flow editor, typically this if basic flows

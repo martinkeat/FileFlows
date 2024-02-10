@@ -14,11 +14,11 @@ public partial class FlowTemplatePicker : ComponentBase
     /// Gets or sets the blocker to use
     /// </summary>
     [CascadingParameter] public Blocker Blocker { get; set; }
-    private string lblTitle, lblFilter, lblNext, lblCancel;
+    private string lblTitle, lblFilter, lblNext, lblCancel, lblOpen;
     private string lblMissingDependencies, lblMissingDependenciesMessage;
     private string FilterText = string.Empty;
     private bool Visible { get; set; }
-    TaskCompletionSource<FlowTemplateModel?> ShowTask;
+    TaskCompletionSource<FlowTemplatePickerResult> ShowTask;
 
     private FlowTemplateModel Selected = null;
     private string SelectedTag = string.Empty;
@@ -39,6 +39,7 @@ public partial class FlowTemplatePicker : ComponentBase
         lblNext = Translater.Instant("Labels.Next");
         lblCancel = Translater.Instant("Labels.Cancel");
         lblFilter = Translater.Instant("Labels.Filter");
+        lblOpen = Translater.Instant("Labels.Open");
         lblMissingDependencies = Translater.Instant("Labels.MissingDependencies");
         lblMissingDependenciesMessage = Translater.Instant("Labels.MissingDependenciesMessage");
         App.Instance.OnEscapePushed += InstanceOnOnEscapePushed;
@@ -53,14 +54,14 @@ public partial class FlowTemplatePicker : ComponentBase
         }
     }
 
-    public Task<FlowTemplateModel?> Show(FlowType type)
+    public Task<FlowTemplatePickerResult> Show(FlowType type)
     {
         Selected = null;
         FilterText = string.Empty;
         SelectedTag = string.Empty;
         SelectedSubTag = string.Empty;
         Visible = true;
-        ShowTask = new TaskCompletionSource<FlowTemplateModel?>();
+        ShowTask = new TaskCompletionSource<FlowTemplatePickerResult?>();
         Blocker.Show();
         Task.Run(async () =>
         {
@@ -95,6 +96,24 @@ public partial class FlowTemplatePicker : ComponentBase
         StateHasChanged();
     }
 
+    /// <summary>
+    /// Opens a local flow
+    /// </summary>
+    async Task Open()
+    {
+        string sUid = Selected.Path[6..];
+        if (Guid.TryParse(sUid, out Guid uid) == false)
+            return;
+        
+        ShowTask.SetResult(new()
+        {
+            Result = FlowTemplatePickerResult.ResultCode.Open,
+            Uid = uid
+        });
+        Visible = false;
+        
+    }
+
     async Task New()
     {
         Blocker.Show();
@@ -110,7 +129,11 @@ public partial class FlowTemplatePicker : ComponentBase
             }
 
             flowResult.Data.Flow.Uid = Guid.NewGuid(); // ensure its a new UID and not an existing one
-            ShowTask.SetResult(flowResult.Data);
+            ShowTask.SetResult(new()
+            {
+                Result = FlowTemplatePickerResult.ResultCode.Template,
+                Model = flowResult.Data
+            });
             Visible = false;
             
         }
@@ -124,7 +147,7 @@ public partial class FlowTemplatePicker : ComponentBase
 
     void Cancel()
     {
-        ShowTask.SetResult(null);
+        ShowTask.SetResult(new FlowTemplatePickerResult { Result = FlowTemplatePickerResult.ResultCode.Cancel });
         this.Visible = false;
     }
 
@@ -192,4 +215,45 @@ public partial class FlowTemplatePicker : ComponentBase
         
         return new ();
     }
+}
+/// <summary>
+/// Represents the result of a flow template picker operation.
+/// </summary>
+public class FlowTemplatePickerResult
+{
+    /// <summary>
+    /// Enumeration representing the result codes.
+    /// </summary>
+    public enum ResultCode
+    {
+        /// <summary>
+        /// Indicates that the operation was cancelled.
+        /// </summary>
+        Cancel = 0,
+
+        /// <summary>
+        /// Indicates that a template was selected.
+        /// </summary>
+        Template = 1,
+
+        /// <summary>
+        /// Indicates that a flow should be opened.
+        /// </summary>
+        Open = 2
+    }
+
+    /// <summary>
+    /// Gets or sets the result code.
+    /// </summary>
+    public ResultCode Result { get; set; }
+
+    /// <summary>
+    /// Gets or sets the unique identifier.
+    /// </summary>
+    public Guid? Uid { get; set; }
+
+    /// <summary>
+    /// Gets or sets the flow template model.
+    /// </summary>
+    public FlowTemplateModel Model { get; set; }
 }
