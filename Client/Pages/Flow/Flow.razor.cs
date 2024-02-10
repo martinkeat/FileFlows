@@ -202,7 +202,7 @@ public partial class Flow : ComponentBase, IDisposable
             return;
         }
         if(showBlocker)
-            Blocker.Show();
+            Blocker.Show("Pages.Flow.Messages.LoadingFlow");
         
         var modelResult = await GetModel(API_URL + "/" + uid);
         ff flow = (modelResult.Success ? modelResult.Data : null) ?? new ff { Parts = new List<ffPart>() };
@@ -695,7 +695,14 @@ public partial class Flow : ComponentBase, IDisposable
         var item = ActiveFlow?.SelectedParts?.FirstOrDefault();
         if (item is not { Type: FlowElementType.SubFlow })
             return;
-        await ActiveFlow.ffFlow.contextMenu("EditSubFlow", item);
+
+        if (item.FlowElementUid?.StartsWith("SubFlow:") != true)
+            return;
+
+        if (Guid.TryParse(item.FlowElementUid[8..], out Guid uid) == false)
+            return;
+
+        await OpenFlowInNewTab(uid, showBlocker: true);
     }
     
     private void Copy() => _ = ActiveFlow?.ffFlow?.contextMenu("Copy", ActiveFlow?.SelectedParts);

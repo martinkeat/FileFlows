@@ -272,7 +272,8 @@
         "SubFlowHelp": "To add input fields to a sub flow so you can pass in custom parameters to this sub flow, create these on the `Fields` tab.\n\nA sub flow must have a single `Input` which can be any valid input flow elements, e.g. `Input File`, `Video File` etc."
       },
       "Messages": {
-        "Close": "Are you sure you want to leave and lose all unsaved changes?"
+        "Close": "Are you sure you want to leave and lose all unsaved changes?",
+        "LoadingFlow": "Loading Flow"
       },
       "Fields": {
         "Variables": "Variables",
