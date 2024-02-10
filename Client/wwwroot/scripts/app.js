@@ -369,5 +369,15 @@ window.ff = {
             case 'success': Toast.success(title, message, timeout); break;
             case 'error': Toast.error(title, message, timeout); break;
         }
+    },
+    updateUrlWithNewUid: function(newUid) {
+        // Get the current URL
+        let currentUrl = window.location.href;
+    
+        // Replace the empty GUID with the new UID
+        let updatedUrl = currentUrl.replace("00000000-0000-0000-0000-000000000000", newUid);
+    
+        // Update the URL
+        window.history.replaceState({}, document.title, updatedUrl);
     }
 };

@@ -209,8 +209,8 @@ class ffFlowLines {
         const path = new Path2D();
 
         // add some spacing for some reason
-        srcX += 2;
-        destX += 2;
+        //srcX += 2;
+        //destX += 2;
         
         path.moveTo(srcX, srcY);
         let linePoints = [[srcX, srcY]];

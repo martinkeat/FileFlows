@@ -772,9 +772,15 @@ public partial class Flow : ComponentBase, IDisposable
         try
         {
             var model = await editor.GetModel();
+            bool isFirst = OpenedFlows.IndexOf(editor) == 0;
             var result = await HttpHelper.Put<ff>(API_URL, model);
             if (result.Success)
             {
+                if (isFirst && Uid == Guid.Empty)
+                {
+                    // update url to save flow
+                    await jsRuntime.InvokeVoidAsync("ff.updateUrlWithNewUid", result.Data.Uid.ToString());
+                }
                 if ((App.Instance.FileFlowsSystem.ConfigurationStatus & ConfigurationStatus.Flows) !=
                     ConfigurationStatus.Flows)
                 {
@@ -808,11 +814,14 @@ public partial class Flow : ComponentBase, IDisposable
         FlowEditor editor = new FlowEditor(this, flow);
         editor.IsDirty = isDirty;
         await editor.Initialize();
+        bool first = OpenedFlows.Any() == false;
         OpenedFlows.Add(editor);
         ActivateFlow(editor);
         if(this.Zoom != 100)
             _ = editor.ffFlow.zoom(this.Zoom);
         await editor.ffFlow.focusName();
+        if (first)
+             await WaitForRender();
     }
     
     /// <summary>
