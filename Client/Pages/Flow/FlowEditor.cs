@@ -57,6 +57,11 @@ public class FlowEditor : IDisposable
             IsDirty = true;
             FlowPage.TriggerStateHasChanged();
         };
+        ffFlow.OnCtrlDblClick = (ffpart) =>
+        {
+            if (ffpart.Type == FlowElementType.SubFlow && Guid.TryParse(ffpart.FlowElementUid, out Guid subFlowUid))
+                _ = FlowPage.OpenFlowInNewTab(subFlowUid);
+        };
         
         lblObsoleteMessage = Translater.Instant("Labels.ObsoleteConfirm.Message");
         await InitModel(Flow);

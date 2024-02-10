@@ -27,6 +27,7 @@ public class ffFlowWrapper
     
     public Func<ffPart, bool, Task<object>> OnEdit { get; set; }
     public Action OnMarkDirty { get; set; }
+    public Action<ffPart> OnCtrlDblClick { get; set; }
 
     
     private ffFlowWrapper(IJSRuntime jsRuntime)
@@ -109,7 +110,11 @@ public class ffFlowWrapper
     [JSInvokable]
     public void MarkDirty()
         => OnMarkDirty();
-    
+
+    [JSInvokable]
+    public void CtrlDblClick(ffPart part)
+        => OnCtrlDblClick(part);
+
     [JSInvokable]
     public string Translate(string key, ExpandoObject model)
     {

@@ -177,11 +177,12 @@ public partial class Flow : ComponentBase, IDisposable
         }
     }
 
-    private async Task OpenFlowInNewTab(Guid uid)
+    public async Task OpenFlowInNewTab(Guid uid)
     {
-        if (OpenedFlows.Any(x => x.Flow.Uid == uid) == true)
+        var existing = OpenedFlows.FirstOrDefault(x => x.Flow.Uid == uid);
+        if (existing != null)
         {
-            Toast.ShowWarning("Pages.Flow.Messages.FlowAlreadyOpened");
+            ActivateFlow(existing); // already opened
             return;
         }
         var modelResult = await GetModel(API_URL + "/" + uid);

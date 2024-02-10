@@ -55,11 +55,13 @@ class ffFlowPart
                 div.classList.add('SubFlow');
         }
 
-        let mc = new Hammer.Manager(div);
-        mc.add( new Hammer.Tap({ event: 'doubletap', taps: 2 }) );
-        mc.on("doubletap", (ev) => {
-            this.editFlowPart(part.uid, false);
-        });
+        // used for touch, currently disabled
+        // let mc = new Hammer.Manager(div);
+        // mc.add( new Hammer.Tap({ event: 'doubletap', taps: 2 }) );
+        // mc.on("doubletap", (ev) => {
+        //     // this is effect the double click/ctrl to open a sub flow instead of opening side editor
+        //     this.editFlowPart(part.uid, false);
+        // });
         div.classList.add('size-' + Math.max(part.inputs, part.outputs));
 
         div.setAttribute('tabIndex', -1);
@@ -136,8 +138,13 @@ class ffFlowPart
         div.addEventListener("dblclick", (event) => {
             event.stopImmediatePropagation();
             event.preventDefault();
-            this.ffFlow.setInfo(part.Name, 'Node');
-            this.editFlowPart(part.uid);
+            if(event.ctrlKey) {
+                console.log('ctrl dbl click part', part);
+                this.ffFlow.csharp.invokeMethodAsync("CtrlDblClick", part);
+            } else {
+                this.ffFlow.setInfo(part.Name, 'Node');
+                this.editFlowPart(part.uid);
+            }
         });
         div.addEventListener("keydown", (event) => {
             if (event.code === 'Delete' || event.code === 'Backspace') {

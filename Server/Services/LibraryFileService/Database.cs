@@ -151,6 +151,7 @@ public partial class LibraryFileService
         file.LibraryName ??= string.Empty;
         file.RelativePath ??= string.Empty;
         file.DuplicateName ??= string.Empty;
+        file.FailureReason ??= string.Empty;
         
         string sql;
         string strOriginalMetadata, strFinalMetadata, strExecutedNodes;
@@ -164,7 +165,7 @@ public partial class LibraryFileService
                   "ProcessingOrder=@6,Fingerprint=@7,FinalFingerprint=@8,IsDirectory=@9,Flags=@10,OriginalSize=@11,FinalSize=@12," +
                   "CreationTime=@13,LastWriteTime=@14,HoldUntil=@15,ProcessingStarted=@16,ProcessingEnded=@17,LibraryUid=@18," +
                   "LibraryName=@19,FlowUid=@20,FlowName=@21,DuplicateUid=@22,DuplicateName=@23,NodeUid=@24,NodeName=@25,WorkerUid=@26," +
-                  "OutputPath=@27,NoLongerExistsAfterProcessing=@28,OriginalMetadata=@29,FinalMetadata=@30,ExecutedNodes=@31 " +
+                  "OutputPath=@27,NoLongerExistsAfterProcessing=@28,OriginalMetadata=@29,FinalMetadata=@30,ExecutedNodes=@31,FailureReason=@32 " +
                   "where Uid = @0";
         }
         else
@@ -179,12 +180,12 @@ public partial class LibraryFileService
                   "ProcessingOrder,Fingerprint,FinalFingerprint,IsDirectory,Flags,OriginalSize,FinalSize," +
                   "CreationTime,LastWriteTime,HoldUntil,ProcessingStarted,ProcessingEnded,LibraryUid," +
                   "LibraryName,FlowUid,FlowName,DuplicateUid,DuplicateName,NodeUid,NodeName,WorkerUid," +
-                  "OutputPath,NoLongerExistsAfterProcessing,OriginalMetadata,FinalMetadata,ExecutedNodes)" +
+                  "OutputPath,NoLongerExistsAfterProcessing,OriginalMetadata,FinalMetadata,ExecutedNodes,FailureReason)" +
                   " values (@0,@1,@2,@3,@4,@5," +
                   "@6,@7,@8,@9,@10,@11,@12," +
                   "@13,@14,@15,@16,@17,@18," +
                   "@19,@20,@21,@22,@23,@24,@25,@26," +
-                  "@27,@28,@29,@30,@31)";
+                  "@27,@28,@29,@30,@31,@32)";
         }
 
         try
@@ -209,7 +210,8 @@ public partial class LibraryFileService
                 file.NodeName, file.WorkerUid?.ToString() ?? string.Empty,
 
                 file.OutputPath, file.NoLongerExistsAfterProcessing ? 1 : 0, strOriginalMetadata, strFinalMetadata,
-                strExecutedNodes
+                strExecutedNodes,
+                file.FailureReason
             );
             Logger.Instance.DLog("File: " + file.Name + "\nExecuted nodes: " + strExecutedNodes);
         }
