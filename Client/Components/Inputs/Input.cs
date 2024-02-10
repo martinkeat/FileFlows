@@ -201,6 +201,9 @@ public abstract class Input<T> : ComponentBase, IInput, IDisposable
                         }
                     }
                 }
+
+                if (areEqual == false)
+                    _ = OnChangedValue.InvokeAsync(value);
             }
             finally
             {
@@ -213,6 +216,11 @@ public abstract class Input<T> : ComponentBase, IInput, IDisposable
 
     [Parameter]
     public EventCallback<T> ValueChanged { get; set; }
+    /// <summary>
+    /// Gets or sets the On changed event, this is similar to the ValueChanged but can be used with the bound value
+    /// Only use this if you want to subscribe to events when the value changes but not update the bound model
+    /// </summary>
+    [Parameter] public EventCallback<T> OnChangedValue { get; set; }
 
     protected override void OnInitialized()
     {

@@ -100,6 +100,17 @@ public partial class InputKeyValue : Input<List<KeyValuePair<string, string>>>
     }
 
     /// <summary>
+    /// Called when the the new value is blurred
+    /// </summary>
+    void BlurAdd()
+    {
+        if (string.IsNullOrWhiteSpace(NewValue))
+            return; // dont add if now value set
+        
+        Add();
+    }
+
+    /// <summary>
     /// Add a new item to the list
     /// </summary>
     void Add()

@@ -226,6 +226,8 @@ export class LibraryFileTable extends FFChart
             }
         }
         let chartDiv = document.getElementById(this.chartUid);
+        if(!chartDiv)
+            return;
         chartDiv.textContent = '';
         chartDiv.appendChild(table);
     }

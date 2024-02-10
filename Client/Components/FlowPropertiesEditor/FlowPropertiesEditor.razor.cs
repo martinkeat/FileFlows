@@ -1,9 +1,11 @@
 ﻿using System.Text;
 using System.Text.Json;
 using FileFlows.Client.Components.Dialogs;
+using FileFlows.Client.Pages;
 using FileFlows.Plugin;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
+using Flow = FileFlows.Shared.Models.Flow;
 
 namespace FileFlows.Client.Components;
 
@@ -19,9 +21,14 @@ public partial class FlowPropertiesEditor
     [Inject] IJSRuntime jsRuntime { get; set; }
     
     /// <summary>
+    /// Gets or sets the flow editor currently opened
+    /// </summary>
+    [Parameter] public FlowEditor FlowEditor { get; set; }
+
+    /// <summary>
     /// Gets or sets the flow
     /// </summary>
-    [Parameter] public Flow Flow { get; set; }
+    public Flow Flow => FlowEditor?.Flow;
 
     private FlowField Editing;
     protected string lblClose, lblHelp, lblTitle, lblSubFlowHelp;
@@ -99,7 +106,10 @@ public partial class FlowPropertiesEditor
     /// Adds a new property variable
     /// </summary>
     void Add()
-        => Fields.Add(new());
+    {
+        Fields.Add(new());
+        MarkDirty();
+    }
 
     /// <summary>
     /// Edits a field
@@ -117,6 +127,7 @@ public partial class FlowPropertiesEditor
         if (await Confirm.Show("Labels.Delete", "Are you sure you want to delete this field?") == false)
             return;
         Fields.Remove(item);
+        MarkDirty();
         StateHasChanged();
     }
 
@@ -149,6 +160,7 @@ public partial class FlowPropertiesEditor
 
         // Insert the item at the new position
         Fields.Insert(newIndex, item);
+        MarkDirty();
 
         await Task.Delay(50);
         Editing = item;
@@ -163,8 +175,11 @@ public partial class FlowPropertiesEditor
         get => Editing?.DefaultValue as string ?? string.Empty;
         set
         {
-            if (Editing?.Type == FlowFieldType.String || Editing?.Type == FlowFieldType.Directory || Editing?.Type == FlowFieldType.Select)
+            if (Editing?.Type is FlowFieldType.String or FlowFieldType.Directory or FlowFieldType.Select)
+            {
                 Editing.DefaultValue = value;
+                MarkDirty();
+            }
         } 
     }
 
@@ -177,7 +192,10 @@ public partial class FlowPropertiesEditor
         set
         {
             if (Editing?.Type == FlowFieldType.Boolean)
+            {
                 Editing.DefaultValue = value;
+                MarkDirty();
+            }
         } 
     }
     /// <summary>
@@ -188,8 +206,11 @@ public partial class FlowPropertiesEditor
         get => Editing?.DefaultValue as int? ?? 0;
         set
         {
-            if (Editing?.Type == FlowFieldType.Number)
+            if (Editing?.Type is FlowFieldType.Number or FlowFieldType.Slider)
+            {
                 Editing.DefaultValue = value;
+                MarkDirty();
+            }
         } 
     }
     /// <summary>
@@ -200,8 +221,11 @@ public partial class FlowPropertiesEditor
         get => Editing.IntMinimum;
         set
         {
-            if (Editing?.Type == FlowFieldType.Number || Editing?.Type == FlowFieldType.Slider)
+            if (Editing?.Type is FlowFieldType.Number or FlowFieldType.Slider)
+            {
                 Editing.IntMinimum = value;
+                MarkDirty();
+            }
         } 
     }
     /// <summary>
@@ -212,8 +236,11 @@ public partial class FlowPropertiesEditor
         get => Editing.IntMaximum;
         set
         {
-            if (Editing?.Type == FlowFieldType.Number || Editing?.Type == FlowFieldType.Slider)
+            if (Editing?.Type is FlowFieldType.Number or FlowFieldType.Slider)
+            {
                 Editing.IntMaximum = value;
+                MarkDirty();
+            }
         } 
     }
 
@@ -223,6 +250,14 @@ public partial class FlowPropertiesEditor
     public bool Inverse
     {
         get => Editing.Inverse;
-        set => Editing.Inverse = value;
+        set { Editing.Inverse = value; MarkDirty(); }
+    }
+
+    /// <summary>
+    /// Marks the current flow editor as dirty and needed to be saved
+    /// </summary>
+    private void MarkDirty()
+    {
+        FlowEditor?.MarkDirty();
     }
 }

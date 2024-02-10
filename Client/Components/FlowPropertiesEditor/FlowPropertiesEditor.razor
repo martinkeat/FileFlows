@@ -16,18 +16,18 @@
             <FlowTab Title="General">
                 @if (Flow.Type != FlowType.SubFlow)
                 {
-                    <InputTextArea @bind-Value="@Flow.Properties.Description" Label="Pages.Flow.Fields.Description" />
-                    <InputText @bind-Value="@Flow.Properties.Author" Label="Pages.Flow.Fields.Author" />
-                    <InputArray @bind-Value="@Flow.Properties.Tags" Label="Pages.Flow.Fields.Tags"/>
-                    <InputText @bind-Value="@Flow.Properties.MinimumVersion" Label="Pages.Flow.Fields.MinimumVersion"/>
-                    <InputKeyValue @bind-Value="@FlowVariables" Label="Pages.Flow.Fields.Variables" />
+                    <InputTextArea @bind-Value="@Flow.Properties.Description" Label="Pages.Flow.Fields.Description"  OnChangedValue="(v) => MarkDirty()" />
+                    <InputText @bind-Value="@Flow.Properties.Author" Label="Pages.Flow.Fields.Author"  OnChangedValue="(v) => MarkDirty()" />
+                    <InputArray @bind-Value="@Flow.Properties.Tags" Label="Pages.Flow.Fields.Tags" OnChangedValue="(v) => MarkDirty()"/>
+                    <InputText @bind-Value="@Flow.Properties.MinimumVersion" Label="Pages.Flow.Fields.MinimumVersion" OnChangedValue="(v) => MarkDirty()" />
+                    <InputKeyValue @bind-Value="@FlowVariables" Label="Pages.Flow.Fields.Variables" OnChangedValue="(v) => MarkDirty()" />
                 }
                 else
                 {
                     <InputTextLabel Label=@lblSubFlowHelp Value=@lblSubFlowHelp HideLabel=@true Pre="true" Formatter="Markdown" />
                     <hr />
-                    <InputTextArea @bind-Value="@Flow.Properties.Description" Label="Pages.Flow.Fields.SubFlowDescription" />
-                    <InputKeyValueInt @bind-Value="@Flow.Properties.Outputs" Label="Pages.Flow.Fields.Outputs" />
+                    <InputTextArea @bind-Value="@Flow.Properties.Description" Label="Pages.Flow.Fields.SubFlowDescription" OnChangedValue="(v) => MarkDirty()"  />
+                    <InputKeyValueInt @bind-Value="@Flow.Properties.Outputs" Label="Pages.Flow.Fields.Outputs" OnChangedValue="(v) => MarkDirty()" />
                 }
             </FlowTab>
             <FlowTab Title="Fields">
@@ -47,7 +47,7 @@
                                             }
                                             else
                                             {
-                                                <input type="text" @bind-value=@field.Name/>
+                                                <input type="text" @bind-value=@field.Name />
                                             }
                                         </div>
                                         <div class="type">
@@ -96,44 +96,43 @@
                                 
                                 <FlowTabs>
                                     <FlowTab Title="General">
-                                        <InputText @bind-Value="@Editing.Description" Label="Pages.Flow.Fields.Field.Description"></InputText>
-                                        <InputText @bind-Value="@Editing.FlowElementField" Label="Pages.Flow.Fields.Field.FlowElementField"></InputText>
+                                        <InputText @bind-Value="@Editing.Description" Label="Pages.Flow.Fields.Field.Description" OnChangedValue="(v) => MarkDirty()"></InputText>
+                                        <InputText @bind-Value="@Editing.FlowElementField" Label="Pages.Flow.Fields.Field.FlowElementField" OnChangedValue="(v) => MarkDirty()"></InputText>
 
                                         @if (Editing.Type == FlowFieldType.String || Editing.Type == FlowFieldType.Directory)
                                         {
-                                            <InputSwitch @bind-Value="@Editing.Required" Label="Pages.Flow.Fields.Field.Required"></InputSwitch>
+                                            <InputSwitch @bind-Value="@Editing.Required" Label="Pages.Flow.Fields.Field.Required" OnChangedValue="(v) => MarkDirty()"></InputSwitch>
                                             <InputText @bind-Value="@DefaultValueString" Label="Pages.Flow.Fields.Field.Default"></InputText>
                                         }
                                         else if (Editing.Type == FlowFieldType.Boolean)
                                         {
                                             <InputSwitch @bind-Value="@DefaultValueBoolean" Label="Pages.Flow.Fields.Field.Default"></InputSwitch>
                                         }
-                                        else if (Editing.Type == FlowFieldType.Number)
+                                        else if (Editing.Type is FlowFieldType.Number or FlowFieldType.Slider)
                                         {
                                             <InputNumber TItem="Int32" @bind-Value="@DefaultValueNumber" Label="Pages.Flow.Fields.Field.Default"></InputNumber>
-                                        }
-                                        else if (Editing.Type == FlowFieldType.Slider)
-                                        {
-                                            <InputNumber TItem="Int32" @bind-Value="@DefaultValueNumber" Label="Pages.Flow.Fields.Field.Default"></InputNumber>
-                                            <InputNumber TItem="Int32" @bind-Value="@IntMinValue" Label="Pages.Flow.Fields.Field.Minimum"></InputNumber>
-                                            <InputNumber TItem="Int32" @bind-Value="@IntMaxValue" Label="Pages.Flow.Fields.Field.Maximum"></InputNumber>
-                                            <InputSwitch @bind-Value="@Inverse" Label="Pages.Flow.Fields.Field.Inverse"></InputSwitch>
+                                            if (Editing.Type == FlowFieldType.Slider)
+                                            {
+                                                <InputNumber TItem="Int32" @bind-Value="@IntMinValue" Label="Pages.Flow.Fields.Field.Minimum"></InputNumber>
+                                                <InputNumber TItem="Int32" @bind-Value="@IntMaxValue" Label="Pages.Flow.Fields.Field.Maximum"></InputNumber>
+                                                <InputSwitch @bind-Value="@Inverse" Label="Pages.Flow.Fields.Field.Inverse"></InputSwitch>
+                                            }
                                         }
                                         else if (Editing.Type == FlowFieldType.Select)
                                         {
-                                            <InputArray @bind-Value="@Editing.Options" Label="Pages.Flow.Fields.Field.Options"></InputArray>
+                                            <InputArray @bind-Value="@Editing.Options" Label="Pages.Flow.Fields.Field.Options" OnChangedValue="(v) => MarkDirty()"></InputArray>
                                             <InputText @bind-Value="@DefaultValueString" Label="Pages.Flow.Fields.Field.Default"></InputText>
                                         }
                                         else if (Editing.Type == FlowFieldType.OutputPath)
                                         {
-                                            <InputArray @bind-Value="@Editing.Options" Label="Pages.Flow.Fields.Field.DeleteIfEmpty"></InputArray>
+                                            <InputArray @bind-Value="@Editing.Options" Label="Pages.Flow.Fields.Field.DeleteIfEmpty" OnChangedValue="(v) => MarkDirty()"></InputArray>
                                         }
                                         
                                     </FlowTab>
                                     <FlowTab Title="Conditions">
-                                        <InputText @bind-Value="@Editing.IfName" Label="Pages.Flow.Fields.Field.IfName"></InputText>
-                                        <InputText @bind-Value="@Editing.IfValue" Label="Pages.Flow.Fields.Field.IfValue"></InputText>
-                                        <InputSwitch @bind-Value="@Editing.IfNot" Label="Pages.Flow.Fields.Field.IfNot"></InputSwitch>
+                                        <InputText @bind-Value="@Editing.IfName" Label="Pages.Flow.Fields.Field.IfName" OnChangedValue="(v) => MarkDirty()"></InputText>
+                                        <InputText @bind-Value="@Editing.IfValue" Label="Pages.Flow.Fields.Field.IfValue" OnChangedValue="(v) => MarkDirty()"></InputText>
+                                        <InputSwitch @bind-Value="@Editing.IfNot" Label="Pages.Flow.Fields.Field.IfNot" OnChangedValue="(v) => MarkDirty()"></InputSwitch>
                                     </FlowTab>
                                 </FlowTabs>
                             </div>

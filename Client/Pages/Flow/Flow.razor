@@ -36,7 +36,7 @@
                             @if (active)
                             {
                                 <span class="flow-name">
-                                    <input type="text" @bind-value="@flowEditor.Flow.Name" id="flow-@flowEditor.Flow.Uid-name"/>
+                                    <input type="text" @bind-value="@ActiveFlowName" id="flow-@flowEditor.Flow.Uid-name" />
                                 </span>
                             }
                             else
@@ -87,7 +87,7 @@
 
     @if (ActiveFlow?.Flow != null)
     {
-        <FlowPropertiesEditor @ref="PropertiesEditor" Flow="@ActiveFlow?.Flow"/>
+        <FlowPropertiesEditor @ref="PropertiesEditor" FlowEditor="@ActiveFlow"/>
     }
 </div>
 

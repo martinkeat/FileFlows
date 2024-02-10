@@ -177,7 +177,23 @@ public partial class Flow : ComponentBase, IDisposable
         }
     }
 
-    public async Task OpenFlowInNewTab(Guid uid)
+    /// <summary>
+    /// Gets or sets the active flows name
+    /// </summary>
+    public string ActiveFlowName
+    {
+        get => ActiveFlow?.Flow?.Name;
+        set
+        {
+            if (ActiveFlow?.Flow != null)
+            {
+                ActiveFlow.Flow.Name = value;
+                ActiveFlow.MarkDirty();
+            }
+        }
+    }
+
+    public async Task OpenFlowInNewTab(Guid uid, bool showBlocker = false)
     {
         var existing = OpenedFlows.FirstOrDefault(x => x.Flow.Uid == uid);
         if (existing != null)
@@ -185,6 +201,9 @@ public partial class Flow : ComponentBase, IDisposable
             ActivateFlow(existing); // already opened
             return;
         }
+        if(showBlocker)
+            Blocker.Show();
+        
         var modelResult = await GetModel(API_URL + "/" + uid);
         ff flow = (modelResult.Success ? modelResult.Data : null) ?? new ff { Parts = new List<ffPart>() };
 
@@ -195,6 +214,9 @@ public partial class Flow : ComponentBase, IDisposable
             
         if (flow.Type == FlowType.SubFlow)
             PropertiesEditor.Show();
+        
+        if(showBlocker)
+            Blocker.Hide();
     }
 
     private async Task LoadFlowElements()
@@ -373,12 +395,14 @@ public partial class Flow : ComponentBase, IDisposable
             typeDisplayName = Translater.TranslateIfHasTranslation($"Flow.Parts.{typeName}.Label", FlowHelper.FormatLabel(typeName));
         }
 
-        var fields = ObjectCloner.Clone(flowElement.Fields).Select(x =>
-        {
-            if (PropertiesEditor.Visible)
-                x.CopyValue = $"{part.Uid}.{x.Name}";
-            return x;
-        }).ToList();
+        var fields = flowElement.Fields == null
+            ? new()
+            : ObjectCloner.Clone(flowElement.Fields).Select(x =>
+            {
+                if (PropertiesEditor.Visible)
+                    x.CopyValue = $"{part.Uid}.{x.Name}";
+                return x;
+            }).ToList();
         // add the name to the fields, so a node can be renamed
         fields.Insert(0, new ElementField
         {
@@ -396,7 +420,6 @@ public partial class Flow : ComponentBase, IDisposable
                 ReadOnlyValue = part.Uid.ToString(),
                 UiOnly = true
             });
-            
         }
 
         bool isFunctionNode = flowElement.Uid == "FileFlows.BasicNodes.Functions.Function";
@@ -539,6 +562,7 @@ public partial class Flow : ComponentBase, IDisposable
             {
                 if (dictNew?.ContainsKey("Outputs") == true && int.TryParse(dictNew["Outputs"]?.ToString(), out outputs)) { }
             }
+            ActiveFlow?.MarkDirty();
             return new { outputs, model = newModel };
         }
         else
@@ -791,6 +815,12 @@ public partial class Flow : ComponentBase, IDisposable
                 }
 
                 editor.UpdateModel(result.Data, clean: true);
+
+                if (model.Type == FlowType.SubFlow)
+                {
+                    // need to refresh the sub flows as their options may have changed
+                    await LoadFlowElements();
+                }
             }
             else
             {
@@ -838,12 +868,7 @@ public partial class Flow : ComponentBase, IDisposable
         if (result.Result == FlowTemplatePickerResult.ResultCode.Open)
         {
             if (result.Uid != null)
-            {
-                Blocker.Show();
-                await OpenFlowInNewTab(result.Uid.Value);
-                Blocker.Hide();
-            }
-
+                await OpenFlowInNewTab(result.Uid.Value, showBlocker: true);
             return;
         }
 

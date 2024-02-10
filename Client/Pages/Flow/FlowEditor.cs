@@ -59,8 +59,8 @@ public class FlowEditor : IDisposable
         };
         ffFlow.OnCtrlDblClick = (ffpart) =>
         {
-            if (ffpart.Type == FlowElementType.SubFlow && Guid.TryParse(ffpart.FlowElementUid, out Guid subFlowUid))
-                _ = FlowPage.OpenFlowInNewTab(subFlowUid);
+            if (ffpart.Type == FlowElementType.SubFlow && ffpart.FlowElementUid?.StartsWith("SubFlow:") == true && Guid.TryParse(ffpart.FlowElementUid[8..], out Guid subFlowUid))
+                _ = FlowPage.OpenFlowInNewTab(subFlowUid, showBlocker: true);
         };
         
         lblObsoleteMessage = Translater.Instant("Labels.ObsoleteConfirm.Message");
@@ -257,5 +257,15 @@ public class FlowEditor : IDisposable
             this.IsDirty = false;
 
         this.Flow = updatedModel;
+    }
+
+    /// <summary>
+    /// Marks the editor as dirty
+    /// </summary>
+    /// <exception cref="NotImplementedException"></exception>
+    public void MarkDirty()
+    {
+        this.IsDirty = true;
+        FlowPage.TriggerStateHasChanged();
     }
 } 

@@ -8,6 +8,8 @@ using System.Runtime.InteropServices;
 using System.Text.Json.Serialization;
 using FileFlows.ScriptExecution;
 using FileFlows.Server.Services;
+using Humanizer;
+using NPoco.Expressions;
 using Logger = FileFlows.Shared.Logger;
 using Range = FileFlows.Shared.Validators.Range;
 
@@ -556,7 +558,7 @@ public class FlowController : Controller
         for (int i = 1; i <= 5; i++)
         {
             FlowElement eleNumOutput = new FlowElement();
-            eleNumOutput.Name = "Sub Flow Output " + i;
+            eleNumOutput.Name = "Output " + i;
             eleNumOutput.Uid = $"SubFlowOutput" + i;
             eleNumOutput.Icon = "fas fa-sign-out-alt";
             eleNumOutput.Inputs = 1;
@@ -626,6 +628,7 @@ public class FlowController : Controller
             var f = new ElementField()
             {
                 Name = field.Name,
+                Label = field.Name.Replace("_", " "),
                 Description = field.Description
             };
             
@@ -640,7 +643,7 @@ public class FlowController : Controller
                 _ => throw new ArgumentOutOfRangeException()
             };
 
-            if (field.Type == FlowFieldType.Number || field.Type == FlowFieldType.Slider)
+            if (field.Type is FlowFieldType.Number or FlowFieldType.Slider)
             {
                 if (field.IntMaximum > field.IntMinimum)
                 {
@@ -653,6 +656,19 @@ public class FlowController : Controller
                     f.Parameters ??= new();
                     f.Parameters[nameof(field.Inverse)] = field.Inverse;
                 }
+            }
+            else if (field.Type is FlowFieldType.Select)
+            {
+                f.Parameters ??= new();
+                f.Parameters[nameof(field.Options)] = field.Options.Select(x =>
+                {
+                    var index = x.IndexOf("|", StringComparison.InvariantCulture);
+                    return new ListOption
+                    {
+                        Label = index > 0 ? x[..index] : x,
+                        Value = index > 0 ? x[(index + 1)..] : x
+                    };
+                }).ToList();
             }
 
             // var defaultValue = field.Type switch

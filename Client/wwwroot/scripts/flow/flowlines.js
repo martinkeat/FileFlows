@@ -46,9 +46,8 @@ class ffFlowLines {
 
         this.ioCanvasBounds = this.ffFlow.canvas.getBoundingClientRect();
         let srcBounds = this.ioNode.getBoundingClientRect();
-        let srcX = (srcBounds.left - this.ioCanvasBounds.left) + this.ioOffset;
-        srcX = Math.round(srcX / 10) * 10;
-        let srcY = (srcBounds.top - this.ioCanvasBounds.top) + this.ioOffset;
+        let srcX = (srcBounds.left - this.ioCanvasBounds.left) + 5; // + 5 for half the width of the output box
+        let srcY = (srcBounds.top - this.ioCanvasBounds.top) + 5;
         this.ioSourceBounds = { left: srcX, top: srcY };
 
         if (this.selectedOutput != null) {
@@ -207,10 +206,6 @@ class ffFlowLines {
         const context = this.ioContext;
 
         const path = new Path2D();
-
-        // add some spacing for some reason
-        //srcX += 2;
-        //destX += 2;
         
         path.moveTo(srcX, srcY);
         let linePoints = [[srcX, srcY]];
