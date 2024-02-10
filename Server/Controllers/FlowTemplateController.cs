@@ -37,21 +37,30 @@ public class FlowTemplateController : Controller
             type = any;
         if (type == any || type != FlowType.SubFlow)
         {
-            var plugins = new PluginService().GetAll().Where(x => x.Enabled)
-                .Select(x => x.Name.Replace(" ", string.Empty).ToLowerInvariant().Replace("nodes", string.Empty))
-                .ToList();
-            foreach (var template in Templates)
+            if (Templates?.Any() == true)
             {
-                template.MissingDependencies = template.Plugins.Where(pl =>
-                        plugins.Contains(
-                            pl.ToLowerInvariant().Replace(" ", string.Empty).Replace("nodes", string.Empty)) == false)
+                var plugins = new PluginService().GetAll().Where(x => x.Enabled)
+                    .Select(x => x.Name.Replace(" ", string.Empty).ToLowerInvariant().Replace("nodes", string.Empty))
                     .ToList();
-            }
+                foreach (var template in Templates)
+                {
+                    template.MissingDependencies = template.Plugins.Where(pl =>
+                            plugins.Contains(
+                                pl.ToLowerInvariant().Replace(" ", string.Empty).Replace("nodes", string.Empty)) ==
+                            false)
+                        .ToList();
+                }
 
-            var results = (Templates ?? new()).Union(LocalFlows())
-                .Where(x => x.Type == type || type == any)
-                .ToList();
-            templates.AddRange(results);
+                var results = (Templates ?? new()).Union(LocalFlows())
+                    .Where(x => x.Type == type || type == any)
+                    .ToList();
+                templates.AddRange(results);
+            }
+            else
+            {
+                templates.AddRange(BasicFallbackFlows());
+                
+            }
         }
 
         if (type == any || type == FlowType.SubFlow)
@@ -73,11 +82,34 @@ public class FlowTemplateController : Controller
                 Tags = new List<string>() { "Basic"},
                 Revision = 1,
                 Type = FlowType.SubFlow,
-                MinimumVersion = "24.02.1.999"
+                MinimumVersion = "24.02.1.100"
             }
         };
     }
 
+
+    /// <summary>
+    /// Basic fall back flows in case the flow templates cannot be loaded
+    /// </summary>
+    /// <returns>the fall back flows</returns>
+    private List<FlowTemplateModel> BasicFallbackFlows()
+    {
+        return new List<FlowTemplateModel>()
+        {
+            new FlowTemplateModel()
+            {
+                Path = "Empty",
+                Name = "Empty",
+                Description = "A blank flow to start from",
+                Author = "FileFlows",
+                Tags = new List<string>() { "Basic" },
+                Revision = 1,
+                Type = FlowType.Standard,
+                MinimumVersion = "24.02.1.100"
+            }
+        };
+    }
+    
     private List<FlowTemplateModel> LocalFlows()
     {
         var flows = new FlowService().GetAll()
@@ -192,12 +224,19 @@ public class FlowTemplateController : Controller
     /// </summary>
     async Task RefreshTemplates()
     {
-        var result = await HttpHelper.Get<List<FlowTemplateModel>>(
-            "https://raw.githubusercontent.com/revenz/FileFlowsRepository/master/flows.json?dt=" +
-            DateTime.UtcNow.Ticks);
-
+        RequestResult<List<FlowTemplateModel>> result = null;
+        try
+        {
+            result = await HttpHelper.Get<List<FlowTemplateModel>>(
+                "https://raw.githubusercontent.com/revenz/FileFlowsRepository/master/flows.json?dt=" +
+                DateTime.UtcNow.Ticks);
+        }
+        catch (Exception ex)
+        {
+            Logger.Instance?.ELog("Failed to load flow templates from github: " + ex.Message);
+        }
         
-        if (result.Success == false)
+        if (result?.Success != true)
         {
             // try loading from disk
             LoadFlowTemplatesFromLocalStorage();
