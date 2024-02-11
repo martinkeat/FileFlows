@@ -213,7 +213,7 @@ class ffFlowLines {
             linePoints.push([_x,_y]);
             path.lineTo(_x,_y);
         };
-        let isError = /--1$/.test(output?.id || '');
+        let isError = /--1$/.test(output?.getAttribute('x-uid') || '');
         if(isError) {
             addLinePoint(srcX + 40, srcY);
             srcX += 40;            
