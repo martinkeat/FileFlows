@@ -282,7 +282,7 @@ public class LibraryFileController : Controller //ControllerStore<LibraryFile>
             Logger.Instance.ILog("Checking Folder exists on server: " + libFile.Name);
             try
             {
-                result = System.IO.File.Exists(libFile.Name);
+                result = System.IO.Directory.Exists(libFile.Name);
             }
             catch (Exception) {  }
         }
