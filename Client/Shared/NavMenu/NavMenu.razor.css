@@ -126,16 +126,13 @@
   .navbar-toggler {
     display: none;
   }
-
   .collapse {
     /* Never collapse the sidebar for wide screens */
     display: block;
   }
-
   .navbar-brand {
     display: unset;
   }
-
   .version-info {
     display: unset;
     position: absolute;
@@ -149,11 +146,9 @@
   .nav-item.flows {
     display: none;
   }
-
   .page-title {
     display: unset;
   }
-
   .nav-menu-group {
     grid-column-start: 1;
     grid-column-end: -1;
@@ -165,7 +160,6 @@
   .nav-menu-group .text-label {
     margin-left: 1rem;
   }
-
   .nav-menu-container:not(.collapsed) {
     position: fixed;
     top: 3.7rem;
@@ -228,7 +222,6 @@
   .nav-item ::deep a {
     height: 2rem;
   }
-
   .nav-menu-group {
     padding-top: 0.25rem;
   }
@@ -237,7 +230,6 @@
   .nav-menu-group {
     display: none;
   }
-
   .nav-menu-container {
     margin-top: 1rem;
   }
@@ -266,15 +258,14 @@
 }
 .bubbles .bubble {
   border: solid 1px var(--bubble-color);
+  background: var(--base);
   border-radius: 1rem;
-  font-size: 0.8rem;
-  background: var(--bubble-color);
+  font-size: 0.7rem;
   display: inline-block;
-  line-height: 1rem;
-  height: 1.2rem;
   text-align: center;
   width: 1.2rem;
-  filter: drop-shadow(2px 3px 1px rgba(51, 51, 51, 0.6666666667));
+  padding-top: 0.1rem;
+  font-weight: bold;
 }
 .bubbles .bubble.Unprocessed {
   --bubble-color: var(--blue);
