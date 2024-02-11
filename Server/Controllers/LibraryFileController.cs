@@ -275,11 +275,33 @@ public class LibraryFileController : Controller //ControllerStore<LibraryFile>
         var libFile = await Get(uid);
         if (libFile == null)
             return false;
-        try
+        bool result = false;
+        
+        if (libFile.IsDirectory)
         {
-            return System.IO.File.Exists(libFile.Name);
+            Logger.Instance.ILog("Checking Folder exists on server: " + libFile.Name);
+            try
+            {
+                result = System.IO.File.Exists(libFile.Name);
+            }
+            catch (Exception) {  }
         }
-        catch (Exception) { return false; }
+        else
+        {
+            try
+            {
+                result = System.IO.File.Exists(libFile.Name);
+            }
+            catch (Exception)
+            {
+            }
+        }
+
+        Logger.Instance.ILog((libFile.IsDirectory ? "Directory" : "File") +
+                             (result == false ? " does not exist" : "exists") +
+                             " on server: " + libFile.Name);
+        
+        return result;
     }
 
     /// <summary>
