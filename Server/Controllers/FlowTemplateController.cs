@@ -30,7 +30,7 @@ public class FlowTemplateController : Controller
     public async Task<List<FlowTemplateModel>> GetAll([FromQuery] FlowType? type)
     {
         List<FlowTemplateModel> templates = new();
-        if (Templates == null || FetchedAt < DateTime.Now.AddMinutes(-10))
+        if (true || Templates == null || FetchedAt < DateTime.Now.AddMinutes(-10))
             await RefreshTemplates();
         FlowType any = (FlowType)(-1);
         if (type == null)
@@ -39,7 +39,7 @@ public class FlowTemplateController : Controller
         {
             if (Templates?.Any() == true)
             {
-                var plugins = new PluginService().GetAll().Where(x => x.Enabled)
+                var plugins = (await new PluginService().GetAllAsync()).Where(x => x.Enabled)
                     .Select(x => x.Name.Replace(" ", string.Empty).ToLowerInvariant().Replace("nodes", string.Empty))
                     .ToList();
                 foreach (var template in Templates)
@@ -98,9 +98,9 @@ public class FlowTemplateController : Controller
         {
             new FlowTemplateModel()
             {
-                Path = "Empty",
-                Name = "Empty",
-                Description = "A blank flow to start from",
+                Path = "default:File",
+                Name = "File",
+                Description = "A blank file template with a single 'Input File' input flow element.",
                 Author = "FileFlows",
                 Tags = new List<string>() { "Basic" },
                 Revision = 1,
@@ -183,6 +183,38 @@ public class FlowTemplateController : Controller
     ]
   }";
         }
+        else if (model.Path == "default:File")
+        {
+            json =  @"{
+    ""Name"": ""File"",
+    ""Type"": 0,
+    ""Revision"": 2,
+    ""Properties"": {
+      ""Description"": ""A blank file template with a single \u0022Input File\u0022 input flow element."",
+      ""Tags"": [
+        ""Basic""
+      ],
+      ""Author"": ""FileFlows"",
+      ""Fields"": [],
+      ""Variables"": {}
+    },
+    ""Parts"": [
+      {
+        ""Uid"": ""c0807c25-7d23-44d0-8a40-2485a265c75b"",
+        ""Name"": """",
+        ""FlowElementUid"": ""FileFlows.BasicNodes.File.InputFile"",
+        ""xPos"": 450,
+        ""yPos"": 50,
+        ""Icon"": ""far fa-file"",
+        ""Label"": """",
+        ""Inputs"": 0,
+        ""Outputs"": 1,
+        ""OutputConnections"": [],
+        ""Type"": 0
+      }
+    ]
+  }";
+        }
         else if (model.Path.StartsWith("local:"))
         {
             var uid = Guid.Parse(model.Path[6..]);
@@ -240,16 +272,24 @@ public class FlowTemplateController : Controller
         {
             // try loading from disk
             LoadFlowTemplatesFromLocalStorage();
+            if (Templates == null)
+                return;
+            
         }
         else
         {
             Templates = result.Data;
+            if (Templates == null)
+                return;
+            
             FetchedAt = DateTime.Now;
 
             // save to disk
             string json = JsonSerializer.Serialize(result.Data);
             _ = System.IO.File.WriteAllTextAsync(FlowTemplatesFile, json);
         }
+
+        
         Templates = Templates.OrderBy(x => x.Name.IndexOf(" ", StringComparison.Ordinal) < 0 ? 1 : Regex.IsMatch(x.Name, "^[\\w]+ File") ? 2 : 3)
             .ThenBy(x => x.Author == "FileFlows" ? 1 : 2)
             .ThenBy(x => Regex.IsMatch(x.Name, @"^Convert [\w]+$") ? 1 : 2)
