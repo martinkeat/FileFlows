@@ -604,6 +604,8 @@ public class FlowWorker : Worker
             Logger.Instance.ELog("Failed downloading latest configuration from server");
             return false;
         }
+        var settingsService = SettingsService.Load();
+        var ffStatus = settingsService.GetFileFlowsStatus().Result;
 
         string dir = GetConfigurationDirectory(revision);
         try
@@ -684,7 +686,7 @@ public class FlowWorker : Worker
             config.Revision,
             config.MaxNodes,
             config.Enterprise,
-            config.AllowRemote,
+            AllowRemote = config.AllowRemote && ffStatus.LicenseFileServer,
             Variables = variables,
             config.Libraries,
             config.PluginNames,

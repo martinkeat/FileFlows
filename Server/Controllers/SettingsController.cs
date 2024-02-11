@@ -43,6 +43,7 @@ public class SettingsController : Controller
             status.LicenseAutoUpdates = (license.Flags & LicenseFlags.AutoUpdates) == LicenseFlags.AutoUpdates;
             status.LicenseWebhooks = (license.Flags & LicenseFlags.Webhooks) == LicenseFlags.Webhooks;
             status.LicenseProcessingOrder = (license.Flags & LicenseFlags.ProcessingOrder) == LicenseFlags.ProcessingOrder;
+            status.LicenseFileServer = (license.Flags & LicenseFlags.FileServer) == LicenseFlags.FileServer;
             status.LicenseEnterprise = (license.Flags & LicenseFlags.Enterprise) == LicenseFlags.Enterprise;
         }
 

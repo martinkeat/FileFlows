@@ -51,6 +51,11 @@ public class FileFlowsStatus
     public bool LicenseProcessingOrder { get; set; }
     
     /// <summary>
+    /// Gets or sets if license allowed for file server
+    /// </summary>
+    public bool LicenseFileServer { get; set; }
+    
+    /// <summary>
     /// Gets or sets if the user has a enterprise license
     /// </summary>
     public bool LicenseEnterprise { get; set; }

@@ -260,8 +260,10 @@ public class Program
                 // need to try a remote
                 if (args.Config.AllowRemote == false)
                 {
+                    string mappedPath = _fileService.GetLocalPath(workingFile);
                     libFile.FailureReason =
-                        "Library file exists but is not accessible from node: " + file.FullName;
+                        "Library file exists but is not accessible from node: " + mappedPath;
+                    LogInfo("Mapped Path: " + mappedPath);
                     LogError(libFile.FailureReason);
                     libFile.Status = FileStatus.MappingIssue;
                     libFile.ExecutedNodes = new List<ExecutedNode>();
