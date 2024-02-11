@@ -184,13 +184,13 @@ public partial class Flows : ListPage<Guid, FlowListModel>
                 Count = this.DataStandard.Count,
                 Value = FlowType.Standard
             },
-            App.Instance.FileFlowsSystem?.LicenseWebhooks == true ? new ()
+            new ()
             {
                 Name = "Sub Flows",
                 Icon = "fas fa-subway",
                 Count = this.DataSubFlows.Count,
                 Value = FlowType.SubFlow
-            } : null,
+            },
             new ()
             {
                 Name = "Failure Flows",

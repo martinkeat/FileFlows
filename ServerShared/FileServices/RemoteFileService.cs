@@ -187,6 +187,11 @@ public class RemoteFileService : IFileService
         string filename = Path.Combine(tempPath, FileHelper.GetShortFileName(path));
         if (File.Exists(filename))
             return filename;
+        
+        // check if its a directory
+        if (DirectoryExists(path).Is(true))
+            return Result<string>.Fail("Cannot map a remote folder");
+
         var result = new FileDownloader(logger, serverUrl, executorUid).DownloadFile(path, filename).Result;
         if (result.IsFailed)
             return Result<string>.Fail(result.Error);
