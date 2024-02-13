@@ -172,6 +172,21 @@ public partial class LibraryFileService : ILibraryFileService
     }
 
     /// <summary>
+    /// Deletes non processed library files from libraries
+    /// </summary>
+    /// <param name="libraryUids">a list of UIDs of libraries delete</param>
+    /// <returns>an awaited task</returns>
+    public async Task DeleteNonProcessedFromLibraries(params Guid[] libraryUids)
+    {
+        if (libraryUids?.Any() != true)
+            return;
+        string inStr = string.Join(",", libraryUids.Select(x => $"'{x}'"));
+        await Database_Execute($"delete from LibraryFile where Status <> 1 and LibraryUid in ({inStr})", null);
+        RemoveLibraries(libraryUids);
+        ClientServiceManager.Instance.UpdateFileStatus();
+    }
+
+    /// <summary>
     /// Tests if a library file exists on server.
     /// This is used to test if a mapping issue exists on the node, and will be called if a Node cannot find the library file
     /// </summary>

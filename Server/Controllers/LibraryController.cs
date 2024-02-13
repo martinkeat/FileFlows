@@ -133,9 +133,9 @@ public class LibraryController : Controller
             return;
         await new LibraryService().Delete(model.Uids);
         if (deleteLibraryFiles)
-        {
             await new LibraryFileService().DeleteFromLibraries(model.Uids);
-        }
+        else
+            await new LibraryFileService().DeleteNonProcessedFromLibraries(model.Uids);
 
         UpdateHasLibraries();
         RefreshCaches();
