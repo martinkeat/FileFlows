@@ -14,7 +14,7 @@ namespace FileFlows.Client.Components;
 /// </summary>
 public partial class FlowPropertiesEditor
 {
-    private List<FlowField> Fields => Flow.Properties.Fields;
+    private List<FlowField> Fields => Flow?.Properties?.Fields ?? new ();
     /// <summary>
     /// Gets or sets the JavaScript runtime
     /// </summary>
@@ -62,6 +62,12 @@ public partial class FlowPropertiesEditor
         lblClose = Translater.Instant("Labels.Close");
         lblHelp = Translater.Instant("Labels.Help");
         lblSubFlowHelp  = Translater.Instant("Pages.Flow.Labels.SubFlowHelp");
+        if (Flow == null)
+        {
+            this.Visible = false;
+            return;
+        }
+
         _FlowVariables = Flow.Properties.Variables?.Select(x => new KeyValuePair<string, string>(x.Key, x.Value.ToString()))
             ?.ToList() ?? new ();
         foreach (var field in Flow.Properties.Fields)

@@ -85,6 +85,7 @@ public partial class InputKeyValueInt : Input<List<KeyValuePair<int, string>>>
     {
         this.Data.Remove(kv);
         CheckForDuplicates();
+        UpdateBindValue();
     }
 
     /// <summary>
@@ -174,6 +175,14 @@ public partial class InputKeyValueInt : Input<List<KeyValuePair<int, string>>>
         return true;
     }
     
+    private async Task OnKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Code == "Enter" || e.Code == "Tab")
+        {
+            BlurAdd();
+            FocusUid();
+        }
+    }
     /// <summary>
     /// A key value
     /// </summary>

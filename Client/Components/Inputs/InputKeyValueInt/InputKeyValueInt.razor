@@ -28,10 +28,10 @@
                 }
                 <tr>
                     <td class="number">
-                        <input id="@Uid" type="number" @bind-value="NewKey"/>
+                        <input type="number" @bind-value="NewKey"/>
                     </td>
                     <td>
-                        <input type="text" @bind-value="NewValue" @onblur="BlurAdd" />
+                        <input id="@Uid" type="text" @bind-value="NewValue" @onblur="BlurAdd" @bind-value:event="oninput" @onkeydown="OnKeyDown" />
                     </td>
                     <td>                        
                         <i class="fas fa-plus" @onclick="Add"></i>

@@ -97,6 +97,7 @@ public partial class InputKeyValue : Input<List<KeyValuePair<string, string>>>
     {
         this.Data.Remove(kv);
         CheckForDuplicates();
+        UpdateBindValue();
     }
 
     /// <summary>

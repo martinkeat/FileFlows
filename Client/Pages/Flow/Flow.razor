@@ -85,10 +85,7 @@
 
     <Editor @ref="Editor" FlowElementEditor=@true></Editor>
 
-    @if (ActiveFlow?.Flow != null)
-    {
-        <FlowPropertiesEditor @ref="PropertiesEditor" FlowEditor="@ActiveFlow"/>
-    }
+    <FlowPropertiesEditor @ref="PropertiesEditor" FlowEditor="@ActiveFlow" />
 </div>
 
 

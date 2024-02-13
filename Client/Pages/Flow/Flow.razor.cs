@@ -213,7 +213,9 @@ public partial class Flow : ComponentBase, IDisposable
         ActivateFlow(fEditor);
             
         if (flow.Type == FlowType.SubFlow)
-            PropertiesEditor.Show();
+            PropertiesEditor?.Show();
+        else
+            PropertiesEditor?.Close();
         
         if(showBlocker)
             Blocker.Hide();
