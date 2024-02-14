@@ -70,6 +70,7 @@ public partial class LibraryFileService
         }
 
         file.FinalSize = 0;
+        file.FailureReason = string.Empty;
         file.OutputPath = string.Empty;
         file.ExecutedNodes = new();
         file.FinalMetadata = new();
