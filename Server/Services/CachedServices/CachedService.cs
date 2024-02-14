@@ -112,7 +112,7 @@ public abstract class CachedService<T> where T : FileFlowObject, new()
             IncrementConfigurationRevision();
         Refresh();
 
-        return GetByUid(item.Uid);
+        return await GetByUidAsync(item.Uid);
     }
 
     /// <summary>

@@ -7,6 +7,7 @@ using FileFlows.Plugin;
 using System.Runtime.InteropServices;
 using System.Text.Json.Serialization;
 using FileFlows.ScriptExecution;
+using FileFlows.Server.Helpers;
 using FileFlows.Server.Services;
 using Humanizer;
 using NPoco.Expressions;
@@ -155,6 +156,7 @@ public class FlowController : Controller
             string json = JsonSerializer.Serialize(new
             {
                 flow.Name,
+                Uid = flow.Type == FlowType.SubFlow ? (object)flow.Uid : null,
                 flow.Type,
                 Revision = Math.Max(1, flow.Revision),
                 Properties = new
@@ -204,7 +206,7 @@ public class FlowController : Controller
     /// <param name="json">The json data to import</param>
     /// <returns>The newly import flow</returns>
     [HttpPost("import")]
-    public Task<Flow> Import([FromBody] string json)
+    public async Task<Flow> Import([FromBody] string json)
     {
         Flow? flow = JsonSerializer.Deserialize<Flow>(json);
         if (flow == null)
@@ -222,12 +224,14 @@ public class FlowController : Controller
         // reparse with new UIDs
         var service = new FlowService();
         flow = JsonSerializer.Deserialize<Flow>(json);
-        flow.Uid = Guid.Empty;
+        if(flow.Type != FlowType.SubFlow || await DbHelper.UidInUse(flow.Uid))
+            flow.Uid = Guid.Empty;
+        
         flow.Default = false;
         flow.DateModified = DateTime.Now;
         flow.DateCreated = DateTime.Now;
         flow.Name = service.GetNewUniqueName(flow.Name);
-        return service.Update(flow);
+        return await service.Update(flow);
     }
 
 

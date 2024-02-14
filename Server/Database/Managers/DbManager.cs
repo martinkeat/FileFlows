@@ -448,6 +448,19 @@ public abstract class DbManager
     }
 
     /// <summary>
+    /// Checks to see a DbObject exists with the given Uid
+    /// </summary>
+    /// <param name="uid">the Uid of the item</param>
+    /// <returns>true if in use, otherwise false</returns>
+    public virtual async Task<bool> UidInUse(Guid uid)
+    {
+        using (var db = await GetDb())
+        {
+            return db.Db.Exists<DbObject>(uid);
+        }
+    }
+
+    /// <summary>
     /// Checks to see if a name is in use
     /// </summary>
     /// <param name="uid">the Uid of the item</param>

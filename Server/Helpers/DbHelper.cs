@@ -345,4 +345,12 @@ public class DbHelper
             }
         }
     }
+
+    /// <summary>
+    /// Checks to see a DbObject exists with the given Uid
+    /// </summary>
+    /// <param name="uid">the Uid of the item</param>
+    /// <returns>true if in use, otherwise false</returns>
+    public static Task<bool> UidInUse(Guid uid)
+        => Manager.UidInUse(uid);
 }
