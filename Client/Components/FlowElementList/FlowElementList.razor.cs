@@ -42,6 +42,11 @@ public partial class FlowElementList : ComponentBase
     }
 
     /// <summary>
+    /// Gets or sets if the filter is currently applied
+    /// </summary>
+    private bool Filtering { get; set; }
+    
+    /// <summary>
     /// Gets or sets the items to display in the list.
     /// </summary>
     [Parameter]
@@ -77,7 +82,7 @@ public partial class FlowElementList : ComponentBase
     /// Handles the key down event for filtering.
     /// </summary>
     /// <param name="e">The keyboard event arguments.</param>
-    protected void FilterKeyDown(KeyboardEventArgs e)
+    protected void FilterKeyUp(KeyboardEventArgs e)
     {
         ApplyFilter();
     }
@@ -87,6 +92,7 @@ public partial class FlowElementList : ComponentBase
     /// </summary>
     protected void ApplyFilter()
     {
+        Filtering = false;
         if (Items == null)
             return;
 
@@ -96,6 +102,7 @@ public partial class FlowElementList : ComponentBase
         }
         else
         {
+            Filtering = true;
             Filtered = Items
                 .Where(x => x.Name.ToLower().Replace(" ", "").Contains(txtFilter)
                             || x.Group.ToLower().Replace(" ", "").Contains(txtFilter)

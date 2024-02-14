@@ -13,7 +13,7 @@
             </div>
         }
         <div class="flow-elements-filter">
-            <input @ref="eleFilter" type="text" @bind-value="txtFilter" @bind-value:event="oninput" autocomplete="off" placeholder="@lblFilter" @onkeydown="FilterKeyDown"/>
+            <input @ref="eleFilter" type="text" @bind-value="txtFilter" @bind-value:event="oninput" autocomplete="off" placeholder="@lblFilter" @onkeyup="FilterKeyUp"/>
             <i class="fas fa-search"></i>
         </div>
     </div>
@@ -32,11 +32,14 @@
                             .Select(g => g.Key.ToString().ToLower())
                             .FirstOrDefault();
                         
-                        <div class="group @(expanded ? "expanded" : "collapsed")">
+                        <div class="group @(expanded || Filtering ? "expanded" : "collapsed")">
                             <div class="group-title" @onclick="() => SelectGroup(grp.Key)">
                                 @Helpers.FlowHelper.FormatLabel(grp.Key.Replace("Nodes", string.Empty))
                                 <span class="count" style="border-color:var(--flow-@(mostCommonFlowType)">@grp.Count()</span>
-                                <i class="@(expanded ? "fas fa-caret-up" : "fas fa-caret-down")" />
+                                @if (Filtering == false)
+                                {   
+                                    <i class="@(expanded ? "fas fa-caret-up" : "fas fa-caret-down")" />
+                                }
                             </div>
                             <div class="group-items group-items-@grp.Count()">
                                 @foreach (var ele in grp
