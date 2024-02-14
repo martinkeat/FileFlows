@@ -90,6 +90,7 @@ class Toast {
         switch (type) {
             case 'success':
                 return 'check-circle';
+            case 'warn':
             case 'warning':
                 return 'exclamation-triangle';
             case 'info':
