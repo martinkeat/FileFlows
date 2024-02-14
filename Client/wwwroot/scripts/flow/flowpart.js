@@ -196,6 +196,14 @@ class ffFlowPart
             part.displayName = name;
             divName.innerHTML = name;
 
+            // Iterate over the classes in reverse order and remove those that start with "height-"
+            for (let i = div.classList.length - 1; i >= 0; i--) {
+                let className = div.classList[i];
+                if (className.startsWith('height-')) {
+                    div.classList.remove(className);
+                }
+            }
+            
             let lines = this.getLineCount(name, part.outputs);
             div.classList.add('height-' + lines);
         } catch (err) {
