@@ -92,13 +92,54 @@ public class Gzipper
     /// Decompresses a file and returns the string contents
     /// </summary>
     /// <param name="inputFile">the file to decompress</param>
+    /// <param name="lines">an optional number of lines to grab, 0 to grab all</param>
     /// <returns>the decompresses file contents</returns>
-    public static string DecompressFileToString(string inputFile)
+    public static string DecompressFileToString(string inputFile, int lines = 0, int bytes = 0)
     {
         using FileStream compressedFileStream = File.Open(inputFile, FileMode.Open);
         using MemoryStream outputStream = new MemoryStream();
         using var decompressor = new GZipStream(compressedFileStream, CompressionMode.Decompress);
-        decompressor.CopyTo(outputStream);
-        return Encoding.UTF8.GetString(outputStream.ToArray());
+        
+        if (lines > 0)
+        {
+            decompressor.CopyTo(outputStream);
+            outputStream.Seek(0, SeekOrigin.Begin); // Reset the stream position to start
+            using (StreamReader reader = new StreamReader(outputStream, Encoding.UTF8))
+            {
+                StringBuilder result = new StringBuilder();
+                for (int i = 0; i < lines; i++)
+                {
+                    var line = reader.ReadLine();
+                    if (line == null)
+                        break;
+                    result.AppendLine(line);
+                }
+                return result.ToString();
+            }
+        }
+        else if (bytes > 0)
+        {    
+            const int bufferSize = 1024; // Adjust the buffer size as needed
+            byte[] buffer = new byte[bufferSize];
+            int totalBytesRead = 0;
+            int bytesRead;
+            while ((bytesRead = decompressor.Read(buffer, 0, Math.Min(bufferSize, bytes - totalBytesRead))) > 0)
+            {
+                outputStream.Write(buffer, 0, bytesRead);
+                totalBytesRead += bytesRead;
+
+                if (totalBytesRead >= bytes)
+                    break; // Break if the specified number of bytes has been reached
+            }
+
+            outputStream.Seek(0, SeekOrigin.Begin); // Reset the stream position to start
+            return Encoding.UTF8.GetString(outputStream.ToArray());
+        }
+        else
+        {
+            decompressor.CopyTo(outputStream);
+            outputStream.Seek(0, SeekOrigin.Begin); // Reset the stream position to start
+            return Encoding.UTF8.GetString(outputStream.ToArray());
+        }
     }
 }

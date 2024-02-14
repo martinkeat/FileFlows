@@ -20,7 +20,7 @@ public class LibraryFileLogHelper
         var logFile = Path.Combine(DirectoryHelper.LibraryFilesLoggingDirectory, uid.ToString());
 
         if (File.Exists(logFile + ".html.gz"))
-            return Gzipper.DecompressFileToString(logFile + ".html.gz");
+            return Gzipper.DecompressFileToString(logFile + ".html.gz", lines: lines, bytes: 2_000_000);
 
         string plainText = GetLog(uid);
         if (string.IsNullOrWhiteSpace(plainText))
