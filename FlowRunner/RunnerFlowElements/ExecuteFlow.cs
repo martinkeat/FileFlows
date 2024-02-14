@@ -154,7 +154,7 @@ public class ExecuteFlow : Node
                         sub.FlowDepthLevel = 1;
                 }
 
-                if (DontRecordFlowPart(part) == false)
+                if (LogFlowPart(part))
                 {
                     args.Logger?.ILog(new string('=', 70));
                     args.Logger?.ILog(
@@ -315,9 +315,13 @@ public class ExecuteFlow : Node
         }
 
         Runner.RecordNodeExecution(feName, feElementUid, output, executionTime, part, FlowDepthLevel + depthAdjustment);
-        args.Logger?.ILog("Flow Element execution time: " + executionTime);
-        args.Logger?.ILog("Flow Element output: " + output);
-        args.Logger?.ILog(new string('=', 70));
+
+        if (LogFlowPart(part) && part.FlowElementUid?.StartsWith("SubFlow:") != true)
+        {
+            args.Logger?.ILog("Flow Element execution time: " + executionTime);
+            args.Logger?.ILog("Flow Element output: " + output);
+            args.Logger?.ILog(new string('=', 70));
+        }
     }
 
     
@@ -360,5 +364,18 @@ public class ExecuteFlow : Node
     {
         return part.FlowElementUid?.EndsWith(nameof(SubFlowOutput)) == true ||
                part.FlowElementUid?.EndsWith("." + nameof(ExecuteFlow)) == true;
+    }
+    /// <summary>
+    /// Checks if a flow part should be recorded or not
+    /// </summary>
+    /// <param name="part">the flow part to check</param>
+    /// <returns>true to not record this flow part, otherwise false</returns>
+    private bool LogFlowPart(FlowPart part)
+    {
+        if(DontRecordFlowPart(part))
+            return false;
+        if (part.FlowElementUid.EndsWith(nameof(SubFlowInput)))
+            return false;
+        return true;
     }
 }
