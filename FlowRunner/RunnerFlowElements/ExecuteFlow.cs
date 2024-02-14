@@ -154,11 +154,15 @@ public class ExecuteFlow : Node
                         sub.FlowDepthLevel = 1;
                 }
 
-                args.Logger?.ILog(new string('=', 70));
-                args.Logger?.ILog($"Executing Flow Element {(Runner.Info.LibraryFile.ExecutedNodes.Count + 1)}: {part.Label?.EmptyAsNull() ?? part.Name?.EmptyAsNull() ?? currentFlowElement.Name} [{currentFlowElement.GetType().FullName}]");
-                args.Logger?.ILog(new string('=', 70));
-                args.Logger?.ILog("Working File: " + args.WorkingFile);
-                
+                if (DontRecordFlowPart(part) == false)
+                {
+                    args.Logger?.ILog(new string('=', 70));
+                    args.Logger?.ILog(
+                        $"Executing Flow Element {(Runner.Info.LibraryFile.ExecutedNodes.Count + 1)}: {part.Label?.EmptyAsNull() ?? part.Name?.EmptyAsNull() ?? currentFlowElement.Name} [{currentFlowElement.GetType().FullName}]");
+                    args.Logger?.ILog(new string('=', 70));
+                    args.Logger?.ILog("Working File: " + args.WorkingFile);
+                }
+
                 nodeStartTime = DateTime.Now;
 
                 // clear the failure reason, if this isn't a failure flow, if it is, we already have the reason for failure
@@ -274,8 +278,7 @@ public class ExecuteFlow : Node
     /// <param name="flowElement">the flow element that was executed</param>
     void RecordFlowElementFinish(NodeParameters args, DateTime startTime, int output, FlowPart part, Node flowElement)
     {
-        if (part.FlowElementUid?.EndsWith(nameof(SubFlowOutput)) == true ||
-            part.FlowElementUid?.EndsWith("." + nameof(ExecuteFlow)) == true)
+        if(DontRecordFlowPart(part))
             return; // we dont record this output, the flow element that called the flow will record this for us
         
         TimeSpan executionTime = DateTime.Now.Subtract(startTime);
@@ -346,5 +349,16 @@ public class ExecuteFlow : Node
             args.Variables[variable.Key] = value;
         }
 
+    }
+
+    /// <summary>
+    /// Checks if a flow part should be recorded or not
+    /// </summary>
+    /// <param name="part">the flow part to check</param>
+    /// <returns>true to not record this flow part, otherwise false</returns>
+    private bool DontRecordFlowPart(FlowPart part)
+    {
+        return part.FlowElementUid?.EndsWith(nameof(SubFlowOutput)) == true ||
+               part.FlowElementUid?.EndsWith("." + nameof(ExecuteFlow)) == true;
     }
 }
