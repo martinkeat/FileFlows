@@ -211,11 +211,6 @@ public partial class Flow : ComponentBase, IDisposable
         await fEditor.Initialize();
         OpenedFlows.Add(fEditor);
         ActivateFlow(fEditor);
-            
-        if (flow.Type == FlowType.SubFlow)
-            PropertiesEditor?.Show();
-        else
-            PropertiesEditor?.Close();
         
         if(showBlocker)
             Blocker.Hide();
@@ -278,6 +273,11 @@ public partial class Flow : ComponentBase, IDisposable
                     if (x.Name.EndsWith("GotoFlow"))
                         return false; // don't allow gotos inside a sub flow
                 }
+
+                if (flow.Type != FlowType.SubFlow &&
+                    (x.Uid.StartsWith("SubFlowInput") || x.Uid.StartsWith("SubFlowOutput")))
+                    return false;
+                
                 return true;
             })
             .ToArray();
@@ -780,6 +780,12 @@ public partial class Flow : ComponentBase, IDisposable
         foreach (var other in OpenedFlows)
             other.SetVisibility(other == flow);
         ActiveFlow = flow;
+        
+            
+        if (flow.Flow.Type == FlowType.SubFlow)
+            PropertiesEditor?.Show();
+        else
+            PropertiesEditor?.Close();
         
         _ = InitializeFlowElements();
         //StateHasChanged();
