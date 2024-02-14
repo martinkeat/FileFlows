@@ -13,7 +13,7 @@ public class TimeHelper
     public static string ToHumanReadableString(TimeSpan t)
     {
         if (t.TotalSeconds < 120) // Less than 2 minutes
-            return $@"{t:%s} seconds";
+            return $@"{((int)t.TotalSeconds)} seconds";
         if (t.TotalMinutes < 120) // Less than 2 hours
             return $@"{t:%m} minutes";
         if (t.TotalHours < 24) // Less than 1 day
