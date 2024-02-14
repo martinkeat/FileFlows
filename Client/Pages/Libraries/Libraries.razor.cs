@@ -141,6 +141,35 @@ public partial class Libraries : ListPage<Guid, Library>
         }
     }
 
+    /// <summary>
+    /// Reprocess all files in a library
+    /// </summary>
+    private async Task Reprocess()
+    {
+        var uids = Table.GetSelected()?.Select(x => x.Uid)?.ToArray() ?? new System.Guid[] { };
+        if (uids.Length == 0)
+            return; // nothing to rescan
+
+        if (await Confirm.Show("Pages.Libraries.Messages.Reprocess.Title",
+                "Pages.Libraries.Messages.Reprocess.Message", defaultValue: false) == false)
+            return;
+
+        Blocker.Show();
+        this.StateHasChanged();
+
+        try
+        {
+            var deleteResult = await HttpHelper.Put($"{ApiUrl}/reprocess", new ReferenceModel<Guid> { Uids = uids });
+            if (deleteResult.Success == false)
+                return;
+        }
+        finally
+        {
+            Blocker.Hide();
+            this.StateHasChanged();
+        }
+    }
+
     public override async Task Delete()
     {
         var uids = Table.GetSelected()?.Select(x => x.Uid)?.ToArray() ?? new System.Guid[] { };

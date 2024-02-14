@@ -15,13 +15,17 @@ public partial class Confirm : ComponentBase, IDisposable
     
     private string lblYes, lblNo;
     private string Message, Title, SwitchMessage;
+    /// <summary>
+    /// The default value of the button to focus when shown, true for yes, false for no
+    /// </summary>
+    private bool DefaultValue;
     TaskCompletionSource<bool> ShowTask;
     TaskCompletionSource<(bool, bool)> ShowSwitchTask;
     private bool ShowSwitch;
     private bool SwitchState;
     private bool RequireSwitch;
 
-    private string btnYesUid; 
+    private string btnYesUid, btnNoUid; 
 
     private static Confirm Instance { get; set; }
 
@@ -50,13 +54,14 @@ public partial class Confirm : ComponentBase, IDisposable
     /// </summary>
     /// <param name="title">the title of the confirm message</param>
     /// <param name="message">the message of the confirm message</param>
+    /// <param name="defaultValue">the default value to have highlighted, true for confirm, false for reject</param>
     /// <returns>the task to await for the confirm result</returns>
-    public static Task<bool> Show(string title, string message)
+    public static Task<bool> Show(string title, string message, bool defaultValue = true)
     {
         if (Instance == null)
             return Task.FromResult(false);
 
-        return Instance.ShowInstance(title, message);
+        return Instance.ShowInstance(title, message, defaultValue);
     }
     
     /// <summary>
@@ -76,7 +81,7 @@ public partial class Confirm : ComponentBase, IDisposable
         return Instance.ShowInstance(title, message, switchMessage, switchState, requireSwitch);
     }
 
-    private Task<bool> ShowInstance(string title, string message)
+    private Task<bool> ShowInstance(string title, string message, bool defaultValue)
     {
         Task.Run(async () =>
         {
@@ -84,6 +89,8 @@ public partial class Confirm : ComponentBase, IDisposable
             // of processing, and if we show this confirm too soon, it may automatically be closed
             await Task.Delay(5);
             this.btnYesUid = Guid.NewGuid().ToString();
+            this.btnNoUid = Guid.NewGuid().ToString();
+            this.DefaultValue = defaultValue;
             this.focused = false;
             this.Title = Translater.TranslateIfNeeded(title?.EmptyAsNull() ?? "Labels.Confirm");
             this.Message = Translater.TranslateIfNeeded(message ?? "");
@@ -95,10 +102,12 @@ public partial class Confirm : ComponentBase, IDisposable
         Instance.ShowTask = new TaskCompletionSource<bool>();
         return Instance.ShowTask.Task;
     }
-    private Task<(bool, bool)> ShowInstance(string title, string message, string switchMessage, bool switchState, bool requireSwitch)
+    private Task<(bool, bool)> ShowInstance(string title, string message, string switchMessage, bool switchState, bool requireSwitch, bool defaultValue = true)
     {
         this.btnYesUid = Guid.NewGuid().ToString();
+        this.btnNoUid = Guid.NewGuid().ToString();
         this.focused = false;
+        this.DefaultValue = defaultValue;
         this.Title = Translater.TranslateIfNeeded(title?.EmptyAsNull() ?? "Labels.Confirm");
         this.Message = Translater.TranslateIfNeeded(message ?? "");
         this.SwitchMessage = Translater.TranslateIfNeeded(switchMessage ?? "");
@@ -117,7 +126,7 @@ public partial class Confirm : ComponentBase, IDisposable
         if (Visible && focused == false)
         {
             focused = true;
-            await jsRuntime.InvokeVoidAsync("eval", $"document.getElementById('{this.btnYesUid}').focus()");
+            await jsRuntime.InvokeVoidAsync("eval", $"document.getElementById('{(DefaultValue ? btnYesUid : btnNoUid )}').focus()");
         }
     }
 

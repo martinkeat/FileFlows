@@ -167,6 +167,20 @@ public class LibraryController : Controller
         });
     }
 
+
+    /// <summary>
+    /// Reprocess libraries.
+    /// All library files will have their status updated to unprocessed.
+    /// </summary>
+    /// <param name="model">A reference model containing UIDs to reprocessing</param>
+    /// <returns>an awaited task</returns>
+    [HttpPut("reprocess")]
+    public async Task Reprocess([FromBody] ReferenceModel<Guid> model)
+    {
+        var service = new LibraryService();
+        await new LibraryFileService().ReprocessByLibraryUid(model.Uids);
+    }
+    
     internal void UpdateFlowName(Guid uid, string name)
     {
         var service = new LibraryService();

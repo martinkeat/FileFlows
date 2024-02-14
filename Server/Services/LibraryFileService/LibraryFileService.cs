@@ -181,7 +181,7 @@ public partial class LibraryFileService : ILibraryFileService
         if (libraryUids?.Any() != true)
             return;
         string inStr = string.Join(",", libraryUids.Select(x => $"'{x}'"));
-        await Database_Execute($"delete from LibraryFile where Status <> 1 and LibraryUid in ({inStr})", null);
+        await Database_Execute($"delete from LibraryFile where Status <> {((int)FileStatus.Processed)} and LibraryUid in ({inStr})", null);
         RemoveLibraries(libraryUids);
         ClientServiceManager.Instance.UpdateFileStatus();
     }

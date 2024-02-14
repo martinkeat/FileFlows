@@ -45,6 +45,7 @@
     "Import": "Import",
     "Browse": "Browse",
     "Rescan": "Rescan",
+    "Reprocess": "Reprocess",
     "Revisions":"Revisions",
     "Restore":"Restore",
     "RestoredMessage":"{type} restored",
@@ -341,7 +342,11 @@
       "Title": "Libraries",      
       "Messages":{
         "DeleteConfirm": "Are you sure you want to delete the selected {count, plural, one {library} other {libraries}}?\n\nIf you wish to keep the records for the files in {count, plural, one {this library} other {these libraries}}, then check the option below.",
-        "KeepLibraryFiles":"Retain files in database for statistics"
+        "KeepLibraryFiles":"Retain files in database for statistics",
+        "Reprocess" : {
+          "Title":"Reprocess Selected Libraries",
+          "Message": "Are you sure you want to proceed with reprocessing the selected libraries?\n\nThis action will mark all files as unprocessed and initiate their reprocessing. Please note that this action cannot be undone."
+        }
       },
       "ErrorMessages": {
         "NoFlows": "There are no flows configured.\nCreate a flow before adding or updating a library."

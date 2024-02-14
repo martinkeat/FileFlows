@@ -10,6 +10,26 @@ namespace FileFlows.Server.Services;
 public partial class LibraryFileService
 {
     /// <summary>
+    /// Reprocess all files based on library UIDs
+    /// </summary>
+    /// <param name="libraryUids">an array of UID of the libraries to reprocess</param>
+    public async Task ReprocessByLibraryUid(params Guid[] libraryUids)
+    {
+        if (libraryUids?.Any() != true)
+            return;
+        
+        string inStr = string.Join(",", libraryUids.Select(x => $"'{x}'"));
+        await DbHelper.Execute($"update LibraryFile set Status = 0 " +
+                               $" where LibraryUid in ({inStr}) and Status <> {((int)FileStatus.Processing)}"); // we dont reset processing files
+        foreach (var f in Data)
+        {
+            if (f.Value.Status != FileStatus.Processing)
+                f.Value.Status = FileStatus.Unprocessed;
+        }
+        ClientServiceManager.Instance.UpdateFileStatus();
+    }
+    
+    /// <summary>
     /// Sets the status of multiple files
     /// </summary>
     /// <param name="status">The status to set</param>
