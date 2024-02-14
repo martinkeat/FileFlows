@@ -2467,11 +2467,6 @@ html, body {
   background: var(--base) !important;
 }
 
-* {
-  scrollbar-color: rgba(var(--accent-rgb), 0.5) var(--base);
-  scrollbar-width: auto;
-}
-
 a, .btn-link {
   color: var(--accent) !important;
 }
