@@ -1,0 +1,14 @@
+.processing-table {
+  tr.failed {
+    i {
+      color: var(--danger) !important;      
+    }
+    background: rgba(187, 0, 0, 0.23);
+  }
+  tr.mapping-issue {
+    i {
+      color: var(--warning) !important;
+    }
+    background: rgb(78, 59, 0, 0.74);
+  }
+}

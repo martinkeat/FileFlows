@@ -9,6 +9,7 @@
 @use 'table';
 @use 'toast';
 @use 'flow';
+@use 'processing-table';
 
 $mobile_width: 850px;
 
@@ -99,7 +100,6 @@ a, .btn-link {
         cursor: pointer;
     }
 }
-
 
 ::-webkit-scrollbar{
     width: 6px;

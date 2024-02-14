@@ -149,6 +149,7 @@ export class LibraryFileTable extends FFChart
     createTableData(data)
     {
         let table = document.createElement('table');
+        table.className = 'processing-table';
         let thead = document.createElement('thead');
         thead.style.width = 'calc(100% - 10px)';
         table.appendChild(thead);
@@ -185,6 +186,21 @@ export class LibraryFileTable extends FFChart
             if(this.recentlyFinished === false)
                 continue;
             // finished
+            if(item.status === 4) {
+                tr.classList.add('failed');
+                tdRelativePath.innerHTML = '<i class="fas fa-times" title="Failed"></i>&nbsp;' + tdRelativePath.innerHTML; 
+            }
+            else if(item.status === 6) {
+                tr.classList.add('mapping-issue');
+                tdRelativePath.innerHTML = '<i class="fas fa-exclamation-triangle" title="Mapping Issue"></i>&nbsp;' + tdRelativePath.innerHTML;
+            }
+            
+            tdRelativePath.innerHTML = '<a>' +  tdRelativePath.innerHTML + '</a>';
+            tdRelativePath.querySelector('a').addEventListener('click', (event) => {
+                event.preventDefault();
+                this.csharp.invokeMethodAsync("OpenFileViewer", item.Uid);
+            });
+                
             let fs = item.FinalSize;
             let os = item.OriginalSize;
             let width = (fs / os) * 100;

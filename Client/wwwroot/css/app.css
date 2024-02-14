@@ -2446,6 +2446,19 @@ a.btn {
   content: "\f19c";
 }
 
+.processing-table tr.failed {
+  background: rgba(187, 0, 0, 0.23);
+}
+.processing-table tr.failed i {
+  color: var(--danger) !important;
+}
+.processing-table tr.mapping-issue {
+  background: rgba(78, 59, 0, 0.74);
+}
+.processing-table tr.mapping-issue i {
+  color: var(--warning) !important;
+}
+
 @font-face {
   font-family: "Montserrat";
   src: url("webfonts/Montserrat-VariableFont_wght.ttf") format("truetype-variations");

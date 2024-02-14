@@ -153,6 +153,7 @@ public partial class CustomDashboard : IDisposable
                 When = when,
                 x.OriginalSize,
                 x.FinalSize,
+                x.Status
             };
         }).ToList();
     }

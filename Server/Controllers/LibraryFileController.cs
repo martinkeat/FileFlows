@@ -88,15 +88,24 @@ public class LibraryFileController : Controller //ControllerStore<LibraryFile>
     [HttpGet("upcoming")]
     public Task<IEnumerable<LibraryFile>> Upcoming()
         => new LibraryFileService().GetAll(FileStatus.Unprocessed, rows: 10);
-    
+
     /// <summary>
     /// Gets the last 10 successfully processed files
     /// </summary>
     /// <returns>the last successfully processed files</returns>
     [HttpGet("recently-finished")]
-    public Task<IEnumerable<LibraryFile>> RecentlyFinished() 
-        => new LibraryFileService().GetAll(FileStatus.Processed, rows: 10);
-        
+    public async Task<IEnumerable<LibraryFile>> RecentlyFinished()
+    {
+        var service = new LibraryFileService();
+        var processed = await service.GetAll(FileStatus.Processed, rows: 10);
+        var failed = await service.GetAll(FileStatus.ProcessingFailed, rows: 10);
+        var mapping = await service.GetAll(FileStatus.MappingIssue, rows: 10);
+        var all = processed.Union(failed).Union(mapping).OrderByDescending(x => x.ProcessingEnded).ToArray();
+        if (all.Length > 10)
+            all = all.Take(10).ToArray();
+        return all;
+    }
+
     /// <summary>
     /// Gets the library status overview
     /// </summary>
