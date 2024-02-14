@@ -12,6 +12,8 @@ public class TimeHelper
     /// <returns>A human-readable representation of the <see cref="TimeSpan"/>.</returns>\
     public static string ToHumanReadableString(TimeSpan t)
     {
+        if (t.TotalSeconds < 1) // Less than 2 minutes
+            return $@"1 second";
         if (t.TotalSeconds < 120) // Less than 2 minutes
             return $@"{((int)t.TotalSeconds)} seconds";
         if (t.TotalMinutes < 120) // Less than 2 hours
