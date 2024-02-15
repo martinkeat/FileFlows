@@ -270,7 +270,10 @@
       "Labels": {
         "EditFlow": "Flow: {Name}",
         "FlowProperties": "Flow Properties",
-        "SubFlowHelp": "To add input fields to a sub flow so you can pass in custom parameters to this sub flow, create these on the `Fields` tab.\n\nA sub flow must have a single `Input` which can be any valid input flow elements, e.g. `Input File`, `Video File` etc."
+        "SubFlowHelp": "To add input fields to a sub flow so you can pass in custom parameters to this sub flow, create these on the `Fields` tab.\n\nA sub flow must have a single `Input` which can be any valid input flow elements, e.g. `Input File`, `Video File` etc.",
+        "OpenScriptBrowser": "Open Script Browser",
+        "SubFlowBrowser": "Sub Flow Browser",
+        "OpenSubFlowBrowser": "Open Sub Flow Browser"        
       },
       "Messages": {
         "Close": "Are you sure you want to leave and lose all unsaved changes?",

@@ -37,6 +37,10 @@ public class FileFlowsRepository
     /// Gets or sets the library templates
     /// </summary>
     public List<RepositoryObject> LibraryTemplates { get; set; } = new ();
+    /// <summary>
+    /// Gets or sets the sub flows
+    /// </summary>
+    public List<RepositoryObject> SubFlows { get; set; } = new ();
 }
 
 /// <summary>
@@ -68,4 +72,14 @@ public class RepositoryObject
     /// Gets or sets the minimum version of FileFlows this object requires
     /// </summary>
     public Version MinimumVersion { get; set; }
+    
+    /// <summary>
+    /// Gets or sets an optional UID of the object
+    /// </summary>
+    public Guid? Uid { get; set; }
+    
+    /// <summary>
+    /// Gets or sets the author if available
+    /// </summary>
+    public string Author { get; set; }
 }

@@ -58,9 +58,17 @@ public partial class FlowElementList : ComponentBase
     private IEnumerable<ffElement> Filtered { get; set; }
     
     /// <summary>
-    /// Gets or sets the event to open the script browser
+    /// Gets or sets the event to open the browser
     /// </summary>
-    [Parameter] public Action OpenScriptBrowser { get; set; }
+    [Parameter] public Action OpenBrowser { get; set; }
+    /// <summary>
+    /// Gets or sets the label to open the browser
+    /// </summary>
+    [Parameter] public string OpenBrowserLabel { get; set; }
+    /// <summary>
+    /// Gets or sets the icon to open the browser
+    /// </summary>
+    [Parameter] public string OpenBrowserIcon { get; set; }
 
     
     /// <summary>

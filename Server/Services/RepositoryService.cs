@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+using FileFlows.Plugin;
 using FileFlows.Shared.Helpers;
 using FileFlows.Shared.Models;
 
@@ -44,7 +45,8 @@ class RepositoryService
                 LibraryTemplates = new(),
                 SharedScripts = new(),
                 SystemScripts = new(),
-                WebhookScripts = new ()
+                WebhookScripts = new (),
+                SubFlows = new ()
             };
         }
     }
@@ -122,7 +124,14 @@ class RepositoryService
     {
         try
         {
-            string content = await GetContent(path);
+            var result = await GetContent(path);
+            if (result.Failed(out string error))
+            {
+                Logger.Instance?.ELog(error);
+                return;
+            }
+
+            string content = result.Value;
             if(outputFile.EndsWith(".json") == false)
                 content = "// path: " + path + "\n\n" + content;
             
@@ -136,18 +145,18 @@ class RepositoryService
             Logger.Instance?.ELog($"Failed downloading script: '{path}' => {ex.Message}");
         }
     }
-    
+
     /// <summary>
     /// Gets the content of a repository object
     /// </summary>
     /// <param name="path">the repository object path</param>
     /// <returns>the repository object content</returns>
-    public async Task<string> GetContent(string path)
+    public async Task<Result<string>> GetContent(string path)
     {
         string url = BASE_URL + path;
         var result = await HttpHelper.Get<string>(url);
         if (result.Success == false)
-            throw new Exception(result.Body);
+            return Result<string>.Fail(result.Body);
         return result.Data;
     }
 

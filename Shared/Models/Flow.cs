@@ -31,6 +31,11 @@ public class Flow : FileFlowObject
     public string Template { get; set; }
     
     /// <summary>
+    /// Gets or sets if this flow is read only
+    /// </summary>
+    public bool ReadOnly { get; set; }
+    
+    /// <summary>
     /// Gets or sets the parts of this flow
     /// </summary>
     public List<FlowPart> Parts { get; set; }

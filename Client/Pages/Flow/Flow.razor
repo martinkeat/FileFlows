@@ -18,11 +18,12 @@
                 <FlowTab Icon="fas fa-scroll" Title="@lblScripts" Visible="@(AvailableScripts != null)">
                     <FlowElementList @ref="eleListScripts"  Items="@AvailableScripts" OnDragStart="@HandleDragStart"
                                      AddSelectedElement="AddSelectedElement" Close="@CloseElements"
-                                     OpenScriptBrowser="@(() => _ = OpenScriptBrowser())" />
+                                     OpenBrowser="@(() => _ = OpenScriptBrowser())" OpenBrowserIcon="fas fa-scroll" OpenBrowserLabel="Pages.Flow.Labels.OpenScriptBrowser" />
                 </FlowTab>
-                <FlowTab Icon="fas fa-subway" Title="@lblSubFlows" Visible="@(AvailableSubFlows?.Any() == true)">
+                <FlowTab Icon="fas fa-subway" Title="@lblSubFlows" Visible="@(AvailableSubFlows != null)">
                     <FlowElementList @ref="eleListSubFlows"  Items="@AvailableSubFlows" DefaultGroup="Sub Flows" OnDragStart="@HandleDragStart"
-                                     AddSelectedElement="AddSelectedElement" Close="@CloseElements" />
+                                     AddSelectedElement="AddSelectedElement" Close="@CloseElements"
+                                     OpenBrowser="@(() => _ = OpenSubFlowBrowser())" OpenBrowserIcon="fas fa-subway" OpenBrowserLabel="Pages.Flow.Labels.OpenSubFlowBrowser" />
                 </FlowTab>
             </FlowTabs>
         </div>
@@ -211,3 +212,4 @@
 </ContextMenu>
 
 <ScriptBrowser @ref="ScriptBrowser" />
+<SubFlowBrowser @ref="SubFlowBrowser" />

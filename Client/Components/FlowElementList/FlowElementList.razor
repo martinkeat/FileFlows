@@ -87,12 +87,12 @@
                 </div>
             }
     </div>
-    @if (OpenScriptBrowser != null)
+    @if (OpenBrowser != null)
     {
         <div class="flow-elements-bottom">
-            <button class="btn" @onclick="() => OpenScriptBrowser()">
-                <i class="fas fa-scroll" ></i>
-                Open Script Browser
+            <button class="btn" @onclick="() => OpenBrowser()">
+                <i class="@OpenBrowserIcon" ></i>
+                @Translater.TranslateIfNeeded(OpenBrowserLabel)
             </button>
         </div>
     }

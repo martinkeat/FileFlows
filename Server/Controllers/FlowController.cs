@@ -148,33 +148,16 @@ public class FlowController : Controller
         var service = new FlowService();
         var flows = uids.Select(x => service.GetByUid(x))
                                     .Where(x => x != null).ToList();
+        
         if (flows.Any() == false)
             return NotFound();
+
+        var subFlows = service.GetAll().Where(x => x.Type == FlowType.SubFlow).ToList();
+            
         if (flows.Count() == 1)
         {
             var flow = flows[0];
-            string json = JsonSerializer.Serialize(new
-            {
-                flow.Name,
-                Uid = flow.Type == FlowType.SubFlow ? (object)flow.Uid : null,
-                flow.Type,
-                Revision = Math.Max(1, flow.Revision),
-                Properties = new
-                {
-                    flow.Properties.Description,
-                    flow.Properties.Tags,
-                    Author = flow.Properties.Author?.EmptyAsNull(),
-                    MinimumVersion = flow.Properties.MinimumVersion?.EmptyAsNull(),
-                    flow.Properties.Fields,
-                    flow.Properties.Variables,
-                    flow.Properties.Outputs
-                },
-                flow.Parts
-            }, new JsonSerializerOptions
-            {
-                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-                WriteIndented = true,
-            });
+            string json = CreateExportJson(flow, subFlows);
             byte[] data = System.Text.Encoding.UTF8.GetBytes(json);
             return File(data, "application/octet-stream", flow.Name + ".json");
         }
@@ -184,10 +167,7 @@ public class FlowController : Controller
         using var zip = new ZipArchive(ms, ZipArchiveMode.Create, true);
         foreach (var flow in flows)
         {
-            var json = JsonSerializer.Serialize(flow, new JsonSerializerOptions
-            {
-                WriteIndented = true
-            });
+            string json = CreateExportJson(flow, subFlows);
             var fe = zip.CreateEntry(flow.Name + ".json");
 
             await using var entryStream = fe.Open();
@@ -198,6 +178,55 @@ public class FlowController : Controller
 
         ms.Seek(0, SeekOrigin.Begin);
         return File(ms.ToArray(), "application/octet-stream", "Flows.zip");
+    }
+
+    private string CreateExportJson(Flow flow, List<Flow> subFlows)
+    {
+        var dependencies = new List<Guid>();
+        LoadSubFlows(dependencies, flow, subFlows);
+        string json = JsonSerializer.Serialize(new
+        {
+            flow.Name,
+            Uid = flow.Type == FlowType.SubFlow ? (object)flow.Uid : null,
+            flow.Type,
+            Revision = Math.Max(1, flow.Revision),
+            Properties = new
+            {
+                flow.Properties.Description,
+                flow.Properties.Tags,
+                Author = flow.Properties.Author?.EmptyAsNull(),
+                MinimumVersion = flow.Properties.MinimumVersion?.EmptyAsNull(),
+                flow.Properties.Fields,
+                flow.Properties.Variables,
+                flow.Properties.Outputs
+            },
+            SubFlows = dependencies.Any() ? dependencies : null,
+            flow.Parts
+        }, new JsonSerializerOptions
+        {
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+            WriteIndented = true,
+        });
+        return json;
+    }
+
+    private void LoadSubFlows(List<Guid> list, Flow flow, List<Flow> subflows)
+    {
+        var sfParts = flow.Parts.Where(x => x.FlowElementUid.StartsWith("SubFlow:"))
+            .Select(x => Guid.Parse(x.FlowElementUid.Split(':')[1])).ToArray();
+
+        foreach (var uid in sfParts)
+        {
+            if (list.Contains(uid))
+                continue;
+            var sf = subflows.FirstOrDefault(x => x.Uid == uid);
+            if (sf == null)
+                continue;
+            
+            list.Add(uid);
+            LoadSubFlows(list, sf, subflows);
+        }
+
     }
 
     /// <summary>
@@ -227,6 +256,7 @@ public class FlowController : Controller
         if(flow.Type != FlowType.SubFlow || await DbHelper.UidInUse(flow.Uid))
             flow.Uid = Guid.Empty;
         
+        flow.ReadOnly = false;
         flow.Default = false;
         flow.DateModified = DateTime.Now;
         flow.DateCreated = DateTime.Now;

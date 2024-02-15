@@ -258,6 +258,9 @@ class ffFlowLines {
         this.accentColor = this.colorFromCssClass('--accent');
         this.lineColor = this.colorFromCssClass('--color-darkest');
         this.errorColor = '#ff6060'; //this.colorFromCssClass('--errr');
+        
+        if(this.ffFlow.readOnly)
+            return; // dont attach events in read only mode
 
         // Listen for mouse moves
         let self = this;

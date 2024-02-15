@@ -121,6 +121,8 @@ class ffFlowPart
     }
     
     attachEventListeners(args){
+        if(this.ffFlow.readOnly)
+            return; // dont attach in read only mode
         let part = args.part;
         let div = args.div;
         let allEvents = args.allEvents;
@@ -139,7 +141,6 @@ class ffFlowPart
             event.stopImmediatePropagation();
             event.preventDefault();
             if(event.ctrlKey) {
-                console.log('ctrl dbl click part', part);
                 this.ffFlow.csharp.invokeMethodAsync("CtrlDblClick", part);
             } else {
                 this.ffFlow.setInfo(part.Name, 'Node');
@@ -213,7 +214,7 @@ class ffFlowPart
     
     getNameWidth(outputs) {
         const unit = 10;
-        const pad = 4.5 * unit;
+        const pad = 3.92 * unit;
         let oSpacing;
     
         if (outputs < 4) {

@@ -1,16 +1,18 @@
 
-window.createffFlow = function(csharp, uid) {
+window.createffFlow = function(csharp, uid, readOnly) {
     let div = document.createElement('div');
     div.className = 'flow-parts';
     div.setAttribute('id', `flow-parts-${uid}`);
     div.innerHTML = '<canvas width="8000" height="4000" tabindex="1" oncontextmenu="return false"></canvas>';    
     document.querySelector('.flows-tabs-contents').appendChild(div);
-    return new ffFlow(csharp, div, uid);
+    return new ffFlow(csharp, div, uid, readOnly);
 };
 class ffFlow 
 {
-    constructor(csharp, eleFlowParts, uid)
+    constructor(csharp, eleFlowParts, uid, readOnly)
     {
+        readOnly = !!readOnly;
+        this.readOnly = readOnly;
         this.csharp= csharp;
         this.eleFlowParts= eleFlowParts;
         this.uid = uid;
@@ -76,7 +78,7 @@ class ffFlow
     init(parts, elements) {
         this.parts = parts;
         this.elements = elements;
-        this.infobox = null;        
+        this.infobox = null;      
         
         this.csharp.invokeMethodAsync("Translate", `Labels.Delete`, null).then(result => {
             this.lblDelete = result;
@@ -110,21 +112,34 @@ class ffFlow
             ev.preventDefault();
         })
 
-        this.eleFlowParts.addEventListener("keydown", (e) => this.onKeyDown(e), false);
-        // this.eleFlowParts.addEventListener("touchstart", (e) => this.Mouse.dragStart(e), false);
-        // this.eleFlowParts.addEventListener("touchend", (e) => this.Mouse.dragEnd(e), false);
-        // this.eleFlowParts.addEventListener("touchmove", (e) => this.Mouse.drag(e), false);
-        this.eleFlowParts.addEventListener("mousedown", (e) => e.button === 0 && this.Mouse.dragStart(e), false);
-        this.eleFlowParts.addEventListener("mouseup", (e) => this.Mouse.dragEnd(e), false);
-        this.eleFlowParts.addEventListener("mousemove", (e) => this.Mouse.drag(e), false);
+        if(this.readOnly === false) {
+            this.eleFlowParts.addEventListener("keydown", (e) => this.onKeyDown(e), false);
+            // this.eleFlowParts.addEventListener("touchstart", (e) => this.Mouse.dragStart(e), false);
+            // this.eleFlowParts.addEventListener("touchend", (e) => this.Mouse.dragEnd(e), false);
+            // this.eleFlowParts.addEventListener("touchmove", (e) => this.Mouse.drag(e), false);
+            this.eleFlowParts.addEventListener("mousedown", (e) => e.button === 0 && this.Mouse.dragStart(e), false);
+            this.eleFlowParts.addEventListener("mouseup", (e) => this.Mouse.dragEnd(e), false);
+            this.eleFlowParts.addEventListener("mousemove", (e) => this.Mouse.drag(e), false);
 
-        this.eleFlowParts.addEventListener("mouseup", (e) => this.FlowLines.ioMouseUp(e), false);
-        this.eleFlowParts.addEventListener("mousemove", (e) => this.FlowLines.ioMouseMove(e), false);
-        this.eleFlowParts.addEventListener("click", (e) => { this.unSelect() }, false);
-        this.eleFlowParts.addEventListener("dragover", (e) => { this.drop(e, false) }, false);
-        this.eleFlowParts.addEventListener("drop", (e) => { this.drop(e, true) }, false);
+            this.eleFlowParts.addEventListener("mouseup", (e) => this.FlowLines.ioMouseUp(e), false);
+            this.eleFlowParts.addEventListener("mousemove", (e) => this.FlowLines.ioMouseMove(e), false);
+            this.eleFlowParts.addEventListener("click", (e) => {
+                this.unSelect()
+            }, false);
+            this.eleFlowParts.addEventListener("dragover", (e) => {
+                this.drop(e, false)
+            }, false);
+            this.eleFlowParts.addEventListener("drop", (e) => {
+                this.drop(e, true)
+            }, false);
 
-        this.eleFlowParts.addEventListener("contextmenu", (e) => { e.preventDefault(); e.stopPropagation(); this.contextMenu(e); return false; }, false);
+            this.eleFlowParts.addEventListener("contextmenu", (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.contextMenu(e);
+                return false;
+            }, false);
+        }
 
 
         // bind these to this so the `this` in these methods are this object and not document

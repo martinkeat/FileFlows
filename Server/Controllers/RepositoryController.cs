@@ -1,4 +1,5 @@
 using FileFlows.Plugin;
+using FileFlows.Server.Helpers;
 using FileFlows.Server.Services;
 using FileFlows.Shared.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -50,6 +51,26 @@ public class RepositoryController : Controller
     }
     
     /// <summary>
+    /// Gets the sub flows
+    /// </summary>
+    /// <param name="missing">only include sub flows not downloaded</param>
+    /// <returns>a collection of sub flows</returns>
+    [HttpGet("subflows")]
+    public async Task<IEnumerable<RepositoryObject>> GetSubFlows([FromQuery] bool missing = true)
+    {
+        var repo = await new RepositoryService().GetRepository();
+        var subflows = repo.SubFlows
+            .Where(x => new Version(Globals.Version) >= x.MinimumVersion);
+        if (missing)
+        {
+            var service = new FlowService();
+            var known = (await service.GetAllAsync()).Where(x => x.Type == FlowType.SubFlow).Select(x => x.Uid).ToList();
+            subflows = subflows.Where(x => x.Uid != null && known.Contains(x.Uid.Value) == false).ToList();
+        }
+        return subflows;
+    }
+    
+    /// <summary>
     /// Increments the configuration revision
     /// </summary>
     /// <returns>an awaited task</returns>
@@ -62,7 +83,13 @@ public class RepositoryController : Controller
     /// <param name="path">the script path</param>
     /// <returns>the script code</returns>
     [HttpGet("content")]
-    public Task<string> GetContent([FromQuery] string path) => new RepositoryService().GetContent(path);
+    public async Task<IActionResult> GetContent([FromQuery] string path)
+    {
+        var result = await new RepositoryService().GetContent(path);
+        if (result.Failed(out string error))
+            return BadRequest(error);
+        return Ok(result.Value);
+    }
     
     /// <summary>
     /// Download script into the FileFlows system
@@ -78,9 +105,52 @@ public class RepositoryController : Controller
         // always re-download all the shared scripts to ensure they are up to date
         await DownloadActual(model.Scripts);
         await RevisionIncrement();
-
     }
 
+    /// <summary>
+    /// Download sub flows from the repository
+    /// </summary>
+    /// <param name="model">A list of sub flows to download</param>
+    /// <returns>an awaited task</returns>
+    [HttpPost("download-sub-flows")]
+    public async Task DownloadSubFlows([FromBody] RepositoryDownloadModel model)
+    {
+        if (model == null || model.Scripts?.Any() != true)
+            return; // nothing to download
+
+        // always re-download all the shared scripts to ensure they are up to date
+        var repoService = new RepositoryService();
+        await repoService.Init();
+        var service = new FlowService();
+        
+        foreach (string path in model.Scripts)
+        {
+            var result = await repoService.GetContent(path);
+            if (result.IsFailed)
+            {
+                Logger.Instance.WLog("Failed to retrieve sub flow content.");
+                continue;
+            }
+
+            string json = result.Value;
+            var flow = JsonSerializer.Deserialize<Flow>(json);
+            if (flow == null)
+            {
+                Logger.Instance.WLog("Failed to deserialize sub flow.");
+                continue;
+            }
+
+            if (await DbHelper.UidInUse(flow.Uid))
+            {
+                Logger.Instance.WLog("Sub flow UID already in use.");
+                continue;
+            }
+
+            flow.ReadOnly = true;
+            await service.Update(flow);
+        }
+    }
+    
     /// <summary>
     /// Perform the actual downloading of scripts
     /// </summary>

@@ -36,11 +36,11 @@ public class ffFlowWrapper
         
     }
 
-    public static async Task<ffFlowWrapper> Create(IJSRuntime jsRuntime, Guid flowUid)
+    public static async Task<ffFlowWrapper> Create(IJSRuntime jsRuntime, Guid flowUid, bool readOnly = false)
     {
         var instance = new ffFlowWrapper(jsRuntime);
         var dotNetObjRef = DotNetObjectReference.Create(instance);
-        instance.jsffFlow = await jsRuntime.InvokeAsync<IJSObjectReference>("createffFlow", dotNetObjRef, flowUid);
+        instance.jsffFlow = await jsRuntime.InvokeAsync<IJSObjectReference>("createffFlow", dotNetObjRef, flowUid, readOnly);
         return instance;
     }
     

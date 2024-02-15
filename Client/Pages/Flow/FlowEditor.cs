@@ -48,7 +48,7 @@ public class FlowEditor : IDisposable
     {
         if (Flow.Uid == Guid.Empty)
             Flow.Uid = Guid.NewGuid();
-        ffFlow = await ffFlowWrapper.Create(jsRuntime, Flow.Uid);
+        ffFlow = await ffFlowWrapper.Create(jsRuntime, Flow.Uid, Flow.ReadOnly);
         ffFlow.OnAddElement = AddElement;
         ffFlow.OnOpenContextMenu = OpenContextMenu;
         ffFlow.OnEdit = Edit;

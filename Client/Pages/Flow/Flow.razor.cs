@@ -41,6 +41,11 @@ public partial class Flow : ComponentBase, IDisposable
     private ScriptBrowser ScriptBrowser { get; set; }
     
     /// <summary>
+    /// Gets or sets the instance of the SubFlowBrowser
+    /// </summary>
+    private SubFlowBrowser SubFlowBrowser { get; set; }
+    
+    /// <summary>
     /// Gets or sets the properties editor
     /// </summary>
     private FlowPropertiesEditor PropertiesEditor { get; set; }
@@ -762,12 +767,33 @@ public partial class Flow : ComponentBase, IDisposable
 
         // force clearing them to update the list
         AvailableScripts = null;
-        StateHasChanged();
+        //StateHasChanged();
 
         await LoadFlowElements();
+        await InitializeFlowElements();
+        await UpdateFlowElementLists();
         StateHasChanged();
     }
 
+    /// <summary>
+    /// Opens the sub flow browser
+    /// </summary>
+    private async Task OpenSubFlowBrowser()
+    {
+        bool result = await SubFlowBrowser.Open();
+        if (result == false)
+            return; // no new scripts downloaded
+
+        // force clearing them to update the list
+        AvailableSubFlows = null;
+        //StateHasChanged();
+
+        await LoadFlowElements();
+        await InitializeFlowElements();
+        await UpdateFlowElementLists();
+        StateHasChanged();
+    }
+    
     private void HandleDragStart((DragEventArgs args, FlowElement element) args)
         => ActiveFlow?.ffFlow?.dragElementStart(args.element.Uid);
 
