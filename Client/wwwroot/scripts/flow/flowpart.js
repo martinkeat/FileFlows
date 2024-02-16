@@ -121,53 +121,53 @@ class ffFlowPart
     }
     
     attachEventListeners(args){
-        if(this.ffFlow.readOnly)
-            return; // dont attach in read only mode
         let part = args.part;
         let div = args.div;
         let allEvents = args.allEvents;
         if(!div)
             div = this.ffFlow.getFlowPart(part.uid);
-        
-        div.addEventListener("click", (event) => {
-            event.stopImmediatePropagation();
-            event.preventDefault();
-            this.unselectAll();
-            div.classList.add('selected');
-            this.ffFlow.SelectedParts = [part];
-            this.ffFlow.selectNode(part);
-        });
+
+        if(this.ffFlow.readOnly === false) {
+            div.addEventListener("click", (event) => {
+                event.stopImmediatePropagation();
+                event.preventDefault();
+                this.unselectAll();
+                div.classList.add('selected');
+                this.ffFlow.SelectedParts = [part];
+                this.ffFlow.selectNode(part);
+            });
+            div.addEventListener("keydown", (event) => {
+                if (event.code === 'Delete' || event.code === 'Backspace') {
+                    this.deleteFlowPart(part.uid);
+                    event.stopImmediatePropagation();
+                    event.preventDefault();
+                } else if (event.code === 'Enter') {
+                    this.editFlowPart(part.uid);
+                    event.stopImmediatePropagation();
+                    event.preventDefault();
+                }
+            });
+            div.addEventListener("contextmenu", (event) => {
+                event.preventDefault();
+                return false;
+            });
+            if (allEvents) {
+                for (let output of div.querySelectorAll('.output div')) {
+                    this.attachOutputNodeEvents(output);
+                }
+            }
+        }
+
         div.addEventListener("dblclick", (event) => {
             event.stopImmediatePropagation();
             event.preventDefault();
             if(event.ctrlKey) {
                 this.ffFlow.csharp.invokeMethodAsync("CtrlDblClick", part);
-            } else {
+            } else if(this.ffFlow.readOnly === false){
                 this.ffFlow.setInfo(part.Name, 'Node');
                 this.editFlowPart(part.uid);
             }
         });
-        div.addEventListener("keydown", (event) => {
-            if (event.code === 'Delete' || event.code === 'Backspace') {
-                this.deleteFlowPart(part.uid);
-                event.stopImmediatePropagation();
-                event.preventDefault();
-            }
-            else if (event.code === 'Enter') {
-                this.editFlowPart(part.uid);
-                event.stopImmediatePropagation();
-                event.preventDefault();
-            }
-        });
-        div.addEventListener("contextmenu", (event) => {
-            event.preventDefault();
-            return false;
-        });
-        if(allEvents){
-            for(let output of div.querySelectorAll('.output div')){
-                this.attachOutputNodeEvents(output);
-            }
-        }
     }
     
     attachOutputNodeEvents(divOutput) {

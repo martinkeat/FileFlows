@@ -243,9 +243,9 @@ public partial class Flow : ComponentBase, IDisposable
         {
 
             var modelResult = await GetModel(API_URL + "/" + uid);
-            if (modelResult.Success == false)
+            if (modelResult.Success == false || modelResult.Data == null)
             {
-                Toast.ShowError("Pages.Flow.Message.FailedToLoadFlow");
+                Toast.ShowWarning("Pages.Flow.Messages.FailedToLoadFlow");
                 return;
             }
 
