@@ -158,4 +158,9 @@ public class FlowListModel: IInUse, IUniqueObject<Guid>
     /// Gets or sets what is using this model
     /// </summary>
     public List<ObjectReference> UsedBy { get; set; }
+    
+    /// <summary>
+    /// Gets or sets if this flow is read only
+    /// </summary>
+    public bool ReadOnly { get; set; }
 }

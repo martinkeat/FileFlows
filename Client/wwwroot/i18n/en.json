@@ -37,6 +37,7 @@
     "Type": "Type",
     "Scripts": "Scripts",
     "Plugins": "Plugins",
+    "SubFlow": "Sub Flow",
     "SubFlows": "Sub Flows",
     "DownloadLog": "Download Log",
     "UnsavedChanges": "Unsaved Changes",

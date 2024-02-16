@@ -848,12 +848,6 @@ public partial class Flow : ComponentBase, IDisposable
             other.SetVisibility(other == flow);
         ActiveFlow = flow;
         
-            
-        if (flow.Flow.Type == FlowType.SubFlow)
-            PropertiesEditor?.Show();
-        else
-            PropertiesEditor?.Close();
-        
         _ = InitializeFlowElements();
         //StateHasChanged();
     }

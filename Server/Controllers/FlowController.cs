@@ -60,7 +60,8 @@ public class FlowController : Controller
                 Default = item.Default,
                 Name = item.Name,
                 Type = item.Type,
-                Uid = item.Uid
+                Uid = item.Uid,
+                ReadOnly = item.ReadOnly
             });
         }
         var dictFlows  = list.ToDictionary(x => x.Uid, x => x);

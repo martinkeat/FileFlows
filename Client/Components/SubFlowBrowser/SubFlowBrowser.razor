@@ -1,6 +1,5 @@
 @namespace FileFlows.Client.Components
 
-
 <div class="browser-wrapper @(Visible ? "visible" : "")">
     <div class="background-overlay"></div>
     <div class="browser">
@@ -19,28 +18,31 @@
                         </ToolBar>
 
                         <Columns>
-                            <FlowTableColumn TItem="RepositoryObject" Width="18rem">
+                            <FlowTableColumn TItem="RepositoryObject">
                                 <Header>
-                                    @Globals.lblName
+                                    @lblSubFlow
                                 </Header>
                                 <Cell Context="item">
-                                    <span>@item.Name</span>
-                                </Cell>
-                            </FlowTableColumn>
-                            <FlowTableColumn TItem="RepositoryObject" Width="8rem">
-                                <Header>
-                                    Author
-                                </Header>
-                                <Cell Context="item">
-                                    <span>@item.Author</span>
-                                </Cell>
-                            </FlowTableColumn>
-                            <FlowTableColumn TItem="RepositoryObject" Pre=@true>
-                                <Header>
-                                    Description
-                                </Header>
-                                <Cell Context="item">
-                                    <span>@item.Description</span>
+                                    <span class="name">@item.Name</span>
+                                    @if (string.IsNullOrWhiteSpace(item.Author) == false)
+                                    {
+                                        <span class="author">@item.Author</span>
+                                    }
+                                    <span class="description">
+                                        @item.Description
+                                    </span>
+                                    @{
+                                        var dependencies = GetDependencies(item);
+                                        if (@dependencies.Any())
+                                        {
+                                            <div class="dependencies">
+                                                @foreach (var dependency in GetDependencies(item))
+                                                {
+                                                    <span>@dependency</span>
+                                                }
+                                            </div>
+                                        }
+                                    }
                                 </Cell>
                             </FlowTableColumn>
                         </Columns>

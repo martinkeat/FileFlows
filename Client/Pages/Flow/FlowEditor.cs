@@ -34,6 +34,7 @@ public class FlowEditor : IDisposable
     private string lblObsoleteMessage;
     private bool _needsRendering = false;
     const string API_URL = "/api/flow";
+    private DateTime LoadedAt;
 
     public FlowEditor(Flow flowPage, ff flow)
     {
@@ -46,6 +47,7 @@ public class FlowEditor : IDisposable
     /// </summary>
     public async Task Initialize()
     {
+        LoadedAt = DateTime.Now;
         if (Flow.Uid == Guid.Empty)
             Flow.Uid = Guid.NewGuid();
         ffFlow = await ffFlowWrapper.Create(jsRuntime, Flow.Uid, Flow.ReadOnly);
@@ -262,9 +264,10 @@ public class FlowEditor : IDisposable
     /// <summary>
     /// Marks the editor as dirty
     /// </summary>
-    /// <exception cref="NotImplementedException"></exception>
     public void MarkDirty()
     {
+        if (LoadedAt > DateTime.Now.AddSeconds(-1))
+            return; // this can be triggered when some values are defaulted on bound controls, dont mark it as dirty this soon
         this.IsDirty = true;
         FlowPage.TriggerStateHasChanged();
     }

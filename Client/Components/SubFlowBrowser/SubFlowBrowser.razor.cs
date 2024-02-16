@@ -21,7 +21,7 @@ public partial class SubFlowBrowser: ComponentBase
 
     private bool Updated;
 
-    private string lblTitle, lblClose;
+    private string lblTitle, lblClose, lblSubFlow;
 
     TaskCompletionSource<bool> OpenTask;
 
@@ -35,6 +35,7 @@ public partial class SubFlowBrowser: ComponentBase
     {
         lblClose = Translater.Instant("Labels.Close");
         lblTitle = Translater.Instant("Pages.Flow.Labels.SubFlowBrowser");
+        lblSubFlow = Translater.Instant("Labels.SubFlow");
     }
 
     internal Task<bool> Open()
@@ -132,4 +133,20 @@ public partial class SubFlowBrowser: ComponentBase
         //await LoadData();
     }
     
+    /// <summary>
+    /// Gets the name of any dependencies this item has
+    /// </summary>
+    /// <param name="item">the item to get dependencies for</param>
+    /// <returns>a list of the names of the dependencies</returns>
+    private string[] GetDependencies(RepositoryObject item)
+    {
+        if (item.SubFlows?.Any() != true)
+            return new string[] { };
+
+
+        return Table.Data.Where(x => x.Uid != null && item.SubFlows.Contains(x.Uid.Value))
+            .Select(x => x.Name)
+            .OrderBy(x => x.ToLowerInvariant())
+            .ToArray();
+    }
 }

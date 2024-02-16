@@ -13,12 +13,52 @@
   bottom:0;
   max-width: 100%;
   background:var(--base-darker);
-  z-index:3;
+  z-index:6;
   left:0;
+}
+.background-overlay {
+  z-index: 5;
 }
 
 .browser-content {
   height:100%;
+}
+
+::deep .column {
+
+  display: flex;
+  flex-direction: column;
+  height: unset !important;
+  position:relative;
+  line-height: unset !important;
+  white-space: unset !important;
+  overflow: unset !important;
+  padding-top: 0.25rem;
+  .name {
+    font-weight: 600;
+    padding-bottom:0.5rem;
+  }
+  .author {
+    display: block;
+    font-weight: 600;
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: #3f3f3f8c;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.9rem;
+    border-bottom-left-radius: 0.5rem;
+  }
+  .dependencies {
+    border-top:solid 1px var(--input-background);
+    padding: 0.5rem 0;
+    font-size: 0.9rem;
+    span {
+      margin-right: 0.5rem;
+      border: solid 1px var(--flow-subflow);
+      padding: 0.25rem;
+    }
+  }
 }
 
 

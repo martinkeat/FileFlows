@@ -67,6 +67,21 @@ FileFlows will search for the 'Default' Failure Flow to use if a flow fails, if 
                         </span>
                     </Cell>
                 </FlowTableColumn>
+                
+                <FlowTableColumn TItem="FlowListModel" Hidden="@(SelectedType != FlowType.SubFlow)" Width="10rem">
+                    <Header>
+                        Read Only
+                    </Header>
+                    <Cell Context="item">
+                        <span>
+                            @if (item.ReadOnly)
+                            {
+                                <i class="fas fa-check"></i>
+                            }
+                        </span>
+                    </Cell>
+                </FlowTableColumn>
+                
                 <FlowTableColumn TItem="FlowListModel" Width="10rem">
                     <Header>
                         In Use

@@ -82,4 +82,9 @@ public class RepositoryObject
     /// Gets or sets the author if available
     /// </summary>
     public string Author { get; set; }
+    
+    /// <summary>
+    /// Gets or sets a list of sub flows this object depends on
+    /// </summary>
+    public List<Guid> SubFlows { get; set; }
 }
