@@ -48,7 +48,7 @@ public partial class FlowTab:ComponentBase
     /// Gets or sets the icon associated with the tab.
     /// </summary>
     [Parameter] public string Icon { get; set; }
-
+    
     /// <summary>
     /// Gets or sets the content of the tab.
     /// </summary>

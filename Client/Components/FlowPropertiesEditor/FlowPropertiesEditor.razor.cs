@@ -21,6 +21,11 @@ public partial class FlowPropertiesEditor
     [Inject] IJSRuntime jsRuntime { get; set; }
     
     /// <summary>
+    /// Gets or sets the mode being edited
+    /// </summary>
+    [Parameter] public string Mode { get; set; }
+    
+    /// <summary>
     /// Gets or sets the flow editor currently opened
     /// </summary>
     [Parameter] public FlowEditor FlowEditor { get; set; }

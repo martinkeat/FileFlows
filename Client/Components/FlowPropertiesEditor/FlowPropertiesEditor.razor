@@ -1,147 +1,137 @@
 ﻿@using FileFlows.Plugin
 @namespace FileFlows.Client.Components
 
-@if (Visible && Flow != null)
+@if (Flow == null)
 {
-    <div class="flow-properties">
-        <span class="title">
-            <h2>
-                <i class="fas fa-times" title="Close" @onclick="() => Close()" />
-                Flow Properties
-            </h2>
-            <button @onclick=@OpenHelp>@lblHelp</button>
-        </span>
-        
-        <FlowTabs>
-            <FlowTab Title="General">
-                @if (Flow.Type != FlowType.SubFlow)
-                {
-                    <InputTextArea @bind-Value="@Flow.Properties.Description" Label="Pages.Flow.Fields.Description"  OnChangedValue="(v) => MarkDirty()" />
-                    <InputText @bind-Value="@Flow.Properties.Author" Label="Pages.Flow.Fields.Author"  OnChangedValue="(v) => MarkDirty()" />
-                    <InputArray @bind-Value="@Flow.Properties.Tags" Label="Pages.Flow.Fields.Tags" OnChangedValue="(v) => MarkDirty()"/>
-                    <InputText @bind-Value="@Flow.Properties.MinimumVersion" Label="Pages.Flow.Fields.MinimumVersion" OnChangedValue="(v) => MarkDirty()" />
-                    <InputKeyValue @bind-Value="@FlowVariables" Label="Pages.Flow.Fields.Variables" OnChangedValue="(v) => MarkDirty()" />
-                }
-                else
-                {
-                    <InputTextLabel Label=@lblSubFlowHelp Value=@lblSubFlowHelp HideLabel=@true Pre="true" Formatter="Markdown" />
-                    <hr />
-                    <InputTextArea @bind-Value="@Flow.Properties.Description" Label="Pages.Flow.Fields.SubFlowDescription" OnChangedValue="(v) => MarkDirty()"  />
-                    <InputKeyValueInt @bind-Value="@Flow.Properties.Outputs" Label="Pages.Flow.Fields.Outputs" OnChangedValue="(v) => MarkDirty()" />
-                }
-            </FlowTab>
-            <FlowTab Title="Fields">
-                <div class="field-wrapper">
-                    <div class="field-list">
-                        @if (Fields.Any())
-                        {
-                            @foreach (var field in Fields)
-                            {
-                                <div @onclick="() => Edit(field)" class="field @(field == Editing ? "selected" : string.Empty)">
-                                    <div class="input">
-                                        <div class="name">
-                                            @if (field.Type == FlowFieldType.OutputPath)
-                                            {
-                                                field.Name = "Output_Path";
-                                                <input type="text" @bind-value=@field.Name readonly />   
-                                            }
-                                            else
-                                            {
-                                                <input type="text" @bind-value=@field.Name />
-                                            }
-                                        </div>
-                                        <div class="type">
-                                            <select @bind="@field.Type">
-                                                <option value=@FlowFieldType.String>String</option>
-                                                <option value=@FlowFieldType.Number>Number</option>
-                                                <option value=@FlowFieldType.Boolean>Boolean</option>
-                                                <option value=@FlowFieldType.Directory>Directory</option>
-                                                <option value=@FlowFieldType.Select>Select</option>
-                                                @if (Flow.Type != FlowType.SubFlow)
-                                                {
-                                                    <option value=@FlowFieldType.OutputPath>Output Path</option>
-                                                }
-                                                else
-                                                {
-                                                    // just haven't done this for flow templates yet, but will
-                                                    <option value=@FlowFieldType.Slider>Slider</option>
-                                                }
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="actions">
-                                        <i class="fas fa-trash" title="Delete" @onclick="() => Delete(field)"></i>
-                                        <i class="fas fa-caret-up" title="Move Up" @onclick="() => Move(field, true)"></i>
-                                        <i class="fas fa-caret-down" title="Move Down" @onclick="() => Move(field, false)"></i>
-                                    </div>
-                                </div>
-                            }
-                        }
-                        <button class="btn" @onclick=Add>
-                            <i class="fas fa-plus"></i>
-                            Add Field
-                        </button>
-                    </div>
+    return;
+}
 
-                    @if (Editing != null)
-                    {
-                        <div class="field-editor">
-                            <div class="head">
-                                <h2>
-                                    <i class="fas fa-times" title="Close" @onclick="() => Edit(null)"/>
-                                    @Editing.Name Properties
-                                </h2>
+@if (Mode == "General")
+{
+    @if (Flow.Type != FlowType.SubFlow)
+    {
+        <InputTextArea @bind-Value="@Flow.Properties.Description" Label="Pages.Flow.Fields.Description" OnChangedValue="(v) => MarkDirty()"/>
+        <InputText @bind-Value="@Flow.Properties.Author" Label="Pages.Flow.Fields.Author" OnChangedValue="(v) => MarkDirty()"/>
+        <InputArray @bind-Value="@Flow.Properties.Tags" Label="Pages.Flow.Fields.Tags" OnChangedValue="(v) => MarkDirty()"/>
+        <InputText @bind-Value="@Flow.Properties.MinimumVersion" Label="Pages.Flow.Fields.MinimumVersion" OnChangedValue="(v) => MarkDirty()"/>
+        <InputKeyValue @bind-Value="@FlowVariables" Label="Pages.Flow.Fields.Variables" OnChangedValue="(v) => MarkDirty()"/>
+    }
+    else
+    {
+        <InputTextLabel Label=@lblSubFlowHelp Value=@lblSubFlowHelp HideLabel=@true Pre="true" Formatter="Markdown"/>
+        <hr/>
+        <InputTextArea @bind-Value="@Flow.Properties.Description" Label="Pages.Flow.Fields.Description" OnChangedValue="(v) => MarkDirty()"/>
+        <InputKeyValueInt @bind-Value="@Flow.Properties.Outputs" Label="Pages.Flow.Fields.Outputs" OnChangedValue="(v) => MarkDirty()"/>
+    }
+}
+else if (Mode == "Fields")
+{
+    <div class="field-wrapper">
+        <div class="field-list">
+            @if (Fields.Any())
+            {
+                @foreach (var field in Fields)
+                {
+                    <div @onclick="() => Edit(field)" class="field @(field == Editing ? "selected" : string.Empty)">
+                        <div class="input">
+                            <div class="name">
+                                @if (field.Type == FlowFieldType.OutputPath)
+                                {
+                                    field.Name = "Output_Path";
+                                    <input type="text" @bind-value=@field.Name readonly/>
+                                }
+                                else
+                                {
+                                    <input type="text" @bind-value=@field.Name/>
+                                }
                             </div>
-                            <div class="content">
-                                
-                                <FlowTabs>
-                                    <FlowTab Title="General">
-                                        <InputText @bind-Value="@Editing.Description" Label="Pages.Flow.Fields.Field.Description" OnChangedValue="(v) => MarkDirty()"></InputText>
-                                        <InputText @bind-Value="@Editing.FlowElementField" Label="Pages.Flow.Fields.Field.FlowElementField" OnChangedValue="(v) => MarkDirty()"></InputText>
-
-                                        @if (Editing.Type == FlowFieldType.String || Editing.Type == FlowFieldType.Directory)
-                                        {
-                                            <InputSwitch @bind-Value="@Editing.Required" Label="Pages.Flow.Fields.Field.Required" OnChangedValue="(v) => MarkDirty()"></InputSwitch>
-                                            <InputText @bind-Value="@DefaultValueString" Label="Pages.Flow.Fields.Field.Default"></InputText>
-                                        }
-                                        else if (Editing.Type == FlowFieldType.Boolean)
-                                        {
-                                            <InputSwitch @bind-Value="@DefaultValueBoolean" Label="Pages.Flow.Fields.Field.Default"></InputSwitch>
-                                        }
-                                        else if (Editing.Type is FlowFieldType.Number or FlowFieldType.Slider)
-                                        {
-                                            <InputNumber TItem="Int32" @bind-Value="@DefaultValueNumber" Label="Pages.Flow.Fields.Field.Default"></InputNumber>
-                                            if (Editing.Type == FlowFieldType.Slider)
-                                            {
-                                                <InputNumber TItem="Int32" @bind-Value="@IntMinValue" Label="Pages.Flow.Fields.Field.Minimum"></InputNumber>
-                                                <InputNumber TItem="Int32" @bind-Value="@IntMaxValue" Label="Pages.Flow.Fields.Field.Maximum"></InputNumber>
-                                                <InputSwitch @bind-Value="@Inverse" Label="Pages.Flow.Fields.Field.Inverse"></InputSwitch>
-                                            }
-                                        }
-                                        else if (Editing.Type == FlowFieldType.Select)
-                                        {
-                                            <InputArray @bind-Value="@Editing.Options" Label="Pages.Flow.Fields.Field.Options" OnChangedValue="(v) => MarkDirty()"></InputArray>
-                                            <InputText @bind-Value="@DefaultValueString" Label="Pages.Flow.Fields.Field.Default"></InputText>
-                                        }
-                                        else if (Editing.Type == FlowFieldType.OutputPath)
-                                        {
-                                            <InputArray @bind-Value="@Editing.Options" Label="Pages.Flow.Fields.Field.DeleteIfEmpty" OnChangedValue="(v) => MarkDirty()"></InputArray>
-                                        }
-                                        
-                                    </FlowTab>
-                                    <FlowTab Title="Conditions">
-                                        <InputText @bind-Value="@Editing.IfName" Label="Pages.Flow.Fields.Field.IfName" OnChangedValue="(v) => MarkDirty()"></InputText>
-                                        <InputText @bind-Value="@Editing.IfValue" Label="Pages.Flow.Fields.Field.IfValue" OnChangedValue="(v) => MarkDirty()"></InputText>
-                                        <InputSwitch @bind-Value="@Editing.IfNot" Label="Pages.Flow.Fields.Field.IfNot" OnChangedValue="(v) => MarkDirty()"></InputSwitch>
-                                    </FlowTab>
-                                </FlowTabs>
+                            <div class="type">
+                                <select @bind="@field.Type">
+                                    <option value=@FlowFieldType.String>String</option>
+                                    <option value=@FlowFieldType.Number>Number</option>
+                                    <option value=@FlowFieldType.Boolean>Boolean</option>
+                                    <option value=@FlowFieldType.Directory>Directory</option>
+                                    <option value=@FlowFieldType.Select>Select</option>
+                                    @if (Flow.Type != FlowType.SubFlow)
+                                    {
+                                        <option value=@FlowFieldType.OutputPath>Output Path</option>
+                                    }
+                                    else
+                                    {
+                                        // just haven't done this for flow templates yet, but will
+                                        <option value=@FlowFieldType.Slider>Slider</option>
+                                    }
+                                </select>
                             </div>
                         </div>
-                    }
+                        <div class="actions">
+                            <i class="fas fa-trash" title="Delete" @onclick="() => Delete(field)"></i>
+                            <i class="fas fa-caret-up" title="Move Up" @onclick="() => Move(field, true)"></i>
+                            <i class="fas fa-caret-down" title="Move Down" @onclick="() => Move(field, false)"></i>
+                        </div>
+                    </div>
+                }
+            }
+            <button class="btn" @onclick=Add>
+                <i class="fas fa-plus"></i>
+                Add Field
+            </button>
+        </div>
+
+        @if (Editing != null)
+        {
+            <div class="field-editor">
+                <div class="head">
+                    <h2>
+                        <i class="fas fa-times" title="Close" @onclick="() => Edit(null)"/>
+                        @Editing.Name Properties
+                    </h2>
                 </div>
-            </FlowTab>
-        </FlowTabs>
-        
-        
+                <div class="content">
+
+                    <FlowTabs>
+                        <FlowTab Title="General">
+                            <InputText @bind-Value="@Editing.Description" Label="Pages.Flow.Fields.Field.Description" OnChangedValue="(v) => MarkDirty()"></InputText>
+                            <InputText @bind-Value="@Editing.FlowElementField" Label="Pages.Flow.Fields.Field.FlowElementField" OnChangedValue="(v) => MarkDirty()"></InputText>
+
+                            @if (Editing.Type == FlowFieldType.String || Editing.Type == FlowFieldType.Directory)
+                            {
+                                <InputSwitch @bind-Value="@Editing.Required" Label="Pages.Flow.Fields.Field.Required" OnChangedValue="(v) => MarkDirty()"></InputSwitch>
+                                <InputText @bind-Value="@DefaultValueString" Label="Pages.Flow.Fields.Field.Default"></InputText>
+                            }
+                            else if (Editing.Type == FlowFieldType.Boolean)
+                            {
+                                <InputSwitch @bind-Value="@DefaultValueBoolean" Label="Pages.Flow.Fields.Field.Default"></InputSwitch>
+                            }
+                            else if (Editing.Type is FlowFieldType.Number or FlowFieldType.Slider)
+                            {
+                                <InputNumber TItem="Int32" @bind-Value="@DefaultValueNumber" Label="Pages.Flow.Fields.Field.Default"></InputNumber>
+                                if (Editing.Type == FlowFieldType.Slider)
+                                {
+                                    <InputNumber TItem="Int32" @bind-Value="@IntMinValue" Label="Pages.Flow.Fields.Field.Minimum"></InputNumber>
+                                    <InputNumber TItem="Int32" @bind-Value="@IntMaxValue" Label="Pages.Flow.Fields.Field.Maximum"></InputNumber>
+                                    <InputSwitch @bind-Value="@Inverse" Label="Pages.Flow.Fields.Field.Inverse"></InputSwitch>
+                                }
+                            }
+                            else if (Editing.Type == FlowFieldType.Select)
+                            {
+                                <InputArray @bind-Value="@Editing.Options" Label="Pages.Flow.Fields.Field.Options" OnChangedValue="(v) => MarkDirty()"></InputArray>
+                                <InputText @bind-Value="@DefaultValueString" Label="Pages.Flow.Fields.Field.Default"></InputText>
+                            }
+                            else if (Editing.Type == FlowFieldType.OutputPath)
+                            {
+                                <InputArray @bind-Value="@Editing.Options" Label="Pages.Flow.Fields.Field.DeleteIfEmpty" OnChangedValue="(v) => MarkDirty()"></InputArray>
+                            }
+
+                        </FlowTab>
+                        <FlowTab Title="Conditions">
+                            <InputText @bind-Value="@Editing.IfName" Label="Pages.Flow.Fields.Field.IfName" OnChangedValue="(v) => MarkDirty()"></InputText>
+                            <InputText @bind-Value="@Editing.IfValue" Label="Pages.Flow.Fields.Field.IfValue" OnChangedValue="(v) => MarkDirty()"></InputText>
+                            <InputSwitch @bind-Value="@Editing.IfNot" Label="Pages.Flow.Fields.Field.IfNot" OnChangedValue="(v) => MarkDirty()"></InputSwitch>
+                        </FlowTab>
+                    </FlowTabs>
+                </div>
+            </div>
+        }
     </div>
 }

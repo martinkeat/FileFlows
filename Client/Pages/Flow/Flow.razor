@@ -2,15 +2,18 @@
 
 @page "/flows/{uid:guid}"
 @using FileFlows.Plugin
-
-<div class="flow-wrapper">
+@{
+    bool fieldsOnTop = FieldsTabOpened && EditorOpen;
+    bool hideFields = ActiveFlow == null || ActiveFlow.Flow?.ReadOnly == true;
+}
+<div class="flow-wrapper @(hideFields ? "hide-flow-elements": "")">
     <div class="flow-container @(App.Instance.NavMenuCollapsed ? "has-collapsed-menu" : "") @(App.Instance.IsMobile ? (ElementsVisible ? "elements-visible" : "elements-hidden") : "")">
         @if (App.Instance.IsMobile)
         {
             <i id="show-elements" class="show-elements fas fa-sitemap" @onclick="ShowElementsOnClick"></i>
         }
-        <div class="flow-elements">
-            <FlowTabs TitleOnlyOnActive="true" ContainTabs="true">
+        <div class="flow-elements @(fieldsOnTop ? "flow-elements-on-top" : "")">
+            <FlowTabs @ref="tabsFlowElements" TitleOnlyOnActive="true" ContainTabs="true" OnTabChanged="OnFlowElementsTabChange" DisableChanging="fieldsOnTop">
                 <FlowTab Icon="fas fa-puzzle-piece" Title="@lblPlugins" Visible="@(AvailablePlugins?.Any() == true)">
                     <FlowElementList @ref="eleListPlugins" Items="@AvailablePlugins" DefaultGroup="@PluginsDefaultGroup" OnDragStart="@HandleDragStart"
                                      AddSelectedElement="AddSelectedElement" Close="@CloseElements" />
@@ -24,6 +27,12 @@
                     <FlowElementList @ref="eleListSubFlows"  Items="@AvailableSubFlows" DefaultGroup="Sub Flows" OnDragStart="@HandleDragStart"
                                      AddSelectedElement="AddSelectedElement" Close="@CloseElements"
                                      OpenBrowser="@(() => _ = OpenSubFlowBrowser())" OpenBrowserIcon="fas fa-subway" OpenBrowserLabel="Pages.Flow.Labels.OpenSubFlowBrowser" />
+                </FlowTab>
+                <FlowTab Icon="fas fa-cogs" Title="@lblProperties" Visible="ActiveFlow?.Flow?.Type != FlowType.Failure">
+                    <FlowPropertiesEditor @ref="PropertiesEditor" FlowEditor="@ActiveFlow" Mode="General" />
+                </FlowTab>
+                <FlowTab @ref="@tabFields" Icon="fas fa-sliders-h" Title="@lblFields" Visible="ActiveFlow?.Flow?.Type != FlowType.Failure">
+                    <FlowPropertiesEditor @ref="PropertiesEditor" FlowEditor="@ActiveFlow" Mode="Fields" />
                 </FlowTab>
             </FlowTabs>
         </div>
@@ -47,6 +56,10 @@
                                 </span>
                             }
                             <div class="actions">
+                                @if (flowEditor.Flow.ReadOnly)
+                                {
+                                    <i class="fas fa-lock" title="Read Only"></i>
+                                }
                                 @if (flowEditor.IsDirty)
                                 {
                                     @if (active)
@@ -85,8 +98,6 @@
     </div>
 
     <Editor @ref="Editor" FlowElementEditor=@true></Editor>
-
-    <FlowPropertiesEditor @ref="PropertiesEditor" FlowEditor="@ActiveFlow" />
 </div>
 
 
@@ -170,10 +181,6 @@
         @lblDelete
     </Item>
     <BlazorContextMenu.Seperator/>
-    <Item OnClick="OpenProperties">
-        <i class="fas fa-clipboard-list"></i>
-        @lblProperties
-    </Item>
     <Item OnClick="OpenHelp">
         <i class="fas fa-question-circle"></i>
         @lblHelp
@@ -201,10 +208,6 @@
         @lblUndo
     </Item>
     <BlazorContextMenu.Seperator/>
-    <Item OnClick="OpenProperties">
-        <i class="fas fa-clipboard-list"></i>
-        @lblProperties
-    </Item>
     <Item OnClick="OpenHelp">
         <i class="fas fa-question-circle"></i>
         @lblHelp

@@ -10,6 +10,7 @@ using System.Text.Json;
 using FileFlows.Plugin;
 using System.Text.RegularExpressions;
 using BlazorContextMenu;
+using FileFlows.Client.Components.Common;
 using Microsoft.AspNetCore.Components.Web;
 
 namespace FileFlows.Client.Pages;
@@ -59,7 +60,7 @@ public partial class Flow : ComponentBase, IDisposable
     private NewFlowEditor AddEditor;
 
     private string lblEdit, lblHelp, lblDelete, lblCopy, lblPaste, lblRedo, lblUndo, lblAdd, 
-        lblProperties, lblEditSubFlow, lblPlugins, lblScripts, lblSubFlows;
+        lblProperties, lblEditSubFlow, lblPlugins, lblScripts, lblSubFlows, lblFields;
 
 
     /// <summary>
@@ -98,6 +99,18 @@ public partial class Flow : ComponentBase, IDisposable
 
     private Func<Task<bool>> NavigationCheck;
 
+    /// <summary>
+    /// A reference to the floe elements tabs
+    /// </summary>
+    private FlowTabs tabsFlowElements;
+
+    private FlowTab tabFields;
+
+    /// <summary>
+    /// Gets or sets if the active tab is the fields tab
+    /// </summary>
+    private bool FieldsTabOpened { get; set; }
+
     protected override void OnInitialized()
     {
         lblSave = Translater.Instant("Labels.Save");
@@ -112,6 +125,7 @@ public partial class Flow : ComponentBase, IDisposable
         lblDelete = Translater.Instant("Labels.Delete");
         lblHelp = Translater.Instant("Labels.Help");
         lblProperties = Translater.Instant("Labels.Properties");
+        lblFields = Translater.Instant("Labels.Fields");
         lblEditSubFlow = Translater.Instant("Labels.EditSubFlow");
         lblPlugins = Translater.Instant("Labels.Plugins");
         lblScripts = Translater.Instant("Labels.Scripts");
@@ -146,6 +160,23 @@ public partial class Flow : ComponentBase, IDisposable
         _ = Init();
     }
 
+    private void OnFlowElementsTabChange(int index)
+    {
+        bool newValue = FieldsTabOpened;
+        if (ActiveFlow?.Flow == null)
+            newValue = false;
+        else if (ActiveFlow.Flow.Type == FlowType.Failure)
+            newValue = false;
+        else if (index != 4)
+            newValue = false;
+        else
+            newValue = true;
+
+        if (newValue == FieldsTabOpened)
+            return;
+        FieldsTabOpened = newValue;
+        StateHasChanged();
+    }
 
     public void Dispose()
     {
@@ -208,17 +239,28 @@ public partial class Flow : ComponentBase, IDisposable
         }
         if(showBlocker)
             Blocker.Show("Pages.Flow.Messages.LoadingFlow");
-        
-        var modelResult = await GetModel(API_URL + "/" + uid);
-        ff flow = (modelResult.Success ? modelResult.Data : null) ?? new ff { Parts = new List<ffPart>() };
+        try
+        {
 
-        var fEditor = new FlowEditor(this, flow);
-        await fEditor.Initialize();
-        OpenedFlows.Add(fEditor);
-        ActivateFlow(fEditor);
-        
-        if(showBlocker)
-            Blocker.Hide();
+            var modelResult = await GetModel(API_URL + "/" + uid);
+            if (modelResult.Success == false)
+            {
+                Toast.ShowError("Pages.Flow.Message.FailedToLoadFlow");
+                return;
+            }
+
+            ff flow = (modelResult.Success ? modelResult.Data : null) ?? new ff { Parts = new List<ffPart>() };
+
+            var fEditor = new FlowEditor(this, flow);
+            await fEditor.Initialize();
+            OpenedFlows.Add(fEditor);
+            ActivateFlow(fEditor);
+        }
+        finally
+        {
+            if (showBlocker)
+                Blocker.Hide();
+        }
     }
 
     private async Task LoadFlowElements()
@@ -300,9 +342,6 @@ public partial class Flow : ComponentBase, IDisposable
         
         await UpdateFlowElementLists();
     }
-
-    private void OpenProperties()
-        => PropertiesEditor.Show();
 
     private async Task<RequestResult<ff>> GetModel(string url)
         => await HttpHelper.Get<ff>(url);
@@ -540,6 +579,7 @@ public partial class Flow : ComponentBase, IDisposable
 
         string title = typeDisplayName;
         EditorOpen = true;
+        StateHasChanged();
         EditorVariables = variables;
         var newModelTask = Editor.Open(new()
         {
@@ -559,6 +599,7 @@ public partial class Flow : ComponentBase, IDisposable
         finally
         {
             EditorOpen = false;
+            StateHasChanged();
             // await ffFlow.focusElement(part.Uid.ToString());
         }
         if (newModelTask.IsCanceled == false)

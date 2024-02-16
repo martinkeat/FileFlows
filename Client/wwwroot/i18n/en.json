@@ -277,7 +277,8 @@
       },
       "Messages": {
         "Close": "Are you sure you want to leave and lose all unsaved changes?",
-        "LoadingFlow": "Loading Flow"
+        "LoadingFlow": "Loading Flow",
+        "FailedToLoadFlow": "Failed to load flow."
       },
       "Fields": {
         "Variables": "Variables",
@@ -285,9 +286,7 @@
         "MinimumVersion": "Minimum Version",
         "VariablesKey": "Name",
         "VariablesValue": "Value",
-        "Description": "The description of this flow template.",
-        "SubFlowDescription": "Description",
-        "SubFlowDescription-Placeholder": "The description of this sub flow which will be shown when selecting this sub flow in a flow.",
+        "Description": "Description.",
         "Author": "Author",
         "Author-Help": "Optionally specify the author of this flow.",
         "Outputs": "Outputs",

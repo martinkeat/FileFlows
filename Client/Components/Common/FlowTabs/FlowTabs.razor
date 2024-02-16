@@ -1,7 +1,7 @@
 ﻿@using Humanizer
 @namespace FileFlows.Client.Components.Common
 
-<div class="flow-tabs @(ContainTabs ? "contain-tabs" : string.Empty)">
+<div class="flow-tabs @(ContainTabs ? "contain-tabs" : string.Empty) @(DisableChanging ? "disabled" :"")">
 
     <div class="flow-tab-buttons @(TitleOnlyOnActive ? "title-only-on-active" : string.Empty)">
         @foreach(var tab in Tabs)
@@ -10,7 +10,8 @@
             {
                 continue;
             }
-            <button class="tab-button tb-@tab.Title.Dehumanize() @(ActiveTab == @tab ? "active" : "")" @onclick="() => SelectTab(tab)">
+            <button class="tab-button tb-@tab.Title.Dehumanize() @(ActiveTab == tab ? "active" : "")" @onclick="() => SelectTab(tab)" 
+                    disabled="@(DisableChanging && ActiveTab != tab)">
                 @if (string.IsNullOrEmpty(tab.Icon) == false)
                 {
                     <i class="@tab.Icon" />

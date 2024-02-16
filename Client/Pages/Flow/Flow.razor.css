@@ -1,7 +1,14 @@
 .flow-wrapper {
+  --flow-elements-width:25rem;
   display: flex;
   flex-direction: row;
   height: 100%;
+}
+.flow-wrapper.hide-flow-elements {
+  --flow-elements-width: 0;
+}
+.flow-wrapper.hide-flow-elements .flow-elements {
+  display: none;
 }
 .flow-wrapper > ::deep .vi-container {
   flex-basis: 1;
@@ -9,8 +16,26 @@
 }
 
 .flow-elements {
-  width: 20rem;
+  width: var(--flow-elements-width);
   padding-top: 0.75rem;
+}
+.flow-elements.flow-elements-on-top {
+  z-index: 4;
+}
+.flow-elements ::deep .row {
+  margin: 0 1rem;
+  flex-direction: column !important;
+}
+.flow-elements ::deep .row .input-label {
+  width: 100% !important;
+}
+.flow-elements ::deep .tab-button {
+  margin: 0;
+  padding: 0;
+}
+.flow-elements ::deep .tab-button i {
+  margin: 0 0.5rem 0 0;
+  width: 0.75rem;
 }
 
 .flow-container {
@@ -89,7 +114,7 @@
   position: fixed;
   bottom: 10px;
   left: 250px;
-  right: calc(20rem + 6px);
+  right: calc(var(--flow-elements-width) + 6px);
   padding: 0.5rem;
   border-top: solid 2px var(--border-color);
   background: var(--base);
@@ -128,7 +153,7 @@
   flex-direction: column;
   left: 0;
   position: absolute;
-  right: 20rem;
+  right: var(--flow-elements-width);
   bottom: 0;
   height: 100vh;
   top: 0;

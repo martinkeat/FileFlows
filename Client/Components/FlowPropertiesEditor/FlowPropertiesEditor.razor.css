@@ -1,26 +1,3 @@
-.flow-properties {
-  background: var(--base);
-  height: 100%;
-  width: 30rem;
-  overflow: auto;
-  z-index: 5;
-  border-left: solid 1px var(--border-color);
-  display: flex;
-  flex-direction: column;
-  max-height: 100vh;
-}
-.flow-properties .title {
-  display: flex;
-  align-items: center;
-  padding: 0.75rem 0.75rem 0.75rem 0;
-}
-.flow-properties .title h2 {
-  flex-grow: 1;
-}
-.flow-properties .title button {
-  width: 7rem;
-}
-
 h2 {
   font-size: 1.25rem;
   margin: 0;
@@ -35,12 +12,13 @@ h2 i {
   display: flex;
   flex-direction: column;
   height: 100%;
-  max-height: calc(100vh - 9rem);
+  max-height: calc(100vh - 4.05rem);
 }
 
 .field-list {
   flex-grow: 1;
   overflow: auto;
+  text-align: center;
 }
 .field-list input[type=text], .field-list select {
   width: 100%;
@@ -82,21 +60,22 @@ h2 i {
   border-color: var(--accent);
 }
 .field-list .field .actions {
-  width: 5rem;
+  width: 4.5rem;
+  min-width: 4.5rem;
   text-align: center;
   align-self: center;
 }
 .field-list .field .actions i {
   cursor: pointer;
   padding: 0.5rem 0.25rem;
-  font-size: 1.25rem;
+  font-size: 1rem;
   opacity: 0.5;
 }
 .field-list .field .actions i:hover {
   opacity: 1;
 }
 .field-list .btn {
-  margin: 1rem 1rem;
+  margin: 1rem 0;
 }
 
 .field-editor {
@@ -106,14 +85,6 @@ h2 i {
 .field-editor .content {
   width: 90%;
   margin: auto;
-}
-
-::deep .row {
-  margin: 0 1rem;
-  flex-direction: column !important;
-}
-::deep .row .input-label {
-  width: 100% !important;
 }
 
 /*# sourceMappingURL=FlowPropertiesEditor.razor.css.map */

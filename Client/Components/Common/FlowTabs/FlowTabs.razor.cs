@@ -24,6 +24,16 @@ public partial class FlowTabs : ComponentBase
     /// Used by the flow editor to contain the flow parts
     /// </summary>
     [Parameter] public bool ContainTabs { get; set; }
+    
+    /// <summary>
+    /// Gets or sets an event when a tab changes
+    /// </summary>
+    [Parameter] public EventCallback<int> OnTabChanged { get; set; }
+    
+    /// <summary>
+    /// Gets or sets if the tabs cannot be changed
+    /// </summary>
+    [Parameter] public bool DisableChanging { get; set; }
 
     /// <summary>
     /// Represents a collection of tabs.
@@ -50,7 +60,11 @@ public partial class FlowTabs : ComponentBase
     /// </summary>
     /// <param name="tab">The tab to select.</param>
     private void SelectTab(FlowTab tab)
-        => ActiveTab = tab;
+    {
+        if (DisableChanging) return;
+        ActiveTab = tab;
+        OnTabChanged.InvokeAsync(Tabs.IndexOf(tab));
+    }
 
     /// <summary>
     /// Called when the visibility of a tab has changed
@@ -71,9 +85,12 @@ public partial class FlowTabs : ComponentBase
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
     public void SelectFirstTab()
     {
+        if (DisableChanging) return;
+        
         if (ActiveTab == null)
         {
             ActiveTab = Tabs.FirstOrDefault(x => x.Visible);
+            OnTabChanged.InvokeAsync(Tabs.IndexOf(ActiveTab));
             StateHasChanged();
         }
     }

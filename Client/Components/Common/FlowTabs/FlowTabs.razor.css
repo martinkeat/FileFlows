@@ -50,15 +50,22 @@
 .tab-button i {
   margin: 0 0.5rem;
 }
-.tab-button:hover {
-  border-color: var(--accent) !important;
-}
 .tab-button.active {
   border-color: var(--accent) !important;
   border-bottom: 1px solid var(--base) !important;
 }
 .tab-button:not(.active) {
   font-size: 0.7rem !important;
+}
+
+.flow-tabs:not(.disabled) .tab-button:hover {
+  border-color: var(--accent) !important;
+}
+
+.flow-tabs.disabled .tab-button.active:hover {
+  box-shadow: none !important;
+  background-image: none !important;
+  cursor: default;
 }
 
 .flow-tabs-content {

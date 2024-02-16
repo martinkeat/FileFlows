@@ -48,25 +48,34 @@
     overflow-x: hidden;
     text-overflow: ellipsis;
     border-color: var(--input-background) !important;
-    
-    position:relative;
-    bottom:-1px;
-    margin-right:0.25rem;
-    
-    i {
-        margin:0 0.5rem;
-    }
 
-    &:hover {
-        border-color: var(--accent) !important;
+    position: relative;
+    bottom: -1px;
+    margin-right: 0.25rem;
+
+    i {
+        margin: 0 0.5rem;
     }
 
     &.active {
         border-color: var(--accent) !important;
-        border-bottom:1px solid var(--base) !important;
+        border-bottom: 1px solid var(--base) !important;
     }
-    &:not(.active){
-        font-size:0.7rem !important;
+
+    &:not(.active) {
+        font-size: 0.7rem !important;
+    }
+}
+.flow-tabs:not(.disabled) {
+    .tab-button:hover {
+        border-color: var(--accent) !important;
+    }
+}
+.flow-tabs.disabled {
+    .tab-button.active:hover {
+        box-shadow: none !important;
+        background-image: none !important;    
+        cursor:default;
     }
 }
 
