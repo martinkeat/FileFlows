@@ -37,6 +37,9 @@
   width: unset !important;
   flex-grow: 1;
 }
+.title-only-on-active .tab-button:not(.active) i {
+  margin: 0;
+}
 
 .tab-button {
   width: 8rem;
