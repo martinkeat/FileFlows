@@ -104,7 +104,8 @@ public partial class FlowElementList : ComponentBase
         if (Items == null)
             return;
 
-        if (string.IsNullOrWhiteSpace(txtFilter))
+        string filter = txtFilter?.Trim()?.Replace(" ", string.Empty)?.ToLowerInvariant() ?? string.Empty;
+        if (string.IsNullOrWhiteSpace(filter))
         {
             Filtered = Items;
         }
@@ -112,8 +113,8 @@ public partial class FlowElementList : ComponentBase
         {
             Filtering = true;
             Filtered = Items
-                .Where(x => x.Name.ToLower().Replace(" ", "").Contains(txtFilter)
-                            || x.Group.ToLower().Replace(" ", "").Contains(txtFilter)
+                .Where(x => x.Name.ToLowerInvariant().Replace(" ", "").Contains(filter)
+                            || x.Group.ToLowerInvariant().Replace(" ", "").Contains(filter)
                 )
                 .ToArray();
         }
