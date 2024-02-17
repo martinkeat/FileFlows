@@ -65,11 +65,6 @@ public partial class Dashboard : ComponentBase, IDisposable
         this.Dashboards = dbResponse.Data;
         foreach (var db in this.Dashboards)
             db.Value = Guid.Parse(db.Value.ToString());
-        this.Dashboards.Add(new ListOption()
-        {
-            Label = "Basic Dashboard",
-            Value = Guid.Empty
-        });
         SortDashboards();
         var lsActiveDashboard = await LocalStorage.GetItemAsync<Guid?>("ACTIVE_DASHBOARD");
         if (lsActiveDashboard != null &&  this.Dashboards.Any(x => ((Guid)x.Value) == lsActiveDashboard))
