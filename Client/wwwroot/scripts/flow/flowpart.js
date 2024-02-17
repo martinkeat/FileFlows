@@ -116,9 +116,9 @@ class ffFlowPart
 
         this.ffFlow.eleFlowParts.appendChild(div);
 
-        console.log('about to set part name', part);
         this.setPartName(part);
         this.ffFlow.initOutputHints(part);
+        return div;
     }
     
     attachEventListeners(args){

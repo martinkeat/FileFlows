@@ -25,7 +25,6 @@ class ffFlowMouse {
     }
 
     dragElementStart(uid) {
-        console.log('dragElementStart', uid);
         this.draggingElementUid = uid;
         event.dataTransfer.setData("text", uid);
         event.dataTransfer.effectAllowed = "copy";

@@ -310,7 +310,25 @@ class ffFlowLines {
         });
     }
 
-    isClickNearLine(ctx, line, event, tolerance = 5) {
+    /**
+     * Checks if a mouse event is near a line
+     * @param event the mouse event
+     * @returns {*|null} the line its over or null
+     */
+    isOverLine(event) {
+        const rect = this.ffFlow.canvas.getBoundingClientRect();
+        const xPos = Math.round(event.clientX - rect.left);
+        const yPos = Math.round(event.clientY - rect.top);
+        for (let line of this.ioLines) {
+            if(this.isClickNearLine(this.ioContext, line.linePoints, { offsetX: xPos, offsetY: yPos}, 30)) {
+                console.log('is near line!', line );
+                return line;
+            }
+        }        
+        return null;
+    }
+
+    isClickNearLine(ctx, line, event, tolerance= 5) {
         const x = event.offsetX / (this.ffFlow.Zoom / 100);
         const y = event.offsetY / (this.ffFlow.Zoom / 100);
 

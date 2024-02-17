@@ -219,6 +219,7 @@ class ffFlow
     drop(event, dropping, uid) {
         let xPos = 100, yPos = 100;
         let replacing;
+        let line;
         if (event) {
             event.preventDefault();
             if (dropping !== true)
@@ -232,6 +233,11 @@ class ffFlow
                 let rUid = target.getAttribute('x-uid');
                 replacing = this.parts.filter(x => x.uid === rUid)[0];
             }
+            
+            if(!replacing){
+                // check if adding ontop of a line
+                line = this.FlowLines.isOverLine(event);
+            }
         } else {
         }
         if (!uid) {
@@ -239,10 +245,10 @@ class ffFlow
             uid = this.Mouse.draggingElementUid;
         }
         console.log('drop', uid);
-        this.addElementActual(uid, xPos, yPos, replacing);
+        this.addElementActual(uid, xPos, yPos, replacing, line);
     }
     
-    addElementActual(uid, xPos, yPos, replacing) {
+    addElementActual(uid, xPos, yPos, replacing, line) {
 
         this.csharp.invokeMethodAsync("AddElement", uid).then(result => {
             if(!result)
@@ -271,6 +277,8 @@ class ffFlow
             
             if(replacing)            
                 this.History.perform(new FlowActionReplacePart(part, replacing))
+            else if(line)
+                this.History.perform(new FlowActionIntersectLine(part, line))
             else
                 this.History.perform(new FlowActionAddPart(part));
 

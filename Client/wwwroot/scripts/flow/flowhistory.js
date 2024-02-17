@@ -226,8 +226,6 @@ class FlowActionReplacePart {
         let index = ffFlow.parts.indexOf(oldPart);
         if(index < 0)
             return;
-        console.log('newPart', newPart);
-        console.log('oldPart', oldPart);
         newPart.uid = oldPart.uid; // so the input connections stay the same
         newPart.xPos = oldPart.xPos;
         newPart.yPos = oldPart.yPos;
@@ -251,6 +249,78 @@ class FlowActionReplacePart {
         ffFlow.parts[index] = newPart;
 
         ffFlow.setInfo();
+        ffFlow.redrawLines();
+    }
+}
+
+class FlowActionIntersectLine {
+
+    part;
+    line;
+    originalConnection;
+    originalOutput;
+
+    constructor(part, line) {
+        this.part = part;
+        this.line = line;
+        this.originalConnection = { index: line.connection.index, part: line.connection.part};
+        this.originalOutput = line.output.getAttribute('x-uid');
+    }
+    
+    deletePart(ffFlow, uid){
+        let div = ffFlow.getFlowPart(uid);
+        if (div) {
+            ffFlow.ffFlowPart.flowPartElements = ffFlow.ffFlowPart.flowPartElements.filter(x => x !== div);
+            div.remove();
+        }
+
+        ffFlow.FlowLines.ioOutputConnections.delete(uid);
+
+        for (let i = 0; i < ffFlow.parts.length; i++) {
+            if (ffFlow.parts[i].uid === uid) {
+                ffFlow.parts.splice(i, 1);
+                break;
+            }
+        }
+
+    }
+    
+    undo(ffFlow)
+    {
+        // first delete the new part
+        this.deletePart(ffFlow, this.part.uid);
+        
+        // reconnect the original connection
+        ffFlow.FlowLines.ioOutputConnections.set(this.originalOutput, [this.originalConnection]);        
+        ffFlow.redrawLines();
+    }
+    
+    perform(ffFlow) {
+        ffFlow.ffFlowPart.addFlowPart(this.part);
+        ffFlow.parts.push(this.part);
+                
+        if(this.part.inputs < 1)
+            return; // can't connect
+        if(this.part.outputs < 1)
+            return // can't connect
+        
+        let output = this.line.output; // output element
+        let outputUid = output.getAttribute('x-uid');
+        
+        let connection = this.line.connection; // { index: number, part: uid }
+        let finalPart = connection.part;
+        
+        // move the output from the original, to this input
+        ffFlow.FlowLines.ioOutputConnections.set(outputUid, [{
+            index: this.originalConnection.index,
+            part: this.part.uid
+        }]);
+
+        // now connect the first output from this part to the previous input
+        let outputIndex = output.className.indexOf('--1') > 0 ? -1 : 1;
+        let partOutputUid = this.part.uid + '-output-' + outputIndex;
+        ffFlow.FlowLines.ioOutputConnections.set(partOutputUid, [{index: this.originalConnection.index, part: finalPart}]);
+        
         ffFlow.redrawLines();
     }
 }
