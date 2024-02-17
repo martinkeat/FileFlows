@@ -40,6 +40,11 @@ public class LocalFileService : IFileService
     /// Gets or sets the logger used for logging
     /// </summary>
     public ILogger? Logger { get; set; }
+    
+    /// <summary>
+    /// Gets or sets if protective paths should be checked
+    /// </summary>
+    public bool CheckProtectivePaths { get; set; }
 
     public Result<string[]> GetFiles(string path, string searchPattern = "", bool recursive = false)
     {
@@ -406,6 +411,9 @@ public class LocalFileService : IFileService
     /// <returns>true if accessible, otherwise false</returns>
     private bool IsProtectedPath(ref string path)
     {
+        if (CheckProtectivePaths == false)
+            return false;
+        
         if (OperatingSystem.IsWindows())
             path = path.Replace("/", "\\");
         else
