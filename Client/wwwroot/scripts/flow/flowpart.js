@@ -116,6 +116,7 @@ class ffFlowPart
 
         this.ffFlow.eleFlowParts.appendChild(div);
 
+        console.log('about to set part name', part);
         this.setPartName(part);
         this.ffFlow.initOutputHints(part);
     }
@@ -193,7 +194,7 @@ class ffFlowPart
                 name = part.label;
             if (!name) 
                 name = part.flowElementUid.substring(part.flowElementUid.lastIndexOf('.') + 1);
-
+            
             part.displayName = name;
             divName.innerHTML = name;
 

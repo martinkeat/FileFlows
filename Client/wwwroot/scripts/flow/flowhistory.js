@@ -166,7 +166,7 @@ class FlowActionConnection {
 }
 
 
-class FlowActionAddNode {
+class FlowActionAddPart {
 
     part;
     
@@ -195,6 +195,60 @@ class FlowActionAddNode {
                 break;
             }
         }
+
+        ffFlow.setInfo();
+        ffFlow.redrawLines();
+    }
+}
+
+
+class FlowActionReplacePart {
+
+    part;
+    replacing;
+
+    constructor(part, replacing) {
+        this.part = part;
+        this.replacing = replacing;
+    }
+
+    perform(ffFlow) {
+        this.swap(ffFlow, this.replacing, this.part);
+    }
+
+    undo(ffFlow)
+    {
+        this.swap(ffFlow, this.part, this.replacing);
+    }
+    
+    swap(ffFlow, oldPart, newPart)
+    {
+        let index = ffFlow.parts.indexOf(oldPart);
+        if(index < 0)
+            return;
+        console.log('newPart', newPart);
+        console.log('oldPart', oldPart);
+        newPart.uid = oldPart.uid; // so the input connections stay the same
+        newPart.xPos = oldPart.xPos;
+        newPart.yPos = oldPart.yPos;
+        if(oldPart.outputConnections) {
+            this.part.outputConnections = [];
+            for (let oc of oldPart.outputConnections) {
+                if(this.part.outputs > oc.output){
+                    this.part.outputConnections.push(oc);
+                }
+            }
+        }
+
+        // have to remove the original before we can add the new one so the correct flow part is found
+        let div = ffFlow.getFlowPart(oldPart.uid);
+        if (div) {
+            ffFlow.ffFlowPart.flowPartElements = ffFlow.ffFlowPart.flowPartElements.filter(x => x !== div);
+            div.remove();
+        }
+
+        ffFlow.ffFlowPart.addFlowPart(newPart);
+        ffFlow.parts[index] = newPart;
 
         ffFlow.setInfo();
         ffFlow.redrawLines();

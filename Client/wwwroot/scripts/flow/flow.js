@@ -218,6 +218,7 @@ class ffFlow
 
     drop(event, dropping, uid) {
         let xPos = 100, yPos = 100;
+        let replacing;
         if (event) {
             event.preventDefault();
             if (dropping !== true)
@@ -226,6 +227,11 @@ class ffFlow
 
             xPos = this.translateCoord(event.clientX) - bounds.left - 20;
             yPos = this.translateCoord(event.clientY) - bounds.top - 20;
+            let target = event.target?.parentNode;
+            if(target && target.className.indexOf('flow-part') >= 0) {
+                let rUid = target.getAttribute('x-uid');
+                replacing = this.parts.filter(x => x.uid === rUid)[0];
+            }
         } else {
         }
         if (!uid) {
@@ -233,10 +239,10 @@ class ffFlow
             uid = this.Mouse.draggingElementUid;
         }
         console.log('drop', uid);
-        this.addElementActual(uid, xPos, yPos);
+        this.addElementActual(uid, xPos, yPos, replacing);
     }
     
-    addElementActual(uid, xPos, yPos) {
+    addElementActual(uid, xPos, yPos, replacing) {
 
         this.csharp.invokeMethodAsync("AddElement", uid).then(result => {
             if(!result)
@@ -262,8 +268,11 @@ class ffFlow
 
             if (part.model?.outputs)
                 part.Outputs = part.model?.outputs;
-
-            this.History.perform(new FlowActionAddNode(part));
+            
+            if(replacing)            
+                this.History.perform(new FlowActionReplacePart(part, replacing))
+            else
+                this.History.perform(new FlowActionAddPart(part));
 
             if (element.noEditorOnAdd === true)
                 return;
@@ -591,7 +600,7 @@ class ffFlow
             p.yPos += 80;
             if(p.Name)
                 p.Name = "Copy of " + p.Name;
-            this.History.perform(new FlowActionAddNode(p));
+            this.History.perform(new FlowActionAddPart(p));
         }
     }
         
