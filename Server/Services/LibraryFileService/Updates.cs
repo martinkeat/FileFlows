@@ -23,6 +23,9 @@ public partial class LibraryFileService
                                $" where LibraryUid in ({inStr}) and Status <> {((int)FileStatus.Processing)}"); // we dont reset processing files
         foreach (var f in Data)
         {
+            if (f.Value?.LibraryUid == null || libraryUids.Contains(f.Value.LibraryUid.Value) == false)
+                continue;
+            
             if (f.Value.Status != FileStatus.Processing)
                 f.Value.Status = FileStatus.Unprocessed;
         }
