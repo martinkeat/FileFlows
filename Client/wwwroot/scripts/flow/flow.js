@@ -79,7 +79,7 @@ class ffFlow
         this.parts = parts;
         this.elements = elements;
         this.infobox = null;      
-        
+                
         this.csharp.invokeMethodAsync("Translate", `Labels.Delete`, null).then(result => {
             this.lblDelete = result;
         });
@@ -568,7 +568,6 @@ class ffFlow
             return false;
         let focusedElement = document.activeElement;        
         while (focusedElement) {
-            console.log('focusedElement', focusedElement);
             if (focusedElement.classList &&
                 (
                     focusedElement.classList.contains('flow-properties') || 
@@ -583,10 +582,8 @@ class ffFlow
     }
 
     async PasteEventListener(e, json) {
-        console.log('paste event!');
         if(this.hasFocus() === false)
             return; // not in focus
-        console.log('paste event in focus!');
         
         if(!json) {
             json = (e?.clipboardData || window.clipboardData)?.getData('text');

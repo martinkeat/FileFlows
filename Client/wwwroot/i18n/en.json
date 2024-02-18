@@ -21,6 +21,7 @@
     "Edit": "Edit",
     "EditSubFlow": "Edit Sub Flow",
     "Open": "Open",
+    "Clear": "Clear",
     "Next": "Next",
     "Remove":"Remove",
     "Copy":"Copy",
@@ -224,6 +225,8 @@
       "TooManyInputNodes":"You can only have one input node"
     },
     "Parts": {
+      "Color": "Color",
+      "Color-Placeholder": "Custom Color",
       "FileExtension": {
         "Fields": {
           "Extensions": "Extensions",

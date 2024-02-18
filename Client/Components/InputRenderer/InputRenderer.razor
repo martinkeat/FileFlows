@@ -25,6 +25,13 @@
                 <InputButton Field=@field Text="@text" OnClick="@onclick" />
             }
             break;
+        case FormInputType.Color:
+        {
+            var value = GetValue<string>(field.Name) ?? "";
+            <InputColor Field=@field Label="@label" Value="@value" ReadOnly=@readOnly ValueChanged="@(x => UpdateValue(field, x))"
+                           Validators=@field.Validators Placeholder="@field.Placeholder" HideLabel=@hideLabel OnSubmit=@OnSubmit OnClose=@OnClose Help=@field.HelpText />
+        }
+            break;
         case FormInputType.Text:
             {
                 if (field.ReadOnlyValue is string strValue)

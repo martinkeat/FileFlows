@@ -19,14 +19,20 @@ class ffFlowPart
         if (ele)
             ele.focus();
     }
+    
+    initFlowPartColor(div, part){
+        if(part.color)
+            div.style.setProperty('--custom-color', part.color);
+        else if(part.customColor)
+            div.style.setProperty('--custom-color', part.customColor);
+    }
 
     addFlowPart(part) {
         let div = document.createElement('div');
         this.flowPartElements.push(div);
         div.setAttribute('x-uid', part.uid);
         div.style.position = 'absolute';
-        if(part.customColor)
-            div.style.setProperty('--custom-color', part.customColor);
+        this.initFlowPartColor(div, part);
         let xPos = Math.floor(part.xPos / 10) * 10;
         let yPos = Math.floor(part.yPos / 10) * 10;
         div.style.left = xPos + 'px';
@@ -289,6 +295,15 @@ class ffFlowPart
                     part.label = dn;
                 delete result.model.Name;
             }
+            if (result.model.Color) {
+                part.color = result.model.Color;
+                delete result.model.Color;
+            } else if (result.model.Color === '') {
+                part.color = '';
+                delete result.model.Color;
+            }
+            let div = this.ffFlow.getFlowPart(part.uid);
+            this.initFlowPartColor(div, part);
             part.model = result.model;
 
             this.setPartName(part);

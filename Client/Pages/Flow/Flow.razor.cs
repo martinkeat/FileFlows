@@ -452,10 +452,21 @@ public partial class Flow : ComponentBase, IDisposable
         // add the name to the fields, so a node can be renamed
         fields.Insert(0, new ElementField
         {
-            Name = "Name",
+            Name = nameof(ffPart.Name),
             Placeholder = typeDisplayName,
             InputType = FormInputType.Text
         });
+        fields.Insert(1, new ElementField
+        {
+            Name = nameof(ffPart.Color),
+            Placeholder = Translater.Instant("Flow.Parts.Color-Placeholder"),
+            InputType = FormInputType.Color
+        });
+        fields.Insert(2, new ElementField
+        {
+            InputType = FormInputType.HorizontalRule
+        });
+
 
         if (PropertiesEditor.Visible && part.Type != FlowElementType.Output) // output is for sub flow outputs, we dont want to show the UID
         {
@@ -478,15 +489,12 @@ public partial class Flow : ComponentBase, IDisposable
 
 
         var model = part.Model ?? new ExpandoObject();
-        // add the name to the model, since this is actually bound on the part not model, but we need this 
+        // add the name/color to the model, since this is actually bound on the part not model, but we need this 
         // so the user can update the name
         if (model is IDictionary<string, object> dict)
         {
-            foreach (var key in dict.Keys)
-            {
-                Console.WriteLine($"Model['{key}'] = " + dict[key]);
-            }
             dict["Name"] = part.Name ?? string.Empty;
+            dict["Color"] = part.Color ?? string.Empty;
         }
 
         List<ListOption> flowOptions = null;

@@ -131,7 +131,11 @@ public enum FormInputType
     /// <summary>
     /// Button
     /// </summary>
-    Button = 28
+    Button = 28,
+    /// <summary>
+    /// Color
+    /// </summary>
+    Color = 29
 }
 
 

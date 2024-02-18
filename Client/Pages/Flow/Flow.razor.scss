@@ -127,6 +127,7 @@
         position: fixed;
         bottom: 10px;
         left: 250px;
+        z-index:2;
         right: calc(var(--flow-elements-width) + 6px);
         padding: 0.5rem;
         border-top: solid 2px var(--border-color);

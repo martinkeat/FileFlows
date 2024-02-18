@@ -21,6 +21,11 @@ public class FlowPart
     public string Name { get; set; }
     
     /// <summary>
+    /// Gets or sets a user overriden color for this flow part
+    /// </summary>
+    public string Color { get; set; }
+    
+    /// <summary>
     /// Gets or sets the FlowElementUid this flow part is an instance of
     /// This is the full name of the flow element, Namespace.TypeName
     /// </summary>

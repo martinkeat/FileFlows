@@ -1,0 +1,84 @@
+@namespace FileFlows.Client.Components.Inputs
+@inherits Input<string>
+
+<InputWrapper Input="@this">
+    <input id="@Uid-input" type="text" placeholder="@Placeholder"
+           autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" @bind-value="@Value"/>
+    <span id="@Uid-preview" class="preview" style="background-color:@Value"></span>
+    @if (string.IsNullOrWhiteSpace(Value) == false)
+    {
+        <button id="@Uid-clear" title="@lblClear" @onclick="Clear"><i class="fas fa-times"/></button>
+    }
+    <div id="@Uid-picker" class="color-picker hidden">
+        <div class="color-picker-area">
+            <div class="color-picker-rgb">
+                <div style="position: relative; width: 100%; height: 100%">
+                    <div class="color-picker-rgb-bg-1"></div>
+                    <div class="color-picker-rgb-bg-2"></div>
+                </div>
+                <div class="crosshair" style="left:@(PointerX + 5.5)px;top:@(PointerY + 6)px">
+                    <div style="position: absolute; background: rgb(255, 255, 255); width: 4px; height: 20px; left: 8px; top: 0px;"></div>
+                    <div style="position: absolute; background: rgb(255, 255, 255); height: 4px; width: 20px; top: 8px; left: 0px;"></div>
+                    <div style="position: absolute; background: rgb(76, 76, 76); height: 18px; width: 2px; left: 9px; top: 1px;"></div>
+                    <div style="position: absolute; background: rgb(76, 76, 76); width: 18px; height: 2px; top: 9px; left: 1px;"></div>
+                </div>
+            </div>
+
+            <div class="color-slider">
+                <div class="color-slider-bar">
+                    <div class="color-slider-bar-indicator" style="top:@(SliderY - 3)px">
+                        <div style="border: 2px solid rgb(76, 76, 76);">
+                            <div style="border: 1px solid rgb(255, 255, 255);">
+                                <div class="color-slider-bar-indicator-square"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div style="background: rgba(0, 0, 255, 0.2); opacity: 0; display: none; position: absolute; left: 231px; top: 0px; width: 36px; height: 127px; cursor: default;">
+            </div>
+        </div>
+        <div class="color-palette">
+            @{
+                var colors = new[]
+                {
+                    "255,0,0", // Red
+                    "255,165,0", // Orange
+                    "255,255,0", // Yellow
+                    "0,128,0", // Green
+                    "0,0,255", // Blue
+                    "128,0,128", // Purple
+                    "255,192,203", // Pink
+                    "255,69,0", // Tomato
+                    "255,99,71", // Tomato
+                    "255,140,0", // Dark Orange
+                    "255,215,0", // Gold
+                    "154,205,50", // Yellow Green
+                    "0,255,255", // Cyan
+                    "0,255,0", // Lime
+                    "128,128,128", // Gray
+                    "255,20,147", // Deep Pink
+                    "218,112,214", // Orchid
+                    "255,218,185", // Peach Puff
+                    "0,0,128", // Navy
+                    "128,0,0" // Maroon
+                };
+            }
+            @foreach (var c in colors)
+            {
+                <div class="color-palette-sw">
+                    @if (c.StartsWith("#"))
+                    {
+                        <div data-color="@c" style="background-color: @c;"></div>
+                    }
+                    else
+                    {
+                        <div data-color="@c" style="background-color: rgb(@c);"></div>
+                    }
+                </div>
+            }
+        </div>
+        <div class="color-btn color-btn-close" style="display: none; left: 12px; bottom: 12px; padding: 0px 15px; max-width: 181px; height: 18px; border: 1px solid rgb(187, 187, 187); color: rgb(0, 0, 0);">
+            <div style="display: inline; line-height: 18px;">Close</div></div>
+    </div>
+</InputWrapper>
