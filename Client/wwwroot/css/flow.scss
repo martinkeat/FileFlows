@@ -6,13 +6,21 @@ $fontSize: 14px;
 $lineHeight: $fontSize * 1.2;
 
 @mixin flowStyles($flowType, $borderColor, $backgroundColor) {
-  &.#{$flowType}:not(.selected) {
-    .icon-wrapper, .input > div, .output:not(.output--1) > div {
-      border-color: $borderColor !important;
+  &.#{$flowType} {
+    &:not(.selected) {
+      .icon-wrapper, .input > div, .output:not(.output--1) > div {
+        border-color: $borderColor !important;
+      }
     }
 
     .connected:not(.output--1) > div {
       @include fillIOConnection($borderColor);
+    }
+    .input.connected > div:before {
+      bottom:3px;
+    }
+    .output:not(.output--1).connected > div:before {
+      top:3px;
     }
   }
 }
@@ -21,10 +29,10 @@ $lineHeight: $fontSize * 1.2;
   &:before {
     content: '';
     position: absolute;
-    top: 3px;
-    left: 3px;
-    right: 3px;
-    bottom: 3px;
+    top: 3px + $unit;
+    left: 3px + $unit;
+    right: 3px + $unit;
+    bottom: 3px + $unit;
     background: $fillColor; 
   }
 }
@@ -54,36 +62,35 @@ $lineHeight: $fontSize * 1.2;
       -webkit-line-clamp: $height;
     }
     .output {
-      bottom:-$unit / 2;
+      bottom:$unit * -1.5;
     }
     .output--1 {
-      right:-$unit / 2;
-      top:$actualHeight / 2 - ($unit / 2);
+      right:-$unit / 2 - $unit;
+      top:$actualHeight / 2 - ($unit / 2) - $unit;
       bottom:unset;
     }
     // Additional styles based on the number of outputs
     @if $outputs == 1 {
       width: $width;
       .output-1 {
-        left: $center;
-        color:red;
+        left: $center - $unit;
       }
       // Styles for when there's only one output
     } @else if $outputs == 2 {
       // Styles for when there are two outputs
       width: $width;
       .output-1 {
-        left: $center - $oSpacing;
+        left: $center - $oSpacing - $unit;
       }
       .output-2 {
-        left: $center + $oSpacing;
+        left: $center + $oSpacing - $unit;
       }
     } @else {
       // Default styles for other cases
       @for $i from 1 through $outputs {
         .output-#{$i}
         {
-          left: $pad + (($i - 1) * $oSpacing);
+          left: $pad + (($i - 1) * $oSpacing) - $unit;
           $finalOutput: $pad + (($i - 1) * $oSpacing);
         }
       }
@@ -93,8 +100,8 @@ $lineHeight: $fontSize * 1.2;
     }
 
     .input {
-      left:$center;
-      top:-$unit / 2;
+      left:$center - $unit;
+      top:$unit * -1.5;
     }
   }
 }
@@ -108,7 +115,7 @@ $lineHeight: $fontSize * 1.2;
   background: var(--base);
   
   @each $flowType in $flowTypes {
-    &.#{$flowType} {
+    &.#{$flowType}:not(.selected) {
       border-color: var(--flow-#{to-lower-case($flowType)});
       .icon-wrapper:before {
         background: var(--flow-#{to-lower-case($flowType)});
@@ -131,7 +138,6 @@ $lineHeight: $fontSize * 1.2;
     display: flex;
     justify-content: center;
     align-items: center;
-    //background:var(--base-darkest);
     &:before {
       content: ' ';
       position:absolute;
@@ -208,6 +214,15 @@ $lineHeight: $fontSize * 1.2;
     background-image: linear-gradient(rgba(var(--accent-rgb), 0.3), rgba(var(--accent-rgb), 0.3)) !important;
     background-color: unset;
     box-shadow: 0 3px 10px rgba(var(--accent-rgb), 0.1);
+    .input, .output {
+      > div {
+        border-color: var(--accent);
+
+        &:before {
+          background: var(--accent) !important;
+        }
+      }
+    }
   }
 
   .name {
@@ -251,17 +266,29 @@ $lineHeight: $fontSize * 1.2;
   .input, .output {
     position: absolute;
   }
+  .input {
+    padding:10px 10px 0 10px;
+  }
+  .output {
+    padding:0 10px 10px 10px;
+    &.output--1 {
+      padding:10px 10px 10px 0;      
+    }
+  }
   .connected.output--1 > div {
-    @include fillIOConnection(var(--error));
+    @include fillIOConnection(var(--error));    
+    &:before {
+      left:3px;
+    }
   }
 
   &.selected {
-    .icon-wrapper, .input > div, .output:not(.output--1) > div {
+    .icon-wrapper, .input > div {
       border-color: var(--accent) !important;
     }
-
     .connected > div {
-      background-color: var(--accent) !important;
+      border-color: var(--accent) !important;
+      background-color: unset !important;
     }
   }
 

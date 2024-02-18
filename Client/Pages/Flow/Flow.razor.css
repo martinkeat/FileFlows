@@ -104,10 +104,10 @@
   margin-top: 1.25rem;
 }
 
-::deep .output > div:hover {
+::deep .output:hover {
   cursor: crosshair;
 }
-::deep .drawing-line .input > div:hover {
+::deep .drawing-line .input:hover {
   cursor: crosshair;
 }
 ::deep .info-box {

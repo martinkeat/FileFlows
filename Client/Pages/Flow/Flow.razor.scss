@@ -115,11 +115,11 @@
 }
 
 ::deep {
-    .output > div:hover {
+    .output:hover {
         cursor: crosshair;
     }
 
-    .drawing-line .input > div:hover {
+    .drawing-line .input:hover {
         cursor: crosshair;
     }
 

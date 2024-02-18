@@ -81,9 +81,6 @@ class ffFlowPart
                 divInput.classList.add('input-' + i);
                 divInput.addEventListener("onclick", function (event) {
                 });
-                divInput.addEventListener("onmousedown", function (event) {
-                    ffFlowLines.ioDown(event, true);
-                });
                 divInput.addEventListener("contextmenu", function (event) {
                     event.preventDefault();
                     return false;
@@ -179,7 +176,7 @@ class ffFlowPart
         divOutput.addEventListener("mousedown", (event) => {
             event.stopImmediatePropagation();
             event.preventDefault();
-            this.ffFlow.FlowLines.ioDown(event, false);
+            this.ffFlow.FlowLines.ioDown(event);
         });
     }
     

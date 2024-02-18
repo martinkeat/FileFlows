@@ -6,7 +6,6 @@ class ffFlowLines {
         this.lineWidth = 1;
         this.ioNode = null;
         this.ioSelected = null;
-        this.ioIsInput = null;
         this.ioContext = null;
         this.ioSourceBounds = null;
         this.ioCanvasBounds = null;
@@ -27,7 +26,6 @@ class ffFlowLines {
             this.ffFlow.eleFlowParts.classList.remove('drawing-line');
         this.ioNode = null;
         this.ioSelected = null;
-        this.ioIsInput = null;
         this.ioContext = null;
         this.ioSourceBounds = null;
         this.ioCanvasBounds = null;
@@ -36,19 +34,33 @@ class ffFlowLines {
         this.ioSelectedConnection = null;
     }
 
-    ioDown(event, isInput) {
-        this.ioNode = event.target.parentNode;
+    ioDown(event) {
 
         if (this.ffFlow.eleFlowParts.classList.contains('drawing-line') === false)
             this.ffFlow.eleFlowParts.classList.add('drawing-line');
-        this.ioSelected = this.ioNode.parentNode.parentNode;
-        this.ioIsInput = isInput;
+        let outputNode = event.target;
+        while(outputNode.parentNode != null && /output\s/.test(outputNode.className) === false)
+            outputNode = outputNode.parentNode;
+        
+        if(!outputNode || !outputNode.tagName)
+            return;
+        
+        this.ioNode = outputNode;
+        this.ioSelected = outputNode;
 
         this.ioCanvasBounds = this.ffFlow.canvas.getBoundingClientRect();
         let srcBounds = this.ioNode.getBoundingClientRect();
-        let srcX = (srcBounds.left - this.ioCanvasBounds.left) + 5; // + 5 for half the width of the output box
-        let srcY = (srcBounds.top - this.ioCanvasBounds.top) + 5;
-        this.ioSourceBounds = { left: srcX, top: srcY };
+        let srcX = (srcBounds.left - this.ioCanvasBounds.left);
+        let srcY = (srcBounds.top - this.ioCanvasBounds.top);
+        let isError = /output--1/.test(this.ioNode.className);
+        if(isError)
+        {
+            srcX += 10;
+            srcY += 15;
+        }else {
+            srcX += 15;
+        }
+        this.ioSourceBounds = { left: srcX, top: srcY, isError: isError };
 
         if (this.selectedOutput != null) {
         }
@@ -64,9 +76,11 @@ class ffFlowLines {
         let destX = this.ffFlow.translateCoord(event.clientX, true) - this.ioCanvasBounds.left;
         let destY = this.ffFlow.translateCoord(event.clientY, true) - this.ioCanvasBounds.top;
         this.redrawLines();
-        let overInput = !!this.ffFlow.eleFlowParts.querySelector('.inputs > div > div:hover');
+        let overInput = !!this.ffFlow.eleFlowParts.querySelector('.inputs > div:hover');
 
-        this.drawLineToPoint({ srcX: this.ioSourceBounds.left, srcY:this.ioSourceBounds.top, destX, destY, color: overInput ? '#ff0090' : null });
+        this.drawLineToPoint({ 
+            srcX: this.ioSourceBounds.left, srcY:this.ioSourceBounds.top, isError:this.ioSourceBounds.isError,
+            destX, destY, color: overInput ? '#ff0090' : null });
     };
 
 
@@ -74,9 +88,13 @@ class ffFlowLines {
         if (!this.ioNode)
             return;
         
-
-        let target = event.target.parentNode;
-        let suitable = target?.classList?.contains(this.ioIsInput ? 'output' : 'input') === true;        
+        let suitable = false;
+        let target = event.target;
+        while(target.parentNode != null && suitable === false) {
+            suitable = target?.classList?.contains('input') === true;
+            if(!suitable)
+                target = target.parentNode;
+        }
         if (suitable) {
             let input = this.isInput ? this.ioNode : target;
             let output = this.isInput ? target : this.ioNode;
@@ -189,16 +207,23 @@ class ffFlowLines {
         let destY = (destBounds.top - canvasBounds.top) + this.ioOffset;
 
         // eliminates any pixel off issues now the grid snaps to 10px
-        srcX = Math.round(srcX / 10) * 10 - 10;
-        srcY = Math.round(srcY / 10) * 10 - 10;
-        destX = Math.round(destX / 10) * 10 - 10;
-        destY = Math.round(destY / 10) * 10 - 10;
+        srcX = Math.round(srcX / 10) * 10;
+        srcY = Math.round(srcY / 10) * 10;
+        destX = Math.round(destX / 10) * 10;
+        destY = Math.round(destY / 10) * 10;
+        
+        let isError = /output--1/.test(output.className); 
+        if(isError){
+            srcX -= 10;
+        }else{
+            srcY -= 10;
+        }
         
         
-        this.drawLineToPoint({ srcX, srcY, destX, destY, output, connection });
+        this.drawLineToPoint({ srcX, srcY, destX, destY, output, connection, isError: isError });
     };
 
-    drawLineToPoint({ srcX, srcY, destX, destY, output, connection, color }) {
+    drawLineToPoint({ srcX, srcY, destX, destY, output, connection, color, isError }) {
         if (!this.ioContext) {
             this.ioContext = this.ffFlow.canvas.getContext('2d');
         }
@@ -213,8 +238,7 @@ class ffFlowLines {
             linePoints.push([_x,_y]);
             path.lineTo(_x,_y);
         };
-        let isError = /--1$/.test(output?.getAttribute('x-uid') || '');
-        if(isError) {
+        if(isError ) {
             addLinePoint(srcX + 40, srcY);
             srcX += 40;            
         }
