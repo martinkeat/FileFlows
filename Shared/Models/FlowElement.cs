@@ -130,4 +130,8 @@ public class FlowElement
     /// Gets or sets if this is a Enterprise only flow element
     /// </summary>
     public virtual bool Enterprise { get; set; }
+    /// <summary>
+    /// Gets an optional custom color to show
+    /// </summary>
+    public virtual string CustomColor { get; set; }
 }

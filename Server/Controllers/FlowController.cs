@@ -397,13 +397,17 @@ public class FlowController : Controller
 
                 if (p.FlowElementUid.EndsWith("." + p.Name))
                     p.Name = string.Empty;
-                string icon =
-                    elements?.Where(x => x.Uid == p.FlowElementUid)?.Select(x => x.Icon)?.FirstOrDefault() ??
-                    string.Empty;
-                if (string.IsNullOrEmpty(icon) == false)
-                    p.Icon = icon;
+                var element = elements?.FirstOrDefault(x => x.Uid == p.FlowElementUid);
+                if (element != null)
+                {
+                    if (string.IsNullOrEmpty(element.Icon) == false)
+                        p.Icon = element.Icon;
+                    if (string.IsNullOrEmpty(element.CustomColor) == false)
+                        p.CustomColor = element.CustomColor;
+                }
+
                 p.Label = Translater.TranslateIfHasTranslation(
-                    $"Flow.Parts.{p.FlowElementUid.Substring(p.FlowElementUid.LastIndexOf(".") + 1)}.Label",
+                    $"Flow.Parts.{p.FlowElementUid[(p.FlowElementUid.LastIndexOf(".", StringComparison.Ordinal) + 1)..]}.Label",
                     string.Empty);
             }
 

@@ -244,7 +244,6 @@ class ffFlow
             console.log('this.Mouse.draggingElementUid', this.Mouse.draggingElementUid);
             uid = this.Mouse.draggingElementUid;
         }
-        console.log('drop', uid);
         this.addElementActual(uid, xPos, yPos, replacing, line);
     }
     
@@ -261,6 +260,7 @@ class ffFlow
             let part = {
                 name: '', // new part, dont set a name
                 label: element.name,
+                customColor: element.customColor,
                 flowElementUid: element.uid,
                 type: element.type,
                 xPos: xPos - 30,

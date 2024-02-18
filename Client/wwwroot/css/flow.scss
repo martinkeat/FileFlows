@@ -9,7 +9,7 @@ $lineHeight: $fontSize * 1.2;
   &.#{$flowType} {
     &:not(.selected) {
       .icon-wrapper, .input > div, .output:not(.output--1) > div {
-        border-color: $borderColor !important;
+        border-color: var(--custom-color, $borderColor) !important;
       }
     }
 
@@ -33,7 +33,7 @@ $lineHeight: $fontSize * 1.2;
     left: 3px + $unit;
     right: 3px + $unit;
     bottom: 3px + $unit;
-    background: $fillColor; 
+    background: var(--custom-color, $fillColor); 
   }
 }
 
@@ -116,9 +116,9 @@ $lineHeight: $fontSize * 1.2;
   
   @each $flowType in $flowTypes {
     &.#{$flowType}:not(.selected) {
-      border-color: var(--flow-#{to-lower-case($flowType)});
+      border-color: var(--custom-color, var(--flow-#{to-lower-case($flowType)}));
       .icon-wrapper:before {
-        background: var(--flow-#{to-lower-case($flowType)});
+        background: var(--custom-color, var(--flow-#{to-lower-case($flowType)}));
       }
     }
   }
@@ -160,19 +160,18 @@ $lineHeight: $fontSize * 1.2;
 
 
 .flow-element {
-  padding: 0.25rem 0.25rem;
   margin: 0.5rem;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   position: relative;
-  padding-left: 2.25rem;
+  padding: 0.25rem 0.25rem 0.25rem 2.25rem;
 
 
   // Loop through different flow types and set their border color
   @each $flowType in $flowTypes {
     &.#{$flowType} .icon-wrapper {
-      border-color: var(--flow-#{to-lower-case($flowType)});
+      border-color: var(--custom-color, var(--flow-#{to-lower-case($flowType)}));
     }
   }
 

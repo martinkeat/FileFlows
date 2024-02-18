@@ -64,6 +64,10 @@ public class Node
     /// </summary>
     public virtual bool NoEditorOnAdd => false;
 
+    /// <summary>
+    /// Gets an optional custom color to show
+    /// </summary>
+    public virtual string CustomColor => null;
 
     /// <summary>
     /// Gets the group this node belongs to

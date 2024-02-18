@@ -55,6 +55,11 @@ public class FlowPart
     /// Gets or sets the number of outputs this part has
     /// </summary>
     public int Outputs { get; set; }
+    
+    /// <summary>
+    /// Gets or sets an optional custom color for the flow part
+    /// </summary>
+    public string CustomColor { get; set; }
 
     /// <summary>
     /// Gets or sets the output connections of this flow part

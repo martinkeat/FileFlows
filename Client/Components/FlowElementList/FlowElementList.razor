@@ -59,6 +59,7 @@
                                     <div id="@ele.Uid" draggable="true" class="flow-element draggable @ele.Type 
                                     @(ele.Obsolete ? "obsolete" : "") @(ele.Enterprise ? "enterprise" : "")
                                      @(App.Instance.IsMobile && SelectedElement == ele.Uid ? "selected" : "") "
+                                         style="@GetElementStyling(ele)"
                                         @ondragstart="(e) => DragStart(e, ele)" @onclick="@(() => SelectPart(ele.Uid))">
                                         <div class="icon-wrapper"><span class="icon @ele.Icon"></span></div>
                                         @((ele.Type == FlowElementType.Script) ? FormatName(ele) : ele.DisplayName[(ele.DisplayName.IndexOf(":", StringComparison.Ordinal) + 1)..])

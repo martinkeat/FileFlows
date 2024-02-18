@@ -25,6 +25,8 @@ class ffFlowPart
         this.flowPartElements.push(div);
         div.setAttribute('x-uid', part.uid);
         div.style.position = 'absolute';
+        if(part.customColor)
+            div.style.setProperty('--custom-color', part.customColor);
         let xPos = Math.floor(part.xPos / 10) * 10;
         let yPos = Math.floor(part.yPos / 10) * 10;
         div.style.left = xPos + 'px';

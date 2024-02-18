@@ -174,4 +174,16 @@ public partial class FlowElementList : ComponentBase
         ApplyFilter();
         StateHasChanged();
     }
+
+    /// <summary>
+    /// Gets the custom styling for a given flow element
+    /// </summary>
+    /// <param name="ele">the element</param>
+    /// <returns>the custom styling</returns>
+    private object GetElementStyling(ffElement ele)
+    {
+        if (string.IsNullOrWhiteSpace(ele.CustomColor))
+            return string.Empty;
+        return "--custom-color:" + ele.CustomColor;
+    }
 }
