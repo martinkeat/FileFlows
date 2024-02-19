@@ -262,6 +262,7 @@ class ffFlow
                 label: element.name,
                 customColor: element.customColor,
                 flowElementUid: element.uid,
+                readOnly: element.readOnly,
                 type: element.type,
                 xPos: xPos - 30,
                 yPos: yPos,

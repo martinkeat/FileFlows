@@ -6,9 +6,9 @@ using System.Dynamic;
 using FileFlows.Plugin;
 
 /// <summary>
-/// A flow part is a part/node of a flow that exeuctes
+/// A flow part is a part/node of a flow that executes
 /// </summary>
-public class FlowPart
+public class FlowPart 
 {
     /// <summary>
     /// Gets or sets the UID of the flow part
@@ -24,6 +24,12 @@ public class FlowPart
     /// Gets or sets a user overriden color for this flow part
     /// </summary>
     public string Color { get; set; }
+    
+    /// <summary>
+    /// Gets or sets if this flow part is read only
+    /// </summary>
+    [DbIgnore]
+    public bool ReadOnly { get; set; }
     
     /// <summary>
     /// Gets or sets the FlowElementUid this flow part is an instance of
@@ -44,6 +50,7 @@ public class FlowPart
     /// <summary>
     /// Gets or sets the icon of the flow part
     /// </summary>
+    [DbIgnore]
     public string Icon { get; set; }
     
     /// <summary>
@@ -64,6 +71,7 @@ public class FlowPart
     /// <summary>
     /// Gets or sets an optional custom color for the flow part
     /// </summary>
+    [DbIgnore]
     public string CustomColor { get; set; }
 
     /// <summary>

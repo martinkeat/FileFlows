@@ -275,7 +275,7 @@ class ffFlowPart
 
     editFlowPart(uid, deleteOnCancel) {
         let part = this.ffFlow.parts.filter(x => x.uid === uid)[0];
-        if (!part)
+        if (!part || part.readOnly)
             return;
 
         this.ffFlow.csharp.invokeMethodAsync("Edit", part, deleteOnCancel === true).then(result => {

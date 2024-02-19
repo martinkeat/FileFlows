@@ -567,7 +567,7 @@ public abstract class DbManager
     {
         var serializerOptions = new JsonSerializerOptions
         {
-            Converters = { new DataConverter(), new BoolConverter(), new Shared.Json.ValidatorConverter() }
+            Converters = { new DataConverter(), new DataConverter<FlowPart>(), new BoolConverter(), new ValidatorConverter() }
         };
         // need to case obj to (ViObject) here so the DataConverter is used
         string json = JsonSerializer.Serialize((FileFlowObject)obj, serializerOptions);

@@ -18,6 +18,10 @@ public class FlowElement
     /// Gets or sets the name of the element
     /// </summary>
     public string Name { get; set; }
+    /// <summary>
+    /// Gets or sets if a flow element is read only
+    /// </summary>
+    public bool ReadOnly { get; set; }
 
     /// <summary>
     /// Gets or sets a description for this element, only used by scripts where the description is user defined 

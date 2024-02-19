@@ -397,6 +397,8 @@ public class FlowController : Controller
 
                 if (p.FlowElementUid.EndsWith("." + p.Name))
                     p.Name = string.Empty;
+                p.CustomColor = null; // clear it
+                p.ReadOnly = false;
                 var element = elements?.FirstOrDefault(x => x.Uid == p.FlowElementUid);
                 if (element != null)
                 {
@@ -404,6 +406,18 @@ public class FlowController : Controller
                         p.Icon = element.Icon;
                     if (string.IsNullOrEmpty(element.CustomColor) == false)
                         p.CustomColor = element.CustomColor;
+                    p.ReadOnly = element.ReadOnly;
+                    if (p.ReadOnly == false)
+                    {
+                        if (element.Uid == "SubFlowOutput" && p.Name.StartsWith("Output "))
+                            p.ReadOnly = true;
+                        else if (element.Uid == "SubFlowInput")
+                            p.ReadOnly = true;
+                    }
+                    p.Icon = element.Icon;
+                    p.Inputs = element.Inputs;
+                    if((element.Uid.EndsWith(".Random") || element.Uid.EndsWith(".IfString") || element.Uid.EndsWith(".Function") ) == false)
+                        p.Outputs = element.Outputs;
                 }
 
                 p.Label = Translater.TranslateIfHasTranslation(
@@ -429,7 +443,7 @@ public class FlowController : Controller
 
             // try find basic node
             var elements = await GetElements(uid);
-            var info = elements.Where(x => x.Uid == "FileFlows.BasicNodes.File.InputFile").FirstOrDefault();
+            var info = elements.FirstOrDefault(x => x.Uid == "FileFlows.BasicNodes.File.InputFile");
             if (info != null && string.IsNullOrEmpty(info.Name) == false)
             {
                 flow.Parts.Add(new FlowPart
@@ -589,6 +603,7 @@ public class FlowController : Controller
         eleInput.Icon = "fas fa-long-arrow-alt-down";
         eleInput.Outputs = 1;
         eleInput.Description = "Sub Flow Input";
+        eleInput.ReadOnly = true;
         eleInput.Group = "Sub Flow";
         eleInput.Model = new ExpandoObject()!;
         eleInput.Type = FlowElementType.Input;
@@ -601,6 +616,7 @@ public class FlowController : Controller
             eleNumOutput.Uid = $"SubFlowOutput" + i;
             eleNumOutput.Icon = "fas fa-sign-out-alt";
             eleNumOutput.Inputs = 1;
+            eleNumOutput.ReadOnly = true;
             eleNumOutput.NoEditorOnAdd = true;
             eleNumOutput.Description = "Sub Flow Output " + i;
             IDictionary<string, object> enoModel = new ExpandoObject()!;
@@ -782,7 +798,7 @@ public class FlowController : Controller
         if (model.Uid == Guid.Empty && model.Type == FlowType.Failure)
         {
             // if first failure flow make it default
-            var others = service.GetAll().Where(x => x.Type == FlowType.Failure).Count();
+            var others = (await service.GetAllAsync()).Count(x => x.Type == FlowType.Failure);
             if (others == 0)
                 model.Default = true;
         }
@@ -791,7 +807,7 @@ public class FlowController : Controller
         if (model.Uid != Guid.Empty)
         {
             // existing, check for name change
-            var existing = service.GetByUid(model.Uid);
+            var existing = await service.GetByUidAsync(model.Uid);
             nameChanged = existing != null && existing.Name != model.Name;
         }
         
