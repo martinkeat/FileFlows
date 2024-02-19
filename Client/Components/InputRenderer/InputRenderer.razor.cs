@@ -83,4 +83,17 @@ public partial class InputRenderer
         this.IsScript = Regex.IsMatch(TypeName, @"^Flow\.Parts\.([0-9A-Fa-f]{8}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{12})");
         return base.OnParametersSetAsync();
     }
+
+    /// <summary>
+    /// Updates the code in a template
+    /// </summary>
+    /// <param name="template">the template value</param>
+    /// <param name="elementField">the template element to update</param>
+    private void UpdateTemplateCode(object template, ElementField elementField)
+    {
+        string strTemplate = template as string;
+        if (string.IsNullOrEmpty(strTemplate))
+            return;
+        UpdateValue(elementField, strTemplate);
+    }
 }

@@ -64,6 +64,11 @@
         case FormInputType.Template:
         {
             var value = GetValue<string>(field.Name);
+            var options = GetParameter<List<ListOption>>(field, "Options");
+            if (options?.Any() == true)
+            {
+                <InputSelect Label="Template" ValueChanged="@(x => UpdateTemplateCode(x, field))" Options="options" />
+            }
             <InputCode Field=@field Label="@label" Value="@value" ReadOnly=@readOnly ValueChanged="@(x => UpdateValue(field, x))"
                        Validators=@field.Validators Variables=@field.Variables Placeholder="@field.Placeholder" HideLabel=@hideLabel 
                        Template="true" OnSubmit=@OnSubmit OnClose=@OnClose Help=@field.HelpText />

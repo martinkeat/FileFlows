@@ -394,35 +394,8 @@ public class FlowController : Controller
                     else
                         p.Name = "Missing Sub Flow";
                 }
-
-                if (p.FlowElementUid.EndsWith("." + p.Name))
-                    p.Name = string.Empty;
-                p.CustomColor = null; // clear it
-                p.ReadOnly = false;
-                var element = elements?.FirstOrDefault(x => x.Uid == p.FlowElementUid);
-                if (element != null)
-                {
-                    if (string.IsNullOrEmpty(element.Icon) == false)
-                        p.Icon = element.Icon;
-                    if (string.IsNullOrEmpty(element.CustomColor) == false)
-                        p.CustomColor = element.CustomColor;
-                    p.ReadOnly = element.ReadOnly;
-                    if (p.ReadOnly == false)
-                    {
-                        if (element.Uid == "SubFlowOutput" && p.Name.StartsWith("Output "))
-                            p.ReadOnly = true;
-                        else if (element.Uid == "SubFlowInput")
-                            p.ReadOnly = true;
-                    }
-                    p.Icon = element.Icon;
-                    p.Inputs = element.Inputs;
-                    if((element.Uid.EndsWith(".Random") || element.Uid.EndsWith(".IfString") || element.Uid.EndsWith(".Function") ) == false)
-                        p.Outputs = element.Outputs;
-                }
-
-                p.Label = Translater.TranslateIfHasTranslation(
-                    $"Flow.Parts.{p.FlowElementUid[(p.FlowElementUid.LastIndexOf(".", StringComparison.Ordinal) + 1)..]}.Label",
-                    string.Empty);
+                
+                LoadFlowPartValues(p, elements);
             }
 
             return flow;
@@ -463,6 +436,39 @@ public class FlowController : Controller
         }
     }
 
+
+    private void LoadFlowPartValues(FlowPart p, FlowElement[] elements)
+    {
+        if (p.FlowElementUid.EndsWith("." + p.Name))
+            p.Name = string.Empty;
+        p.CustomColor = null; // clear it
+        p.ReadOnly = false;
+
+        p.Label = Translater.TranslateIfHasTranslation(
+            $"Flow.Parts.{p.FlowElementUid[(p.FlowElementUid.LastIndexOf(".", StringComparison.Ordinal) + 1)..]}.Label",
+            string.Empty);
+        
+        var element = elements?.FirstOrDefault(x => x.Uid == p.FlowElementUid);
+        if (element == null)
+            return;
+        if (string.IsNullOrEmpty(element.Icon) == false)
+            p.Icon = element.Icon;
+        if (string.IsNullOrEmpty(element.CustomColor) == false)
+            p.CustomColor = element.CustomColor;
+        p.ReadOnly = element.ReadOnly;
+        if (p.ReadOnly == false)
+        {
+            if (element.Uid == "SubFlowOutput" && p.Name.StartsWith("Output "))
+                p.ReadOnly = true;
+            else if (element.Uid == "SubFlowInput")
+                p.ReadOnly = true;
+        }
+        p.Icon = element.Icon;
+        p.Inputs = element.Inputs;
+        if((element.Uid.EndsWith(".Random") || element.Uid.EndsWith(".IfString") || element.Uid.EndsWith(".Function") ) == false)
+            p.Outputs = element.Outputs;
+        
+    }
 
     /// <summary>
     /// Gets all nodes in the system
@@ -817,7 +823,7 @@ public class FlowController : Controller
         if(nameChanged)
             _ = new ObjectReferenceUpdater().RunAsync();
 
-        return model;
+        return await Get(model.Uid);
     }
 
     /// <summary>

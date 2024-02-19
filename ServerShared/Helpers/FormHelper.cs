@@ -89,6 +89,24 @@ public class FormHelper
                     }
                 }
             }
+            if (attribute is TemplateAttribute template)
+            {
+                // get the options
+                if (string.IsNullOrWhiteSpace(template.OptionsProperty) == false)
+                {
+                    var selPropertyValue = GetStaticProperty(type, template.OptionsProperty);
+                    if (selPropertyValue != null)
+                    {
+                        try
+                        {
+                            ef.Parameters ??= new Dictionary<string, object>();
+                            if (ef.Parameters.ContainsKey("Options") == false && selPropertyValue is List<ListOption> options)
+                                ef.Parameters.Add("Options", options);
+                        }
+                        catch (Exception) { }
+                    }
+                }
+            }
 
             if(attribute is KeyValueAttribute keyvalue)
             {

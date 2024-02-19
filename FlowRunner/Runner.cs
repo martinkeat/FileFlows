@@ -2,11 +2,11 @@
 using FileFlows.ServerShared.Helpers;
 using FileFlows.Plugin;
 using FileFlows.ServerShared.Services;
-using FileFlows.Shared;
 using FileFlows.Shared.Models;
 using System.Text.RegularExpressions;
 using FileFlows.FlowRunner.Helpers;
 using FileFlows.FlowRunner.RunnerFlowElements;
+using FileFlows.FlowRunner.TemplateRenders;
 using FileFlows.Plugin.Services;
 using FileFlows.ServerShared.FileServices;
 
@@ -474,11 +474,9 @@ public class Runner
             task.Wait();
             return task.Result.Success;
         };
+        var renderer = new ScribanRenderer();
         nodeParameters.RenderTemplate = (template) =>
-        {
-            
-            return template;
-        };
+            renderer.Render(nodeParameters, template);
         
         nodeParameters.IsDocker = Globals.IsDocker;
         nodeParameters.IsWindows = Globals.IsWindows;
