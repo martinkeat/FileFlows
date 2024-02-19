@@ -17,6 +17,10 @@ public partial class InputCode : Input<string>, IDisposable
     private MonacoEditor CodeEditor { get; set; }
 
     private Dictionary<string, object> _Variables = new ();
+    /// <summary>
+    /// Gets or sets if this is a template otherwise its code
+    /// </summary>
+    [Parameter] public bool Template { get; set; }
     
     [Parameter]
     public Dictionary<string, object> Variables
@@ -32,7 +36,7 @@ public partial class InputCode : Input<string>, IDisposable
             AutomaticLayout = true,
             Minimap = new EditorMinimapOptions { Enabled = false },
             Theme = "vs-dark",
-            Language = "javascript",
+            Language = Template ? "liquid" : "javascript",
             Value = this.Value?.Trim() ?? "",
             ReadOnly = this.Editor.ReadOnly
         };

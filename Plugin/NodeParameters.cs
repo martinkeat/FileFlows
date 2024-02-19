@@ -100,6 +100,11 @@ public class NodeParameters
     public Func<string, bool>? HasPluginActual { get; set; }
     
     /// <summary>
+    /// Gets or sets the function responsible for rendering a template
+    /// </summary>
+    public Func<string, string>? RenderTemplate { get; set; }
+    
+    /// <summary>
     /// Gets or sets the action that records statistics
     /// </summary>
     public Action<string, object>? StatisticRecorder { get; set; }

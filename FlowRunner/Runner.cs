@@ -474,6 +474,11 @@ public class Runner
             task.Wait();
             return task.Result.Success;
         };
+        nodeParameters.RenderTemplate = (template) =>
+        {
+            
+            return template;
+        };
         
         nodeParameters.IsDocker = Globals.IsDocker;
         nodeParameters.IsWindows = Globals.IsWindows;
