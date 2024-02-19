@@ -64,7 +64,11 @@ class ffFlowMouse {
         if (this.ffFlow.active && this.dragItem) {
             this.initialX = this.currentX;
             this.initialY = this.currentY;
-            for(let part of this.ffFlow.eleFlowParts.querySelectorAll('.flow-part.selected')) {
+            let selectedItems = this.ffFlow.eleFlowParts.querySelectorAll('.flow-part.selected');
+            let single = selectedItems.length === 1;
+            console.log('single', single);
+            
+            for(let part of selectedItems) {
                 part.style.transform = '';
                 let originalXPos = parseInt(part.style.left, 10);
                 let originalYPos = parseInt(part.style.top, 10);
@@ -74,8 +78,29 @@ class ffFlowMouse {
                 let partTop = parseInt(part.style.top, 10);
                 let xPos = partLeft + transCurX;
                 let yPos = partTop + transCurY;
-                if(xPos !== originalXPos || yPos !== originalYPos)
+                if(xPos !== originalXPos || yPos !== originalYPos) 
+                {
+                    let canIntersect = single && !part.querySelector('.connected') && 
+                        part.querySelector('.input-1') && part.querySelector('.output-1');
+                    
                     this.ffFlow.History.perform(new FlowActionMove(part, xPos, yPos, originalXPos, originalYPos));
+
+                    if(canIntersect)
+                    {
+                        // get center of the part div
+                        const rectPart = part.getBoundingClientRect();
+                        const rectParent = part.parentNode.getBoundingClientRect();
+                        const centerX = Math.round(xPos + rectPart.width / 2);
+                        const centerY = Math.round(yPos + rectPart.height / 2);
+                        let line = this.ffFlow.FlowLines.isOverLine({ xPos: centerX, yPos: centerY, tolerance: 50});
+                        let uid = part.getAttribute('x-uid');
+                        let p = this.ffFlow.parts.filter(x => x.uid === uid);
+                        console.log('p', p);
+                        if(line && p)
+                            this.ffFlow.History.perform(new FlowActionIntersectLine(p[0], line, true));
+                            
+                    }
+                }
             }
             //this.ffFlow.redrawLines();
         }
@@ -123,30 +148,30 @@ class ffFlowMouse {
     }
 
     drag(e) {
-        if (this.ffFlow.active || this.canvasSelecting) {
+        if (!this.ffFlow.active && !this.canvasSelecting)
+            return;
 
-            e.preventDefault();
+        e.preventDefault();
 
-            if (e.type === "touchmove") {
-                this.currentX = e.touches[0].clientX - this.initialX;
-                this.currentY = e.touches[0].clientY - this.initialY;
-            } else {
-                this.currentX = e.clientX - this.initialX;
-                this.currentY = e.clientY - this.initialY;
-            }
-
-
-            this.xOffset = this.currentX;
-            this.yOffset = this.currentY;
-            if(this.ffFlow.active) 
-            {
-                for(let part of this.ffFlow.eleFlowParts.querySelectorAll('.flow-part.selected')) 
-                {
-                    this.setTranslate(this.currentX, this.currentY, part);
-                }
-            }
-            this.ffFlow.redrawLines();
+        if (e.type === "touchmove") {
+            this.currentX = e.touches[0].clientX - this.initialX;
+            this.currentY = e.touches[0].clientY - this.initialY;
+        } else {
+            this.currentX = e.clientX - this.initialX;
+            this.currentY = e.clientY - this.initialY;
         }
+
+
+        this.xOffset = this.currentX;
+        this.yOffset = this.currentY;
+        if(this.ffFlow.active) 
+        {
+            for(let part of this.ffFlow.eleFlowParts.querySelectorAll('.flow-part.selected')) 
+            {
+                this.setTranslate(this.currentX, this.currentY, part);
+            }
+        }
+        this.ffFlow.redrawLines();
     }
 
     setTranslate(xPos, yPos, el) {

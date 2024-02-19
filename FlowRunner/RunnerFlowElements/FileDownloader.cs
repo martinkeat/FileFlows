@@ -22,9 +22,9 @@ public class FileDownloader : Node
         {
             args.PartPercentageUpdate(percent);
             
-            args.RecordAdditionalInfo("Progress", percent + "%", new TimeSpan(0, 1, 0));
-            args.RecordAdditionalInfo("Speed", speed, new TimeSpan(0, 1, 0));
-            args.RecordAdditionalInfo("ETA", eta == null ? null : Plugin.Helpers.TimeHelper.ToHumanReadableString(eta.Value), new TimeSpan(0, 1, 0));
+            args.RecordAdditionalInfo("Progress", percent + "%", 1, new TimeSpan(0, 1, 0));
+            args.RecordAdditionalInfo("Speed", speed, 1, new TimeSpan(0, 1, 0));
+            args.RecordAdditionalInfo("ETA", eta == null ? null : Plugin.Helpers.TimeHelper.ToHumanReadableString(eta.Value),1, new TimeSpan(0, 1, 0));
         };
         
         var result = downloader.DownloadFile(args.LibraryFileName, dest).Result;

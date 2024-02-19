@@ -209,6 +209,7 @@ public class ScriptService:IScriptService
         executor.Logger.DLogAction = logFunction;
         executor.Logger.ILogAction = logFunction;
         executor.Logger.WLogAction = logFunction;
+        
         string error = string.Empty;
         executor.Logger.ELogAction = (args) =>
         {
@@ -219,7 +220,10 @@ public class ScriptService:IScriptService
                 System.Text.Json.JsonSerializer.Serialize(x)));
         };
         executor.Variables = variables ?? new Dictionary<string, object>();
-        executor.AdditionalArguments.Add("Flow", new NodeParameters(null, Logger.Instance, false, null, fileService: new LocalFileService()));
+        executor.AdditionalArguments.Add("Flow", new NodeParameters(null, Logger.Instance, false, null, fileService: new LocalFileService())
+        {
+            AdditionalInfoRecorder = ((s, o, arg3, arg4) => { })
+        });
         executor.AdditionalArguments.Add("PluginMethod", new Func<string, string, object[], object>((plugin, method, args) =>
             new ExpandoObject()
         ));

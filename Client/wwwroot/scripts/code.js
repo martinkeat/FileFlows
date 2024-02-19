@@ -177,6 +177,13 @@ NewGuid: function ():string { },
  */
 CopyToTemp: function (filename:string):string { }
 /**
+ * Records additional information that will be shown on the processing runner
+ * @param {string} name - The name or label to show
+ * @param {any} value - The value to show next to the name
+ * @param {any} steps - How many steps to keep this information visible for, each flow part change decreases the steps
+ */
+AdditionalInfoRecorder: function (name:string, value:any, steps:number):string { }
+/**
  * The file name
  * @type {string}
  */

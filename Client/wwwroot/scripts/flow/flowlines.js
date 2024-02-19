@@ -341,10 +341,12 @@ class ffFlowLines {
      */
     isOverLine(event) {
         const rect = this.ffFlow.canvas.getBoundingClientRect();
-        const xPos = Math.round(event.clientX - rect.left);
-        const yPos = Math.round(event.clientY - rect.top);
+        const xPos = event.xPos ?? Math.round(event.clientX - rect.left);
+        const yPos = event.yPos ?? Math.round(event.clientY - rect.top);
+        let tolerance = event.tolerance || 30;
+        console.log('isOverLine: ' + xPos + ' ,' + yPos);
         for (let line of this.ioLines) {
-            if(this.isClickNearLine(this.ioContext, line.linePoints, { offsetX: xPos, offsetY: yPos}, 30)) {
+            if(this.isClickNearLine(this.ioContext, line.linePoints, { offsetX: xPos, offsetY: yPos}, tolerance)) {
                 console.log('is near line!', line );
                 return line;
             }

@@ -26,3 +26,12 @@
 ::deep .monaco-highlighted-label span:not(.highlight) {
     color: white !important;
 }
+
+.row.error {
+    margin-top: 0 !important;    
+}
+.error-text {
+    color: var(--accent);
+    font-size: 0.8rem;
+    margin-left: 1rem;
+}

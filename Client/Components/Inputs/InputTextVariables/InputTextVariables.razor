@@ -8,11 +8,11 @@
 <div class="input-text-variables">
     <InputWrapper Input="@this">
         <VariableInput Uid="@Uid" Variables=@Variables @bind-Value="Value" Placeholder=@Placeholder SubmitEvent="OnSubmit" CloseEvent="OnClose" />
-    </InputWrapper>
-
-    <InputWrapper>
-        <div class="preview">
-            <input @bind-value="@Preview" readonly="readonly" disabled="disabled" />
-        </div>
+        @if (false)
+        { // remove this, not sure if its useful, takes up a lot of space
+            <div class="preview">
+                <input @bind-value="@Preview" readonly="readonly" disabled="disabled"/>
+            </div>
+        }
     </InputWrapper>
 </div>

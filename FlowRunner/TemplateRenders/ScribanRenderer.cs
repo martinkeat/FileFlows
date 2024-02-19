@@ -23,17 +23,26 @@ public class ScribanRenderer: ITemplateRenderer
         try
         {
             string tcode = text;
-            foreach (string k in args.Variables.Keys.OrderByDescending(x => x.Length))
+            
+            var dict = new Dictionary<string, object>();
+            foreach(string key in args.Variables.Keys)
             {
-                string keyRegex = @"Variables(\?)?\." + k.Replace(".", @"(\?)?\.");
-                string replacement = "Variables[\"" + k + "\"]";
-                tcode = Regex.Replace(tcode, keyRegex, replacement);
+                string newKey = key.Replace(".", "");
+                tcode = tcode.Replace(key, "Variables." + newKey);
+                if (dict.ContainsKey(newKey) == false)
+                    dict.Add(newKey, args.Variables[key]);
             }
+            // foreach (string k in args.Variables.Keys.OrderByDescending(x => x.Length))
+            // {
+            //     string keyRegex = @"Variables(\?)?\." + k.Replace(".", @"(\?)?\.");
+            //     string replacement = "Variables[\"" + k + "\"]";
+            //     tcode = Regex.Replace(tcode, keyRegex, replacement);
+            // }
 
             
             var scriptObject1 = new ScriptObject();
             scriptObject1.Import(typeof(FileFlowFunctions));
-            scriptObject1.Add("Variables", args.Variables);
+            scriptObject1.Add("Variables", dict);
 
             var context = new TemplateContext();
             context.PushGlobal(scriptObject1);

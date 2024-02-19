@@ -45,13 +45,13 @@ Extension: {{Variables.ext}}
     public void ScribanTest2()
     {
         string text = @"
-{{ difference = Variables.file.Size - Variables.file.Orig.Size }}
-{{ percent = (difference / Variables.file.Orig.Size) * 100 | math.round 2 }}
+{{ difference = file.Size - file.Orig.Size }}
+{{ percent = (difference / file.Orig.Size) * 100 | math.round 2 }}
 
-Input File: {{ Variables.file.Orig.FullName }}
-Output File: {{ Variables.file.FullName }}
-Original Size: {{ Variables.file.Orig.Size | file_size }}
-Final Size: {{ Variables.file.Size | file_size }}
+Input File: {{ file.Orig.FullName }}
+Output File: {{ file.FullName }}
+Original Size: {{ file.Orig.Size | file_size }}
+Final Size: {{ file.Size | file_size }}
 
 {{- if difference < 0 }}
 File grew in size: {{ difference | math.abs | file_size }}

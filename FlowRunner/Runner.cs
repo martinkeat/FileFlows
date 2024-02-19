@@ -302,7 +302,14 @@ public class Runner
         if (ExecutedStepsCountedTowardsTotal > Program.Config.MaxNodes)
              return Result<bool>.Fail("Exceeded maximum number of flow elements to process");
 
-        Info.AdditionalInfos.Clear(); // clear current additional info, may need to change this in the future
+        // remove old additional info
+        var aiKeys = Info.AdditionalInfos.Keys.ToArray();
+        foreach (var kv in aiKeys)
+        {
+            if (--Info.AdditionalInfos[kv].Steps < 1)
+                Info.AdditionalInfos.Remove(kv);
+        }
+        
         Info.CurrentPartName = partName;
         Info.CurrentPart = ExecutedSteps;
         Info.CurrentPartPercent = 0;
@@ -563,7 +570,7 @@ public class Runner
         }
     }
     
-    private void RecordAdditionalInfo(string name, object value, TimeSpan? expiry)
+    private void RecordAdditionalInfo(string name, object value, int steps, TimeSpan? expiry)
     {
         if (value == null)
         {
@@ -580,7 +587,8 @@ public class Runner
             Info.AdditionalInfos[name] = new()
             {
                 Value = value,
-                Expiry = expiry ?? new TimeSpan(0, 1, 0)
+                Expiry = expiry ?? new TimeSpan(0, 1, 0),
+                Steps = steps
             };
         }
         _ = SendUpdate(Info);

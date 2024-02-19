@@ -259,22 +259,25 @@ class FlowActionIntersectLine {
     line;
     originalConnection;
     originalOutput;
+    existingPart;
 
-    constructor(part, line) {
+    constructor(part, line, existing) {
         this.part = part;
         this.line = line;
         this.originalConnection = { index: line.connection.index, part: line.connection.part};
         this.originalOutput = line.output.getAttribute('x-uid');
+        this.existingPart = !!existing;
     }
     
-    deletePart(ffFlow, uid){
+    deletePart(ffFlow, part){
+        let uid = part.uid;
         let div = ffFlow.getFlowPart(uid);
         if (div) {
             ffFlow.ffFlowPart.flowPartElements = ffFlow.ffFlowPart.flowPartElements.filter(x => x !== div);
             div.remove();
         }
 
-        ffFlow.FlowLines.ioOutputConnections.delete(uid);
+        this.deleteOutputConnections(ffFlow, part);
 
         for (let i = 0; i < ffFlow.parts.length; i++) {
             if (ffFlow.parts[i].uid === uid) {
@@ -282,13 +285,24 @@ class FlowActionIntersectLine {
                 break;
             }
         }
-
+    }
+    
+    deleteOutputConnections(ffFlow, part){
+        ffFlow.FlowLines.ioOutputConnections.delete(part.uid);
+        for(let i=0;i<= part.outputs;i++){
+            ffFlow.FlowLines.ioOutputConnections.delete(part.uid + '-output-' + (i === 0 ? '-1' : i));            
+        }        
     }
     
     undo(ffFlow)
     {
         // first delete the new part
-        this.deletePart(ffFlow, this.part.uid);
+        if(!this.existingPart)
+            this.deletePart(ffFlow, this.part);
+        else{
+            // clear connections
+            this.deleteOutputConnections(ffFlow, this.part);
+        }
         
         // reconnect the original connection
         ffFlow.FlowLines.ioOutputConnections.set(this.originalOutput, [this.originalConnection]);        
@@ -296,8 +310,10 @@ class FlowActionIntersectLine {
     }
     
     perform(ffFlow) {
-        ffFlow.ffFlowPart.addFlowPart(this.part);
-        ffFlow.parts.push(this.part);
+        if(!this.existingPart) {
+            ffFlow.ffFlowPart.addFlowPart(this.part);
+            ffFlow.parts.push(this.part);
+        }
                 
         if(this.part.inputs < 1)
             return; // can't connect

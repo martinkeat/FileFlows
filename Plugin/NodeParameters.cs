@@ -112,7 +112,7 @@ public class NodeParameters
     /// <summary>
     /// Gets or sets the action that records additional info
     /// </summary>
-    public Action<string, object, TimeSpan?>? AdditionalInfoRecorder { get; set; }
+    public Action<string, object, int, TimeSpan?>? AdditionalInfoRecorder { get; set; }
 
     /// <summary>
     /// Gets or sets the function responsible for getting plugin settings JSON configuration
@@ -1091,7 +1091,10 @@ public class NodeParameters
     /// </summary>
     /// <param name="name">the name of the statistic</param>
     /// <param name="value">the value of the statistic</param>
-    public void RecordAdditionalInfo(string name, object value, TimeSpan? expiry) => AdditionalInfoRecorder?.Invoke(name, value, expiry);
+    /// <param name="steps">the number of steps to keep this info around for</param>
+    /// <param name="expiry">expiry time of this info</param>
+    public void RecordAdditionalInfo(string name, object value, int steps, TimeSpan? expiry) 
+        => AdditionalInfoRecorder?.Invoke(name, value, steps, expiry);
 }
 
 

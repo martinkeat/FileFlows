@@ -217,4 +217,9 @@ public class AdditionalInfo
     /// Gets or sets the value of the item.
     /// </summary>
     public object Value { get; set; }
+    
+    /// <summary>
+    /// Gets or sets how many steps to keep this info around for
+    /// </summary>
+    public int Steps { get; set; }
 }
