@@ -661,6 +661,7 @@ a.btn {
   vertical-align: middle;
 }
 .flow-part .icon-wrapper img, .flow-element .icon-wrapper img {
+  z-index: 1;
   width: 1.5rem;
 }
 

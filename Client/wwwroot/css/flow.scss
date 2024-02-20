@@ -156,6 +156,7 @@ $lineHeight: $fontSize * 1.2;
       vertical-align: middle;
     }
     img {
+      z-index:1;
       width: 1.5rem;
     }
   }
