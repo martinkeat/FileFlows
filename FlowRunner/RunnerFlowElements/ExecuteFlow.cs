@@ -4,6 +4,7 @@ using FileFlows.ServerShared;
 using FileFlows.Shared;
 using FileFlows.Shared.Models;
 using Humanizer;
+using NPoco.Expressions;
 
 namespace FileFlows.FlowRunner.RunnerFlowElements;
 
@@ -74,7 +75,9 @@ public class ExecuteFlow : Node
             args.UpdateVariables(new Dictionary<string, object>
             {
                 { "FailedNode", Runner.Info.LibraryFile.ExecutedNodes.Last()?.NodeName },
-                { "FlowName", Runner.ExecutedFlows.LastOrDefault()?.Name ?? Flow.Name }
+                { "FailedElement", Runner.Info.LibraryFile.ExecutedNodes.Last()?.NodeName },
+                { "FlowName", Runner.ExecutedFlows.LastOrDefault()?.Name ?? Flow.Name },
+                { "FailureReason", Runner.Info.LibraryFile.FailureReason?.EmptyAsNull() }
             });
         }
         Runner.ExecutedFlows.Add(Flow);
