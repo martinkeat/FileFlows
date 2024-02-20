@@ -72,14 +72,12 @@ public class ExecuteFlow : Node
         if (Flow.Type == FlowType.Failure)
         {
             COMPLETED_OUTPUT = RunnerCodes.Failure;
-            var failureReason = Runner.Info.LibraryFile.FailureReason?.EmptyAsNull();
-            args.Logger?.ILog("Failure reason into variables: " + (failureReason ?? "null"));
             args.UpdateVariables(new Dictionary<string, object>
             {
                 { "FailedNode", Runner.Info.LibraryFile.ExecutedNodes.Last()?.NodeName },
                 { "FailedElement", Runner.Info.LibraryFile.ExecutedNodes.Last()?.NodeName },
                 { "FlowName", Runner.ExecutedFlows.LastOrDefault()?.Name ?? Flow.Name },
-                { "FailureReason", failureReason }
+                { "FailureReason", args.FailureReason?.EmptyAsNull() }
             });
         }
         Runner.ExecutedFlows.Add(Flow);

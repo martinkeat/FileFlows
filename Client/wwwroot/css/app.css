@@ -660,6 +660,9 @@ a.btn {
   display: inline-block;
   vertical-align: middle;
 }
+.flow-part .icon-wrapper img, .flow-element .icon-wrapper img {
+  width: 1.5rem;
+}
 
 .flow-element {
   margin: 0.5rem;

@@ -100,13 +100,21 @@ class ffFlowPart
         let divIconWrapper = document.createElement('div');
         divIconWrapper.classList.add('icon-wrapper');
         div.appendChild(divIconWrapper);
-        let spanIcon = document.createElement('span');
-        spanIcon.classList.add('icon');
-        if (part.icon) {
-            for (let picon of part.icon.split(' '))
-                spanIcon.classList.add(picon);
+        if(/^svg:/.test(part.icon || ''))
+        {
+            let imgIcon = document.createElement('img');
+            imgIcon.setAttribute('src', '/icons/' + part.icon.substring(4) + '.svg');
+            divIconWrapper.appendChild(imgIcon);
         }
-        divIconWrapper.appendChild(spanIcon);
+        else {
+            let spanIcon = document.createElement('span');
+            spanIcon.classList.add('icon');
+            if (part.icon) {
+                for (let picon of part.icon.split(' '))
+                    spanIcon.classList.add(picon);
+            }
+            divIconWrapper.appendChild(spanIcon);
+        }
 
         let divName = document.createElement('div');
         divName.classList.add('name');
