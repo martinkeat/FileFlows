@@ -390,7 +390,7 @@ public class Runner
     {
         DateTime start = DateTime.Now;
         Info.LibraryFile.Status = status;
-        if (status == FileStatus.Processed)
+        if (status == FileStatus.Processed || status == FileStatus.ReprocessByFlow)
         {
             Info.LibraryFile.ProcessingEnded = DateTime.Now;
         }
@@ -424,32 +424,6 @@ public class Runner
     /// <param name="logger">the logger used to log messages</param>
     private void RunActual(FlowLogger logger)
     {
-        // string initialFile = null;
-        // int additionalPartsForTotal = 0;
-        // if (Info.IsRemote)
-        // {
-        //     if (Program.Config.AllowRemote)
-        //     {
-        //         Info.TotalParts = Flow.Parts.Count + 1;
-        //         Info.CurrentPart = 1;
-        //         Info.CurrentPartName = "Downloading";
-        //         logger.ILog("Downloading Parts: " + Info.TotalParts);
-        //         initialFile = DownloadFile(logger, Info.LibraryFile, Service.ServiceBaseUrl, WorkingDir);
-        //         additionalPartsForTotal = 1;
-        //     }
-        //
-        //     if (string.IsNullOrEmpty(initialFile))
-        //     {
-        //         Info.LibraryFile.Status = FileStatus.MappingIssue;
-        //         SendUpdate(Info, waitMilliseconds: 1000).Wait();
-        //         return;
-        //     }
-        // }
-        // else
-        // {
-        //     initialFile = Info.LibraryFile.Name;
-        // }
-        
         nodeParameters = new NodeParameters(Info.LibraryFile.Name, logger,
             Info.IsDirectory, Info.LibraryPath, fileService: FileService.Instance)
         {

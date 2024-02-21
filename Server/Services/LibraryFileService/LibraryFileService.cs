@@ -104,7 +104,7 @@ public partial class LibraryFileService : ILibraryFileService
         file.ExecutedNodes ??= new ();
         file.OriginalMetadata ??= new ();
         file.FinalMetadata ??= new ();
-        if (file.Status == FileStatus.Processed || file.Status == FileStatus.ProcessingFailed)
+        if (file.Status == FileStatus.Processed || file.Status == FileStatus.ReprocessByFlow || file.Status == FileStatus.ProcessingFailed)
             file.Flags = LibraryFileFlags.None;
         Database_Update(file);
         UpdateFile(file);
