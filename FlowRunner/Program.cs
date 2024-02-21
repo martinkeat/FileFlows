@@ -155,8 +155,10 @@ public class Program
                 WorkingDirectory = workingDir,
                 Hostname = hostname
             });
-            return result == null ? -2 : 
-                result is  FileStatus.Processed or FileStatus.ReprocessByFlow ? 0 : -1;
+            return result == null ? -2 :
+                result is FileStatus.ProcessingFailed or FileStatus.Processing ? -1 :
+                0; // otherwise it didnt fail, the status should have been updated (Processed, Mapping Failed, Reprocess, Missing Flow etc)
+                //result is  FileStatus.Processed or FileStatus.ReprocessByFlow or FileStatus.MappingIssue ? 0 : -1;
         }
         catch (Exception ex)
         {
