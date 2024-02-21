@@ -36,6 +36,8 @@ class ffFlow
     
     dispose() {
         this.eleFlowParts.remove();
+        if(this.infobox)
+            this.infobox.remove();
     }
 
     focusName(){
@@ -51,6 +53,12 @@ class ffFlow
         if(show) {
             this.eleFlowParts.classList.add('show');
             this.redrawLines();
+        }
+        if(this.infobox)
+        {
+            this.infobox.classList.remove('show');
+            if(show) 
+                this.infobox.classList.add('show');
         }
     }
 
@@ -212,7 +220,6 @@ class ffFlow
      * Called from C# code to insert a new element to the flow
      */
     insertElement(uid) {
-        console.log('insertElement', uid);
         this.drop(null, true, uid);
     }
 
@@ -400,6 +407,8 @@ class ffFlow
             if (!this.infobox) {
                 let box = document.createElement('div');
                 box.classList.add('info-box');
+                box.classList.add('show');
+                box.setAttribute('id', 'info-box-' + this.uid);
 
                 // remove button
                 let remove = document.createElement('span');
@@ -424,7 +433,7 @@ class ffFlow
                 box.appendChild(this.infoboxSpan);
 
 
-                this.eleFlowParts.appendChild(box);
+                this.eleFlowParts.parentNode.appendChild(box);
                 this.infobox = box;
             }
             this.infobox.style.display = '';

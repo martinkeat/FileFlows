@@ -115,13 +115,17 @@
   bottom: 10px;
   left: 250px;
   z-index: 2;
-  right: calc(var(--flow-elements-width) + 6px);
+  right: calc(var(--flow-elements-width) + 5px);
   padding: 0.5rem;
   border-top: solid 2px var(--border-color);
   background: var(--base);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  display: none;
+}
+::deep .info-box.show {
+  display: unset;
 }
 ::deep .info-box span + span {
   margin-left: 0.5rem;
