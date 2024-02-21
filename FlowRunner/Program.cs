@@ -155,7 +155,8 @@ public class Program
                 WorkingDirectory = workingDir,
                 Hostname = hostname
             });
-            return result == null ? -2 : result == FileStatus.Processed ? 0 : -1;
+            return result == null ? -2 : 
+                result is  FileStatus.Processed or FileStatus.ReprocessByFlow ? 0 : -1;
         }
         catch (Exception ex)
         {
