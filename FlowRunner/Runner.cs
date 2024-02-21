@@ -534,9 +534,7 @@ public class Runner
         {
             if (nodeParameters.ReprocessNode != null)
             {
-                Info.LibraryFile.Node = nodeParameters.ReprocessNode;
-                Info.LibraryFile.NodeName = nodeParameters.ReprocessNode.Name;
-                Info.LibraryFile.NodeUid = nodeParameters.ReprocessNode.Uid;
+                Info.LibraryFile.ProcessOnNodeUid = nodeParameters.ReprocessNode.Uid;
                 SetStatus(FileStatus.ReprocessByFlow);
             }
             else

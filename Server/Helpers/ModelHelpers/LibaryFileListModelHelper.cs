@@ -13,8 +13,9 @@ public class LibaryFileListModelHelper
     /// <param name="files">the files to convert</param>
     /// <param name="status">the status selected in the UI</param>
     /// <param name="libraries">the libraries in the system</param>
+    /// <param name="nodeNames">a dictionary of processing node names</param>
     /// <returns>a list of files in the list model</returns>
-    public static IEnumerable<LibaryFileListModel> ConvertToListModel(IEnumerable<LibraryFile> files, FileStatus status, IEnumerable<Library> libraries)
+    public static IEnumerable<LibaryFileListModel> ConvertToListModel(IEnumerable<LibraryFile> files, FileStatus status, IEnumerable<Library> libraries, Dictionary<Guid, string> nodeNames)
     {
         files = files.ToList();
         var dictLibraries = libraries.ToDictionary(x => x.Uid, x => x);
@@ -57,7 +58,10 @@ public class LibaryFileListModelHelper
 
             if (status == FileStatus.ReprocessByFlow)
             {
-                item.Node = x.Node?.Name;
+                if (x.ProcessOnNodeUid != null && nodeNames.TryGetValue(x.ProcessOnNodeUid.Value, out var name))
+                    item.Node = name ?? "Unknown";
+                else
+                    item.Node = "Unknown";
             }
             
             if (status == FileStatus.Duplicate)

@@ -63,10 +63,11 @@ public class LibraryFileController : Controller //ControllerStore<LibraryFile>
         }
 
         var libraries = new LibraryService().GetAll();
+        var nodeNames = new NodeService().GetAll().ToDictionary(x => x.Uid, x => x.Name);
         return new()
         {
             Status = lfStatus,
-            LibraryFiles = LibaryFileListModelHelper.ConvertToListModel(files, status, libraries)
+            LibraryFiles = LibaryFileListModelHelper.ConvertToListModel(files, status, libraries, nodeNames)
         };
     }
 

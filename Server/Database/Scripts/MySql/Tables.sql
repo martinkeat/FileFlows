@@ -80,6 +80,7 @@ CREATE TABLE LibraryFile
     NodeUid             varchar(36)        COLLATE utf8_unicode_ci      NOT NULL,
     NodeName            VARCHAR(100)       COLLATE utf8_unicode_ci      NOT NULL,
     WorkerUid           varchar(36)        COLLATE utf8_unicode_ci      NOT NULL,
+    ProcessOnNodeUid    varchar(36)        COLLATE utf8_unicode_ci      NOT NULL,
 
     -- output
     OutputPath          VARCHAR(1024)      COLLATE utf8_unicode_ci      NOT NULL,

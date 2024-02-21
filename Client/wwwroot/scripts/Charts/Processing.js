@@ -252,7 +252,7 @@ class Runner {
         const time = this.timeDiff(Date.parse(runner.startedAt), Date.now());
 
         this.infoElements.file.textContent = runner.relativeFile || "";
-        this.infoElements.node.textContent = runner.nodeName || "";
+        this.infoElements.node.textContent = runner.nodeName === 'FileFlowsServer' ? 'Internal Processing Node' : runner.nodeName || "";
         this.infoElements.library.textContent = runner.libraryName || "";
         this.infoElements.step.textContent = step || "";
         this.infoElements.time.textContent = time || "";

@@ -70,6 +70,7 @@ CREATE TABLE LibraryFile
     NodeUid             varchar(36)        NOT NULL,
     NodeName            VARCHAR(100)       NOT NULL,
     WorkerUid           varchar(36)        NOT NULL,
+    ProcessOnNodeUid    varchar(36)        NOT NULL,
 
     -- output
     OutputPath          VARCHAR(1024)      NOT NULL,

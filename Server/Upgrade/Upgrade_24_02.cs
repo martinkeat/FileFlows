@@ -17,6 +17,7 @@ public class Upgrade_24_02
     {
         Logger.Instance.ILog("Upgrade running, running 24.02 upgrade script");
         AddFailureReasonField();
+        AddProcessOnNodeUidField();
     }
 
     private void AddFailureReasonField()
@@ -28,6 +29,22 @@ public class Upgrade_24_02
 
         string sql = "ALTER TABLE LibraryFile " +
                      " ADD FailureReason               VARCHAR(512) ";
+        if (manager is MySqlDbManager)
+            sql += " COLLATE utf8_unicode_ci ";
+        sql += " NOT NULL    DEFAULT('')".Trim();
+        
+        manager.Execute(sql, null).Wait();
+    }
+
+    private void AddProcessOnNodeUidField()
+    {
+        var manager = DbHelper.GetDbManager();
+        if (manager.ColumnExists("LibraryFile", "ProcessOnNodeUid").Result)
+            return;
+        Logger.Instance.ILog("LibraryFile.ProcessOnNodeUid does not exist, adding");
+
+        string sql = "ALTER TABLE LibraryFile " +
+                     " ADD ProcessOnNodeUid               varchar(36) ";
         if (manager is MySqlDbManager)
             sql += " COLLATE utf8_unicode_ci ";
         sql += " NOT NULL    DEFAULT('')".Trim();

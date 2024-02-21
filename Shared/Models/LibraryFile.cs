@@ -182,6 +182,11 @@ public class LibraryFile : FileFlowObject
     /// Gets or sets the UID of the worker that is executing this library file
     /// </summary>
     public Guid? WorkerUid { get; set; }
+
+    /// <summary>
+    /// Gets or sets the UID a UID this file should be processed on
+    /// </summary>
+    public Guid? ProcessOnNodeUid { get; set; }
     
     /// <summary>
     /// Gets or sets when the file began processing

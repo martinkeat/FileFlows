@@ -73,6 +73,7 @@ public partial class LibraryFileService
         file.FinalSize = 0;
         file.FailureReason = string.Empty;
         file.OutputPath = string.Empty;
+        file.ProcessOnNodeUid = null;
         file.ExecutedNodes = new();
         file.FinalMetadata = new();
         file.OriginalMetadata= new();
@@ -426,7 +427,7 @@ public partial class LibraryFileService
             var waitingForReprocess = outOfSchedule
                 ? null
                 : (await GetAll(FileStatus.ReprocessByFlow)).FirstOrDefault(x =>
-                    x.Node?.Uid == node.Uid || x.NodeUid == node.Uid);
+                    x.ProcessOnNodeUid == node.Uid);
             
             if(waitingForReprocess != null)
                 Logger.Instance.ILog($"File waiting for reprocessing [{node.Name}]: " + waitingForReprocess.Name);
