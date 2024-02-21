@@ -422,13 +422,18 @@ public partial class LibraryFileService
         await NextFileSemaphore.WaitAsync();
         try
         {
-            var nextFile = (await GetAll(FileStatus.Unprocessed, skip: 0, rows: 1, allowedLibraries: canProcess,
+            var waitinForReprocess = outOfSchedule
+                ? null
+                : (await GetAll(FileStatus.ReprocessByFlow)).FirstOrDefault(x =>
+                    x.Node?.Uid == node.Uid || x.NodeUid == node.Uid);
+            
+            var nextFile = waitinForReprocess ?? (await GetAll(FileStatus.Unprocessed, skip: 0, rows: 1, allowedLibraries: canProcess,
                 maxSizeMBs: node.MaxFileSizeMb, exclusionUids: executing, forcedOnly: outOfSchedule)).FirstOrDefault();
 
             if (nextFile == null)
                 return nextFile;
 
-            if (HigherPriorityWaiting(node, nextFile))
+            if (waitinForReprocess == null && HigherPriorityWaiting(node, nextFile))
             {
                 Logger.Instance.ILog("Higher priority node waiting to process file");
                 return null; // a higher priority node should process this file

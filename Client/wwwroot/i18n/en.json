@@ -172,7 +172,8 @@
       "ProcessingFailed": "Processing Failed",
       "Duplicate": "Duplicate",
       "MappingIssue": "Mapping Issue",
-      "MissingLibrary": "Missing Library"
+      "MissingLibrary": "Missing Library",
+      "ReprocessByFlow": "Reprocess By Flow"
     },
     "MatchRange": {
       "Any": "Any",

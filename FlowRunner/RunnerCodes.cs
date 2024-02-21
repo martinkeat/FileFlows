@@ -29,4 +29,9 @@ public static class RunnerCodes
     /// Code for a mapping issue
     /// </summary>
     public const int MappingIssue = -9997;
+
+    /// <summary>
+    /// Code for a special case when a flow requests a file be reprocessed by another processing node
+    /// </summary>
+    public const int ReprocessByFlow = -99;
 }

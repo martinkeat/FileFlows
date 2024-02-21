@@ -120,8 +120,9 @@
         </FlowTableColumn>
         <FlowTableColumn TItem="LibaryFileListModel" Width="12rem" MobileWidth="0" Hidden="(Client.App.Instance.IsMobile || 
                                                                                             (SelectedStatus != FileStatus.Processing && 
-                                                                                            SelectedStatus != FileStatus.ProcessingFailed &&
-                                                                                            SelectedStatus != FileStatus.Processed
+                                                                                             SelectedStatus != FileStatus.ProcessingFailed &&
+                                                                                             SelectedStatus != FileStatus.Processed &&
+                                                                                             SelectedStatus != FileStatus.ReprocessByFlow
                                                                                             ))">
             <Header>
                 Node
@@ -164,7 +165,7 @@
                 <span>@(item.Status == null ? string.Empty : Translater.Instant("Enums.FileStatus." + item.Status))</span>
             </Cell>
         </FlowTableColumn>
-        <FlowTableColumn TItem="LibaryFileListModel" Width="min(6rem, 10vw)" Hidden="@(SelectedStatus == FileStatus.Processing || App.Instance.IsMobile)">
+        <FlowTableColumn TItem="LibaryFileListModel" Width="min(6rem, 10vw)" Hidden="@(SelectedStatus == FileStatus.Processing || SelectedStatus == FileStatus.ReprocessByFlow || App.Instance.IsMobile)">
             <Header>
                 Size
             </Header>

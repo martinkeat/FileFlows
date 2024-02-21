@@ -63,6 +63,9 @@ public class WebServer
         if (Environment.GetEnvironmentVariable("HTTPS") == "1")
             protocol = "https";
 
+        string serverUrl = $"{protocol}://0.0.0.0:{Port}/";
+        Logger.Instance.ILog("Server URL: " + serverUrl);
+
         // Add services to the container.
         builder.Services.AddControllersWithViews();
         builder.Services.AddSignalR();
@@ -213,18 +216,17 @@ public class WebServer
 
         app.MapHub<Hubs.ClientServiceHub>("/client-service");
 
-
         app.UseResponseCompression();
 
         // this will run the asp.net app and wait until it is killed
-        Console.WriteLine("Running FileFlows Server");
+        Logger.Instance.ILog("Running FileFlows Server");
      
         var _clientServiceHub = app.Services.GetRequiredService<IHubContext<ClientServiceHub>>();
         _ = new ClientServiceManager(_clientServiceHub); 
 
-        app.Run($"{protocol}://0.0.0.0:{Port}/");                
+        app.Run(serverUrl);                
         
-        Console.WriteLine("Finished running FileFlows Server");
+        Logger.Instance.ILog("Finished running FileFlows Server");
 
         WorkerManager.StopWorkers();
     }

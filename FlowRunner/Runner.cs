@@ -453,6 +453,7 @@ public class Runner
         nodeParameters = new NodeParameters(Info.LibraryFile.Name, logger,
             Info.IsDirectory, Info.LibraryPath, fileService: FileService.Instance)
         {
+            Node = new () { Uid = Node.Uid, Name = Node.Name, Type = Node.Address },
             Enterprise = Program.Config.Enterprise,
             LibraryFileName = Info.LibraryFile.Name,
             IsRemote = Info.IsRemote
@@ -554,9 +555,19 @@ public class Runner
         };
 
         int result = flowExecutor.Execute(nodeParameters);
-        
-        if(result == RunnerCodes.Completed)
-            SetStatus(FileStatus.Processed);
+
+        if (result == RunnerCodes.Completed)
+        {
+            if (nodeParameters.ReprocessNode != null)
+            {
+                Info.LibraryFile.Node = nodeParameters.ReprocessNode;
+                Info.LibraryFile.NodeName = nodeParameters.ReprocessNode.Name;
+                Info.LibraryFile.NodeUid = nodeParameters.ReprocessNode.Uid;
+                SetStatus(FileStatus.ReprocessByFlow);
+            }
+            else
+                SetStatus(FileStatus.Processed);
+        }
         else if(result is RunnerCodes.Failure or RunnerCodes.TerminalExit)
             SetStatus(FileStatus.ProcessingFailed);
         else if(result == RunnerCodes.RunCanceled)

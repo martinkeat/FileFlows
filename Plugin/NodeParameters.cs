@@ -31,6 +31,12 @@ public class NodeParameters
     /// to change the file path this should be updated too
     /// </summary>
     public string WorkingFile { get; private set; }
+    
+    /// <summary>
+    /// Gets or sets a another processing node to reprocess this file on.
+    /// This will be marked for reprocessing once completed.
+    /// </summary>
+    public ObjectReference ReprocessNode { get; set; }
 
     /// <summary>
     /// Gets the working file shortname
@@ -78,6 +84,11 @@ public class NodeParameters
     /// This is cleared whenever a new flow element starts execution 
     /// </summary>
     public string FailureReason { get; set; }
+    
+    /// <summary>
+    /// Gets the processing node this is running on
+    /// </summary>
+    public ObjectReference Node { get; init; }
 
     /// <summary>
     /// Gets or sets the parameters used in the flow execution
@@ -886,7 +897,7 @@ public class NodeParameters
     /// <returns>the string with the variables replaced</returns>
     public string ReplaceVariables(string input, bool stripMissing = false, bool cleanSpecialCharacters = false) => VariablesHelper.ReplaceVariables(input, Variables, stripMissing, cleanSpecialCharacters);
 
-
+    
     /// <summary>
     /// Gets a safe filename with any reserved characters removed or replaced
     /// </summary>

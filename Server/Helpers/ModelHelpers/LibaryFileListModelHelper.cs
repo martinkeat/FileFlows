@@ -55,6 +55,11 @@ public class LibaryFileListModelHelper
                 item.Date = x.ProcessingEnded < x.ProcessingStarted ? x.ProcessingStarted : x.ProcessingEnded;
             }
 
+            if (status == FileStatus.ReprocessByFlow)
+            {
+                item.Node = x.Node?.Name;
+            }
+            
             if (status == FileStatus.Duplicate)
                 item.Duplicate = x.Duplicate?.Name;
 

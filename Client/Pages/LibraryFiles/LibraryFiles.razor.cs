@@ -185,6 +185,7 @@ public partial class LibraryFiles : ListPage<Guid, LibaryFileListModel>, IDispos
                FileStatus.MappingIssue => "fas fa-map-marked-alt",
                FileStatus.MissingLibrary => "fas fa-trash",
                FileStatus.OnHold => "fas fa-hand-paper",
+               FileStatus.ReprocessByFlow => "fas fa-redo",
                _ => ""
            };
            if (status.Status != FileStatus.Unprocessed && status.Status != FileStatus.Processing && status.Status != FileStatus.Processed && status.Count == 0)

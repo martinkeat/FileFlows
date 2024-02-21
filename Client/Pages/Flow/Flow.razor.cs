@@ -498,6 +498,7 @@ public partial class Flow : ComponentBase, IDisposable
         }
 
         List<ListOption> flowOptions = null;
+        List<ListOption> nodeOptions = null;
         List<ListOption> variableOptions = null;
 
         foreach (var field in fields)
@@ -577,6 +578,30 @@ public partial class Flow : ComponentBase, IDisposable
                             }
 
                             field.Parameters["Options"] = variableOptions;
+                        }
+                        else if (optp == "NODE_LIST")
+                        {
+                            if (nodeOptions == null)
+                            {
+                                nodeOptions = new List<ListOption>();
+                                var flowsResult = await HttpHelper.Get<ProcessingNode[]>($"/api/node");
+                                if (flowsResult.Success)
+                                {
+                                    nodeOptions = flowsResult.Data?.Where(x => x.Enabled)?.OrderBy(x => x.Name)?.Select(x => new ListOption
+                                    {
+                                        Label = x.Name == "FileFlowsServer" ? "Internal Processing Node" : x.Name,
+                                        Value = new ObjectReference
+                                        {
+                                            Name = x.Name,
+                                            Uid = x.Uid,
+                                            Type = x.GetType().FullName
+                                        }
+                                    })?.ToList() ?? new List<ListOption>();
+                                }
+
+                            }
+
+                            field.Parameters["Options"] = nodeOptions;
                         }
                     }
                 }
@@ -776,7 +801,7 @@ public partial class Flow : ComponentBase, IDisposable
     
     private async Task OpenHelp()
     {
-        await jsRuntime.InvokeVoidAsync("open", "https://fileflows.com/docs/pages/flows/editor", "_blank");
+        await jsRuntime.InvokeVoidAsync("open", "https://fileflows.com/docs/webconsole/flows/editor", "_blank");
     }
 
     private class CodeTemplate

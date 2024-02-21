@@ -154,7 +154,7 @@ public partial class Settings : InputRegister
 
     private async Task OpenHelp()
     {
-        await jsRuntime.InvokeVoidAsync("open", "https://fileflows.com/docs/pages/settings", "_blank");
+        await jsRuntime.InvokeVoidAsync("open", "https://fileflows.com/docs/webconsole/settings", "_blank");
     }
 
     private async Task TestDbConnection()

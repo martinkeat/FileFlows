@@ -102,7 +102,7 @@ let ffApi = new FileFlowsApi();
         var result = await Editor.Open(new()
         {
             TypeName = "Pages.Script", Title = title, Fields = fields, Model = item, Large = true, ReadOnly = readOnly,
-            SaveCallback = SaveCallback ?? Save, HelpUrl = "https://fileflows.com/docs/pages/scripts",
+            SaveCallback = SaveCallback ?? Save, HelpUrl = "https://fileflows.com/docs/webconsole/scripts",
             AdditionalButtons = new ActionButton[]
             {
                 new ()

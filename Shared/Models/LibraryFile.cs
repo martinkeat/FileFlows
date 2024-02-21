@@ -320,7 +320,11 @@ public enum FileStatus
     /// <summary>
     /// The library this file was created under no longer exists
     /// </summary>
-    MissingLibrary = 7
+    MissingLibrary = 7,
+    /// <summary>
+    /// Special case, the file has ben marked for reprocessing, this can only happen once
+    /// </summary>
+    ReprocessByFlow = 99
 }
 
 /// <summary>
