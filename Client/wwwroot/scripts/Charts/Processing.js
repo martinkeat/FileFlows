@@ -310,8 +310,10 @@ class Runner {
         </div>
       </div>
       <div class="buttons">
-        <button class="btn btn-log">Info</button>
-        <button class="btn btn-cancel">Cancel</button>
+        <div class="buttons-inner">
+            <button class="btn btn-log">Info</button>
+            <button class="btn btn-cancel">Cancel</button>  
+        </div>
       </div>
     `;
 
