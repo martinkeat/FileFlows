@@ -3074,9 +3074,6 @@ hr {
 .widget .processing-runners.runners-1 .runner, .widget .processing-runners.runners-2 .runner, .widget .processing-runners.runners-3 .runner {
   height: 125px;
 }
-.widget .processing-runners.runners-1 .buttons, .widget .processing-runners.runners-2 .buttons, .widget .processing-runners.runners-3 .buttons {
-  bottom: 0.25rem;
-}
 @media screen and (max-width: 1400px) {
   .widget .processing-runners:not(.runners-1) .info {
     display: flex;
@@ -3144,12 +3141,20 @@ hr {
   position: relative;
   top: -0.5rem;
 }
+.widget .runner:hover .buttons {
+  display: flex;
+}
 .widget .runner .buttons {
   position: absolute;
   bottom: 0;
+  background: var(--base);
+  left: 11rem;
   right: 0;
-  display: flex;
+  display: none;
   flex-direction: row;
+}
+.widget .runner .buttons .buttons-inner {
+  margin-left: auto;
 }
 .widget .runner .buttons .btn {
   transform: scale(0.9);
@@ -3539,6 +3544,13 @@ hr {
   .processing-runners .runner {
     margin: 0 0.5rem 1rem 0;
     width: calc(100% - 0.5rem);
+  }
+  .processing-runners .runner .buttons {
+    display: flex !important;
+    left: 0 !important;
+  }
+  .processing-runners .runner .buttons .buttons-inner {
+    margin: auto;
   }
   .grid-stack-item {
     left: unset !important;

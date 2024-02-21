@@ -568,9 +568,6 @@ input[type=file]{
             .runner {
                 height:125px;
             }
-            .buttons {
-                bottom:0.25rem;
-            }
         }
         &:not(.runners-1) {
             @media screen and (max-width:1400px){
@@ -641,12 +638,20 @@ input[type=file]{
             position:relative;
             top:-0.5rem;
         }
+        &:hover .buttons {
+            display:flex;
+        }
         .buttons {
             position:absolute;
-            bottom:0;
-            right:0;
-            display:flex;
+            bottom: 0;
+            background: var(--base);
+            left: 11rem;
+            right: 0;
+            display:none;
             flex-direction: row;
+            .buttons-inner {
+                margin-left:auto;
+            }
             .btn {
                 transform: scale(0.9);
                 width: 5rem;
@@ -1099,6 +1104,13 @@ input[type=file]{
         .runner {
             margin:0 0.5rem 1rem 0;
             width:calc(100% - 0.5rem);
+            .buttons {
+                display:flex !important;
+                left:0 !important;
+                .buttons-inner {
+                    margin:auto;
+                }
+            }
         }
     }
     .grid-stack-item {
