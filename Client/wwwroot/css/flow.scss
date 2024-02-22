@@ -311,6 +311,32 @@ $lineHeight: $fontSize * 1.2;
   }
 }
 
+.flow-parts.drawing-line
+{
+  .flow-part.has-input:hover,
+  .flow-part.has-input .draggable:hover {
+    cursor: crosshair !important;
+  }
+}
+
+.flow-elements, .flow-parts:not(.drawing-line) {
+  .draggable {
+    cursor: grab;
+
+    &:active {
+      cursor: grabbing !important;
+    }
+
+    &:hover {
+      cursor: grab;
+    }
+  }
+}
+.dragging {
+  cursor: grabbing;
+}
+
+
 .ribbon {
   position: absolute;
   right: 8px;

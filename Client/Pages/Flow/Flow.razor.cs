@@ -445,7 +445,7 @@ public partial class Flow : ComponentBase, IDisposable
             ? new()
             : ObjectCloner.Clone(flowElement.Fields).Select(x =>
             {
-                if (PropertiesEditor.Visible)
+                if (FieldsTabOpened)
                     x.CopyValue = $"{part.Uid}.{x.Name}";
                 return x;
             }).ToList();
@@ -468,7 +468,7 @@ public partial class Flow : ComponentBase, IDisposable
         });
 
 
-        if (PropertiesEditor.Visible && part.Type != FlowElementType.Output) // output is for sub flow outputs, we dont want to show the UID
+        if (FieldsTabOpened && part.Type != FlowElementType.Output) // output is for sub flow outputs, we dont want to show the UID
         {
             fields.Insert(0, new ElementField
             {
@@ -512,7 +512,7 @@ public partial class Flow : ComponentBase, IDisposable
                         condition.Owner = field;
                     if (condition.Field == null && string.IsNullOrWhiteSpace(condition.Property) == false)
                     {
-                        var other = fields.Where(x => x.Name == condition.Property).FirstOrDefault();
+                        var other = fields.FirstOrDefault(x => x.Name == condition.Property);
                         if (other != null && model is IDictionary<string, object> mdict) 
                         {
                             object otherValue = mdict.ContainsKey(other.Name) ? mdict[other.Name] : null;

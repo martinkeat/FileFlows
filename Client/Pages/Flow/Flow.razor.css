@@ -107,9 +107,6 @@
 ::deep .output:hover {
   cursor: crosshair;
 }
-::deep .drawing-line .input:hover {
-  cursor: crosshair;
-}
 ::deep .info-box {
   position: fixed;
   bottom: 10px;

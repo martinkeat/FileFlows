@@ -4,7 +4,6 @@ using FileFlows.ServerShared;
 using FileFlows.Shared;
 using FileFlows.Shared.Models;
 using Humanizer;
-using NPoco.Expressions;
 
 namespace FileFlows.FlowRunner.RunnerFlowElements;
 
@@ -115,7 +114,8 @@ public class ExecuteFlow : Node
             Node? currentFlowElement = null;
             try
             {
-                var lfeResult = FlowHelper.LoadFlowElement(part, args.Variables);
+                TemporaryLogger loadFELogger = new(); // log this to a string so we can include it in the flow element start
+                var lfeResult = FlowHelper.LoadFlowElement(loadFELogger, part, args.Variables);
                 if(lfeResult.Failed(out string lfeError) || lfeResult.Value == null)
                 {
                     if(string.IsNullOrWhiteSpace(lfeError) == false)
@@ -164,6 +164,24 @@ public class ExecuteFlow : Node
                         $"Executing Flow Element {(Runner.Info.LibraryFile.ExecutedNodes.Count + 1)}: {part.Label?.EmptyAsNull() ?? part.Name?.EmptyAsNull() ?? currentFlowElement.Name} [{currentFlowElement.GetType().FullName}]");
                     args.Logger?.ILog(new string('=', 70));
                     args.Logger?.ILog("Working File: " + args.WorkingFile);
+                    foreach (var msg in loadFELogger.Messages)
+                    {
+                        switch (msg.Type)
+                        {
+                            case LogType.Debug:
+                                args.Logger?.DLog(msg.Message);
+                                break;
+                            case LogType.Info:
+                                args.Logger?.ILog(msg.Message);
+                                break;
+                            case LogType.Warning:
+                                args.Logger?.WLog(msg.Message);
+                                break;
+                            case LogType.Error:
+                                args.Logger?.ELog(msg.Message);
+                                break;
+                        }
+                    }
                 }
 
                 nodeStartTime = DateTime.Now;

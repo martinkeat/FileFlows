@@ -18,7 +18,6 @@ $mobile_width: 850px;
     src: url("webfonts/Montserrat-VariableFont_wght.ttf") format("truetype-variations"); 
 }
 
-
 html {
     overflow: hidden;
 }
@@ -28,6 +27,7 @@ html {
         height:100%;
     }
 }
+
 
 html, body {
     font-family: "Montserrat", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
@@ -120,22 +120,6 @@ a, .btn-link {
     background-color: var(--scrollbar-thumb-color);
 }
 ::-webkit-scrollbar-corner {background-color: var(--base) !important;}
-
-
-.draggable {
-    cursor:grab;
-    
-    &:active {
-        cursor: grabbing !important;
-    }
-    &:hover {
-        cursor:grab;
-    }
-}
-.dragging {
-    cursor: grabbing;
-}
-
 
 .background-overlay {
     position:fixed;

@@ -103,6 +103,7 @@
   vertical-align: middle;
 }
 .flow-part .icon-wrapper img, .flow-element .icon-wrapper img {
+  z-index: 1;
   width: 1.5rem;
 }
 
@@ -1942,6 +1943,10 @@
 }
 .flow-part .output--1 > div {
   border-color: var(--error) !important;
+}
+
+.flow-parts.drawing-line .flow-part:hover {
+  cursor: crosshair !important;
 }
 
 .ribbon {

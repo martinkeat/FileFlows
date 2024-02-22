@@ -2503,6 +2503,25 @@ a.btn {
   border-color: var(--error) !important;
 }
 
+.flow-parts.drawing-line .flow-part.has-input:hover,
+.flow-parts.drawing-line .flow-part.has-input .draggable:hover {
+  cursor: crosshair !important;
+}
+
+.flow-elements .draggable, .flow-parts:not(.drawing-line) .draggable {
+  cursor: grab;
+}
+.flow-elements .draggable:active, .flow-parts:not(.drawing-line) .draggable:active {
+  cursor: grabbing !important;
+}
+.flow-elements .draggable:hover, .flow-parts:not(.drawing-line) .draggable:hover {
+  cursor: grab;
+}
+
+.dragging {
+  cursor: grabbing;
+}
+
 .ribbon {
   position: absolute;
   right: 8px;
@@ -2647,20 +2666,6 @@ a, .btn-link {
 
 ::-webkit-scrollbar-corner {
   background-color: var(--base) !important;
-}
-
-.draggable {
-  cursor: grab;
-}
-.draggable:active {
-  cursor: grabbing !important;
-}
-.draggable:hover {
-  cursor: grab;
-}
-
-.dragging {
-  cursor: grabbing;
 }
 
 .background-overlay {

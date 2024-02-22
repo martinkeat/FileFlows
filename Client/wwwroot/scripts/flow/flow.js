@@ -576,7 +576,9 @@ class ffFlow
     hasFocus() {
         if(this.eleFlowParts.classList.contains('show') === false)
             return false;
-        let focusedElement = document.activeElement;        
+        let focusedElement = document.activeElement;  
+        if(/^(input|select|textarea)$/i.test(focusedElement?.tagName || ''))
+            return false;
         while (focusedElement) {
             if (focusedElement.classList &&
                 (

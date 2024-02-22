@@ -76,7 +76,7 @@ class ffFlowLines {
         let destX = this.ffFlow.translateCoord(event.clientX, true) - this.ioCanvasBounds.left;
         let destY = this.ffFlow.translateCoord(event.clientY, true) - this.ioCanvasBounds.top;
         this.redrawLines();
-        let overInput = !!this.ffFlow.eleFlowParts.querySelector('.inputs > div:hover');
+        let overInput = !!this.ffFlow.eleFlowParts.querySelector('.flow-part:hover');
 
         this.drawLineToPoint({ 
             srcX: this.ioSourceBounds.left, srcY:this.ioSourceBounds.top, isError:this.ioSourceBounds.isError,
@@ -91,11 +91,15 @@ class ffFlowLines {
         let suitable = false;
         let target = event.target;
         while(target.parentNode != null && suitable === false) {
-            suitable = target?.classList?.contains('input') === true;
+            suitable = target?.classList?.contains('flow-part') === true && target?.classList?.contains('has-input') === true;
             if(!suitable)
                 target = target.parentNode;
         }
-        if (suitable) {
+        
+        if(suitable) // get the input for the target
+            target = target.querySelector('.input');                    
+        
+        if (suitable && target) {
             let input = this.isInput ? this.ioNode : target;
             let output = this.isInput ? target : this.ioNode;
             let outputId = output.getAttribute('x-uid');
@@ -344,10 +348,8 @@ class ffFlowLines {
         const xPos = event.xPos ?? Math.round(event.clientX - rect.left);
         const yPos = event.yPos ?? Math.round(event.clientY - rect.top);
         let tolerance = event.tolerance || 30;
-        console.log('isOverLine: ' + xPos + ' ,' + yPos);
         for (let line of this.ioLines) {
             if(this.isClickNearLine(this.ioContext, line.linePoints, { offsetX: xPos, offsetY: yPos}, tolerance)) {
-                console.log('is near line!', line );
                 return line;
             }
         }        

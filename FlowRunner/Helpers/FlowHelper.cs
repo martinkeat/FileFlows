@@ -124,11 +124,12 @@ public class FlowHelper
     /// <summary>
     /// Loads a flow element instance
     /// </summary>
+    /// <param name="logger">The logger used to log</param>
     /// <param name="part">the part in the flow</param>
     /// <param name="variables">the variables that are executing in the flow from NodeParameters</param>
     /// <returns>the node instance</returns>
     /// <exception cref="Exception">If the flow element type cannot be found</exception>
-    internal static Result<Node> LoadFlowElement(FlowPart part, Dictionary<string, object> variables)
+    internal static Result<Node> LoadFlowElement(ILogger logger, FlowPart part, Dictionary<string, object> variables)
     {
         if (part.Type == FlowElementType.Script)
         {
@@ -188,6 +189,22 @@ public class FlowHelper
             var subFlow = Program.Config.Flows.FirstOrDefault(x => x.Uid.ToString() == sUid);
             if (subFlow == null)
                 return Result<Node>.Fail($"Failed to locate sub flow '{sUid}'.");
+            // add all the fields into the variables 
+            if (subFlow.Properties?.Fields?.Any() == true && part.Model is IDictionary<string, object> subFlowModel)
+            {
+                foreach (var field in subFlow.Properties.Fields)
+                {
+                    if (string.IsNullOrWhiteSpace(field.FlowElementField))
+                        continue;
+                    if (subFlowModel.TryGetValue(field.Name, out object? fieldValue))
+                    {
+                        logger?.ILog(
+                            $"Setting sub flow field variable [{field.FlowElementField}] = {fieldValue?.ToString() ?? "null"}");
+                        variables[field.FlowElementField] = fieldValue;
+                    }
+                }
+            }
+
             return new ExecuteFlow
             {
                 Flow = subFlow,
@@ -249,7 +266,7 @@ public class FlowHelper
         // load any values that have been set by properties
         foreach (var prop in properties)
         {
-            string strongName = part.Name + "." + prop.Name;
+            string strongName = part.Uid + "." + prop.Name;
             object varValue;
             if (variables.TryGetValue(part.Uid + "." + prop.Name, out varValue) == false 
                     && variables.TryGetValue(strongName, out varValue) == false)

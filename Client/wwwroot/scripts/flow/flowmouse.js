@@ -66,7 +66,6 @@ class ffFlowMouse {
             this.initialY = this.currentY;
             let selectedItems = this.ffFlow.eleFlowParts.querySelectorAll('.flow-part.selected');
             let single = selectedItems.length === 1;
-            console.log('single', single);
             
             for(let part of selectedItems) {
                 part.style.transform = '';

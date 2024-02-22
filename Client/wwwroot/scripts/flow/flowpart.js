@@ -71,11 +71,12 @@ class ffFlowPart
         //     this.editFlowPart(part.uid, false);
         // });
         div.classList.add('size-' + Math.max(part.inputs, part.outputs));
-
+        
         div.setAttribute('tabIndex', -1);
         this.attachEventListeners({part: part, div: div});
 
         if (part.inputs > 0) {
+            div.classList.add('has-input');
             let divInputs = document.createElement('div');
             divInputs.classList.add('inputs');
             div.appendChild(divInputs);
