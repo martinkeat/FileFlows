@@ -371,6 +371,8 @@ public class Runner
                 await Task.Delay(500);
             LastUpdate = DateTime.Now;
             var service = FlowRunnerService.Load();
+            if(nodeParameters?.OriginalMetadata != null)
+                Info.LibraryFile.OriginalMetadata = nodeParameters.OriginalMetadata;
             await service.Update(info);
         }
         catch (Exception)
