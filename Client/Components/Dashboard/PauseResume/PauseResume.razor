@@ -3,7 +3,7 @@
 @if (string.IsNullOrEmpty(lblPauseLabel) == false)
 {
     <button @onclick=@TogglePaused class="btn btn-pause">
-        @if (SystemInfo.IsPaused)
+        @if (PausedService.IsPaused == false)
         {
             <i class="fas fa-pause"></i>
         }

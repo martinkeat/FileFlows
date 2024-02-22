@@ -14,7 +14,8 @@ builder.Services.AddSingleton<IHotKeysService, HotKeysService>();
 builder.Services.AddSingleton<INavigationService, NavigationService>();
 builder.Services.AddSingleton<IClipboardService, ClipboardService>();
 builder.Services.AddMemoryCache();
-builder.Services.AddScoped<ClientService>();
+builder.Services.AddSingleton<ClientService>();
+builder.Services.AddSingleton<IPausedService, PausedService>();
 builder.Services.AddBlazorContextMenu(options =>
 {
     options.ConfigureTemplate(template =>

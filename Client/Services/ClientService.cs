@@ -33,7 +33,7 @@ public partial class ClientService
     /// <summary>
     /// Gets when this is paused until
     /// </summary>
-    private DateTime? PausedUntil { get; set; }
+    public DateTime? PausedUntil { get; private set; }
 
     /// <summary>
     /// Gets if this system is paused

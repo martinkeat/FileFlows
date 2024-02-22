@@ -15,8 +15,14 @@ public partial class Dashboard : ComponentBase, IDisposable
     [CascadingParameter] Editor Editor { get; set; }
     public EventHandler AddWidgetEvent { get; set; }
     
+    /// <summary>
+    /// Gets or sets the paused service
+    /// </summary>
+    [Inject] private IPausedService PausedService { get; set; }
+    
 
     private string lblAddWidget;
+    private bool IsPaused;
     
     private List<ListOption> Dashboards;
 
@@ -46,8 +52,18 @@ public partial class Dashboard : ComponentBase, IDisposable
         ConfiguredStatus = App.Instance.FileFlowsSystem.ConfigurationStatus;
         lblAddWidget = Translater.Instant("Pages.Dashboard.Labels.AddWidget");
         ClientService.SystemPausedUpdated += ClientServiceOnSystemPausedUpdated;
+        PausedService.OnPausedLabelChanged += PausedServiceOnOnPausedLabelChanged;
+        IsPaused = PausedService.IsPaused;
 
         await LoadDashboards();
+    }
+
+    private void PausedServiceOnOnPausedLabelChanged(string label)
+    {
+        if (PausedService.IsPaused == IsPaused)
+            return;
+        IsPaused = PausedService.IsPaused;
+        StateHasChanged();
     }
 
     /// <summary>
@@ -152,5 +168,6 @@ public partial class Dashboard : ComponentBase, IDisposable
     {
         Editor?.Dispose();
         ClientService.SystemPausedUpdated -= ClientServiceOnSystemPausedUpdated;
+        PausedService.OnPausedLabelChanged -= PausedServiceOnOnPausedLabelChanged;
     }
 }

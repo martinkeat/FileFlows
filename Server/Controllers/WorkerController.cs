@@ -258,6 +258,8 @@ public class WorkerController : Controller
                     nameof(LibraryFile.LibraryUid),
                     nameof(LibraryFile.NodeName),
                     nameof(LibraryFile.NodeUid),
+                    nameof(LibraryFile.ProcessOnNodeUid),
+                    nameof(LibraryFile.OriginalMetadata),
                     nameof(LibraryFile.RelativePath),
                     nameof(LibraryFile.Name),
                     nameof(LibraryFile.Uid));

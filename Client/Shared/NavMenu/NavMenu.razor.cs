@@ -27,9 +27,14 @@ public partial class NavMenu : IDisposable
     private string lblVersion, lblHelp, lblForum, lblDiscord;
 
     private string NavMenuCssClass => collapseNavMenu ? "collapse" : null;
-    private NavMenuItem nmiFlows, nmiLibraries;
+    private NavMenuItem nmiFlows, nmiLibraries, nmiPause;
 
     private int Unprocessed = -1, Processing = -1, Failed = -1;
+    /// <summary>
+    /// Gets or sets the paused service
+    /// </summary>
+    [Inject] private IPausedService PausedService { get; set; }
+    
 
     // private BackgroundTask bubblesTask;
 
@@ -47,8 +52,18 @@ public partial class NavMenu : IDisposable
         // bubblesTask.Start();
         
         this.ClientService.FileStatusUpdated += ClientServiceOnFileStatusUpdated;
+        PausedService.OnPausedLabelChanged += PausedServiceOnOnPausedLabelChanged;
         
         this.LoadMenu();
+    }
+
+    private void PausedServiceOnOnPausedLabelChanged(string label)
+    {
+        if (nmiPause == null || nmiPause.Title == label)
+            return;
+        
+        nmiPause.Title = label;
+        StateHasChanged();
     }
 
     private void ClientServiceOnFileStatusUpdated(List<LibraryStatus> data)
@@ -77,6 +92,7 @@ public partial class NavMenu : IDisposable
     void LoadMenu()
     {
         this.MenuItems.Clear();
+        nmiPause = new(PausedService.PausedLabel, "far fa-pause-circle", "#pause");
 
         MenuItems.Add(new NavMenuGroup
         {
@@ -85,7 +101,8 @@ public partial class NavMenu : IDisposable
             Items = new List<NavMenuItem>
             {
                 new ("Pages.Dashboard.Title", "fas fa-chart-pie", ""),
-                new ("Pages.LibraryFiles.Title", "fas fa-copy", "library-files")
+                new ("Pages.LibraryFiles.Title", "fas fa-copy", "library-files"),
+                nmiPause
             }
         });
 
@@ -191,6 +208,11 @@ public partial class NavMenu : IDisposable
 
     async Task Click(NavMenuItem item)
     {
+        if (item == nmiPause)
+        {
+            await PausedService.Toggle();
+            return;
+        }
         bool ok = await NavigationService.NavigateTo(item.Url);
         if (ok)
         {
