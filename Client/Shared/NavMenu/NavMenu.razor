@@ -6,9 +6,13 @@
 }
 
 <div class="top-row navbar navbar-dark">
-    <a class="navbar-brand" target="_blank" href="https://fileflows.com/" rel="noreferrer">
-        
-    </a>
+    <a class="navbar-brand" target="_blank" href="https://fileflows.com/" rel="noreferrer"></a>
+    @if (PausedService.IsPaused)
+    {
+        <span class="paused" @onclick="() => PausedService.Toggle()" title="@PausedService.PausedLabel">
+            <i class="fas fa-pause-circle"/>
+        </span>
+    }
     <span class="page-title">
         @if (Active != null)
         {

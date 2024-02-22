@@ -210,6 +210,11 @@ public class PausedService : IPausedService
     /// <param name="duration">the duration in seconds</param>
     private async Task SetPausedState(int duration)
     {
+        if (duration == 0)
+        {
+            if (await Confirm.Show("Dialogs.ResumeDialog.Title", "Dialogs.ResumeDialog.Message") == false)
+                return;
+        }
         await HttpHelper.Post($"/api/system/pause?duration=" + duration);
         var systemInfoResult = await GetSystemInfo();
         if (systemInfoResult.Success)

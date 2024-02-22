@@ -11,6 +11,15 @@
   height: 3.5rem;
 }
 
+.navbar .paused {
+  font-size: 2rem;
+  color: var(--yellow);
+  position: relative;
+  top: 0.25rem;
+  right: 0.5rem;
+  cursor: pointer;
+}
+
 .navbar-brand, .page-title {
   font-size: 1.5rem;
   font-weight: bold;
@@ -124,6 +133,9 @@
 
 @media (min-width: 850px) {
   .navbar-toggler {
+    display: none;
+  }
+  .navbar-brand .paused {
     display: none;
   }
   .collapse {

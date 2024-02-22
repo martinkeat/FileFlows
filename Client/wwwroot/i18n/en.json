@@ -141,6 +141,11 @@
       "Title":"Pause Processing",
       "Message":"Select the amount of time to pause processing for.\nNote: The current flows will continue to execute, but no other flows will be executed until his time is up."
     },
+    "ResumeDialog":
+    {
+      "Title":"Resume Processing",
+      "Message":"Are you sure you want to resume processing?"
+    },
     "FlowTemplatePicker": {
       "Title": "Select a template to start from"
     }
