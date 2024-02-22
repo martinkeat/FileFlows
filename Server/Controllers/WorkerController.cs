@@ -243,6 +243,12 @@ public class WorkerController : Controller
             var libFileService = new LibraryFileService();
             var libFile = libFileService.GetByUid(info.LibraryFile.Uid);
             var originalStatus = libFile.Status;
+            if (info.LibraryFile.Status == FileStatus.Processing && libFile.OriginalMetadata?.Any() != true &&
+                info.LibraryFile.OriginalMetadata?.Any() == true)
+            {
+                // we have the original metadata, update
+                libFile.OriginalMetadata = info.LibraryFile.OriginalMetadata;
+            }
             if (info.LibraryFile != libFile)
                 ObjectHelper.CopyProperties(info.LibraryFile, libFile,
                     nameof(LibraryFile.OriginalSize),
