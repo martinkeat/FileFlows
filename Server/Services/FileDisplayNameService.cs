@@ -59,11 +59,12 @@ public class FileDisplayNameService
     /// </summary>
     /// <param name="name">the original name</param>
     /// <param name="relativePath">the relative path</param>
+    /// <param name="libraryName">the name of the library</param>
     /// <returns>the display name</returns>
-    public static string GetDisplayName(string name, string relativePath)
+    public static string GetDisplayName(string name, string relativePath, string libraryName)
     {
         if (NoScript || jsGetDisplayName == null)
             return relativePath?.EmptyAsNull() ?? name;
-        return jsGetDisplayName.Invoke("getDisplayName", name, relativePath)?.ToString() ?? name;
+        return jsGetDisplayName.Invoke("getDisplayName", name, relativePath, libraryName)?.ToString() ?? name;
     }
 }

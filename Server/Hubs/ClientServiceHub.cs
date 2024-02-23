@@ -74,7 +74,9 @@ public class ClientServiceManager
                 minified[executor.Key] = new()
                 {
                     Uid = executor.Key,
-                    DisplayName = FileDisplayNameService.GetDisplayName(executor.Value.LibraryFile.Name, executor.Value.LibraryFile.RelativePath),
+                    DisplayName = FileDisplayNameService.GetDisplayName(executor.Value.LibraryFile.Name, 
+                        executor.Value.LibraryFile.RelativePath,
+                        executor.Value.Library.Name),
                     LibraryName = executor.Value.Library.Name,
                     LibraryFileUid = executor.Value.LibraryFile.Uid,
                     LibraryFileName = executor.Value.LibraryFile.Name,
