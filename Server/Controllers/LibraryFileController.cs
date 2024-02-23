@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Reflection.Metadata.Ecma335;
 using Microsoft.AspNetCore.Mvc;
 using FileFlows.Server.Helpers;
@@ -7,6 +8,7 @@ using FileFlows.Server.Services;
 using FileFlows.Server.Workers;
 using FileFlows.ServerShared.Models;
 using FileFlows.Shared.Helpers;
+using Humanizer;
 
 namespace FileFlows.Server.Controllers;
 
@@ -81,30 +83,55 @@ public class LibraryFileController : Controller //ControllerStore<LibraryFile>
     [HttpGet]
     public Task<IEnumerable<LibraryFile>> GetAll([FromQuery] FileStatus? status, [FromQuery] int skip = 0, [FromQuery] int top = 0)
         => new LibraryFileService().GetAll(status, skip, top);
-    
+
     /// <summary>
     /// Get next 10 upcoming files to process
     /// </summary>
     /// <returns>a list of upcoming files to process</returns>
     [HttpGet("upcoming")]
-    public Task<IEnumerable<LibraryFile>> Upcoming()
-        => new LibraryFileService().GetAll(FileStatus.Unprocessed, rows: 10);
+    public async Task<IActionResult> Upcoming()
+    {
+        var data = await new LibraryFileService().GetAll(FileStatus.Unprocessed, rows: 10);
+        var results = data.Select(x => new
+        {
+            x.Uid,
+            x.Name,
+            DisplayName = FileDisplayNameService.GetDisplayName(x.Name, x.RelativePath)
+        });
+        return Ok(results);
+    }
 
     /// <summary>
     /// Gets the last 10 successfully processed files
     /// </summary>
     /// <returns>the last successfully processed files</returns>
     [HttpGet("recently-finished")]
-    public async Task<IEnumerable<LibraryFile>> RecentlyFinished()
+    public async Task<IActionResult> RecentlyFinished()
     {
         var service = new LibraryFileService();
         var processed = await service.GetAll(FileStatus.Processed, rows: 10);
         var failed = await service.GetAll(FileStatus.ProcessingFailed, rows: 10);
         var mapping = await service.GetAll(FileStatus.MappingIssue, rows: 10);
-        var all = processed.Union(failed).Union(mapping).OrderByDescending(x => x.ProcessingEnded).ToArray();
+        var minDate = new DateTime(2020, 1, 1);
+        var all = processed.Union(failed).Union(mapping).OrderByDescending(x => x.ProcessingEnded < minDate ? x.ProcessingStarted : x.ProcessingEnded).ToArray();
         if (all.Length > 10)
             all = all.Take(10).ToArray();
-        return all;
+        var data = all.Select(x =>
+        {
+            var when = x.ProcessingEnded.Humanize(false, DateTime.Now);
+            return new
+            {
+                x.Uid,
+                DisplayName = FileDisplayNameService.GetDisplayName(x.Name, x.RelativePath),
+                x.RelativePath,
+                x.ProcessingEnded,
+                When = when,
+                x.OriginalSize,
+                x.FinalSize,
+                x.Status
+            };
+        });
+        return Ok(data);
     }
 
     /// <summary>
@@ -175,7 +202,8 @@ public class LibraryFileController : Controller //ControllerStore<LibraryFile>
             existing.Library = file.Library; // name may have changed and is being updated
         
         existing.DateCreated = file.DateCreated; // this can be changed if library file is unheld
-        existing.ProcessingEnded = file.ProcessingEnded;
+        if(file.ProcessingEnded > new DateTime(2020, 1,1))
+            existing.ProcessingEnded = file.ProcessingEnded;
         existing.ProcessingStarted = file.ProcessingStarted;
         existing.WorkerUid = file.WorkerUid;
         existing.CreationTime = file.CreationTime;

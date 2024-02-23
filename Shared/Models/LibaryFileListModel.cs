@@ -12,6 +12,11 @@ public class LibaryFileListModel: IUniqueObject<Guid>
     public Guid Uid { get; set; }
     
     /// <summary>
+    /// Gets or sets a display name for the file
+    /// </summary>
+    public string DisplayName { get; set; }
+    
+    /// <summary>
     /// Gets or sets the name of the library file
     /// </summary>
     public string Name { get; set; }

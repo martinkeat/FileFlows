@@ -1,3 +1,4 @@
+using FileFlows.Server.Services;
 using FileFlows.Shared.Models;
 
 namespace FileFlows.Server.Helpers.ModelHelpers;
@@ -24,6 +25,7 @@ public class LibaryFileListModelHelper
             var item = new LibaryFileListModel
             {
                 Uid = x.Uid,
+                DisplayName = FileDisplayNameService.GetDisplayName(x.Name, x.RelativePath),
                 Flow = x.Flow?.Name,
                 Library = x.Library?.Name,
                 RelativePath = x.RelativePath,

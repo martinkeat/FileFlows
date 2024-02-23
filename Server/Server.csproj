@@ -9,7 +9,8 @@
         <ProductVersion>0.2.1.366</ProductVersion>
         <Copyright></Copyright>
         <ImplicitUsings>enable</ImplicitUsings>
-        <InvariantGlobalization>true</InvariantGlobalization>
+        <!-- this caused issues with humanizer -->
+        <!--<InvariantGlobalization>true</InvariantGlobalization>-->
         <RootNamespace>FileFlows.$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
         <AssemblyName>FileFlows.Server</AssemblyName>
         <GenerateDocumentationFile>True</GenerateDocumentationFile>

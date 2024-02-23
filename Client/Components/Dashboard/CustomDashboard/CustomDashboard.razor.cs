@@ -140,22 +140,10 @@ public partial class CustomDashboard : IDisposable
     [JSInvokable]
     public async Task<List<object>> FetchRecentlyFinished()
     {
-        var result = await HttpHelper.Get<List<LibraryFile>>("/api/library-file/recently-finished");
+        var result = await HttpHelper.Get<List<object>>("/api/library-file/recently-finished");
         if (!result.Success || result.Data?.Any() != true)
             return new List<object>();
-        return result.Data.Select(x =>
-        {
-            string when = FormatHelper.HumanizeDate(x.ProcessingEnded);
-            return (object)new
-            {
-                x.Uid,
-                x.RelativePath,
-                When = when,
-                x.OriginalSize,
-                x.FinalSize,
-                x.Status
-            };
-        }).ToList();
+        return result.Data;
     }
     
     /// <summary>

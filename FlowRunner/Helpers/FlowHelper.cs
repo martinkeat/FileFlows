@@ -218,13 +218,21 @@ public class FlowHelper
             return Result<Node>.Fail("Failed to load flow element: " + part.FlowElementUid);
         }
 
-        return CreateFlowElementInstance(part, nt, variables);
+        return CreateFlowElementInstance(logger, part, nt, variables);
 
     }
 
-    private static Node CreateFlowElementInstance(FlowPart part, Type nt, Dictionary<string, object> variables)
+    /// <summary>
+    /// Creates an instance of a flow element
+    /// </summary>
+    /// <param name="logger">the logger</param>
+    /// <param name="part">the flow part to create an instance for</param>
+    /// <param name="flowElementType">the flow element type</param>
+    /// <param name="variables">the variables to load</param>
+    /// <returns>an instance of the flow element</returns>
+    private static Node CreateFlowElementInstance(ILogger logger, FlowPart part, Type flowElementType, Dictionary<string, object> variables)
     {
-        var node = Activator.CreateInstance(nt);
+        var node = Activator.CreateInstance(flowElementType);
         if(node == null)
             return default;
 
@@ -235,7 +243,7 @@ public class FlowHelper
             return sfOutput;
         }
         
-        var properties = nt.GetProperties(BindingFlags.Instance | BindingFlags.Public);
+        var properties = flowElementType.GetProperties(BindingFlags.Instance | BindingFlags.Public);
         if (part.Model is IDictionary<string, object> dict)
         {
             foreach (var k in dict.Keys)
@@ -258,7 +266,7 @@ public class FlowHelper
                 catch (Exception ex)
                 {
                     Program.Logger?.ELog("Failed setting property: " + ex.Message + Environment.NewLine + ex.StackTrace);
-                    Program.Logger?.ELog("Type: " + nt.Name + ", Property: " + k);
+                    Program.Logger?.ELog("Type: " + flowElementType.Name + ", Property: " + k);
                 }
             }
         }
@@ -271,6 +279,10 @@ public class FlowHelper
             if (variables.TryGetValue(part.Uid + "." + prop.Name, out varValue) == false 
                     && variables.TryGetValue(strongName, out varValue) == false)
                 continue;
+            if (varValue == null)
+                continue;
+
+            logger?.ILog(strongName + " => Type Is: " + varValue.GetType().FullName);
             
             var value = Converter.ConvertObject(prop.PropertyType, varValue);
             if (value != null)

@@ -74,6 +74,7 @@ public partial class LibraryFileService
         file.FailureReason = string.Empty;
         file.OutputPath = string.Empty;
         file.ProcessOnNodeUid = null;
+        file.ProcessingEnded = DateTime.MinValue;
         file.ExecutedNodes = new();
         file.FinalMetadata = new();
         file.OriginalMetadata= new();

@@ -14,6 +14,12 @@ using System.Collections.Generic;
 public class LibraryFile : FileFlowObject
 {
     /// <summary>
+    /// Gets or sets the display name for this library file
+    /// </summary>
+    [DbIgnore]
+    public string DisplayName { get; set; }
+    
+    /// <summary>
     /// Gets or sets the relative path of the library file.
     /// This is the path relative to the library
     /// </summary>

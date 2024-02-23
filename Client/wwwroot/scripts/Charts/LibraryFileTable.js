@@ -64,19 +64,20 @@ export class LibraryFileTable extends FFChart
         if(this.url.endsWith('recently-finished') !== true)
             return await super.fetchData();
         else {
-            let data = await this.csharp.invokeMethodAsync("FetchRecentlyFinished");
-            for(var d of data){
-                d.When = d.when;
-                delete d.when;
-                d.RelativePath = d.relativePath;
-                delete d.relativePath;
-                d.Uid = d.uid;
-                delete d.uid;
-                d.FinalSize = d.finalSize;
-                delete d.finalSize;
-                d.OriginalSize = d.originalSize;
-                delete d.originalSize;
-            }
+            let data = await (await fetch(this.url)).json();
+            //".csharp.invokeMethodAsync("FetchRecentlyFinished");
+            // for(var d of data){
+            //     d.When = d.when;
+            //     delete d.when;
+            //     d.RelativePath = d.relativePath;
+            //     delete d.relativePath;
+            //     d.Uid = d.uid;
+            //     delete d.uid;
+            //     d.FinalSize = d.finalSize;
+            //     delete d.finalSize;
+            //     d.OriginalSize = d.originalSize;
+            //     delete d.originalSize;
+            // }
             return data;
         }
     }
@@ -175,11 +176,12 @@ export class LibraryFileTable extends FFChart
         table.appendChild(tbody);
         for(let item of data)
         {
+            console.log('item', item);
             let tr = document.createElement('tr');
             tbody.appendChild(tr);
 
             let tdRelativePath = document.createElement('td');
-            tdRelativePath.innerText = item.RelativePath;
+            tdRelativePath.innerText = item.DisplayName;// ||item.RelativePath;
             tdRelativePath.style.wordBreak = 'break-word';
             tr.appendChild(tdRelativePath);
 

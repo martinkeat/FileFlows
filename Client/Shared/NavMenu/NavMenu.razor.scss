@@ -11,16 +11,6 @@
     height: 3.5rem;
 }
 
-.navbar .paused {
-    font-size: 2rem;
-    color: var(--yellow);
-    position: relative;
-    top: 0.25rem;
-    right: 0.5rem;
-    cursor:pointer;
-}
-
-
 .navbar-brand, .page-title {
     font-size: 1.5rem;
     font-weight: bold;
@@ -86,6 +76,17 @@
         
     }
 }
+.paused-indicator {
+    position: absolute;
+    bottom: 5.5rem;
+    width: 100%;
+    text-align: center;
+    font-size: 4.5rem;
+    color: var(--accent);
+    .paused {
+        cursor:pointer;
+    }
+}
 .support-links {
     position: absolute;
     bottom: 3rem;
@@ -136,9 +137,6 @@
 @media (min-width: 850px) {
     .navbar-toggler {
         display: none;
-    }
-    .navbar-brand .paused {
-        display:none;
     }
 
     .collapse {
@@ -234,7 +232,12 @@
     }
 }
 
-@media screen and (max-height:890px){
+@media screen and (max-height:650px){
+    .paused-indicator {
+        display: none !important;
+    }
+}
+@media screen and (max-height:970px){
     .nav-item {
         padding-bottom:0.25rem;
         ::deep a {
@@ -244,15 +247,27 @@
     .nav-menu-group {
         padding-top:0.25rem;
     }
+    .paused-indicator {
+        font-size:3.5rem;
+    }
+}
+@media screen and (max-height:840px){
+
+    .paused-indicator {
+        bottom:4.5rem;
+    }
 }
 
-@media screen and (max-height:796px) 
+@media screen and (max-height:810px) 
 {
     .nav-menu-group {
         display:none;
     }
     .nav-menu-container {
         margin-top:1rem;
+    }
+    .paused-indicator {
+        font-size:3rem;
     }
 }
 

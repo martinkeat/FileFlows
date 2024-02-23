@@ -7,12 +7,6 @@
 
 <div class="top-row navbar navbar-dark">
     <a class="navbar-brand" target="_blank" href="https://fileflows.com/" rel="noreferrer"></a>
-    @if (PausedService.IsPaused)
-    {
-        <span class="paused" @onclick="() => PausedService.Toggle()" title="@PausedService.PausedLabel">
-            <i class="fas fa-pause-circle"/>
-        </span>
-    }
     <span class="page-title">
         @if (Active != null)
         {
@@ -88,6 +82,15 @@
             </a>
         </li>
     </ul>
+    
+    @if (App.Instance.IsMobile == false && PausedService.IsPaused)
+    {
+        <div class="paused-indicator">
+            <span class="paused" @onclick="() => PausedService.Toggle()" title="@PausedService.PausedLabel">
+                <i class="far fa-pause-circle"/>
+            </span>
+        </div>
+    }
     
     <div class="support-links">
         <a href="https://fileflows.com/forum" rel="noreferrer" target="_blank" title="@lblForum"><i class="fas fa-comments"></i></a>

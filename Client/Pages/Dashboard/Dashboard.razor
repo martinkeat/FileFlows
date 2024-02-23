@@ -5,9 +5,6 @@
 
 @if (App.Instance.IsMobile && (int)ConfiguredStatus >= 3)
 {
-    <div class="mobile-pause-resume">
-        <PauseResume />   
-    </div>
     <div class="mobile-dashboard-selector dashboard-selector">
         <select @bind="ActiveDashboardUid">
             @if (Dashboards?.Any() == true)
@@ -69,7 +66,7 @@
             {
                 if (IsPaused)
                 {
-                    <div class="system-paused">
+                    <div class="system-paused" @onclick="() => PausedService.Resume()">
                         <i class="fas fa-pause"></i> FileFlows is currently paused!
                     </div>
                 }

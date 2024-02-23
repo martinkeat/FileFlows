@@ -227,6 +227,7 @@ public class ScriptService:IScriptService
         executor.AdditionalArguments.Add("PluginMethod", new Func<string, string, object[], object>((plugin, method, args) =>
             new ExpandoObject()
         ));
+        
         if (executor.Execute() as bool? == false)
         {
             if(error.Contains("MISSING VARIABLE:") == false) // missing variables we don't care about
@@ -262,7 +263,10 @@ public class ScriptService:IScriptService
             script.Uid = script.Name;
         }
 
-        IncrementConfigurationRevision();
+        if(script.Name == Globals.FileDisplayNameScript)
+            FileDisplayNameService.Initialize();
+        else
+            IncrementConfigurationRevision();
 
         return script;
     }

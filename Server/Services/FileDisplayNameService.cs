@@ -1,0 +1,69 @@
+using FileFlows.Plugin;
+using Jint;
+
+namespace FileFlows.Server.Services;
+
+/// <summary>
+/// Service to convert a file name to a display name
+/// </summary>
+public class FileDisplayNameService
+{
+    /// <summary>
+    /// If no script is loaded and should not be called
+    /// </summary>
+    private static bool NoScript = true;
+    /// <summary>
+    /// The engine to execute the script
+    /// </summary>
+    private static Engine jsGetDisplayName;
+    
+    /// <summary>
+    /// Initializes the service
+    /// </summary>
+    public static void Initialize()
+    {
+        string code;
+        try
+        {
+            var script = new ScriptService().Get(Globals.FileDisplayNameScript, ScriptType.System).Result;
+            code = script.Code;
+        }
+        catch(Exception)
+        {
+            jsGetDisplayName = null;
+            NoScript = true;
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(code))
+        {
+            jsGetDisplayName = null;
+            NoScript = true;
+            return;
+        }
+
+        try
+        {
+            jsGetDisplayName= new Engine().Execute(code);
+            NoScript = false;
+        }
+        catch (Exception ex)
+        {
+            Logger.Instance.ELog($"Error in {Globals.FileDisplayNameScript} script: " + ex.Message);
+            NoScript = true;
+        }
+    }
+    
+    /// <summary>
+    /// Gets the display name for the file
+    /// </summary>
+    /// <param name="name">the original name</param>
+    /// <param name="relativePath">the relative path</param>
+    /// <returns>the display name</returns>
+    public static string GetDisplayName(string name, string relativePath)
+    {
+        if (NoScript || jsGetDisplayName == null)
+            return relativePath?.EmptyAsNull() ?? name;
+        return jsGetDisplayName.Invoke("getDisplayName", name, relativePath)?.ToString() ?? name;
+    }
+}

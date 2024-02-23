@@ -150,6 +150,8 @@ public partial class LibraryFileService
     /// </summary>
     /// <param name="uid">The UID of the file</param>
     public Task ResetFileInfoForProcessing(Guid uid)
-        => DbHelper.Execute($"update LibraryFile set ExecutedNodes = '', OriginalMetadata = '', FinalMetadata = '', FinalSize = 0, OutputPath = '', FailureReason = '', ProcessOnNodeUid = '' where Uid = '{uid}'");
+        => DbHelper.Execute(
+            $"update LibraryFile set ExecutedNodes = '', OriginalMetadata = '', FinalMetadata = '', FinalSize = 0, OutputPath = '', FailureReason = '', ProcessOnNodeUid = '', ProcessingEnded = @0 where Uid = '{uid}'",
+            new DateTime(1970, 1, 1));
 
 }
