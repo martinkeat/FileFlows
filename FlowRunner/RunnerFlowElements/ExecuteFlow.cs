@@ -112,9 +112,9 @@ public class ExecuteFlow : Node
 
             DateTime nodeStartTime = DateTime.Now;
             Node? currentFlowElement = null;
+            TemporaryLogger loadFELogger = new(); // log this to a string so we can include it in the flow element start
             try
             {
-                TemporaryLogger loadFELogger = new(); // log this to a string so we can include it in the flow element start
                 var lfeResult = FlowHelper.LoadFlowElement(loadFELogger, part, args.Variables);
                 if(lfeResult.Failed(out string lfeError) || lfeResult.Value == null)
                 {
@@ -164,24 +164,8 @@ public class ExecuteFlow : Node
                         $"Executing Flow Element {(Runner.Info.LibraryFile.ExecutedNodes.Count + 1)}: {part.Label?.EmptyAsNull() ?? part.Name?.EmptyAsNull() ?? currentFlowElement.Name} [{currentFlowElement.GetType().FullName}]");
                     args.Logger?.ILog(new string('=', 70));
                     args.Logger?.ILog("Working File: " + args.WorkingFile);
-                    foreach (var msg in loadFELogger.Messages)
-                    {
-                        switch (msg.Type)
-                        {
-                            case LogType.Debug:
-                                args.Logger?.DLog(msg.Message);
-                                break;
-                            case LogType.Info:
-                                args.Logger?.ILog(msg.Message);
-                                break;
-                            case LogType.Warning:
-                                args.Logger?.WLog(msg.Message);
-                                break;
-                            case LogType.Error:
-                                args.Logger?.ELog(msg.Message);
-                                break;
-                        }
-                    }
+                    loadFELogger.WriteToLog(args.Logger);
+                    loadFELogger = null;
                 }
 
                 nodeStartTime = DateTime.Now;
@@ -234,6 +218,12 @@ public class ExecuteFlow : Node
             {
                 if (string.IsNullOrWhiteSpace(args.FailureReason))
                     args.FailureReason = ex.Message;
+
+                if (loadFELogger != null)
+                {
+                    loadFELogger.WriteToLog(args.Logger);
+                    loadFELogger = null;
+                }
                 
                 args.Result = NodeResult.Failure;
                 args.Logger?.ELog("Execution error: " + ex.Message + Environment.NewLine + ex.StackTrace);

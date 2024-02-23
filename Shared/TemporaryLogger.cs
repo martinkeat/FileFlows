@@ -61,4 +61,34 @@ public class TemporaryLogger : ILogger
             System.Text.Json.JsonSerializer.Serialize(x)));
         Messages.Add((type, message));
     }
+
+    /// <summary>
+    /// Writes these messages to another log
+    /// </summary>
+    /// <param name="other">the other logger</param>
+    public void WriteToLog(ILogger other)
+    {
+        if (other == null)
+            return;
+        
+        foreach (var msg in Messages)
+        {
+            switch (msg.Type)
+            {
+                case LogType.Debug:
+                    other.DLog(msg.Message);
+                    break;
+                case LogType.Info:
+                    other.ILog(msg.Message);
+                    break;
+                case LogType.Warning:
+                    other.WLog(msg.Message);
+                    break;
+                case LogType.Error:
+                    other.ELog(msg.Message);
+                    break;
+            }
+        }
+
+    }
 }
