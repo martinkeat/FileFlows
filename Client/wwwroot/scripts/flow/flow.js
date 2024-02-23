@@ -32,12 +32,15 @@ class ffFlow
         this.ffFlowPart = new ffFlowPart(this);
         this.Mouse = new ffFlowMouse(this);
         this.History= new ffFlowHistory(this);
+        this.onKeyDown = this.onKeyDown.bind(this);
+        document.addEventListener('keydown', this.onKeyDown);
     }
     
     dispose() {
         this.eleFlowParts.remove();
         if(this.infobox)
             this.infobox.remove();
+        document.removeEventListener('keydown', this.onKeyDown);
     }
 
     focusName(){
@@ -121,7 +124,7 @@ class ffFlow
         })
 
         if(this.readOnly === false) {
-            this.eleFlowParts.addEventListener("keydown", (e) => this.onKeyDown(e), false);
+            //this.eleFlowParts.addEventListener("keydown", (e) => this.onKeyDown(e), false);
             // this.eleFlowParts.addEventListener("touchstart", (e) => this.Mouse.dragStart(e), false);
             // this.eleFlowParts.addEventListener("touchend", (e) => this.Mouse.dragEnd(e), false);
             // this.eleFlowParts.addEventListener("touchmove", (e) => this.Mouse.drag(e), false);
@@ -545,10 +548,14 @@ class ffFlow
     }
     
     onKeyDown(event) {
+        if(this.hasFocus() === false || this.readOnly)
+            return;
+        
         if (event.code === 'Delete' || event.code === 'Backspace') {
             for(let part of this.SelectedParts || []) {
                 this.ffFlowPart.deleteFlowPart(part.uid);
             }
+            this.FlowLines.deleteConnection();
             event.stopImmediatePropagation();
             event.preventDefault();
         }
@@ -572,7 +579,11 @@ class ffFlow
         }
         e?.preventDefault();
     }
-    
+
+    /**
+     * Checks if this flow instance has focus
+     * @returns {boolean} true if it has focus, otherwise false
+     */
     hasFocus() {
         if(this.eleFlowParts.classList.contains('show') === false)
             return false;
