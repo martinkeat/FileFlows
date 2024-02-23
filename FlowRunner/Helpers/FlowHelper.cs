@@ -275,18 +275,51 @@ public class FlowHelper
         foreach (var prop in properties)
         {
             string strongName = part.Uid + "." + prop.Name;
-            object varValue;
+            object? varValue;
             if (variables.TryGetValue(part.Uid + "." + prop.Name, out varValue) == false 
                     && variables.TryGetValue(strongName, out varValue) == false)
                 continue;
             if (varValue == null)
                 continue;
 
+            if (varValue is JsonElement je)
+            {
+                switch (je.ValueKind)
+                {
+                    case JsonValueKind.False: varValue = (object)false;
+                        break;
+                    case JsonValueKind.True: varValue = (object)true;
+                        break;
+                    case JsonValueKind.String: varValue = je.GetString();
+                        break;
+                    case JsonValueKind.Number:
+                        if (prop.PropertyType == typeof(long))
+                            varValue = je.GetInt64();
+                        else if (prop.PropertyType == typeof(float))
+                            varValue = (float)je.GetDouble();
+                        else if (prop.PropertyType == typeof(int))
+                            varValue = je.GetInt32();
+                        else if (prop.PropertyType == typeof(short))
+                            varValue = je.GetInt16();
+                        else if (je.TryGetInt32(out int i32))
+                            varValue = i32;
+                        else
+                            continue;
+                        break;
+                }
+            }
+
             logger?.ILog(strongName + " => Type Is: " + varValue.GetType().FullName);
-            
-            var value = Converter.ConvertObject(prop.PropertyType, varValue);
-            if (value != null)
-                prop.SetValue(node, value);
+            try
+            {
+                var value = Converter.ConvertObject(prop.PropertyType, varValue);
+                if (value != null)
+                    prop.SetValue(node, value);
+            }
+            catch (Exception ex)
+            {
+                logger.ELog("Failed setting variable: " + ex.Message);
+            }
         }
 
         return (Node)node;
