@@ -173,11 +173,11 @@ export class LibraryFileTable extends FFChart
             if(this.recentlyFinished === false)
                 continue;
             // finished
-            if(item.status === 4) {
+            if(item.Status === 4) {
                 tr.classList.add('failed');
                 tdRelativePath.innerHTML = '<i class="fas fa-times" title="Failed"></i>&nbsp;' + tdRelativePath.innerHTML; 
             }
-            else if(item.status === 6) {
+            else if(item.Status === 6) {
                 tr.classList.add('mapping-issue');
                 tdRelativePath.innerHTML = '<i class="fas fa-exclamation-triangle" title="Mapping Issue"></i>&nbsp;' + tdRelativePath.innerHTML;
             }
