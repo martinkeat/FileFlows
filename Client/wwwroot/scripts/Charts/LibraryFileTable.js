@@ -64,21 +64,7 @@ export class LibraryFileTable extends FFChart
         if(this.url.endsWith('recently-finished') !== true)
             return await super.fetchData();
         else {
-            let data = await (await fetch(this.url)).json();
-            //".csharp.invokeMethodAsync("FetchRecentlyFinished");
-            // for(var d of data){
-            //     d.When = d.when;
-            //     delete d.when;
-            //     d.RelativePath = d.relativePath;
-            //     delete d.relativePath;
-            //     d.Uid = d.uid;
-            //     delete d.uid;
-            //     d.FinalSize = d.finalSize;
-            //     delete d.finalSize;
-            //     d.OriginalSize = d.originalSize;
-            //     delete d.originalSize;
-            // }
-            return data;
+            return await (await fetch(this.url)).json();
         }
     }
 
@@ -176,7 +162,6 @@ export class LibraryFileTable extends FFChart
         table.appendChild(tbody);
         for(let item of data)
         {
-            console.log('item', item);
             let tr = document.createElement('tr');
             tbody.appendChild(tr);
 

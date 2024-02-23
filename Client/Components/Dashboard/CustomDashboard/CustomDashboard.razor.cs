@@ -133,18 +133,6 @@ public partial class CustomDashboard : IDisposable
             return;
         JsCallbacks[eventName] = callback;
     }
-
-    /// <summary>
-    /// Gets recently finished library files
-    /// </summary>
-    [JSInvokable]
-    public async Task<List<object>> FetchRecentlyFinished()
-    {
-        var result = await HttpHelper.Get<List<object>>("/api/library-file/recently-finished");
-        if (!result.Success || result.Data?.Any() != true)
-            return new List<object>();
-        return result.Data;
-    }
     
     /// <summary>
     /// Opens a log for a executing library file

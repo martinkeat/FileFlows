@@ -128,7 +128,7 @@ public class LibraryFileController : Controller //ControllerStore<LibraryFile>
                 When = when,
                 x.OriginalSize,
                 x.FinalSize,
-                x.Status
+                Status = (int)x.Status
             };
         });
         return Ok(data);
