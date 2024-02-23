@@ -120,6 +120,11 @@ public class FlowExecutorInfoMinified
     /// Gets or sets the UID of the flow
     /// </summary>
     public Guid Uid { get; set; }
+
+    /// <summary>
+    /// Gets or sets the display name of the file being executed
+    /// </summary>
+    public string DisplayName { get; set; }
     
     /// <summary>
     /// Gets or sets the name of the Node executing this flow

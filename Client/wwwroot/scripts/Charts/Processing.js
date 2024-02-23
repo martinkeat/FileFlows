@@ -250,8 +250,8 @@ class Runner {
     updateInfo = (runner) => {
         const step = this.humanizeStepName(runner.currentPartName);
         const time = this.timeDiff(Date.parse(runner.startedAt), Date.now());
-
-        this.infoElements.file.textContent = runner.relativeFile || "";
+        
+        this.infoElements.file.textContent = runner.displayName || runner.relativeFile || '';
         this.infoElements.node.textContent = runner.nodeName === 'FileFlowsServer' ? 'Internal Processing Node' : runner.nodeName || "";
         this.infoElements.library.textContent = runner.libraryName || "";
         this.infoElements.step.textContent = step || "";

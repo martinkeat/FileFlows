@@ -2,6 +2,7 @@
 using FileFlows.Server.Services;
 using FileFlows.Shared.Models;
 using Microsoft.AspNetCore.SignalR;
+using Org.BouncyCastle.Tls;
 
 
 namespace FileFlows.Server.Hubs;
@@ -73,6 +74,7 @@ public class ClientServiceManager
                 minified[executor.Key] = new()
                 {
                     Uid = executor.Key,
+                    DisplayName = FileDisplayNameService.GetDisplayName(executor.Value.LibraryFile.Name, executor.Value.LibraryFile.RelativePath),
                     LibraryName = executor.Value.Library.Name,
                     LibraryFileUid = executor.Value.LibraryFile.Uid,
                     LibraryFileName = executor.Value.LibraryFile.Name,
