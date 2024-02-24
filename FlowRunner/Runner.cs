@@ -505,20 +505,26 @@ public class Runner
         nodeParameters.Result = NodeResult.Success;
         nodeParameters.GetToolPathActual = (name) =>
         {
+            string? variable = null;
             var varOverride = nodeParameters.Variables
                 .LastOrDefault(x => x.Key.ToLowerInvariant() == name.ToLowerInvariant());
             if (varOverride.Value != null && varOverride.Value is string strVarOverride)
             {
                 nodeParameters.Logger?.ILog($"ToolPathVariable '{name}' = '{strVarOverride}'");
-                return strVarOverride;
+                variable = strVarOverride;
             }
-            
-            
-            var variable = Program.Config.Variables.Where(x => x.Key.ToLowerInvariant() == name.ToLowerInvariant())
-                .Select(x => x.Value).FirstOrDefault();
-            if (string.IsNullOrWhiteSpace(variable))
-                return variable;
-            return Node.Map(variable);
+
+            if (string.IsNullOrEmpty(variable))
+            {
+                variable = Program.Config.Variables.Where(x => string.Equals(x.Key, name, StringComparison.InvariantCultureIgnoreCase))
+                    .Select(x => x.Value).FirstOrDefault();
+                if (string.IsNullOrWhiteSpace(variable))
+                    return variable;
+            }
+
+            var final = Node.Map(variable);
+            nodeParameters?.Logger?.ILog($"Tool '{name}' variable = '{final}");
+            return final;
         };
         nodeParameters.GetPluginSettingsJson = (pluginSettingsType) =>
         {
