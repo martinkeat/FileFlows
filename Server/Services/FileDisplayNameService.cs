@@ -1,4 +1,5 @@
 using FileFlows.Plugin;
+using FileFlows.Shared.Models;
 using Jint;
 
 namespace FileFlows.Server.Services;
@@ -52,6 +53,16 @@ public class FileDisplayNameService
             Logger.Instance.ELog($"Error in {Globals.FileDisplayNameScript} script: " + ex.Message);
             NoScript = true;
         }
+    }
+
+    /// <summary>
+    /// Gets the display name for the file
+    /// </summary>
+    /// <param name="libFile">the library file</param>
+    /// <returns>the display name</returns>
+    public static string GetDisplayName(LibraryFile libFile)
+    {
+        return GetDisplayName(libFile.Name, libFile.RelativePath, libFile.LibraryName);
     }
     
     /// <summary>

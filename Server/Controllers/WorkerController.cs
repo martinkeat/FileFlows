@@ -43,7 +43,8 @@ public class WorkerController : Controller
         _ = new NodeController().UpdateLastSeen(info.NodeUid);
         
         if (new SettingsService().Get()?.Result?.HideProcessingStartedNotifications != true)
-            ClientServiceManager.Instance.SendToast(LogType.Info, "Started processing: " + info.LibraryFile.RelativePath);
+            ClientServiceManager.Instance.SendToast(LogType.Info, "Started processing: " +
+                                                                  FileDisplayNameService.GetDisplayName(info.LibraryFile));
         ClientServiceManager.Instance.StartProcessing(info.LibraryFile);
         ClientServiceManager.Instance.UpdateFileStatus();
         
@@ -215,13 +216,13 @@ public class WorkerController : Controller
                     SystemEvents.TriggerLibraryFileProcessedFailed(libfile, library);
                     
                     if(new SettingsService().Get()?.Result?.HideProcessingFinishedNotifications != true)
-                        ClientServiceManager.Instance.SendToast(LogType.Error, "Failed processing: " + info.LibraryFile.RelativePath);
+                        ClientServiceManager.Instance.SendToast(LogType.Error, "Failed processing: " + FileDisplayNameService.GetDisplayName(info.LibraryFile));
                 }
                 else
                 {
                     SystemEvents.TriggerLibraryFileProcessedSuccess(libfile, library);
                     if(new SettingsService().Get()?.Result?.HideProcessingFinishedNotifications != true)
-                        ClientServiceManager.Instance.SendToast(LogType.Info, "Finished processing: " + info.LibraryFile.RelativePath);
+                        ClientServiceManager.Instance.SendToast(LogType.Info, "Finished processing: " + FileDisplayNameService.GetDisplayName(info.LibraryFile));
                 }
 
                 SystemEvents.TriggerLibraryFileProcessed(libfile, library);
