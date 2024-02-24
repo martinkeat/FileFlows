@@ -252,6 +252,7 @@
   "Widgets": {
     "CPUUsage": "CPU Usage",
     "MemoryUsage": "Memory Usage",
+    "DatabaseConnections": "Database Connections",
     "TemporaryFileStorage": "Temporary File Storage",
     "ProcessingNodes": "Processing Nodes",
     "Processing": "Processing",

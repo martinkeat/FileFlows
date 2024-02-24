@@ -252,6 +252,7 @@
   "Widgets": {
     "CPUUsage": "CPU-Auslastung",
     "MemoryUsage": "Speicherauslastung",
+    "DatabaseConnections": "Datenbankverbindungen",
     "TemporaryFileStorage": "Temporärer Dateispeicher",
     "ProcessingNodes": "Nodes",
     "Processing": "Verarbeitung",
