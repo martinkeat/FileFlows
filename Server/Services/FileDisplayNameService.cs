@@ -65,6 +65,14 @@ public class FileDisplayNameService
     {
         if (NoScript || jsGetDisplayName == null)
             return relativePath?.EmptyAsNull() ?? name;
-        return jsGetDisplayName.Invoke("getDisplayName", name, relativePath, libraryName)?.ToString() ?? name;
+        try
+        {
+            return jsGetDisplayName.Invoke("getDisplayName", name, relativePath, libraryName)?.ToString() ?? name;
+        }
+        catch (Exception ex)
+        {
+            Logger.Instance.ILog("Error getting display name: " + ex.Message);
+            return relativePath;
+        }
     }
 }

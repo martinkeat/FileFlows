@@ -114,6 +114,8 @@ public class LibraryFileController : Controller //ControllerStore<LibraryFile>
         var mapping = await service.GetAll(FileStatus.MappingIssue, rows: 10);
         var minDate = new DateTime(2020, 1, 1);
         var all = processed.Union(failed).Union(mapping).OrderByDescending(x => x.ProcessingEnded < minDate ? x.ProcessingStarted : x.ProcessingEnded).ToArray();
+        if (all.Any() == false)
+            return Ok(new object[] { });
         if (all.Length > 10)
             all = all.Take(10).ToArray();
         var data = all.Select(x =>
