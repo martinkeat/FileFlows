@@ -689,7 +689,11 @@
           "Message":"Are you sure you want to restart FileFlows?\n\nYour settings will be automatically saved first.\n\nNote: Ensure there are no flows executing."
         },
         "CheckUpdateSuccess":"Successfully triggered a check for update.\nNote this may take a few minutes to download if available.",
-        "CheckUpdateFailed":"Failed to check for an update"
+        "CheckUpdateFailed":"Failed to check for an update",
+        "DisableTelemetryConfirm": {
+          "Title": "Disable Telemetry",
+          "Message": "Are you sure you want to disable telemetry?\\n\\nRest assured, no personal information is recorded. The data sent includes information about the flow elements in use, plugins utilized, as well as the total number of files failed and processed.\\n\\nThis information helps us understand user preferences and informs our decisions regarding the deprecation of unused flow elements."
+        }
       },
       "Fields": {
         "Telemetry": "Telemetry",

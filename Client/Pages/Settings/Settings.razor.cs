@@ -350,8 +350,8 @@ public partial class Settings : InputRegister
     {
         if (disabled)
         {
-            if (await Confirm.Show("Disable Telemetry",
-                    "Are you sure you want to disable telemetry?\n\nRest assured, no personal information is recorded. The data sent includes information about the flow elements in use, plugins utilized, as well as the total number of files failed and processed.\n\nThis information helps us understand user preferences and informs our decisions regarding the deprecation of unused flow elements.",
+            if (await Confirm.Show("Pages.Settings.Messages.DisableTelemetryConfirm.Title",
+                    "Pages.Settings.Messages.DisableTelemetryConfirm.Message",
                     false) == false)
             {
                 Model.DisableTelemetry = false;

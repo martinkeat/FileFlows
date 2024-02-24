@@ -689,7 +689,11 @@
           "Message":"Sind Sie sicher, dass Sie FileFlows neu starten wollen?\n\nIhre Einstellungen werden zunächst automatisch gespeichert.\n\nHinweis: Stellen Sie sicher, dass keine Aufgaben ausgeführt werden."
         },
         "CheckUpdateSuccess":"Die Prüfung auf ein Update wurde erfolgreich ausgelöst. Beachten Sie, dass der Download, sofern verfügbar, einige Minuten dauern kann.",
-        "CheckUpdateFailed":"Prüfung auf ein Update fehlgeschlagen"
+        "CheckUpdateFailed":"Prüfung auf ein Update fehlgeschlagen",
+        "DisableTelemetryConfirm": {
+          "Title": "Telemetrie deaktivieren",
+          "Message": "Sind Sie sicher, dass Sie die Telemetrie deaktivieren möchten?\n\nKeine Sorge, es werden keine persönlichen Daten aufgezeichnet. Die gesendeten Daten beinhalten Informationen über die verwendeten Elemente des Workflows, die genutzten Plugins sowie die Gesamtzahl der fehlgeschlagenen und verarbeiteten Dateien.\n\nDiese Informationen helfen uns, die Benutzerpräferenzen zu verstehen und Entscheidungen über die Abwertung nicht verwendeter Flow-Elemente zu treffen."
+        }
       },
       "Fields": {
         "Telemetry": "Telemetrie",
