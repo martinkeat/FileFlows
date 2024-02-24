@@ -20,6 +20,23 @@
   .name {
     display:block;
     font-weight: 600;
+    i, img {
+      margin-right: 0.75rem;
+      width: 1.25rem;
+      text-align: center;
+    }
+    i.subflow {
+      color:var(--yellow);
+    }
+    i.failure {
+      color:var(--danger);
+    }
+    i.standard {
+      color:var(--flow-process);
+    }
+    img {
+      width:1rem;
+    }
   }
   .tags {
     display: block;

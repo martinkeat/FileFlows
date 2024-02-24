@@ -141,6 +141,15 @@ public class FlowTemplateController : Controller
             ftm.Tags = flow.Properties.Tags?.ToList() ?? new ();
             ftm.Tags.Add("Local");
             ftm.Type = flow.Type;
+            string typeName = Translater.Instant($"Enums.{nameof(FlowType)}." + flow.Type);
+            ftm.Icon = flow.Type switch
+            {
+                FlowType.SubFlow => "fas fa-subway",
+                FlowType.Failure => "fas fa-exclamation-circle",
+                _ => "fas fa-sitemap"
+            };
+            ftm.Author = typeName;
+            ftm.Tags.Add("Local:" + typeName);
             results.Add(ftm);
         }
         return results;

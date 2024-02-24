@@ -182,7 +182,7 @@ public class WebServer
         // need to scan for plugins before initing the translater as that depends on the plugins directory
         Helpers.PluginScanner.Scan();
 
-        Helpers.TranslaterHelper.InitTranslater();
+        Helpers.TranslaterHelper.InitTranslater(settings.Language?.EmptyAsNull() ?? "en");
 
         ServerShared.Services.Service.ServiceBaseUrl = $"{protocol}://localhost:{Port}";
         // update the client with the proper ServiceBaseUrl

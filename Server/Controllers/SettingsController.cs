@@ -192,7 +192,9 @@ public class SettingsController : Controller
         AppSettings.Instance.LicenseKey = model.LicenseKey?.Trim();
         AppSettings.Instance.LicenseEmail = model.LicenseEmail?.Trim();
         await LicenseHelper.Update();
-
+        
+        TranslaterHelper.InitTranslater(model.Language?.EmptyAsNull() ?? "en");
+        
         var newConnectionString = GetConnectionString(model, model.DbType);
         if (IsConnectionSame(AppSettings.Instance.DatabaseConnection, newConnectionString) == false)
         {

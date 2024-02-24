@@ -190,6 +190,11 @@
       "MissingLibrary": "Missing Library",
       "ReprocessByFlow": "Reprocess By Flow"
     },
+    "FlowType": {
+      "Standard": "Standard",
+      "Failure": "Failure",
+      "SubFlow": "Sub Flow"
+    },
     "MatchRange": {
       "Any": "Any",
       "GreaterThan": "Greater Than",
@@ -382,6 +387,11 @@
       "Buttons": {
         "Repository": "Repository"
       },
+      "Labels": {
+        "FailureFlows": "Failure Flows",
+        "StandardFlows": "Standard Flows",
+        "SubFlows": "Sub Flows"
+      },
       "Fields": {
         "Author": "Author",
         "Template":"Template"
@@ -390,7 +400,8 @@
         "FlowImported": "Flow ''{name}'' imported",
         "Duplicated": "Flow ''{name}'' duplicated",
         "DeleteUsed":"You cannot delete a flow that is in use",
-        "LoadingTemplates":"Loading Templates"
+        "LoadingTemplates":"Loading Templates",
+        "FailureFlowDescription": "This is a special flow type that will be executed if any flow fails.\nFileFlows will search for the 'Default' Failure Flow to use if a flow fails, if not found then processing will immediately stop."
       }
     },
     "Libraries": {

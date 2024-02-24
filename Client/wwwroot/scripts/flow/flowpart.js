@@ -279,7 +279,8 @@ class ffFlowPart
 
     deleteFlowPart(uid) 
     {
-        this.ffFlow.History.perform(new FlowActionDelete(this.ffFlow, uid));
+        if(uid && this.ffFlow.getFlowPart(uid))
+            this.ffFlow.History.perform(new FlowActionDelete(this.ffFlow, uid));
     }
 
     editFlowPart(uid, deleteOnCancel) {

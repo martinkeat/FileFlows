@@ -14,9 +14,7 @@
     
 @if (SelectedType == FlowType.Failure)
 {
-    <div class="info box">This is a special flow type that will be executed if any flow fails.
-FileFlows will search for the 'Default' Failure Flow to use if a flow fails, if not found then processing will immediately stop.
-    </div>
+    <div class="info box">@lblFailureFlowDescription</div>
 }
     <FlowTable @ref="Table" Data="@(SelectedType == FlowType.Failure ? DataFailure : SelectedType == FlowType.SubFlow ? DataSubFlows : DataStandard)" TItem="FlowListModel" Selection="SelectionMode.Multiple"
             DoubleClick="@OnDoubleClick" TableIdentifier=@TableIdentifier>
@@ -56,7 +54,7 @@ FileFlows will search for the 'Default' Failure Flow to use if a flow fails, if 
                 </FlowTableColumn>
                 <FlowTableColumn TItem="FlowListModel" Hidden="@(SelectedType != FlowType.Failure)" Width="10rem">
                     <Header>
-                        Default
+                        @lblDefault
                     </Header>
                     <Cell Context="item">
                         <span>
@@ -70,7 +68,7 @@ FileFlows will search for the 'Default' Failure Flow to use if a flow fails, if 
                 
                 <FlowTableColumn TItem="FlowListModel" Hidden="@(SelectedType != FlowType.SubFlow)" Width="10rem">
                     <Header>
-                        Read Only
+                        @lblReadOnly
                     </Header>
                     <Cell Context="item">
                         <span>
@@ -84,7 +82,7 @@ FileFlows will search for the 'Default' Failure Flow to use if a flow fails, if 
                 
                 <FlowTableColumn TItem="FlowListModel" Width="10rem">
                     <Header>
-                        In Use
+                        @lblInUse
                     </Header>
                     <Cell Context="item">
                         @if (item.UsedBy?.Any() == true)
@@ -105,8 +103,3 @@ FileFlows will search for the 'Default' Failure Flow to use if a flow fails, if 
     // 155px here because of skybox
     <div class="pointer-add" style="top:9.75rem">Add</div>
 }
-
-@* *@
-@* <FileFlows.Client.Components.Dialogs.FlowTemplatePicker @ref=TemplatePicker /> *@
-@* *@
-@* <NewFlowEditor @ref=AddEditor /> *@

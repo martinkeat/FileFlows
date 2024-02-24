@@ -2,7 +2,6 @@ using FileFlows.Client.Components.Common;
 using Microsoft.AspNetCore.Components;
 using FileFlows.Client.Components;
 using FileFlows.Client.Components.Dialogs;
-using FileFlows.Plugin;
 using Microsoft.JSInterop;
 using ffFlow = FileFlows.Shared.Models.Flow;
 
@@ -33,7 +32,16 @@ public partial class Flows : ListPage<Guid, FlowListModel>
     private FlowType SelectedType = FlowType.Standard;
 
     public override string FetchUrl => ApiUrl + "/list-all";
+    private string lblFailureFlowDescription, lblDefault, lblReadOnly, lblInUse;
 
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        lblFailureFlowDescription = Translater.Instant("Pages.Flows.Messages.FailureFlowDescription");
+        lblDefault = Translater.Instant("Labels.Default");
+        lblReadOnly = Translater.Instant("Labels.ReadOnly");
+        lblInUse = Translater.Instant("Labels.InUse");
+    }
 
     async Task Enable(bool enabled, ffFlow flowWrapper)
     {
@@ -48,47 +56,8 @@ public partial class Flows : ListPage<Guid, FlowListModel>
         }
     }
 
-    private async void Add()
-    {
-        //if (TemplatePicker == null)
-        {
-            NavigationManager.NavigateTo("flows/" + Guid.Empty);
-            return;
-        }
-        //
-        // var flowTemplateModel = await TemplatePicker.Show(SelectedType);
-        // if (flowTemplateModel == null)
-        //     return; // twas canceled
-        // if (flowTemplateModel.Fields?.Any() != true)
-        // {
-        //     // nothing extra to fill in, go to the flow editor, typically this if basic flows
-        //     App.Instance.NewFlowTemplate = flowTemplateModel.Flow;
-        //     NavigationManager.NavigateTo("flows/" + Guid.Empty);
-        //     return;
-        // }
-        //
-        // Logger.Instance.ILog("flowTemplateModel: " , flowTemplateModel);
-        // var newFlow = await AddEditor.Show(flowTemplateModel);
-        // if (newFlow == null)
-        //     return; // was canceled
-        //
-        // if (newFlow.Uid != Guid.Empty)
-        // {
-        //     if ((App.Instance.FileFlowsSystem.ConfigurationStatus & ConfigurationStatus.Flows) != ConfigurationStatus.Flows)
-        //     {
-        //         // refresh the app configuration status
-        //         await App.Instance.LoadAppInfo();
-        //     }
-        //     // was saved, refresh list
-        //     await this.Refresh();
-        // }
-        // else
-        // {
-        //     // edit it
-        //     App.Instance.NewFlowTemplate = newFlow;
-        //     NavigationManager.NavigateTo("flows/" + Guid.Empty);
-        // }
-    }
+    private void Add()
+        => NavigationManager.NavigateTo("flows/" + Guid.Empty);
 
     public override async Task<bool> Edit(FlowListModel item)
     {
@@ -179,21 +148,21 @@ public partial class Flows : ListPage<Guid, FlowListModel>
         {
             new ()
             {
-                Name = "Standard Flows",
+                Name = Translater.Instant("Pages.Flows.Labels.StandardFlows"),
                 Icon = "fas fa-sitemap",
                 Count = this.DataStandard.Count,
                 Value = FlowType.Standard
             },
             new ()
             {
-                Name = "Sub Flows",
+                Name = Translater.Instant("Pages.Flows.Labels.SubFlows"),
                 Icon = "fas fa-subway",
                 Count = this.DataSubFlows.Count,
                 Value = FlowType.SubFlow
             },
             new ()
             {
-                Name = "Failure Flows",
+                Name = Translater.Instant("Pages.Flows.Labels.FailureFlows"),
                 Icon = "fas fa-exclamation-circle",
                 Count = this.DataFailure.Count,
                 Value = FlowType.Failure

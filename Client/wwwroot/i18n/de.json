@@ -190,6 +190,11 @@
       "MissingLibrary": "Fehlende Bibliothek",
       "ReprocessByFlow": "Neu verarbeiten"
     },
+    "FlowType": {
+      "Standard": "Standard",
+      "Failure": "Fehler",
+      "SubFlow": "Unter Flow"
+    },
     "MatchRange": {
       "Any": "Beliebig",
       "GreaterThan": "Größer als",
@@ -382,6 +387,11 @@
       "Buttons": {
         "Repository": "Repository"
       },
+      "Labels": {
+        "FailureFlows": "Fehler flows",
+        "StandardFlows": "Standard Flows",
+        "SubFlows": "Unter Flows"
+      },
       "Fields": {
         "Author": "Author",
         "Template":"Template"
@@ -390,7 +400,8 @@
         "FlowImported": "Flow ''{name}'' importiert",
         "Duplicated": "Flow ''{name}'' dupliziert",
         "DeleteUsed":"Sie können keinen Flow löschen, die gerade in Gebrauch ist.",
-        "LoadingTemplates":"Lade Templates"
+        "LoadingTemplates":"Lade Templates",
+        "FailureFlowDescription": "Das ist ein spezieller Fluss-Typ, der ausgeführt wird, wenn ein beliebiger Fluss fehlschlägt. FileFlows sucht nach dem 'Standard' Fehlerfluss, der verwendet werden soll, wenn ein Fluss fehlschlägt. Falls nicht gefunden, wird die Verarbeitung sofort gestoppt."
       }
     },
     "Libraries": {

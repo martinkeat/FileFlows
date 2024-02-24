@@ -11,6 +11,11 @@ public class FlowTemplateModel
     /// Gets or sets the path of the script
     /// </summary>
     public string Path { get; set; } = string.Empty;
+    
+    /// <summary>
+    /// Gets or sets an optional icon
+    /// </summary>
+    public string Icon { get; set; }
 
     /// <summary>
     /// Gets or sets the name
