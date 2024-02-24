@@ -505,6 +505,15 @@ public class Runner
         nodeParameters.Result = NodeResult.Success;
         nodeParameters.GetToolPathActual = (name) =>
         {
+            var varOverride = nodeParameters.Variables
+                .LastOrDefault(x => x.Key.ToLowerInvariant() == name.ToLowerInvariant());
+            if (varOverride.Value != null && varOverride.Value is string strVarOverride)
+            {
+                nodeParameters.Logger?.ILog($"ToolPathVariable '{name}' = '{strVarOverride}");
+                return strVarOverride;
+            }
+            
+            
             var variable = Program.Config.Variables.Where(x => x.Key.ToLowerInvariant() == name.ToLowerInvariant())
                 .Select(x => x.Value).FirstOrDefault();
             if (string.IsNullOrWhiteSpace(variable))
