@@ -1,0 +1,870 @@
+{
+  "ProductName": "FileFlows",
+  "Labels": {
+    "VersionNumber": "Version: {version}",
+    "Version":"Version",
+    "Save": "Speichern",
+    "Saving": "Speichert",
+    "Execute": "Ausführen",
+    "Executing": "Ausführen",
+    "Cancel": "Abbrechen",
+    "Close": "Schließen",
+    "Select": "Auswählen",
+    "Yes": "Ja",
+    "No": "Nein",
+    "Ok": "OK",
+    "About": "Über",
+    "Pause": "Verarbeitung pausieren",
+    "Paused":"Verarbeitung fortsetzen",
+    "PausedWithTime":"Fortsetzen in",
+    "None": "None",
+    "Add": "Hinzufügen",
+    "Edit": "Editieren",
+    "EditSubFlow": "Sub Flow editieren",
+    "Open": "Öffnen",
+    "Clear": "Leeren",
+    "Next": "Nächste",
+    "Remove":"Entfernen",
+    "Copy":"Kopieren",
+    "Paste":"Einfügen",
+    "Redo":"Wiederherstellen",
+    "Undo":"Rückgängig",
+    "Fields": "Felder",
+    "Duplicate":"Duplizieren",
+    "ResetLayout":"Layout zurücksetzen",
+    "UsedBy":"Verwendet von",
+    "Update": "Update",
+    "Refresh": "Aktualisieren",
+    "Download": "Download",
+    "Default":"Default",
+    "Type": "Typ",
+    "Scripts": "Scripte",
+    "Plugins": "Plugins",
+    "SubFlow": "Sub Flow",
+    "SubFlows": "Sub Flows",
+    "DownloadLog": "Log herunterladen",
+    "UnsavedChanges": "Nicht gespeicherte Änderungen",
+    "Enabled": "Aktivieren",
+    "Export": "Exportieren",
+    "Import": "Importieren",
+    "Browse": "Durchsuche",
+    "Rescan": "Rescan",
+    "Reprocess": "Reprocess",
+    "Revisions":"Revisionen",
+    "Restore":"Wiederherstellen",
+    "RestoredMessage":"{type} wiederhergestellt",
+    "RestoredFailedMessage":"Fehler beim Wiederherstellen von {type}",
+    "Restoring":"Wiederherstellen",
+    "Help": "Hilfe",
+    "Discord":"Discord",
+    "Forum":"Forum",
+    "License":"Lizenz",
+    "Name": "Name",
+    "Status": "Status",
+    "When": "Wann",
+    "Size": "Dateigröße",
+    "Advanced": "Erweitert",
+    "Search": "Suche",
+    "Searching": "Suchen",
+    "Filter": "Filter",
+    "FilterPlaceholder": "Filter (/)",
+    "Run": "Start",
+    "RunHistory": "Startverlauf",
+    "LastRun": "Letzter Start",
+    "Never": "Nie",
+    "Trigger": "Auslöser",
+    "RunAt": "Starten als",
+    "Success": "Erfolgreich",
+    "ReturnCode": "Rückgabe Code",
+    "Log": "Log",
+    "View": "View",
+    "Delete": "Löschen",
+    "Deleting": "Löschen",
+    "DeleteItems": "Sind Sie sicher, dass Sie die ausgewählten Elemente löschen wollen?",
+    "DeleteLibraryFiles": "Sind Sie sicher, dass Sie die ausgewählten Elemente löschen wollen?\n\nBeachten Sie, dass dadurch die Dateien nicht von der Festplatte gelöscht wird, sondern lediglich aus der FileFlows-Datenbank entfernt wird.",
+    "DeleteLibraryFilesPhysicallySwitch": "Von Datenträger löschen",
+    "DeleteLibraryFilesPhysicallyMessage": "Sind Sie sicher, dass Sie die ausgewählten Dateien löschen wollen?\n\nWARNUNG: Beachten Sie, dass dadurch die Datei dauerhaft von der Festplatte gelöscht wird und nicht rückgängig gemacht werden kann.",
+    "CancelItems": "Sind Sie sicher, dass Sie die ausgewählten Dateien abbrechen möchten?",
+    "CancelMessage": "Möchten Sie den Vorgang wirklich abbrechen und alle nicht gespeicherten Änderungen verlieren?",
+    "Confirm": "Bestätige",
+    "Prompt": "Eingabeaufforderung",
+    "SelectOne": "Auswählen",
+    "Increase": "Erhöhen",
+    "Decrease": "Senken",
+    "SpaceSavings": "{size} gespart, {items} Elemente",
+    "SpaceIncrease": "{size} erhöht, {items} Elemente",
+    "Total": "Total",
+    "Other": "Andere",
+    "UpdateAvailable": "Neue Version verfügbar! {version}",
+    "Output": "Ausgabe",
+    "Input": "Eingabe",
+    "Node": "Node",
+    "BaseCodeOn": "Code-Vorlage verwenden",
+    "CopyToClipboard": "In Zwischenablage kopieren",
+    "CopiedToClipboard": "''{text}'' in Zwischenablage kopiert.",
+    "Test":"Test",
+    "LogPartialNotAvailable":"Es konnte kein Teilprotokoll für den Node gefunden werden.",
+    "ViewLog":"Log betrachten",
+    "SetStatusProcessed": "Als verarbeitet markieren",
+    "CommunityFlows": "Community Flows",
+    "Properties": "Eigenschaften",
+    "MissingDependencies": "Fehlende Abhängigkeiten",
+    "MissingDependenciesMessage": "Die folgenden fehlenden Plugins müssen vor der Verwendung dieser Vorlage heruntergeladen werden:\n\n#LIST#",
+    "NoFilesCurrentlyProcessing": "Derzeit werden keine Dateien verarbeitet.",
+    "ProcessingPaused": "Die Verarbeitung ist derzeit pausiert.",
+    "NoFilesRecentlyFinished": "Keine kürzlich abgeschlossenen Dateien",
+    "NoUpcomingFiles": "Keine anstehenden Dateien",
+    "Failed": "Gescheitert",
+    "MappingIssue": "Zuordnungsproblem",
+    "ObsoleteConfirm": {
+      "Title": "Veralteter Node",
+      "Message": "Es wird empfohlen, zu einem anderen Node zu wechseln.",
+      "Question": "Dieser Node ist jetzt veraltet und wird bald entfernt. Sind Sie sicher, dass Sie diesen Knoten verwenden möchten?"
+    },
+    "DateRanges":{
+      "Live": "Live",
+      "AnyTime":"Jederzeit",
+      "Today":"Heute",
+      "Yesterday":"Gestern",
+      "Last24Hours":"Letzte 24 Stunden",
+      "Last3Days":"Letzte 3 Tage"
+    }
+  },
+  "Dialogs":{
+    "FileBrowser": {
+      "FileTitle": "Eine Datei auswählen",
+      "DirectoryTitle": "Ein Verzeichnis wählen"
+    },
+    "Import": {
+      "Title": "Import Flow",
+      "Message": "Wählen Sie eine exportierten Flow aus, um den Flow in das System zu importieren."
+    },
+    "ImportScript":{
+      "Title":"Import Script",
+      "Messages":{
+        "NoMoreImports":"Für dieses Skript gibt es keine zusätzlichen Importe."
+      }
+    },
+    "PauseDialog":
+    {
+      "Title":"Verarbeitung unterbrechen",
+      "Message":"Wählen Sie die Zeitspanne aus, für die die Verarbeitung unterbrochen werden soll.\nHinweis: Die aktuellen Flows werden weiterhin ausgeführt, aber keine weiteren Flows werden ausgeführt, bis die Zeit abgelaufen ist."
+    },
+    "ResumeDialog":
+    {
+      "Title":"Verarbeitung fortsetzen",
+      "Message":"Sind Sie sicher, dass Sie die Bearbeitung fortsetzen wollen?"
+    },
+    "FlowTemplatePicker": {
+      "Title": "Wählen Sie eine Vorlage aus, mit der Sie beginnen möchten"
+    }
+  },
+  "Enums": {
+    "Days": {
+      "Monday": "Montag",
+      "Tuesday": "Dienstag",
+      "Wednesday": "Mittwoch",
+      "Thursday": "Donnerstag",
+      "Friday": "Freitag",
+      "Saturday": "Samstag",
+      "Sunday": "Sonntag",
+      "Mon": "Mo",
+      "Tue": "Di",
+      "Wed": "Mi",
+      "Thu": "Do",
+      "Fri": "Fr",
+      "Sat": "Sa",
+      "Sun": "So"
+    },
+    "FileStatus": {
+      "OnHold":"Gehalten",
+      "Disabled": "Deaktiviert",
+      "OutOfSchedule": "Außerhalb des Zeitplans",
+      "Processed": "Fertig",
+      "Processing": "Verarbeitung",
+      "Unprocessed": "Noch nicht verarbeitet",
+      "FlowNotFound": "Flow nicht gefunden",
+      "ProcessingFailed": "Fehlerhaft",
+      "Duplicate": "Duplikate",
+      "MappingIssue": "Zuordnungsproblem",
+      "MissingLibrary": "Fehlende Bibliothek",
+      "ReprocessByFlow": "Neu verarbeiten"
+    },
+    "MatchRange": {
+      "Any": "Beliebig",
+      "GreaterThan": "Größer als",
+      "LessThan": "Kleiner als",
+      "Between": "zwischen",
+      "NotBetween": "Nicht zwischen"
+    },
+    "ProcessingOrder":{
+      "AsFound": "Gefunden (Standard)",
+      "Alphabetical": "Alphabetisch",
+      "LargestFirst":"Größte zuerst",
+      "NewestFirst":"Neuste zuerst",
+      "OldestFirst":"Älteste zuerst",
+      "Random":"Zufällig",
+      "SmallestFirst":"Kleinste zuerst"
+    },
+    "ProcessingPriority": {
+      "Lowest": "Am niedrigsten",
+      "Low": "Niedrig",
+      "Normal": "Normal",
+      "High": "Hoch",
+      "Highest": "Höchste"
+    },
+    "ProcessingNodeStatus": {
+      "Offline": "Offline",
+      "Idle": "Leerlauf",
+      "Processing": "Verarbeitung",
+      "Disabled": "Deaktiviert",
+      "OutOfSchedule": "Außerhalb des Zeitplans",
+      "VersionMismatch": "Versionskonflikt"
+    }
+  },
+  "ErrorMessages": {
+    "UnexpectedError": "Ein unerwarteter Fehler ist aufgetreten.",
+    "SaveFailed": "Speichern fehlgeschlagen!",
+    "DeleteFailed": "Löschen fehlgeschlagen!",
+    "NotFound": "Element nicht gefunden!",
+    "NameInUse": "Der Name ist bereits in Verwendung!",
+    "NameRequired": "Name ist erforderlich!",
+    "DuplicatesFound": "Duplikate gefunden!",
+    "NoFlowSpecified": "Kein Flow angegeben, Sie müssen ein Flow auswählen, um eine Bibliothek zu erstellen",
+    "CannotDeleteInternalNode": "Sie können den internen Node nicht löschen!",
+    "NotAllFilesCouldBeDeleted": "Es konnten nicht alle Dateien gelöscht werden.\nWeitere Informationen finden Sie im Protokoll.",
+    "SetFileStatus": "Dateistatus konnte nicht gesetzt werden"
+  },
+  "Times": {
+    "Never": "Nie",
+    "SecondsAgo": "{num} {num, plural, one {second} other {seconds}} her",
+    "MinutesAgo": "{num} {num, plural, one {minute} other {minutes}} her",
+    "HoursAgo": "{num} {num, plural, one {hour} other {hour}} her",
+    "DaysAgo": "{num} {num, plural, one {day} other {days}} her"
+  },
+  "Flow": {
+    "ErrorMessages":{
+      "NoParts":"Keine spezifischen Teile des Flow, Sie müssen einige Teile haben, um einen Flow zu speichern",
+      "NoInput":"Kein spezifischer Imput, jeder Flow benötigt einen Imput.",
+      "TooManyInputNodes":"Sie können nur einen Imput haben"
+    },
+    "Parts": {
+      "Color": "Farbe",
+      "Color-Placeholder": "Benutzerdefinierte Farbe",
+      "FileExtension": {
+        "Fields": {
+          "Extensions": "Erweiterungen",
+          "Extensions-Help": "Eine Liste von Erweiterungen, die bei Übereinstimmung an den ersten Ausgabeknoten ausgegeben wird, andernfalls wird der zweite Ausgabeknoten verwendet."
+        }
+      }
+    }
+  },
+  "MenuGroups": {
+    "Overview": "Übersicht",
+    "Configuration": "Konfiguration",
+    "Extensions": "Erweiterungen",
+    "System": "System",
+    "Information": "Informationen"
+  },
+  "Widgets": {
+    "CPUUsage": "CPU-Auslastung",
+    "MemoryUsage": "Speicherauslastung",
+    "TemporaryFileStorage": "Temporärer Dateispeicher",
+    "ProcessingNodes": "Verarbeitungsknoten",
+    "Processing": "Verarbeitung",
+    "Upcoming": "Anstehend",
+    "Codecs": "Codecs",
+    "AudioCodecs": "Audio-Codecs",
+    "VideoCodecs": "Video-Codecs",
+    "VideoResolutions": "Videoauflösungen",
+    "RecentlyFinished": "Kürzlich abgeschlossen",
+    "ProcessingTimes": "Verarbeitungszeiten",
+    "VideoContainers": "Video-Container",
+    "StorageSaved": "Gespeicherter Speicherplatz"
+  },
+  "Pages": {
+    "Dashboard": {
+      "Title": "Dashboard",
+      "Labels": {
+        "ShrinkageTitle": "Speicher gespart",
+        "FinalSize": "Finale Größe",
+        "OriginalSize": "Originale Größe",
+        "Savings": "Gespart",
+        "AddWidget":"Widget einfügen"
+      },
+      "ErrorMessages": {
+        "LogFailed": "Abruf des Protokolls für Worker fehlgeschlagen",
+        "FailedToCreate":"Dashboard kann nicht erstellt werden"
+      },
+      "Messages": {
+        "CancelMessage": "Sind Sie sicher, dass Sie die Arbeit für {RelativeFile} abbrechen wollen?",
+        "Waiting": "Warten auf die Bearbeitung einer Datei",
+        "DeleteDashboard":"Sind Sie sicher, dass Sie das aktuelle Dashboard löschen möchten?\n\nDies kann nicht rückgängig gemacht werden.",
+        "DeleteWidget": "Sind Sie sicher, dass Sie dieses Widget entfernen möchten?"
+      },
+      "Fields": {
+        "Log": "Log",
+        "Node": "Node",
+        "CurrentStep": "Schritt",
+        "File": "Datei",
+        "Overall": "Insgesamt",
+        "Current": "Aktuell",
+        "Uid": "UID",
+        "Library": "Bibliothek",
+        "ProcessingTime": "Bearbeitungszeit",
+        "Upcoming": "Als nächstes",
+        "RecentlyFinished": "Kürzlich fertiggestellt",
+        "WorkingFile": "Working File"
+      }
+    },
+    "Flow": {
+      "Title": "Flow",
+      "Labels": {
+        "EditFlow": "Flow: {Name}",
+        "FlowProperties": "Flow Eigenschaften",
+        "SubFlowHelp": "Um Eingabefelder zu einem sub Flow hinzuzufügen, damit Sie benutzerdefinierte Parameter an diesen Sub Flow übergeben können, erstellen Sie diese auf der Registerkarte. Ein sub Flow muss einen einzigen Imput haben, der ein beliebiges gültiges Eingabeablaufelement sein kann, z. B. 'Eingangsdatei', 'Videodatei' usw.",
+        "OpenScriptBrowser": "Skript-Browser öffnen",
+        "SubFlowBrowser": "Sub Flow Browser",
+        "OpenSubFlowBrowser": "Sub Flow Browser öffnen"        
+      },
+      "Messages": {
+        "Close": "Sind Sie sicher, dass Sie die Seite verlassen und alle ungespeicherten Änderungen verlieren wollen?",
+        "LoadingFlow": "Lade Flow",
+        "FailedToLoadFlow": "Laden des Flows fehlgeschlagen."
+      },
+      "Fields": {
+        "Variables": "Variablen",
+        "Tags": "Tags",
+        "MinimumVersion": "Minimale Version",
+        "VariablesKey": "Name",
+        "VariablesValue": "Wert",
+        "Description": "Beschreibung.",
+        "Author": "Author",
+        "Author-Help": "Geben Sie optional den Autor dieses Flows an.",
+        "Outputs": "Outputs",
+        "OutputsKey": "Output",
+        "OutputsValue": "Beschreibung",
+        "Outputs-Help": "Die Anzahl der Outputs, die dieser sub Flow hat. Dies ist die Anzahl der Outputs, die verfügbar sind, wenn dieser sub Flow in einem anderen Flow verwendet wird",
+        "Field": {            
+          "Description": "Eine optionale Beschreibung, die mit diesem Feld angezeigt wird.  Dies kann ein Hilfetext für das Feld sein.",
+          "FlowElementField": "Element Feld",
+          "FlowElementField-Help": "Optional, geben Sie dies im Format '{Uid}.{Feldname}' an, z. B. '53a72207-34a2-4b71-b3d8-8b12764a85fe.Force', um ein Feld direkt in einem Flow-Element festzulegen.  Siehe Hilfe für weitere Informationen.",
+          "Required": "Erforderlich",
+          "Required-Help": "Wenn dieser Wert erforderlich ist und gesetzt werden muss.",
+          "Default": "Standard",
+          "Minimum": "Minimum",
+          "Maximum": "Maximum",
+          "Inverse": "Umgekehrt",
+          "Inverse-Help": "Wenn die Werte umgekehrt werden sollen, werden rechts niedrigere Werte angezeigt.",
+          "Options": "Optionen",
+          "DeleteIfEmpty": "Löschen wenn leer",
+          "DeleteIfEmpty-Help": "Wenn hier Werte hinzugefügt werden und der Benutzer 'Original löschen' wählt, wird der Ordner auch gelöscht, wenn keine Datei mit einem dieser regulären Ausdrücke übereinstimmt.",
+          "Options-Help": "Ein Array von Listenoptionen, um ein Label und einen Wert zu setzen, verwenden Sie ein |-Trennzeichen, z.B. `label|value`.",
+          "IfName": "Wenn",
+          "IfName-Help": "Wenn dies dem Benutzer nur angezeigt werden soll, wenn ein anderer Wert diese Bedingungen erfüllt.",
+          "IfValue": "Wenn Wert",
+          "IfValue-Help": "Der Wert, der abgeglichen werden soll, kann ein regulärer Ausdruck sein.  Für Boolean-Werte verwenden Sie true oder false.",
+          "IfNot": "Wenn nicht",
+          "IfNot-Help": "Wenn der Wert invertiert werden soll und nur angezeigt werden soll, wenn der Wert nicht übereinstimmt."
+        }
+      }
+    },
+    "Flows": {
+      "Title": "Flows",
+      "Template": {
+        "Title": "Flow hinzufügen",
+        "Fields": {
+          "PageDescription": "Wählen Sie eine Vorlage aus, auf der der Flow basieren soll.",
+          "Template": "Template"
+        }
+      },
+      "Buttons": {
+        "Repository": "Repository"
+      },
+      "Fields": {
+        "Author": "Author",
+        "Template":"Template"
+      },
+      "Messages": {
+        "FlowImported": "Flow ''{name}'' importiert",
+        "Duplicated": "Flow ''{name}'' dupliziert",
+        "DeleteUsed":"Sie können keinen Flow löschen, die gerade in Gebrauch ist.",
+        "LoadingTemplates":"Lade Templates"
+      }
+    },
+    "Libraries": {
+      "Title": "Bibliotheken",      
+      "Messages":{
+        "DeleteConfirm": "Sind Sie sicher, dass Sie die ausgewählten {count, plural, one {library} other {libraries}} löschen möchten?\n\nWenn Sie die Datensätze für die Dateien in {count, plural, one {this library} other {these libraries}} beibehalten möchten, dann aktivieren Sie die unten stehende Option.",
+        "KeepLibraryFiles":"Dateien in der Datenbank für Statistiken aufbewahren",
+        "Reprocess" : {
+          "Title":"Ausgewählte Bibliotheken nachbearbeiten",
+          "Message": "Sind Sie sicher, dass Sie mit der erneuten Verarbeitung der ausgewählten Bibliotheken fortfahren möchten? Mit dieser Aktion werden alle Dateien als unverarbeitet markiert und ihre erneute Verarbeitung wird eingeleitet. Bitte beachten Sie, dass diese Aktion nicht rückgängig gemacht werden kann."
+        }
+      },
+      "ErrorMessages": {
+        "NoFlows": "Es sind keine Flows konfiguriert.\nErstellen Sie einen Flows, bevor Sie eine Bibliothek hinzufügen oder aktualisieren."
+      }
+    },
+    "Library": {
+      "Title": "Bibliothek",
+      "Labels": {
+        "CreationTime": "Erstellungszeit",
+        "LastWriteTime": "Letzter Schreibzeitpunkt"
+      },
+      "Fields": {
+        "Template": "Template",
+        "Name": "Name",
+        "Path": "Pfad",
+        "Enabled": "Aktiviert",
+        "Flow": "Flow",
+        "Folders": "Ordner",
+        "Folders-Help": "Wenn diese Bibliothek Ordner statt Dateien verarbeitet, bedeutet dies nicht, dass Unterordner gescannt werden, da eine Bibliothek dies bereits tut. Es bedeutet, dass ein Ordnerobjekt statt einzelner Dateien verarbeitet wird.",
+        "Priority": "Priorität",
+        "Priority-Help": "Die Priorität, mit der Dateien verarbeitet werden sollen. Wenn in einer Bibliothek mit höherer Priorität Dateien auf ihre Verarbeitung warten, werden diese zuerst bearbeitet.",
+        "Filter": "Filter",
+        "Filter-Help": "Ein optionaler regulärer Filterausdruck, der auf passende Dateien angewendet wird.\nDieser Filter wird auf den vollständigen absoluten Dateinamen der Datei angewendet.\nBeispiel: \\.(mp4|mkv|avi|mpg|mov)$",
+        "ExclusionFilter":"Ausschlussfilter",
+        "ExclusionFilter-Help":"Ein optionaler regulärer Filterausdruck, der auf übereinstimmende Dateien angewendet wird. Dies kann den Ausschluss bestimmter Dateinamen von der Verarbeitung vereinfachen.",
+        "ExcludeHidden": "Versteckte Dateien ausschließen",
+        "ExcludeHidden-Help": "Wenn aktiviert, werden versteckte Dateien und Ordner nicht gescannt.",
+        "UseFingerprinting": "Fingerabdrücke verwenden",
+        "UseFingerprinting-Help": "Wenn diese Option aktiviert ist, werden die Dateien beim Import und nach Abschluss eines Flusses mit einer Prüfsumme verglichen.  Alle übereinstimmenden Prüfsummendateien werden bei zukünftigen Bibliotheksimporten übersprungen.",
+        "WaitTimeSeconds": "Wartezeit",
+        "WaitTimeSeconds-Suffix": "Sekunden",
+        "WaitTimeSeconds-Help": "Die Anzahl der Sekunden, die seit der letzten Änderung in diesem Ordner vergangen sein müssen, damit sie in die Bibliothek aufgenommen werden.",
+        "ScanInterval": "Scan-Intervall",
+        "ScanInterval-Suffix": "Sekunden",
+        "ScanInterval-Help": "The shortest possible time in seconds between scans.  It is not guaranteed to scan at this interval each time, as another scan might be in progress.",
+        "FileSizeDetectionInterval": "File Detection Interval",
+        "FileSizeDetectionInterval-Suffix": "Sekunden",
+        "FileSizeDetectionInterval-Help": "Die Zeitspanne in Sekunden, die gewartet werden soll, um die Dateigröße während des Bibliotheksscanners erneut zu überprüfen.  Verwenden Sie dies, wenn eine andere Anwendung möglicherweise in Teilen in eine Datei schreibt, z. B. eine PVR-Anwendung, die alle 20 Sekunden Teile einer Aufnahme schreibt.",
+        "Schedule": "Zeitplan",
+        "Schedule-Help": "Dieser Zeitplan läuft in der unter Einstellungen konfigurierten Zeitzone.",
+        "ScheduleDescription": "Damit können Sie konfigurieren, wann diese Bibliothek aktiv sein soll.\n\n Der Bibliotheksscanner wird nicht gegen diese Bibliothek laufen und es werden auch keine Dateien außerhalb des Zeitplans verarbeitet.\n",
+        "Scan": "Scannen",
+        "Scan-Help": "Wenn Scan aktiviert ist, wird die Bibliothek routinemäßig nach neuen Inhalten durchsucht. Wenn deaktiviert, wartet die Bibliothek auf Dateisystemereignisse, um neue Dateien zu erkennen.",
+        "UpdateMovedFiles": "Verschobene Dateien aktualisieren",
+        "UpdateMovedFiles-Help": "Wenn diese Funktion aktiviert ist, wird die Originaldatei aktualisiert, um auf die neue Datei zu verweisen, wenn eine Datei innerhalb derselben Bibliothek als verschoben erkannt wurde. Ist sie deaktiviert, wird stattdessen ein Duplikat hinzugefügt. Eine Datei wird als verschoben erkannt, wenn die Originaldatei nicht existiert und eine neue Datei mit derselben Signatur gefunden wird.",
+        "ReprocessRecreatedFiles":"Neu erstellte Dateien wiederverarbeiten",
+        "ReprocessRecreatedFiles-Help":"Wenn diese Option aktiviert ist und eine Datei mit einem anderen Erstellungszeitpunkt als dem aufgezeichneten erkannt wird, wird die Datei automatisch zur erneuten Verarbeitung freigegeben. Dies ist bei einer Bibliothek mit heruntergeladenen Dateien hilfreich, wenn Sie dieselbe Datei mehrmals herunterladen und jedes Mal verarbeiten möchten.",
+        "ProcessingOrder":"Bearbeitung des Reihenfolge",
+        "ProcessingOrder-Help": "Die Reihenfolge, in der die Dateien von dieser Bibliothek verarbeitet werden.",
+        "SkipFileAccessTests":"Dateizugriffstests überspringen",
+        "SkipFileAccessTests-Help": "Wenn diese Option aktiviert ist, prüft die Bibliothek nicht, ob sie die Datei lesen oder schreiben kann, bevor sie sie in die Warteschlange für Dateien aufnimmt.",
+        "HoldMinutes":"Minuten warten",
+        "HoldMinutes-Suffix":"Minuten",
+        "HoldMinutes-Help":"Halten Sie optional alle in dieser Bibliothek gefundenen Dateien für diese Anzahl von Minuten zurück, bevor Sie sie verarbeiten.  Jede Datei wird für diese Zeitspanne zurückgehalten.",
+        "DetectionDescription": "Hier können Sie eine Bibliothek so konfigurieren, dass sie nur Dateien erkennt, die den angegebenen Mustern entsprechen. So können Sie beispielsweise nur Dateien einbeziehen, die vor weniger als 7 Tagen erstellt wurden, Dateien, die zuletzt vor 3 bis 7 Tagen beschrieben wurden und deren Größe größer als 1 Gigabyte ist.",
+        "DetectFileCreation": "Erstellung von Dateien",
+        "DetectFileCreationLower": "",
+        "DetectFileCreationUpper": "",
+        "DetectFileLastWritten": "Datei Zuletzt geschrieben",
+        "DetectFileLastWrittenLower": "",
+        "DetectFileLastWrittenUpper": "",
+        "DetectFileSize": "Größe der Datei",
+        "DetectFileSizeLower": "",
+        "DetectFileSizeUpper": "",
+        "FullScanDisabled": "Vollständigen Scan deaktivieren",
+        "FullScanDisabled-Help": "Der Zweck der vollständigen Überprüfung ist es, alle Dateien abzufangen, die bei der Überwachung des Dateisystems übersehen wurden.",
+        "FullScanIntervalMinutes": "Vollständiger Scan-Intervall",
+        "FullScanIntervalMinutes-Help": "Das Intervall, in dem eine vollständige Überprüfung dieser Bibliothek stattfinden soll.",
+        "DownloadsDirectory": "Downloads Ordner",
+        "DownloadsDirectory-Help": "Ein spezielles Verzeichnis, in dem eine erfolgreich verarbeitete Datei automatisch erneut verarbeitet wird, wenn sie in diesem Ordner wiedergefunden wird. Dies ist hilfreich, wenn Sie eine Datei erneut herunterladen.",
+        "MaxRunners": "Maximale Worker",
+        "MaxRunners-Help": "Die maximale Anzahl von Workern, die gleichzeitig Dateien in dieser Bibliothek verarbeiten können. 0 für unbegrenzt.",
+        "Extensions": "Erweiterungen",
+        "Extensions-Help": "Eine optionale Liste von Erweiterungen für Dateien, die in diese Bibliothek aufgenommen werden sollen. Wenn sie leer gelassen wird, werden alle Dateien aufgenommen, es sei denn, auf der Registerkarte `Advanced` ist ein Filter oder Ausschlussfilter definiert."
+      }
+    },
+    "LibraryFile": {
+      "Tabs":{
+        "OriginalMetadata": "Input",
+        "FinalMetadata": "Output"
+      },
+      "Fields": {
+        "Name": "Original Datei",
+        "Log": "Log",
+        "OriginalSize": "Originalgröße",
+        "OriginalSizeSuffix": "Bytes",
+        "FinalSize": "Endgültige Größe",
+        "FinalSizeSuffix": "Bytes",
+        "Fingerprint": "Fingerabdruck",
+        "CreationTime": "Datum der Erstellung",
+        "Library": "Bibliothek",
+        "Status": "Status",
+        "Flow": "Flow",
+        "ProcessingTime": "Bearbeitungszeit",
+        "OutputPath": "Output Pfad",
+        "FailureReason": "Grund des Fehlers",
+        "ExecutedNodes": "Ausgeführte Nodes",
+        "Node": "Processing Node",
+        "FinalMetadata": "Endgültige Metadaten",
+        "OriginalMetadata": "Original-Metadaten"
+      }
+    },
+    "LibraryFiles": {
+      "Title": "Files",
+      "Buttons": {
+        "Ignore": "ignorieren",
+        "Process": "Prozess",
+        "View": "Ansicht",
+        "MoveToTop": "Nach oben bewegen",
+        "Reprocess": "Wiederholen",
+        "Unhold": "Freigabe",
+        "ToggleForce": "Toggle Force Processing"
+      },
+      "Labels": {
+        "ScanTriggered": "Ausgelöstes Scannen für alle aktivierten Bibliotheken"
+      }
+    },
+    "Log": {
+      "Title": "Log",
+      "Labels":{
+        "AutoRefresh":"Automatisch aktualisieren"
+      }
+    },
+    "Nodes": {
+      "Title": "Nodes",
+      "Labels": {
+        "FileFlowsServer": "Interner Node",
+        "Address": "Adresse",
+        "Internal": "Intern",
+        "Runners": "Runners",
+        "Version": "Version",
+        "DownloadNode":"Node herunterladen",
+        "UpgradeRequired": "Upgrade erforderlich",
+        "UpgradeRequiredHint": "Der Server und die Nodes müssen dieselbe Version haben"
+      },
+      "Fields": {
+        "FlowRunners": "Flow Runners",
+        "Address": "Adresse",
+        "Enabled": "Aktiviert"
+      }
+    },
+    "Widget":{
+      "Title":"Widget",
+      "Fields": {
+        "CpuUsage": "CPU-Auslastung",
+        "MemoryUsage": "Speicherverbrauch",
+        "TempStorage": "Temporäre Lagerung",
+        "LogStorage": "Log-Storage",
+        "FilesUpcoming":"Demnächst",
+        "FilesRecentlyFinished":"Kürzlich fertiggestellt",
+        "StorageSaved": "Speicher gespart",
+        "LibraryProcessingTimes": "Bearbeitungszeiten der Bibliothek [Seconds Per Megabyte]",
+        "ProcessingTimes": "Bearbeitungszeiten",
+        "Codecs": "Codecs",
+        "AudioCodecs": "Audio Codecs",
+        "VideoCodecs": "Video Codecs",
+        "VideoContainers": "Video-Container",
+        "VideoResolution": "Video-Auflösung",
+        "OpenDatabaseConnections": "Offene Datenbank-Verbindungen",
+        "ComicFormats": "Comic-Formate",
+        "ComicPages": "Comic-Seiten",
+        "ImageFormats": "Bildformate",
+        "NvidiaSmi": "NVIDIA SMI",
+        "Processing": "Verarbeitung",
+        "ProcessingNodes": "Verarbeitungs Nodes"
+      }
+    },
+    "ProcessingNode": {
+      "Title": "Node",
+      "Fields": {
+        "InternalProcessingNodeDescription": "Dies ist der interne Node in FileFlows. \n\n Mit diesem Knoten können Sie FileFlows ausführen, ohne sich um die Installation anderer Knoten auf entfernten Systemen kümmern zu müssen, und Sie können FileFlows als eigenständige Anwendung verwenden.\n\nSie können diesen internen Knoten und zusätzliche Verarbeitungsknoten verwenden, wenn Sie dies wünschen, oder Sie können diesen Knoten deaktivieren und nur zusätzliche Knoten verwenden.",
+        "TempPath": "Temp-Verzeichnis",
+        "TempPath-Help": "Dieses Verzeichnis wird von den Flows verwendet, um temporäre Dateien zu erstellen, während der Flow verarbeitet wird. Dieses Verzeichnis wird regelmäßig bereinigt, also bewahren Sie hier nichts Wichtiges auf.",
+        "FlowRunners": "Flow Runners",
+        "FlowRunners-Help": "Die Anzahl der Flow-Runner-Instanzen, die zur Ausführung eines Flows zur Verfügung stehen.",
+        "Address": "Adresse",
+        "Address-Help": "Die Adresse (Hostname oder IP-Adresse) des Knotens.  Sie sollten dies nur dann ändern, wenn Sie die Adresse des Knotens geändert haben.  Zum Beispiel, wenn Sie den Computernamen des Nodes geändert haben.",
+        "Enabled": "Aktiviert",
+        "MappingsDescription": "Mithilfe von Zuordnungen können Sie einen Pfad vom Server zu einem Ort auf dem Knoten zuordnen.\n\n Sie können beispielsweise Server zuordnen:'/usr/local/bin/ffmpeg' zu Node:'C:\\Utils\\ffmpeg\\ffmpeg.exe'Sie sollten Zuordnungen für alle Bibliotheken und Tools hinzufügen, die für die Ausführung auf dem entfernten System benötigt werden.",        "Mappings": "Mappings",
+        "MappingsKey": "Server",
+        "MappingsValue": "Node",
+        "VariablesDescription": "Mit Variablen können Sie erweiterte Variablen konfigurieren, die auf einem Node gesetzt werden sollen.",
+        "Variables": "Variablen",
+        "VariablesKey": "Name",
+        "VariablesValue": "Wert",
+        "Priority": "Priorität",
+        "Priority-Help": "Je höher die Zahl, desto höher die Priorität.  Knoten mit einer höheren Priorität werden bevorzugt und erhalten die Dateien zuerst, es sei denn, diese Knoten sind außerhalb des Zeitplans, deaktiviert oder haben ihre maximale Anzahl an Workern.",
+        "Schedule": "Zeitplan",
+        "Schedule-Help": "Dieser Zeitplan läuft in der Zeitzone des Node",
+        "ScheduleDescription": "Damit können Sie konfigurieren, wann dieser Node aktiv sein wird.\n\n Der Node wird keine Dateien außerhalb dieses konfigurierten Zeitplans verarbeiten.\n",
+        "DontChangeOwner": "Besitzer wechseln",
+        "DontChangeOwner-Help": "Wenn diese Option aktiviert ist, ändert der Knoten den Eigentümer aller neu erstellten Dateien in die PGID und PUID, die in den Umgebungsvariablen definiert sind. Wenn diese Umgebungsvariablen nicht gesetzt sind, wird der Eigentümer geändert in ''users:nobody''.",
+        "DontSetPermissions": "Berechtigungen festlegen",
+        "DontSetPermissions-Help": "Wenn diese Option aktiviert ist, werden die Dateiberechtigungen für alle neu erstellten Dateien festgelegt.",
+        "Permissions": "Berechtigungen",
+        "Permissions-Placeholder": "777",
+        "Permissions-Help": "Die Dateiberechtigungen, die für neu erstellte Dateien festgelegt werden sollen.  Ist sie leer, wird die Standardberechtigung 777 verwendet.",
+        "ProcessingDescription": "Damit können Sie konfigurieren, was dieser Node verarbeiten kann. Beispielsweise können Sie diesen Node darauf beschränken, nur bestimmte Bibliotheken oder eine maximale Dateigröße zu verarbeiten, wenn es sich um einen Node mit geringerer Leistung handelt.",
+        "AllLibraries": "Alle Bibliotheken",
+        "AllLibraries-Help": "Welche Bibliotheken dieser Node verarbeiten wird.",
+        "Libraries": "Bibliotheken",
+        "Libraries-Help": "Auswahl der Bibliotheken, die dieser Node verarbeiten kann.",
+        "MaxFileSizeMb": "Maximale Dateigröße",
+        "MaxFileSizeMb-Suffix": "MB",
+        "MaxFileSizeMb-Help": "Die maximale Dateigröße, die dieser Node verarbeiten kann. Ist sie auf 0 gesetzt, gibt es keine Begrenzung.",
+        "PreExecuteScript":"Skript vor dem Ausführen",
+        "PreExecuteScript-Help":"Ein Skript, das ausgeführt wird, bevor eine Datei verarbeitet wird. Das Ergebnis dieses Skripts muss 1 sein, damit es irgendetwas anderes übergeben kann und der Knoten keine Datei verarbeitet.",
+        "CopyMappings": "Mappings kopieren",
+        "ProcessFileCheckInterval": "Intervall der Dateiprüfung",
+        "ProcessFileCheckInterval-Help": "Wie oft wird geprüft, ob eine neue Datei für die Verarbeitung in den Verarbeitungsknoten vorliegt.\nSetzen Sie den Wert auf 0, um den Systemwert zu verwenden.",
+        "ProcessFileCheckInterval-Suffix": "Sekunden"
+      }
+    },
+    "Plugins": {
+      "Title": "Plugins",
+      "Labels": {
+        "PluginBrowser": "Plugin-Browser"
+      },
+      "Messages": {
+        "UpdatingPlugins": "Plugins aktualisieren",
+        "DeleteUsed":"Sie können ein verwendetes Plugin nicht löschen.",
+        "DeletePlugins": "Sind Sie sicher, dass Sie die ausgewählten {count, plural, one {plugin} other {plugins}} löschen wollen?"
+      },
+      "Fields": {
+        "Authors": "Authors",
+        "Version": "Version",
+        "Url": "Hauptseite",
+        "Description": "Beschreibung",
+        "Elements": "Nodes"
+      }
+    },
+    "Revisions":{
+      "Title":"Überarbeitungen"
+    },
+    "Scripts":{
+      "Title":"Scripts",
+      "Messages": {
+        "Imported": "Script ''{name}'' importiert",
+        "Duplicated":"Skripte ''{name}'' dupliziert",
+        "DeleteSystem":"Sie können ein Systemskript nicht löschen.",
+        "DeleteUsed":"Sie können kein Skript löschen, das gerade verwendet wird.",
+        "NoRepositoryScriptsToUpdate":"Keine Repository-Skripte zur Aktualisierung ausgewählt"
+      },
+      "Labels": {
+        "ScriptBrowser":"Script Repository",
+        "UpdatingScripts": "Skripte aktualisieren"
+      },
+      "Buttons": {
+        "ScriptBrowser": "Repository",
+        "UpdateAllScripts": "Alle Skripte aktualisieren"
+      },
+      "Fields":{
+        "Code": "Code"
+      }
+    },
+    "Script": {
+      "Title": "Script",
+      "Fields": {
+        "Code": "Code"
+      }
+    },
+    "Settings": {
+      "Title": "Einstellungen",
+      "Labels": {
+        "General": "Allgemein",
+        "InternalProcessingNode": "Interner Node",
+        "Database":"Datenbank",
+        "System":"System",
+        "Restart":"FileFlows neu starten",
+        "Logging":"Protokollierung",
+        "CheckNow":"Jetzt prüfen",
+        "Updates": "Aktualisierungen",
+        "FileServer": "Datei-Server"
+      },
+      "Messages":{
+        "Database":{
+          "NoServer":"Server ist erforderlich",
+          "NoDatabase":"Name ist erforderlich",
+          "NoUser":"Benutzer ist erforderlich",
+          "NoPassword":"Passwort ist erforderlich",
+          "TestSuccess":"Erfolgreich mit der Datenbank verbunden",
+          "TestingDatabase":"Testen der Datenbankverbindung"
+        },
+        "Restart":{
+          "Title":"FileFlows neu starten",
+          "Message":"Sind Sie sicher, dass Sie FileFlows neu starten wollen?\n\nIhre Einstellungen werden zunächst automatisch gespeichert.\n\nHinweis: Stellen Sie sicher, dass keine Aufgaben ausgeführt werden."
+        },
+        "CheckUpdateSuccess":"Die Prüfung auf ein Update wurde erfolgreich ausgelöst. Beachten Sie, dass der Download, sofern verfügbar, einige Minuten dauern kann.",
+        "CheckUpdateFailed":"Prüfung auf ein Update fehlgeschlagen"
+      },
+      "Fields": {
+        "Telemetry": "Telemetrie",
+        "Telemetry-Help": "Telemetrie ist nützlich, um herauszufinden, welche Geräte wir unterstützen müssen, welche Flow-Teile am meisten genutzt werden und worauf wir uns bei der Entwicklung konzentrieren sollten.",
+        "KeepFailedFlowTempFiles": "Fehlgeschlagene Temp-Dateien behalten",
+        "KeepFailedFlowTempFiles-Help": "Wenn Sie diese Option aktivieren, bleiben die von einem Fluss verwendeten temporären Dateien im Falle eines Fehlers erhalten und werden nicht automatisch gelöscht.",        
+        "AutoUpdate": "Auto Update",
+        "AutoUpdate-Help": "Wenn diese Option aktiviert ist, wird FileFlows routinemäßig auf Aktualisierungen geprüft, und wenn eine Aktualisierung gefunden wird, wird sie automatisch heruntergeladen und installiert.",
+        "AutoUpdatePlugins": "Plugins automatisch aktualisieren",
+        "AutoUpdatePlugins-Help": "Wenn diese Option aktiviert ist, werden Plugins routinemäßig auf Aktualisierungen überprüft, und wenn Aktualisierungen gefunden werden, werden sie automatisch heruntergeladen.",
+        "AutoUpdateNodes": "Auto-Update-Nodes",
+        "AutoUpdateNodes-Help": "Wenn diese Funktion aktiviert ist, werden externe Nodes automatisch aktualisiert, wenn der FileFlows-Server aktualisiert wird.  Das bedeutet, dass Sie in einer verteilten Umgebung nur die FileFlows-Server-Instanz aktualisieren müssen.",
+        "LogQueueMessages":"Warteschlangenmeldungen protokollieren",
+        "LogQueueMessages-Help":"Dies führt zu einer übermäßigen Protokollierung aller Dateien, die sich in der Warteschlange des Bibliotheksüberwachers befinden. Schalten Sie diese Option ein, wenn Sie Probleme mit nicht angezeigten Dateien haben, und schalten Sie sie anschließend wieder aus, um zu vermeiden, dass Ihre Protokolldateien mit übermäßiger Protokollierung gefüllt werden.",
+        "LoggingPath": "Logging-Verzeichnis",
+        "LoggingPath-Help": "Hier werden die Protokolldateien erstellt.",
+        "LogFileRetention": "Aufbewahrung von Log-Dateien",
+        "LogFileRetention-Suffix": "Dateien",
+        "LogFileRetention-Help": "Wie viele Protokolldateien aufbewahrt werden sollen, bevor ältere Protokolldateien gelöscht werden.\nJede Protokolldatei ist bis zu 10 MB groß.p",
+        "LogDatabaseRetention":"Aufbewahrung von Protokollen in der Datenbank",
+        "LogDatabaseRetention-Suffix": "Aufzeichnungen",
+        "LogDatabaseRetention-Help":"Die maximale Anzahl der Datensätze, die bei der Ausführung des Pruners für das Datenbankprotokoll beibehalten werden sollen. Die Tabelle ist nicht auf diese Anzahl beschränkt, da sie nach der Ausführung des Pruners wachsen kann.",
+        "LogEveryRequest":"Jede Anfrage protokollieren",
+        "LogEveryRequest-Help": "Wenn jede Anfrage an den Server protokolliert werden soll.",
+        "PluginRepositoryUrls": "Plugin-Repositories",
+        "PluginRepositoryUrls-Help": "Eine zeilengetrennte Liste von Plugin-Repository-URLs, die bei der Suche nach Plugins verwendet werden sollen.\nDie Reihenfolge ist wichtig: Wenn mehrere Repositories dasselbe Plugin enthalten, wird das erste Repository als Quelle verwendet.\nDas Standard-Repository wird immer am Ende dieser Liste hinzugefügt.",
+        "CheckForUpdateNow":"Checks für Updates",
+        "CheckForUpdateNow-Help":"Prüft, ob ein Update vorhanden ist, und wenn es gefunden wird, lädt es das Update herunter und installiert es, wenn keine Flows ausgeführt werden.",
+        "ShowFileAddedNotifications": "Benachrichtigungen über hinzugefügte Dateien",
+        "ShowFileAddedNotifications-Help": "Ob eine Benachrichtigung in der Web-Konsole angezeigt werden soll, wenn eine Datei gefunden und der Warteschlange hinzugefügt wurde.",
+        "HideProcessingStartedNotifications": "Bearbeitung begonnener Meldungen",
+        "HideProcessingStartedNotifications-Help": "Wenn eine Benachrichtigung in der Web-Konsole angezeigt werden soll, wenn die Verarbeitung einer Datei beginnt.",
+        "HideProcessingFinishedNotifications": "Bearbeitung von Beendigungsmitteilungen",
+        "HideProcessingFinishedNotifications-Help": "Wenn eine Benachrichtigung in der Web-Konsole angezeigt werden soll, wenn die Verarbeitung einer Datei abgeschlossen ist",
+        "ProcessFileCheckInterval": "Intervall für die Dateiprüfung",
+        "ProcessFileCheckInterval-Help": "Wie oft wird geprüft, ob eine neue Datei zur Verarbeitung in den Verarbeitungsknoten vorliegt.",
+        "ProcessFileCheckInterval-Suffix": "Sekunden",
+        "InternalProcessingNode": {
+          "Description": "Hier können Sie den internen Verarbeitungsknoten von FileFlows konfigurieren. Ein Processing Node ist das, was einen Flow ausführt und Dateien verarbeitet.",
+          "Enabled": "Aktiviert",
+          "Enabled-Help": "Wenn diese Funktion deaktiviert ist, werden keine Dateien durch den internen Verarbeitungsknoten verarbeitet.   Sie können diese Funktion deaktivieren, wenn Sie das System anhalten möchten.",
+          "TempPath": "Temp-Verzeichnis",
+          "TempPath-Help": "Dieses Verzeichnis wird von den Flows verwendet, um temporäre Dateien zu erstellen, während der Flow verarbeitet wird. Dieses Verzeichnis wird regelmäßig bereinigt, also bewahren Sie hier nichts Wichtiges auf.",
+          "FlowRunners": "Flow Runners",
+          "FlowRunners-Help": "Die Anzahl der Flow-Runner-Instanzen, die zur Ausführung eines Flows zur Verfügung stehen.",
+          "Schedule": "Zeitplan",
+          "Schedule-Help": "Hier können Sie festlegen, wann die Verarbeitung von Dateien beginnen kann.  Außerhalb dieses Zeitplans können keine Dateien verarbeitet werden."
+        },
+        "Database":{
+          "Description":"Hier können Sie konfigurieren, welche Datenbank FileFlows verwenden soll.\nHinweis: Alle Änderungen hier erfordern einen Neustart von FileFlows, damit es Ihre Daten migrieren und ggf. die neue Datenbank erstellen kann.",
+          "Type":"Typ",
+          "Type-Help":"Der zu verwendende Datenbanktyp. Der Standardtyp ist SQLite, der keine zusätzliche Einrichtung oder Konfiguration erfordert.",
+          "Server":"Server",
+          "Server-Help":"Die Adresse des Datenbankservers und der Port oder die benannte Instanz, falls erforderlich.",
+          "Port":"Port",
+          "Port-Help":"Der Standard-Port für MySQL ist 3306.",
+          "Name":"Name",
+          "Name-Help":"Der Name der zu erstellenden Datenbank, wenn leer gelassen, wird ''FileFlows'' verwendet.",
+          "User":"Benutzer",
+          "User-Help":"Der für die Verbindung zur Datenbank verwendete Benutzer.",
+          "Password": "Passwort",
+          "Password-Help":"Das Passwort des Benutzers für die Verbindung zur Datenbank.",
+          "RecreateDatabase":"Datenbank wiederherstellen",
+          "RecreateDatabase-Help":"Wenn diese Option aktiviert ist, wird die neue Datenbank, falls sie bereits existiert, gelöscht und neu erstellt.  Ist die Option deaktiviert und die Datenbank existiert bereits, werden keine Daten migriert und die neue Datenbank wird einfach so verwendet, wie sie ist."
+        },
+        "FileServer": {
+          "Description": "Dies ermöglicht es externen Nodes eine Datei zur Verarbeitung herunterzuladen, ohne sie zuzuordnen.\n\nDamit werden Ihre Dateien über Ihr Netzwerk offengelegt.",
+          "Enabled": "Aktiviert",
+          "FilePermissions":"Dateiberechtigungen",
+          "FilePermissions-Placeholder": "777",
+          "FilePermissions-Help": "Optionale Berechtigungen für erstellte oder geänderte Dateien oder Ordner.",
+          "OwnerGroup": "Owner Group",
+          "OwnerGroup-Placeholder": "users:nobody",
+          "OwnerGroup-Help": "Optionale Eigentümer:Gruppe zum Ändern des Eigentümers von erstellten oder geänderten Dateien oder Ordnern",
+          "AllowList": "Zulässige Pfade",
+          "AllowList-Placeholder": "Bleibt leer. Es sind alle Pfade außer Systempfade erlaubt.",
+          "AllowList-Help": "Eine neue zeilengetrennte Liste von Pfaden, auf die der exponierte Dateiserver zugreifen darf.\nDas sind die Speicherorte, auf die aus der Ferne gelesen/geschrieben werden kann.\nHinweis: Alle Bibliothekspfade sind automatisch zulässig."
+        },
+        "License": {
+          "Key": "Lizenzschlüssel",
+          "Email": "Lizenz E-Mail",
+          "Status": "Status",
+          "ProcessingNodes":"Processing Nodes",
+          "Flags":"Besonderheiten",
+          "ExpiryDate":"Verfallsdatum",
+          "Files": "Dateien"
+        }
+      }
+    },
+    "Statistics": {
+      "Title": "Statistik"
+    },
+    "System":{
+      "Title":"System",
+      "Labels":{
+        "CpuUsage":"CPU-Auslastung",
+        "MemoryUsage":"Speicherverbrauch",
+        "TempStorage":"Vorübergehende Zwischenspeicherung",
+        "LogStorage": "Log-Storage",
+        "LibraryProcessingTimes":"Bearbeitungszeiten der Bibliothek [Seconds Per Megabyte]",
+        "ProcessingHeatMap":"Heatmap Verarbeitung",
+        "Codec":"Codec",
+        "VideoContainer": "Video-Container",
+        "VideoResolution": "Video-Auflösung",
+        "OpenDbConnections":"Offene Datenbank-Verbindungen"
+      }
+    },
+    "Tasks": {
+      "Title": "Aufgaben",
+      "Messages": {
+        "NoScripts":"Es wurde kein Skript gefunden, für das eine Aufgabe erstellt werden kann.",
+        "NoHistory": "Für diese Aufgabe ist keine Laufhistorie verfügbar."
+      },
+      "Buttons": {
+        "EditScript": "Skript bearbeiten"
+      }
+    },
+    "FileFlowsTask":{
+      "Title":"Task"
+    },
+    "FileFlowsTaskHistory": {
+      "Title": "Aufgaben-Historie",
+      "Fields": {
+        "RunHistory": "Historie"
+      }
+    },
+    "FileFlowsTaskRun": {
+      "Title": "Task Run",
+      "Fields": {
+        "RunAt": "Laufend",
+        "Success": "Erfolgreich",
+        "ReturnValue": "Rückgabewert",
+        "Log": "Log"
+      }
+    },
+    "Task":{ 
+      "Title":"Aufgabe",
+      "Fields": {
+        "Script": "Script",
+        "Script-Help":"Das Skript, das nach dem konfigurierten Zeitplan ausgeführt werden soll",
+        "Schedule": "Zeitplan",
+        "Schedule-Help": "Wann dieses Skript ausgeführt werden soll",
+        "CustomSchedule":"Benutzerdefinierter Zeitplan",
+        "CustomSchedule-Help": "Diese Aufgabe wird einmal pro 15-Minuten-Block zu Beginn dieses Blocks ausgeführt",
+        "Type":"Typ",
+        "Type-Help":"The type of task this  Time based tasks will run at the configured times.  Other tasks are event based",
+        "TimeSchedule":"Zeitplan",
+        "TimeSchedule-Help":"Wann die Aufgabe ausgeführt werden soll."
+      }
+    },
+    "Variables": {
+      "Title": "Variablen"
+    },
+    "Variable": {
+      "Title": "Variabel"
+    },
+    "Webhook": {
+      "Title": "Webhook",
+      "Fields": {
+        "Route": "Route",
+        "Method": "Methode",
+        "Code": "Code"
+      }
+    },
+    "Webhooks": {
+      "Title": "Webhooks",
+      "Columns": {
+        "Method": "Methode",
+        "Route": "Route"
+      }
+    }    
+  },
+  "Validators":{
+    "Required" :"Erforderlich",
+    "Range": "Muss zwischen {Minimum} und {Maximum} liegen",
+    "Pattern":"Ist nicht gültig"
+  }
+}

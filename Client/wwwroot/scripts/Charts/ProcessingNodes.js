@@ -24,6 +24,16 @@ export class ProcessingNodes extends FFChart
         this.eventListenerName = this.recentlyFinished ? 'FinishProcessing' : 'StartProcessing';
         this.eventListener = (event) => this.handleEvent(event);
         document.addEventListener(`onClientService${this.eventListenerName }`, this.eventListener);
+
+        this.lblName = 'Name';
+        this.csharp.invokeMethodAsync("Translate", 'Labels.Name').then(result => {
+            this.lblName = result;
+        });
+        this.lblStatus = 'Status';
+        this.csharp.invokeMethodAsync("Translate", 'Labels.Status').then(result => {
+            this.lblStatus = result;
+        });
+            
     }
 
     /**
@@ -86,13 +96,14 @@ export class ProcessingNodes extends FFChart
         let theadTr = document.createElement('tr');
         thead.appendChild(theadTr);
 
-        let columns = ['Name', 'Status']
+        let columns = [this.lblName, this.lblStatus]
         let statusWidth ='10rem';
 
         for(let title of columns){
             let th = document.createElement('th');
+            
             th.innerText = title;
-            if(title !== 'Name') {
+            if(title !== this.lblName) {
                 th.style.width = statusWidth;
                 th.style.minWidth = statusWidth;
                 th.style.maxWidth = statusWidth;
@@ -106,11 +117,11 @@ export class ProcessingNodes extends FFChart
         for(let item of data)
         {
             let tr = document.createElement('tr');
-            if(item.Status.toLowerCase() === 'version mismatch')
+            if(item.Status === 5)
                 tr.style.color = 'var(--orange)';
-            else if(item.Status.toLowerCase() === 'out of schedule')
+            else if(item.Status === 4)
                 tr.style.color = 'var(--yellow)';
-            else if(item.Status.toLowerCase() === 'disabled')
+            else if(item.Status === 3)
                 tr.style.opacity = '0.6';
             tbody.appendChild(tr);
 
@@ -123,7 +134,9 @@ export class ProcessingNodes extends FFChart
             tdStatus.style.width = statusWidth;
             tdStatus.style.minWidth = statusWidth;
             tdStatus.style.maxWidth = statusWidth;
-            tdStatus.innerText = item.Status;
+            this.csharp.invokeMethodAsync("Translate", item.StatusText).then(result => {
+                tdStatus.innerText = result;
+            });
             tr.appendChild(tdStatus);
         }
         let chartDiv = document.getElementById(this.chartUid);

@@ -1,5 +1,6 @@
 @namespace FileFlows.Client.Pages
 @inherits InputRegister
+
 @page "/settings"
 
 <PageView>
@@ -98,13 +99,15 @@
                         </div>
                     </FlowTab>
                     <FlowTab Title="@lblAdvanced">
-                        <InputSwitch @bind-Value="@Model.DisableTelemetry" Inverse="@true" Label="Pages.Settings.Fields.Telemetry" />
-                        <InputSwitch @bind-Value="@Model.KeepFailedFlowTempFiles" Label="Pages.Settings.Fields.KeepFailedFlowTempFiles" />
+                        <InputSelect @bind-Value="@Language" Options=@LanguageOptions Label="Pages.Settings.Fields.Language" AllowClear="false" />
                         @{
                             if (Model.ProcessFileCheckInterval < 5)
                                 Model.ProcessFileCheckInterval = 5;
                         }
                         <InputNumber @bind-Value="@Model.ProcessFileCheckInterval" Label="Pages.Settings.Fields.ProcessFileCheckInterval" Min=5 Max=86400 />
+                        
+                        <InputSwitch @bind-Value="@Model.DisableTelemetry" Inverse="@true" Label="Pages.Settings.Fields.Telemetry" OnChangedValue="OnTelemetryChange"/>
+                        <InputSwitch @bind-Value="@Model.KeepFailedFlowTempFiles" Label="Pages.Settings.Fields.KeepFailedFlowTempFiles" />
                     </FlowTab>
                     <FlowTab Title="@lblLicense">
                         <p class="box info">Here you can enter your license key to enable additional features

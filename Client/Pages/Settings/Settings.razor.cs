@@ -14,10 +14,24 @@ using FileFlows.Shared.Validators;
 using Microsoft.JSInterop;
 using FileFlows.Plugin;
 
+/// <summary>
+/// Page for system settings
+/// </summary>
 public partial class Settings : InputRegister
 {
+    /// <summary>
+    /// Gets or sets blocker instance
+    /// </summary>
     [CascadingParameter] Blocker Blocker { get; set; }
+    /// <summary>
+    /// Gets or sets the javascript runtime used
+    /// </summary>
     [Inject] IJSRuntime jsRuntime { get; set; }
+    
+    /// <summary>
+    /// Gets or sets the navigation manager used
+    /// </summary>
+    [Inject] private NavigationManager  NavigationManager { get; set; }
 
     private bool ShowExternalDatabase => LicensedFor(LicenseFlags.ExternalDatabase);
 
@@ -46,6 +60,15 @@ public partial class Settings : InputRegister
         new() { Label = "MySQL", Value = DatabaseType.MySql }
     };
 
+    /// <summary>
+    /// The languages available in the system
+    /// </summary>
+    private readonly List<ListOption> LanguageOptions = new()
+    {
+        new() { Label = "English", Value = "en" },
+        new() { Label = "Deutsch", Value = "de" },
+    };
+
     private object DbType
     {
         get => Model.DbType;
@@ -60,6 +83,22 @@ public partial class Settings : InputRegister
         }
     }
 
+    /// <summary>
+    /// Gets or sets the language
+    /// </summary>
+    private object Language
+    {
+        get => Model.Language;
+        set
+        {
+            if (value is string lang)
+            {
+                Model.Language = lang;
+            }
+        }
+    }
+
+    private string initialLannguage;
 
     protected override async Task OnInitializedAsync()
     {
@@ -85,6 +124,7 @@ public partial class Settings : InputRegister
         try
         {
             await Refresh();
+            initialLannguage = Model.Language;
         }
         finally
         {
@@ -142,7 +182,15 @@ public partial class Settings : InputRegister
 
             await App.Instance.LoadAppInfo();
 
-            await this.Refresh();
+            if (initialLannguage != Model.Language)
+            {
+                // need to do a full page reload
+                NavigationManager.NavigateTo(NavigationManager.Uri, forceLoad: true);
+            }
+            else
+            {
+                await this.Refresh();
+            }
         }
         finally
         {
@@ -295,5 +343,19 @@ public partial class Settings : InputRegister
         }
 
         return sb.ToString();
+    }
+    
+    
+    private async Task OnTelemetryChange(bool disabled)
+    {
+        if (disabled)
+        {
+            if (await Confirm.Show("Disable Telemetry",
+                    "Are you sure you want to disable telemetry?\n\nRest assured, no personal information is recorded. The data sent includes information about the flow elements in use, plugins utilized, as well as the total number of files failed and processed.\n\nThis information helps us understand user preferences and informs our decisions regarding the deprecation of unused flow elements.",
+                    false) == false)
+            {
+                Model.DisableTelemetry = false;
+            }
+        }
     }
 }

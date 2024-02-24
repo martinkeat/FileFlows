@@ -50,7 +50,7 @@ public partial class Plugins : ListPage<Guid, PluginInfoModel>
 
     async Task PluginsUpdated()
     {
-        await App.Instance.LoadLanguage();
+        await App.Instance.LoadLanguage(App.Settings.Language);
         await this.Load(default);
     }
 

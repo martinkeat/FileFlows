@@ -5,8 +5,6 @@
  */
 export class LibraryFileTable extends FFChart
 {
-    lblIncrease = 'Increase';
-    lblDecrease = 'Decrease';
     recentlyFinished;
     timer;
     existing;
@@ -26,6 +24,29 @@ export class LibraryFileTable extends FFChart
         this.eventListenerName = this.recentlyFinished ? 'FinishProcessing' : 'StartProcessing';
         this.eventListener = (event) => this.handleEvent(event);
         document.addEventListener(`onClientService${this.eventListenerName }`, this.eventListener);
+
+        this.lblNoFilesRecentlyFinished = 'No files recently finished';
+        this.lblNoUpcomingFiles = 'No upcoming files';
+        this.lblIncrease = 'Increase';
+        this.lblDecrease = 'Decrease';
+        this.lblName = 'Name';
+        this.lblWhen = 'When';
+        this.lblSize = 'Size';
+        this.lblFailed = 'Failed';
+        this.lblMappingIssue = 'Mapping Issue';
+        args.csharp.invokeMethodAsync("TranslateAll", ['Labels.NoFilesRecentlyFinished', `Labels.NoUpcomingFiles`, 'Labels.Increase', 
+            'Labels.Decrease', 'Labels.Name', 'Labels.When', 'Labels.Size', 'Labels.Failed', 'Labels.MappingIssue']).then(result => {
+
+            this.lblNoFilesRecentlyFinished = result[0];
+            this.lblNoUpcomingFiles = result[1];
+            this.lblIncrease = result[2];
+            this.lblDecrease = result[3];
+            this.lblName = result[4];
+            this.lblWhen = result[5];
+            this.lblSize = result[6];
+            this.lblFailed = result[7];
+            this.lblMappingIssue = result[8];
+        });
     }
 
     /**
@@ -123,7 +144,7 @@ export class LibraryFileTable extends FFChart
 
         let spanText = document.createElement('span');
         span.appendChild(spanText);
-        spanText.innerText = this.recentlyFinished ? 'No files recently finished' : 'No upcoming files';
+        spanText.innerText = this.recentlyFinished ? this.lblNoFilesRecentlyFinished : this.lblNoUpcomingFiles;
 
         chartDiv.appendChild(div);
 
@@ -143,13 +164,13 @@ export class LibraryFileTable extends FFChart
         let theadTr = document.createElement('tr');
         thead.appendChild(theadTr);
 
-        let columns = this.recentlyFinished ? ['Name', 'When', 'Size'] : ['Name']
+        let columns = this.recentlyFinished ? [this.lblName, this.lblWhen, this.lblSize] : [this.lblName]
 
         for(let title of columns){
             let th = document.createElement('th');
             th.innerText = title;
-            if(title !== 'Name') {
-                let width = title !== 'Size' ? '9rem' : '6rem';
+            if(title !== this.lblName) {
+                let width = title !== this.lblSize ? '9rem' : '6rem';
                 th.style.width = width;
                 th.style.minWidth = width;
                 th.style.maxWidth = width;
@@ -175,11 +196,11 @@ export class LibraryFileTable extends FFChart
             // finished
             if(item.Status === 4) {
                 tr.classList.add('failed');
-                tdRelativePath.innerHTML = '<i class="fas fa-times" title="Failed"></i>&nbsp;' + tdRelativePath.innerHTML; 
+                tdRelativePath.innerHTML = `<i class="fas fa-times" title="${this.lblFailed}"></i>&nbsp;` + tdRelativePath.innerHTML; 
             }
             else if(item.Status === 6) {
                 tr.classList.add('mapping-issue');
-                tdRelativePath.innerHTML = '<i class="fas fa-exclamation-triangle" title="Mapping Issue"></i>&nbsp;' + tdRelativePath.innerHTML;
+                tdRelativePath.innerHTML = `<i class="fas fa-exclamation-triangle" title="${this.lblMappingIssue}"></i>&nbsp;` + tdRelativePath.innerHTML;
             }
             
             tdRelativePath.innerHTML = '<a>' +  tdRelativePath.innerHTML + '</a>';

@@ -169,6 +169,7 @@ public class SettingsController : Controller
         await Save(new ()
         {
             PausedUntil = model.PausedUntil,
+            Language = model.Language,
             LogFileRetention = model.LogFileRetention,
             LogDatabaseRetention = model.LogDatabaseRetention,
             LogEveryRequest = model.LogEveryRequest,

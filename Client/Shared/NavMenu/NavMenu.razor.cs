@@ -96,7 +96,7 @@ public partial class NavMenu : IDisposable
 
         MenuItems.Add(new NavMenuGroup
         {
-            Name = "Overview",
+            Name = Translater.Instant("MenuGroups.Overview"),
             Icon = "fas fa-info-circle",
             Items = new List<NavMenuItem>
             {
@@ -111,7 +111,7 @@ public partial class NavMenu : IDisposable
 
         MenuItems.Add(new NavMenuGroup
         {
-            Name = "Configuration",
+            Name = Translater.Instant("MenuGroups.Configuration"),
             Icon = "fas fa-code-branch",
             Items = new List<NavMenuItem>
             {
@@ -123,7 +123,7 @@ public partial class NavMenu : IDisposable
 
         MenuItems.Add(new NavMenuGroup
         {
-            Name = "Extensions",
+            Name = Translater.Instant("MenuGroups.Extensions"),
             Icon = "fas fa-laptop-house",
             Items = new List<NavMenuItem>
             {
@@ -134,7 +134,7 @@ public partial class NavMenu : IDisposable
         });
         MenuItems.Add(new NavMenuGroup
         {
-            Name = "System",
+            Name = Translater.Instant("MenuGroups.System"),
             Icon = "fas fa-desktop",
             Items = new List<NavMenuItem>
             {
@@ -147,11 +147,11 @@ public partial class NavMenu : IDisposable
 
         MenuItems.Add(new NavMenuGroup
         {
-            Name = "Information",
+            Name = Translater.Instant("MenuGroups.Information"),
             Icon = "fas fa-question-circle",
             Items = new List<NavMenuItem>
             {
-                new NavMenuItem("Pages.Log.Title", "fas fa-file-alt", "log")
+                new ("Pages.Log.Title", "fas fa-file-alt", "log")
             }
         });
 

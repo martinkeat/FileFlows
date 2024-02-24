@@ -12,6 +12,7 @@ export class Processing extends FFChart
     runners = {};
     isPaused;
     eventListener;
+    
 
     /**
      * Constructs a new Processing instance.
@@ -21,9 +22,22 @@ export class Processing extends FFChart
     constructor(uid, args) {        
         super(uid, args);
         this.recentlyFinished = args.flags === 1;
-        this.createNoData();
         this.eventListener = (event) => this.onExecutorsUpdated(event);
         document.addEventListener("onClientServiceUpdateExecutors", this.eventListener);
+
+        let loaded = 0;
+        this.lblNoFilesProcessing = 'No files currently processing';
+        args.csharp.invokeMethodAsync("Translate", `Labels.NoFilesCurrentlyProcessing`).then(result => {
+            this.lblNoFilesProcessing = result;
+            if(++loaded >= 2)
+                this.createNoData()
+        });
+        this.lblProcessingPaused = 'Processing is currently paused';
+        args.csharp.invokeMethodAsync("Translate", `Labels.ProcessingPaused`).then(result => {
+            this.lblProcessingPaused = result;
+            if(++loaded >= 2)
+                this.createNoData()
+        });
     }
     
     /**
@@ -127,10 +141,10 @@ export class Processing extends FFChart
         span.appendChild(spanText);
         if(this.isPaused){
             icon.className = 'fas fa-pause';
-            spanText.innerText = 'Processing is currently paused';
+            spanText.innerText = this.lblProcessingPaused;
         }else {
             icon.className = 'fas fa-times';
-            spanText.innerText = 'No files currently processing';
+            spanText.innerText = this.lblNoFilesProcessing;
         }
 
         chartDiv.appendChild(div);

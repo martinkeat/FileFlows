@@ -1,3 +1,5 @@
+using System.Text.RegularExpressions;
+
 namespace FileFlows.Client
 {
     using System.Net.Http;
@@ -55,11 +57,31 @@ namespace FileFlows.Client
         public event FileFlowsSystemUpdated OnFileFlowsSystemUpdated;
         
 
-        public async Task LoadLanguage()
+        public async Task LoadLanguage(string language)
         {
-            string langFile = await LoadLanguageFile("i18n/en.json?version=" + Globals.Version);
-            string pluginLang = await LoadLanguageFile("/api/plugin/language/en.json?ts=" + System.DateTime.Now.ToFileTime());
-            Translater.Init(langFile, pluginLang);
+            List<string> langFiles = new();
+
+            bool nonEnglishLanguage = string.IsNullOrWhiteSpace(language) == false &&
+                                      language.ToLowerInvariant() != "en" && Regex.IsMatch(language, "^[a-z]{2,3}$",
+                                          RegexOptions.IgnoreCase);
+            langFiles.Add(await LoadLanguageFile("i18n/en.json?version=" + Globals.Version));
+            if (nonEnglishLanguage)
+            {
+                var other = await LoadLanguageFile("i18n/" + language + ".json?version=" + Globals.Version);
+                if (string.IsNullOrWhiteSpace(other) == false)
+                    langFiles.Add(other);
+            }
+
+            langFiles.Add(
+                await LoadLanguageFile("/api/plugin/language/en.json?ts=" + System.DateTime.Now.ToFileTime()));
+            if (nonEnglishLanguage)
+            {
+                var other = await LoadLanguageFile("/api/plugin/language/" + language + ".json?version=" + Globals.Version);
+                if (string.IsNullOrWhiteSpace(other) == false)
+                    langFiles.Add(other);
+                
+            }
+            Translater.Init(langFiles.ToArray());
         }
 
         public async Task LoadAppInfo()
@@ -99,7 +121,7 @@ namespace FileFlows.Client
             Settings = (await HttpHelper.Get<FileFlows.Shared.Models.Settings>("/api/settings")).Data ??
                        new FileFlows.Shared.Models.Settings();
             await LoadAppInfo();
-            await LoadLanguage();
+            await LoadLanguage(Settings.Language);
             LanguageLoaded = true;
             this.StateHasChanged();
         }

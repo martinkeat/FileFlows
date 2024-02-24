@@ -64,7 +64,8 @@ public class NodeController : Controller
             .Select(x => new
             {
                 Name = x.Uid == Globals.InternalNodeUid ? "Internal" : x.Name,
-                Status = x.Status.ToString().Humanize()
+                Status = (int) x.Status,
+                StatusText = $"Enums.{nameof(ProcessingNodeStatus)}.{x.Status}"
             });
         return Ok(data);
     }

@@ -115,6 +115,12 @@ public class ffFlowWrapper
     public void CtrlDblClick(ffPart part)
         => OnCtrlDblClick(part);
 
+    /// <summary>
+    /// Translates a string
+    /// </summary>
+    /// <param name="key">the string key to translate</param>
+    /// <param name="model">the model to pass into the translation</param>
+    /// <returns>the translated string</returns>
     [JSInvokable]
     public string Translate(string key, ExpandoObject model)
     {

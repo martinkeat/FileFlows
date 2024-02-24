@@ -19,6 +19,11 @@ public class Settings : FileFlowObject
     /// Gets or sets if nodes should be automatically updated when the server is updated
     /// </summary>
     public bool AutoUpdateNodes { get; set; }
+    
+    /// <summary>
+    /// Gets or sets the language code for the system
+    /// </summary>
+    public string Language { get; set; }
 
     /// <summary>
     /// Gets or sets if telemetry should be disabled

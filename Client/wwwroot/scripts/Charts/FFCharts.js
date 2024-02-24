@@ -159,7 +159,9 @@ function addWidget(dashboard, p, csharp){
     icon.className = p.icon;
     let spanTitle = document.createElement('span');
     title.appendChild(spanTitle);
-    spanTitle.innerText = p.name;
+    csharp.invokeMethodAsync("Translate", 'Widgets.' + p.name.replace(/\s/g, '')).then(result => {
+        spanTitle.innerText = result;        
+    });
 
     let eleRemove = document.createElement('i');
     title.appendChild(eleRemove);

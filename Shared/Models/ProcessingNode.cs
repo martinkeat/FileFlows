@@ -195,26 +195,26 @@ public enum ProcessingNodeStatus
     /// <summary>
     /// The node is offline or cannot be reached
     /// </summary>
-    Offline,
+    Offline = 0,
     /// <summary>
     /// The node is available but not processing
     /// </summary>
-    Idle,
+    Idle = 1,
     /// <summary>
     /// The node is currently processing files
     /// </summary>
-    Processing,
+    Processing = 2,
     /// <summary>
     /// The node is disabled
     /// </summary>
-    Disabled,
+    Disabled = 3,
     /// <summary>
     /// The node is out of schedule
     /// </summary>
-    OutOfSchedule,
+    OutOfSchedule = 4,
     /// <summary>
     /// The node's version does not match the servers
     /// </summary>
-    VersionMismatch,
+    VersionMismatch = 5,
     
 }

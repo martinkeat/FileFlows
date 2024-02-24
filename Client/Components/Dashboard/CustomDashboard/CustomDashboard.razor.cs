@@ -133,7 +133,29 @@ public partial class CustomDashboard : IDisposable
             return;
         JsCallbacks[eventName] = callback;
     }
-    
+
+    /// <summary>
+    /// Translates a string
+    /// </summary>
+    /// <param name="key">the string key to translate</param>
+    /// <returns>the translated string</returns>
+    [JSInvokable]
+    public string Translate(string key)
+        => Translater.Instant(key);
+
+    /// <summary>
+    /// Translates an array of strings
+    /// </summary>
+    /// <param name="keys">the string keys to translate</param>
+    /// <returns>the translated strings</returns>
+    [JSInvokable]
+    public string[] TranslateAll(string[] keys)
+    {
+        for (int i = 0; i < keys.Length; i++)
+            keys[i] = Translater.Instant(keys[i]);
+        return keys;
+    }
+
     /// <summary>
     /// Opens a log for a executing library file
     /// </summary>
