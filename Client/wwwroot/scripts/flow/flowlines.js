@@ -122,7 +122,6 @@ class ffFlowLines {
 
                 if (this.ffFlow.SingleOutputConnection) {
                     connections = [{ index: index, part: part }];
-                    console.log('this.ffFlow', this.ffFlow);
                     this.ffFlow.History.perform(new FlowActionConnection(this.ffFlow, outputId, connections));
                 }
                 else

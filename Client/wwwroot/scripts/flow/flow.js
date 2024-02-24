@@ -618,18 +618,49 @@ class ffFlow
         try {
             parts = JSON.parse(json);
         }catch(err) { return; }
-        for(let p of parts){
+        let uidTranslations = {};
+        let copiedConnections = [];
+        for(let p of parts)
+        {
             if(!p.uid)
                 return; // not a valid item pasted in
-            p.uid = await this.csharp.invokeMethodAsync("NewGuid");
+            let oldUid = p.uid;
+            p.uid = await this.csharp.invokeMethodAsync("NewGuid")
             // for now we dont copy connections
-            p.outputConnections = null;
-            p.xPos += 120;
-            p.yPos += 80;
-            if(p.Name)
-                p.Name = "Copy of " + p.Name;
-            this.History.perform(new FlowActionAddPart(p));
+            if(parts.length < 2) {
+                p.xPos += 120;
+                p.yPos += 80;
+                p.outputConnections = null;
+                this.History.perform(new FlowActionAddPart(p));
+            }
+            else {                
+                p.xPos += 120;
+                p.yPos += 180;
+                if(p.outputConnections?.length)
+                    copiedConnections.push(Object.assign({}, p.outputConnections[0], {uid: p.uid}));
+                p.outputConnections = null;
+                uidTranslations[oldUid] = p.uid;
+            }
         }
+        if(parts.length < 2)
+            return;
+
+        let eleParts = [];
+        for(let p of parts) {
+            this.History.perform(new FlowActionAddPart(p));
+            eleParts.push(this.getElement(p.uid));
+        }
+        
+        for(let conn of copiedConnections){
+            if(!uidTranslations[conn.inputNode])
+                continue;
+            let mappedUid = uidTranslations[conn.inputNode];
+            this.History.perform(new FlowActionConnection(this, conn.uid + '-output-' + conn.output, 
+                [{ index: conn.input, part: mappedUid }]))
+        }
+        this.ffFlowPart.unselectAll();
+        this.SelectedParts = eleParts;
+        this.redrawLines();
     }
         
     contextMenu_Edit(part){
