@@ -128,15 +128,9 @@ class ffFlow
             // this.eleFlowParts.addEventListener("touchstart", (e) => this.Mouse.dragStart(e), false);
             // this.eleFlowParts.addEventListener("touchend", (e) => this.Mouse.dragEnd(e), false);
             // this.eleFlowParts.addEventListener("touchmove", (e) => this.Mouse.drag(e), false);
-            this.eleFlowParts.addEventListener("mousedown", (e) => e.button === 0 && this.Mouse.dragStart(e), false);
-            this.eleFlowParts.addEventListener("mouseup", (e) => this.Mouse.dragEnd(e), false);
-            this.eleFlowParts.addEventListener("mousemove", (e) => this.Mouse.drag(e), false);
 
             this.eleFlowParts.addEventListener("mouseup", (e) => this.FlowLines.ioMouseUp(e), false);
             this.eleFlowParts.addEventListener("mousemove", (e) => this.FlowLines.ioMouseMove(e), false);
-            this.eleFlowParts.addEventListener("click", (e) => {
-                this.unSelect()
-            }, false);
             this.eleFlowParts.addEventListener("dragover", (e) => {
                 this.drop(e, false)
             }, false);
@@ -149,6 +143,45 @@ class ffFlow
                 e.stopPropagation();
                 this.contextMenu(e);
                 return false;
+            }, false);
+
+            let mouseStillDown = false;
+            let mouseMoved = false;
+            this.eleFlowParts.addEventListener("click", (e) => {
+                mouseStillDown = false;
+                this.Mouse.canvasSelecting = false
+                this.unSelect()
+            }, false);
+
+            this.eleFlowParts.addEventListener("mousedown", (e) => {
+                if(e.button !== 0)
+                    return;
+                this.Mouse.dragStart(e);
+
+                mouseStillDown = true;
+                mouseMoved = false;
+                this.Mouse.canvasSelecting = false;
+
+                if(e.target.tagName !== 'CANVAS')
+                    return;
+                let createTimeout = () => {
+                    setTimeout(() => {
+                        if(mouseStillDown && !mouseMoved)
+                            createTimeout();
+                        else  if(mouseStillDown && mouseMoved) {
+                            this.Mouse.canvasSelecting = true;
+                        }
+                    }, 50);
+                }
+                createTimeout();
+            }, false);
+            this.eleFlowParts.addEventListener("mouseup", (e) => {
+                mouseStillDown = false;
+                this.Mouse.dragEnd(e);
+            }, false);
+            this.eleFlowParts.addEventListener("mousemove", (e) => {
+                mouseMoved = true;
+                this.Mouse.drag(e);
             }, false);
         }
 

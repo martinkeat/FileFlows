@@ -53,11 +53,6 @@ class ffFlowMouse {
             this.ffFlow.active = true;
             this.canvasSelecting = false;
         }
-        else if(e.target.tagName === 'CANVAS'){
-            this.canvasSelecting = true;
-        }else {
-            this.canvasSelecting = false;
-        }
     }
 
     dragEnd(e) {
