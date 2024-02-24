@@ -678,10 +678,11 @@ class ffFlow
         if(parts.length < 2)
             return;
 
-        let eleParts = [];
+        this.ffFlowPart.unselectAll();
         for(let p of parts) {
             this.History.perform(new FlowActionAddPart(p));
-            eleParts.push(this.getElement(p.uid));
+            let ele = this.getFlowPart(p.uid);
+            ele.classList.add('selected');
         }
         
         for(let conn of copiedConnections){
@@ -691,8 +692,7 @@ class ffFlow
             this.History.perform(new FlowActionConnection(this, conn.uid + '-output-' + conn.output, 
                 [{ index: conn.input, part: mappedUid }]))
         }
-        this.ffFlowPart.unselectAll();
-        this.SelectedParts = eleParts;
+        this.SelectedParts = parts;
         this.redrawLines();
     }
         
