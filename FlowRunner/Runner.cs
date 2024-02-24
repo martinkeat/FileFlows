@@ -509,7 +509,7 @@ public class Runner
                 .LastOrDefault(x => x.Key.ToLowerInvariant() == name.ToLowerInvariant());
             if (varOverride.Value != null && varOverride.Value is string strVarOverride)
             {
-                nodeParameters.Logger?.ILog($"ToolPathVariable '{name}' = '{strVarOverride}");
+                nodeParameters.Logger?.ILog($"ToolPathVariable '{name}' = '{strVarOverride}'");
                 return strVarOverride;
             }
             
