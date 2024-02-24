@@ -211,6 +211,24 @@ public class LibraryController : Controller
                 string json = System.IO.File.ReadAllText(tf.FullName);
                 if(json.StartsWith("//"))
                     json = string.Join("\n", json.Split('\n').Skip(1)); // remove the //path comment
+                if (tf.FullName.ToLowerInvariant().Contains("videolibrary"))
+                {
+                    json = @"{
+    ""name"": ""Video Library"",
+    ""revision"": 2,
+    ""minimumVersion"": ""24.01.1.2000"",
+    ""group"": ""General"",
+    ""description"": ""Video library that searches for common video files"",
+    ""extensions"":[""ts"", ""mp4"", ""mkv"", ""avi"", ""mpe"", ""mpeg"", ""mov"", ""mpv"", ""flv"", ""wmv"", ""webm"", ""avchd"", ""h264"", ""h265""],
+    ""filter"": """",
+    ""exclusionFilter"":""(_UNPACK_)"",
+    ""path"": ""/media/videos"",
+    ""scanInterval"": 60,
+    ""fileSizeDetectionInterval"": 5,
+    ""useFingerprint"": false,
+    ""ignoreThis"": true
+}";
+                }
                 json = TemplateHelper.ReplaceWindowsPathIfWindows(json);
                 var jst =JsonSerializer.Deserialize<LibraryTemplate>(json, new JsonSerializerOptions
                 {
@@ -224,6 +242,8 @@ public class LibraryController : Controller
                     FileSizeDetectionInterval = jst.FileSizeDetectionInterval,
                     Filter = jst.Filter ?? string.Empty,
                     ExclusionFilter = jst.ExclusionFilter ?? string.Empty,
+                    Extensions = jst.Extensions?.OrderBy(x => x.ToLowerInvariant())?.ToList(),
+                    UseFingerprinting = jst.UseFingerprint,
                     Name = jst.Name,
                     Description = jst.Description,
                     Path = jst.Path,

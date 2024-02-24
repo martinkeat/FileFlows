@@ -642,6 +642,11 @@ public partial class Editor : InputRegister, IDisposable
         this.Maximised = maximised;
     }
 
+    /// <summary>
+    /// Triggers state has changed on the editor
+    /// </summary>
+    public void TriggerStateHasChanged() => StateHasChanged();
+
     public void Dispose()
     {
         App.Instance.OnEscapePushed -= InstanceOnOnEscapePushed;

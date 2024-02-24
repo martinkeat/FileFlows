@@ -50,6 +50,8 @@ public partial class Libraries : ListPage<Guid, Library>
         SetModelProperty(nameof(template.Template), template.Name);
         SetModelProperty(nameof(template.FileSizeDetectionInterval), template.FileSizeDetectionInterval);
         SetModelProperty(nameof(template.Filter), template.Filter);
+        SetModelProperty(nameof(template.Extensions), template.Extensions?.ToArray() ?? new string[] { });
+        SetModelProperty(nameof(template.UseFingerprinting), template.UseFingerprinting);
         SetModelProperty(nameof(template.ExclusionFilter), template.ExclusionFilter);
         SetModelProperty(nameof(template.Path), template.Path);
         SetModelProperty(nameof(template.Priority), template.Priority);
@@ -57,12 +59,10 @@ public partial class Libraries : ListPage<Guid, Library>
         SetModelProperty(nameof(template.ReprocessRecreatedFiles), template.ReprocessRecreatedFiles);
         SetModelProperty(nameof(Library.Folders), false);
 
+        editor.TriggerStateHasChanged();
         void SetModelProperty(string property, object value)
         {
-            if(model.ContainsKey(property))
-                model[property] = value;
-            else
-                model.Add(property, value);
+            model[property] = value;
         }
     }
 

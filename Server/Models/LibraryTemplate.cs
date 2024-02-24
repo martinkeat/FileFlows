@@ -24,6 +24,11 @@ class LibraryTemplate
     public string Description { get; set; }
     
     /// <summary>
+    /// Gets or sets a list of extensions
+    /// </summary>
+    public string[] Extensions { get; set; }
+    
+    /// <summary>
     /// Gets or sets the filter for this template
     /// </summary>
     public string Filter { get; set; }
@@ -58,4 +63,9 @@ class LibraryTemplate
     /// This is helpful if you download the same file multiple times and want to reprocess it again
     /// </summary>
     public bool ReprocessRecreatedFiles { get; set; }
+    
+    /// <summary>
+    /// Gets or sets if fingerprinting should be turned on
+    /// </summary>
+    public bool UseFingerprint { get; set; }
 }
