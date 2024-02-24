@@ -453,12 +453,14 @@ public partial class Flow : ComponentBase, IDisposable
         fields.Insert(0, new ElementField
         {
             Name = nameof(ffPart.Name),
+            Label = Translater.Instant("Labels.Name"),
             Placeholder = typeDisplayName,
             InputType = FormInputType.Text
         });
         fields.Insert(1, new ElementField
         {
             Name = nameof(ffPart.Color),
+            Label = Translater.Instant("Flow.Parts.Color"),
             Placeholder = Translater.Instant("Flow.Parts.Color-Placeholder"),
             InputType = FormInputType.Color
         });

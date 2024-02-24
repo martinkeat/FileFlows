@@ -1,4 +1,5 @@
-﻿using FileFlows.Server.Controllers;
+﻿using System.IO.Compression;
+using FileFlows.Server.Controllers;
 using FileFlows.Server.Services;
 using FileFlows.Shared.Models;
 
@@ -36,7 +37,8 @@ public class PluginScanner
             Converters = { new Shared.Json.ValidatorConverter() }
         };
 
-        List<string> langFiles = new List<string>();
+        // dictionary of languages index by their language code
+        Dictionary<string, List<string>> langFiles = new();
 
         if(Directory.Exists(pluginDir) == false)
         {
@@ -76,8 +78,16 @@ public class PluginScanner
                 var langEntry = zf.GetEntry("en.json");
                 if (langEntry != null)
                 {
+                    // older plugin
                     using var srLang = new StreamReader(langEntry.Open());
-                    langFiles.Add(srLang.ReadToEnd());
+                    if (langFiles.ContainsKey("en") == false)
+                        langFiles["en"] = new ();
+                    langFiles["en"].Add(srLang.ReadToEnd());
+                }
+                else
+                {
+                    // get all files in the i18n directory and read them
+                    ExtractLanguageFilesFromZip(zf, langFiles);
                 }
 
 #pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
@@ -163,9 +173,39 @@ public class PluginScanner
             }
         }
 
-        CreateLanguageFile(langFiles);
+        foreach(var key in langFiles.Keys)
+            CreateLanguageFile(langFiles[key], key);
 
         Logger.Instance.ILog("Finished scanning for plugins");
+    }
+
+    /// <summary>
+    /// Extracts JSON language files from a ZipArchive.
+    /// </summary>
+    /// <param name="zf">The ZipArchive containing language files.</param>
+    /// <param name="langFiles">A dictionary to store language files.</param>
+    static void ExtractLanguageFilesFromZip(ZipArchive zf, Dictionary<string, List<string>> langFiles)
+    {
+        var i18nEntries = zf.Entries.Where(e => e.FullName.StartsWith("i18n") && e.FullName.EndsWith(".json"))
+            .ToArray();
+
+        foreach (var entry in i18nEntries)
+        {
+            // Get the language code from the entry name
+            string languageCode = Path.GetFileNameWithoutExtension(entry.Name);
+
+            // Read the contents of the JSON file
+            using var sr = new StreamReader(entry.Open());
+            string jsonContent = sr.ReadToEnd();
+
+            // Add the JSON content to the dictionary
+            if (!langFiles.ContainsKey(languageCode))
+            {
+                langFiles[languageCode] = new List<string>();
+            }
+
+            langFiles[languageCode].Add(jsonContent);
+        }
     }
 
     /// <summary>
@@ -310,7 +350,8 @@ public class PluginScanner
     /// Saves to wwwroot/i18n/plugins.en.json
     /// </summary>
     /// <param name="jsonFiles">the individual plugin language files</param>
-    static void CreateLanguageFile(List<string> jsonFiles)
+    /// <param name="langCode">the language code for the file</param>
+    static void CreateLanguageFile(List<string> jsonFiles, string langCode)
     {
         var json = "{}";
         try
@@ -341,6 +382,6 @@ public class PluginScanner
         if (Directory.Exists(dir) == false)
             Directory.CreateDirectory(dir);
 
-        File.WriteAllText(Path.Combine(dir, "plugins.en.json"), json);        
+        File.WriteAllText(Path.Combine(dir, $"plugins.{langCode}.json"), json);        
     }
 }

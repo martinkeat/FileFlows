@@ -242,6 +242,29 @@
     "HoursAgo": "{num} {num, plural, one {hour} other {hour}} her",
     "DaysAgo": "{num} {num, plural, one {day} other {days}} her"
   },
+  "MenuGroups": {
+    "Overview": "Übersicht",
+    "Configuration": "Konfiguration",
+    "Extensions": "Erweiterungen",
+    "System": "System",
+    "Information": "Informationen"
+  },
+  "Widgets": {
+    "CPUUsage": "CPU-Auslastung",
+    "MemoryUsage": "Speicherauslastung",
+    "TemporaryFileStorage": "Temporärer Dateispeicher",
+    "ProcessingNodes": "Nodes",
+    "Processing": "Verarbeitung",
+    "Upcoming": "Anstehend",
+    "Codecs": "Codecs",
+    "AudioCodecs": "Audio-Codecs",
+    "VideoCodecs": "Video-Codecs",
+    "VideoResolutions": "Videoauflösungen",
+    "RecentlyFinished": "Kürzlich abgeschlossen",
+    "ProcessingTimes": "Verarbeitungszeiten",
+    "VideoContainers": "Video-Container",
+    "StorageSaved": "Gespeicherter Speicherplatz"
+  },
   "Flow": {
     "ErrorMessages":{
       "NoParts":"Keine spezifischen Teile des Flow, Sie müssen einige Teile haben, um einen Flow zu speichern",
@@ -258,29 +281,6 @@
         }
       }
     }
-  },
-  "MenuGroups": {
-    "Overview": "Übersicht",
-    "Configuration": "Konfiguration",
-    "Extensions": "Erweiterungen",
-    "System": "System",
-    "Information": "Informationen"
-  },
-  "Widgets": {
-    "CPUUsage": "CPU-Auslastung",
-    "MemoryUsage": "Speicherauslastung",
-    "TemporaryFileStorage": "Temporärer Dateispeicher",
-    "ProcessingNodes": "Verarbeitungsknoten",
-    "Processing": "Verarbeitung",
-    "Upcoming": "Anstehend",
-    "Codecs": "Codecs",
-    "AudioCodecs": "Audio-Codecs",
-    "VideoCodecs": "Video-Codecs",
-    "VideoResolutions": "Videoauflösungen",
-    "RecentlyFinished": "Kürzlich abgeschlossen",
-    "ProcessingTimes": "Verarbeitungszeiten",
-    "VideoContainers": "Video-Container",
-    "StorageSaved": "Gespeicherter Speicherplatz"
   },
   "Pages": {
     "Dashboard": {
@@ -504,7 +504,7 @@
       }
     },
     "LibraryFiles": {
-      "Title": "Files",
+      "Title": "Dateien",
       "Buttons": {
         "Ignore": "ignorieren",
         "Process": "Prozess",

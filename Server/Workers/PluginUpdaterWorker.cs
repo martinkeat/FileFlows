@@ -30,7 +30,7 @@ public class PluginUpdaterWorker : Worker
             return;
 
         Logger.Instance?.ILog("Plugin Updater started");
-        var controller = new PluginController();
+        var controller = new PluginController(null);
         var plugins = controller.GetAll().Result;
         var latestPackagesResult = controller.GetPluginPackagesActual().Result;
         var latestPackages = latestPackagesResult.IsFailed ? new () 

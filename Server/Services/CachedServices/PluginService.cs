@@ -38,7 +38,7 @@ public class PluginService : CachedService<PluginInfo>, IPluginService
     /// <returns>the byte data of the plugin</returns>
     public Task<byte[]> Download(PluginInfo plugin)
     {
-        var result = new PluginController().DownloadPackage(plugin.PackageName);
+        var result = new PluginController(null).DownloadPackage(plugin.PackageName);
         using var ms = new MemoryStream();
         result.FileStream.CopyTo(ms);
         return Task.FromResult(ms.ToArray());

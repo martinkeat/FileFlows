@@ -1,20 +1,13 @@
 using System.Net;
-using FileFlows.Server.Services;
-using FileFlows.ServerShared.Services;
 using FluentResults;
-
-namespace FileFlows.Server.Controllers;
-
-using System.ComponentModel;
 using System.Dynamic;
-using System.Reflection;
+using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Mvc;
-using FileFlows.Plugin.Attributes;
 using FileFlows.Server.Helpers;
 using FileFlows.Shared.Models;
 using FileFlows.Shared.Helpers;
-using FileFlows.ServerShared.Helpers;
-using System.Text.Json;
+
+namespace FileFlows.Server.Controllers;
 
 /// <summary>
 /// Plugin Controller
@@ -22,6 +15,19 @@ using System.Text.Json;
 [Route("/api/plugin")]
 public class PluginController : Controller
 {
+    /// <summary>
+    /// Represents the hosting environment of the application.
+    /// </summary>
+    private readonly IWebHostEnvironment _hostingEnvironment;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="PluginController"/> class.
+    /// </summary>
+    /// <param name="hostingEnvironment">The hosting environment.</param>
+    public PluginController(IWebHostEnvironment hostingEnvironment)
+    {
+        _hostingEnvironment = hostingEnvironment;
+    }
     /// <summary>
     /// Get a list of all plugins in the system
     /// </summary>
@@ -113,8 +119,15 @@ public class PluginController : Controller
     /// <param name="langCode">The language code to get the translations for</param>
     /// <returns>The json plugin translation file</returns>
     [HttpGet("language/{langCode}.json")]
-    public IActionResult LanguageFile([FromQuery] string langCode = "en")
-        => File("i18n/plugins.en.json", "text/json");
+    public IActionResult LanguageFile([FromRoute] string langCode = "en")
+    {
+        if(Regex.IsMatch(langCode, "^[a-zA-Z]{2,3}$") == false)
+            return new JsonResult(new {});
+        string file = $"i18n/plugins.{langCode}.json";
+        if(System.IO.File.Exists(Path.Combine(_hostingEnvironment.WebRootPath, file)))
+            return File(file, "text/json");
+        return new JsonResult(new {});
+    }
 
     /// <summary>
     /// Get the available plugin packages 

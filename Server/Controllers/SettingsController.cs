@@ -321,7 +321,7 @@ public class SettingsController : Controller
         cfg.MaxNodes = LicenseHelper.IsLicensed() ? 250 : 30;
         cfg.KeepFailedFlowTempFiles = Instance.KeepFailedFlowTempFiles;
         cfg.Enterprise = LicenseHelper.IsLicensed(LicenseFlags.Enterprise);
-        var pluginInfos = (await new PluginController().GetAll())
+        var pluginInfos = (await new PluginController(null).GetAll())
             .Where(x => x.Enabled)
             .ToDictionary(x => x.PackageName + ".ffplugin", x => x);
         var plugins = new Dictionary<string, byte[]>();
