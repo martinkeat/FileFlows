@@ -114,7 +114,7 @@ public class NodeManager
         WorkerManager.StartWorkers(
             flowWorker, 
             updater, 
-            new RestApiWorker(),
+            //new RestApiWorker(), // is this used?
             new LogFileCleaner(),
             new TempFileCleaner(AppSettings.Instance.HostName), 
             new SystemStatisticsWorker(),

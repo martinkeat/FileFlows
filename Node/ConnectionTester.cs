@@ -24,7 +24,7 @@ public class ConnectionTester
             address = address.Substring(0, address.IndexOf("/"));
 
         // try the common set of ports protocols
-        foreach (int port in new[] { givenPort, 5151, 5000, 80 }.Distinct())
+        foreach (int port in new[] { givenPort, 19200, 5000, 5151, 80 }.Distinct())
         {
             if (port < 0 || port > 65535)
                 continue;

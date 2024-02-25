@@ -1,3 +1,4 @@
+using System.Xml.Schema;
 using FileFlows.Server.Database.Managers;
 using FileFlows.Server.Helpers;
 using FileFlows.Shared.Models;
@@ -18,6 +19,17 @@ public class Upgrade_24_02
         Logger.Instance.ILog("Upgrade running, running 24.02 upgrade script");
         AddFailureReasonField();
         AddProcessOnNodeUidField();
+        SetServerPort();
+    }
+
+    private void SetServerPort()
+    {
+        if (AppSettings.Instance.ServerPort != null && AppSettings.Instance.ServerPort >= 1 &&
+            AppSettings.Instance.ServerPort <= 65535)
+            return;
+        Logger.Instance.ILog("Saving server port 5000");
+        AppSettings.Instance.ServerPort = 5000;
+        AppSettings.Instance.Save();
     }
 
     private void AddFailureReasonField()

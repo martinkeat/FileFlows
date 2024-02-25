@@ -11,7 +11,7 @@ public class RestApiWorker: Worker
     /// <summary>
     /// The port the API runs on
     /// </summary>
-    internal static int Port = 5000;
+    internal static int Port = 19201;
     
     private DateTime startedAt = DateTime.UtcNow;
 
@@ -31,7 +31,7 @@ public class RestApiWorker: Worker
 
         int port = Port;
         if (port < 1 || port > 65535)
-            port = 5000;
+            port = 19201;
 
         started = true;
         var builder = WebApplication.CreateBuilder();
