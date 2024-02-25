@@ -180,7 +180,11 @@ public class ExecuteFlow : Node
                 if (output is RunnerCodes.TerminalExit or RunnerCodes.RunCanceled)
                     return output; // just finish this, the flow element that caused the terminal exit already was recorded
                 
+                if (Runner.Canceled)
+                    return RunnerCodes.RunCanceled;
+                
                 RecordFlowElementFinish(args, nodeStartTime, output, part, currentFlowElement);
+                
                 
                 if (output == RunnerCodes.Failure && part.ErrorConnection == null)
                 {
@@ -206,7 +210,7 @@ public class ExecuteFlow : Node
                 {
                     // couldn't find the connection, maybe bad data, but flow has now finished
                     args.Logger?.WLog("Couldn't find output node, flow completed: " + outputNode?.Output);
-                    return RunnerCodes.Completed;
+                    return outputNode?.Output == -1 ? RunnerCodes.Failure : RunnerCodes.Completed;
                 }
                 
                 if(part.Type == FlowElementType.SubFlow)

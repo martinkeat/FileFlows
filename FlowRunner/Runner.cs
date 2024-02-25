@@ -546,8 +546,10 @@ public class Runner
         };
 
         int result = flowExecutor.Execute(nodeParameters);
-
-        if (result == RunnerCodes.Completed)
+        
+        if(Canceled)
+            SetStatus(FileStatus.ProcessingFailed);
+        else if (result == RunnerCodes.Completed)
         {
             if (nodeParameters.ReprocessNode != null)
             {
