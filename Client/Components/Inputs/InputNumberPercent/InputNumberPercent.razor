@@ -1,0 +1,14 @@
+@namespace FileFlows.Client.Components.Inputs
+@inherits Input<FileFlows.Plugin.Types.NumberPercent>
+
+<InputWrapper Input="@this">
+    <div class="input-number-percent-wrapper">
+        <div class="flow-numeric">
+            <input id=@Uid type="number" @bind-value="@Number" disabled=@(Disabled || ReadOnly ? string.Empty : null)  />
+        </div>
+        <select class="btn-select" @onchange=@SelectChange>
+            <option value="false" selected="@(!Percentage)">@lblNonPercent</option>
+            <option value="true" selected="@Percentage">@lblPercent</option>
+        </select>
+    </div>
+</InputWrapper>

@@ -1,0 +1,8 @@
+@namespace FileFlows.Client.Components.Inputs
+@inherits Input<TimeSpan>
+
+<InputWrapper Input="@this">
+    <div>
+        <input type="text" id="@Uid" autocomplete="off" value="@ValueString" />
+    </div>
+</InputWrapper>

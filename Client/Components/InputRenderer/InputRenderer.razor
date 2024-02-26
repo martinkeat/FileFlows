@@ -6,6 +6,7 @@
 @using FileFlows.Shared.Widgets
 @using Microsoft.Extensions.Logging
 @using System.Collections
+@using FileFlows.Plugin.Types
 
 @{
     string label = string.IsNullOrEmpty(field.Label) == false ? field.Label : IsScript ? FlowHelper.FormatLabel(field.Name) : TypeName + ".Fields." + field.Name;
@@ -102,6 +103,14 @@
                 <InputNumber TItem="int" Field=@field Label="@label" Value="@value" ReadOnly=@readOnly ValueChanged="@(x => UpdateValue(field, x))"
     Validators=@field.Validators Placeholder="@field.Placeholder" Min="@min" Max="@max" HideLabel=@hideLabel OnSubmit=@OnSubmit OnClose=@OnClose Help=@field.HelpText />
             }
+            break;
+        case FormInputType.NumberPercent:
+        {
+            var value = GetValue<NumberPercent>(field.Name) ?? new ();
+            var unit = GetParameter<string>(field, nameof(InputNumberPercent.Unit));
+            <InputNumberPercent Field=@field Label="@label" Value="@value" ReadOnly=@readOnly ValueChanged="@(x => UpdateValue(field, x))" Unit="@unit"
+                         Validators=@field.Validators Placeholder="@field.Placeholder" HideLabel=@hideLabel OnSubmit=@OnSubmit OnClose=@OnClose Help=@field.HelpText />
+        }
             break;
         case FormInputType.Period:
         {
@@ -247,6 +256,14 @@
                                     Pre=@pre Link=@link Formatter="@formatter" Help=@field.HelpText/>
                 }
             }
+            break;
+        case FormInputType.Time:
+        {
+            var value = GetValue<TimeSpan>(field.Name);
+            <InputTime Field=@field Label="@label" Value="@value" ReadOnly=@readOnly 
+                           ValueChanged="@(x => UpdateValue(field, x))" HideLabel=@hideLabel 
+                           OnSubmit=@OnSubmit OnClose=@OnClose Help=@field.HelpText />
+        }
             break;
         case FormInputType.ExecutedNodes:
             {

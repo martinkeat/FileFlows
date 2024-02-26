@@ -139,7 +139,15 @@ public enum FormInputType
     /// <summary>
     /// Template
     /// </summary>
-    Template = 30
+    Template = 30,
+    /// <summary>
+    /// Number Percent
+    /// </summary>
+    NumberPercent = 31,
+    /// <summary>
+    /// Time
+    /// </summary>
+    Time = 32
 }
 
 

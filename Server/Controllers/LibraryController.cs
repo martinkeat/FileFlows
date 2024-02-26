@@ -204,6 +204,7 @@ public class LibraryController : Controller
     {
         SortedDictionary<string, List<Library>> templates = new(StringComparer.OrdinalIgnoreCase);
         var lstGeneral = new List<Library>();
+        string generalGroup = Translater.Instant("Templates.Libraries.Groups.General");
         foreach (var tf in GetTemplateFiles())
         {
             try
@@ -218,6 +219,20 @@ public class LibraryController : Controller
                     PropertyNameCaseInsensitive = true
                 });
                 string group = jst.Group ?? string.Empty;
+                group = Translater.Instant("Templates.Groups." + CleanForJsonKey(group));
+                if (string.IsNullOrWhiteSpace(group) || group == CleanForJsonKey(jst.Group))
+                    group = jst.Group ?? string.Empty;
+                
+                string name = jst.Name;
+                string prefix = "Templates.Libraries." + CleanForJsonKey(jst.Name) + ".";
+                string translateName = Translater.Instant( prefix + "Name");
+                if (string.IsNullOrWhiteSpace(translateName) == false && translateName != "Name")
+                    name = translateName;
+                string description = jst.Description;
+                string translateDescription = Translater.Instant(prefix + "Description");
+                if (string.IsNullOrWhiteSpace(translateDescription) == false && translateDescription != "Description")
+                    description = translateDescription;
+                    
                 var library = new Library
                 {
                     Enabled = true,
@@ -226,14 +241,14 @@ public class LibraryController : Controller
                     ExclusionFilter = jst.ExclusionFilter ?? string.Empty,
                     Extensions = jst.Extensions?.OrderBy(x => x.ToLowerInvariant())?.ToList(),
                     UseFingerprinting = jst.UseFingerprint,
-                    Name = jst.Name,
-                    Description = jst.Description,
+                    Name = name,
+                    Description = description,
                     Path = jst.Path,
                     Priority = jst.Priority,
                     ScanInterval = jst.ScanInterval,
                     ReprocessRecreatedFiles = jst.ReprocessRecreatedFiles
                 };
-                if (group == "General")
+                if (group == generalGroup)
                     lstGeneral.Add(library);
                 else
                 {
@@ -247,7 +262,7 @@ public class LibraryController : Controller
 
         var dict = new Dictionary<string, List<Library>>();
         if(lstGeneral.Any())
-            dict.Add("General", lstGeneral.OrderBy(x => x.Name.ToLowerInvariant()).ToList());
+            dict.Add(generalGroup, lstGeneral.OrderBy(x => x.Name.ToLowerInvariant()).ToList());
         foreach (var kv in templates)
         {
             if(kv.Value.Any())
@@ -256,6 +271,14 @@ public class LibraryController : Controller
 
         return dict;
     }
+
+    /// <summary>
+    /// Cleans a value for a json key
+    /// </summary>
+    /// <param name="value">the text value</param>
+    /// <returns>the cleaned json key</returns>
+    private string CleanForJsonKey(string value)
+        => Regex.Replace(value, @"[\s/\\]", string.Empty);
 
     /// <summary>
     /// Rescans enabled libraries and waits for them to be scanned

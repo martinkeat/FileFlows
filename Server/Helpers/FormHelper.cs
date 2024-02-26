@@ -1,3 +1,5 @@
+using FileFlows.Plugin.Types;
+
 namespace FileFlows.Server.Helpers
 {
     using System.ComponentModel;

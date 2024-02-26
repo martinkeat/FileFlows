@@ -116,6 +116,11 @@
     "NoUpcomingFiles": "No upcoming files",
     "Failed": "Failed",
     "MappingIssue": "Mapping Issue",
+    "Number": "Number",
+    "Percent": "Percent",
+    "Pixels": "Pixels",
+    "ReadOnly": "Read Only",
+    "InUse": "In Use",
     "ObsoleteConfirm": {
       "Title": "Obsolete Node",
       "Message": "It is recommended you switch to a different node.",
@@ -285,6 +290,56 @@
           "Extensions": "Extensions",
           "Extensions-Help": "A list of extensions that if match will output to the first output node, otherwise the second output node will be used."
         }
+      }
+    }
+  },
+  "Templates": {
+    "Groups": {
+      "Books": "Books",
+      "DownloadClients": "Download Clients",
+      "DVR": "DVR",
+      "General": "General",
+    },
+    "Libraries": {
+      "AudioBookLibrary": {
+        "Name": "Audio Book Library",
+        "Description": "Audio Book library that searches for common audio book files"
+      },
+      "ComicLibrary": {
+        "Name": "Comic Library",
+        "Description": "Comic library that searches for common comic book files"
+      },
+      "eBookLibrary": {
+        "Name": "eBook Library",
+        "Description": "eBook library that searches for common eBook files"
+      },
+      "ImageLibrary": {
+        "Name": "Image Library",
+        "Description": "Image library that searches for common image files"
+      },
+      "MusicLibrary": {
+        "Name": "Music Library",
+        "Description": "Music library that searches for common music files"
+      },
+      "PlexDVR": {
+        "Name": "Plex DVR",
+        "Description": "Library to monitor Plex DVR recordings so you can automatically convert these after they have completed."
+      },
+      "SABnzbdMusic": {
+        "Name": "SABnzbd Music",
+        "Description": "Library to monitor a \"complete\" downloads directory from SABnzbd.\n\nThis library can then use a flow to convert music into a target format, and place those music files in destination folder e.g. \"converted\".\n\nThe application that instructed SABnzbd to do the download can monitor the \"converted\" folder for completed files."
+      },
+      "SABnzbdVideos": {
+        "Name": "SABnzbd Videos",
+        "Description": "Library to monitor a \"complete\" downloads directory from SABnzbd.\n\nThis library can then use a flow to convert videos into a target format, and place those videos in destination folder e.g. \"converted\".\n\nThe application that instructed SABnzbd to do the download can monitor the \"converted\" folder for completed files."
+      },
+      "SamplesTrailersPreviews": {
+        "Name": "Samples/Trailers/Previews",
+        "Description": "Finds any sample, trailers, or preview video files in a directory so you can delete them if necessary.\nUseful for a matching 'SABnzbd Videos' library so the folder can be cleanly deleted after the main file is processed."
+      },
+      "VideoLibrary": {
+        "Name": "Video Library",
+        "Description": "Video library that searches for common video files"
       }
     }
   },

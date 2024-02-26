@@ -103,7 +103,7 @@
     "CopyToClipboard": "In Zwischenablage kopieren",
     "CopiedToClipboard": "''{text}'' in Zwischenablage kopiert.",
     "Test":"Test",
-    "LogPartialNotAvailable":"Es konnte kein Teilprotokoll für den Node gefunden werden.",
+    "LogPartialNotAvailable":"Für die Node ist teilweise kein Protokoll verfügbar!",
     "ViewLog":"Log betrachten",
     "SetStatusProcessed": "Als verarbeitet markieren",
     "CommunityFlows": "Community Flows",
@@ -116,6 +116,11 @@
     "NoUpcomingFiles": "Keine anstehenden Dateien",
     "Failed": "Gescheitert",
     "MappingIssue": "Zuordnungsproblem",
+    "Number": "Nummer",
+    "Percent": "Prozent",
+    "Pixels": "Pixels",
+    "ReadOnly": "Nur lesen",
+    "InUse": "Benutzung",
     "ObsoleteConfirm": {
       "Title": "Veralteter Node",
       "Message": "Es wird empfohlen, zu einem anderen Node zu wechseln.",
@@ -285,6 +290,56 @@
           "Extensions": "Erweiterungen",
           "Extensions-Help": "Eine Liste von Erweiterungen, die bei Übereinstimmung an den ersten Ausgabeknoten ausgegeben wird, andernfalls wird der zweite Ausgabeknoten verwendet."
         }
+      }
+    }
+  },
+  "Templates": {
+    "Groups": {
+      "Books": "Bücher",
+      "DownloadClients": "Download Clienten",
+      "DVR": "DVR",
+      "General": "General",
+    },
+    "Libraries": {
+      "AudioBookLibrary": {
+        "Name": "Audio Book Library",
+        "Description": "Audio Book library that searches for common audio book files"
+      },
+      "ComicLibrary": {
+        "Name": "Comic-Bibliothek",
+        "Description": "Comic-Bibliothek, die nach gängigen Comic-Dateien sucht."
+      },
+      "eBookLibrary": {
+        "Name": "eBook-Bibliothek",
+        "Description": "eBook-Bibliothek, die nach gängigen eBook-Dateien sucht."
+      },
+      "ImageLibrary": {
+        "Name": "Image Library",
+        "Description": "Image library that searches for common image files"
+      },
+      "MusicLibrary": {
+        "Name": "Music Library",
+        "Description": "Music library that searches for common music files"
+      },
+      "PlexDVR": {
+        "Name": "Plex DVR",
+        "Description": "Library to monitor Plex DVR recordings so you can automatically convert these after they have completed."
+      },
+      "SABnzbdMusic": {
+        "Name": "SABnzbd Musik",
+        "Description": "Diese Bibliothek kann dann einen Flow verwenden, um Musik in ein Zielformat zu konvertieren und diese Musikdateien in einem Zielordner, z. B. \"konvertiert\", abzulegen. Die Anwendung, die SABnzbd mit dem Download beauftragt hat, kann den Ordner \"konvertiert\" auf fertige Dateien Ã¼berwachen."
+      },
+      "SABnzbdVideos": {
+        "Name": "SABnzbd Videos",
+        "Description": "Bibliothek zum Überwachen eines Verzeichnisses für \"vollständige\" Downloads von SABnzbd.\n\nDiese Bibliothek kann dann einen Fluss verwenden, um Videos in ein Zielformat zu konvertieren und diese Videos in einem Zielordner, z. B. \"konvertiert\", abzulegen.\n\nDie Anwendung, die SABnzbd mit dem Download beauftragt hat, kann den Ordner \"konvertiert\" auf fertige Dateien überwachen."
+      },
+      "SamplesTrailersPreviews": {
+        "Name": "Samples/Trailers/Previews",
+        "Description": "Findet alle Beispiel-, Trailer- oder Vorschau-Videodateien in einem Verzeichnis, so dass Sie sie bei Bedarf löschen können. Nützlich für eine passende 'SABnzbd Videos'-Bibliothek, so dass der Ordner sauber gelöscht werden kann, nachdem die Hauptdatei verarbeitet wurde."
+      },
+      "VideoLibrary": {
+        "Name": "Video Library",
+        "Description": "Video library that searches for common video files"
       }
     }
   },
@@ -491,8 +546,8 @@
     },
     "LibraryFile": {
       "Tabs":{
-        "OriginalMetadata": "Input",
-        "FinalMetadata": "Output"
+        "OriginalMetadata": "Original Datei",
+        "FinalMetadata": "Geänderte Datei"
       },
       "Fields": {
         "Name": "Original Datei",

@@ -257,7 +257,12 @@ public abstract class Input<T> : ComponentBase, IInput, IDisposable
         }
     }
 
-    private void FieldOnValueChanged(object sender, object value)
+    /// <summary>
+    /// Called when the field value changes
+    /// </summary>
+    /// <param name="sender">the sender of the event</param>
+    /// <param name="value">the new value</param>
+    protected virtual void FieldOnValueChanged(object sender, object value)
     {
         if (Disposed) return;
         if (_ValueUpdating)

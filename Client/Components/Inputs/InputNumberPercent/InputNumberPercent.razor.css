@@ -1,0 +1,42 @@
+input {
+  width: 100%;
+  height: 2.1875rem;
+  line-height: 1.5;
+  font-size: 1rem;
+  padding: 0.1875rem 0.625rem;
+  max-width: 40rem;
+}
+
+.input-number-percent-wrapper {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  max-width: 40rem;
+}
+
+.flow-numeric {
+  flex-grow: 1;
+}
+
+.select {
+  padding: 0.25rem 1rem 0;
+  background: rgba(var(--input-background-rgb), 0.5);
+}
+
+::deep .rz-spinner {
+  width: 100%;
+  border-color: var(--input-background) !important;
+  border-radius: 0 !important;
+}
+::deep .rz-spinner-button {
+  border: solid 1px transparent !important;
+  background-color: transparent !important;
+  width: 1rem !important;
+}
+::deep .rz-spinner-button:hover {
+  border-color: var(--accent) !important;
+  background-image: unset !important;
+  box-shadow: unset !important;
+}
+
+/*# sourceMappingURL=InputNumberPercent.razor.css.map */

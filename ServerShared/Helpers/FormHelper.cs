@@ -1,4 +1,6 @@
-﻿namespace FileFlows.ServerShared.Helpers;
+﻿using FileFlows.Plugin.Types;
+
+namespace FileFlows.ServerShared.Helpers;
 
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
@@ -126,6 +128,16 @@ public class FormHelper
                     }
                 }
             }
+
+            if (attribute is NumberPercentAttribute numPercent)
+            {
+                model.Add(prop.Name, new NumberPercent()
+                {
+                    Value = numPercent.DefaultValue,
+                    Percentage = numPercent.DefaultPercentage
+                });
+            }
+            
             if (model.ContainsKey(prop.Name) == false)
             {
                 var dValue = prop.GetCustomAttributes(typeof(DefaultValueAttribute), false).FirstOrDefault() as DefaultValueAttribute;
