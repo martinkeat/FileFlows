@@ -78,7 +78,10 @@ public class FileDisplayNameService
             return relativePath?.EmptyAsNull() ?? name;
         try
         {
-            return jsGetDisplayName.Invoke("getDisplayName", name, relativePath, libraryName)?.ToString() ?? name;
+            lock (jsGetDisplayName)
+            {
+                return jsGetDisplayName.Invoke("getDisplayName", name, relativePath, libraryName)?.ToString() ?? name;
+            }
         }
         catch (Exception ex)
         {
