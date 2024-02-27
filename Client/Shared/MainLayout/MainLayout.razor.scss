@@ -9,10 +9,11 @@
 }
 
 .sidebar {
-    background-color: rgba(var(--base-rgb), 0.15);
+    background-color: var(--base);
     border-right:1px solid var(--border-color);
     z-index:3;
 }
+
 
 @media (min-width: 850px) {
     .page {
@@ -34,7 +35,6 @@
         max-width: calc(100% - 3.5rem);
     }
 }
-
 .expand-collapse {
     display:none;
 }

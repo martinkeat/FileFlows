@@ -1,14 +1,25 @@
-﻿.input-file-wrapper {
+.input-file-wrapper {
   display: flex;
   flex-direction: row;
   width: 100%;
   max-width: 40rem;
 }
-.input-file-wrapper ::deep > div {
-  flex-grow: 1;
-}
-.input-file-wrapper ::deep button {
+.input-file-wrapper button {
   width: 3rem;
   margin: 0;
   padding: 0;
+  border: none;
+  background: rgba(var(--input-background-rgb), 0.5);
 }
+.input-file-wrapper button:hover {
+  box-shadow: none !important;
+  border: solid 1px var(--accent);
+}
+.input-file-wrapper:focus-within button {
+  border-left: solid 1px var(--accent);
+}
+.input-file-wrapper ::deep > div {
+  flex-grow: 1;
+}
+
+/*# sourceMappingURL=InputFile.razor.css.map */

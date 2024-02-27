@@ -4,7 +4,7 @@ window.ff = {
 
     log: function (level, parameters) {
 
-        if (!parameters || parameters.length == 0)
+        if (!parameters || parameters.length === 0)
             return;
         let message = parameters[0]
         parameters.splice(0, 1);
@@ -79,57 +79,6 @@ window.ff = {
     },
     scrollTableToTop: function(){
         document.querySelector('.flowtable-body').scrollTop = 0;
-    },
-    
-    
-    dashboard: function(uid) {
-        let dashboardData = localStorage.getItem('dashboard-' + uid);
-        
-        if(dashboardData)
-        {
-            try {
-                dashboardData = JSON.parse(dashboardData);
-                for (let item of dashboardData) {
-                    let ele = document.getElementById(item.id);
-                    if (!ele) {
-                        console.log('element not found', item, item.id);
-                        continue;
-                    }
-                    ele.setAttribute('gs-x', item.x);
-                    ele.setAttribute('gs-y', item.y);
-                    ele.setAttribute('gs-w', item.w);
-                    ele.setAttribute('gs-h', item.h);
-                }
-            }catch(err){
-                // can throw if the saved data is corrupt, silent fail to defaults
-            }
-        }
-
-        var grid = GridStack.init({
-            cellHeight:170,
-            handle: '.draghandle'
-        });
-
-        saveGrid = () => {
-            let data = [];
-            for(let ele of document.querySelectorAll('.grid-stack-item')){
-                let id = ele.id;
-                let x = parseInt(ele.getAttribute('gs-x'), 10);
-                let y = parseInt(ele.getAttribute('gs-y'), 10);
-                let w = parseInt(ele.getAttribute('gs-w'), 10);
-                let h = parseInt(ele.getAttribute('gs-h'), 10);
-                data.push({
-                    id:id, x: x, y:y, w:w, h:h
-                });                
-            }
-            localStorage.setItem('dashboard-' + uid, JSON.stringify(data));
-        }
-        
-        grid.on('resizestop', (e, el) => {
-            window.dashboardElementResized.args = e;
-            el.dispatchEvent(window.dashboardElementResized);
-            saveGrid();
-        });
     },
     
     nearBottom: function(element){

@@ -1,13 +1,11 @@
 // safari specific changes
 .safari
 {
+  --bold:500;
+  --nav-menu-bold:500;
+  
   select {
     -webkit-appearance: none;
-  }
-  .widget .title {
-    font-weight:500;
-  }
-  .nav-menu-group {
-    font-weight:500;
+    padding:0 0.25rem;
   }
 }

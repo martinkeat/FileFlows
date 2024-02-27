@@ -225,7 +225,7 @@ a.btn {
 }
 .flow-modal-title {
   background: var(--input-background);
-  font-weight: 600;
+  font-weight: var(--bold, 600);
   padding: 0.5rem 1rem;
 }
 
@@ -360,7 +360,7 @@ a.btn {
   color: var(--yellow);
 }
 .html-log .arrow {
-  font-weight: bold;
+  font-weight: var(--bold, 600);
 }
 
 @media screen and (max-width: 578px) {
@@ -453,7 +453,7 @@ a.btn {
   font-size: 0.9rem;
 }
 .table thead > tr {
-  font-weight: 600;
+  font-weight: var(--bold, 600);
   background: rgba(var(--input-background-rgb), 0.3);
 }
 .table th, .table td {
@@ -2562,14 +2562,13 @@ a.btn {
   color: var(--warning) !important;
 }
 
+.safari {
+  --bold:500;
+  --nav-menu-bold:500;
+}
 .safari select {
   -webkit-appearance: none;
-}
-.safari .widget .title {
-  font-weight: 500;
-}
-.safari .nav-menu-group {
-  font-weight: 500;
+  padding: 0 0.25rem;
 }
 
 @font-face {
@@ -2578,6 +2577,11 @@ a.btn {
 }
 html {
   overflow: hidden;
+}
+
+body {
+  --bold:600;
+  --nav-menu-bold:700;
 }
 
 @media screen and (max-width: 849.99px) {
@@ -2590,7 +2594,7 @@ html, body {
   font-size: 14px;
   font-weight: 400;
   color: var(--color) !important;
-  background: var(--base) !important;
+  background: var(--base-darker) !important;
 }
 
 a, .btn-link {
@@ -2604,7 +2608,7 @@ a, .btn-link {
   bottom: 5rem;
   text-align: center;
   z-index: 1000;
-  font-weight: bold;
+  font-weight: var(--bold, 600);
   color: var(--color);
   opacity: 0.7;
 }
@@ -2769,7 +2773,7 @@ hr {
 }
 .box.info a {
   color: var(--yellow) !important;
-  font-weight: bold;
+  font-weight: var(--bold, 600);
   text-decoration: underline;
 }
 
@@ -2967,9 +2971,15 @@ hr {
 }
 
 .widget {
-  box-shadow: 0 3px 10px rgba(var(--color-rgb), 0.1);
-  background: rgba(var(--base), 0.2);
   font-size: 0.9rem;
+}
+.widget .inner {
+  border: solid 1px var(--base-lightest);
+  position: absolute;
+  left: 0.25rem;
+  right: 0.25rem;
+  bottom: 0.25rem;
+  top: 0.25rem;
 }
 .widget .title {
   height: 2.5rem;
@@ -3406,7 +3416,7 @@ hr {
 }
 .flowtable thead th {
   border-color: var(--border-color);
-  font-weight: 600;
+  font-weight: var(--bold, 600);
   background: rgba(var(--input-background-rgb), 0.3);
   padding: 0.25rem;
 }

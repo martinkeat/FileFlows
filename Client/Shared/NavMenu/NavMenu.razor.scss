@@ -13,7 +13,7 @@
 
 .navbar-brand, .page-title {
     font-size: 1.5rem;
-    font-weight: bold;
+    font-weight: var(--bold, 600);
     display:none;
     cursor:pointer;
     svg {
@@ -45,7 +45,7 @@
 .nav-menu-group {
     padding-left: 1rem;
     text-transform: uppercase;
-    font-weight:700;
+    font-weight:var(--nav-menu-bold, 700);
     padding-top:0.5rem;
 
     &:first-of-type {
@@ -300,7 +300,7 @@
         text-align: center;
         width: 1.2rem;
         padding-top: 0.1rem;
-        font-weight: bold;
+        font-weight: var(--bold, 600);
 
         &.Unprocessed {
             --bubble-color: var(--blue);

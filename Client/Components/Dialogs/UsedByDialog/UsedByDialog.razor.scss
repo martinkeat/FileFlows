@@ -3,7 +3,7 @@ table {
   width: 100%;
   border-collapse: collapse;
   thead tr {
-    font-weight: 600;
+    font-weight: var(--bold, 600);
     background: rgba(var(--input-background-rgb), 0.3);
     th {
       padding: 0.25rem 0.5rem;

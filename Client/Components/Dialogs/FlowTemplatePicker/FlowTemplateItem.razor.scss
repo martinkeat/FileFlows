@@ -19,7 +19,7 @@
   }
   .name {
     display:block;
-    font-weight: 600;
+    font-weight: var(--bold, 600);
     i, img {
       margin-right: 0.75rem;
       width: 1.25rem;
@@ -43,7 +43,7 @@
   }
   .author {    
     display: block;
-    font-weight: 600;
+    font-weight: var(--bold, 600);
     position: absolute;
     top: 0;
     right: 0;

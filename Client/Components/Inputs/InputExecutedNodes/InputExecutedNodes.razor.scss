@@ -14,12 +14,12 @@
 
     .output-error td {
         color: var(--error);
-        font-weight: bold;
+        font-weight: var(--bold, 600);
     }
 
     .output-exit td {
         color: var(--success);
-        font-weight: bold;
+        font-weight: var(--bold, 600);
     }
     
     .failure-flow-input td {

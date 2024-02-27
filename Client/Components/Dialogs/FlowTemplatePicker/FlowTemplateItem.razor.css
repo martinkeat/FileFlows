@@ -20,7 +20,7 @@
 }
 .template .name {
   display: block;
-  font-weight: 600;
+  font-weight: var(--bold, 600);
 }
 .template .name i, .template .name img {
   margin-right: 0.75rem;
@@ -44,7 +44,7 @@
 }
 .template .author {
   display: block;
-  font-weight: 600;
+  font-weight: var(--bold, 600);
   position: absolute;
   top: 0;
   right: 0;

@@ -35,12 +35,12 @@
   overflow: unset !important;
   padding-top: 0.25rem;
   .name {
-    font-weight: 600;
+    font-weight: var(--bold, 600);
     padding-bottom:0.5rem;
   }
   .author {
     display: block;
-    font-weight: 600;
+    font-weight: var(--bold, 600);
     position: absolute;
     top: 0;
     right: 0;

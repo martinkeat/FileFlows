@@ -128,7 +128,7 @@
 
 .flowtable-header-row {
   padding-right: 0.7rem;
-  font-weight: 600;
+  font-weight: var(--bold, 600);
   background: rgba(var(--input-background-rgb), 0.3);
 }
 

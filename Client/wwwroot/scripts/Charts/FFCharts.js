@@ -108,9 +108,8 @@ function initDashboardActual(uid, csharp, isReadOnly) {
 
     if (window.innerWidth < 850)
         return;
-    
     let grid = GridStack.init({
-        cellHeight:170,
+        cellHeight:186,
         handle: '.draghandle',
         disableResize: isReadOnly,
         disableDrag: isReadOnly
@@ -150,9 +149,13 @@ function addWidget(dashboard, p, csharp){
         
     if(p.type === 1)
         div.setAttribute('gs-no-resize', 1);
+    
+    let inner = document.createElement('div');
+    inner.className = 'inner';
+    div.appendChild(inner);
 
     let title = document.createElement('div');
-    div.appendChild(title);
+    inner.appendChild(title);
     title.className = 'title draghandle';
     let icon = document.createElement('i');
     title.appendChild(icon);
@@ -177,7 +180,7 @@ function addWidget(dashboard, p, csharp){
 
     let content = document.createElement('div');
     content.className = 'content wt' + p.type;
-    div.appendChild(content);
+    inner.appendChild(content);
     if(p.type === 105){
         let top = document.createElement('div');
         top.setAttribute('id', p.uid + '-top');

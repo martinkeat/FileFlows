@@ -4,15 +4,27 @@
     width: 100%;
     max-width:40rem;
 
+    button {
+        width: 3rem;
+        margin: 0;
+        padding: 0;
+        border:none;
+        background: rgba(var(--input-background-rgb), 0.5);
+        &:hover {
+            box-shadow: none !important;
+            border: solid 1px var(--accent);
+        }
+    }
+    &:focus-within {
+        button {
+            border-left: solid 1px var(--accent);
+        }
+    }
+    
+
     ::deep {
         > div {
             flex-grow: 1;
-        }
-
-        button {
-            width: 3rem;
-            margin: 0;
-            padding: 0;
         }
     }
     

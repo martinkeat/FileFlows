@@ -4,7 +4,7 @@ table {
   border-collapse: collapse;
 }
 table thead tr {
-  font-weight: 600;
+  font-weight: var(--bold, 600);
   background: rgba(var(--input-background-rgb), 0.3);
 }
 table thead tr th {

@@ -64,7 +64,7 @@
 
 .flow-modal-title {
     background: var(--input-background);
-    font-weight: 600;
+    font-weight: var(--bold, 600);
     padding: 0.5rem 1rem;
 }
 

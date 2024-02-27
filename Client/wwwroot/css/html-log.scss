@@ -67,7 +67,7 @@
     }
 
     .arrow {
-        font-weight: bold;
+        font-weight: var(--bold, 600);
     }
 }
 

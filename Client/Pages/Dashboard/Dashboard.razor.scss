@@ -35,7 +35,7 @@
     border: solid 1px var(--warning);
     padding: 1rem;
     margin-bottom: 1rem;
-    font-weight: 600;
+    font-weight: var(--bold, 600);
     display: flex;
     cursor:pointer;
     i {

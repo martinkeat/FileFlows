@@ -10,11 +10,11 @@
 }
 .flowtable .output-error td {
   color: var(--error);
-  font-weight: bold;
+  font-weight: var(--bold, 600);
 }
 .flowtable .output-exit td {
   color: var(--success);
-  font-weight: bold;
+  font-weight: var(--bold, 600);
 }
 .flowtable .failure-flow-input td {
   color: var(--orange);
