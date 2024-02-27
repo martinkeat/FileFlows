@@ -121,6 +121,8 @@ public abstract class UpdaterWorker : Worker
             // if inside docker or systemd we just restart, the restart policy should automatically kick in then run the upgrade script when it starts
             if (Globals.IsDocker == false && Globals.IsSystemd == false)
             {
+                MakeExecutable(updateScript);
+                
                 Logger.Instance?.ILog($"{UpdaterName}About to execute upgrade script: " + updateScript);
                 var fi = new FileInfo(updateScript);
 
@@ -139,6 +141,47 @@ public abstract class UpdaterWorker : Worker
             Logger.Instance?.ELog($"{UpdaterName}: Failed running update script: " + ex.Message);
         }
     }
+    
+    
+
+    /// <summary>
+    /// Makes the specified file executable by changing its permissions.
+    /// </summary>
+    /// <param name="filename">The filename of the file to make executable.</param>
+    /// <returns>True if the file was made executable successfully, otherwise false.</returns>
+    public static bool MakeExecutable(string filename) {
+        // Check if the operating system supports chmod command
+        if (OperatingSystem.IsLinux() == false && OperatingSystem.IsMacOS() == false && OperatingSystem.IsFreeBSD() == false) 
+            return false;
+
+        try {
+            Logger.Instance.ILog("Making upgrade script executable: " + filename);
+            // Execute the chmod command to make the file executable
+            ProcessStartInfo psi = new ProcessStartInfo {
+                FileName = "/bin/chmod",
+                ArgumentList = { "+x", filename }, // Add +x to make the file executable
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            };
+
+            Process? process = Process.Start(psi);
+            process.WaitForExit();
+
+            // Check the exit code to determine if chmod was successful
+            if (process.ExitCode == 0)
+                return true;
+                
+            Logger.Instance.WLog("Failed making file executable: " + process.StandardError.ReadToEnd());
+            return false;
+            
+        } catch (Exception ex) {
+            Logger.Instance.WLog($"Error making file executable: {ex.Message}");
+            return false;
+        }
+    }
+    
 
     /// <summary>
     /// Downloads an update
