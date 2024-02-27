@@ -5,7 +5,7 @@
 pushd Node > /dev/null
 
 # Run the .NET Core application in the background, suppressing output
-dotnet FileFlows.Node.dll > /dev/null 2>&1 &
+dotnet FileFlows.Node.dll --gui > /dev/null 2>&1 &
 
 # Store the process ID (PID) of the dotnet process
 dotnet_pid=$!
