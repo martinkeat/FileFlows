@@ -24,10 +24,10 @@ class CommandLineOptions
     public string Temp { get; set; } = string.Empty;
     
     /// <summary>
-    /// Gets or sets the temporary working directory this node will use
+    /// Gets or sets if the GUI should be shown
     /// </summary>
-    [CommandLineArg("If a GUI should be hidden", "true", "no-gui")]
-    public bool NoGui { get; set; }
+    [CommandLineArg("If a GUI should be shown", "true", "gui")]
+    public bool Gui { get; set; }
     
     /// <summary>
     /// Gets or sets the por the REST API will be exposed on
@@ -127,10 +127,10 @@ class CommandLineOptions
         for (int i = 0; i < args.Length - 1; i++)
         {
             if (args[i].ToLower() == key)
-                return args[i + 1].ToLower() != "false" && args[i + 1] != "0";
+                return args[i + 1].ToLowerInvariant() != "false" && args[i + 1] != "0";
         }
 
-        return args.Last().ToLower() == key;
+        return string.Equals(args.Last(), key, StringComparison.InvariantCultureIgnoreCase);
     }
 
     /// <summary>

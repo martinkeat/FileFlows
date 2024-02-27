@@ -58,7 +58,7 @@ public class Program
         if (createdNew == false)
         {
             // app is already running
-            if (options.NoGui)
+            if (options.Gui == false)
             {
                 Console.WriteLine("An instance of FileFlows Node is already running");
             }
@@ -108,7 +108,7 @@ public class Program
 
             AppSettings.Init();
 
-            bool showUi = options.Docker == false && options.NoGui == false;
+            bool showUi = options.Docker == false && options.Gui;
 
             Manager = new ();
             

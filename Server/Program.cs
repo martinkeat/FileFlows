@@ -27,9 +27,6 @@ public class Program
 
     public static void Main(string[] args)
     {
-        #if(DEBUG)
-        args = new[] { "--no-gui" };
-        #endif
         try
         {
             if (args.Any(x =>
@@ -53,7 +50,7 @@ public class Program
             
             ServerShared.Globals.IsDocker = args?.Any(x => x == "--docker") == true;
             ServerShared.Globals.IsSystemd = args?.Any(x => x == "--systemd-service") == true;
-            var noGui = args?.Any((x => x.ToLower() == "--no-gui")) == true || Docker;
+            var noGui = args?.Any((x => x.ToLower() == "--gui")) == false || Docker;
 
             if (noGui == false && Globals.IsWindows)
             {
