@@ -1,20 +1,37 @@
+$step:7;
+$offset:7;
+
+@mixin generate-base-colors($step: 7, $offset: 3) {
+    $base-colors: ();
+
+    @for $i from 0 through 4 {
+        $name: nth(('base-darkest', 'base-darker', 'base', 'base-lighter', 'base-lightest'), $i + 1);
+        $value: $offset + ($step * $i);
+        $r: $value;
+        $g: $value;
+        $b: $value;
+
+        $base-colors: map-merge($base-colors, (
+                $name: rgb($r, $g, $b),
+                '#{$name}-rgb': (#{$r}, #{$g}, #{$b})
+        ));
+    }
+
+    @each $name, $color in $base-colors {
+        --#{$name}: #{$color};
+    }
+}
+
 body {
+    @include generate-base-colors($step, $offset);
+    
+    
     --color: rgb(240, 240, 240);
     --color-rgb: 240, 240, 240;
     --color-darker: rgb(220, 220, 220);
     --color-darke-rgb: 220, 220, 220;
     --color-darkest: rgb(160, 160, 160);
     --color-darkest-rgb: 160, 160, 160;
-    --base: rgb(20, 20, 20);
-    --base-rgb: 20, 20, 20;
-    --base-lightest: rgb(32,32,32);
-    --base-lightest-rgb: 32,32,32;
-    --base-lighter: rgb(26,26,26);
-    --base-lighter-rgb: 26,26,26;
-    --base-darker: rgb(16, 16, 16);
-    --base-darker-rgb: 16, 16, 16;
-    --base-darkest: rgb(10, 10, 10);
-    --base-darkest-rgb: 10, 10, 10;
     --accent: rgb(255, 0, 144);
     --accent-rgb: 255, 0, 144;
     --border-color: rgba(var(--color-rgb), 0.1);
