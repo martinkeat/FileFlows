@@ -60,7 +60,7 @@
 }
 .flow-modal-title {
   color: var(--accent);
-  font-weight: 600;
+  font-weight: var(--bold, 600);
 }
 
 .flow-modal-body {

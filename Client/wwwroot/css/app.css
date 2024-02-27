@@ -2985,7 +2985,7 @@ hr {
   height: 2.5rem;
   color: var(--color);
   padding: 0.75rem 0.75rem 0;
-  font-weight: 600;
+  font-weight: var(--bold, 600);
 }
 .widget .title i:not(.fa-trash) {
   color: var(--accent);
