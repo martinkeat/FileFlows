@@ -1,0 +1,13 @@
+// safari specific changes
+.safari
+{
+  select {
+    -webkit-appearance: none;
+  }
+  .widget .title {
+    font-weight:500;
+  }
+  .nav-menu-group {
+    font-weight:500;
+  }
+}

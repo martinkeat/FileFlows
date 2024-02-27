@@ -100,7 +100,8 @@
 
     <script>
         if (window.safari) {
-            document.getElementById("unsupported-browser").style.display = "unset";
+            document.body.classList.add('safari');
+            // document.getElementById("unsupported-browser").style.display = "unset";
         }
     </script>
 </body>

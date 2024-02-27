@@ -2562,6 +2562,16 @@ a.btn {
   color: var(--warning) !important;
 }
 
+.safari select {
+  -webkit-appearance: none;
+}
+.safari .widget .title {
+  font-weight: 500;
+}
+.safari .nav-menu-group {
+  font-weight: 500;
+}
+
 @font-face {
   font-family: "Montserrat";
   src: url("webfonts/Montserrat-VariableFont_wght.ttf") format("truetype-variations");
