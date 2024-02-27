@@ -82,9 +82,15 @@
     width: 100%;
     text-align: center;
     font-size: 4.5rem;
-    color: var(--accent);
-    .paused {
+    > span {
         cursor:pointer;
+    }
+    .paused {
+        color: var(--accent);        
+    }
+    .not-paused {
+        color: var(--color);
+        opacity:0.15;
     }
 }
 .support-links {

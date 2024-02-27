@@ -83,10 +83,10 @@
         </li>
     </ul>
     
-    @if (App.Instance.IsMobile == false && PausedService.IsPaused)
+    @if (App.Instance.IsMobile == false)
     {
         <div class="paused-indicator">
-            <span class="paused" @onclick="() => PausedService.Toggle()" title="@PausedService.PausedLabel">
+            <span class="@(PausedService.IsPaused ? "paused" : "not-paused")" @onclick="() => PausedService.Toggle()" title="@PausedService.PausedLabel">
                 <i class="far fa-pause-circle"/>
             </span>
         </div>
