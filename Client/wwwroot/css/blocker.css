@@ -1,5 +1,5 @@
 .blocker {
-  background: rgba(var(--base-rgb), 0.9);
+  background: rgba(var(--base-darkest-rgb), 0.9);
   z-index: 1000;
   position: absolute;
   top: 0;
@@ -13,25 +13,14 @@
 }
 .blocker .blocker-spinner {
   margin: auto;
-  --border-width: 16px;
-  height: 100px;
-  width: 100px;
+  border: 4px solid rgba(255, 0, 144, 0.2);
+  border-top: 4px solid #FF0090;
   border-radius: 50%;
-  /* 0.5px's are needed to avoid hard-stopping */
-  --mask: radial-gradient(
-    farthest-side,
-    transparent calc(100% - var(--border-width) - 0.5px),
-    #000 calc(100% - var(--border-width) + 0.5px)
-  );
-  -webkit-mask: var(--mask);
-  mask: var(--mask);
-  /* we're using two half linear-gradient which is masked by the radial-gradient */
-  background: linear-gradient(to top, rgba(var(--accent-rgb), 1), rgba(var(--accent-rgb), 0.5)) 100% 0/50% 100% no-repeat, linear-gradient(rgba(var(--accent-rgb), 0.5) 50%, transparent 95%) 0 0/50% 100% no-repeat;
+  width: 50px;
+  height: 50px;
   animation: spin 1s linear infinite;
 }
 .blocker .blocker-message {
-  color: var(--accent);
-  border: solid 1px var(--accent);
   margin-top: 2rem;
   padding: 0.5rem 2rem;
   font-size: 0.75rem;

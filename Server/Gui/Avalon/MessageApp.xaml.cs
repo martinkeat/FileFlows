@@ -1,6 +1,6 @@
 using Avalonia;
 
-namespace FileFlows.Server.Ui;
+namespace FileFlows.Server.Gui.Avalon;
 
 internal class MessageApp : Application
 {

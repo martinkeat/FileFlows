@@ -11,6 +11,7 @@
 @use 'flow';
 @use 'processing-table';
 @use 'safari';
+@use 'photino';
 
 $mobile_width: 850px;
 
@@ -34,10 +35,9 @@ body {
     }
 }
 
-
 html, body {
     font-family: "Montserrat", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
-    font-size: 14px;
+    font-size: var(--font-size, 14px);
     font-weight:400;
     color: var(--color) !important;
     background: var(--base-darker) !important;
@@ -46,6 +46,7 @@ html, body {
 a, .btn-link {
     color: var(--accent) !important;
 }
+
 
 .loading-version {
     position:fixed;
@@ -108,6 +109,7 @@ a, .btn-link {
     }
 }
 
+
 ::-webkit-scrollbar{
     width: 6px;
     height: 10px;
@@ -125,6 +127,7 @@ a, .btn-link {
     --scrollbar-thumb-color: #444;
     background-color: var(--scrollbar-thumb-color);
 }
+
 ::-webkit-scrollbar-corner {background-color: var(--base) !important;}
 
 .background-overlay {
@@ -136,6 +139,7 @@ a, .btn-link {
     z-index:2;
     background:#0000009e;
 }
+
 button {
     .fas, .far {
         width:1rem;
@@ -145,7 +149,6 @@ button {
 .row {
     flex-wrap:nowrap !important;
 }
-
 
 #unsupported-browser, .update-available {
     position: fixed;

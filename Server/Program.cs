@@ -1,14 +1,17 @@
 using System.Collections;
 using System.Net;
+using System.Text;
 using Avalonia;
 using FileFlows.Plugin;
 using FileFlows.Server.Database;
 using FileFlows.Server.Database.Managers;
+using FileFlows.Server.Gui;
 using FileFlows.Server.Helpers;
 using FileFlows.Server.Services;
-using FileFlows.Server.Ui;
 using FileFlows.Shared.Helpers;
 using FileFlows.Shared.Models;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Metadata;
+using PhotinoNET;
 
 namespace FileFlows.Server;
 
@@ -27,6 +30,9 @@ public class Program
 
     public static void Main(string[] args)
     {
+#if DEBUG
+        args = new[] { "--gui" };    
+#endif
         try
         {
             if (args.Any(x =>
@@ -72,7 +78,7 @@ public class Program
                     {
                         try
                         {
-                            var appBuilder = BuildAvaloniaApp(true);
+                            var appBuilder = Gui.Avalon.App.BuildAvaloniaApp(true);
                             appBuilder.StartWithClassicDesktopLifetime(args);
                         }
                         catch (Exception) { }
@@ -111,27 +117,38 @@ public class Program
             }
             else
             {
-                
                 Task.Run(() =>
                 {
                     Console.WriteLine("Starting FileFlows Server...");
                     WebServer.Start(args);
                 });
-
-                DateTime dt = DateTime.Now;
-                try
+                
+                string url = WebServer.GetServerUrl(args).Replace("0.0.0.0", "localhost");
+                if (OperatingSystem.IsLinux())
                 {
-                    var appBuilder = BuildAvaloniaApp();
-                    appBuilder.StartWithClassicDesktopLifetime(args);
+                    _ = Task.Run(Gui.Avalon.App.Open);
+                    Gui.Photino.WebView.Open(url);
                 }
-                catch (Exception ex)
-                {
-                    if(DateTime.Now.Subtract(dt) < new TimeSpan(0,0,2))
-                        Console.WriteLine("Failed to launch GUI: " + ex.Message + Environment.NewLine + ex.StackTrace);
-                    else
-                        Console.WriteLine("Error: " + ex.Message + Environment.NewLine + ex.StackTrace);
-                }
+                else
+                    Gui.Avalon.AvalonWebView.Open(url);
+                    
             }
+            // else {
+            //
+            //     DateTime dt = DateTime.Now;
+            //     try
+            //     {
+            //         var appBuilder = BuildAvaloniaApp();
+            //         appBuilder.StartWithClassicDesktopLifetime(args);
+            //     }
+            //     catch (Exception ex)
+            //     {
+            //         if(DateTime.Now.Subtract(dt) < new TimeSpan(0,0,2))
+            //             Console.WriteLine("Failed to launch GUI: " + ex.Message + Environment.NewLine + ex.StackTrace);
+            //         else
+            //             Console.WriteLine("Error: " + ex.Message + Environment.NewLine + ex.StackTrace);
+            //     }
+            // }
 
             _ = WebServer.Stop();
             Console.WriteLine("Exiting FileFlows Server...");
@@ -271,9 +288,4 @@ public class Program
         DirectoryHelper.CleanDirectory(tempDir);
     }
 
-
-    // Avalonia configuration, don't remove; also used by visual designer.
-    public static AppBuilder BuildAvaloniaApp(bool messagebox = false)
-        => (messagebox ? AppBuilder.Configure<MessageApp>() : AppBuilder.Configure<App>())
-            .UsePlatformDetect();
 }

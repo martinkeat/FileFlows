@@ -17,6 +17,25 @@
     <link rel="manifest" href="/manifest.json?v=#VERSION#">
     <link rel="stylesheet" href="_content/BlazorDateRangePicker/daterangepicker.min.css?v=#VERSION#" />
     <link href="_content/Blazor.ContextMenu/blazorContextMenu.min.css?v=#VERSION#" rel="stylesheet" />
+
+
+    <script type="text/javascript">
+        window.onerror = function(message, source, lineno, colno, error) {
+            // Handle the error here
+            console.error("@@@Error:", message, "at", source, "line:", lineno, "column:", colno);
+        };
+        window.addEventListener('error', function(event) {
+            // Check if the sidebar element exists
+            var sidebarLoaded = !!document.querySelector('.sidebar');
+            console.log('got error, has sidebar: ' + sidebarLoaded);
+
+            // If the sidebar is not loaded, trigger a refresh
+            if (!sidebarLoaded) {
+                //   location.reload();
+            }
+        });
+    </script>
+    
     <script defer src="_content/BlazorDateRangePicker/clickAndPositionHandler.js?v=#VERSION#"></script>
     <script src="scripts/gridstack/gridstack-h5.min.js?v=#VERSION#"></script>
     <script src="scripts/handlebars.min.js?v=#VERSION#"></script>
@@ -102,6 +121,12 @@
         if (window.safari) {
             document.body.classList.add('safari');
             // document.getElementById("unsupported-browser").style.display = "unset";
+        }
+        if(/photino/i.test(navigator.userAgent)){
+            let root = document.getElementsByTagName( 'html' )[0]; // '0' to assign the first (and only `HTML` tag)
+            root.setAttribute( 'class', 'photino' );
+            document.body.classList.add('photino');
+            window.PHOTINO = true;
         }
     </script>
 </body>

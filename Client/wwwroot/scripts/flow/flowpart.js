@@ -3,6 +3,25 @@ class ffFlowPart
     constructor(ffFlow) {
         this.ffFlow = ffFlow;
         this.flowPartElements = [];
+        this.fontSize = this.getFontSize();
+        this.fpLineHeight = this.getFlowPartLineHeight();
+    }
+    
+    getFontSize(){
+        let value = getComputedStyle(document.body).getPropertyValue('--font-size');
+        if(!value)
+            value = 14;
+        else
+            value = parseFloat(value);
+        return value;        
+    }
+    getFlowPartLineHeight(){
+        let value = getComputedStyle(document.body).getPropertyValue('--flow-part-line-height');
+        if(!value)
+            value = this.fontSize * 1.2;
+        else
+            value = parseFloat(value);
+        return value;
     }
 
     reset() {
@@ -251,8 +270,8 @@ class ffFlowPart
         div.style.width = width + 'px';
         div.innerText = text;
         // get number of lines needed for div
-        let fontSize = 14;
-        let lineHeight = fontSize * 1.2;
+        let fontSize = this.fontSize || 14;
+        let lineHeight = this.fpLineHeight || fontSize * 1.2;
         div.style.fontSize = fontSize + 'px';
         div.style.lineHeight = lineHeight + 'px';
 

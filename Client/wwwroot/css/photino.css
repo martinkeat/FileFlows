@@ -1,0 +1,45 @@
+html.photino-ignore {
+  --font-size:12px;
+  --flow-part-line-height: 14px;
+  --nav-menu-offset:40px;
+}
+
+body.photino {
+  --bold:500;
+  --nav-menu-bold:500;
+}
+body.photino #blazor-error-ui,
+body.photino .blazor-error-ui-wrapper {
+  display: none !important;
+}
+body.photino .flow-part .name {
+  line-height: 12px;
+}
+body.photino .nav-item {
+  padding-bottom: 0.1rem;
+}
+@media screen and (max-height: 780px) {
+  body.photino .nav-menu-group {
+    display: none;
+  }
+}
+@media screen and (max-height: 690px) {
+  body.photino .support-links, body.photino .version-info {
+    display: none !important;
+  }
+  body.photino .paused-indicator {
+    bottom: 1rem !important;
+  }
+}
+body.photino .paused-indicator {
+  font-size: 2.75rem;
+  bottom: 5rem;
+  display: unset !important;
+}
+@media screen and (max-height: 610px) {
+  body.photino .paused-indicator {
+    display: none !important;
+  }
+}
+
+/*# sourceMappingURL=photino.css.map */

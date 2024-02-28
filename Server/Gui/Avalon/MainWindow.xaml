@@ -1,6 +1,6 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        x:Class="FileFlows.Server.Ui.MainWindow" 
+        x:Class="FileFlows.Server.Gui.Avalon.MainWindow" 
         Title="FileFlows" Width="400" 
 		MaxWidth="400" 
 		
@@ -8,13 +8,13 @@
         Foreground="#ff0090"
         Background="#111214"
         FontSize="16"
-		Icon="avares://FileFlows.Server/Ui/icon.ico"
+		Icon="avares://FileFlows.Server/Gui/icon.ico"
 	>
 	<Grid RowDefinitions="Auto,*">
 
 		<!-- Title bar -->
 		<Grid IsVisible="{Binding CustomTitle}" Height="30" ColumnDefinitions="Auto, *,Auto,Auto" IsHitTestVisible="True" Background="Transparent">
-			<Image      Grid.Column="0" VerticalAlignment="Center" Source="avares://FileFlows.Server/Ui/icon.ico" Width="40" Margin="0,4,0,0" ></Image>
+			<Image      Grid.Column="0" VerticalAlignment="Center" Source="avares://FileFlows.Server/Gui/icon.ico" Width="40" Margin="0,4,0,0" ></Image>
 			<TextBlock  Grid.Column="1" VerticalAlignment="Center" FontSize="16" Text="FileFlows"></TextBlock>
 			
 			<Button Grid.Column="2" Margin="0" Content="🗕" Command="{Binding Hide}" Width="60"
@@ -24,7 +24,7 @@
 			        Foreground="#eee" Background="Transparent" BorderBrush="Transparent" />
 		</Grid>
 		<StackPanel Grid.Row="1" Margin="10">
-			<Image Source="avares://FileFlows.Server/Ui/icon.ico" Width="100" />
+			<Image Source="avares://FileFlows.Server/Gui/icon.ico" Width="100" />
 
 
 			<TextBlock Margin="6" Text="{Binding Version}" TextAlignment="Center" />

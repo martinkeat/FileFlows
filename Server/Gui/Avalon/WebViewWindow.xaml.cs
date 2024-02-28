@@ -1,4 +1,4 @@
-namespace FileFlows.Server.Ui;
+namespace FileFlows.Server.Gui.Avalon;
 
 using System.ComponentModel;
 using System.Diagnostics;
@@ -12,17 +12,17 @@ using Avalonia.Controls.ApplicationLifetimes;
 /// <summary>
 /// Main window for Server application
 /// </summary>
-public class MainWindow : Window
+public class WebViewWindow : Window
 {
     private readonly TrayIcon _trayIcon;
     NativeMenu menu = new();
 
-    public MainWindow()
+    public WebViewWindow()
     {
         _trayIcon = new TrayIcon();
         InitializeComponent();
         
-        var dc = new MainWindowViewModel(this)
+        var dc = new WebViewWindowWindowModel(this)
         {
             CustomTitle = Globals.IsWindows
         };
@@ -38,13 +38,8 @@ public class MainWindow : Window
         
         _trayIcon.IsVisible = true;
 
-        _trayIcon.Icon = new WindowIcon(AvaloniaLocator.Current.GetService<IAssetLoader>()?.Open(new Uri($"avares://FileFlows.Server/Ui/icon.ico")));
+        //_trayIcon.Icon = new WindowIcon(AvaloniaLocator.Current.GetService<IAssetLoader>()?.Open(new Uri($"avares://FileFlows.Server/Ui/icon.ico")));
 
-        //this.Events().Closing.Subscribe(_ =>
-        //{
-        //    _trayIcon.IsVisible = false;
-        //    _trayIcon.Dispose();
-        //});
 
         AddMenuItem("Open", () => this.Launch());
         AddMenuItem("Quit", () => this.Quit());
@@ -66,7 +61,8 @@ public class MainWindow : Window
     }
 
     private bool ConfirmedQuit = false;
-    protected override void OnClosing(CancelEventArgs e)
+
+    protected override void OnClosing(WindowClosingEventArgs e)
     {
         if (ConfirmedQuit == false)
         {
@@ -126,13 +122,13 @@ public class MainWindow : Window
         else
             Process.Start(new ProcessStartInfo("xdg-open", url));
     }
-
-    protected override void HandleWindowStateChanged(WindowState state)
-    {
-        base.HandleWindowStateChanged(state);
-        if(Globals.IsWindows && state == WindowState.Minimized)
-            this.Hide();
-    }
+    
+    // protected override void HandleWindowStateChanged(WindowState state)
+    // {
+    //     base.HandleWindowStateChanged(state);
+    //     if(Globals.IsWindows && state == WindowState.Minimized)
+    //         this.Hide();
+    // }
 
     /// <summary>
     /// Quit the application
@@ -153,13 +149,13 @@ public class MainWindow : Window
     }
 }
 
-public class MainWindowViewModel
+public class WebViewWindowWindowModel
 { 
     /// <summary>
     /// Gets or sets if a custom title should be rendered
     /// </summary>
     public bool CustomTitle { get; set; }
-    private MainWindow Window { get; set; }
+    private WebViewWindow Window { get; set; }
     public string ServerUrl { get; set; }
     public string Version { get; set; }
 
@@ -184,7 +180,7 @@ public class MainWindowViewModel
 
     public void Hide() => Window.Minimize();
 
-    public MainWindowViewModel(MainWindow window)
+    public WebViewWindowWindowModel(WebViewWindow window)
     {
         this.Window = window;
         this.ServerUrl = $"http://{Environment.MachineName.ToLower()}:{WebServer.Port}/";

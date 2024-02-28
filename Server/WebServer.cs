@@ -3,6 +3,7 @@ using FileFlows.Server.Workers;
 using System.Text.RegularExpressions;
 using Microsoft.OpenApi.Models;
 using System.Runtime.InteropServices;
+using Esprima.Ast;
 using FileFlows.Server.Hubs;
 using FileFlows.Server.Middleware;
 using FileFlows.ServerShared.Workers;
@@ -16,8 +17,22 @@ namespace FileFlows.Server;
 public class WebServer
 {
     private static WebApplication app;
+
+    /// <summary>
+    /// Gets or sets if the web server started
+    /// </summary>
+    public static bool Started { get; private set; }
+
+    /// <summary>
+    /// Gets or sets a error when starting the web server
+    /// </summary>
+    public static string StartError { get; private set; }
+
+    /// <summary>
+    /// Gets or sets the port
+    /// </summary>
     public static int Port { get; private set; }
-    
+
     /// <summary>
     /// Stops the server
     /// </summary>
@@ -26,6 +41,40 @@ public class WebServer
         if (app == null)
             return;
         await app.StopAsync();
+    }
+
+    /// <summary>
+    /// Gets the server address
+    /// </summary>
+    /// <param name="args">the command line arguments</param>
+    /// <returns>the server address</returns>
+    public static string GetServerUrl(string[] args)
+    {
+        bool isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+        string protocol = "http";
+        Port = AppSettings.Instance.ServerPort ?? 19200;
+#if (DEBUG)
+        Port = 6868;
+#endif
+
+        var url = args?.Where(x => x?.StartsWith("--urls=") == true)?.FirstOrDefault();
+        if (string.IsNullOrEmpty(url) == false)
+        {
+            var portMatch = Regex.Match(url, @"(?<=(:))[\d]+");
+            if (portMatch.Success)
+                Port = int.Parse(portMatch.Value);
+            if (url.StartsWith("https"))
+                protocol = "https";
+        }
+
+        if (int.TryParse(Environment.GetEnvironmentVariable("Port"), out int port) && port is > 0 and <= 65535)
+            Port = port;
+        if (Environment.GetEnvironmentVariable("HTTPS") == "1")
+            protocol = "https";
+
+        string serverUrl = $"{protocol}://0.0.0.0:{Port}/";
+        Logger.Instance.ILog("Server URL: " + serverUrl);
+        return serverUrl;
     }
 
     /// <summary>
@@ -41,30 +90,9 @@ public class WebServer
             // remove the file upload limit so the File Service can receive larger files
             options.Limits.MaxRequestBodySize = null; // Set to null to remove the limit
         });
-        
-        bool isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
-        string protocol = "http";
-        Port = AppSettings.Instance.ServerPort ?? 19200;
-#if (DEBUG)
-        Port = 6868;
-#endif
-        
-        var url = args?.Where(x => x?.StartsWith("--urls=") == true)?.FirstOrDefault();
-        if(string.IsNullOrEmpty(url) == false)
-        {
-            var portMatch = Regex.Match(url, @"(?<=(:))[\d]+");
-            if (portMatch.Success)
-                Port = int.Parse(portMatch.Value);
-            if (url.StartsWith("https"))
-                protocol = "https";
-        }
-        if (int.TryParse(Environment.GetEnvironmentVariable("Port"), out int port) && port is > 0 and <= 65535)
-            Port = port;
-        if (Environment.GetEnvironmentVariable("HTTPS") == "1")
-            protocol = "https";
 
-        string serverUrl = $"{protocol}://0.0.0.0:{Port}/";
-        Logger.Instance.ILog("Server URL: " + serverUrl);
+        string serverUrl = GetServerUrl(args);
+        string protocol = serverUrl[..serverUrl.IndexOf(":", StringComparison.Ordinal)];
 
         // Add services to the container.
         builder.Services.AddControllersWithViews();
@@ -73,7 +101,9 @@ public class WebServer
         builder.Services.AddControllers().AddJsonOptions(options =>
         {
             options.JsonSerializerOptions.PropertyNamingPolicy = null;
-            options.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault | System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
+            options.JsonSerializerOptions.DefaultIgnoreCondition =
+                System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault |
+                System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
         });
         builder.Services.AddMvc();
         builder.Services.AddSwaggerGen(c =>
@@ -117,7 +147,8 @@ public class WebServer
         app.UseSwagger();
         app.UseSwaggerUI(c =>
         {
-            c.IndexStream = () => typeof(WebServer).Assembly.GetManifestResourceStream("FileFlows.Server.Resources.SwaggerIndex.html");
+            c.IndexStream = () =>
+                typeof(WebServer).Assembly.GetManifestResourceStream("FileFlows.Server.Resources.SwaggerIndex.html");
 
             c.RoutePrefix = "api/help";
             c.DocumentTitle = "FileFlows API";
@@ -158,8 +189,8 @@ public class WebServer
             app.UseCors(builder => builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader().WithExposedHeaders("*"));
 
         app.MapControllerRoute(
-             name: "default",
-             pattern: "{controller=Home}/{action=Index}/{id?}");
+            name: "default",
+            pattern: "{controller=Home}/{action=Index}/{id?}");
 
         // this will allow refreshing from a SPA url to load the index.html file
         app.MapControllerRoute(
@@ -179,15 +210,32 @@ public class WebServer
         var settings = new Controllers.SettingsController().Get().Result;
 
 
+
+        ServerShared.Services.Service.ServiceBaseUrl = $"{protocol}://localhost:{Port}";
+        // update the client with the proper ServiceBaseUrl
+        Shared.Helpers.HttpHelper.Client =
+            Shared.Helpers.HttpHelper.GetDefaultHttpHelper(ServerShared.Services.Service.ServiceBaseUrl);
+
+
+        app.MapHub<Hubs.FlowHub>("/flow");
+
+        app.MapHub<Hubs.ClientServiceHub>("/client-service");
+
+        app.UseResponseCompression();
+
+        // this will run the asp.net app and wait until it is killed
+        Logger.Instance.ILog("Running FileFlows Server");
+
+        var _clientServiceHub = app.Services.GetRequiredService<IHubContext<ClientServiceHub>>();
+        _ = new ClientServiceManager(_clientServiceHub);
+
+        Task task = app.RunAsync(serverUrl);
+        
+        
         // need to scan for plugins before initing the translater as that depends on the plugins directory
         Helpers.PluginScanner.Scan();
 
         Helpers.TranslaterHelper.InitTranslater(settings.Language?.EmptyAsNull() ?? "en");
-
-        ServerShared.Services.Service.ServiceBaseUrl = $"{protocol}://localhost:{Port}";
-        // update the client with the proper ServiceBaseUrl
-        Shared.Helpers.HttpHelper.Client = Shared.Helpers.HttpHelper.GetDefaultHttpHelper(ServerShared.Services.Service.ServiceBaseUrl);
-
 
         LibraryWorker.ResetProcessing(internalOnly: true);
         WorkerManager.StartWorkers(
@@ -212,22 +260,52 @@ public class WebServer
             new LibraryFileServiceUpdater()
         );
 
-        app.MapHub<Hubs.FlowHub>("/flow");
+        Started = CheckServerListening(serverUrl.Replace("0.0.0.0", "localhost").TrimEnd('/') + "/api/status").Result;
+        if (Started == false)
+            StartError = "Failed to start on: " + serverUrl;
 
-        app.MapHub<Hubs.ClientServiceHub>("/client-service");
-
-        app.UseResponseCompression();
-
-        // this will run the asp.net app and wait until it is killed
-        Logger.Instance.ILog("Running FileFlows Server");
-     
-        var _clientServiceHub = app.Services.GetRequiredService<IHubContext<ClientServiceHub>>();
-        _ = new ClientServiceManager(_clientServiceHub); 
-
-        app.Run(serverUrl);                
-        
+        task.Wait();
         Logger.Instance.ILog("Finished running FileFlows Server");
-
         WorkerManager.StopWorkers();
+    }
+
+
+
+    private static async Task<bool> CheckServerListening(string url)
+    {
+        using var handler = new HttpClientHandler();
+        // Ignore all certificate errors
+        handler.ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => true;
+
+        using var client = new HttpClient(handler);
+
+        client.Timeout = TimeSpan.FromSeconds(30); // Set the timeout to 30 seconds
+
+        for (int i = 0; i < 15; i++) // Retry 15 times (15 * 2 seconds = 30 seconds)
+        {
+            try
+            {
+                var response = await client.GetAsync(url);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    // If successful, the server is actively listening
+                    return true;
+                }
+                else
+                {
+                    // If the status code is not success, wait for 2 seconds before retrying
+                    await Task.Delay(2000);
+                }
+            }
+            catch (Exception)
+            {
+                // If an exception occurs, wait for 2 seconds before retrying
+                await Task.Delay(2000);
+            }
+        }
+
+        // If the server fails to bind after retrying, return false
+        return false;
     }
 }

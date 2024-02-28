@@ -76,7 +76,7 @@ public class Upgrader
                 new Upgrade_1_0_10().Run(settings);
             if (currentVersion < new Version(1, 1, 0, 2246))  
                 new Upgrade_1_1_0().Run(settings);
-            if (currentVersion < new Version(24, 3))  
+            if (currentVersion < new Version(24, 2, 6, 2772)) // dev needs this 24.2.6, can change to 24.3 once in march  
                 new Upgrade_24_02().Run(settings);
         }
 
