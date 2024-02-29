@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 
+# Change to the current directory
+
 # Change directory to Server and push to directory stack, suppressing output
-pushd Server > /dev/null
+pushd "$(dirname "$0")/Server" > /dev/null
 
 # Run the .NET Core application in the background, suppressing output
 dotnet FileFlows.Server.dll --gui > /dev/null 2>&1 &

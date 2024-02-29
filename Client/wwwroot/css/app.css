@@ -2571,6 +2571,10 @@ body.photino {
   --bold:500;
   --nav-menu-bold:500;
 }
+body.photino select {
+  -webkit-appearance: none;
+  padding: 0 0.25rem;
+}
 body.photino #blazor-error-ui,
 body.photino .blazor-error-ui-wrapper {
   display: none !important;

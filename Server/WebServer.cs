@@ -12,11 +12,43 @@ using Microsoft.AspNetCore.SignalR;
 namespace FileFlows.Server;
 
 /// <summary>
+/// Web server state
+/// </summary>
+public enum WebServerState
+{
+    /// <summary>
+    /// Web Server is Starting
+    /// </summary>
+    Starting,
+    /// <summary>
+    /// Web Server is Listening
+    /// </summary>
+    Listening,
+    /// <summary>
+    /// Web Server failed to start
+    /// </summary>
+    Error
+}
+
+/// <summary>
 /// Web Server for the FileFlows Server
 /// </summary>
 public class WebServer
 {
     private static WebApplication app;
+    
+    /// <summary>
+    /// Represents a method that handles status update events from the web server.
+    /// </summary>
+    /// <param name="state">The current state of the web server.</param>
+    /// <param name="message">A message associated with the status update.</param>
+    /// <param name="url">The URL the server is listening on </param>
+    public delegate void StatusUpdateHandler(WebServerState state, string message, string url);
+
+    /// <summary>
+    /// Event that occurs when the status of the web server is updated.
+    /// </summary>
+    public static event StatusUpdateHandler OnStatusUpdate;
 
     /// <summary>
     /// Gets or sets if the web server started
@@ -93,6 +125,8 @@ public class WebServer
 
         string serverUrl = GetServerUrl(args);
         string protocol = serverUrl[..serverUrl.IndexOf(":", StringComparison.Ordinal)];
+
+        OnStatusUpdate?.Invoke(WebServerState.Starting, "Starting web server", serverUrl);
 
         // Add services to the container.
         builder.Services.AddControllersWithViews();
@@ -262,7 +296,14 @@ public class WebServer
 
         Started = CheckServerListening(serverUrl.Replace("0.0.0.0", "localhost").TrimEnd('/') + "/api/status").Result;
         if (Started == false)
+        {
             StartError = "Failed to start on: " + serverUrl;
+            OnStatusUpdate?.Invoke(WebServerState.Error, "Failed to start", serverUrl);
+        }
+        else
+        {
+            OnStatusUpdate?.Invoke(WebServerState.Listening, "Web server listening", serverUrl);
+        }
 
         task.Wait();
         Logger.Instance.ILog("Finished running FileFlows Server");

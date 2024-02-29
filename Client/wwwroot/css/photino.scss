@@ -7,6 +7,12 @@ body.photino
 {
   --bold:500;
   --nav-menu-bold:500;
+
+  select {
+    -webkit-appearance: none;
+    padding:0 0.25rem;
+  }
+  
   #blazor-error-ui,
   .blazor-error-ui-wrapper {
     display: none !important;

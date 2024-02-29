@@ -83,7 +83,7 @@ public class DirectoryHelper
     private static string _BaseDirectory;
 
     /// <summary>
-    /// Gets the base directory of FileFlows
+    /// Gets or sets the base directory of FileFlows
     /// eg %appdata%\FileFlows
     /// </summary>
     public static string BaseDirectory
@@ -99,6 +99,7 @@ public class DirectoryHelper
             }
             return _BaseDirectory;
         }
+        set =>  _BaseDirectory = value;
     }
     
     private static string ExecutingDirectory => Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);

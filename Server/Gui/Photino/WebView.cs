@@ -1,4 +1,3 @@
-using System.Text;
 using PhotinoNET;
 
 namespace FileFlows.Server.Gui.Photino;
@@ -8,25 +7,57 @@ namespace FileFlows.Server.Gui.Photino;
 /// </summary>
 public class WebView
 {
+    private PhotinoWindow window;
+
+    public WebView()
+    {
+        WebServer.OnStatusUpdate += WebServer_StatusUpdate;
+    }
+
+    private void WebServer_StatusUpdate(WebServerState state, string message, string url)
+    {
+        if (state == WebServerState.Error)
+            ShowError(message);
+        if (state == WebServerState.Listening)
+        {
+            Thread.Sleep(5000);
+            window.LoadRawString(GetLoadingHtml(message));
+            
+            // Parse the URL
+            Uri uri = new Uri(url);
+            string protocol = uri.Scheme;
+            int port = uri.Port;
+            if (port > 0)
+                url  = $"{protocol}://{Environment.MachineName.ToLowerInvariant()}:{port}/";
+            else
+                url  = $"{protocol}://{Environment.MachineName.ToLowerInvariant()}/";
+            
+            #if(DEBUG)
+            url = "http://localhost:5276/";
+            #endif
+            
+           LoadIFrame(url);
+        }
+
+        if (state == WebServerState.Starting)
+            window.LoadRawString(GetLoadingHtml(message));
+
+    }
+
     /// <summary>
     /// Opens a web view at the given URL
     /// </summary>
-    /// <param name="url">the url to the FileFlows UI</param>
-    public static void Open(string url)
+    public void Open()
     {
-        string siteUrl = url;
         string folderPrefix = "";
 #if (DEBUG)
         folderPrefix = "../Client/";
-        siteUrl = "http://localhost:5276/";
 #endif
-        url = url.TrimEnd('/') + "/api/status";
 
         var iconFile = folderPrefix + "wwwroot/icon" + (PhotinoWindow.IsWindowsPlatform ? ".ico" : ".png");
 
-
         // Creating a new PhotinoWindow instance with the fluent API
-        var window = new PhotinoWindow()
+        window = new PhotinoWindow()
             .SetTitle("FileFlows")
             // Resize to a percentage of the main monitor work area
             .SetUseOsDefaultSize(false)
@@ -35,41 +66,64 @@ public class WebView
             .SetChromeless(false)
             .SetIconFile(iconFile)
             .SetResizable(true)
-            //.SetMaximized(true)
-            // Center window in the middle of the screen
-            // Users can resize windows by default.
-            // Let's make this one fixed instead.
-            .RegisterCustomSchemeHandler("app",
-                (object sender, string scheme, string url, out string contentType) =>
-                {
-                    contentType = "text/javascript";
-                    return new MemoryStream(Encoding.UTF8.GetBytes(@"
-                        (() =>{
-                            window.setTimeout(() => {
-                                alert(`🎉 Dynamically inserted JavaScript.`);
-                            }, 1000);
-                        })();
-                    "));
-                })
-            // Most event handlers can be registered after the
-            // PhotinoWindow was instantiated by calling a registration 
-            // method like the following RegisterWebMessageReceivedHandler.
-            // This could be added in the PhotinoWindowOptions if preferred.
-            .RegisterWebMessageReceivedHandler((object sender, string message) =>
-            {
-                var window = (PhotinoWindow)sender;
+            // //.SetMaximized(true)
+            // // Center window in the middle of the screen
+            // // Users can resize windows by default.
+            // // Let's make this one fixed instead.
+            // .RegisterCustomSchemeHandler("app",
+            //     (object sender, string scheme, string url, out string contentType) =>
+            //     {
+            //         contentType = "text/javascript";
+            //         return new MemoryStream(Encoding.UTF8.GetBytes(@"
+            //             (() =>{
+            //                 window.setTimeout(() => {
+            //                     alert(`🎉 Dynamically inserted JavaScript.`);
+            //                 }, 1000);
+            //             })();
+            //         "));
+            //     })
+            // // Most event handlers can be registered after the
+            // // PhotinoWindow was instantiated by calling a registration 
+            // // method like the following RegisterWebMessageReceivedHandler.
+            // // This could be added in the PhotinoWindowOptions if preferred.
+            // .RegisterWebMessageReceivedHandler((object sender, string message) =>
+            // {
+            //     var window = (PhotinoWindow)sender;
+            //
+            //     // The message argument is coming in from sendMessage.
+            //     // "window.external.sendMessage(message: string)"
+            //     string response = $"Received message: \"{message}\"";
+            //
+            //     // Send a message back the to JavaScript event handler.
+            //     // "window.external.receiveMessage(callback: Function)"
+            //     window.SendWebMessage(response);
+            // })
+            .LoadRawString(GetLoadingHtml());
 
-                // The message argument is coming in from sendMessage.
-                // "window.external.sendMessage(message: string)"
-                string response = $"Received message: \"{message}\"";
 
-                // Send a message back the to JavaScript event handler.
-                // "window.external.receiveMessage(callback: Function)"
-                window.SendWebMessage(response);
-            })
-            //.Load("wwwroot/index.html"); // Can be used with relative path strings or "new URI()" instance to load a website.
-            //.Load("http://localhost:5276/")
-            .LoadRawString($@"<!DOCTYPE html>
+
+            // Task.Run(async () =>
+            // {
+            //
+            //     while (WebServer.Started == false && WebServer.StartError == null)
+            //         await Task.Delay(250);
+            //
+            //     if (WebServer.StartError != null)
+            //     {
+            //     }
+            //     else
+            //     {
+            //         await Task.Delay(3000);
+            //         window.Load(siteUrl);
+            //     }
+            // });
+
+
+            window.WaitForClose(); // Starts the application event loop  
+    }
+
+    private string GetLoadingHtml(string message = "")
+        => $@"<!DOCTYPE html>
 <html lang=""en"">
 <head>
     <meta charset=UTF-8"">
@@ -84,6 +138,7 @@ public class WebView
             font-size:14px;
             font-family: Arial, sans-serif;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             height: 100vh;
@@ -93,6 +148,11 @@ public class WebView
         svg {{
             height:3rem;
         }}
+
+        .message {{
+            display:block;
+            margin-top:3rem;
+        }}  
         
         .version {{
             position:absolute;
@@ -116,22 +176,18 @@ public class WebView
 </svg>
 </div>
 
+<div class=""message"">{message ?? string.Empty}</div>
+
 <div class=""version"">
     {Globals.Version}
 </div>
 </body>
 </html>
-");
-        
-        Task.Run(async () =>
-        {
+";
 
-            while (WebServer.Started == false && WebServer.StartError == null)
-                await Task.Delay(250);
-
-            if (WebServer.StartError != null)
-            {
-                window.LoadRawString($@"<!DOCTYPE html>
+    private void ShowError(string error)
+    {
+        window.LoadRawString($@"<!DOCTYPE html>
 <html lang=""en"">
 <head>
 <meta charset=""UTF-8"">
@@ -158,20 +214,112 @@ public class WebView
 <body>
     <div class=""error-message"">
         <h1>Error!</h1>
-        <p>{WebServer.StartError}</p>
+        <p>{error}</p>
     </div>
 </body>
 </html>
 ");
-            }
-            else
-            {
-                await Task.Delay(3000);
-                window.Load(siteUrl);
-            }
-        });
+    }
 
+    private void LoadIFrame(string url)
+    {
+        window.SetContextMenuEnabled(false)
+              .LoadRawString($@"<!DOCTYPE html>
+<html lang=""en"">
+<head>
+    <meta charset=""UTF-8"">
+    <meta name=""viewport"" content=""width=device-width, initial-scale=1.0"">
+    <title>FileFlows</title>
+    <style>
+        html {{
+            font-size:14px;
+        }}
+        body {{
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: #000;
+            color: #fff;
+            display:flex;
+            flex-direction:column;
+            height:100vh;
+            width:100vw;
+            overflow:hidden;
+        }}
 
-        window.WaitForClose(); // Starts the application event loop
+        .address-bar {{
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding:0.5rem 7rem;
+            border-bottom:2px solid rgb(30,30,30);
+        }}
+
+        .address-bar span {{
+            background-color: #222;
+            padding: 0.25rem;
+            border-radius: 1rem;
+            flex-grow: 1;
+            text-align: center;
+        }}
+
+        .refresh-button {{
+            background-color: #444;
+            color: #fff;
+            width: 1.5rem;
+            height: 1.5rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            margin-right: 0.25rem;
+        }}
+
+        .refresh-button:hover {{
+            background-color: #555;
+        }}
+
+        .refresh-icon {{
+            width: 1rem;
+            height: 1rem;
+            fill: currentColor;
+        }}
+
+        .iframe-container {{
+            flex-grow:1;
+        }}
+
+        .iframe-container iframe {{
+            width: 100%;
+            height: 100%;
+            border: none;
+        }}
+    </style>
+</head>
+<body>
+
+<div class=""address-bar"">
+<div class=""refresh-button"" onclick=""refreshPage()"">
+
+    <svg class=""refresh-icon"" xmlns=""http://www.w3.org/2000/svg""  viewBox=""0 0 30 30"" width=""30px"" height=""30px""><path d=""M 15 3 C 12.031398 3 9.3028202 4.0834384 7.2070312 5.875 A 1.0001 1.0001 0 1 0 8.5058594 7.3945312 C 10.25407 5.9000929 12.516602 5 15 5 C 20.19656 5 24.450989 8.9379267 24.951172 14 L 22 14 L 26 20 L 30 14 L 26.949219 14 C 26.437925 7.8516588 21.277839 3 15 3 z M 4 10 L 0 16 L 3.0507812 16 C 3.562075 22.148341 8.7221607 27 15 27 C 17.968602 27 20.69718 25.916562 22.792969 24.125 A 1.0001 1.0001 0 1 0 21.494141 22.605469 C 19.74593 24.099907 17.483398 25 15 25 C 9.80344 25 5.5490109 21.062074 5.0488281 16 L 8 16 L 4 10 z""/></svg>
+    
+</div>
+<span>{url}</span>
+</div>
+
+<div class=""iframe-container"">
+<iframe src=""{url}""></iframe>
+</div>
+
+<script>
+    function refreshPage() {{
+        document.querySelector('iframe').src = document.querySelector('iframe').src;
+    }}
+</script>
+
+</body>
+</html>
+");
     }
 }

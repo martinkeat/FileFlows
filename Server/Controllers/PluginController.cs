@@ -1,7 +1,7 @@
 using System.Net;
-using FluentResults;
 using System.Dynamic;
 using System.Text.RegularExpressions;
+using FileFlows.Plugin;
 using Microsoft.AspNetCore.Mvc;
 using FileFlows.Server.Helpers;
 using FileFlows.Shared.Models;
@@ -138,8 +138,8 @@ public class PluginController : Controller
     public async Task<IActionResult> GetPluginPackages([FromQuery] bool missing = false)
     {
         var result = await GetPluginPackagesActual(missing);
-        if (result.IsFailed)
-            return BadRequest(result.Errors.FirstOrDefault()?.Message ?? string.Empty);
+        if (result.Failed(out string message))
+            return BadRequest(message);
         return Ok(result.Value);
     }
     
@@ -159,7 +159,7 @@ public class PluginController : Controller
                 if (plugins.Success == false)
                 {
                     if (plugins.StatusCode == HttpStatusCode.PreconditionFailed)
-                        return Result.Fail("To access additional plugins, you must upgrade FileFlows to the latest version.");
+                        return Result<List<PluginPackageInfo>>.Fail("To access additional plugins, you must upgrade FileFlows to the latest version.");
                 }
                 foreach(var plugin in plugins.Data)
                 {

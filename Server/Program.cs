@@ -10,9 +10,6 @@ using FileFlows.Server.Helpers;
 using FileFlows.Server.Services;
 using FileFlows.Shared.Helpers;
 using FileFlows.Shared.Models;
-using Microsoft.AspNetCore.Mvc.ModelBinding.Metadata;
-using PhotinoNET;
-
 namespace FileFlows.Server;
 
 public class Program
@@ -27,6 +24,11 @@ public class Program
     /// General cache used by the server
     /// </summary>
     internal static CacheStore GeneralCache = new ();
+    
+    /// <summary>
+    /// Gets or sets an optional entry point that launched this
+    /// </summary>
+    public static string? EntryPoint { get; private set; }
 
     public static void Main(string[] args)
     {
@@ -40,7 +42,9 @@ public class Program
                     x.ToLower() == "-help"))
             {
                 Console.WriteLine("FileFlows v" + Globals.Version);
-                Console.WriteLine("--no-gui: To hide the GUI");
+                Console.WriteLine("--gui: To show the full GUI");
+                Console.WriteLine("--minimal-gui: To show the limited GUI application");
+                Console.WriteLine("--base-dir: Optional override to set where the base data files will be read/saved to");
                 return;
             }
             
@@ -54,9 +58,16 @@ public class Program
                 return;
             }
             
-            ServerShared.Globals.IsDocker = args?.Any(x => x == "--docker") == true;
-            ServerShared.Globals.IsSystemd = args?.Any(x => x == "--systemd-service") == true;
-            var noGui = args?.Any((x => x.ToLower() == "--gui")) == false || Docker;
+            Globals.IsDocker = args?.Any(x => x == "--docker") == true;
+            Globals.IsSystemd = args?.Any(x => x == "--systemd-service") == true;
+            var baseDir = args.SkipWhile((arg, index) => arg != "--base-dir" || index == args.Length - 1).Skip(1).FirstOrDefault();
+            if (string.IsNullOrWhiteSpace(baseDir) == false)
+                DirectoryHelper.BaseDirectory = baseDir;
+            
+            bool minimalGui = Globals.IsDocker == false && args?.Any(x => x.ToLowerInvariant() == "--minimal-gui") == true; 
+            bool fullGui = Globals.IsDocker == false && args?.Any(x => x.ToLowerInvariant() == "--gui") == true;
+            bool noGui = fullGui == false && minimalGui == false;
+            Program.EntryPoint = args.SkipWhile((arg, index) => arg != "--entry-point" || index == args.Length - 1).Skip(1).FirstOrDefault();
 
             if (noGui == false && Globals.IsWindows)
             {
@@ -115,40 +126,34 @@ public class Program
                 Console.WriteLine("Starting FileFlows Server...");
                 WebServer.Start(args);
             }
-            else
+            else if(fullGui)
             {
-                Task.Run(() =>
+                _ = Task.Run(async () =>
                 {
+                    await Task.Delay(50);
                     Console.WriteLine("Starting FileFlows Server...");
                     WebServer.Start(args);
                 });
                 
-                string url = WebServer.GetServerUrl(args).Replace("0.0.0.0", "localhost");
-                if (OperatingSystem.IsLinux())
-                {
-                    _ = Task.Run(Gui.Avalon.App.Open);
-                    Gui.Photino.WebView.Open(url);
-                }
-                else
-                    Gui.Avalon.AvalonWebView.Open(url);
-                    
+                var webview = new Gui.Photino.WebView();
+                webview.Open();;
             }
-            // else {
-            //
-            //     DateTime dt = DateTime.Now;
-            //     try
-            //     {
-            //         var appBuilder = BuildAvaloniaApp();
-            //         appBuilder.StartWithClassicDesktopLifetime(args);
-            //     }
-            //     catch (Exception ex)
-            //     {
-            //         if(DateTime.Now.Subtract(dt) < new TimeSpan(0,0,2))
-            //             Console.WriteLine("Failed to launch GUI: " + ex.Message + Environment.NewLine + ex.StackTrace);
-            //         else
-            //             Console.WriteLine("Error: " + ex.Message + Environment.NewLine + ex.StackTrace);
-            //     }
-            // }
+             else if(minimalGui) {
+            
+                DateTime dt = DateTime.Now;
+                try
+                {
+                    var appBuilder = Gui.Avalon.App.BuildAvaloniaApp();
+                    appBuilder.StartWithClassicDesktopLifetime(args);
+                }
+                catch (Exception ex)
+                {
+                    if(DateTime.Now.Subtract(dt) < new TimeSpan(0,0,2))
+                        Console.WriteLine("Failed to launch GUI: " + ex.Message + Environment.NewLine + ex.StackTrace);
+                    else
+                        Console.WriteLine("Error: " + ex.Message + Environment.NewLine + ex.StackTrace);
+                }
+            }
 
             _ = WebServer.Stop();
             Console.WriteLine("Exiting FileFlows Server...");
@@ -172,6 +177,8 @@ public class Program
         Thread.Sleep(1); // so log message can be written
         if(Docker)
             Logger.Instance.ILog("Running inside docker container");
+        if(string.IsNullOrWhiteSpace(Program.EntryPoint) == false)
+            Logger.Instance.ILog("Entry Point: " + EntryPoint);
         Thread.Sleep(1); // so log message can be written
         Logger.Instance.DLog("Arguments: " + (args?.Any() == true ? string.Join(" ", args) : "No arguments"));
         Thread.Sleep(1); // so log message can be written
