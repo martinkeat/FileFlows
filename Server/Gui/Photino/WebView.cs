@@ -40,7 +40,7 @@ public class WebView
         }
 
         if (state == WebServerState.Starting)
-            window.LoadRawString(GetLoadingHtml(message));
+            window?.LoadRawString(GetLoadingHtml(message));
 
     }
 
