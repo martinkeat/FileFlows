@@ -281,7 +281,7 @@ public class FileDownloader
     private static string FormatSpeed(double bytesPerSecond)
     {
         if (bytesPerSecond >= 1024 * 1024)
-            return $"{(bytesPerSecond / (1024 * 1024)):F2} Mbps";
+            return $"{(bytesPerSecond / (1024 * 1024)):F2} MBps";
         if (bytesPerSecond >= 1024)
             return $"{(bytesPerSecond / 1024):F2} KBps";
         return $"{bytesPerSecond:F2} Bps";
