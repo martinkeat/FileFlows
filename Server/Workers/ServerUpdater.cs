@@ -33,16 +33,19 @@ public class ServerUpdater : UpdaterWorker
     protected override bool PreCheck() => LicenseHelper.IsLicensed(LicenseFlags.AutoUpdates);
 
     /// <inheritdoc />
-    protected override void PreUpgradeArgumentsAdd(Process process)
+    protected override void PreUpgradeArgumentsAdd(ProcessStartInfo startInfo)
     {
-        if (OperatingSystem.IsMacOS() && string.IsNullOrWhiteSpace(Program.EntryPoint) == false)
+        Logger.Instance.ILog("Is MacOS: " + OperatingSystem.IsMacOS());
+        bool hasEntryPoint = string.IsNullOrWhiteSpace(Program.EntryPoint) == false;
+        Logger.Instance.ILog("Has Entry Point: " + hasEntryPoint);
+        if (OperatingSystem.IsMacOS() && hasEntryPoint)
         {
-            Logger.Instance.ILog("Upgrade Mac App");
-            process.StartInfo.ArgumentList.Add("mac");
-            process.StartInfo.ArgumentList.Add(Program.EntryPoint);
-            process.StartInfo.ArgumentList.Add(Globals.Version.Split('.').Last());
+            Logger.Instance.ILog("Upgrading Mac App");
+            startInfo.ArgumentList.Add("mac");
+            startInfo.ArgumentList.Add(Program.EntryPoint);
+            startInfo.ArgumentList.Add(Globals.Version.Split('.').Last());
         }
-        base.PreUpgradeArgumentsAdd(process);
+        base.PreUpgradeArgumentsAdd(startInfo);
     }
 
     protected override void Initialize(ScheduleType schedule, int interval)

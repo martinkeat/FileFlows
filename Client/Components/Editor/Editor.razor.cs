@@ -257,7 +257,7 @@ public partial class Editor : InputRegister, IDisposable
                 string desc = Markdig.Markdown.ToHtml(EditorDescription).Trim();
                 if (desc.StartsWith("<p>") && desc.EndsWith("</p>"))
                     desc = desc[3..^4].Trim();
-                desc = desc.Replace("<a ", "<a rel=\"noreferrer\" target=\"_blank\" ");
+                desc = desc.Replace("<a ", "<a onclick=\"ff.openLink\" ");
                 builder.AddContent(++count, new MarkupString(desc));
                 builder.CloseElement();
             }

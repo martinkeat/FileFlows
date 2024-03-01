@@ -115,8 +115,8 @@ public abstract class UpdaterWorker : Worker
     /// <summary>
     /// Called before any upgrade arguments have been added to inject custom ones first
     /// </summary>
-    /// <param name="process">the process</param>
-    protected virtual void PreUpgradeArgumentsAdd(Process process) {}
+    /// <param name="startInfo">the process start info</param>
+    protected virtual void PreUpgradeArgumentsAdd(ProcessStartInfo startInfo) {}
 
     private void RunUpdateScript(string updateScript)
     {
@@ -133,6 +133,7 @@ public abstract class UpdaterWorker : Worker
                 var fi = new FileInfo(updateScript);
 
                 var psi = new ProcessStartInfo(updateScript);
+                PreUpgradeArgumentsAdd(psi);
                 psi.ArgumentList.Add(Process.GetCurrentProcess().Id.ToString());
                 psi.WorkingDirectory = fi.DirectoryName;
                 psi.UseShellExecute = true;
