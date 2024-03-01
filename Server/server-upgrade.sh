@@ -32,7 +32,7 @@ if [ "$1" == "mac" ]; then
   
   # Relaunch the macOS .app folder
   # Schedule the application launch using the 'at' command
-  (sleep 5 && open -ga "$2") &
+  # (sleep 5 && open -ga "$2") &
 
   # Exit the script
   exit 0
