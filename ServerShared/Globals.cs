@@ -97,11 +97,16 @@ public class Globals
     public const string FlowFailureInputUid = "FileFlows.BasicNodes.FlowFailure";
 
     /// <summary>
+    /// A custom URL for FileFlows.com
+    /// </summary>
+    public static string CustomFileFlowsDotComUrl;
+
+    /// <summary>
     /// The URL for fileflows.com
     /// </summary>
-    public static readonly string FileFlowsDotComUrl =
-        (Environment.GetEnvironmentVariable("FFURL")?.EmptyAsNull() ?? "https://fileflows.com")
-        .TrimEnd('/');
+    public static readonly string FileFlowsDotComUrl = (CustomFileFlowsDotComUrl?.EmptyAsNull() ??
+                                                        Environment.GetEnvironmentVariable("FFURL")?.EmptyAsNull() ??
+                                                        "https://fileflows.com").TrimEnd('/');
 
     /// <summary>
     /// The base url for Plugin 

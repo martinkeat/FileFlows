@@ -1,13 +1,9 @@
 using System.Collections;
 using System.Net;
-using System.Text;
 using Avalonia;
-using FileFlows.Plugin;
 using FileFlows.Server.Database;
 using FileFlows.Server.Database.Managers;
-using FileFlows.Server.Gui;
 using FileFlows.Server.Helpers;
-using FileFlows.Server.Services;
 using FileFlows.Shared.Helpers;
 using FileFlows.Shared.Models;
 namespace FileFlows.Server;
@@ -109,7 +105,10 @@ public class Program
             ServicePointManager.DefaultConnectionLimit = 50;
 
             InitializeLoggers();
-
+            
+            // must be done after directory helper otherwise will fail 
+            Globals.CustomFileFlowsDotComUrl = AppSettings.Instance.FileFlowsDotComUrl?.EmptyAsNull();
+            
             WriteLogHeader(args);
 
             CleanDefaultTempDirectory();

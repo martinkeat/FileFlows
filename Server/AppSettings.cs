@@ -47,6 +47,10 @@ internal class AppSettings
     /// </summary>
     public bool StartMinimized { get; set; }
 
+    /// <summary>
+    /// Gets or sets an optional FileFlows.com URL
+    /// </summary>
+    public string FileFlowsDotComUrl { get; set; }
 
     /// <summary>
     /// Gets or sets the connection string of where to migrate the data to
