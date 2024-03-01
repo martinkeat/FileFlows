@@ -105,16 +105,16 @@ public class Program
             ServicePointManager.DefaultConnectionLimit = 50;
 
             InitializeLoggers();
-            
+
             // must be done after directory helper otherwise will fail 
-            Globals.CustomFileFlowsDotComUrl = AppSettings.Instance.FileFlowsDotComUrl?.EmptyAsNull();
+            Globals.CustomFileFlowsDotComUrl = AppSettings.Instance.FileFlowsDotComUrl;
             
             WriteLogHeader(args);
 
             CleanDefaultTempDirectory();
             
             HttpHelper.Client = HttpHelper.GetDefaultHttpHelper(string.Empty);
-
+            
             CheckLicense();
 
             if (PrepareDatabase() == false)
@@ -130,8 +130,15 @@ public class Program
                 _ = Task.Run(async () =>
                 {
                     await Task.Delay(50);
-                    Console.WriteLine("Starting FileFlows Server...");
-                    WebServer.Start(args);
+                    try
+                    {
+                        Logger.Instance.ILog("Starting FileFlows Server...");
+                        WebServer.Start(args);
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.Instance.ELog("Failed starting server: " + ex.Message + Environment.NewLine + ex.StackTrace);
+                    }
                 });
                 
                 var webview = new Gui.Photino.WebView();
@@ -178,6 +185,8 @@ public class Program
             Logger.Instance.ILog("Running inside docker container");
         if(string.IsNullOrWhiteSpace(Program.EntryPoint) == false)
             Logger.Instance.DLog("Entry Point: " + EntryPoint);
+        if(string.IsNullOrWhiteSpace(Globals.CustomFileFlowsDotComUrl) == false)
+            Logger.Instance.ILog("Custom FileFlows.com: " + Globals.CustomFileFlowsDotComUrl);
         Thread.Sleep(1); // so log message can be written
         Logger.Instance.DLog("Arguments: " + (args?.Any() == true ? string.Join(" ", args) : "No arguments"));
         Thread.Sleep(1); // so log message can be written

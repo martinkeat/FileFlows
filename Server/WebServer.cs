@@ -126,6 +126,7 @@ public class WebServer
         string serverUrl = GetServerUrl(args);
         string protocol = serverUrl[..serverUrl.IndexOf(":", StringComparison.Ordinal)];
 
+        Logger.Instance.ILog("Started web server: " + serverUrl);
         OnStatusUpdate?.Invoke(WebServerState.Starting, "Starting web server", serverUrl);
 
         // Add services to the container.
