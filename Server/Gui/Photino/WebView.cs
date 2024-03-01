@@ -40,7 +40,12 @@ public class WebView
         }
 
         if (state == WebServerState.Starting)
-            window?.LoadRawString(GetLoadingHtml(message));
+        {
+            if (window == null)
+                Thread.Sleep(100);
+            if (window != null)
+                window.LoadRawString(GetLoadingHtml(message));
+        }
 
     }
 
