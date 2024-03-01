@@ -3,8 +3,14 @@ using System.Text;
 
 namespace FileFlows.Server.Helpers;
 
+/// <summary>
+/// Decryption/Encryption methods
+/// </summary>
 public class Decrypter
 {
+    /// <summary>
+    /// Gets the encryption key
+    /// </summary>
     internal static string EncryptionKey => AppSettings.Instance.EncryptionKey;
 
     /// <summary>
@@ -45,6 +51,11 @@ public class Decrypter
 
     }
 
+    /// <summary>
+    /// Encrypts a string
+    /// </summary>
+    /// <param name="text">the text to encrypt</param>
+    /// <returns>the encrypted text</returns>
     public static string Encrypt(string text)
     {
         byte[] clearBytes = Encoding.Unicode.GetBytes(text);
