@@ -104,9 +104,9 @@ public class Globals
     /// <summary>
     /// The URL for fileflows.com
     /// </summary>
-    public static readonly string FileFlowsDotComUrl = (CustomFileFlowsDotComUrl?.EmptyAsNull() ??
-                                                        Environment.GetEnvironmentVariable("FFURL")?.EmptyAsNull() ??
-                                                        "https://fileflows.com").TrimEnd('/');
+    public static string FileFlowsDotComUrl => (CustomFileFlowsDotComUrl?.EmptyAsNull() ??
+                                                Environment.GetEnvironmentVariable("FFURL")?.EmptyAsNull() ??
+                                                "https://fileflows.com").TrimEnd('/');
 
     /// <summary>
     /// The base url for Plugin 
