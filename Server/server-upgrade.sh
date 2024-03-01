@@ -17,7 +17,7 @@ if [ "$1" == "mac" ]; then
   echo "--------------------------------------------" > version
   
   # update version file
-  echo "$3" > version
+  echo "$3" > version.txt
   
   rm -rf Server >> upgrade.log
   rm -rf FlowRunner >> upgrade.log

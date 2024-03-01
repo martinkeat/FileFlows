@@ -47,6 +47,22 @@ public class NodeUpdater:UpdaterWorker
         Program.Quit(Globals.IsSystemd ? 0 : 99);
     }
 
+    /// <inheritdoc />
+    protected override void PreUpgradeArgumentsAdd(ProcessStartInfo startInfo)
+    {
+        Logger.Instance.ILog("Is MacOS: " + OperatingSystem.IsMacOS());
+        bool hasEntryPoint = string.IsNullOrWhiteSpace(Program.EntryPoint) == false;
+        Logger.Instance.ILog("Has Entry Point: " + hasEntryPoint);
+        if (OperatingSystem.IsMacOS() && hasEntryPoint)
+        {
+            Logger.Instance.ILog("Upgrading Mac App");
+            startInfo.ArgumentList.Add("mac");
+            startInfo.ArgumentList.Add(Program.EntryPoint!);
+            startInfo.ArgumentList.Add(Globals.Version.Split('.').Last());
+        }
+        base.PreUpgradeArgumentsAdd(startInfo);
+    }
+    
     /// <summary>
     /// Downloads the binary update from the FileFlows server
     /// </summary>

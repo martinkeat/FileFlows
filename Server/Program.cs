@@ -70,7 +70,7 @@ public class Program
             Program.EntryPoint = args.SkipWhile((arg, index) => arg != "--entry-point" || index == args.Length - 1).Skip(1).FirstOrDefault();
             
             if(string.IsNullOrWhiteSpace(EntryPoint) == false && OperatingSystem.IsMacOS())
-                File.WriteAllText(Path.Combine(DirectoryHelper.BaseDirectory, "version"), Globals.Version.Split('.').Last());
+                File.WriteAllText(Path.Combine(DirectoryHelper.BaseDirectory, "version.txt"), Globals.Version.Split('.').Last());
 
             if (noGui == false && Globals.IsWindows)
             {

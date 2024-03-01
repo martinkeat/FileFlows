@@ -2,6 +2,7 @@
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 using Avalonia;
+using FileFlows.Node.Helpers;
 using FileFlows.Node.Ui;
 using FileFlows.Node.Utils;
 using FileFlows.ServerShared;
@@ -18,6 +19,11 @@ public class Program
     /// Gets an instance of a node manager
     /// </summary>
     internal static NodeManager? Manager { get; private set; }
+    
+    /// <summary>
+    /// Gets or sets an optional entry point that launched this
+    /// </summary>
+    public static string? EntryPoint { get; private set; }
 
     private static bool Exiting = false;
     private static Mutex appMutex;
@@ -45,14 +51,21 @@ public class Program
                 SystemdService.Install(DirectoryHelper.BaseDirectory, true);
             return;
         }
+
+        Program.EntryPoint = options.EntryPoint;
         Globals.IsDocker = options.Docker;
         Globals.IsSystemd = options.IsSystemd;
-        if (options.ApiPort > 0 && options.ApiPort < 65535)
-            Workers.RestApiWorker.Port = options.ApiPort;
+        // if (options.ApiPort > 0 && options.ApiPort < 65535)
+        //     Workers.RestApiWorker.Port = options.ApiPort;
+        
+        
+        DirectoryHelper.Init(options.Docker, true);
         
         Console.WriteLine("BaseDirectory: " + DirectoryHelper.BaseDirectory);
         
-        DirectoryHelper.Init(options.Docker, true);
+        
+        if(string.IsNullOrWhiteSpace(options.EntryPoint) == false && OperatingSystem.IsMacOS())
+            File.WriteAllText(Path.Combine(DirectoryHelper.BaseDirectory, "version.txt"), Globals.Version.Split('.').Last());
         
         appMutex = new Mutex(true, appName, out bool createdNew);
         if (createdNew == false)
@@ -64,12 +77,7 @@ public class Program
             }
             else
             {
-                try
-                {
-                    var appBuilder = BuildAvaloniaApp(true);
-                    appBuilder.StartWithClassicDesktopLifetime(args);
-                }
-                catch (Exception) { }
+                GuiHelper.ShowMessage("FileFlows", "FileFlows Node is already running.");
             }
             
             return;
@@ -211,9 +219,8 @@ public class Program
 
 
     // Avalonia configuration, don't remove; also used by visual designer.
-    public static AppBuilder BuildAvaloniaApp(bool messagebox = false)
-        => (messagebox ? AppBuilder.Configure<MessageApp>() : AppBuilder.Configure<App>())
-            .UsePlatformDetect();
+    public static AppBuilder BuildAvaloniaApp()
+        =>  AppBuilder.Configure<App>().UsePlatformDetect();
 
     /// <summary>
     /// Quits the node application

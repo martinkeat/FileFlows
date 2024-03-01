@@ -30,6 +30,12 @@ class CommandLineOptions
     public bool Gui { get; set; }
     
     /// <summary>
+    /// Gets or sets if the GUI should be shown
+    /// </summary>
+    [CommandLineArg("The entry point of the application", "/home/user/FileFlows", "entry-point", hidden: true)]
+    public string EntryPoint { get; set; }
+    
+    /// <summary>
     /// Gets or sets the por the REST API will be exposed on
     /// </summary>
     [CommandLineArg("The port the REST API will be exposed on", "5000", "api-port")]
