@@ -111,6 +111,12 @@ public abstract class UpdaterWorker : Worker
     {
         
     }
+    
+    /// <summary>
+    /// Called before any upgrade arguments have been added to inject custom ones first
+    /// </summary>
+    /// <param name="process">the process</param>
+    protected virtual void PreUpgradeArgumentsAdd(Process process) {}
 
     private void RunUpdateScript(string updateScript)
     {

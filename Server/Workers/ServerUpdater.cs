@@ -1,4 +1,5 @@
-﻿using FileFlows.Server.Helpers;
+﻿using System.Diagnostics;
+using FileFlows.Server.Helpers;
 using FileFlows.Shared.Formatters;
 using FileFlows.Server.Controllers;
 using FileFlows.ServerShared.Workers;
@@ -30,7 +31,19 @@ public class ServerUpdater : UpdaterWorker
     /// </summary>
     /// <returns>if false, no update will be checked for</returns>
     protected override bool PreCheck() => LicenseHelper.IsLicensed(LicenseFlags.AutoUpdates);
-    
+
+    /// <inheritdoc />
+    protected override void PreUpgradeArgumentsAdd(Process process)
+    {
+        if (OperatingSystem.IsMacOS() && string.IsNullOrWhiteSpace(Program.EntryPoint) == false)
+        {
+            Logger.Instance.ILog("Upgrade Mac App");
+            process.StartInfo.ArgumentList.Add("mac");
+            process.StartInfo.ArgumentList.Add(Program.EntryPoint);
+        }
+        base.PreUpgradeArgumentsAdd(process);
+    }
+
     protected override void Initialize(ScheduleType schedule, int interval)
     {
         if (int.TryParse(Environment.GetEnvironmentVariable("AutoUpdateInterval") ?? string.Empty, out int minutes) &&

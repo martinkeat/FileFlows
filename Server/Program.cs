@@ -178,9 +178,7 @@ public class Program
         if(Docker)
             Logger.Instance.ILog("Running inside docker container");
         if(string.IsNullOrWhiteSpace(Program.EntryPoint) == false)
-            Logger.Instance.ILog("Entry Point: " + EntryPoint);
-        else
-            Logger.Instance.ILog("Entry Point: Not specified");
+            Logger.Instance.DLog("Entry Point: " + EntryPoint);
         Thread.Sleep(1); // so log message can be written
         Logger.Instance.DLog("Arguments: " + (args?.Any() == true ? string.Join(" ", args) : "No arguments"));
         Thread.Sleep(1); // so log message can be written
