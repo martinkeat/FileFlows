@@ -52,6 +52,8 @@ public abstract class WidgetDefinition
             return new VideoCodecs();
         if (uid == VideoContainers.WD_UID)
             return new VideoContainers();
+        if (uid == AudioContainers.WD_UID)
+            return new AudioContainers();
         if (uid == VideoResolution.WD_UID)
             return new VideoResolution();
         if (uid == OpenDatabaseConnections.WD_UID)

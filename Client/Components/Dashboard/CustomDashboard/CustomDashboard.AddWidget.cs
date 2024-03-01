@@ -264,6 +264,19 @@ public partial class CustomDashboard
             });
         }
 
+        if (DoesntHaveWidget(FileFlows.Shared.Widgets.AudioContainers.WD_UID))
+        {
+            fields.Add(new ElementField
+            {
+                InputType = FormInputType.Widget,
+                Name = nameof(FileFlows.Shared.Widgets.AudioContainers),
+                Parameters = new Dictionary<string, object>
+                {
+                    { nameof(InputWidget.Type), WidgetType.PieChart }
+                }
+            });
+        }
+        
         if (DoesntHaveWidget(FileFlows.Shared.Widgets.VideoResolution.WD_UID))
         {
             fields.Add(new ElementField
@@ -398,6 +411,9 @@ public partial class CustomDashboard
                                 break;
                             case nameof(VideoContainers):
                                 newWidgets.Add(CreateNewWidgetModel(VideoContainers.WD_UID, 4, 2));
+                                break;
+                            case nameof(AudioContainers):
+                                newWidgets.Add(CreateNewWidgetModel(AudioContainers.WD_UID, 4, 2));
                                 break;
                             case nameof(VideoResolution):
                                 newWidgets.Add(CreateNewWidgetModel(VideoResolution.WD_UID, 4, 2));

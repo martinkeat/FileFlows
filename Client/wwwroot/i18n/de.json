@@ -274,6 +274,7 @@
     "RecentlyFinished": "Kürzlich abgeschlossen",
     "ProcessingTimes": "Verarbeitungszeiten",
     "VideoContainers": "Video-Container",
+    "AudioContainers": "Audio-Container",
     "StorageSaved": "Gespeicherter Speicherplatz"
   },
   "Flow": {
@@ -625,6 +626,7 @@
         "AudioCodecs": "Audio Codecs",
         "VideoCodecs": "Video Codecs",
         "VideoContainers": "Video-Container",
+        "AudioContainers": "Audio-Container",
         "VideoResolution": "Video-Auflösung",
         "OpenDatabaseConnections": "Offene Datenbank-Verbindungen",
         "ComicFormats": "Comic-Formate",
@@ -852,21 +854,6 @@
     },
     "Statistics": {
       "Title": "Statistik"
-    },
-    "System":{
-      "Title":"System",
-      "Labels":{
-        "CpuUsage":"CPU-Auslastung",
-        "MemoryUsage":"Speicherverbrauch",
-        "TempStorage":"Vorübergehende Zwischenspeicherung",
-        "LogStorage": "Log-Storage",
-        "LibraryProcessingTimes":"Bearbeitungszeiten der Bibliothek [Seconds Per Megabyte]",
-        "ProcessingHeatMap":"Heatmap Verarbeitung",
-        "Codec":"Codec",
-        "VideoContainer": "Video-Container",
-        "VideoResolution": "Video-Auflösung",
-        "OpenDbConnections":"Offene Datenbank-Verbindungen"
-      }
     },
     "Tasks": {
       "Title": "Aufgaben",
