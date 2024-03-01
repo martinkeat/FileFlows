@@ -7,13 +7,25 @@ namespace FileFlows.Server.Gui.Photino;
 /// </summary>
 public class WebView
 {
+    /// <summary>
+    /// the photino window instance
+    /// </summary>
     private PhotinoWindow window;
 
+    /// <summary>
+    /// Constructs a web view
+    /// </summary>
     public WebView()
     {
         WebServer.OnStatusUpdate += WebServer_StatusUpdate;
     }
 
+    /// <summary>
+    /// Event called when the web server sends a status update
+    /// </summary>
+    /// <param name="state">the state</param>
+    /// <param name="message">the message</param>
+    /// <param name="url">the URL of the web server</param>
     private void WebServer_StatusUpdate(WebServerState state, string message, string url)
     {
         if (state == WebServerState.Error)
