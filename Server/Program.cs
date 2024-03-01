@@ -68,6 +68,9 @@ public class Program
             bool fullGui = Globals.IsDocker == false && args?.Any(x => x.ToLowerInvariant() == "--gui") == true;
             bool noGui = fullGui == false && minimalGui == false;
             Program.EntryPoint = args.SkipWhile((arg, index) => arg != "--entry-point" || index == args.Length - 1).Skip(1).FirstOrDefault();
+            
+            if(string.IsNullOrWhiteSpace(EntryPoint) == false && OperatingSystem.IsMacOS())
+                File.WriteAllText(Path.Combine(DirectoryHelper.BaseDirectory, "version"), Globals.Version.Split('.').Last());
 
             if (noGui == false && Globals.IsWindows)
             {
