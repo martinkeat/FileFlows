@@ -40,6 +40,7 @@ public class ServerUpdater : UpdaterWorker
             Logger.Instance.ILog("Upgrade Mac App");
             process.StartInfo.ArgumentList.Add("mac");
             process.StartInfo.ArgumentList.Add(Program.EntryPoint);
+            process.StartInfo.ArgumentList.Add(Globals.Version.Split('.').Last());
         }
         base.PreUpgradeArgumentsAdd(process);
     }
