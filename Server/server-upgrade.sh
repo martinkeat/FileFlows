@@ -10,6 +10,10 @@ if [ "$1" == "mac" ]; then
   
   echo 'Upgrading FileFlows' >> upgrade.log
   
+  for arg in "$@"; do
+      echo "$arg" >> upgrade.log
+  done
+  
   # update version file
   echo "$3" > version
   
@@ -31,7 +35,12 @@ else
   if [ "$1" != "systemd" && "$1" != "docker" ]; then 
     kill %1
   fi
-
+  
+  echo 'Upgrading FileFlows Standard' >> upgrade.log
+  for arg in "$@"; do
+      echo "$arg" >> upgrade.log
+  done
+  
   cd ..
   rm -rf Server
   rm -rf FlowRunner
@@ -43,6 +52,7 @@ else
   mv Update/run-node.sh run-node.sh
   mv Update/run-server.sh run-server.sh
   
+  echo 'Removing Update folder' >> upgrade.log
   rm -rf Update
   
   if [ "$1" != "systemd" && "$1" != "docker" ]; then 
