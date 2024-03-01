@@ -2,13 +2,17 @@ window.dashboardElementResized = new Event('dashboardElementResized', {});
 
 window.ff = {
     
-    openExternally: function(url){
+    open: function(url){
         if(window?.external?.sendMessage)
             window.external.sendMessage('open:' + url);
         else
-            open(url, "_blank");  
+            open(url, '_blank', 'noopener,noreferrer');  
     },
-
+    openLink: function(event) {
+        event.preventDefault();
+        let url = event.target.getAttribute('href');
+        ff.open(url);        
+    },
     log: function (level, parameters) {
 
         if (!parameters || parameters.length === 0)
