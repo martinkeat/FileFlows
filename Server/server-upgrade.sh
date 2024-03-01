@@ -6,22 +6,22 @@ if [ "$1" == "mac" ]; then
   
   cd ..
   
-  rm -rf ../upgrade.log
+  rm -rf upgrade.log
   
-  echo 'Upgrading FileFlows' >> ../upgrade.log
+  echo 'Upgrading FileFlows' >> upgrade.log
   
   # update version file
   echo "$3" > version
   
-  rm -rf Server >> ../upgrade.log
-  rm -rf FlowRunner >> ../upgrade.log
+  rm -rf Server >> upgrade.log
+  rm -rf FlowRunner >> upgrade.log
   
-  mv Update/FlowRunner FlowRunner >> ../upgrade.log
-  mv Update/Server Server >> ../upgrade.log
+  mv Update/FlowRunner FlowRunner >> upgrade.log
+  mv Update/Server Server >> upgrade.log
   
-  rm -rf Update >> ../upgrade.log
+  rm -rf Update >> upgrade.log
   
-  echo "Launching open -a ""$2""" >> ../upgrade.log
+  echo "Launching open -a ""$2""" >> upgrade.log
   
   # Relaunch the macOS .app folder
   open -ga "$2" 2>&1 &
