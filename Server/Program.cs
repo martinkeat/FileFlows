@@ -29,25 +29,6 @@ public class Program
     /// Gets or sets an optional entry point that launched this
     /// </summary>
     public static string? EntryPoint { get; private set; }
-    
-    /// <summary>
-    /// Retrieves the value of the next argument from the command-line arguments array based on a specified argument name.
-    /// </summary>
-    /// <param name="args">The command-line arguments array.</param>
-    /// <param name="name">The name of the argument to search for.</param>
-    /// <returns>
-    /// The value of the next argument if found; otherwise, <c>null</c>.
-    /// </returns>
-    private static string? GetArg(string[] args, string name)
-    {
-        for (int i = 0; i < args.Length - 2; i++)
-        {
-            if (string.Equals(args[i], name, StringComparison.InvariantCultureIgnoreCase))
-                return args[i + 1];
-        }
-
-        return null;
-    }
 
     public static void Main(string[] args)
     {
@@ -79,14 +60,14 @@ public class Program
             
             Globals.IsDocker = args?.Any(x => x == "--docker") == true;
             Globals.IsSystemd = args?.Any(x => x == "--systemd-service") == true;
-            var baseDir = GetArg(args, "--base-dir");
+            var baseDir = args.SkipWhile((arg, index) => arg != "--base-dir" || index == args.Length - 1).Skip(1).FirstOrDefault();
             if (string.IsNullOrWhiteSpace(baseDir) == false)
                 DirectoryHelper.BaseDirectory = baseDir;
             
             bool minimalGui = Globals.IsDocker == false && args?.Any(x => x.ToLowerInvariant() == "--minimal-gui") == true; 
             bool fullGui = Globals.IsDocker == false && args?.Any(x => x.ToLowerInvariant() == "--gui") == true;
             bool noGui = fullGui == false && minimalGui == false;
-            Program.EntryPoint = GetArg(args, "--entry-point");
+            Program.EntryPoint = args.SkipWhile((arg, index) => arg != "--entry-point" || index == args.Length - 1).Skip(1).FirstOrDefault();
 
             if (noGui == false && Globals.IsWindows)
             {
@@ -198,6 +179,8 @@ public class Program
             Logger.Instance.ILog("Running inside docker container");
         if(string.IsNullOrWhiteSpace(Program.EntryPoint) == false)
             Logger.Instance.ILog("Entry Point: " + EntryPoint);
+        else
+            Logger.Instance.ILog("Entry Point: Not specified");
         Thread.Sleep(1); // so log message can be written
         Logger.Instance.DLog("Arguments: " + (args?.Any() == true ? string.Join(" ", args) : "No arguments"));
         Thread.Sleep(1); // so log message can be written
