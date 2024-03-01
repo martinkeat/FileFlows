@@ -12,8 +12,14 @@ using NPoco;
 /// </summary>
 class CustomDbMapper : DefaultMapper
 {
+    /// <summary>
+    /// The JSON options
+    /// </summary>
     public static readonly JsonSerializerOptions JsonOptions;
 
+    /// <summary>
+    /// Static constructor for Custom DB Mapper
+    /// </summary>
     static CustomDbMapper()
     {
         JsonOptions = new JsonSerializerOptions();
