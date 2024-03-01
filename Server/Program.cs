@@ -9,6 +9,9 @@ using FileFlows.Shared.Models;
 
 namespace FileFlows.Server;
 
+/// <summary>
+/// Main entry point for server
+/// </summary>
 public class Program
 {
     /// <summary>
