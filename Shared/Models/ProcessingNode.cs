@@ -130,7 +130,7 @@ public class ProcessingNode: FileFlowObject
                 string replacement = mapping.Value.Replace("\\", "/");
                 path = Regex.Replace(path, "^" + pattern, replacement, RegexOptions.IgnoreCase);
             }
-            // now convert / to path charcter
+            // now convert / to path character
             if (DirectorySeperatorChar != '/')
                 path = path.Replace('/', DirectorySeperatorChar);
             if(path.StartsWith("//")) // special case for SMB paths

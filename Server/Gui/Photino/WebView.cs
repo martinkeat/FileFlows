@@ -1,5 +1,3 @@
-using System.Diagnostics;
-using System.Runtime.InteropServices;
 using PhotinoNET;
 
 namespace FileFlows.Server.Gui.Photino;
@@ -50,17 +48,6 @@ public class WebView
         }
 
     }
-
-    private void OpenUrl(string url)
-    {
-        
-        if (Globals.IsWindows)
-            Process.Start(new ProcessStartInfo("cmd", $"/c start {url}") { CreateNoWindow = true });
-        else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-            Process.Start("open", url);
-        else
-            Process.Start(new ProcessStartInfo("xdg-open", url));
-    }
     
     /// <summary>
     /// Opens a web view at the given URL
@@ -84,11 +71,6 @@ public class WebView
             .SetChromeless(false)
             .SetIconFile(iconFile)
             .SetResizable(true)
-            .RegisterWebMessageReceivedHandler((object sender, string message) =>
-            {
-                if (message.StartsWith("open:"))
-                    OpenUrl(message[5..]);
-            })
             .LoadRawString(GetLoadingHtml());
 
 
@@ -215,7 +197,7 @@ public class WebView
     private void LoadIFrame(string url)
     {
         window.SetContextMenuEnabled(false)
-              .LoadRawString($@"<!DOCTYPE html>
+            .LoadRawString($@"<!DOCTYPE html>
 <html lang=""en"">
 <head>
     <meta charset=""UTF-8"">

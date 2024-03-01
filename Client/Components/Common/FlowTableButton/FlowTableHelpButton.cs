@@ -27,7 +27,8 @@ namespace FileFlows.Client.Components.Common
                 url = "https://fileflows.com/docs";
             else if (url.ToLower().StartsWith("http") == false)
                 url = "https://fileflows.com/docs/webconsole/" + url;
-            await jsRuntime.InvokeVoidAsync("ff.open", url.ToLower());
+
+            App.Instance.OpenUrl(url.ToLowerInvariant());
         }
     }
 }

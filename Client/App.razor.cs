@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+using System.Web;
 
 namespace FileFlows.Client
 {
@@ -118,6 +119,7 @@ namespace FileFlows.Client
             var dotNetObjRef = DotNetObjectReference.Create(this);
             _ = jsRuntime.InvokeVoidAsync("ff.onEscapeListener", new object[] { dotNetObjRef });
             _ = jsRuntime.InvokeVoidAsync("ff.attachEventListeners", new object[] { dotNetObjRef });
+            _ = jsRuntime.InvokeVoidAsync("ff.setCSharp",  new object[] { dotNetObjRef });
             Settings = (await HttpHelper.Get<FileFlows.Shared.Models.Settings>("/api/settings")).Data ??
                        new FileFlows.Shared.Models.Settings();
             await LoadAppInfo();
@@ -149,6 +151,20 @@ namespace FileFlows.Client
         {
             OnEscapePushed?.Invoke(args);
         }
+        
+        
+        /// <summary>
+        /// Escape was pushed
+        /// </summary>
+        [JSInvokable]
+        public async Task<bool> OpenUrl(string url)
+        {
+            if (App.Instance.FileFlowsSystem.IsWebView == false)
+                return false;
+            await HttpHelper.Post("/api/system/open-url?url=" + HttpUtility.UrlEncode(url));
+            return true;
+        }
+        
     }
 }
 

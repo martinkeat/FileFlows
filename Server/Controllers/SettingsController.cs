@@ -30,6 +30,7 @@ public class SettingsController : Controller
         status.IsLinux = OperatingSystem.IsLinux();
         status.IsMacOS = OperatingSystem.IsMacOS();
         status.IsDocker = Globals.IsDocker;
+        status.IsWebView = Program.UsingWebView;
         
         var license = LicenseHelper.GetLicense();
         if (license?.Status == LicenseStatus.Valid)

@@ -76,6 +76,10 @@ public class FileFlowsStatus
     /// Gets or sets if this is a windows based system
     /// </summary>
     public bool IsDocker { get; set; }
+    /// <summary>
+    /// Gets or sets if this is a web view 
+    /// </summary>
+    public bool IsWebView { get; set; }
 }
 
 /// <summary>

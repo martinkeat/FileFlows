@@ -29,6 +29,11 @@ public class Program
     /// Gets or sets an optional entry point that launched this
     /// </summary>
     public static string? EntryPoint { get; private set; }
+    
+    /// <summary>
+    /// Gets or sets if using a web view
+    /// </summary>
+    public static bool UsingWebView { get; private set; }
 
     public static void Main(string[] args)
     {
@@ -148,6 +153,7 @@ public class Program
                     }
                 });
                 
+                UsingWebView = true;
                 var webview = new Gui.Photino.WebView();
                 webview.Open();;
             }

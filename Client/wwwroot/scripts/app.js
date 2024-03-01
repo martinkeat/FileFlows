@@ -1,12 +1,14 @@
 window.dashboardElementResized = new Event('dashboardElementResized', {});
 
 window.ff = {
-    
+    setCsharp(csharp) {
+        window.ffcsharp = csharp;   
+    },
     open: function(url){
-        if(window?.external?.sendMessage)
-            window.external.sendMessage('open:' + url);
-        else
-            open(url, '_blank', 'noopener,noreferrer');  
+        window.ffcsharp.invokedmethod('OpenUrl', url).then(result => {
+            if(!result)
+                open(url, '_blank', 'noopener,noreferrer');
+        })
     },
     openLink: function(event) {
         event.preventDefault();

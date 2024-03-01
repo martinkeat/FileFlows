@@ -33,6 +33,28 @@ public class SystemController:Controller
             return string.Empty;
         return Globals.Version.ToString();
     }
+
+    /// <summary>
+    /// Opens a URL in the host OS
+    /// </summary>
+    /// <param name="url">the URL to open</param>
+    [HttpPost("open-url")]
+    public void OpenUrl([FromQuery]string url)
+    {
+        if (string.IsNullOrWhiteSpace(url))
+            return;
+        if (url.ToLowerInvariant()?.StartsWith("http") != true)
+            return; // dont allow
+        if (Program.UsingWebView == false)
+            return; // only open if using WebView
+        
+        if (OperatingSystem.IsWindows())
+            Process.Start(new ProcessStartInfo("cmd", $"/c start {url}") { CreateNoWindow = true });
+        else if (OperatingSystem.IsMacOS())
+            Process.Start("open", url);
+        else
+            Process.Start(new ProcessStartInfo("xdg-open", url));
+    }
     
     /// <summary>
     /// Gets an node update available
