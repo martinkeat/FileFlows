@@ -48,6 +48,7 @@ public class ServerUpdater : UpdaterWorker
         base.PreUpgradeArgumentsAdd(startInfo);
     }
 
+    /// <inheritdoc />
     protected override void Initialize(ScheduleType schedule, int interval)
     {
         if (int.TryParse(Environment.GetEnvironmentVariable("AutoUpdateInterval") ?? string.Empty, out int minutes) &&
