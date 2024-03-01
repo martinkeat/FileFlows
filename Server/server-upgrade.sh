@@ -10,9 +10,11 @@ if [ "$1" == "mac" ]; then
   
   echo 'Upgrading FileFlows' >> upgrade.log
   
+  echo "--------------------------------------------" > version
   for arg in "$@"; do
       echo "$arg" >> upgrade.log
   done
+  echo "--------------------------------------------" > version
   
   # update version file
   echo "$3" > version
@@ -30,7 +32,7 @@ if [ "$1" == "mac" ]; then
   
   # Relaunch the macOS .app folder
   # Schedule the application launch using the 'at' command
-  echo "open -ga \"$2\" >> upgrade.log 2>&1" | at now + 5 seconds
+  (sleep 5 && open -ga "$2") &
 
   # Exit the script
   exit 0
@@ -42,9 +44,12 @@ else
   fi
   
   echo 'Upgrading FileFlows Standard' >> upgrade.log
+  
+  echo "--------------------------------------------" > version
   for arg in "$@"; do
       echo "$arg" >> upgrade.log
   done
+  echo "--------------------------------------------" > version
   
   cd ..
   rm -rf Server
