@@ -13,10 +13,19 @@ public abstract class UpdaterWorker : Worker
     /// </summary>
     public static bool UpdatePending { get; private set; }
 
+    /// <summary>
+    /// Gets the current version
+    /// </summary>
     protected Version CurrentVersion { get; init; }
-
+    
+    /// <summary>
+    /// The name of the updater
+    /// </summary>
     protected readonly string UpdaterName;
 
+    /// <summary>
+    /// The upgrade script prefix
+    /// </summary>
     private readonly string UpgradeScriptPrefix;
 
     /// <summary>
