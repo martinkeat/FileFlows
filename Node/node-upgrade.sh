@@ -22,11 +22,11 @@ if [ "$1" == "mac" ]; then
   rm -rf Node >> upgrade.log
   rm -rf FlowRunner >> upgrade.log
   
-  mv Update/FlowRunner FlowRunner >> upgrade.log
-  mv Update/Node Node >> upgrade.log
+  mv NodeUpdate/FlowRunner FlowRunner >> upgrade.log
+  mv NodeUpdate/Node Node >> upgrade.log
   
   echo 'Removing Update folder' >> upgrade.log
-  rm -rf Update >> upgrade.log
+  rm -rf NodeUpdate >> upgrade.log
   
   echo "Launching open -a ""$2""" >> upgrade.log
   

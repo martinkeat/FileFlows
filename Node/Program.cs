@@ -58,11 +58,9 @@ public class Program
         // if (options.ApiPort > 0 && options.ApiPort < 65535)
         //     Workers.RestApiWorker.Port = options.ApiPort;
         
-        
         DirectoryHelper.Init(options.Docker, true);
         
         Console.WriteLine("BaseDirectory: " + DirectoryHelper.BaseDirectory);
-        
         
         if(string.IsNullOrWhiteSpace(options.EntryPoint) == false && OperatingSystem.IsMacOS())
             File.WriteAllText(Path.Combine(DirectoryHelper.BaseDirectory, "version.txt"), Globals.Version.Split('.').Last());
@@ -92,7 +90,6 @@ public class Program
             if (string.IsNullOrEmpty(Service.ServiceBaseUrl))
                 Service.ServiceBaseUrl = "http://localhost:6868/";
             #endif
-
 
             if (string.IsNullOrEmpty(options.Server) == false)
                 AppSettings.ForcedServerUrl = options.Server;
