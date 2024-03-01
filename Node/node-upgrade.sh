@@ -10,11 +10,11 @@ if [ "$1" == "mac" ]; then
   
   echo 'Upgrading FileFlows Node' >> upgrade.log
   
-  echo "--------------------------------------------" > version
+  echo "--------------------------------------------" > upgrade.log
   for arg in "$@"; do
       echo "$arg" >> upgrade.log
   done
-  echo "--------------------------------------------" > version
+  echo "--------------------------------------------" > upgrade.log
   
   # update version file
   echo "$3" > version.txt
