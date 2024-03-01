@@ -6,25 +6,26 @@ if [ "$1" == "mac" ]; then
   
   cd ..
   
-  rm -rf ../Logs/upgrade.log
+  rm -rf ../upgrade.log
   
-  echo 'Upgrading FileFlows' >> ..Logs//upgrade.log
+  echo 'Upgrading FileFlows' >> ../upgrade.log
   
   # update version file
   echo "$3" > version
   
-  rm -rf Server >> ../Logs/upgrade.log
-  rm -rf FlowRunner >> ../Logs/upgrade.log
+  rm -rf Server >> ../upgrade.log
+  rm -rf FlowRunner >> ../upgrade.log
   
-  mv Update/FlowRunner FlowRunner >> ../Logs/upgrade.log
-  mv Update/Server Server >> ../Logs/upgrade.log
+  mv Update/FlowRunner FlowRunner >> ../upgrade.log
+  mv Update/Server Server >> ../upgrade.log
   
-  rm -rf Update >> ../Logs/upgrade.log
+  rm -rf Update >> ../upgrade.log
   
-  echo "Launching open -a ""$2""" >> ../Logs/upgrade.log
+  echo "Launching open -a ""$2""" >> ../upgrade.log
   
   # Relaunch the macOS .app folder
-  open -a "$2"
+  open -ga "$2" 2>&1 &
+  
 else
   
   if [ "$1" != "systemd" && "$1" != "docker" ]; then 
