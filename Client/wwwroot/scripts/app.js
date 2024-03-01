@@ -1,6 +1,13 @@
 window.dashboardElementResized = new Event('dashboardElementResized', {});
 
 window.ff = {
+    
+    openExternally: function(url){
+        if(window?.external?.sendMessage)
+            window.external.sendMessage('open:' + url);
+        else
+            open(url, "_blank");  
+    },
 
     log: function (level, parameters) {
 

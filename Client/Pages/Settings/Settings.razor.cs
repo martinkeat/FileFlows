@@ -202,7 +202,7 @@ public partial class Settings : InputRegister
 
     private async Task OpenHelp()
     {
-        await jsRuntime.InvokeVoidAsync("open", "https://fileflows.com/docs/webconsole/settings", "_blank");
+        await jsRuntime.InvokeVoidAsync("ff.open", "https://fileflows.com/docs/webconsole/settings");
     }
 
     private async Task TestDbConnection()
