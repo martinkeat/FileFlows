@@ -12,6 +12,11 @@ namespace FileFlows.Server.Hubs;
 /// </summary>
 public class ClientServiceHub : Hub
 {
+    /// <summary>
+    /// Broadcast a message
+    /// </summary>
+    /// <param name="command">the command to send in the message</param>
+    /// <param name="data">the data to go along with the command</param>
     public async Task BroadcastMessage(string command, string data)
     {
         await Clients.All.SendAsync("ReceiveMessage", command, data);
