@@ -38,8 +38,7 @@ public class MainWindow : Window
         
         _trayIcon.IsVisible = true;
 
-        //_trayIcon.Icon = new WindowIcon(AvaloniaLocator.Current.GetService<IAssetLoader>()?.Open(new Uri($"avares://FileFlows.Server/Ui/icon.ico")));
-
+        _trayIcon.Icon = new WindowIcon(AssetLoader.Open(new Uri($"avares://FileFlows.Server/Gui/icon.ico")));
 
         AddMenuItem("Open", () => this.Launch());
         AddMenuItem("Quit", () => this.Quit());

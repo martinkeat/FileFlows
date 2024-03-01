@@ -35,11 +35,11 @@ public class Program
     /// </summary>
     public static bool UsingWebView { get; private set; }
 
-    [STAThread] // need for Photino.net on windows
+    //[STAThread] // need for Photino.net on windows
     public static void Main(string[] args)
     {
 #if DEBUG
-        // args = new[] { "--gui" };    
+        args = new[] { "--gui" };    
 #endif
         try
         {
@@ -164,8 +164,21 @@ public class Program
                 });
 
                 UsingWebView = true;
+
                 var webview = new Gui.Photino.WebView();
-                webview.Open();
+                if (OperatingSystem.IsWindows())
+                {
+                    // windows doesnt like the normal method, fun fun fun
+                    Thread thread = new Thread(() => webview.Open());
+                    thread.SetApartmentState(ApartmentState.STA);
+                    thread.Start();
+                    thread.Join();
+                }
+                else
+                {
+                    // this works fine on mac/linux
+                    webview.Open();
+                }
             }
             else if (minimalGui)
             {

@@ -13,14 +13,6 @@ internal class App : Application
             window.Show();
     }
     
-    /// <summary>
-    /// Opens a web view at the given URL
-    /// </summary>
-    public static void Open()
-    {
-        var appBuilder = BuildAvaloniaApp();
-        appBuilder.StartWithClassicDesktopLifetime(new string[] { });
-    }
 
     // Avalonia configuration, don't remove; also used by visual designer.
     public static AppBuilder BuildAvaloniaApp(bool messagebox = false)
