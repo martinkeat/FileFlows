@@ -2,7 +2,7 @@
 
 if [ "$1" == "mac" ]; then
   # this means it running as a mac .app and we treat it differently
-  kill %1
+  kill "$3"
   
   cd ..
   
@@ -23,12 +23,17 @@ if [ "$1" == "mac" ]; then
   mv Update/FlowRunner FlowRunner >> upgrade.log
   mv Update/Server Server >> upgrade.log
   
+  echo 'Removing Update folder' >> upgrade.log
   rm -rf Update >> upgrade.log
   
   echo "Launching open -a ""$2""" >> upgrade.log
   
   # Relaunch the macOS .app folder
-  open -ga "$2" 2>&1 &
+  # Schedule the application launch using the 'at' command
+  echo "open -ga \"$2\" >> upgrade.log 2>&1" | at now + 5 seconds
+
+  # Exit the script
+  exit 0
   
 else
   
