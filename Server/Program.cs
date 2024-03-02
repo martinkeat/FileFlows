@@ -49,40 +49,45 @@ public class Program
                 Console.WriteLine("FileFlows v" + Globals.Version);
                 Console.WriteLine("--gui: To show the full GUI");
                 Console.WriteLine("--minimal-gui: To show the limited GUI application");
-                Console.WriteLine("--base-dir: Optional override to set where the base data files will be read/saved to");
+                Console.WriteLine(
+                    "--base-dir: Optional override to set where the base data files will be read/saved to");
                 return;
             }
-            
-            
+
+
             if (Globals.IsLinux && args?.Any(x => x == "--systemd") == true)
             {
-                if(args?.Any(x => x == "--uninstall") == true)
+                if (args?.Any(x => x == "--uninstall") == true)
                     SystemdService.Uninstall(false);
                 else
                     SystemdService.Install(DirectoryHelper.BaseDirectory, isNode: false);
                 return;
             }
-            
+
             Globals.IsDocker = args?.Any(x => x == "--docker") == true;
             Globals.IsSystemd = args?.Any(x => x == "--systemd-service") == true;
-            var baseDir = args.SkipWhile((arg, index) => arg != "--base-dir" || index == args.Length - 1).Skip(1).FirstOrDefault();
+            var baseDir = args.SkipWhile((arg, index) => arg != "--base-dir" || index == args.Length - 1).Skip(1)
+                .FirstOrDefault();
             if (string.IsNullOrWhiteSpace(baseDir) == false)
                 DirectoryHelper.BaseDirectory = baseDir;
-            
-            bool minimalGui = Globals.IsDocker == false && args?.Any(x => x.ToLowerInvariant() == "--minimal-gui") == true; 
+
+            bool minimalGui = Globals.IsDocker == false &&
+                              args?.Any(x => x.ToLowerInvariant() == "--minimal-gui") == true;
             bool fullGui = Globals.IsDocker == false && args?.Any(x => x.ToLowerInvariant() == "--gui") == true;
             bool noGui = fullGui == false && minimalGui == false;
-            Program.EntryPoint = args.SkipWhile((arg, index) => arg != "--entry-point" || index == args.Length - 1).Skip(1).FirstOrDefault();
-            
-            if(string.IsNullOrWhiteSpace(EntryPoint) == false && OperatingSystem.IsMacOS())
-                File.WriteAllText(Path.Combine(DirectoryHelper.BaseDirectory, "version.txt"), Globals.Version.Split('.').Last());
+            Program.EntryPoint = args.SkipWhile((arg, index) => arg != "--entry-point" || index == args.Length - 1)
+                .Skip(1).FirstOrDefault();
+
+            if (string.IsNullOrWhiteSpace(EntryPoint) == false && OperatingSystem.IsMacOS())
+                File.WriteAllText(Path.Combine(DirectoryHelper.BaseDirectory, "version.txt"),
+                    Globals.Version.Split('.').Last());
 
             if (noGui == false && Globals.IsWindows)
             {
                 // hide the console on window
                 Utils.WindowsConsoleManager.Hide();
             }
-            
+
             if (Docker == false)
             {
                 appMutex = new Mutex(true, appName, out bool createdNew);
@@ -100,18 +105,45 @@ public class Program
                             var appBuilder = Gui.Avalon.App.BuildAvaloniaApp(true);
                             appBuilder.StartWithClassicDesktopLifetime(args);
                         }
-                        catch (Exception) { }
+                        catch (Exception)
+                        {
+                        }
                     }
-            
+
                     return;
                 }
             }
+
             DirectoryHelper.Init(Docker, false);
-            
-            
-            if(File.Exists(Path.Combine(DirectoryHelper.BaseDirectory, "server-upgrade.bat")))
+            try
+            {
+                Run(noGui, fullGui, minimalGui, args);
+            }
+            catch (Exception ex)
+            {
+                Logger.Instance.ELog("Error: " + ex.Message + Environment.NewLine + ex.StackTrace);
+                throw;
+            }
+        }
+        catch (Exception ex)
+        {
+            try
+            {
+                Logger.Instance.ELog("Error: " + ex.Message + Environment.NewLine + ex.StackTrace);
+            }
+            catch (Exception)
+            {
+            }
+
+            Console.WriteLine("Error: " + ex.Message + Environment.NewLine + ex.StackTrace);
+        }
+    }
+
+    private static void Run(bool noGui, bool fullGui, bool minimalGui, string[] args)
+        {
+            if (File.Exists(Path.Combine(DirectoryHelper.BaseDirectory, "server-upgrade.bat")))
                 File.Delete(Path.Combine(DirectoryHelper.BaseDirectory, "server-upgrade.bat"));
-            if(File.Exists(Path.Combine(DirectoryHelper.BaseDirectory, "server-upgrade.sh")))
+            if (File.Exists(Path.Combine(DirectoryHelper.BaseDirectory, "server-upgrade.sh")))
                 File.Delete(Path.Combine(DirectoryHelper.BaseDirectory, "server-upgrade.sh"));
 
             ServicePointManager.DefaultConnectionLimit = 50;
@@ -120,24 +152,24 @@ public class Program
 
             // must be done after directory helper otherwise will fail 
             Globals.CustomFileFlowsDotComUrl = AppSettings.Instance.FileFlowsDotComUrl;
-            
+
             WriteLogHeader(args);
 
             CleanDefaultTempDirectory();
-            
+
             HttpHelper.Client = HttpHelper.GetDefaultHttpHelper(string.Empty);
-            
+
             CheckLicense();
 
             if (PrepareDatabase() == false)
                 return;
-            
+
             if (Docker || noGui)
             {
                 Console.WriteLine("Starting FileFlows Server...");
                 WebServer.Start(args);
             }
-            else if(fullGui)
+            else if (fullGui)
             {
                 _ = Task.Run(async () =>
                 {
@@ -149,16 +181,18 @@ public class Program
                     }
                     catch (Exception ex)
                     {
-                        Logger.Instance.ELog("Failed starting server: " + ex.Message + Environment.NewLine + ex.StackTrace);
+                        Logger.Instance.ELog("Failed starting server: " + ex.Message + Environment.NewLine +
+                                             ex.StackTrace);
                     }
                 });
-                
+
                 UsingWebView = true;
                 var webview = new Gui.Photino.WebView();
                 webview.Open();
             }
-             else if(minimalGui) {
-            
+            else if (minimalGui)
+            {
+
                 DateTime dt = DateTime.Now;
                 try
                 {
@@ -167,7 +201,7 @@ public class Program
                 }
                 catch (Exception ex)
                 {
-                    if(DateTime.Now.Subtract(dt) < new TimeSpan(0,0,2))
+                    if (DateTime.Now.Subtract(dt) < new TimeSpan(0, 0, 2))
                         Console.WriteLine("Failed to launch GUI: " + ex.Message + Environment.NewLine + ex.StackTrace);
                     else
                         Console.WriteLine("Error: " + ex.Message + Environment.NewLine + ex.StackTrace);
@@ -177,18 +211,8 @@ public class Program
             _ = WebServer.Stop();
             Console.WriteLine("Exiting FileFlows Server...");
         }
-        catch (Exception ex)
-        {
-            try
-            {
-                Logger.Instance.ELog("Error: " + ex.Message + Environment.NewLine + ex.StackTrace);
-            }
-            catch (Exception) { }
-            Console.WriteLine("Error: " + ex.Message + Environment.NewLine + ex.StackTrace);
-        }
-    }
 
-    private static void WriteLogHeader(string[] args)
+        private static void WriteLogHeader(string[] args)
     {
         Logger.Instance.ILog(new string('=', 50));
         Thread.Sleep(1); // so log message can be written
