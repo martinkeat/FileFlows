@@ -151,12 +151,18 @@ public class Program
             }
             else if (fullGui)
             {
+
+                UsingWebView = true;
+
+                var webview = new Gui.Photino.WebView();
                 _ = Task.Run(async () =>
                 {
-                    await Task.Delay(500);
+                    // this fixes a bug on windows that if the webview hasnt opened, it has a memory access exception
+                    do
+                    {
+                        await Task.Delay(100);
+                    } while (webview.Opened == false);
 
-                    if(OperatingSystem.IsWindows())
-                        WindowsConsoleManager.SetIcon("FileFlows", Path.Combine(DirectoryHelper.BaseDirectory, "Server", "icon.ico"));
                     try
                     {
                         Logger.Instance.ILog("Starting FileFlows Server...");
@@ -168,10 +174,6 @@ public class Program
                                              ex.StackTrace);
                     }
                 });
-
-                UsingWebView = true;
-
-                var webview = new Gui.Photino.WebView();
                 // if (OperatingSystem.IsWindows())
                 // {
                 //     // windows doesnt like the normal method, fun fun fun

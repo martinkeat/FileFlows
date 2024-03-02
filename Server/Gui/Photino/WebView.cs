@@ -11,6 +11,11 @@ public class WebView
     /// the photino window instance
     /// </summary>
     private PhotinoWindow window;
+    
+    /// <summary>
+    /// Gets or sets if the web view has opened 
+    /// </summary>
+    public bool Opened { get; private set; }
 
     /// <summary>
     /// Constructs a web view
@@ -104,6 +109,10 @@ public class WebView
             .SetResizable(true)
             .SetJavascriptClipboardAccessEnabled(true)
             .LoadRawString(GetLoadingHtml());
+        window.WindowCreated += (sender, args) =>
+        {
+            Opened = true;
+        }; 
 
         window.WaitForClose(); // Starts the application event loop
     }
