@@ -3267,6 +3267,14 @@ hr {
   .not-configured-pointer {
     display: none;
   }
+  .widget .inner {
+    position: unset;
+    left: unset;
+    right: unset;
+    bottom: unset;
+    top: unset;
+    margin-bottom: 1rem;
+  }
 }
 @media screen and (min-width: 850px) {
   .page.collapsed .not-configured-pointer {
