@@ -11,8 +11,6 @@ public class WebView
     /// the photino window instance
     /// </summary>
     private PhotinoWindow window;
-    
-    private DateTime ShowAfter = DateTime.MaxValue;
 
     /// <summary>
     /// Constructs a web view
@@ -30,12 +28,6 @@ public class WebView
     /// <param name="url">the URL of the web server</param>
     private void WebServer_StatusUpdate(WebServerState state, string message, string url)
     {
-        int count = 0;
-        while(DateTime.Now < ShowAfter && count++ < 10 )
-            Thread.Sleep(50);
-        if (count >= 10)
-            return;
-        
         try
         {
             if (state == WebServerState.Error)
@@ -100,7 +92,6 @@ public class WebView
             .SetResizable(true)
             .LoadRawString(GetLoadingHtml());
 
-        ShowAfter = DateTime.Now.AddMilliseconds(50);
         window.WaitForClose(); // Starts the application event loop
     }
 

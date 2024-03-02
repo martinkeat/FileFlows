@@ -35,6 +35,7 @@ public class Program
     /// </summary>
     public static bool UsingWebView { get; private set; }
 
+    [STAThread] // need for Photino.net on windows
     public static void Main(string[] args)
     {
 #if DEBUG
