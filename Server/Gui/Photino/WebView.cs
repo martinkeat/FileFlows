@@ -28,6 +28,9 @@ public class WebView
     /// <param name="url">the URL of the web server</param>
     private void WebServer_StatusUpdate(WebServerState state, string message, string url)
     {
+        if(OperatingSystem.IsWindows())
+            Thread.Sleep(10_000);
+        
         try
         {
             if (state == WebServerState.Error)

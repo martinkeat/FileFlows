@@ -299,11 +299,11 @@ public class WebServer
         if (Started == false)
         {
             StartError = "Failed to start on: " + serverUrl;
-            OnStatusUpdate?.Invoke(WebServerState.Error, "Failed to start", serverUrl);
+            Task.Run(() => OnStatusUpdate?.Invoke(WebServerState.Error, "Failed to start", serverUrl));
         }
         else
         {
-            OnStatusUpdate?.Invoke(WebServerState.Listening, "Web server listening", serverUrl);
+            Task.Run(() => OnStatusUpdate?.Invoke(WebServerState.Listening, "Web server listening", serverUrl));
         }
 
         task.Wait();
