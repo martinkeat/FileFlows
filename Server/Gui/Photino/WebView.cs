@@ -11,8 +11,8 @@ public class WebView
     /// the photino window instance
     /// </summary>
     private PhotinoWindow window;
-
-    private SemaphoreSlim windowLock = new(1);
+    
+    private DateTime ShowAfter = DateTime.MaxValue;
 
     /// <summary>
     /// Constructs a web view
@@ -30,16 +30,12 @@ public class WebView
     /// <param name="url">the URL of the web server</param>
     private void WebServer_StatusUpdate(WebServerState state, string message, string url)
     {
-        UpdateToProcess = new(state, message, url);
-    }
-
-    private record ProcessUpdate(WebServerState state, string message, string url);
-
-    private ProcessUpdate UpdateToProcess;
-    
-    private void ProcessStatusUpdate(WebServerState state, string message, string url)
-    {
-        windowLock.Wait();
+        int count = 0;
+        while(DateTime.Now < ShowAfter && count++ < 10 )
+            Thread.Sleep(50);
+        if (count >= 10)
+            return;
+        
         try
         {
             if (state == WebServerState.Error)
@@ -77,10 +73,6 @@ public class WebView
         {
             Logger.Instance.ELog("WebServer_StatusUpdate error: " + ex.Message + Environment.NewLine + ex.StackTrace);
         }
-        finally
-        {
-            windowLock.Release();
-        }
 
     }
     
@@ -89,50 +81,27 @@ public class WebView
     /// </summary>
     public void Open()
     {
-        windowLock.Wait();
-        bool closed = false;
-        try
-        {
-            string folderPrefix = "";
+        string folderPrefix = "";
 #if (DEBUG)
-            folderPrefix = "../Client/";
+        folderPrefix = "../Client/";
 #endif
 
-            var iconFile = folderPrefix + "wwwroot/icon" + (PhotinoWindow.IsWindowsPlatform ? ".ico" : ".png");
+        var iconFile = folderPrefix + "wwwroot/icon" + (PhotinoWindow.IsWindowsPlatform ? ".ico" : ".png");
 
-            // Creating a new PhotinoWindow instance with the fluent API
-            window = new PhotinoWindow()
-                .SetTitle("FileFlows")
-                // Resize to a percentage of the main monitor work area
-                .SetUseOsDefaultSize(false)
-                .SetSize(new System.Drawing.Size(1600, 1080))
-                .Center()
-                .SetChromeless(false)
-                .SetIconFile(iconFile)
-                .SetResizable(true)
-                .LoadRawString(GetLoadingHtml());
-            window.WindowCreated += (sender, args) =>
-            {
-                window.WaitForClose();
-                closed = true;
-            };
+        // Creating a new PhotinoWindow instance with the fluent API
+        window = new PhotinoWindow()
+            .SetTitle("FileFlows")
+            // Resize to a percentage of the main monitor work area
+            .SetUseOsDefaultSize(false)
+            .SetSize(new System.Drawing.Size(1600, 1080))
+            .Center()
+            .SetChromeless(false)
+            .SetIconFile(iconFile)
+            .SetResizable(true)
+            .LoadRawString(GetLoadingHtml());
 
-            //window.WaitForClose(); // Starts the application event loop
-        }
-        finally
-        {
-            windowLock.Release();
-        }
-
-        while (closed == false)
-        {
-            Thread.Sleep(500);
-            if (UpdateToProcess != null)
-            {
-                ProcessStatusUpdate(UpdateToProcess.state, UpdateToProcess.message, UpdateToProcess.url);
-                UpdateToProcess = null;
-            }
-        }
+        ShowAfter = DateTime.Now.AddMilliseconds(50);
+        window.WaitForClose(); // Starts the application event loop
     }
 
     private string GetLoadingHtml(string message = "")
@@ -200,7 +169,6 @@ public class WebView
 
     private void ShowError(string error)
     {
-        windowLock.Wait();
         try
         {
             window.LoadRawString($@"<!DOCTYPE html>
@@ -241,15 +209,10 @@ public class WebView
             Logger.Instance.ELog("Failed setting error in webview: " + ex.Message + Environment.NewLine +
                                  ex.StackTrace);
         }
-        finally
-        {
-            windowLock.Release();
-        }
     }
 
     private void LoadIFrame(string url)
     {
-        windowLock.Wait();
         try
         {
             window.SetContextMenuEnabled(false)
@@ -355,10 +318,6 @@ public class WebView
         {
             Logger.Instance.ELog("Failed setting iframe content in webview: " + ex.Message + Environment.NewLine +
                                  ex.StackTrace);
-        }
-        finally
-        {
-            windowLock.Release();
         }
     }
 }
