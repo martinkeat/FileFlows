@@ -82,7 +82,6 @@ public class WebView
 #endif
 
         var iconFile = folderPrefix + "wwwroot/icon" + (PhotinoWindow.IsWindowsPlatform ? ".ico" : ".png");
-        iconFile = folderPrefix + "wwwroot/icon.png";
 
         var browserInit = "";
         if (PhotinoWindow.IsWindowsPlatform)

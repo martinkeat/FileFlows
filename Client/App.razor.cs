@@ -22,7 +22,7 @@ namespace FileFlows.Client
         [Inject] public HttpClient Client { get; set; }
         [Inject] public IJSRuntime jsRuntime { get; set; }
         [Inject] public NavigationManager NavigationManager { get; set; }
-        [Inject] private Blazored.LocalStorage.ILocalStorageService LocalStorage { get; set; }
+        [Inject] private FFLocalStorageService LocalStorage { get; set; }
         public bool LanguageLoaded { get; set; } = false;
 
         public int DisplayWidth { get; private set; }

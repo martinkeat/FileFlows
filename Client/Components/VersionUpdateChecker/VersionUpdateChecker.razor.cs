@@ -35,7 +35,7 @@ public partial class VersionUpdateChecker : IDisposable
     /// <summary>
     /// Gets or sets the Local Storage instance
     /// </summary>
-    [Inject] private Blazored.LocalStorage.ILocalStorageService LocalStorage { get; set; }
+    [Inject] private FFLocalStorageService LocalStorage { get; set; }
 
 
     /// <summary>
@@ -112,7 +112,7 @@ public partial class VersionUpdateChecker : IDisposable
     /// </summary>
     void Dismiss()
     {
-        LocalStorage.SetItemAsStringAsync("DismissedVersion", LatestVersion.ToString());
+        _ = LocalStorage.SetItemAsync("DismissedVersion", LatestVersion.ToString());
         this.Dismissed = true;
         this.StateHasChanged();
     }
@@ -124,7 +124,7 @@ public partial class VersionUpdateChecker : IDisposable
     /// <returns></returns>
     private async Task<bool> IsVersionDismissed(Version version)
     {
-        var dismissed = await LocalStorage.GetItemAsStringAsync("DismissedVersion");
+        var dismissed = await LocalStorage.GetItemAsync<string>("DismissedVersion");
         return dismissed == version.ToString();
     }
 

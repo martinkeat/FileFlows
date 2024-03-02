@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using System.Net.Http;
 using BlazorContextMenu;
-using Blazored.LocalStorage;
 using FileFlows.Client;
 
 
@@ -26,7 +25,7 @@ builder.Services.AddBlazorContextMenu(options =>
     });
 });
 
-builder.Services.AddBlazoredLocalStorage();
+builder.Services.AddSingleton<FFLocalStorageService>();
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 
 await builder.Build().RunAsync();

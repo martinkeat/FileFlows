@@ -10,7 +10,7 @@ public partial class MainLayout : LayoutComponentBase
     public Blocker DisconnectedBlocker { get; set; }
     public Editor Editor { get; set; }
     [Inject] private ClientService ClientService { get; set; }
-    [Inject] private Blazored.LocalStorage.ILocalStorageService LocalStorage { get; set; }
+    [Inject] private FFLocalStorageService LocalStorage { get; set; }
 
     public static MainLayout Instance { get; private set; }
 

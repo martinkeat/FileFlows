@@ -10,7 +10,7 @@ public partial class Dashboard : ComponentBase, IDisposable
 {
     private ConfigurationStatus ConfiguredStatus = ConfigurationStatus.Flows | ConfigurationStatus.Libraries;
     [Inject] public IJSRuntime jSRuntime { get; set; }
-    [Inject] private Blazored.LocalStorage.ILocalStorageService LocalStorage { get; set; }
+    [Inject] private FFLocalStorageService LocalStorage { get; set; }
     [CascadingParameter] public Blocker Blocker { get; set; }
     [CascadingParameter] Editor Editor { get; set; }
     public EventHandler AddWidgetEvent { get; set; }

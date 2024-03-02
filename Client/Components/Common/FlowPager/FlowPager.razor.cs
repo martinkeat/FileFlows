@@ -7,8 +7,6 @@ public partial class FlowPager<TItem>
 {
     [CascadingParameter] private FlowTable<TItem> Table { get; set; }
     
-    [Inject] private Blazored.LocalStorage.ILocalStorageService LocalStorage { get; set; }
-
     /// <summary>
     /// Gets the total items in the datalist
     /// </summary>

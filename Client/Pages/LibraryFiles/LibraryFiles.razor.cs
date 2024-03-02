@@ -13,7 +13,7 @@ public partial class LibraryFiles : ListPage<Guid, LibaryFileListModel>, IDispos
     private FileStatus? filterStatus;
     public override string ApiUrl => "/api/library-file";
     [Inject] private INavigationService NavigationService { get; set; }
-    [Inject] private Blazored.LocalStorage.ILocalStorageService LocalStorage { get; set; }
+    [Inject] private FFLocalStorageService LocalStorage { get; set; }
     
     /// <summary>
     /// Gets or sets the client service
