@@ -88,12 +88,6 @@ public class WebView
 
         var iconFile = folderPrefix + "wwwroot/icon" + (PhotinoWindow.IsWindowsPlatform ? ".ico" : ".png");
 
-        var browserInit = "";
-        if (PhotinoWindow.IsWindowsPlatform)
-        {
-            //Windows example for WebView2
-            browserInit = "--disable-web-security";
-        }
         // Creating a new PhotinoWindow instance with the fluent API
         window = new PhotinoWindow()
             .SetTitle("FileFlows")
@@ -102,8 +96,7 @@ public class WebView
             .SetSize(new System.Drawing.Size(1600, 1080))
             .Center()
             .SetIgnoreCertificateErrorsEnabled(true)
-            .SetGrantBrowserPermissions(true)
-            .SetBrowserControlInitParameters(browserInit)
+            //.SetGrantBrowserPermissions(true)
             .SetChromeless(false)
             .SetIconFile(iconFile)
             .SetResizable(true)
