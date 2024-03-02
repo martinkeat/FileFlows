@@ -164,6 +164,16 @@ namespace FileFlows.Client
             await HttpHelper.Post("/api/system/open-url?url=" + HttpUtility.UrlEncode(url));
             return true;
         }
+
+        public void OpenHelp(string url)
+        {
+            if (Instance.FileFlowsSystem.IsWebView) 
+                _ = OpenUrl(url);
+            else
+            {
+                _ = jsRuntime.InvokeVoidAsync("ff.open", url, true);
+            }
+        }
         
     }
 }

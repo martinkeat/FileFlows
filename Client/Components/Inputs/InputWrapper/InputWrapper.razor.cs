@@ -63,7 +63,7 @@ namespace FileFlows.Client.Components.Inputs
                 string help = Markdig.Markdown.ToHtml(Input.Help).Trim();
                 if (help.StartsWith("<p>") && help.EndsWith("</p>"))
                     help = help[3..^4].Trim();
-                help = help.Replace("<a ", "<a onclick=\"ff.openLink\" ");
+                help = help.Replace("<a ", "<a onclick=\"ff.openLink(event);return false;\" ");
                 this.HelpHtml = help;
             }
         }

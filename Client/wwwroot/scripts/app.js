@@ -1,11 +1,20 @@
 window.dashboardElementResized = new Event('dashboardElementResized', {});
+var ffcsharp;
 
 window.ff = {
-    setCsharp(csharp) {
-        window.ffcsharp = csharp;   
+    setCSharp(csharp) {
+        window.ff.ffcsharp = csharp;
     },
-    open: function(url){
-        window.ffcsharp.invokedmethod('OpenUrl', url).then(result => {
+    open: function(url, inBrowser){
+        if(inBrowser) {
+            open(url, '_blank', 'noopener,noreferrer');
+            return;            
+        }
+        if(!window.ff.ffcsharp){
+            console.log('ffcsharp not set, cannot open help');
+            return;
+        }
+        window.ff.ffcsharp.invokeMethodAsync('OpenUrl', url).then(result => {
             if(!result)
                 open(url, '_blank', 'noopener,noreferrer');
         })

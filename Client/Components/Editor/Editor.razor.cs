@@ -257,7 +257,7 @@ public partial class Editor : InputRegister, IDisposable
                 string desc = Markdig.Markdown.ToHtml(EditorDescription).Trim();
                 if (desc.StartsWith("<p>") && desc.EndsWith("</p>"))
                     desc = desc[3..^4].Trim();
-                desc = desc.Replace("<a ", "<a onclick=\"ff.openLink\" ");
+                desc = desc.Replace("<a ", "<a onclick=\"ff.openLink(event);return false;\" ");
                 builder.AddContent(++count, new MarkupString(desc));
                 builder.CloseElement();
             }
@@ -634,7 +634,7 @@ public partial class Editor : InputRegister, IDisposable
     {
         if (string.IsNullOrWhiteSpace(HelpUrl))
             return;
-        _ = App.Instance.OpenUrl(HelpUrl.ToLowerInvariant());
+        App.Instance.OpenHelp(HelpUrl.ToLowerInvariant());
     }
 
     protected void OnMaximised(bool maximised)

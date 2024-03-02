@@ -38,7 +38,7 @@ public class Program
     public static void Main(string[] args)
     {
 #if DEBUG
-        args = new[] { "--gui" };    
+        // args = new[] { "--gui" };    
 #endif
         try
         {
