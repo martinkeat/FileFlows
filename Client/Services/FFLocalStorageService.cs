@@ -73,6 +73,12 @@ public class FFLocalStorageService
     /// <returns>A task representing the asynchronous operation.</returns>
     public async Task CheckLocalStorageEnabled()
     {
-        _localStorageEnabled = await _jsRuntime.InvokeAsync<bool>("ff.localStorageEnabled()");
+        try
+        {
+            _localStorageEnabled = await _jsRuntime.InvokeAsync<bool>("ff.localStorageEnabled()");
+        }
+        catch (Exception)
+        {
+        }
     }
 }

@@ -4,6 +4,7 @@ using Avalonia;
 using FileFlows.Server.Database;
 using FileFlows.Server.Database.Managers;
 using FileFlows.Server.Helpers;
+using FileFlows.Server.Utils;
 using FileFlows.Shared.Helpers;
 using FileFlows.Shared.Models;
 
@@ -153,6 +154,9 @@ public class Program
                 _ = Task.Run(async () =>
                 {
                     await Task.Delay(500);
+
+                    if(OperatingSystem.IsWindows())
+                        WindowsConsoleManager.SetIcon("FileFlows", Path.Combine(DirectoryHelper.BaseDirectory, "Server", "icon.ico"));
                     try
                     {
                         Logger.Instance.ILog("Starting FileFlows Server...");
