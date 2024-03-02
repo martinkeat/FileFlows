@@ -45,6 +45,8 @@ public partial class Settings : InputRegister
 
     private SettingsUiModel Model { get; set; } = new ();
     private string LicenseFlagsString = string.Empty;
+    // indicates if the page has rendered or not
+    private bool hasRendered = false;
     
     private ProcessingNode InternalProcessingNode { get; set; }
 
@@ -69,6 +71,9 @@ public partial class Settings : InputRegister
         new() { Label = "Deutsch", Value = "de" },
     };
 
+    /// <summary>
+    /// Gets or sets the type of databsae to use
+    /// </summary>
     private object DbType
     {
         get => Model.DbType;
@@ -100,6 +105,7 @@ public partial class Settings : InputRegister
 
     private string initialLannguage;
 
+    /// <inheritdoc />
     protected override async Task OnInitializedAsync()
     {
         lblSave = Translater.Instant("Labels.Save");
@@ -132,6 +138,15 @@ public partial class Settings : InputRegister
         }
     }
 
+
+    /// <inheritdoc />
+    protected override void OnAfterRender(bool firstRender)
+    {
+        base.OnAfterRender(firstRender);
+        hasRendered = true;
+    }
+
+    
     private async Task Refresh(bool blocker = true)
     {
         if(blocker)
@@ -348,7 +363,7 @@ public partial class Settings : InputRegister
     
     private async Task OnTelemetryChange(bool disabled)
     {
-        if (disabled)
+        if (hasRendered && disabled)
         {
             if (await Confirm.Show("Pages.Settings.Messages.DisableTelemetryConfirm.Title",
                     "Pages.Settings.Messages.DisableTelemetryConfirm.Message",

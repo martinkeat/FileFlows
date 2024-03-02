@@ -38,6 +38,7 @@ public partial class NavMenu : IDisposable
 
     // private BackgroundTask bubblesTask;
 
+    /// <inheritdoc />
     protected override void OnInitialized()
     {
         lblVersion = Translater.Instant("Labels.Version");
@@ -56,7 +57,7 @@ public partial class NavMenu : IDisposable
         
         this.LoadMenu();
     }
-
+    
     private void PausedServiceOnOnPausedLabelChanged(string label)
     {
         if (nmiPause == null || nmiPause.Title == label)
