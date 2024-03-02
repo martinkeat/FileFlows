@@ -30,6 +30,15 @@ public class WebView
     /// <param name="url">the URL of the web server</param>
     private void WebServer_StatusUpdate(WebServerState state, string message, string url)
     {
+        UpdateToProcess = new(state, message, url);
+    }
+
+    private record ProcessUpdate(WebServerState state, string message, string url);
+
+    private ProcessUpdate UpdateToProcess;
+    
+    private void ProcessStatusUpdate(WebServerState state, string message, string url)
+    {
         windowLock.Wait();
         try
         {
@@ -81,6 +90,7 @@ public class WebView
     public void Open()
     {
         windowLock.Wait();
+        bool closed = false;
         try
         {
             string folderPrefix = "";
@@ -101,14 +111,27 @@ public class WebView
                 .SetIconFile(iconFile)
                 .SetResizable(true)
                 .LoadRawString(GetLoadingHtml());
+            window.WindowCreated += (sender, args) =>
+            {
+                window.WaitForClose();
+                closed = true;
+            };
 
-
-
-            window.WaitForClose(); // Starts the application event loop  
+            //window.WaitForClose(); // Starts the application event loop
         }
         finally
         {
             windowLock.Release();
+        }
+
+        while (closed == false)
+        {
+            Thread.Sleep(500);
+            if (UpdateToProcess != null)
+            {
+                ProcessStatusUpdate(UpdateToProcess.state, UpdateToProcess.message, UpdateToProcess.url);
+                UpdateToProcess = null;
+            }
         }
     }
 
