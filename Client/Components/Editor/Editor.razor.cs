@@ -634,7 +634,7 @@ public partial class Editor : InputRegister, IDisposable
     {
         if (string.IsNullOrWhiteSpace(HelpUrl))
             return;
-        _ = jsRuntime.InvokeVoidAsync("ff.open", HelpUrl.ToLower(), "_blank");
+        _ = App.Instance.OpenUrl(HelpUrl.ToLowerInvariant());
     }
 
     protected void OnMaximised(bool maximised)
