@@ -12,6 +12,8 @@ public class WebView
     /// </summary>
     private PhotinoWindow window;
 
+    private SemaphoreSlim windowLock = new(1);
+
     /// <summary>
     /// Constructs a web view
     /// </summary>
@@ -28,6 +30,7 @@ public class WebView
     /// <param name="url">the URL of the web server</param>
     private void WebServer_StatusUpdate(WebServerState state, string message, string url)
     {
+        windowLock.Wait();
         try
         {
             if (state == WebServerState.Error)
@@ -65,6 +68,10 @@ public class WebView
         {
             Logger.Instance.ELog("WebServer_StatusUpdate error: " + ex.Message + Environment.NewLine + ex.StackTrace);
         }
+        finally
+        {
+            windowLock.Release();
+        }
 
     }
     
@@ -73,45 +80,36 @@ public class WebView
     /// </summary>
     public void Open()
     {
-        string folderPrefix = "";
+        windowLock.Wait();
+        try
+        {
+            string folderPrefix = "";
 #if (DEBUG)
-        folderPrefix = "../Client/";
+            folderPrefix = "../Client/";
 #endif
 
-        var iconFile = folderPrefix + "wwwroot/icon" + (PhotinoWindow.IsWindowsPlatform ? ".ico" : ".png");
+            var iconFile = folderPrefix + "wwwroot/icon" + (PhotinoWindow.IsWindowsPlatform ? ".ico" : ".png");
 
-        // Creating a new PhotinoWindow instance with the fluent API
-        window = new PhotinoWindow()
-            .SetTitle("FileFlows")
-            // Resize to a percentage of the main monitor work area
-            .SetUseOsDefaultSize(false)
-            .SetSize(new System.Drawing.Size(1600, 1080))
-            .Center()
-            .SetChromeless(false)
-            .SetIconFile(iconFile)
-            .SetResizable(true)
-            .LoadRawString(GetLoadingHtml());
+            // Creating a new PhotinoWindow instance with the fluent API
+            window = new PhotinoWindow()
+                .SetTitle("FileFlows")
+                // Resize to a percentage of the main monitor work area
+                .SetUseOsDefaultSize(false)
+                .SetSize(new System.Drawing.Size(1600, 1080))
+                .Center()
+                .SetChromeless(false)
+                .SetIconFile(iconFile)
+                .SetResizable(true)
+                .LoadRawString(GetLoadingHtml());
 
-
-
-            // Task.Run(async () =>
-            // {
-            //
-            //     while (WebServer.Started == false && WebServer.StartError == null)
-            //         await Task.Delay(250);
-            //
-            //     if (WebServer.StartError != null)
-            //     {
-            //     }
-            //     else
-            //     {
-            //         await Task.Delay(3000);
-            //         window.Load(siteUrl);
-            //     }
-            // });
 
 
             window.WaitForClose(); // Starts the application event loop  
+        }
+        finally
+        {
+            windowLock.Release();
+        }
     }
 
     private string GetLoadingHtml(string message = "")
@@ -179,6 +177,7 @@ public class WebView
 
     private void ShowError(string error)
     {
+        windowLock.Wait();
         try
         {
             window.LoadRawString($@"<!DOCTYPE html>
@@ -216,12 +215,18 @@ public class WebView
         }
         catch (Exception ex)
         {
-            Logger.Instance.ELog("Failed setting error in webview: " + ex.Message + Environment.NewLine + ex.StackTrace);
+            Logger.Instance.ELog("Failed setting error in webview: " + ex.Message + Environment.NewLine +
+                                 ex.StackTrace);
+        }
+        finally
+        {
+            windowLock.Release();
         }
     }
 
     private void LoadIFrame(string url)
     {
+        windowLock.Wait();
         try
         {
             window.SetContextMenuEnabled(false)
@@ -325,7 +330,12 @@ public class WebView
         }
         catch (Exception ex)
         {
-            Logger.Instance.ELog("Failed setting iframe content in webview: " + ex.Message + Environment.NewLine + ex.StackTrace);
+            Logger.Instance.ELog("Failed setting iframe content in webview: " + ex.Message + Environment.NewLine +
+                                 ex.StackTrace);
+        }
+        finally
+        {
+            windowLock.Release();
         }
     }
 }

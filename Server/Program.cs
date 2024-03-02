@@ -82,11 +82,11 @@ public class Program
                 File.WriteAllText(Path.Combine(DirectoryHelper.BaseDirectory, "version.txt"),
                     Globals.Version.Split('.').Last());
 
-            if (noGui == false && Globals.IsWindows)
-            {
-                // hide the console on window
-                Utils.WindowsConsoleManager.Hide();
-            }
+            // if (noGui == false && Globals.IsWindows)
+            // {
+            //     // hide the console on window
+            //     Utils.WindowsConsoleManager.Hide();
+            // }
 
             if (Docker == false)
             {
@@ -115,32 +115,8 @@ public class Program
             }
 
             DirectoryHelper.Init(Docker, false);
-            try
-            {
-                Run(noGui, fullGui, minimalGui, args);
-            }
-            catch (Exception ex)
-            {
-                Logger.Instance.ELog("Error: " + ex.Message + Environment.NewLine + ex.StackTrace);
-                throw;
-            }
-        }
-        catch (Exception ex)
-        {
-            try
-            {
-                Logger.Instance.ELog("Error: " + ex.Message + Environment.NewLine + ex.StackTrace);
-            }
-            catch (Exception)
-            {
-            }
 
-            Console.WriteLine("Error: " + ex.Message + Environment.NewLine + ex.StackTrace);
-        }
-    }
 
-    private static void Run(bool noGui, bool fullGui, bool minimalGui, string[] args)
-        {
             if (File.Exists(Path.Combine(DirectoryHelper.BaseDirectory, "server-upgrade.bat")))
                 File.Delete(Path.Combine(DirectoryHelper.BaseDirectory, "server-upgrade.bat"));
             if (File.Exists(Path.Combine(DirectoryHelper.BaseDirectory, "server-upgrade.sh")))
@@ -211,8 +187,21 @@ public class Program
             _ = WebServer.Stop();
             Console.WriteLine("Exiting FileFlows Server...");
         }
+        catch (Exception ex)
+        {
+            try
+            {
+                Logger.Instance.ELog("Error: " + ex.Message + Environment.NewLine + ex.StackTrace);
+            }
+            catch (Exception)
+            {
+            }
 
-        private static void WriteLogHeader(string[] args)
+            Console.WriteLine("Error: " + ex.Message + Environment.NewLine + ex.StackTrace);
+        }
+    }
+
+    private static void WriteLogHeader(string[] args)
     {
         Logger.Instance.ILog(new string('=', 50));
         Thread.Sleep(1); // so log message can be written
