@@ -102,6 +102,7 @@ public class WebView
             .SetChromeless(false)
             .SetIconFile(iconFile)
             .SetResizable(true)
+            .SetJavascriptClipboardAccessEnabled(true)
             .LoadRawString(GetLoadingHtml());
 
         window.WaitForClose(); // Starts the application event loop

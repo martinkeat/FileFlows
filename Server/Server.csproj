@@ -15,7 +15,7 @@
         <AssemblyName>FileFlows.Server</AssemblyName>
         <GenerateDocumentationFile>True</GenerateDocumentationFile>
         <UseAppHost>True</UseAppHost>
-        <ApplicationIcon>Gui\icon.ico</ApplicationIcon>
+        <ApplicationIcon>icon.ico</ApplicationIcon>
         <ServerGarbageCollection>false</ServerGarbageCollection>
         <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
     </PropertyGroup>
@@ -55,9 +55,9 @@
 
     <ItemGroup>
         <AvaloniaResource Include="Gui\Avalon\*.xaml" />
-        <!--<AvaloniaResource Include="Gui\Avalon\*.axaml" />-->
         <AvaloniaResource Include="Gui\icon.ico" />
         <AvaloniaResource Include="Gui\icon.svg" />
+        <EmbeddedResource Include="icon.ico" />
     </ItemGroup>
     
     <ItemGroup>
