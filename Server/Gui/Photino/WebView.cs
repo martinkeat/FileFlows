@@ -209,7 +209,7 @@ public class WebView
     {
         try
         {
-            window.SetContextMenuEnabled(false)
+            window//.SetContextMenuEnabled(false)
                 .LoadRawString($@"<!DOCTYPE html>
 <html lang=""en"">
 <head>

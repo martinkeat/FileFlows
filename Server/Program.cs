@@ -84,11 +84,11 @@ public class Program
                 File.WriteAllText(Path.Combine(DirectoryHelper.BaseDirectory, "version.txt"),
                     Globals.Version.Split('.').Last());
 
-            // if (noGui == false && Globals.IsWindows)
-            // {
-            //     // hide the console on window
-            //     Utils.WindowsConsoleManager.Hide();
-            // }
+            if (noGui == false && Globals.IsWindows)
+            {
+                // hide the console on window
+                Utils.WindowsConsoleManager.Hide();
+            }
 
             if (Docker == false)
             {
@@ -127,13 +127,12 @@ public class Program
 
             InitializeLoggers();
 
-            Logger.Instance.DLog("GUI: " + fullGui);
-            Logger.Instance.DLog("Minimal GUI: " + minimalGui);
-
             // must be done after directory helper otherwise will fail 
             Globals.CustomFileFlowsDotComUrl = AppSettings.Instance.FileFlowsDotComUrl;
 
             WriteLogHeader(args);
+            Logger.Instance.DLog("GUI: " + fullGui);
+            Logger.Instance.DLog("Minimal GUI: " + minimalGui);
 
             CleanDefaultTempDirectory();
 
