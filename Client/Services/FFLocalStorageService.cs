@@ -36,6 +36,8 @@ public class FFLocalStorageService
             await CheckLocalStorageEnabled();
         if(_localStorageEnabled == true)
         {
+            if (value != null)
+                value = System.Text.Json.JsonSerializer.Serialize(value);
             await _jsRuntime.InvokeVoidAsync("localStorage.setItem", key, value);
         }
         else
@@ -56,8 +58,15 @@ public class FFLocalStorageService
             await CheckLocalStorageEnabled();
         if(_localStorageEnabled == true)
         {
-            var result = await _jsRuntime.InvokeAsync<string>("localStorage.getItem", key);
-            return result != null ? System.Text.Json.JsonSerializer.Deserialize<T>(result) : default;
+            try
+            {
+                var result = await _jsRuntime.InvokeAsync<string>("localStorage.getItem", key);
+                return result != null ? System.Text.Json.JsonSerializer.Deserialize<T>(result) : default;
+            }
+            catch (Exception)
+            {
+                return default;
+            }
 
         }
         else
@@ -75,9 +84,9 @@ public class FFLocalStorageService
     {
         try
         {
-            _localStorageEnabled = await _jsRuntime.InvokeAsync<bool>("ff.localStorageEnabled()");
+            _localStorageEnabled = await _jsRuntime.InvokeAsync<bool>("localStorageEnabled");
         }
-        catch (Exception)
+        catch (Exception ex)
         {
         }
     }

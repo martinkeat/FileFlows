@@ -46,7 +46,7 @@ public partial class Settings : InputRegister
     private SettingsUiModel Model { get; set; } = new ();
     private string LicenseFlagsString = string.Empty;
     // indicates if the page has rendered or not
-    private bool hasRendered = false;
+    private DateTime firstRenderedAt = DateTime.MaxValue;
     
     private ProcessingNode InternalProcessingNode { get; set; }
 
@@ -142,8 +142,9 @@ public partial class Settings : InputRegister
     /// <inheritdoc />
     protected override void OnAfterRender(bool firstRender)
     {
+        if (firstRender)
+            firstRenderedAt = DateTime.Now;
         base.OnAfterRender(firstRender);
-        hasRendered = true;
     }
 
     
@@ -363,7 +364,7 @@ public partial class Settings : InputRegister
     
     private async Task OnTelemetryChange(bool disabled)
     {
-        if (hasRendered && disabled)
+        if (firstRenderedAt < DateTime.Now.AddSeconds(-1) && disabled)
         {
             if (await Confirm.Show("Pages.Settings.Messages.DisableTelemetryConfirm.Title",
                     "Pages.Settings.Messages.DisableTelemetryConfirm.Message",

@@ -34,6 +34,14 @@
                 //   location.reload();
             }
         });
+        window.localStorageEnabled = function(){
+            try{
+                localStorage.getItem('');
+                return true;
+            }catch(err){
+                return false;
+            }
+        };
     </script>
     
     <script defer src="_content/BlazorDateRangePicker/clickAndPositionHandler.js?v=#VERSION#"></script>

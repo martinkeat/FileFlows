@@ -24,14 +24,6 @@ window.ff = {
         let url = event.target.getAttribute('href');
         ff.open(url);        
     },
-    localStorageEnabled: function(){
-        try{
-            localStorage.get('test');
-            return true;
-        }catch(err){
-            return false;
-        }
-    },
     log: function (level, parameters) {
 
         if (!parameters || parameters.length === 0)
