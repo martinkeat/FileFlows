@@ -2,6 +2,7 @@
 using BlazorMonaco;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace FileFlows.Client.Components.Dialogs;
 
@@ -129,6 +130,10 @@ public partial class FlowTemplatePicker : ComponentBase
             }
 
             flowResult.Data.Flow.Uid = Guid.NewGuid(); // ensure its a new UID and not an existing one
+            
+            // this gets the translated name, if it was translated
+            flowResult.Data.Flow.Name = flowResult.Data.Name;
+            
             ShowTask.SetResult(new()
             {
                 Result = FlowTemplatePickerResult.ResultCode.Template,
@@ -210,10 +215,24 @@ public partial class FlowTemplatePicker : ComponentBase
     public async Task<List<FlowTemplateModel>> GetTemplates(FlowType type)
     {
         var result = await HttpHelper.Get<List<FlowTemplateModel>>("/api/flow-template?type=" + type);
-        if (result.Success)
-            return result.Data ?? new();
-        
-        return new ();
+        if (!result.Success)
+            return new ();
+        var results =  result.Data ?? new();
+
+        foreach (var template in results)
+        {
+            string key = "Templates.Flows." + template.Name.Replace(" ", "") + ".";
+
+            string translatedName = Translater.Instant(key + "Name", suppressWarnings: true);
+            if (string.IsNullOrWhiteSpace(translatedName) == false && translatedName != "Name")
+                template.Name = translatedName;
+            string translatedDescription = Translater.Instant(key + "Description", suppressWarnings: true);
+            if (string.IsNullOrWhiteSpace(translatedDescription) == false && translatedDescription != "Description")
+                template.Description = translatedDescription;
+        }
+
+        return results;
+
     }
 }
 /// <summary>

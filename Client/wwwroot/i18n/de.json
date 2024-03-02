@@ -299,7 +299,45 @@
       "Books": "Bücher",
       "DownloadClients": "Download Clienten",
       "DVR": "DVR",
-      "General": "General",
+      "General": "General"
+    },
+    "Flows": {
+      "ConvertComic": {
+        "Name": "Comic konvertieren",
+        "Description": "Ein Flow, der Comics von CBR, CBZ, CB7, PDF, GZ, BZ2 entweder in CBZ oder PDF konvertiert."
+      },
+      "ConvertImage": {
+        "Name": "Convert Image",
+        "Description": "A flow that converts images."
+      },
+      "ConvertVideo": {
+        "Name": "Video konvertieren",
+        "Description": "Ein Flow, der eine Videodatei in ein anderes Format konvertiert."
+      },
+      "File": {
+        "Name": "Datei",
+        "Description": "Eine leere Dateivorlage mit einer einzelnen ''Eingabedatei''."
+      },
+      "Folder": {
+        "Name": "Ordner",
+        "Description": "Eine leere Ordnervorlage mit einem einzelnen ''Eingabeordner'' .\n\nHINWEIS: Diese Vorlage sollte nur zur Verarbeitung von Ordnern und nicht von Dateien verwendet werden.  Die Verarbeitung eines Ordners unterliegt EinschrÃ¤nkungen, da der Ordner verarbeitet wird und nicht die darin enthaltenen Dateien."
+      },
+      "FailureFlow": {
+        "Name": "Fehler-Flow",
+        "Description": "Basis-Fehlerflow, der ausgeführt wird, wenn ein Flow aus irgendeinem Grund ausfällt."
+      },
+      "ImageFile": {
+        "Name": "Bilddatei",
+        "Description": "Eine leere Bildvorlage mit einer einzelnen ''Bilddatei''."
+      },
+      "AudioFile": {
+        "Name": "Audio File",
+        "Description": "A blank Audio template with a single ''Audio File'' input flow element."
+      },
+      "VideoFile": {
+        "Name": "Videodatei",
+        "Description": "Eine leere Videodateivorlage mit einer einzelnen ''Videodatei''."
+      }
     },
     "Libraries": {
       "AudioBookLibrary": {
