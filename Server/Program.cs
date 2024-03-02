@@ -35,7 +35,7 @@ public class Program
     /// </summary>
     public static bool UsingWebView { get; private set; }
 
-    //[STAThread] // need for Photino.net on windows
+    [STAThread] // need for Photino.net on windows
     public static void Main(string[] args)
     {
 #if DEBUG
@@ -73,9 +73,10 @@ public class Program
                 DirectoryHelper.BaseDirectory = baseDir;
 
             bool minimalGui = Globals.IsDocker == false &&
-                              args?.Any(x => x.ToLowerInvariant() == "--minimal-gui") == true;
-            bool fullGui = Globals.IsDocker == false && args?.Any(x => x.ToLowerInvariant() == "--gui") == true;
+                              args?.Any(x => x.ToLowerInvariant().Trim() == "--minimal-gui") == true;
+            bool fullGui = Globals.IsDocker == false && args?.Any(x => x.ToLowerInvariant().Trim() == "--gui") == true;
             bool noGui = fullGui == false && minimalGui == false;
+            
             Program.EntryPoint = args.SkipWhile((arg, index) => arg != "--entry-point" || index == args.Length - 1)
                 .Skip(1).FirstOrDefault();
 
@@ -116,6 +117,9 @@ public class Program
             }
 
             DirectoryHelper.Init(Docker, false);
+            
+            Logger.Instance.DLog("GUI: " + fullGui);
+            Logger.Instance.DLog("Minimal GUI: " + minimalGui);
 
 
             if (File.Exists(Path.Combine(DirectoryHelper.BaseDirectory, "server-upgrade.bat")))
@@ -150,7 +154,7 @@ public class Program
             {
                 _ = Task.Run(async () =>
                 {
-                    await Task.Delay(50);
+                    await Task.Delay(500);
                     try
                     {
                         Logger.Instance.ILog("Starting FileFlows Server...");
@@ -166,15 +170,15 @@ public class Program
                 UsingWebView = true;
 
                 var webview = new Gui.Photino.WebView();
-                if (OperatingSystem.IsWindows())
-                {
-                    // windows doesnt like the normal method, fun fun fun
-                    Thread thread = new Thread(() => webview.Open());
-                    thread.SetApartmentState(ApartmentState.STA);
-                    thread.Start();
-                    thread.Join();
-                }
-                else
+                // if (OperatingSystem.IsWindows())
+                // {
+                //     // windows doesnt like the normal method, fun fun fun
+                //     Thread thread = new Thread(() => webview.Open());
+                //     thread.SetApartmentState(ApartmentState.STA);
+                //     thread.Start();
+                //     thread.Join();
+                // }
+                // else
                 {
                     // this works fine on mac/linux
                     webview.Open();

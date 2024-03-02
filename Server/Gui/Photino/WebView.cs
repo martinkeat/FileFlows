@@ -29,7 +29,7 @@ public class WebView
     private void WebServer_StatusUpdate(WebServerState state, string message, string url)
     {
         if(OperatingSystem.IsWindows())
-            Thread.Sleep(10_000);
+            Thread.Sleep(500);
         
         try
         {
