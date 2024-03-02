@@ -24,6 +24,7 @@ class CustomDbMapper : DefaultMapper
     {
         JsonOptions = new JsonSerializerOptions();
         JsonOptions.Converters.Add(new TimeSpanConverter());
+        JsonOptions.Converters.Add(new DataConverter());
     }
     
     /// <summary>

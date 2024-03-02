@@ -193,8 +193,9 @@ public class DbMigrater
             {
                 dest.Insert(obj);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Console.WriteLine("Migration error:" + ex.Message);
             }
         }
     }
