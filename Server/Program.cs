@@ -118,10 +118,6 @@ public class Program
 
             DirectoryHelper.Init(Docker, false);
             
-            Logger.Instance.DLog("GUI: " + fullGui);
-            Logger.Instance.DLog("Minimal GUI: " + minimalGui);
-
-
             if (File.Exists(Path.Combine(DirectoryHelper.BaseDirectory, "server-upgrade.bat")))
                 File.Delete(Path.Combine(DirectoryHelper.BaseDirectory, "server-upgrade.bat"));
             if (File.Exists(Path.Combine(DirectoryHelper.BaseDirectory, "server-upgrade.sh")))
@@ -130,6 +126,9 @@ public class Program
             ServicePointManager.DefaultConnectionLimit = 50;
 
             InitializeLoggers();
+
+            Logger.Instance.DLog("GUI: " + fullGui);
+            Logger.Instance.DLog("Minimal GUI: " + minimalGui);
 
             // must be done after directory helper otherwise will fail 
             Globals.CustomFileFlowsDotComUrl = AppSettings.Instance.FileFlowsDotComUrl;
