@@ -155,7 +155,7 @@ public class Program
                 
                 UsingWebView = true;
                 var webview = new Gui.Photino.WebView();
-                webview.Open();;
+                webview.Open();
             }
              else if(minimalGui) {
             

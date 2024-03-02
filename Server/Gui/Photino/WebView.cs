@@ -28,35 +28,42 @@ public class WebView
     /// <param name="url">the URL of the web server</param>
     private void WebServer_StatusUpdate(WebServerState state, string message, string url)
     {
-        if (state == WebServerState.Error)
-            ShowError(message);
-        if (state == WebServerState.Listening)
+        try
         {
-            Thread.Sleep(5000);
-            window.LoadRawString(GetLoadingHtml(message));
-            
-            // Parse the URL
-            Uri uri = new Uri(url);
-            string protocol = uri.Scheme;
-            int port = uri.Port;
-            if (port > 0)
-                url  = $"{protocol}://{Environment.MachineName.ToLowerInvariant()}:{port}/";
-            else
-                url  = $"{protocol}://{Environment.MachineName.ToLowerInvariant()}/";
-            
-            #if(DEBUG)
-            url = "http://localhost:5276/";
-            #endif
-            
-           LoadIFrame(url);
-        }
-
-        if (state == WebServerState.Starting)
-        {
-            if (window == null)
-                Thread.Sleep(100);
-            if (window != null)
+            if (state == WebServerState.Error)
+                ShowError(message);
+            if (state == WebServerState.Listening)
+            {
+                Thread.Sleep(5000);
                 window.LoadRawString(GetLoadingHtml(message));
+
+                // Parse the URL
+                Uri uri = new Uri(url);
+                string protocol = uri.Scheme;
+                int port = uri.Port;
+                if (port > 0)
+                    url = $"{protocol}://{Environment.MachineName.ToLowerInvariant()}:{port}/";
+                else
+                    url = $"{protocol}://{Environment.MachineName.ToLowerInvariant()}/";
+
+#if(DEBUG)
+                url = "http://localhost:5276/";
+#endif
+
+                LoadIFrame(url);
+            }
+
+            if (state == WebServerState.Starting)
+            {
+                if (window == null)
+                    Thread.Sleep(100);
+                if (window != null)
+                    window.LoadRawString(GetLoadingHtml(message));
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.Instance.ELog("WebServer_StatusUpdate error: " + ex.Message + Environment.NewLine + ex.StackTrace);
         }
 
     }
@@ -172,7 +179,9 @@ public class WebView
 
     private void ShowError(string error)
     {
-        window.LoadRawString($@"<!DOCTYPE html>
+        try
+        {
+            window.LoadRawString($@"<!DOCTYPE html>
 <html lang=""en"">
 <head>
 <meta charset=""UTF-8"">
@@ -204,12 +213,19 @@ public class WebView
 </body>
 </html>
 ");
+        }
+        catch (Exception ex)
+        {
+            Logger.Instance.ELog("Failed setting error in webview: " + ex.Message + Environment.NewLine + ex.StackTrace);
+        }
     }
 
     private void LoadIFrame(string url)
     {
-        window.SetContextMenuEnabled(false)
-            .LoadRawString($@"<!DOCTYPE html>
+        try
+        {
+            window.SetContextMenuEnabled(false)
+                .LoadRawString($@"<!DOCTYPE html>
 <html lang=""en"">
 <head>
     <meta charset=""UTF-8"">
@@ -306,5 +322,10 @@ public class WebView
 </body>
 </html>
 ");
+        }
+        catch (Exception ex)
+        {
+            Logger.Instance.ELog("Failed setting iframe content in webview: " + ex.Message + Environment.NewLine + ex.StackTrace);
+        }
     }
 }
