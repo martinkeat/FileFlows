@@ -1,5 +1,6 @@
 ﻿using System.Security.Cryptography;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace FileFlows.Server.Helpers;
 
@@ -78,5 +79,17 @@ public class Decrypter
             }
         }
         return text;
+    }
+    
+    
+    /// <summary>
+    /// Checks if the given input string appears to be encrypted.
+    /// </summary>
+    /// <param name="input">The input string to be checked.</param>
+    /// <returns>True if the input string appears to be encrypted; otherwise, false.</returns>
+    public static bool IsPossiblyEncrypted(string input)
+    {
+        // Single line regular expression to check for potential encrypted strings
+        return Regex.IsMatch(input, @"^[a-zA-Z0-9/+]{40,}[=]{0,2}$");
     }
 }

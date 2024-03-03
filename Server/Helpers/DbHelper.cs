@@ -2,8 +2,10 @@ using System.Text.RegularExpressions;
 using FileFlows.Plugin;
 using FileFlows.Server.Controllers;
 using FileFlows.Server.Database.Managers;
+using FileFlows.ServerShared.Services;
 using FileFlows.Shared.Models;
 using NPoco;
+using VariableService = FileFlows.Server.Services.VariableService;
 
 namespace FileFlows.Server.Helpers;
 
@@ -290,58 +292,43 @@ public class DbHelper
     /// </summary>
     public static void RestoreDefaults()
     {
-        var manager = GetDbManager();
-        var variables = manager.Fetch<string>("select name from DbObject where Type = 'FileFlows.Shared.Models.Variable'").Result.ToList();
-
-        var ffmpeg = variables.FirstOrDefault(x => x.ToLowerInvariant() == "ffmpeg");
-        if (ffmpeg == null)
-        {
-            // doesnt exist, insert it
-            try
-            {
-                manager.Update(new Variable()
-                {
-                    Name = "ffmpeg",
-                    Value = Globals.IsWindows
-                        ? Path.Combine(DirectoryHelper.BaseDirectory, @"Tools\ffmpeg.exe")
-                        : "/usr/local/bin/ffmpeg"
-                }).Wait();
-            }
-            catch (Exception ex)
-            {
-                Logger.Instance.ELog("Error inserting ffmpeg: " + ex.Message);
-            }
-        }
-        else if (ffmpeg != "ffmpeg")
-        {
-            // not lower case
-            manager.Execute("update DbObject set Name = 'ffmpeg' where Name like 'ffmpeg' and Type = 'FileFlows.Shared.Models.Variable'", null).Wait();
-        }
+        var service = new VariableService();
+        var variables = service.GetAll();
 
         string programFiles = Environment.ExpandEnvironmentVariables("%ProgramW6432%");
         
         foreach (var variable in new[]
                  {
-                     ("ffprobe", Globals.IsWindows ? Path.Combine(DirectoryHelper.BaseDirectory, @"Tools\ffprobe.exe") : "/usr/local/bin/ffprobe"), 
+                     ("ffmpeg", VariableHelper.GetDefaultFFmpegLocation()),
+                     ("ffprobe", VariableHelper.GetDefaultFFprobeLocation()), 
                      ("unrar", Globals.IsWindows ? Path.Combine(programFiles, "WinRAR", "UnRAR.exe") : "unrar"), 
                      ("rar", Globals.IsWindows ? Path.Combine(programFiles, "WinRAR", "Rar.exe") : "rar"), 
                      ("7zip", Globals.IsWindows ? Path.Combine(programFiles, "7-Zip", "7z.exe") : "7z")
                  })
         {
-            if (variables.Contains(variable.Item1))
-                continue;
-            // doesnt exist, insert it
-            try
+            var dbVariable = variables.FirstOrDefault(x =>
+                string.Equals(x.Name, variable.Item1, StringComparison.InvariantCultureIgnoreCase));
+            if (dbVariable == null)
             {
-                manager.Update(new Variable()
+                // doesnt exist, insert it
+                try
                 {
-                    Name = variable.Item1,
-                    Value = variable.Item2
-                }).Wait();
+                    service.Update(new ()
+                    {
+                        Name = variable.Item1,
+                        Value = variable.Item2
+                    }).Wait();
+                }
+                catch (Exception ex)
+                {
+                    Logger.Instance.ELog($"Error inserting '{variable.Item1}: " + ex.Message);
+                }
             }
-            catch (Exception ex)
+            else if(Decrypter.IsPossiblyEncrypted(dbVariable.Value))
             {
-                Logger.Instance.ELog($"Error inserting '{variable.Item1}: " + ex.Message);
+                // bad encryption, restore the default
+                dbVariable.Value = variable.Item2;
+                service.Update(dbVariable).Wait();
             }
         }
     }
