@@ -65,7 +65,7 @@ public class LibraryControllerTests:CacheControllerTestBase
             ExclusionFilter = exclude
         };
         var updated = controller.Save(lib).Result;
-        var list = controller.GetAll();
+        var list = controller.GetAll().Result;
         var fromList = list.First(x => x.Name == name);
         foreach (var other in new[] { updated, fromList })
         {

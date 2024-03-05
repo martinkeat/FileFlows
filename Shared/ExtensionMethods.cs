@@ -25,9 +25,7 @@ public static class ExtensionMethods
     /// <param name="str">the input string</param>
     /// <returns>the string or null if empty</returns>
     public static string? EmptyAsNull(this string str)
-    {
-        return str == string.Empty ? null : str;
-    }
+        => str == string.Empty ? null : str;
 
     /// <summary>
     /// Tries to find a match 

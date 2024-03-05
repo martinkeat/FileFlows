@@ -58,8 +58,14 @@ public class TestLogger : ILogger
             x.GetType().IsPrimitive ? x.ToString() :
             x is string ? x.ToString() :
             System.Text.Json.JsonSerializer.Serialize(x)));
+        Writer?.Invoke(message);
         Messages.Add(message);
     }
+
+    /// <summary>
+    /// Gets or sets an optional writer
+    /// </summary>
+    public  Action<string> Writer { get; set; }
 
     /// <summary>
     /// Returns the entire log as a string

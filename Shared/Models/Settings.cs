@@ -125,6 +125,22 @@ public class Settings : FileFlowObject
     /// Gets or sets the allowed paths for the file server
     /// </summary>
     public string[] FileServerAllowedPaths { get; set; }
+    
+    /// <summary>
+    /// Gets or sets the caching settings
+    /// </summary>
+    public CacheSettings Cache { get; set; }
+}
+
+
+/// <summary>
+/// Cache Settings
+/// </summary>
+public class CacheSettings {
+    /// <summary>
+    /// Gets or sets if the caching should be used
+    /// </summary>
+    public bool UseCache { get; set; }
 }
 
 /// <summary>

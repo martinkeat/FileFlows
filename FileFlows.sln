@@ -21,6 +21,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FlowRunner", "FlowRunner\Fl
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScriptExecution", "ScriptExecution\ScriptExecution.csproj", "{09568E2E-EBE2-447D-9628-19C618AE7461}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataLayer", "DataLayer\DataLayer.csproj", "{FDCE8821-3228-42C9-8639-A279E51E2EE3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Managers", "Managers\Managers.csproj", "{508AFEAB-0FF3-45AD-89CE-D78B30A4F2D2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -63,6 +67,14 @@ Global
 		{09568E2E-EBE2-447D-9628-19C618AE7461}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{09568E2E-EBE2-447D-9628-19C618AE7461}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{09568E2E-EBE2-447D-9628-19C618AE7461}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FDCE8821-3228-42C9-8639-A279E51E2EE3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FDCE8821-3228-42C9-8639-A279E51E2EE3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FDCE8821-3228-42C9-8639-A279E51E2EE3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FDCE8821-3228-42C9-8639-A279E51E2EE3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{508AFEAB-0FF3-45AD-89CE-D78B30A4F2D2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{508AFEAB-0FF3-45AD-89CE-D78B30A4F2D2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{508AFEAB-0FF3-45AD-89CE-D78B30A4F2D2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{508AFEAB-0FF3-45AD-89CE-D78B30A4F2D2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
