@@ -7,9 +7,9 @@ CREATE PROCEDURE GetUpcoming
 AS
 
 create table #tempLibraries (
-                                Uid varchar(36),
-                                Name varchar(255),
-                                Priority int
+    Uid varchar(36),
+    Name varchar(255),
+    Priority int
 )
 
     insert into #tempLibraries

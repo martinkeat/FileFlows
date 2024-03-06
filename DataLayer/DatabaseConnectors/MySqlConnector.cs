@@ -1,4 +1,6 @@
+using FileFlows.DataLayer.Converters;
 using FileFlows.Plugin;
+using FileFlows.Shared.Models;
 using MySqlConnectorFactory = MySqlConnector.MySqlConnectorFactory;
 
 namespace FileFlows.DataLayer.DatabaseConnectors;
@@ -8,6 +10,9 @@ namespace FileFlows.DataLayer.DatabaseConnectors;
 /// </summary>
 public class MySqlConnector : IDatabaseConnector
 {
+    /// <inheritdoc />
+    public DatabaseType Type => DatabaseType.MySql;
+
     /// <summary>
     /// The connection string to the database
     /// </summary>
@@ -23,6 +28,15 @@ public class MySqlConnector : IDatabaseConnector
     private ILogger Logger;
     
     /// <summary>
+    /// Instance of CustomDbMapper for this server connection
+    /// </summary>
+    private readonly CustomDbMapper CustomDbMapperInstance;
+
+    /// <inheritdoc />
+    public string FormatDateQuoted(DateTime date)
+        => "'" + date.ToString("yyyy-MM-dd HH:mm:ss.ffffff") + "'";
+
+    /// <summary>
     /// Initialises a MySQL Connector
     /// </summary>
     /// <param name="logger">the logger to use by this connector</param>
@@ -31,6 +45,7 @@ public class MySqlConnector : IDatabaseConnector
     {
         Logger = logger;
         ConnectionString = connectionString;
+        CustomDbMapperInstance = new ();
         connectionPool = new(CreateConnection, 20, connectionLifetime: new TimeSpan(0, 10, 0));
     }
     
@@ -41,6 +56,9 @@ public class MySqlConnector : IDatabaseConnector
     private DatabaseConnection CreateConnection()
     {
         var db = new NPoco.Database(ConnectionString, null, MySqlConnectorFactory.Instance);
+        db.Mappers.Add(GuidNullableConverter.Instance);
+        db.Mappers.Add(NoNullsConverter.Instance);
+        db.Mappers.Add(CustomDbMapperInstance);
         return new DatabaseConnection(db, false);
     }
 

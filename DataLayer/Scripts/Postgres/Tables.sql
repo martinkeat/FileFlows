@@ -88,9 +88,9 @@ CREATE TABLE "LibraryFile"
     "NoLongerExistsAfterProcessing"          BOOLEAN                      NOT NULL,
 
     -- json data
-    "OriginalMetadata"    JSONB               NOT NULL,
-    "FinalMetadata"       JSONB               NOT NULL,
-    "ExecutedNodes"       JSONB               NOT NULL
+    "OriginalMetadata"    TEXT                NOT NULL,
+    "FinalMetadata"       TEXT                NOT NULL,
+    "ExecutedNodes"       TEXT                NOT NULL
 );
 
 CREATE INDEX ON "LibraryFile" ("Status");

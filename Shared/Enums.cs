@@ -230,7 +230,7 @@ public enum ProcessingOrder
     /// <summary>
     /// Sort the files alphabetically
     /// </summary>
-    Alphabetical
+    Alphabetical = 6
 }
 
 

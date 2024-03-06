@@ -1,5 +1,6 @@
 ﻿using FileFlows.DataLayer.DatabaseConnectors;
 using FileFlows.Plugin;
+using FileFlows.Shared.Models;
 
 namespace FileFlows.DataLayer;
 
@@ -16,7 +17,17 @@ public class DatabaseAccessManager
     /// <summary>
     /// Gets or sets the singleton instance of the Database Access Manager
     /// </summary>
-    public static DatabaseAccessManager Instance { get; set; } 
+    public static DatabaseAccessManager Instance { get; set; }
+    
+    /// <summary>
+    /// Gets the type of database this is
+    /// </summary>
+    public DatabaseType Type { get; init; }
+
+    /// <summary>
+    /// The logger used
+    /// </summary>
+    private readonly ILogger Logger;
     
     /// <summary>
     /// Initializes a new instance of the DatabaseAccessManager class.
@@ -26,9 +37,53 @@ public class DatabaseAccessManager
     /// <param name="connectionString">The connection string used to connect to the database.</param>
     public DatabaseAccessManager(ILogger logger, DatabaseType type, string connectionString)
     {
+        Logger = logger;
+        Type = type;
         DbConnector = LoadConnector(logger, type, connectionString);
         this.DbObjectManager = new (type, DbConnector);
+        this.DbStatisticManager = new (type, DbConnector);
+        this.DbRevisionManager = new (type, DbConnector);
+        this.DbLogMessageManager = new (type, DbConnector);
+        this.LibraryFileManager = new (type, DbConnector);
         this.FileFlowsObjectManager = new(this.DbObjectManager);
+    }
+
+    /// <summary>
+    /// Creates a database access manager from its connection string
+    /// </summary>
+    /// <param name="logger">the logger to use</param>
+    /// <param name="connectionString">the connection string</param>
+    /// <returns>the database access manager instance</returns>
+    public static DatabaseAccessManager FromConnectionString(ILogger logger, string connectionString)
+    {
+        if (connectionString.ToLowerInvariant().IndexOf("host=", StringComparison.Ordinal) > 0)
+            return new DatabaseAccessManager(logger, DatabaseType.Postgres, connectionString);
+        if (connectionString.ToLowerInvariant().IndexOf("uid=", StringComparison.Ordinal) > 0)
+            return new DatabaseAccessManager(logger, DatabaseType.MySql, connectionString);
+        if (connectionString.ToLowerInvariant().IndexOf("server=", StringComparison.Ordinal) > 0)
+            return new DatabaseAccessManager(logger, DatabaseType.SqlServer, connectionString);
+        return new DatabaseAccessManager(logger, DatabaseType.Sqlite, connectionString);
+    }
+
+    /// <summary>
+    /// Creates a database access manager from its type
+    /// </summary>
+    /// <param name="logger">the logger to use</param>
+    /// <param name="type">the type of database</param>
+    /// <param name="connectionString">the connection string</param>
+    /// <returns>the database access manager instance</returns>
+    public static DatabaseAccessManager FromType(ILogger logger, DatabaseType type, string connectionString)
+    {
+        switch (type)
+        {
+            case DatabaseType.MySql:
+                return new DatabaseAccessManager(logger, DatabaseType.MySql, connectionString);
+            case DatabaseType.Postgres:
+                return new DatabaseAccessManager(logger, DatabaseType.Postgres, connectionString);
+            case DatabaseType.SqlServer:
+                return new DatabaseAccessManager(logger, DatabaseType.SqlServer, connectionString);
+            default: return new DatabaseAccessManager(logger, DatabaseType.Sqlite, connectionString);
+        }
     }
 
     /// <summary>
@@ -57,9 +112,29 @@ public class DatabaseAccessManager
     /// Gets the DbObject manager to manage the database operations for the DbObject table
     /// </summary>
     public DbObjectManager DbObjectManager { get; init; }
+    
+    /// <summary>
+    /// Gets the DbStatistic manager to manage the database operations for the DbStatistic table
+    /// </summary>
+    public DbStatisticManager DbStatisticManager { get; init; }
+    
+    /// <summary>
+    /// Gets the DbRevision manager to manage the database operations for the RevisionedObject table
+    /// </summary>
+    public DbRevisionManager DbRevisionManager { get; init; }
+    
+    /// <summary>
+    /// Gets the DbLogMessage manager to manage the database operations for the DbLogMessage table
+    /// </summary>
+    public DbLogMessageManager DbLogMessageManager { get; init; }
 
     /// <summary>
     /// Gets the FileFlowsObject manager to manage the database operations for the FileFlowsObjects that are saved in the DbObject table
     /// </summary>
     public FileFlowsObjectManager FileFlowsObjectManager { get; init; }
+
+    /// <summary>
+    /// Gets the Library File manager to manage the database operations for the Library Files
+    /// </summary>
+    public LibraryFileManager LibraryFileManager { get; init; }
 }

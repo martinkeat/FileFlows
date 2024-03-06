@@ -1,7 +1,9 @@
 using System.Text.RegularExpressions;
+using FileFlows.DataLayer.Converters;
 using FileFlows.Plugin;
 using Microsoft.Data.SqlClient;
 using NPoco;
+using DatabaseType = FileFlows.Shared.Models.DatabaseType;
 using MySqlConnectorFactory = MySqlConnector.MySqlConnectorFactory;
 
 namespace FileFlows.DataLayer.DatabaseConnectors;
@@ -11,6 +13,9 @@ namespace FileFlows.DataLayer.DatabaseConnectors;
 /// </summary>
 public class SqlServerConnector : IDatabaseConnector
 {
+    /// <inheritdoc />
+    public DatabaseType Type => DatabaseType.SqlServer;
+    
     /// <summary>
     /// The connection string to the database
     /// </summary>
@@ -24,6 +29,15 @@ public class SqlServerConnector : IDatabaseConnector
     /// Logger used for logging
     /// </summary>
     private ILogger Logger;
+
+    /// <summary>
+    /// Instance of CustomDbMapper for this server connection
+    /// </summary>
+    private readonly CustomDbMapper CustomDbMapperInstance; 
+    
+    /// <inheritdoc />
+    public string FormatDateQuoted(DateTime date)
+        => "'" + date.ToString("yyyy-MM-ddTHH:mm:ss.fffZ") + "'";
     
     /// <summary>
     /// Initialises a SQL Server Connector
@@ -34,6 +48,7 @@ public class SqlServerConnector : IDatabaseConnector
     {
         Logger = logger;
         ConnectionString = connectionString;
+        CustomDbMapperInstance = new ();
         connectionPool = new(CreateConnection, 20, connectionLifetime: new TimeSpan(0, 10, 0));
     }
 
@@ -44,6 +59,9 @@ public class SqlServerConnector : IDatabaseConnector
     private DatabaseConnection CreateConnection()
     {
         var db = new Database(ConnectionString, null, SqlClientFactory.Instance);
+        db.Mappers.Add(Converters.GuidNullableConverter.Instance);
+        db.Mappers.Add(Converters.NoNullsConverter.Instance);
+        db.Mappers.Add(CustomDbMapperInstance);
         return new DatabaseConnection(db, false);
     }
 

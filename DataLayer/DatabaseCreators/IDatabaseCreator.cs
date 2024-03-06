@@ -1,10 +1,10 @@
 using FileFlows.Plugin;
+using FileFlows.Shared.Models;
 
 namespace FileFlows.DataLayer.DatabaseCreators;
 
 public interface IDatabaseCreator
 {
-
     /// <summary>
     /// Creates the database
     /// </summary>
@@ -17,5 +17,32 @@ public interface IDatabaseCreator
     /// </summary>
     /// <returns>if successful or not</returns>
     Result<bool> CreateDatabaseStructure();
+}
 
+/// <summary>
+/// Static methods for database creators
+/// </summary>
+internal static class DatabaseCreator 
+{
+    /// <summary>
+    /// Gets a database creator from its type 
+    /// </summary>
+    /// <param name="type">the type of database to use</param>
+    /// <param name="logger">the logger to use</param>
+    /// <param name="connectionString">the connection string to the database</param>
+    /// <returns>the database creator</returns>
+    internal static IDatabaseCreator Get(DatabaseType type, ILogger logger, string connectionString)
+    {
+        switch (type)
+        {
+            case DatabaseType.Postgres:
+                return new PostgresDatabaseCreator(logger, connectionString);
+            case DatabaseType.MySql:
+                return new MySqlDatabaseCreator(logger, connectionString);
+            case DatabaseType.SqlServer:
+                return new SqlServerDatabaseCreator(logger, connectionString);
+            default:
+                return new SQLiteDatabaseCreator(logger, connectionString);
+        }
+    }
 }

@@ -14,9 +14,29 @@ namespace FileFlows.DataLayer;
 /// </summary>
 public class DbObjectManager
 {
-    private readonly IDatabaseConnector? DbConnector;
+    /// <summary>
+    /// The database connector
+    /// </summary>
+    private readonly IDatabaseConnector DbConnector;
+    /// <summary>
+    /// The type of database
+    /// </summary>
     private readonly DatabaseType DbType; 
-    public DbObjectManager(DatabaseType dbType, IDatabaseConnector? dbConnector)
+    
+    /// <summary>
+    /// Wraps a field name
+    /// </summary>
+    /// <param name="name">the name to wrap</param>
+    /// <returns>the wrapped field name</returns>
+    private string Wrap(string name)
+        => DbConnector.WrapFieldName(name);
+    
+    /// <summary>
+    /// Initializes a new instance of the DbObject manager
+    /// </summary>
+    /// <param name="dbType">the type of database</param>
+    /// <param name="dbConnector">the database connector</param>
+    public DbObjectManager(DatabaseType dbType, IDatabaseConnector dbConnector)
     {
         DbType = dbType;
         DbConnector = dbConnector;
@@ -43,7 +63,21 @@ public class DbObjectManager
     internal async Task Insert(DbObject dbObject)
     {
         using var db = await DbConnector.GetDb(write: true);
-        await db.Db.InsertAsync(dbObject);
+        await db.Db.ExecuteAsync("insert into " + Wrap(nameof(DbObject)) + "(" +
+                           Wrap(nameof(DbObject.Uid)) + ", " +
+                           Wrap(nameof(DbObject.Name)) + ", " +
+                           Wrap(nameof(DbObject.Type)) + ", " +
+                           Wrap(nameof(DbObject.DateCreated)) + ", " +
+                           Wrap(nameof(DbObject.DateModified)) + ", " +
+                           Wrap(nameof(DbObject.Data)) + " " +
+                           " ) values (@0, @1, @2, @3, @4, @5)",
+            dbObject.Uid,
+            dbObject.Name,
+            dbObject.Type,
+            dbObject.DateCreated.Clamp(),
+            dbObject.DateModified.Clamp(),
+            dbObject.Data ?? string.Empty
+        );
     }
 
     /// <summary>
@@ -53,7 +87,29 @@ public class DbObjectManager
     internal async Task Update(DbObject dbObject)
     {
         using var db = await DbConnector.GetDb(write: true);
-        await db.Db.UpdateAsync(dbObject);
+        await db.Db.ExecuteAsync("update " + Wrap(nameof(DbObject)) + " set " +
+                                 
+                                 Wrap(nameof(DbObject.Name)) + " = @1, " +
+                                 Wrap(nameof(DbObject.Type)) + " = @2, " +
+                                 Wrap(nameof(DbObject.DateModified)) + " = @3, " +
+                                 Wrap(nameof(DbObject.Data)) + " = @4" +
+                                 " where " + Wrap(nameof(DbObject.Uid)) + " = @0 ",
+            dbObject.Uid,
+            dbObject.Name,
+            dbObject.Type,
+            dbObject.DateModified.Clamp(),
+            dbObject.Data ?? string.Empty
+        );
+    }
+
+    /// <summary>
+    /// Fetches all items
+    /// </summary>
+    /// <returns>the items</returns>
+    internal async Task<List<DbObject>> GetAll()
+    {
+        using var db = await DbConnector.GetDb();
+        return (await db.Db.FetchAsync<DbObject>()).ToList();
     }
 
     /// <summary>

@@ -1,29 +1,5 @@
 namespace FileFlows.DataLayer;
 
-/// <summary>
-/// The types of Databases supported
-/// </summary>
-public enum DatabaseType
-{
-    /// <summary>
-    /// SQLite Database
-    /// </summary>
-    Sqlite = 0,
-    /// <summary>
-    /// Microsoft SQL Server
-    /// </summary>
-    SqlServer = 1,
-    /// <summary>
-    /// MySql / MariaDB
-    /// </summary>
-    MySql = 2,
-    /// <summary>
-    /// Postgres DB
-    /// </summary>
-    Postgres = 3
-}
-
-
 
 /// <summary>
 /// Statistic types

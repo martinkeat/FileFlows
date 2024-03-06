@@ -159,5 +159,9 @@ public enum DatabaseType
     /// <summary>
     /// MySql / MariaDB
     /// </summary>
-    MySql = 2
+    MySql = 2,
+    /// <summary>
+    /// Postgres
+    /// </summary>
+    Postgres = 3
 }

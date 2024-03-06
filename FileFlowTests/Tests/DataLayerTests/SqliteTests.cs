@@ -1,9 +1,10 @@
 using System.IO;
+using System.Text.Json;
 using System.Threading;
 using FileFlows.DataLayer;
 using FileFlows.DataLayer.DatabaseConnectors;
 using FileFlows.DataLayer.DatabaseCreators;
-using DatabaseType = FileFlows.DataLayer.DatabaseType;
+using FileFlows.Shared.Json;
 
 namespace FileFlowTests.Tests.DataLayerTests;
 
@@ -202,8 +203,8 @@ public class SqliteTests : DbLayerTest
                  {
                      // DatabaseType.Sqlite,
                      // DatabaseType.SqlServer,
-                     // DatabaseType.MySql,
-                     DatabaseType.Postgres,
+                     DatabaseType.MySql,
+                     //DatabaseType.Postgres,
                  })
         {
             string dbName = "FileFlows_" + TestContext.TestName;
@@ -275,5 +276,135 @@ public class SqliteTests : DbLayerTest
             Assert.AreEqual(0, invalid);
             Assert.AreEqual(totalWrites, finalItems.Count);
         }
+
+    }
+
+    [TestMethod]
+    public void BulkInsert()
+    {
+        var rand = new Random(DateTime.Now.Microsecond);
+        foreach (var dbType in new[]
+                 {
+                     //DatabaseType.Sqlite, 
+                    // DatabaseType.Postgres,
+                     // DatabaseType.SqlServer,
+                     DatabaseType.MySql
+                 })
+        {
+            string dbName = "FileFlows_" + TestContext.TestName;
+            var dbCreator = GetCreator(dbType, dbName, out string connectionString);
+            var dbCreateResult = dbCreator.CreateDatabase(true).Value;
+            Assert.AreNotEqual(DbCreateResult.Failed, dbCreateResult);
+            if(dbCreateResult == DbCreateResult.Created)
+                Assert.AreEqual(true, dbCreator.CreateDatabaseStructure().Value);
+
+            var db = new DatabaseAccessManager(Logger, dbType, connectionString);
+
+            var library = new Library()
+            {
+                Uid = Guid.NewGuid(),
+                Name = "TestLibrary",
+                Enabled = true,
+                DateCreated = DateTime.UtcNow,
+                DateModified = DateTime.UtcNow,
+                Description = "this is a test description",
+                Path = "/a/b/c",
+                Scan = true,
+                HoldMinutes = 30,
+                LastScanned = DateTime.UtcNow
+            };
+            
+            db.FileFlowsObjectManager.AddOrUpdateObject(library).Wait();
+
+            var created = db.FileFlowsObjectManager.Single<Library>(library.Uid).Result.Value;
+            Assert.IsNotNull(created);
+
+            List<LibraryFile> files = new();
+            for (int i = 0; i < 100; i++)
+            {
+                files.Add(new()
+                {
+                    DateCreated = DateTime.UtcNow,
+                    DateModified = DateTime.UtcNow,
+                    Uid = Guid.NewGuid(),
+                    Name = "/unit-test/fake/file_" + (i + 1).ToString("D4") + ".mkv",
+                    RelativePath = "file_" + (i + 1).ToString("D4") + ".mkv",
+                    Fingerprint = "",
+                    Flags = LibraryFileFlags.None,
+                    LibraryName = library.Name,
+                    LibraryUid = library.Uid,
+                    OriginalSize = rand.NextInt64(1000, 1_000_000_000_000_000),
+                    CreationTime = DateTime.UtcNow,
+                    LastWriteTime = DateTime.UtcNow,
+                });
+            }
+
+            db.LibraryFileManager.InsertBulk(files).Wait();
+
+            var results = db.LibraryFileManager.GetAll().Result.OrderBy(x => x.Name).ToList();
+            Assert.AreEqual(files.Count, results.Count);
+            for (int i = 0; i < results.Count; i++)
+            {
+                var fileProperties = files[i].GetType().GetProperties();
+                var resultProperties = results[i].GetType().GetProperties();
+
+                Assert.AreEqual(fileProperties.Length, resultProperties.Length);
+
+                foreach (var fileProperty in fileProperties)
+                {
+                    var resultProperty = resultProperties.FirstOrDefault(p => p.Name == fileProperty.Name);
+                    Assert.IsNotNull(resultProperty, $"Property {fileProperty.Name} not found in result object.");
+
+                    if (resultProperty.PropertyType == typeof(ObjectReference))
+                        continue; // we dont care about this type
+                    
+                    var fileValue = fileProperty.GetValue(files[i]);
+                    var resultValue = resultProperty.GetValue(results[i]);
+
+                    if (resultProperty.PropertyType == typeof(string))
+                    {
+                        fileValue = fileValue as string ?? string.Empty;
+                        resultValue = resultValue as string ?? string.Empty;
+                    }
+                    
+                    if (resultProperty.PropertyType == typeof(DateTime))
+                    {
+                        fileValue = ((DateTime)fileValue!).EnsureNotLessThan1970().ToString("yyyy-MM-ddTHH:mm:ss");
+                        resultValue = ((DateTime)resultValue!).EnsureNotLessThan1970().ToString("yyyy-MM-ddTHH:mm:ss");
+                    }
+
+                    if (resultProperty.PropertyType == typeof(List<ExecutedNode>))
+                    {
+                        fileValue = JsonEncode(fileValue ?? new List<ExecutedNode>());
+                        resultValue = JsonEncode(resultValue ?? new List<ExecutedNode>());
+                    }
+                    
+                    if (resultProperty.PropertyType == typeof(Dictionary<string, object>))
+                    {
+                        fileValue = JsonEncode(fileValue ?? new Dictionary<string, object>());
+                        resultValue = JsonEncode(resultValue ?? new Dictionary<string, object>());
+                    }
+                    
+                    Assert.AreEqual(fileValue, resultValue, $"Property {fileProperty.Name} values do not match.");
+                }
+            }
+        }
+    }
+    
+    static readonly JsonSerializerOptions JsonOptions = new JsonSerializerOptions()
+    {
+        Converters = { new TimeSpanConverter() }
+    };
+    
+    /// <summary>
+    /// JSON encodes an object for the database
+    /// </summary>
+    /// <param name="o">the object to encode</param>
+    /// <returns>the JSON encoded object</returns>
+    private static string JsonEncode(object? o)
+    {
+        if (o == null)
+            return string.Empty;
+        return JsonSerializer.Serialize(o, JsonOptions);
     }
 }

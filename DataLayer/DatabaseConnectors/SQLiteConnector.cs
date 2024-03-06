@@ -1,8 +1,10 @@
 using System.ComponentModel;
 using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 using FileFlows.DataLayer.Helpers;
 using FileFlows.Plugin;
 using NPoco;
+using DatabaseType = FileFlows.Shared.Models.DatabaseType;
 
 namespace FileFlows.DataLayer.DatabaseConnectors;
 
@@ -14,12 +16,15 @@ public class SQLiteConnector : IDatabaseConnector
     private DatabaseConnection dbConnectionWrite;
     private FairSemaphore writeSemaphore = new(1);
     // private DatabaseConnectionPool readPool;
-
     
     /// <summary>
     /// Logger used for logging
     /// </summary>
     private ILogger Logger;
+
+    /// <inheritdoc />
+    public string FormatDateQuoted(DateTime date)
+        => "'" + date.ToString("yyyy-MM-ddTHH:mm:ss.ffffffZ") + "'";
     
     public SQLiteConnector(ILogger logger, string connectionString)
     {
@@ -40,6 +45,8 @@ public class SQLiteConnector : IDatabaseConnector
             PlatformHelper.IsArm ? Microsoft.Data.Sqlite.SqliteFactory.Instance : System.Data.SQLite.SQLiteFactory.Instance);
         
         db.Mappers.Add(new Converters.GuidConverter());
+        db.Mappers.Add(new Converters.NoNullsConverter());
+        db.Mappers.Add(new Converters.CustomDbMapper());
 
         return new DatabaseConnection(db, false);
     }
@@ -58,6 +65,9 @@ public class SQLiteConnector : IDatabaseConnector
     }
 
     /// <inheritdoc />
+    public DatabaseType Type => DatabaseType.Sqlite;
+
+    /// <inheritdoc />
     public async Task<DatabaseConnection> GetDb(bool write)
     {
         //if (write)
@@ -73,4 +83,37 @@ public class SQLiteConnector : IDatabaseConnector
 
     /// <inheritdoc />
     public string WrapFieldName(string name) => name;
+    
+    
+    
+    
+    
+    /// <summary>
+    /// Looks to see if the file in the specified connection string exists, and if so, moves it
+    /// </summary>
+    /// <param name="connectionString">The connection string</param>
+    internal static void MoveFileFromConnectionString(string connectionString)
+    {
+        string filename = GetFilenameFromConnectionString(connectionString);
+        if (string.IsNullOrWhiteSpace(filename))
+            return;
+        
+        if (File.Exists(filename) == false)
+            return;
+        
+        string dest = filename + ".backup";
+        File.Move(filename, dest, true);
+    }
+
+    /// <summary>
+    /// Gets the filename from a connection string
+    /// </summary>
+    /// <param name="connectionString">the connection string</param>
+    /// <returns>the filename</returns>
+    private static string GetFilenameFromConnectionString(string connectionString)
+    {
+        if (string.IsNullOrWhiteSpace(connectionString))
+            return string.Empty;
+        return Regex.Match(connectionString, @"(?<=(Data Source=))[^;]+")?.Value ?? string.Empty;
+    }
 }

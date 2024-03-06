@@ -14,6 +14,11 @@ using NPoco;
 class CustomDbMapper : DefaultMapper
 {
     /// <summary>
+    /// One instance for better memory management
+    /// </summary>
+    public static readonly CustomDbMapper Instance = new();
+    
+    /// <summary>
     /// The JSON options
     /// </summary>
     public static readonly JsonSerializerOptions JsonOptions;
@@ -71,15 +76,16 @@ class CustomDbMapper : DefaultMapper
     
     public override Func<object, object> GetToDbConverter(Type destType, MemberInfo sourceMemberInfo)
     {
-        if (sourceMemberInfo.GetMemberInfoType() == typeof(Guid))
-            return (value) =>
-            {
-                if (value == null)
-                    return string.Empty;
-                if (value is Guid guid && guid == Guid.Empty)
-                    return string.Empty;
-                return value.ToString() ?? string.Empty;
-            };
+        // this break postgres
+        // if (sourceMemberInfo.GetMemberInfoType() == typeof(Guid))
+        //     return (value) =>
+        //     {
+        //         if (value == null)
+        //             return string.Empty;
+        //         if (value is Guid guid && guid == Guid.Empty)
+        //             return string.Empty;
+        //         return value.ToString() ?? string.Empty;
+        //     };
         if (sourceMemberInfo.GetMemberInfoType() == typeof(Guid?))
             return (value) =>
             {
