@@ -36,6 +36,39 @@ public class LibraryFileManager
     }
 
     /// <summary>
+    /// Fixes the data if required
+    /// </summary>
+    /// <param name="data">the data to fix</param>
+    /// <returns>the fixed data</returns>
+    private List<LibraryFile> FixData(List<LibraryFile> data)
+    {
+        if (data == null) return data;
+        if (DbType != DatabaseType.Sqlite) return data;
+        foreach (var d in data)
+            FixData(d);
+        return data;
+    }
+
+    /// <summary>
+    /// Fixes the data if required
+    /// </summary>
+    /// <param name="data">the data to fix</param>
+    /// <returns>the fixed data</returns>
+    private LibraryFile FixData(LibraryFile data)
+    {
+        if (data == null) return data;
+        if (DbType != DatabaseType.Sqlite) return data;
+        data.ProcessingStarted = DateTimeHelper.LocalToUtc(data.ProcessingStarted);
+        data.ProcessingEnded = DateTimeHelper.LocalToUtc(data.ProcessingEnded);
+        data.CreationTime = DateTimeHelper.LocalToUtc(data.CreationTime);
+        data.HoldUntil = DateTimeHelper.LocalToUtc(data.HoldUntil);
+        data.LastWriteTime = DateTimeHelper.LocalToUtc(data.LastWriteTime);
+        data.DateCreated = DateTimeHelper.LocalToUtc(data.DateCreated);
+        data.DateModified = DateTimeHelper.LocalToUtc(data.DateModified);
+        return data;
+    }
+
+    /// <summary>
     /// Wraps a field name
     /// </summary>
     /// <param name="name">the name to wrap</param>
@@ -62,7 +95,6 @@ public class LibraryFileManager
 
     private void EnsureValusAreAcceptable(LibraryFile file)
     {
-
         if (file.Uid == Guid.Empty)
             file.Uid = Guid.NewGuid();
         file.Fingerprint ??= string.Empty;
@@ -87,7 +119,6 @@ public class LibraryFileManager
     internal async Task Update(LibraryFile file)
     {
         EnsureValusAreAcceptable(file);
-
 
         string strOriginalMetadata = JsonEncode(file.OriginalMetadata);
         string strFinalMetadata = JsonEncode(file.FinalMetadata);
@@ -295,7 +326,7 @@ public class LibraryFileManager
     internal async Task<List<LibraryFile>> GetAll()
     {
         using var db = await DbConnector.GetDb();
-        return (await db.Db.FetchAsync<LibraryFile>()).ToList();
+        return FixData(await db.Db.FetchAsync<LibraryFile>());
     }
     #endregion
     
@@ -309,7 +340,7 @@ public class LibraryFileManager
     public async Task<LibraryFile?> Get(Guid uid)
     {
         using var db = await DbConnector.GetDb();
-        return await db.Db.FirstOrDefaultAsync<LibraryFile>($"where {Wrap(nameof(LibraryFile.Uid))}='{uid}'");
+        return FixData(await db.Db.FirstOrDefaultAsync<LibraryFile>($"where {Wrap(nameof(LibraryFile.Uid))}='{uid}'"));
     }
 
     /// <summary>
@@ -320,8 +351,8 @@ public class LibraryFileManager
     public async Task<LibraryFile?> GetFileIfKnown(string path)
     {
         using var db = await DbConnector.GetDb();
-        return await db.Db.FirstOrDefaultAsync<LibraryFile>($"where {Wrap(nameof(LibraryFile.Name))} = @0 or " +
-                                                            $" {Wrap(nameof(LibraryFile.OutputPath))} = @0", path);
+        return FixData(await db.Db.FirstOrDefaultAsync<LibraryFile>($"where {Wrap(nameof(LibraryFile.Name))} = @0 or " +
+                                                            $" {Wrap(nameof(LibraryFile.OutputPath))} = @0", path));
     }
 
     /// <summary>
@@ -332,8 +363,8 @@ public class LibraryFileManager
     public async Task<LibraryFile?> GetFileByFingerprint(string fingerprint)
     {
         using var db = await DbConnector.GetDb();
-        return await db.Db.FirstOrDefaultAsync<LibraryFile>($"where {Wrap(nameof(LibraryFile.Fingerprint))} = @0 or " +
-                                                            $" {Wrap(nameof(LibraryFile.FinalFingerprint))} = @0", fingerprint);
+        return FixData(await db.Db.FirstOrDefaultAsync<LibraryFile>($"where {Wrap(nameof(LibraryFile.Fingerprint))} = @0 or " +
+                                                            $" {Wrap(nameof(LibraryFile.FinalFingerprint))} = @0", fingerprint));
     }
 
     #endregion
@@ -527,7 +558,7 @@ public class LibraryFileManager
         }
         
         using var db = await DbConnector.GetDb();
-        return (await db.Db.FetchAsync<LibraryFile>(sql)).ToList();
+        return FixData(await db.Db.FetchAsync<LibraryFile>(sql));
     }
 
     /// <summary>

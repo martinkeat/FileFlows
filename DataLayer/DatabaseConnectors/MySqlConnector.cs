@@ -26,15 +26,10 @@ public class MySqlConnector : IDatabaseConnector
     /// Logger used for logging
     /// </summary>
     private ILogger Logger;
-    
-    /// <summary>
-    /// Instance of CustomDbMapper for this server connection
-    /// </summary>
-    private readonly CustomDbMapper CustomDbMapperInstance;
 
     /// <inheritdoc />
     public string FormatDateQuoted(DateTime date)
-        => "'" + date.ToString("yyyy-MM-dd HH:mm:ss.ffffff") + "'";
+        => "'" + date.ToString("yyyy-MM-dd HH:mm:ss.fff") + "'";
 
     /// <summary>
     /// Initialises a MySQL Connector
@@ -45,7 +40,6 @@ public class MySqlConnector : IDatabaseConnector
     {
         Logger = logger;
         ConnectionString = connectionString;
-        CustomDbMapperInstance = new ();
         connectionPool = new(CreateConnection, 20, connectionLifetime: new TimeSpan(0, 10, 0));
     }
     
@@ -56,9 +50,12 @@ public class MySqlConnector : IDatabaseConnector
     private DatabaseConnection CreateConnection()
     {
         var db = new NPoco.Database(ConnectionString, null, MySqlConnectorFactory.Instance);
-        db.Mappers.Add(GuidNullableConverter.Instance);
-        db.Mappers.Add(NoNullsConverter.Instance);
-        db.Mappers.Add(CustomDbMapperInstance);
+        db.Mappers = new()
+        {
+            GuidNullableConverter.UseInstance(),
+            NoNullsConverter.UseInstance(),
+            CustomDbMapper.UseInstance()
+        };
         return new DatabaseConnection(db, false);
     }
 

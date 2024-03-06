@@ -43,6 +43,34 @@ public class DbObjectManager
     }
 
     /// <summary>
+    /// Fixes the data if required
+    /// </summary>
+    /// <param name="data">the data to fix</param>
+    /// <returns>the fixed data</returns>
+    private List<DbObject> FixData(List<DbObject> data)
+    {
+        if (data == null) return data;
+        if (DbType != DatabaseType.Sqlite) return data;
+        foreach (var d in data)
+            FixData(d);
+        return data;
+    }
+
+    /// <summary>
+    /// Fixes the data if required
+    /// </summary>
+    /// <param name="o">the data to fix</param>
+    /// <returns>the fixed data</returns>
+    private DbObject FixData(DbObject o)
+    {
+        if (o == null) return o;
+        if (DbType != DatabaseType.Sqlite) return o;
+        o.DateCreated = DateTimeHelper.LocalToUtc(o.DateCreated);
+        o.DateModified = DateTimeHelper.LocalToUtc(o.DateModified);
+        return o;
+    }
+    
+    /// <summary>
     /// Adds or updates a DbObject directly in the database
     /// Note: NO revision will be saved
     /// </summary>
@@ -67,15 +95,15 @@ public class DbObjectManager
                            Wrap(nameof(DbObject.Uid)) + ", " +
                            Wrap(nameof(DbObject.Name)) + ", " +
                            Wrap(nameof(DbObject.Type)) + ", " +
+                           Wrap(nameof(DbObject.Data)) + ", " +
                            Wrap(nameof(DbObject.DateCreated)) + ", " +
-                           Wrap(nameof(DbObject.DateModified)) + ", " +
-                           Wrap(nameof(DbObject.Data)) + " " +
-                           " ) values (@0, @1, @2, @3, @4, @5)",
+                           Wrap(nameof(DbObject.DateModified)) + " " +
+                           " ) values (@0, @1, @2, @3, " +
+                           DbConnector.FormatDateQuoted(dbObject.DateCreated.Clamp()) + ", "+ 
+                           DbConnector.FormatDateQuoted(dbObject.DateModified.Clamp()) + ")",
             dbObject.Uid,
             dbObject.Name,
             dbObject.Type,
-            dbObject.DateCreated.Clamp(),
-            dbObject.DateModified.Clamp(),
             dbObject.Data ?? string.Empty
         );
     }
@@ -91,13 +119,12 @@ public class DbObjectManager
                                  
                                  Wrap(nameof(DbObject.Name)) + " = @1, " +
                                  Wrap(nameof(DbObject.Type)) + " = @2, " +
-                                 Wrap(nameof(DbObject.DateModified)) + " = @3, " +
-                                 Wrap(nameof(DbObject.Data)) + " = @4" +
+                                 Wrap(nameof(DbObject.Data)) + " = @3, " +
+                                 Wrap(nameof(DbObject.DateModified)) + " = " + DbConnector.FormatDateQuoted(dbObject.DateModified.Clamp()) +
                                  " where " + Wrap(nameof(DbObject.Uid)) + " = @0 ",
             dbObject.Uid,
             dbObject.Name,
             dbObject.Type,
-            dbObject.DateModified.Clamp(),
             dbObject.Data ?? string.Empty
         );
     }
@@ -109,7 +136,7 @@ public class DbObjectManager
     internal async Task<List<DbObject>> GetAll()
     {
         using var db = await DbConnector.GetDb();
-        return (await db.Db.FetchAsync<DbObject>()).ToList();
+        return FixData(await db.Db.FetchAsync<DbObject>());
     }
 
     /// <summary>
@@ -120,7 +147,7 @@ public class DbObjectManager
     internal async Task<List<DbObject>> GetAll(string typeName)
     {
         using var db = await DbConnector.GetDb();
-        return (await db.Db.FetchAsync<DbObject>($"where {DbConnector.WrapFieldName(nameof(DbObject.Type))} = @0", typeName)).ToList();
+        return FixData(await db.Db.FetchAsync<DbObject>($"where {Wrap(nameof(DbObject.Type))} = @0", typeName));
     }
     
     /// <summary>
@@ -131,7 +158,7 @@ public class DbObjectManager
     internal async Task<DbObject> Single(string typeName)
     {
         using var db = await DbConnector.GetDb();
-        return await db.Db.FirstOrDefaultAsync<DbObject>($@"where {DbConnector.WrapFieldName("Type")}=@0", typeName);
+        return FixData(await db.Db.FirstOrDefaultAsync<DbObject>($@"where {Wrap(nameof(DbObject.Type))}=@0", typeName));
     }
 
     /// <summary>
@@ -145,8 +172,8 @@ public class DbObjectManager
     {
         using var db = await DbConnector.GetDb();
         if(ignoreCase)
-            return await db.Db.FirstOrDefaultAsync<DbObject>($"where {DbConnector.WrapFieldName("Type")}=@0 and LOWER({DbConnector.WrapFieldName("Name")})=@1", typeName, name.ToLowerInvariant());
-        return await db.Db.FirstOrDefaultAsync<DbObject>($"where {DbConnector.WrapFieldName("Type")}=@0 and {DbConnector.WrapFieldName("Name")}=@1", typeName, name);
+            return FixData(await db.Db.FirstOrDefaultAsync<DbObject>($"where {Wrap(nameof(DbObject.Type))}=@0 and LOWER({Wrap(nameof(DbObject.Name))})=@1", typeName, name.ToLowerInvariant()));
+        return FixData(await db.Db.FirstOrDefaultAsync<DbObject>($"where {Wrap(nameof(DbObject.Type))}=@0 and {Wrap(nameof(DbObject.Name))}=@1", typeName, name));
     }
     
 
@@ -159,9 +186,9 @@ public class DbObjectManager
     {
         using var db = await DbConnector.GetDb();
         return await db.Db.FetchAsync<string>(
-            $"select {DbConnector.WrapFieldName(nameof(DbObject.Name))} " +
-            $"from {DbConnector.WrapFieldName(nameof(DbObject))} " +
-            $"where {DbConnector.WrapFieldName(nameof(DbObject.Type))} = @0", typeName);
+            $"select {Wrap(nameof(DbObject.Name))} " +
+            $" from {Wrap(nameof(DbObject))} " +
+            $" where {Wrap(nameof(DbObject.Type))} = @0", typeName);
     }
     
     /// <summary>
@@ -172,7 +199,7 @@ public class DbObjectManager
     internal async Task<DbObject> Single(Guid uid)
     {
         using var db = await DbConnector.GetDb();
-        return await db.Db.FirstOrDefaultAsync<DbObject>($"where {DbConnector.WrapFieldName("Uid")}='{uid}'");
+        return FixData(await db.Db.FirstOrDefaultAsync<DbObject>($"where {DbConnector.WrapFieldName("Uid")}='{uid}'"));
     }
     
     /// <summary>
@@ -183,9 +210,8 @@ public class DbObjectManager
     {
         using var db = await DbConnector.GetDb(write: true);
         await db.Db.ExecuteAsync($"update {DbConnector.WrapFieldName(nameof(DbObject))} " +
-                                 $"set {DbConnector.WrapFieldName("DateModified")} = @0 " +
-                                 $"where {DbConnector.WrapFieldName("Uid")} = @1", DateTime.Now,
-            uid);
+                                 $" set {Wrap(nameof(DbObject.DateModified))} = " + DbConnector.FormatDateQuoted(DateTime.UtcNow) +
+                                 $" where {Wrap(nameof(DbObject.Uid))} = '{uid}'");
     }
 
     /// <summary>
@@ -198,8 +224,8 @@ public class DbObjectManager
     public async Task SetDataValue(Guid uid, string? typeName, string field, object value)
     {
         using var db = await DbConnector.GetDb(write: true);
-        string sql = $"update {DbConnector.WrapFieldName(nameof(DbObject))} set ";
-        string dataColumnName = DbConnector.WrapFieldName("Data");
+        string sql = $"update {Wrap(nameof(DbObject))} set ";
+        string dataColumnName = Wrap(nameof(DbObject.Data));
         if (DbType == DatabaseType.SqlServer)
             sql += $" {dataColumnName} = json_modify({dataColumnName}, '$.{field}', @0)";
         else if (DbType == DatabaseType.Postgres)
@@ -216,12 +242,12 @@ public class DbObjectManager
             sql += $" {dataColumnName} = json_set({dataColumnName}, '$.{field}', @0)";
 
         if (value is DateTime dt)
-            value = dt.ToString("yyyy-MM-ddTHH:mm:ss.fffffffZ");
+            value = dt.ToString("yyyy-MM-ddTHH:mm:ss.fffZ");
         if (value is bool bValue)
             value = bValue ? 1 : 0;
         
-        sql += $" where {DbConnector.WrapFieldName(nameof(DbObject.Uid))} = '{uid}'" +
-               $" and {DbConnector.WrapFieldName(nameof(DbObject.Type))} = {SqlHelper.Escape(typeName!)}";
+        sql += $" where {Wrap(nameof(DbObject.Uid))} = '{uid}'" +
+               $" and {Wrap(nameof(DbObject.Type))} = {SqlHelper.Escape(typeName!)}";
         
 
         await db.Db.ExecuteAsync(sql, value, typeName);
@@ -254,15 +280,18 @@ public class DbObjectManager
                 var type = obj.GetType();
                 obj.Name = obj.Name?.EmptyAsNull() ?? type.Name;
                 obj.Uid = Guid.NewGuid();
-                obj.DateCreated = DateTime.Now;
+                obj.DateCreated = DateTime.UtcNow;
                 obj.DateModified = obj.DateCreated;
 
                 sql.AppendLine($"insert into {DbConnector.WrapFieldName(nameof(DbObject))} " +
-                               $"({DbConnector.WrapFieldName("Uid")}, {DbConnector.WrapFieldName("Name")}," +
-                               $" {DbConnector.WrapFieldName("Type")}, {DbConnector.WrapFieldName("Data")})" +
+                               $"({Wrap(nameof(DbObject.Uid))}, {Wrap(nameof(DbObject.Name))}," +
+                               $"({Wrap(nameof(DbObject.DateCreated))}, {Wrap(nameof(DbObject.DateModified))}," +
+                               $" {Wrap(nameof(DbObject.Type))}, {Wrap(nameof(DbObject.Data))})" +
                                $" values (" +
                                obj.Uid.ToString().SqlEscape() + "," +
                                obj.Name.SqlEscape() + "," +
+                               DbConnector.FormatDateQuoted(obj.DateCreated) + ", " + 
+                               DbConnector.FormatDateQuoted(obj.DateModified) + ", " + 
                                (type?.FullName ?? string.Empty).SqlEscape() + "," +
                                json.SqlEscape() +
                                ");");

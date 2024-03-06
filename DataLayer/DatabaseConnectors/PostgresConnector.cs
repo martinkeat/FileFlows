@@ -58,9 +58,13 @@ public class PostgresConnector : IDatabaseConnector
     private DatabaseConnection CreateConnection()
     {
         var db = new Database(ConnectionString, null,  Npgsql.NpgsqlFactory.Instance);
-        db.Mappers.Add(Converters.GuidNullableConverter.Instance);
-        db.Mappers.Add(Converters.NoNullsConverter.Instance);;
-        db.Mappers.Add(Converters.CustomDbMapper.Instance);
+        db.Mappers = new()
+        {
+            GuidNullableConverter.UseInstance(),
+            NoNullsConverter.UseInstance(),
+            CustomDbMapper.UseInstance()
+        };
+        
         return new DatabaseConnection(db, false);
     }
 

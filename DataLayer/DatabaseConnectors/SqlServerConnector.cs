@@ -30,10 +30,6 @@ public class SqlServerConnector : IDatabaseConnector
     /// </summary>
     private ILogger Logger;
 
-    /// <summary>
-    /// Instance of CustomDbMapper for this server connection
-    /// </summary>
-    private readonly CustomDbMapper CustomDbMapperInstance; 
     
     /// <inheritdoc />
     public string FormatDateQuoted(DateTime date)
@@ -48,7 +44,6 @@ public class SqlServerConnector : IDatabaseConnector
     {
         Logger = logger;
         ConnectionString = connectionString;
-        CustomDbMapperInstance = new ();
         connectionPool = new(CreateConnection, 20, connectionLifetime: new TimeSpan(0, 10, 0));
     }
 
@@ -59,9 +54,12 @@ public class SqlServerConnector : IDatabaseConnector
     private DatabaseConnection CreateConnection()
     {
         var db = new Database(ConnectionString, null, SqlClientFactory.Instance);
-        db.Mappers.Add(Converters.GuidNullableConverter.Instance);
-        db.Mappers.Add(Converters.NoNullsConverter.Instance);
-        db.Mappers.Add(CustomDbMapperInstance);
+        db.Mappers = new()
+        {
+            GuidNullableConverter.UseInstance(),
+            NoNullsConverter.UseInstance(),
+            CustomDbMapper.UseInstance()
+        };
         return new DatabaseConnection(db, false);
     }
 

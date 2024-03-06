@@ -8,7 +8,7 @@ namespace FileFlows.DataLayer.Converters;
 /// UID Converter that converts GUIDs to string when saving to the database
 /// this is used by the sqlite db to avoid writing GUIDs as blobs
 /// </summary>
-public class GuidConverter:DefaultMapper
+public class GuidConverter:FileFlowsMapper<GuidConverter>
 {
     /// <summary>
     /// Get the convert for converting an object to the object actually stored in the database
@@ -18,7 +18,7 @@ public class GuidConverter:DefaultMapper
     /// <returns>the converter function to use</returns>
     public override Func<object, object> GetToDbConverter(Type destType, MemberInfo sourceMemberInfo)
     {
-        if (destType == typeof(Guid))
+        if (Enable && destType == typeof(Guid))
             return x => x.ToString();
         return base.GetToDbConverter(destType, sourceMemberInfo);
     }
@@ -31,7 +31,7 @@ public class GuidConverter:DefaultMapper
     /// <returns>the converter function to use</returns>
     public override Func<object, object> GetParameterConverter(DbCommand dbCommand, Type sourceType)
     {
-        if (sourceType == typeof(Guid))
+        if (Enable && sourceType == typeof(Guid))
             return x => x.ToString();
         return base.GetParameterConverter(dbCommand, sourceType);
     }

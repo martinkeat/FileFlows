@@ -43,10 +43,13 @@ public class SQLiteConnector : IDatabaseConnector
     {
         var db = new NPoco.Database(connectionString, null,
             PlatformHelper.IsArm ? Microsoft.Data.Sqlite.SqliteFactory.Instance : System.Data.SQLite.SQLiteFactory.Instance);
-        
-        db.Mappers.Add(new Converters.GuidConverter());
-        db.Mappers.Add(new Converters.NoNullsConverter());
-        db.Mappers.Add(new Converters.CustomDbMapper());
+
+        db.Mappers = new()
+        {
+            Converters.GuidConverter.UseInstance(),
+            Converters.CustomDbMapper.UseInstance(),
+            // Converters.UtcDateConverter.UseInstance()
+        };
 
         return new DatabaseConnection(db, false);
     }

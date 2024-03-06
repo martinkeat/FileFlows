@@ -1,4 +1,5 @@
-﻿using FileFlows.DataLayer.DatabaseConnectors;
+﻿using FileFlows.DataLayer.Converters;
+using FileFlows.DataLayer.DatabaseConnectors;
 using FileFlows.Plugin;
 using FileFlows.Shared.Models;
 
@@ -28,6 +29,14 @@ public class DatabaseAccessManager
     /// The logger used
     /// </summary>
     private readonly ILogger Logger;
+
+    /// <summary>
+    /// Resets the database, use this if migrating data or unit testing
+    /// </summary>
+    public static void Reset()
+    {
+        FileFlowsMapper<CustomDbMapper>.DisableAll();
+    }
     
     /// <summary>
     /// Initializes a new instance of the DatabaseAccessManager class.
@@ -40,6 +49,8 @@ public class DatabaseAccessManager
         Logger = logger;
         Type = type;
         DbConnector = LoadConnector(logger, type, connectionString);
+        // if (type == DatabaseType.Sqlite)
+        //     return;
         this.DbObjectManager = new (type, DbConnector);
         this.DbStatisticManager = new (type, DbConnector);
         this.DbRevisionManager = new (type, DbConnector);
