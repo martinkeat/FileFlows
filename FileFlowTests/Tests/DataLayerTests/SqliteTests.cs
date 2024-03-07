@@ -1,4 +1,5 @@
 using System.IO;
+using System.Runtime.InteropServices.JavaScript;
 using System.Text.Json;
 using System.Threading;
 using FileFlows.DataLayer;
@@ -401,6 +402,166 @@ public class SqliteTests : DbLayerTest
                     Assert.AreEqual(fileValue, resultValue, $"{dbType}: Property {fileProperty.Name} values do not match.");
                 }
             }
+        }
+    }
+    
+    
+
+    [TestMethod]
+    public void OneBillionDollars()
+    {
+        var rand = new Random(DateTime.Now.Microsecond);
+        foreach (var dbType in new[]
+                 {
+                     //DatabaseType.Sqlite, 
+                     // DatabaseType.Postgres,
+                     // DatabaseType.SqlServer,
+                     DatabaseType.MySql,
+                 })
+        {
+            Logger.ILog("Database Type: " + dbType);
+            
+            DatabaseAccessManager.Reset();
+            
+            string dbName = "FileFlows_" + TestContext.TestName;
+            var dbCreator = GetCreator(dbType, dbName, out string connectionString);
+            var dbCreateResult = dbCreator.CreateDatabase(true).Value;
+
+            
+            Assert.AreNotEqual(DbCreateResult.Failed, dbCreateResult);
+            if(dbCreateResult == DbCreateResult.Created)
+                Assert.AreEqual(true, dbCreator.CreateDatabaseStructure().Value);
+            
+            var db = new DatabaseAccessManager(Logger, dbType, connectionString);
+            
+            var library = new Library()
+            {
+                Uid = Guid.NewGuid(),
+                Name = "TestLibrary",
+                Enabled = true,
+                DateCreated = DateTime.UtcNow,
+                DateModified = DateTime.UtcNow,
+                Description = "this is a test description",
+                Path = "/a/b/c",
+                Scan = true,
+                HoldMinutes = 30,
+                LastScanned = DateTime.UtcNow
+            };
+            
+            db.FileFlowsObjectManager.AddOrUpdateObject(library).Wait();
+
+            var created = db.FileFlowsObjectManager.Single<Library>(library.Uid).Result.Value;
+            Assert.IsNotNull(created);
+
+            List<LibraryFile> files = new();
+            for (int i = 0; i < 1_000_000; i++)
+            {
+                files.Add(new()
+                {
+                    DateCreated = DateTime.UtcNow,
+                    DateModified = DateTime.UtcNow,
+                    Uid = Guid.NewGuid(),
+                    Name = "/unit-test/fake/file_" + (i + 1).ToString("D4") + ".mkv",
+                    RelativePath = "file_" + (i + 1).ToString("D4") + ".mkv",
+                    Fingerprint = "",
+                    Flags = LibraryFileFlags.None,
+                    LibraryName = library.Name,
+                    LibraryUid = library.Uid,
+                    OriginalSize = rand.NextInt64(1000, 1_000_000_000_000_000),
+                    CreationTime = DateTime.UtcNow,
+                    LastWriteTime = DateTime.UtcNow,
+                });
+            }
+
+            db.LibraryFileManager.InsertBulk(files).Wait();
+            
+            var total = db.LibraryFileManager.GetTotal().Result;
+            Assert.AreEqual(files.Count, total);
+        }
+    }
+    
+    
+
+    [TestMethod]
+    public void StatusTests()
+    {
+        foreach (var dbType in new[]
+                 {
+                     // DatabaseType.Sqlite, 
+                     DatabaseType.Postgres,
+                     // DatabaseType.SqlServer,
+                     // DatabaseType.MySql,
+                 })
+        {
+            Logger.ILog("Database Type: " + dbType);
+            
+            DatabaseAccessManager.Reset();
+            
+            string dbName = "FileFlows_" + TestContext.TestName;
+            var dbCreator = GetCreator(dbType, dbName, out string connectionString);
+            var dbCreateResult = dbCreator.CreateDatabase(true).Value;
+
+            
+            Assert.AreNotEqual(DbCreateResult.Failed, dbCreateResult);
+            if(dbCreateResult == DbCreateResult.Created)
+                Assert.AreEqual(true, dbCreator.CreateDatabaseStructure().Value);
+            
+            var dam = new DatabaseAccessManager(Logger, dbType, connectionString);
+
+            var testHelper = new TestDataHelper(Logger, dam);
+            
+            var expected = testHelper.BulkInsert(100_000);
+
+            int max = 1;
+            LibraryFilterSystemInfo sysInfo = new()
+            {
+                Executors = new (),
+                AllLibraries = expected.Libraries.ToDictionary(x => x.Uid, x => x),
+                LicensedForProcessingOrder = true,
+            };
+
+            DateTime start = DateTime.Now;
+            var actualDisabled  = dam.LibraryFileManager.GetAll(new LibraryFileFilter()
+            {
+                Status = FileStatus.Disabled,
+                Rows = max,
+                SysInfo = sysInfo
+            }).Result;
+            Logger.ILog("Disabled time taken: " + (DateTime.Now.Subtract(start)));
+            Assert.AreEqual(Math.Min(max, expected.Disabled.Count), actualDisabled.Count);
+            
+            start = DateTime.Now;
+            var actualOutOfSchedule = dam.LibraryFileManager.GetAll(new LibraryFileFilter()
+            {
+                Status = FileStatus.OutOfSchedule,
+                Rows = max,
+                SysInfo = sysInfo
+            }).Result;
+            Logger.ILog("Out of schedule time taken: " + (DateTime.Now.Subtract(start)));
+            Assert.AreEqual(Math.Min(max, expected.OutOfSchedule.Count), actualOutOfSchedule.Count);
+            
+            
+            start = DateTime.Now;
+            var actualOnHold = dam.LibraryFileManager.GetAll(new LibraryFileFilter()
+            {
+                Status = FileStatus.OnHold,
+                Rows = max,
+                SysInfo = sysInfo
+            }).Result;
+            Logger.ILog("On Hold time taken: " + (DateTime.Now.Subtract(start)));
+            Assert.AreEqual(Math.Min(max, expected.Held.Count), actualOnHold.Count);
+            
+            
+            start = DateTime.Now;
+            var actualUnprocessed  = dam.LibraryFileManager.GetAll(new LibraryFileFilter()
+            {
+                Status = FileStatus.Unprocessed,
+                Rows = max,
+                SysInfo = sysInfo
+            }).Result;
+            Logger.ILog("Unprocessed time taken: " + (DateTime.Now.Subtract(start)));
+            Assert.AreEqual(Math.Min(max, expected.Active.Count), actualUnprocessed.Count);
+            
         }
     }
     

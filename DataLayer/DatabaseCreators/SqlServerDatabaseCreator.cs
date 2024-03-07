@@ -79,7 +79,7 @@ public class SqlServerDatabaseCreator : IDatabaseCreator
         
         using var db = new NPoco.Database(ConnectionString, null, SqlClientFactory.Instance);
         string sqlTables = ScriptHelper.GetSqlScript("SqlServer", "Tables.sql", clean: true);
-        Logger.ILog("SQL Tables:\n" + sqlTables);
+        //Logger.ILog("SQL Tables:\n" + sqlTables);
         db.Execute(sqlTables);
         
         return true;

@@ -69,7 +69,6 @@ public class MySqlDatabaseCreator : IDatabaseCreator
         
         using var db = new NPoco.Database(ConnectionString, null, MySqlConnector.MySqlConnectorFactory.Instance);
         string sqlTables = ScriptHelper.GetSqlScript("MySql", "Tables.sql", clean: true);
-        Logger.ILog("SQL Tables:\n" + sqlTables);
         db.Execute(sqlTables);
         
         return true;

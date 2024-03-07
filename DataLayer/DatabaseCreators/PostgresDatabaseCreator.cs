@@ -80,7 +80,6 @@ public class PostgresDatabaseCreator : IDatabaseCreator
         
         using var db = new NPoco.Database(ConnectionString, null, Npgsql.NpgsqlFactory.Instance);
         string sqlTables = ScriptHelper.GetSqlScript("Postgres", "Tables.sql", clean: true);
-        Logger.ILog("SQL Tables:\n" + sqlTables);
         db.Execute(sqlTables);
         
         return true;

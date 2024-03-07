@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using FileFlows.DataLayer.DatabaseConnectors;
 using FileFlows.DataLayer.Helpers;
 using FileFlows.DataLayer.Models;
@@ -220,103 +221,117 @@ public class LibraryFileManager
     /// <param name="files">the files to insert</param>
     public async Task InsertBulk(List<LibraryFile> files)
     {
-        string sql = "";
-        List<object> parameters = new ();
-        foreach (var file in files)
+        // Calculate the number of batches needed
+        int batchSize = 100;
+        int totalFiles = files.Count();
+        int numberOfBatches = (int)Math.Ceiling((double)totalFiles / batchSize);
+
+        // Group files into batches
+        var fileBatches = files
+            .Select((file, index) => new { file, groupIndex = index / batchSize })
+            .GroupBy(item => item.groupIndex)
+            .Select(group => group.Select(item => item.file).ToList())
+            .ToList();
+        foreach (var batch in fileBatches)
         {
+            string sql = "";
+            List<object> parameters = new();
+            foreach (var file in batch)
+            {
+                EnsureValusAreAcceptable(file);
 
-            EnsureValusAreAcceptable(file);
+                int offset = parameters.Count - 1;
 
-            int offset = parameters.Count - 1;
+                bool postgres = DbType == DatabaseType.Postgres;
 
-            bool postgres = DbType == DatabaseType.Postgres;
-            
 
-            sql += $"insert into {Wrap(nameof(LibraryFile))} ( " +
-                  $"{Wrap(nameof(LibraryFile.Uid))}, " +
-                  $"{Wrap(nameof(LibraryFile.Name))}, " +
-                  $"{Wrap(nameof(LibraryFile.Status))}, " +
-                  $"{Wrap(nameof(LibraryFile.Flags))}, " +
-                  $"{Wrap(nameof(LibraryFile.OriginalSize))}, " +
-                  $"{Wrap(nameof(LibraryFile.FinalSize))}, " +
-                  $"{Wrap("ProcessingOrder")}, " + // special case, since Order is reserved in sql
-                  $"{Wrap(nameof(LibraryFile.IsDirectory))}, " +
-                  $"{Wrap(nameof(LibraryFile.NoLongerExistsAfterProcessing))}, " +
-                  
-                  $"{Wrap(nameof(LibraryFile.DateCreated))}, " +
-                  $"{Wrap(nameof(LibraryFile.DateModified))}, " +
-                  $"{Wrap(nameof(LibraryFile.CreationTime))}, " +
-                  $"{Wrap(nameof(LibraryFile.LastWriteTime))}, " +
-                  $"{Wrap(nameof(LibraryFile.HoldUntil))}, " +
-                  $"{Wrap(nameof(LibraryFile.ProcessingStarted))}, " +
-                  $"{Wrap(nameof(LibraryFile.ProcessingEnded))}, " +
-                  
-                  $"{Wrap(nameof(LibraryFile.RelativePath))}, " +
-                  $"{Wrap(nameof(LibraryFile.Fingerprint))}, " +
-                  $"{Wrap(nameof(LibraryFile.FinalFingerprint))}, " +
-                  $"{Wrap(nameof(LibraryFile.LibraryUid))}, " +
-                  $"{Wrap(nameof(LibraryFile.LibraryName))}, " +
-                  $"{Wrap(nameof(LibraryFile.FlowUid))}, " +
-                  $"{Wrap(nameof(LibraryFile.FlowName))}, " +
-                  $"{Wrap(nameof(LibraryFile.DuplicateUid))}, " +
-                  $"{Wrap(nameof(LibraryFile.DuplicateName))}, " +
-                  $"{Wrap(nameof(LibraryFile.NodeUid))}, " +
-                  $"{Wrap(nameof(LibraryFile.NodeName))}, " +
-                  $"{Wrap(nameof(LibraryFile.WorkerUid))}, " +
-                  $"{Wrap(nameof(LibraryFile.ProcessOnNodeUid))}, " +
-                  $"{Wrap(nameof(LibraryFile.OutputPath))}, " +
-                  $"{Wrap(nameof(LibraryFile.OriginalMetadata))}, " +
-                  $"{Wrap(nameof(LibraryFile.FinalMetadata))}, " +
-                  $"{Wrap(nameof(LibraryFile.ExecutedNodes))}, " +
-                  $"{Wrap(nameof(LibraryFile.FailureReason))} " +
-                  " )" +
-                  $" values (@{++offset},@{++offset}," +
-                  ((int)file.Status) + ", " +
-                  ((int)file.Flags) + ", " +
-                  (file.OriginalSize) + ", " +
-                  (file.FinalSize) + ", " +
-                  (file.Order) + ", " +
-                  (file.IsDirectory ? (postgres ? "true" : "1") : (postgres ? "false" : "0" )) + "," +
-                  (file.NoLongerExistsAfterProcessing ? (postgres ? "true" : "1") : (postgres ? "false" : "0" )) + "," +
-                  
-                  DbConnector.FormatDateQuoted(file.DateCreated) + "," + //$"@{++offset}," + // date created
-                  DbConnector.FormatDateQuoted(file.DateModified) + "," + //$"@{++offset}," + // date modified
-                  DbConnector.FormatDateQuoted(file.CreationTime) +", " + 
-                  DbConnector.FormatDateQuoted(file.LastWriteTime)  +", " + 
-                  DbConnector.FormatDateQuoted(file.HoldUntil)  +", " + 
-                  DbConnector.FormatDateQuoted(file.ProcessingStarted) +", " + 
-                  DbConnector.FormatDateQuoted(file.ProcessingEnded) +", " + 
-                  $"@{++offset},@{++offset},@{++offset},@{++offset},@{++offset},@{++offset}," +
-                  $"@{++offset},@{++offset},@{++offset},@{++offset},@{++offset},@{++offset}," +
-                  $"@{++offset},@{++offset},@{++offset},@{++offset},@{++offset},@{++offset});\n";
-            
-            parameters.Add(DbType is DatabaseType.Sqlite ? file.Uid.ToString() : file.Uid);
-            parameters.Add(file.Name);
-            
-            // we have to always include every value for the migration, otherwise if we use default and the data is migrated that data will change
-            parameters.Add(file.RelativePath);
-            parameters.Add(file.Fingerprint);
-            parameters.Add(file.FinalFingerprint ?? string.Empty);
-            parameters.Add(file.LibraryUid?.ToString() ?? string.Empty);
-            parameters.Add(file.LibraryName);
-            parameters.Add(file.FlowUid?.ToString() ?? string.Empty);
-            parameters.Add(file.FlowName ?? string.Empty);
-            parameters.Add(file.DuplicateUid?.ToString() ?? string.Empty);
-            parameters.Add(file.DuplicateName ?? string.Empty);
-            parameters.Add(file.NodeUid?.ToString() ?? string.Empty);
-            parameters.Add(file.NodeName ?? string.Empty);
-            parameters.Add(file.WorkerUid?.ToString() ?? string.Empty);
-            parameters.Add(file.ProcessOnNodeUid?.ToString() ?? string.Empty);
-            parameters.Add(file.OutputPath ?? string.Empty);
-            parameters.Add(JsonEncode(file.OriginalMetadata));
-            parameters.Add(JsonEncode(file.FinalMetadata));
-            parameters.Add(JsonEncode(file.ExecutedNodes));
-            parameters.Add(file.FailureReason ?? string.Empty);
+                sql += $"insert into {Wrap(nameof(LibraryFile))} ( " +
+                       $"{Wrap(nameof(LibraryFile.Uid))}, " +
+                       $"{Wrap(nameof(LibraryFile.Name))}, " +
+                       $"{Wrap(nameof(LibraryFile.Status))}, " +
+                       $"{Wrap(nameof(LibraryFile.Flags))}, " +
+                       $"{Wrap(nameof(LibraryFile.OriginalSize))}, " +
+                       $"{Wrap(nameof(LibraryFile.FinalSize))}, " +
+                       $"{Wrap("ProcessingOrder")}, " + // special case, since Order is reserved in sql
+                       $"{Wrap(nameof(LibraryFile.IsDirectory))}, " +
+                       $"{Wrap(nameof(LibraryFile.NoLongerExistsAfterProcessing))}, " +
+
+                       $"{Wrap(nameof(LibraryFile.DateCreated))}, " +
+                       $"{Wrap(nameof(LibraryFile.DateModified))}, " +
+                       $"{Wrap(nameof(LibraryFile.CreationTime))}, " +
+                       $"{Wrap(nameof(LibraryFile.LastWriteTime))}, " +
+                       $"{Wrap(nameof(LibraryFile.HoldUntil))}, " +
+                       $"{Wrap(nameof(LibraryFile.ProcessingStarted))}, " +
+                       $"{Wrap(nameof(LibraryFile.ProcessingEnded))}, " +
+
+                       $"{Wrap(nameof(LibraryFile.RelativePath))}, " +
+                       $"{Wrap(nameof(LibraryFile.Fingerprint))}, " +
+                       $"{Wrap(nameof(LibraryFile.FinalFingerprint))}, " +
+                       $"{Wrap(nameof(LibraryFile.LibraryUid))}, " +
+                       $"{Wrap(nameof(LibraryFile.LibraryName))}, " +
+                       $"{Wrap(nameof(LibraryFile.FlowUid))}, " +
+                       $"{Wrap(nameof(LibraryFile.FlowName))}, " +
+                       $"{Wrap(nameof(LibraryFile.DuplicateUid))}, " +
+                       $"{Wrap(nameof(LibraryFile.DuplicateName))}, " +
+                       $"{Wrap(nameof(LibraryFile.NodeUid))}, " +
+                       $"{Wrap(nameof(LibraryFile.NodeName))}, " +
+                       $"{Wrap(nameof(LibraryFile.WorkerUid))}, " +
+                       $"{Wrap(nameof(LibraryFile.ProcessOnNodeUid))}, " +
+                       $"{Wrap(nameof(LibraryFile.OutputPath))}, " +
+                       $"{Wrap(nameof(LibraryFile.OriginalMetadata))}, " +
+                       $"{Wrap(nameof(LibraryFile.FinalMetadata))}, " +
+                       $"{Wrap(nameof(LibraryFile.ExecutedNodes))}, " +
+                       $"{Wrap(nameof(LibraryFile.FailureReason))} " +
+                       " )" +
+                       $" values (@{++offset},@{++offset}," +
+                       ((int)file.Status) + ", " +
+                       ((int)file.Flags) + ", " +
+                       (file.OriginalSize) + ", " +
+                       (file.FinalSize) + ", " +
+                       (file.Order) + ", " +
+                       (file.IsDirectory ? (postgres ? "true" : "1") : (postgres ? "false" : "0")) + "," +
+                       (file.NoLongerExistsAfterProcessing ? (postgres ? "true" : "1") : (postgres ? "false" : "0")) +
+                       "," +
+
+                       DbConnector.FormatDateQuoted(file.DateCreated) + "," + //$"@{++offset}," + // date created
+                       DbConnector.FormatDateQuoted(file.DateModified) + "," + //$"@{++offset}," + // date modified
+                       DbConnector.FormatDateQuoted(file.CreationTime) + ", " +
+                       DbConnector.FormatDateQuoted(file.LastWriteTime) + ", " +
+                       DbConnector.FormatDateQuoted(file.HoldUntil) + ", " +
+                       DbConnector.FormatDateQuoted(file.ProcessingStarted) + ", " +
+                       DbConnector.FormatDateQuoted(file.ProcessingEnded) + ", " +
+                       $"@{++offset},@{++offset},@{++offset},@{++offset},@{++offset},@{++offset}," +
+                       $"@{++offset},@{++offset},@{++offset},@{++offset},@{++offset},@{++offset}," +
+                       $"@{++offset},@{++offset},@{++offset},@{++offset},@{++offset},@{++offset});\n";
+
+                parameters.Add(DbType is DatabaseType.Sqlite ? file.Uid.ToString() : file.Uid);
+                parameters.Add(file.Name);
+
+                // we have to always include every value for the migration, otherwise if we use default and the data is migrated that data will change
+                parameters.Add(file.RelativePath);
+                parameters.Add(file.Fingerprint);
+                parameters.Add(file.FinalFingerprint ?? string.Empty);
+                parameters.Add(file.LibraryUid?.ToString() ?? string.Empty);
+                parameters.Add(file.LibraryName);
+                parameters.Add(file.FlowUid?.ToString() ?? string.Empty);
+                parameters.Add(file.FlowName ?? string.Empty);
+                parameters.Add(file.DuplicateUid?.ToString() ?? string.Empty);
+                parameters.Add(file.DuplicateName ?? string.Empty);
+                parameters.Add(file.NodeUid?.ToString() ?? string.Empty);
+                parameters.Add(file.NodeName ?? string.Empty);
+                parameters.Add(file.WorkerUid?.ToString() ?? string.Empty);
+                parameters.Add(file.ProcessOnNodeUid?.ToString() ?? string.Empty);
+                parameters.Add(file.OutputPath ?? string.Empty);
+                parameters.Add(JsonEncode(file.OriginalMetadata));
+                parameters.Add(JsonEncode(file.FinalMetadata));
+                parameters.Add(JsonEncode(file.ExecutedNodes));
+                parameters.Add(file.FailureReason ?? string.Empty);
+            }
+
+            var array = parameters.ToArray();
+            using var db = await DbConnector.GetDb(write: true);
+            await db.Db.ExecuteAsync(sql, args: array);
         }
-        
-        var array = parameters.ToArray();
-        using var db = await DbConnector.GetDb(write: true);
-        await db.Db.ExecuteAsync(sql, args:array);
     }
 
     /// <summary>
@@ -327,6 +342,17 @@ public class LibraryFileManager
     {
         using var db = await DbConnector.GetDb();
         return FixData(await db.Db.FetchAsync<LibraryFile>());
+    }
+
+    /// <summary>
+    /// Gets the total number of files in the database
+    /// This is used for unit testing
+    /// </summary>
+    /// <returns>the total number of files</returns>
+    internal async Task<int> GetTotal()
+    {
+        using var db = await DbConnector.GetDb();
+        return await db.Db.ExecuteScalarAsync<int>("select count(*) from " + Wrap(nameof(LibraryFile)));
     }
     #endregion
     
@@ -542,8 +568,8 @@ public class LibraryFileManager
     /// <returns>a list of matching library files</returns>
     public async Task<List<LibraryFile>> GetAll(LibraryFileFilter filter)
     {
-        var sql = ConstructQuery(filter);
-        if (string.IsNullOrWhiteSpace(sql) == false)
+        var sql = await ConstructQuery(filter);
+        if (string.IsNullOrWhiteSpace(sql))
             return new List<LibraryFile>();
         if (filter.Skip > 0 || filter.Rows > 0)
         {
@@ -565,7 +591,7 @@ public class LibraryFileManager
     /// Constructs the query of the cached data
     /// </summary>
     /// <returns>a IEnumerable of files</returns>
-    private string ConstructQuery(LibraryFileFilter args)
+    private async Task<string> ConstructQuery(LibraryFileFilter args)
     {
         try
         {
@@ -576,6 +602,21 @@ public class LibraryFileManager
                 $" and {Wrap(nameof(LibraryFile.Flags))} & {(int)LibraryFileFlags.ForceProcessing} = 0";
 
             string sql;
+            List<string> orderBys = new();
+
+            string ReturnWithOrderBy()
+            {
+#if(DEBUG)
+                // make it easier to read for debugging
+                sql = Regex.Replace(sql, @"\s+", " ");
+                foreach (var keyword in new[] { "and", "where", "inner" })
+                {
+                    sql = sql.Replace($" {keyword} ", $"\n {keyword} ");
+                }
+#endif
+                return sql + (orderBys.Any() == false ? "" : "order by \n" + string.Join(", \n", orderBys));
+            }
+
             // the status in the db is correct and not a computed status
             int iStatus = (int)args.Status;
             if (iStatus < 0)
@@ -584,8 +625,8 @@ public class LibraryFileManager
 
             if (args.ForcedOnly)
                 sql += $" and {Wrap(nameof(LibraryFile.Flags))} & {(int)LibraryFileFlags.ForceProcessing} > 0";
-            
-            if(string.IsNullOrWhiteSpace(args.Filter) == false)
+
+            if (string.IsNullOrWhiteSpace(args.Filter) == false)
             {
                 var filter = args.Filter.ToLowerInvariant();
                 sql += $" and lower({Wrap(nameof(LibraryFile.RelativePath))}) like " +
@@ -595,14 +636,18 @@ public class LibraryFileManager
             if (iStatus > 0)
             {
                 if (args.Status is FileStatus.Processed or FileStatus.ProcessingFailed)
-                    sql += $" order by case " +
-                           $" when {Wrap(nameof(LibraryFile.ProcessingEnded))} > {Wrap(nameof(LibraryFile.ProcessingStarted))} THEN {Wrap(nameof(LibraryFile.ProcessingEnded))} " +
-                           $" else {Wrap(nameof(LibraryFile.ProcessingStarted))} " +
-                           $" end desc, {Wrap(nameof(LibraryFile.DateModified))} desc";
+                {
+                    orderBys.Add($" case " +
+                                 $" when {Wrap(nameof(LibraryFile.ProcessingEnded))} > {Wrap(nameof(LibraryFile.ProcessingStarted))} THEN {Wrap(nameof(LibraryFile.ProcessingEnded))} " +
+                                 $" else {Wrap(nameof(LibraryFile.ProcessingStarted))} " +
+                                 $" end desc");
+                    orderBys.Add($"{Wrap(nameof(LibraryFile.DateModified))} desc");
+                }
                 else
-                    sql += $" order by {Wrap(nameof(LibraryFile.DateModified))} desc";
+                    orderBys.Add($" {Wrap(nameof(LibraryFile.DateModified))} desc");
 
-                return sql;
+
+                return ReturnWithOrderBy();
             }
 
 
@@ -617,8 +662,8 @@ public class LibraryFileManager
 
                 string libInStr = string.Join(",", disabled.Select(x => $"'{x}'"));
                 sql += $" and {Wrap(nameof(LibraryFile.LibraryUid))} in ({libInStr})";
-                sql += $" order by {Wrap(nameof(LibraryFile.DateModified))}";
-                return sql;
+                orderBys.Add($"{Wrap(nameof(LibraryFile.DateModified))}");
+                return ReturnWithOrderBy();
             }
 
             int quarter = TimeHelper.GetCurrentQuarter();
@@ -633,8 +678,8 @@ public class LibraryFileManager
                 sql += AND_NOT_FORCED;
                 string libInStr = string.Join(",", outOfSchedule.Select(x => $"'{x}'"));
                 sql += $" and {Wrap(nameof(LibraryFile.LibraryUid))} in ({libInStr})";
-                sql += $" order by {Wrap(nameof(LibraryFile.DateModified))}";
-                return sql;
+                orderBys.Add($"{Wrap(nameof(LibraryFile.DateModified))}");
+                return ReturnWithOrderBy();
             }
 
 
@@ -657,8 +702,9 @@ public class LibraryFileManager
             if (args.Status == FileStatus.OnHold)
             {
                 sql += $" and {Wrap(nameof(LibraryFile.HoldUntil))} > {Date(DateTime.UtcNow)} ";
-                sql += $" order by {Wrap(nameof(LibraryFile.HoldUntil))}, {Wrap(nameof(LibraryFile.DateModified))} ";
-                return sql;
+                orderBys.Add($"{Wrap(nameof(LibraryFile.HoldUntil))}");
+                orderBys.Add($"{Wrap(nameof(LibraryFile.DateModified))}");
+                return ReturnWithOrderBy();
             }
 
             if (args.AllowedLibraries?.Any() == true)
@@ -669,7 +715,6 @@ public class LibraryFileManager
 
             sql += $" and {Wrap(nameof(LibraryFile.HoldUntil))} <= {Date(DateTime.UtcNow)} ";
 
-            var canUserCustomProcessingOrder = args.SysInfo.LicensedForProcessingOrder;
             if (args.MaxSizeMBs is > 0)
                 sql += $" and {Wrap(nameof(LibraryFile.OriginalSize))} < " + args.MaxSizeMBs * 1_000_000 + " ";
 
@@ -679,64 +724,128 @@ public class LibraryFileManager
                 sql += $"$ and {Wrap(nameof(LibraryFile))}.{Wrap(nameof(LibraryFile.Uid))} not in ({unwanted}) ";
             }
 
-            sql += $" order by case " +
-                   $" when {Wrap(nameof(LibraryFile.Order))} > 0 THEN {Wrap(nameof(LibraryFile.OriginalSize))} " +
-                   $" else {1_000_000_000} " +
-                   $" end";
+            orderBys.Add($"case " +
+                         $" when {Wrap("Processing" + nameof(LibraryFile.Order))} > 0 THEN {Wrap(nameof(LibraryFile.OriginalSize))} " +
+                         $" else {1_000_000_000} " +
+                         $" end");
 
-            if (DbType != DatabaseType.Sqlite)
+
+
+            var possibleComplexSortingLibraries = args.AllowedLibraries?.Where(x =>
             {
-                sql = $"select {Wrap(nameof(LibraryFile))}.* from {Wrap(nameof(LibraryFile))} " +
-                      $" inner join {Wrap(nameof(DbObject))} on " +
-                      $" {Wrap(nameof(DbObject))}.{Wrap(nameof(DbObject.Type))} = '{typeof(LibraryFile).FullName}' and " +
-                      $" {Wrap(nameof(DbObject))}.{Wrap(nameof(DbObject.Uid))} = " +
-                      $" {Wrap(nameof(LibraryFile))}.{Wrap(nameof(LibraryFile.Uid))} " +
-                      sql;
+                if (args.SysInfo.AllLibraries.TryGetValue(x, out Library library) == false)
+                    return false;
+                if (library.Enabled == false)
+                    return false;
+                if (library.ProcessingOrder == ProcessingOrder.AsFound)
+                    return false;
+                if (TimeHelper.InSchedule(library.Schedule) == false)
+                    return false;
+                // check this library has any unprocessed files
+                return true;
+            })?.ToArray() ?? new Guid[] { };
 
-                switch (DbType)
-                {
-                    case DatabaseType.SqlServer:
-                        sql += $@" 
- order by case 
-    when json_value({Wrap(nameof(DbObject))}.{Wrap(nameof(DbObject.Data))}, '$.{nameof(Library.ProcessingOrder)}') = '{(int)ProcessingOrder.Random} then newid()
-    when json_value({Wrap(nameof(DbObject))}.{Wrap(nameof(DbObject.Data))}, '$.{nameof(Library.ProcessingOrder)}') = '{(int)ProcessingOrder.SmallestFirst} then {Wrap(nameof(LibraryFile))}.{Wrap(nameof(LibraryFile.OriginalSize))} asc
-    when json_value({Wrap(nameof(DbObject))}.{Wrap(nameof(DbObject.Data))}, '$.{nameof(Library.ProcessingOrder)}') = '{(int)ProcessingOrder.LargestFirst} then {Wrap(nameof(LibraryFile))}.{Wrap(nameof(LibraryFile.OriginalSize))} desc
-    when json_value({Wrap(nameof(DbObject))}.{Wrap(nameof(DbObject.Data))}, '$.{nameof(Library.ProcessingOrder)}') = '{(int)ProcessingOrder.NewestFirst} then {Wrap(nameof(LibraryFile))}.{Wrap(nameof(LibraryFile.CreationTime))} desc
-    when json_value({Wrap(nameof(DbObject))}.{Wrap(nameof(DbObject.Data))}, '$.{nameof(Library.ProcessingOrder)}') = '{(int)ProcessingOrder.OldestFirst} then {Wrap(nameof(LibraryFile))}.{Wrap(nameof(LibraryFile.CreationTime))} asc
-    when json_value({Wrap(nameof(DbObject))}.{Wrap(nameof(DbObject.Data))}, '$.{nameof(Library.ProcessingOrder)}') = '{(int)ProcessingOrder.Alphabetical} then {Wrap(nameof(LibraryFile))}.{Wrap(nameof(LibraryFile.RelativePath))} asc
-    else null
-end ";
-                        break;
-                    case DatabaseType.MySql:
-                        sql += $@" 
-order by case 
-    when json_extract({Wrap(nameof(DbObject))}.{Wrap(nameof(DbObject.Data))}, '$.{nameof(Library.ProcessingOrder)}') = '{(int)ProcessingOrder.Random}' then rand()
-    when json_extract({Wrap(nameof(DbObject))}.{Wrap(nameof(DbObject.Data))}, '$.{nameof(Library.ProcessingOrder)}') = '{(int)ProcessingOrder.SmallestFirst}' then {Wrap(nameof(LibraryFile))}.{Wrap(nameof(LibraryFile.OriginalSize))} asc
-    when json_extract({Wrap(nameof(DbObject))}.{Wrap(nameof(DbObject.Data))}, '$.{nameof(Library.ProcessingOrder)}') = '{(int)ProcessingOrder.LargestFirst}' then {Wrap(nameof(LibraryFile))}.{Wrap(nameof(LibraryFile.OriginalSize))} desc
-    when json_extract({Wrap(nameof(DbObject))}.{Wrap(nameof(DbObject.Data))}, '$.{nameof(Library.ProcessingOrder)}') = '{(int)ProcessingOrder.NewestFirst}' then {Wrap(nameof(LibraryFile))}.{Wrap(nameof(LibraryFile.CreationTime))} desc
-    when json_extract({Wrap(nameof(DbObject))}.{Wrap(nameof(DbObject.Data))}, '$.{nameof(Library.ProcessingOrder)}') = '{(int)ProcessingOrder.OldestFirst}' then {Wrap(nameof(LibraryFile))}.{Wrap(nameof(LibraryFile.CreationTime))} asc
-    when json_extract({Wrap(nameof(DbObject))}.{Wrap(nameof(DbObject.Data))}, '$.{nameof(Library.ProcessingOrder)}') = '{(int)ProcessingOrder.Alphabetical}' then {Wrap(nameof(LibraryFile))}.{Wrap(nameof(LibraryFile.RelativePath))} asc
-    else null 
-end ";
-                        break;
-                    case DatabaseType.Postgres:
-                        sql += @$" 
-order by case 
-    WHEN {Wrap(nameof(DbObject))}.{Wrap(nameof(DbObject.Data))}::json->>'{nameof(Library.ProcessingOrder)}' = '{(int)ProcessingOrder.Random} then random()
-    WHEN {Wrap(nameof(DbObject))}.{Wrap(nameof(DbObject.Data))}::json->>'{nameof(Library.ProcessingOrder)}' = '{(int)ProcessingOrder.SmallestFirst} then {Wrap(nameof(LibraryFile))}.{Wrap(nameof(LibraryFile.OriginalSize))} ASC
-    WHEN {Wrap(nameof(DbObject))}.{Wrap(nameof(DbObject.Data))}::json->>'{nameof(Library.ProcessingOrder)}' = '{(int)ProcessingOrder.LargestFirst} then {Wrap(nameof(LibraryFile))}.{Wrap(nameof(LibraryFile.OriginalSize))} DESC
-    WHEN {Wrap(nameof(DbObject))}.{Wrap(nameof(DbObject.Data))}::json->>'{nameof(Library.ProcessingOrder)}' = '{(int)ProcessingOrder.NewestFirst} then {Wrap(nameof(LibraryFile))}.{Wrap(nameof(LibraryFile.CreationTime))} DESC
-    WHEN {Wrap(nameof(DbObject))}.{Wrap(nameof(DbObject.Data))}::json->>'{nameof(Library.ProcessingOrder)}' = '{(int)ProcessingOrder.OldestFirst} then {Wrap(nameof(LibraryFile))}.{Wrap(nameof(LibraryFile.CreationTime))} ASC
-    WHEN {Wrap(nameof(DbObject))}.{Wrap(nameof(DbObject.Data))}::json->>'{nameof(Library.ProcessingOrder)}' = '{(int)ProcessingOrder.Alphabetical} then {Wrap(nameof(LibraryFile))}.{Wrap(nameof(LibraryFile.RelativePath))} ASC
-    else null
-end ";
-                        break;
-                }
+            if (possibleComplexSortingLibraries.Any() == false || args.SysInfo.LicensedForProcessingOrder == false)
+            {
+                orderBys.Add($"{Wrap(nameof(LibraryFile.DateCreated))}");
+                return ReturnWithOrderBy();
+            }
+            
+            // check if any of the complex sorting libraries have any unprocessed files
+            string inStr = string.Join(",", possibleComplexSortingLibraries.Select(x => $"'{x}'"));
+            using var db = await DbConnector.GetDb();
+            int unprocessedFiles = await db.Db.ExecuteScalarAsync<int>("select count(*) form " + Wrap(nameof(LibraryFile)) + " where " +
+                                  Wrap(nameof(LibraryFile.Status)) + " = 0 and " +
+                                  Wrap(nameof(LibraryFile.LibraryUid)) + $" in ({inStr})");
+            
+            if(unprocessedFiles < 1)
+            {
+                // no need to do complex sorting, no files match that
+                orderBys.Add($"{Wrap(nameof(LibraryFile.DateCreated))}");
+                return ReturnWithOrderBy();
             }
 
-            sql += $", {Wrap(nameof(LibraryFile.DateCreated))} ";
+            sql = $"select {Wrap(nameof(LibraryFile))}.* from {Wrap(nameof(LibraryFile))} " +
+                  $" inner join {Wrap(nameof(DbObject))} on " +
+                  $" {Wrap(nameof(DbObject))}.{Wrap(nameof(DbObject.Type))} = '{typeof(Library).FullName}' and " +
+                  $" {Wrap(nameof(DbObject))}.{Wrap(nameof(DbObject.Uid))} = " +
+                  (DbType != DatabaseType.Postgres
+                      ? $" {Wrap(nameof(LibraryFile))}.{Wrap(nameof(LibraryFile.LibraryUid))} "
+                      : $" cast({Wrap(nameof(LibraryFile))}.{Wrap(nameof(LibraryFile.LibraryUid))} as uuid) "
+                  ) + sql;
 
-            return sql;
+            switch (DbType)
+            {
+                case DatabaseType.SqlServer:
+                    orderBys.Add($@" 
+case 
+    when json_value({Wrap(nameof(DbObject))}.{Wrap(nameof(DbObject.Data))}, '$.{nameof(Library.ProcessingOrder)}') = '{(int)ProcessingOrder.Random}' then rand()
+    when json_value({Wrap(nameof(DbObject))}.{Wrap(nameof(DbObject.Data))}, '$.{nameof(Library.ProcessingOrder)}') = '{(int)ProcessingOrder.SmallestFirst}' then {Wrap(nameof(LibraryFile))}.{Wrap(nameof(LibraryFile.OriginalSize))}
+    when json_value({Wrap(nameof(DbObject))}.{Wrap(nameof(DbObject.Data))}, '$.{nameof(Library.ProcessingOrder)}') = '{(int)ProcessingOrder.LargestFirst}' then {Wrap(nameof(LibraryFile))}.{Wrap(nameof(LibraryFile.OriginalSize))} * -1
+    when json_value({Wrap(nameof(DbObject))}.{Wrap(nameof(DbObject.Data))}, '$.{nameof(Library.ProcessingOrder)}') = '{(int)ProcessingOrder.NewestFirst}' then DATEDIFF(second, '1970-01-01', {Wrap(nameof(LibraryFile))}.{Wrap(nameof(LibraryFile.CreationTime))}) * -1
+    when json_value({Wrap(nameof(DbObject))}.{Wrap(nameof(DbObject.Data))}, '$.{nameof(Library.ProcessingOrder)}') = '{(int)ProcessingOrder.OldestFirst}' then DATEDIFF(second, '1970-01-01', {Wrap(nameof(LibraryFile))}.{Wrap(nameof(LibraryFile.CreationTime))})
+    else null
+end ");
+                    orderBys.Add($@"
+case
+    when json_value({Wrap(nameof(DbObject))}.{Wrap(nameof(DbObject.Data))}, '$.{nameof(Library.ProcessingOrder)}') = '{(int)ProcessingOrder.Alphabetical}' then {Wrap(nameof(LibraryFile))}.{Wrap(nameof(LibraryFile.RelativePath))}
+    else null
+end ");
+                    break;
+                case DatabaseType.MySql:
+                    orderBys.Add($@" 
+case 
+    when json_extract({Wrap(nameof(DbObject))}.{Wrap(nameof(DbObject.Data))}, '$.{nameof(Library.ProcessingOrder)}') = '{(int)ProcessingOrder.Random}' then rand()
+    when json_extract({Wrap(nameof(DbObject))}.{Wrap(nameof(DbObject.Data))}, '$.{nameof(Library.ProcessingOrder)}') = '{(int)ProcessingOrder.SmallestFirst}' then {Wrap(nameof(LibraryFile))}.{Wrap(nameof(LibraryFile.OriginalSize))}
+    when json_extract({Wrap(nameof(DbObject))}.{Wrap(nameof(DbObject.Data))}, '$.{nameof(Library.ProcessingOrder)}') = '{(int)ProcessingOrder.LargestFirst}' then {Wrap(nameof(LibraryFile))}.{Wrap(nameof(LibraryFile.OriginalSize))} * -1 
+    when json_extract({Wrap(nameof(DbObject))}.{Wrap(nameof(DbObject.Data))}, '$.{nameof(Library.ProcessingOrder)}') = '{(int)ProcessingOrder.NewestFirst}' then {Wrap(nameof(LibraryFile))}.{Wrap(nameof(LibraryFile.CreationTime))} * -1
+    when json_extract({Wrap(nameof(DbObject))}.{Wrap(nameof(DbObject.Data))}, '$.{nameof(Library.ProcessingOrder)}') = '{(int)ProcessingOrder.OldestFirst}' then {Wrap(nameof(LibraryFile))}.{Wrap(nameof(LibraryFile.CreationTime))} 
+    else null 
+end ");
+                    orderBys.Add($@"
+case 
+    when json_extract({Wrap(nameof(DbObject))}.{Wrap(nameof(DbObject.Data))}, '$.{nameof(Library.ProcessingOrder)}') = '{(int)ProcessingOrder.Alphabetical}' then {Wrap(nameof(LibraryFile))}.{Wrap(nameof(LibraryFile.RelativePath))}
+    else null
+end");
+                    break;
+                case DatabaseType.Sqlite:
+                    orderBys.Add($@" 
+case 
+    when json_extract({Wrap(nameof(DbObject))}.{Wrap(nameof(DbObject.Data))}, '$.{nameof(Library.ProcessingOrder)}') = '{(int)ProcessingOrder.Random}' then random()
+    when json_extract({Wrap(nameof(DbObject))}.{Wrap(nameof(DbObject.Data))}, '$.{nameof(Library.ProcessingOrder)}') = '{(int)ProcessingOrder.SmallestFirst}' then {Wrap(nameof(LibraryFile))}.{Wrap(nameof(LibraryFile.OriginalSize))}
+    when json_extract({Wrap(nameof(DbObject))}.{Wrap(nameof(DbObject.Data))}, '$.{nameof(Library.ProcessingOrder)}') = '{(int)ProcessingOrder.LargestFirst}' then {Wrap(nameof(LibraryFile))}.{Wrap(nameof(LibraryFile.OriginalSize))} * -1 
+    when json_extract({Wrap(nameof(DbObject))}.{Wrap(nameof(DbObject.Data))}, '$.{nameof(Library.ProcessingOrder)}') = '{(int)ProcessingOrder.NewestFirst}' then {Wrap(nameof(LibraryFile))}.{Wrap(nameof(LibraryFile.CreationTime))} * -1
+    when json_extract({Wrap(nameof(DbObject))}.{Wrap(nameof(DbObject.Data))}, '$.{nameof(Library.ProcessingOrder)}') = '{(int)ProcessingOrder.OldestFirst}' then {Wrap(nameof(LibraryFile))}.{Wrap(nameof(LibraryFile.CreationTime))} 
+    else null 
+end ");
+                    orderBys.Add($@"
+case 
+    when json_extract({Wrap(nameof(DbObject))}.{Wrap(nameof(DbObject.Data))}, '$.{nameof(Library.ProcessingOrder)}') = '{(int)ProcessingOrder.Alphabetical}' then {Wrap(nameof(LibraryFile))}.{Wrap(nameof(LibraryFile.RelativePath))}
+    else null
+end");
+                    break;
+                case DatabaseType.Postgres:
+                    orderBys.Add($@"
+case 
+    WHEN {Wrap(nameof(DbObject))}.{Wrap(nameof(DbObject.Data))}::json->>'{nameof(Library.ProcessingOrder)}' = '{(int)ProcessingOrder.Random}' then random()
+    WHEN {Wrap(nameof(DbObject))}.{Wrap(nameof(DbObject.Data))}::json->>'{nameof(Library.ProcessingOrder)}' = '{(int)ProcessingOrder.SmallestFirst}' then {Wrap(nameof(LibraryFile))}.{Wrap(nameof(LibraryFile.OriginalSize))} 
+    WHEN {Wrap(nameof(DbObject))}.{Wrap(nameof(DbObject.Data))}::json->>'{nameof(Library.ProcessingOrder)}' = '{(int)ProcessingOrder.LargestFirst}' then {Wrap(nameof(LibraryFile))}.{Wrap(nameof(LibraryFile.OriginalSize))} * -1
+    WHEN {Wrap(nameof(DbObject))}.{Wrap(nameof(DbObject.Data))}::json->>'{nameof(Library.ProcessingOrder)}' = '{(int)ProcessingOrder.NewestFirst}' then extract(EPOCH FROM {Wrap(nameof(LibraryFile))}.{Wrap(nameof(LibraryFile.CreationTime))}) * -1
+    WHEN {Wrap(nameof(DbObject))}.{Wrap(nameof(DbObject.Data))}::json->>'{nameof(Library.ProcessingOrder)}' = '{(int)ProcessingOrder.OldestFirst}' then extract(EPOCH FROM {Wrap(nameof(LibraryFile))}.{Wrap(nameof(LibraryFile.CreationTime))}) 
+    else null
+end ");
+                    orderBys.Add(@$"
+case 
+    WHEN {Wrap(nameof(DbObject))}.{Wrap(nameof(DbObject.Data))}::json->>'{nameof(Library.ProcessingOrder)}' = '{(int)ProcessingOrder.Alphabetical}' then {Wrap(nameof(LibraryFile))}.{Wrap(nameof(LibraryFile.RelativePath))} 
+    else null 
+end");
+                    break;
+
+            }
+
+            orderBys.Add($"{Wrap(nameof(LibraryFile.DateCreated))}");
+
+            return ReturnWithOrderBy();
         }
         catch (Exception ex)
         {
