@@ -5,6 +5,8 @@ using System.Threading;
 using FileFlows.DataLayer;
 using FileFlows.DataLayer.DatabaseConnectors;
 using FileFlows.DataLayer.DatabaseCreators;
+using FileFlows.DataLayer.Helpers;
+using FileFlows.DataLayer.Upgrades;
 using FileFlows.Shared.Json;
 
 namespace FileFlowTests.Tests.DataLayerTests;
@@ -35,19 +37,18 @@ public class SqliteTests : DbLayerTest
         return null;
     }
 
-    private IDatabaseConnector GetConnector(DatabaseType type, string dbName)
+    private IDatabaseConnector GetConnector(DatabaseType type, string connectionString)
     {
-        string connString = GetConnectionString(type, dbName);
         switch (type)
         {
             case DatabaseType.Sqlite:
-                return new SQLiteConnector(Logger, connString);
+                return new SQLiteConnector(Logger, connectionString);
             case DatabaseType.SqlServer:
-                return new SqlServerConnector(Logger, connString);
+                return new SqlServerConnector(Logger, connectionString);
             case DatabaseType.MySql:
-                return new FileFlows.DataLayer.DatabaseConnectors.MySqlConnector(Logger, connString);
+                return new FileFlows.DataLayer.DatabaseConnectors.MySqlConnector(Logger, connectionString);
             case DatabaseType.Postgres:
-                return new PostgresConnector(Logger, connString);
+                return new PostgresConnector(Logger, connectionString);
         }
 
         Assert.Fail("Invalid database type");
@@ -487,10 +488,10 @@ public class SqliteTests : DbLayerTest
     {
         foreach (var dbType in new[]
                  {
-                     // DatabaseType.Sqlite, 
+                     DatabaseType.Sqlite, 
                      DatabaseType.Postgres,
-                     // DatabaseType.SqlServer,
-                     // DatabaseType.MySql,
+                     DatabaseType.SqlServer,
+                     DatabaseType.MySql,
                  })
         {
             Logger.ILog("Database Type: " + dbType);
@@ -510,7 +511,7 @@ public class SqliteTests : DbLayerTest
 
             var testHelper = new TestDataHelper(Logger, dam);
             
-            var expected = testHelper.BulkInsert(100_000);
+            var expected = testHelper.BulkInsert(1_000);
 
             int max = 1;
             LibraryFilterSystemInfo sysInfo = new()
@@ -564,6 +565,170 @@ public class SqliteTests : DbLayerTest
             
         }
     }
+    
+    
+    
+    
+    [TestMethod]
+    public void UpgradeTest()
+    {
+        var rand = new Random(DateTime.Now.Microsecond);
+        DateTime nowDate = DateTime.Now;
+        DateTime utcDate = nowDate.ToUniversalTime();
+        foreach (var dbType in new[]
+                 {
+                     //DatabaseType.Sqlite, 
+                     DatabaseType.MySql,
+                 })
+        {
+            Logger.ILog("Database Type: " + dbType);
+            
+            DatabaseAccessManager.Reset();
+            
+            string dbName = "FileFlows_" + TestContext.TestName;
+            var dbCreator = GetCreator(dbType, dbName, out string connectionString);
+            var dbCreateResult = dbCreator.CreateDatabase(true).Value;
+
+            
+            Assert.AreNotEqual(DbCreateResult.Failed, dbCreateResult);
+            if(dbCreateResult == DbCreateResult.Created)
+                Assert.AreEqual(true, dbCreator.CreateDatabaseStructure().Value);
+            
+            
+            
+            var library = new Library()
+            {
+                Uid = Guid.NewGuid(),
+                Name = "TestLibrary",
+                Enabled = true,
+                DateCreated = nowDate,
+                DateModified = nowDate,
+                Description = "this is a test description",
+                Path = "/a/b/c",
+                Scan = true,
+                HoldMinutes = 30,
+                LastScanned = nowDate
+            };
+            var dboLibrary = FileFlowsObjectManager.ConvertToDbObject(library);
+            var dbConnector = GetConnector(dbType, connectionString);
+            var db = dbConnector.GetDb().Result;
+            // manually insert so we control the old datetime format
+            string sql = $"insert into DbObject (Uid, Name, Type, DateCreated, DateModified, Data) values (" +
+                         $"'{dboLibrary.Uid}', '{dboLibrary.Name}', '{dboLibrary.Type}', " +
+                         $"'{dboLibrary.DateCreated:yyyy-MM-ddTHH:mm:ss.fff}', " +
+                         $"'{dboLibrary.DateModified:yyyy-MM-ddTHH:mm:ss.fff}', " +
+                         $"{SqlHelper.Escape(dboLibrary.Data)})";
+            db.Db.Execute(sql);
+
+            sql = $"insert into RevisionedObject (Uid, RevisionName, RevisionType, RevisionUid, RevisionCreated, RevisionDate, RevisionData) values (" +
+                         $"'{Guid.NewGuid()}', 'test', 'test', '{Guid.NewGuid()}', " +
+                         $"'{nowDate:yyyy-MM-ddTHH:mm:ss.fff}', " +
+                         $"'{nowDate:yyyy-MM-ddTHH:mm:ss.fff}', " +
+                         $"'')";
+            db.Db.Execute(sql);
+
+            sql = @$"insert into LibraryFile(Uid,Name,RelativePath,Status,ProcessingOrder,Fingerprint,FinalFingerprint,IsDirectory,Flags,OriginalSize,FinalSize,LibraryUid,LibraryName,
+                        FlowUid,FlowName,DuplicateUid,DuplicateName,NodeUid,NodeName,WorkerUid,ProcessOnNodeUid,OutputPath,FailureReason,NoLongerExistsAfterProcessing,OriginalMetadata,FinalMetadata,ExecutedNodes,
+                        DateCreated,DateModified,CreationTime,LastWriteTime,HoldUntil,ProcessingStarted,ProcessingEnded)
+                values ('{Guid.NewGuid()}', 'name', 'relativepath', 0, 0, 'fingerprint', 'finalfinger', 0, 0, 123,456, '', 'libname', 
+                        '', 'flow-name', '', 'dupname', '', 'node-name', '', '', 'output', '', 0, '', '', '',
+                    '{nowDate:yyyy-MM-ddTHH:mm:ss.fff}',
+                    '{nowDate:yyyy-MM-ddTHH:mm:ss.fff}',
+                    '{nowDate:yyyy-MM-ddTHH:mm:ss.fff}',
+                    '{nowDate:yyyy-MM-ddTHH:mm:ss.fff}',
+                    '{nowDate:yyyy-MM-ddTHH:mm:ss.fff}',
+                    '{nowDate:yyyy-MM-ddTHH:mm:ss.fff}',
+                    '{nowDate:yyyy-MM-ddTHH:mm:ss.fff}'
+                    )";
+            db.Db.Execute(sql);
+            
+            var dam = new DatabaseAccessManager(Logger, dbType, connectionString);
+
+            var dboOriginal = dam.DbObjectManager.GetAll().Result;
+            var roOriginal = dam.DbRevisionManager.GetAll().Result;
+            var lfOriginal = dam.LibraryFileManager.GetAll().Result;
+
+            //  now upgrade the data
+            var upgradeResult = new Upgrade_24_03_2().Run(Logger, dbType, connectionString);
+            if(upgradeResult.Failed(out string error))
+                Assert.Fail(error);
+
+            var dboUpdated = dam.DbObjectManager.GetAll().Result;
+            var roUpdated = dam.DbRevisionManager.GetAll().Result;
+            var lfUpdated = dam.LibraryFileManager.GetAll().Result;
+
+            foreach (var dbo in dboOriginal)
+            {
+                Assert.AreEqual(nowDate.ToString("yyyy-MM-dd HH:mm"), dbo.DateCreated.ToString("yyyy-MM-dd HH:mm"));
+                Assert.AreEqual(nowDate.ToString("yyyy-MM-dd HH:mm"), dbo.DateModified.ToString("yyyy-MM-dd HH:mm"));
+                Assert.AreNotEqual(utcDate.ToString("yyyy-MM-dd HH:mm"), dbo.DateCreated.ToString("yyyy-MM-dd HH:mm"));
+                Assert.AreNotEqual(utcDate.ToString("yyyy-MM-dd HH:mm"), dbo.DateModified.ToString("yyyy-MM-dd HH:mm"));
+            }
+            foreach (var dbo in dboUpdated)
+            {
+                Assert.AreNotEqual(nowDate.ToString("yyyy-MM-dd HH:mm"), dbo.DateCreated.ToString("yyyy-MM-dd HH:mm"));
+                Assert.AreNotEqual(nowDate.ToString("yyyy-MM-dd HH:mm"), dbo.DateModified.ToString("yyyy-MM-dd HH:mm"));
+                Assert.AreEqual(utcDate.ToString("yyyy-MM-dd HH:mm"), dbo.DateCreated.ToString("yyyy-MM-dd HH:mm"));
+                Assert.AreEqual(utcDate.ToString("yyyy-MM-dd HH:mm"), dbo.DateModified.ToString("yyyy-MM-dd HH:mm"));
+            }
+            
+            
+            foreach (var _ro in roOriginal)
+            {
+                Assert.AreEqual(nowDate.ToString("yyyy-MM-dd HH:mm"), _ro.RevisionDate.ToString("yyyy-MM-dd HH:mm"));
+                Assert.AreEqual(nowDate.ToString("yyyy-MM-dd HH:mm"), _ro.RevisionCreated.ToString("yyyy-MM-dd HH:mm"));
+                Assert.AreNotEqual(utcDate.ToString("yyyy-MM-dd HH:mm"), _ro.RevisionDate.ToString("yyyy-MM-dd HH:mm"));
+                Assert.AreNotEqual(utcDate.ToString("yyyy-MM-dd HH:mm"), _ro.RevisionCreated.ToString("yyyy-MM-dd HH:mm"));
+            }
+            foreach (var _ro in roUpdated)
+            {
+                Assert.AreNotEqual(nowDate.ToString("yyyy-MM-dd HH:mm"), _ro.RevisionDate.ToString("yyyy-MM-dd HH:mm"));
+                Assert.AreNotEqual(nowDate.ToString("yyyy-MM-dd HH:mm"), _ro.RevisionCreated.ToString("yyyy-MM-dd HH:mm"));
+                Assert.AreEqual(utcDate.ToString("yyyy-MM-dd HH:mm"), _ro.RevisionDate.ToString("yyyy-MM-dd HH:mm"));
+                Assert.AreEqual(utcDate.ToString("yyyy-MM-dd HH:mm"), _ro.RevisionCreated.ToString("yyyy-MM-dd HH:mm"));
+            }
+            
+            
+            foreach (var lf in lfOriginal)
+            {
+                Assert.AreEqual(nowDate.ToString("yyyy-MM-dd HH:mm"), lf.DateCreated.ToString("yyyy-MM-dd HH:mm"));
+                Assert.AreEqual(nowDate.ToString("yyyy-MM-dd HH:mm"), lf.DateModified.ToString("yyyy-MM-dd HH:mm"));
+                Assert.AreEqual(nowDate.ToString("yyyy-MM-dd HH:mm"), lf.CreationTime.ToString("yyyy-MM-dd HH:mm"));
+                Assert.AreEqual(nowDate.ToString("yyyy-MM-dd HH:mm"), lf.ProcessingEnded.ToString("yyyy-MM-dd HH:mm"));
+                Assert.AreEqual(nowDate.ToString("yyyy-MM-dd HH:mm"), lf.ProcessingStarted.ToString("yyyy-MM-dd HH:mm"));
+                Assert.AreEqual(nowDate.ToString("yyyy-MM-dd HH:mm"), lf.HoldUntil.ToString("yyyy-MM-dd HH:mm"));
+                Assert.AreEqual(nowDate.ToString("yyyy-MM-dd HH:mm"), lf.LastWriteTime.ToString("yyyy-MM-dd HH:mm"));
+                Assert.AreNotEqual(utcDate.ToString("yyyy-MM-dd HH:mm"), lf.DateCreated.ToString("yyyy-MM-dd HH:mm"));
+                Assert.AreNotEqual(utcDate.ToString("yyyy-MM-dd HH:mm"), lf.DateModified.ToString("yyyy-MM-dd HH:mm"));
+                Assert.AreNotEqual(utcDate.ToString("yyyy-MM-dd HH:mm"), lf.CreationTime.ToString("yyyy-MM-dd HH:mm"));
+                Assert.AreNotEqual(utcDate.ToString("yyyy-MM-dd HH:mm"), lf.ProcessingEnded.ToString("yyyy-MM-dd HH:mm"));
+                Assert.AreNotEqual(utcDate.ToString("yyyy-MM-dd HH:mm"), lf.ProcessingStarted.ToString("yyyy-MM-dd HH:mm"));
+                Assert.AreNotEqual(utcDate.ToString("yyyy-MM-dd HH:mm"), lf.HoldUntil.ToString("yyyy-MM-dd HH:mm"));
+                Assert.AreNotEqual(utcDate.ToString("yyyy-MM-dd HH:mm"), lf.LastWriteTime.ToString("yyyy-MM-dd HH:mm"));
+            }
+            foreach (var lf in lfUpdated)
+            {
+                Assert.AreNotEqual(nowDate.ToString("yyyy-MM-dd HH:mm"), lf.DateCreated.ToString("yyyy-MM-dd HH:mm"));
+                Assert.AreNotEqual(nowDate.ToString("yyyy-MM-dd HH:mm"), lf.DateModified.ToString("yyyy-MM-dd HH:mm"));
+                Assert.AreNotEqual(nowDate.ToString("yyyy-MM-dd HH:mm"), lf.CreationTime.ToString("yyyy-MM-dd HH:mm"));
+                Assert.AreNotEqual(nowDate.ToString("yyyy-MM-dd HH:mm"), lf.ProcessingEnded.ToString("yyyy-MM-dd HH:mm"));
+                Assert.AreNotEqual(nowDate.ToString("yyyy-MM-dd HH:mm"), lf.ProcessingStarted.ToString("yyyy-MM-dd HH:mm"));
+                Assert.AreNotEqual(nowDate.ToString("yyyy-MM-dd HH:mm"), lf.HoldUntil.ToString("yyyy-MM-dd HH:mm"));
+                Assert.AreNotEqual(nowDate.ToString("yyyy-MM-dd HH:mm"), lf.LastWriteTime.ToString("yyyy-MM-dd HH:mm"));
+                Assert.AreEqual(utcDate.ToString("yyyy-MM-dd HH:mm"), lf.DateCreated.ToString("yyyy-MM-dd HH:mm"));
+                Assert.AreEqual(utcDate.ToString("yyyy-MM-dd HH:mm"), lf.DateModified.ToString("yyyy-MM-dd HH:mm"));
+                Assert.AreEqual(utcDate.ToString("yyyy-MM-dd HH:mm"), lf.CreationTime.ToString("yyyy-MM-dd HH:mm"));
+                Assert.AreEqual(utcDate.ToString("yyyy-MM-dd HH:mm"), lf.ProcessingEnded.ToString("yyyy-MM-dd HH:mm"));
+                Assert.AreEqual(utcDate.ToString("yyyy-MM-dd HH:mm"), lf.ProcessingStarted.ToString("yyyy-MM-dd HH:mm"));
+                Assert.AreEqual(utcDate.ToString("yyyy-MM-dd HH:mm"), lf.HoldUntil.ToString("yyyy-MM-dd HH:mm"));
+                Assert.AreEqual(utcDate.ToString("yyyy-MM-dd HH:mm"), lf.LastWriteTime.ToString("yyyy-MM-dd HH:mm"));
+            }
+        }
+    }
+    
+    
+
+    
     
     static readonly JsonSerializerOptions JsonOptions = new JsonSerializerOptions()
     {

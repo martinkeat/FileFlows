@@ -36,7 +36,7 @@ public class PostgresConnector : IDatabaseConnector
 
     /// <inheritdoc />
     public string FormatDateQuoted(DateTime date)
-        => "'" + date.ToString("yyyy-MM-ddTHH:mm:ss.ffffffZ") + "'::timestamp";
+        => "'" + date.ToString("yyyy-MM-ddTHH:mm:ss.fffZ") + "'::timestamp";
 
     /// <summary>
     /// Initialises a Postgres Connector

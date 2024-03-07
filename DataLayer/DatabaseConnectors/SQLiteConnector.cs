@@ -24,7 +24,8 @@ public class SQLiteConnector : IDatabaseConnector
 
     /// <inheritdoc />
     public string FormatDateQuoted(DateTime date)
-        => "'" + date.ToString("yyyy-MM-ddTHH:mm:ss.ffffffZ") + "'";
+        => "datetime('" + date.ToString("yyyy-MM-ddTHH:mm:ss.fffZ") + "', 'utc')";
+       // => "'" + date.ToString("yyyy-MM-ddTHH:mm:ss.fffZ") + "'";
     
     public SQLiteConnector(ILogger logger, string connectionString)
     {

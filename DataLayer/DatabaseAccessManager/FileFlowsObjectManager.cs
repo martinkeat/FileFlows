@@ -199,7 +199,7 @@ public class FileFlowsObjectManager
     /// </summary>
     /// <param name="item">the item to convert</param>
     /// <returns>the converted item</returns>
-    internal DbObject ConvertToDbObject(FileFlowObject item)
+    internal static DbObject ConvertToDbObject(FileFlowObject item)
     {
         var serializerOptions = new JsonSerializerOptions
         {
@@ -249,7 +249,7 @@ public class FileFlowsObjectManager
     /// <param name="dbObject">the DbObject instance to convert</param>
     /// <typeparam name="T">the type to convert to</typeparam>
     /// <returns>the converetd object</returns>
-    private T Convert<T>(DbObject dbObject) where T : FileFlowObject, new()
+    internal T Convert<T>(DbObject dbObject) where T : FileFlowObject, new()
     {
         if (dbObject == null)
             return default;

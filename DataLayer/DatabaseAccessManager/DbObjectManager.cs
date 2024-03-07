@@ -21,7 +21,7 @@ public class DbObjectManager
     /// <summary>
     /// The type of database
     /// </summary>
-    private readonly DatabaseType DbType; 
+    private readonly DatabaseType DbType;
     
     /// <summary>
     /// Wraps a field name
@@ -40,34 +40,6 @@ public class DbObjectManager
     {
         DbType = dbType;
         DbConnector = dbConnector;
-    }
-
-    /// <summary>
-    /// Fixes the data if required
-    /// </summary>
-    /// <param name="data">the data to fix</param>
-    /// <returns>the fixed data</returns>
-    private List<DbObject> FixData(List<DbObject> data)
-    {
-        if (data == null) return data;
-        if (DbType != DatabaseType.Sqlite) return data;
-        foreach (var d in data)
-            FixData(d);
-        return data;
-    }
-
-    /// <summary>
-    /// Fixes the data if required
-    /// </summary>
-    /// <param name="o">the data to fix</param>
-    /// <returns>the fixed data</returns>
-    private DbObject FixData(DbObject o)
-    {
-        if (o == null) return o;
-        if (DbType != DatabaseType.Sqlite) return o;
-        o.DateCreated = DateTimeHelper.LocalToUtc(o.DateCreated);
-        o.DateModified = DateTimeHelper.LocalToUtc(o.DateModified);
-        return o;
     }
     
     /// <summary>
@@ -136,7 +108,7 @@ public class DbObjectManager
     internal async Task<List<DbObject>> GetAll()
     {
         using var db = await DbConnector.GetDb();
-        return FixData(await db.Db.FetchAsync<DbObject>());
+        return await db.Db.FetchAsync<DbObject>();
     }
 
     /// <summary>
@@ -147,7 +119,7 @@ public class DbObjectManager
     internal async Task<List<DbObject>> GetAll(string typeName)
     {
         using var db = await DbConnector.GetDb();
-        return FixData(await db.Db.FetchAsync<DbObject>($"where {Wrap(nameof(DbObject.Type))} = @0", typeName));
+        return await db.Db.FetchAsync<DbObject>($"where {Wrap(nameof(DbObject.Type))} = @0", typeName);
     }
     
     /// <summary>
@@ -158,7 +130,7 @@ public class DbObjectManager
     internal async Task<DbObject> Single(string typeName)
     {
         using var db = await DbConnector.GetDb();
-        return FixData(await db.Db.FirstOrDefaultAsync<DbObject>($@"where {Wrap(nameof(DbObject.Type))}=@0", typeName));
+        return await db.Db.FirstOrDefaultAsync<DbObject>($@"where {Wrap(nameof(DbObject.Type))}=@0", typeName);
     }
 
     /// <summary>
@@ -172,8 +144,8 @@ public class DbObjectManager
     {
         using var db = await DbConnector.GetDb();
         if(ignoreCase)
-            return FixData(await db.Db.FirstOrDefaultAsync<DbObject>($"where {Wrap(nameof(DbObject.Type))}=@0 and LOWER({Wrap(nameof(DbObject.Name))})=@1", typeName, name.ToLowerInvariant()));
-        return FixData(await db.Db.FirstOrDefaultAsync<DbObject>($"where {Wrap(nameof(DbObject.Type))}=@0 and {Wrap(nameof(DbObject.Name))}=@1", typeName, name));
+            return await db.Db.FirstOrDefaultAsync<DbObject>($"where {Wrap(nameof(DbObject.Type))}=@0 and LOWER({Wrap(nameof(DbObject.Name))})=@1", typeName, name.ToLowerInvariant());
+        return await db.Db.FirstOrDefaultAsync<DbObject>($"where {Wrap(nameof(DbObject.Type))}=@0 and {Wrap(nameof(DbObject.Name))}=@1", typeName, name);
     }
     
 
@@ -199,7 +171,7 @@ public class DbObjectManager
     internal async Task<DbObject> Single(Guid uid)
     {
         using var db = await DbConnector.GetDb();
-        return FixData(await db.Db.FirstOrDefaultAsync<DbObject>($"where {DbConnector.WrapFieldName("Uid")}='{uid}'"));
+        return await db.Db.FirstOrDefaultAsync<DbObject>($"where {DbConnector.WrapFieldName("Uid")}='{uid}'");
     }
     
     /// <summary>
