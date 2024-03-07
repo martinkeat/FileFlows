@@ -9,10 +9,10 @@ public class TimeHelper
     /// Gets the integer index of the current time quarter
     /// A time quarter is a 15minute block, starting on Sunday at midnight.
     /// </summary>
-    /// <returns>The integer index of the current time quater</returns>
+    /// <returns>The integer index of the current time quarter</returns>
     public static int GetCurrentQuarter()
     {
-        DateTime date = DateTime.Now;
+        DateTime date = DateTime.Now; // schedules are local to the server time, only thing left in non UTC dates
 
         int quarter = (((int)date.DayOfWeek) * 96) + (date.Hour * 4);
         if (date.Minute >= 45)

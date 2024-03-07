@@ -822,7 +822,82 @@ end");
     }
     #endregion
     
-    
+    #region get overview
+    /// <summary>
+    /// Gets the library status overview
+    /// </summary>
+    /// <returns>the library status overview</returns>
+    public async Task<List<LibraryStatus>> GetStatus(List<Library> libraries)
+    {
+        var disabled = libraries.Where(x => x.Enabled == false).Select(x => x.Uid).ToList();
+        List<Guid> libraryUids = libraries.Select(x => x.Uid).ToList();
+        int quarter = TimeHelper.GetCurrentQuarter();
+        var outOfSchedule = libraries.Where(x => disabled.Contains(x.Uid) == false && x.Schedule?.Length != 672 || x.Schedule[quarter] == '0')
+            .Select(x => x.Uid).ToList();
+
+        string AND_NOT_FORCED =
+            $" and {Wrap(nameof(LibraryFile.Flags))} & {(int)LibraryFileFlags.ForceProcessing} = 0";
+        
+        using var db = await DbConnector.GetDb();
+
+        var results = db.Db.Fetch<LibraryStatus>($@"select {Wrap(nameof(LibraryFile.Status))}, count(*) AS {Wrap("StatusCount")}
+from {Wrap(nameof(LibraryFile))}
+where {Wrap(nameof(LibraryFile.Status))} > 0
+group by {Wrap(nameof(LibraryFile.Status))}");
+        
+        // now for the complicated bit
+        
+        if (disabled.Any())
+        {
+            string inStr = string.Join(",", disabled.Select(x => $"'{x}'"));
+            
+            var disabledCount = await db.Db.ExecuteScalarAsync<int>($@"select count(*)
+from {Wrap(nameof(LibraryFile))}
+where {Wrap(nameof(LibraryFile.Status))} = 0
+{AND_NOT_FORCED}
+and {Wrap(nameof(LibraryFile.LibraryUid))} in ({inStr})
+");
+            results.Add(new () { Count = disabledCount, Status = FileStatus.Disabled});
+        }
+        
+        
+        if (outOfSchedule.Any())
+        {
+            string inStr = string.Join(",", outOfSchedule.Select(x => $"'{x}'"));
+            
+            var disabledCount = await db.Db.ExecuteScalarAsync<int>($@"select count(*)
+from {Wrap(nameof(LibraryFile))}
+where {Wrap(nameof(LibraryFile.Status))} = 0
+{AND_NOT_FORCED}
+and {Wrap(nameof(LibraryFile.LibraryUid))} in ({inStr})
+");
+            results.Add(new () { Count = disabledCount, Status = FileStatus.OutOfSchedule});
+        }
+
+        string disabledOutOfScheduled = string.Join(",", disabled.Union(outOfSchedule).Select(x => $"'{x}'"));
+        
+        string FORCED_OR_LIBRARY =
+            $" and ( ({Wrap(nameof(LibraryFile.Flags))} & {(int)LibraryFileFlags.ForceProcessing} > 0) or ({Wrap(nameof(LibraryFile.LibraryUid))} not in ({disabledOutOfScheduled})) )";
+        
+        var onHoldCount = await db.Db.ExecuteScalarAsync<int>($@"select count(*)
+from {Wrap(nameof(LibraryFile))}
+where {Wrap(nameof(LibraryFile.Status))} = 0
+and {Wrap(nameof(LibraryFile.HoldUntil))} > {Date(DateTime.UtcNow)}
+{FORCED_OR_LIBRARY}
+");
+        results.Add(new () { Count = onHoldCount, Status = FileStatus.OnHold});
+        
+        var unProcessedCount = await db.Db.ExecuteScalarAsync<int>($@"select count(*)
+from {Wrap(nameof(LibraryFile))}
+where {Wrap(nameof(LibraryFile.Status))} = 0
+and {Wrap(nameof(LibraryFile.HoldUntil))} <= {Date(DateTime.UtcNow)}
+{FORCED_OR_LIBRARY}
+");
+        results.Add(new () { Count = unProcessedCount, Status = FileStatus.Unprocessed});
+
+        return results;
+    }
+    #endregion
     
     static readonly JsonSerializerOptions JsonOptions = new JsonSerializerOptions()
     {

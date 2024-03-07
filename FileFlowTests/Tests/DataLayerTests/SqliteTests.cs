@@ -511,7 +511,7 @@ public class SqliteTests : DbLayerTest
 
             var testHelper = new TestDataHelper(Logger, dam);
             
-            var expected = testHelper.BulkInsert(1_000);
+            var expected = testHelper.BulkInsert(100_000);
 
             int max = 1;
             LibraryFilterSystemInfo sysInfo = new()
@@ -562,7 +562,13 @@ public class SqliteTests : DbLayerTest
             }).Result;
             Logger.ILog("Unprocessed time taken: " + (DateTime.Now.Subtract(start)));
             Assert.AreEqual(Math.Min(max, expected.Active.Count), actualUnprocessed.Count);
-            
+
+
+            var statusList = dam.LibraryFileManager.GetStatus(sysInfo.AllLibraries.Values.ToList()).Result.ToDictionary(x => x.Status, x => x.Count);
+            Assert.AreEqual(expected.Disabled.Count, statusList[FileStatus.Disabled]);
+            Assert.AreEqual(expected.OutOfSchedule.Count, statusList[FileStatus.OutOfSchedule]);
+            Assert.AreEqual(expected.Held.Count, statusList[FileStatus.OnHold]);
+            Assert.AreEqual(expected.Active.Count, statusList[FileStatus.Unprocessed]);
         }
     }
     
@@ -723,6 +729,8 @@ public class SqliteTests : DbLayerTest
                 Assert.AreEqual(utcDate.ToString("yyyy-MM-dd HH:mm"), lf.HoldUntil.ToString("yyyy-MM-dd HH:mm"));
                 Assert.AreEqual(utcDate.ToString("yyyy-MM-dd HH:mm"), lf.LastWriteTime.ToString("yyyy-MM-dd HH:mm"));
             }
+            
+            
         }
     }
     

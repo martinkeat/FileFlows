@@ -18,6 +18,7 @@ class Upgrade_24_03_2
     /// <param name="logger">the logger</param>
     /// <param name="dbType">the database type</param>
     /// <param name="connectionString">the database connection string</param>
+    /// <returns>the upgrade result</returns>
     public Result<bool> Run(ILogger logger, DatabaseType dbType, string connectionString)
     {
         if (dbType == DatabaseType.Sqlite)
@@ -27,6 +28,12 @@ class Upgrade_24_03_2
 
     }
 
+    /// <summary>
+    /// Run the upgrade for a MySql Server
+    /// </summary>
+    /// <param name="logger">the logger</param>
+    /// <param name="connectionString">the database connection string</param>
+    /// <returns>the upgrade result</returns>
     private Result<bool> RunMySql(ILogger logger, string connectionString)
     {
         // Get the local timezone of the machine
@@ -104,6 +111,12 @@ class Upgrade_24_03_2
 
     }
 
+    /// <summary>
+    /// Run the upgrade for a SQLite Server
+    /// </summary>
+    /// <param name="logger">the logger</param>
+    /// <param name="connectionString">the database connection string</param>
+    /// <returns>the upgrade result</returns>
     private Result<bool> RunSqlite(ILogger logger, string connectionString)
     {
         try
@@ -130,6 +143,7 @@ class Upgrade_24_03_2
         ProcessingStarted = datetime(ProcessingStarted, 'utc'),
         ProcessingEnded = datetime(ProcessingEnded, 'utc')
         ");
+            
             return true;
         }
         catch (Exception ex)
@@ -141,24 +155,71 @@ class Upgrade_24_03_2
 #endif
         }
     }
-
-
+    
+    /// <summary>
+    /// Represents an object in the database that will be upgraded.
+    /// </summary>
     private class DbObjectUpgrade
     {
+        /// <summary>
+        /// Gets or sets the unique identifier of the object.
+        /// </summary>
         public Guid Uid { get; set; }
+
+        /// <summary>
+        /// Gets or sets the date and time when the object was created.
+        /// </summary>
         public DateTime DateCreated { get; set; }
+
+        /// <summary>
+        /// Gets or sets the date and time when the object was last modified.
+        /// </summary>
         public DateTime DateModified { get; set; }
     }
-    
+
+    /// <summary>
+    /// Represents a file in the library that will be upgraded.
+    /// </summary>
     private class LibraryFileUpgrade
     {
+        /// <summary>
+        /// Gets or sets the unique identifier of the file.
+        /// </summary>
         public Guid Uid { get; set; }
+
+        /// <summary>
+        /// Gets or sets the date and time when the file was created.
+        /// </summary>
         public DateTime DateCreated { get; set; }
+
+        /// <summary>
+        /// Gets or sets the date and time when the file was last modified.
+        /// </summary>
         public DateTime DateModified { get; set; }
+
+        /// <summary>
+        /// Gets or sets the date and time when processing of the file started.
+        /// </summary>
         public DateTime ProcessingStarted { get; set; }
+
+        /// <summary>
+        /// Gets or sets the date and time when processing of the file ended.
+        /// </summary>
         public DateTime ProcessingEnded { get; set; }
+
+        /// <summary>
+        /// Gets or sets the date and time until which the file is held.
+        /// </summary>
         public DateTime HoldUntil { get; set; }
+
+        /// <summary>
+        /// Gets or sets the date and time when the file was created in the filesystem.
+        /// </summary>
         public DateTime CreationTime { get; set; }
+
+        /// <summary>
+        /// Gets or sets the date and time when the file was last written to in the filesystem.
+        /// </summary>
         public DateTime LastWriteTime { get; set; }
     }
 }
