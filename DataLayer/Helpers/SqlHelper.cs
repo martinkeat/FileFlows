@@ -25,7 +25,7 @@ public class SqlHelper
     /// <param name="input">the string to escape</param>
     /// <returns>the escaped string</returns>
     public static string Escape(string input) =>
-        input == null ? string.Empty : "'" + input.Replace("'", "''") + "'";
+        input == null ? "''" : "'" + input.Replace("'", "''") + "'";
     
     // /// <summary>
     // /// Adds a skip to a sql command

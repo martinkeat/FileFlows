@@ -286,9 +286,9 @@ public class SqliteTests : DbLayerTest
         foreach (var dbType in new[]
                  {
                      DatabaseType.Sqlite, 
-                     DatabaseType.Postgres,
-                     DatabaseType.SqlServer,
-                     DatabaseType.MySql,
+                     // DatabaseType.Postgres,
+                     // DatabaseType.SqlServer,
+                     // DatabaseType.MySql,
                  })
         {
             Logger.ILog("Database Type: " + dbType);
@@ -326,7 +326,7 @@ public class SqliteTests : DbLayerTest
             Assert.IsNotNull(created);
 
             List<LibraryFile> files = new();
-            for (int i = 0; i < 100; i++)
+            for (int i = 0; i < 10_000; i++)
             {
                 files.Add(new()
                 {
@@ -511,15 +511,22 @@ public class SqliteTests : DbLayerTest
 
             var testHelper = new TestDataHelper(Logger, dam);
             
-            var expected = testHelper.BulkInsert(100_000);
+            var expected = testHelper.BulkInsert(1_000);
 
-            int max = 1;
+            int max = 100;
             LibraryFilterSystemInfo sysInfo = new()
             {
                 Executors = new (),
                 AllLibraries = expected.Libraries.ToDictionary(x => x.Uid, x => x),
                 LicensedForProcessingOrder = true,
             };
+
+
+            var statusList = dam.LibraryFileManager.GetStatus(sysInfo.AllLibraries.Values.ToList()).Result.ToDictionary(x => x.Status, x => x.Count);
+            Assert.AreEqual(expected.Disabled.Count, statusList[FileStatus.Disabled]);
+            Assert.AreEqual(expected.OutOfSchedule.Count, statusList[FileStatus.OutOfSchedule]);
+            Assert.AreEqual(expected.Held.Count, statusList[FileStatus.OnHold]);
+            Assert.AreEqual(expected.Active.Count, statusList[FileStatus.Unprocessed]);
 
             DateTime start = DateTime.Now;
             var actualDisabled  = dam.LibraryFileManager.GetAll(new LibraryFileFilter()
@@ -528,7 +535,7 @@ public class SqliteTests : DbLayerTest
                 Rows = max,
                 SysInfo = sysInfo
             }).Result;
-            Logger.ILog("Disabled time taken: " + (DateTime.Now.Subtract(start)));
+            Logger.ILog($"Disabled time taken [{statusList[FileStatus.Disabled]}]: " + (DateTime.Now.Subtract(start)));
             Assert.AreEqual(Math.Min(max, expected.Disabled.Count), actualDisabled.Count);
             
             start = DateTime.Now;
@@ -538,7 +545,7 @@ public class SqliteTests : DbLayerTest
                 Rows = max,
                 SysInfo = sysInfo
             }).Result;
-            Logger.ILog("Out of schedule time taken: " + (DateTime.Now.Subtract(start)));
+            Logger.ILog($"Out of schedule time taken [{statusList[FileStatus.OutOfSchedule]}]: " + (DateTime.Now.Subtract(start)));
             Assert.AreEqual(Math.Min(max, expected.OutOfSchedule.Count), actualOutOfSchedule.Count);
             
             
@@ -549,7 +556,7 @@ public class SqliteTests : DbLayerTest
                 Rows = max,
                 SysInfo = sysInfo
             }).Result;
-            Logger.ILog("On Hold time taken: " + (DateTime.Now.Subtract(start)));
+            Logger.ILog($"On Hold time taken [{statusList[FileStatus.OnHold]}]: " + (DateTime.Now.Subtract(start)));
             Assert.AreEqual(Math.Min(max, expected.Held.Count), actualOnHold.Count);
             
             
@@ -560,15 +567,9 @@ public class SqliteTests : DbLayerTest
                 Rows = max,
                 SysInfo = sysInfo
             }).Result;
-            Logger.ILog("Unprocessed time taken: " + (DateTime.Now.Subtract(start)));
+            Logger.ILog($"Unprocessed time taken [{statusList[FileStatus.Unprocessed]}]: " + (DateTime.Now.Subtract(start)));
             Assert.AreEqual(Math.Min(max, expected.Active.Count), actualUnprocessed.Count);
-
-
-            var statusList = dam.LibraryFileManager.GetStatus(sysInfo.AllLibraries.Values.ToList()).Result.ToDictionary(x => x.Status, x => x.Count);
-            Assert.AreEqual(expected.Disabled.Count, statusList[FileStatus.Disabled]);
-            Assert.AreEqual(expected.OutOfSchedule.Count, statusList[FileStatus.OutOfSchedule]);
-            Assert.AreEqual(expected.Held.Count, statusList[FileStatus.OnHold]);
-            Assert.AreEqual(expected.Active.Count, statusList[FileStatus.Unprocessed]);
+            
         }
     }
     

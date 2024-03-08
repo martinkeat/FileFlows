@@ -10,7 +10,7 @@ namespace FileFlows.DataLayer.Upgrades;
 /// Upgrades for 24.03.2
 /// Changing DateTimes to UTC
 /// </summary>
-class Upgrade_24_03_2
+public class Upgrade_24_03_2
 {
     /// <summary>
     /// Run the upgrade

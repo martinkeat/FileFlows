@@ -55,7 +55,7 @@ public class DatabaseAccessManager
         this.DbStatisticManager = new (type, DbConnector);
         this.DbRevisionManager = new (type, DbConnector);
         this.DbLogMessageManager = new (type, DbConnector);
-        this.LibraryFileManager = new (type, DbConnector);
+        this.LibraryFileManager = new (logger, type, DbConnector);
         this.FileFlowsObjectManager = new(this.DbObjectManager);
     }
 

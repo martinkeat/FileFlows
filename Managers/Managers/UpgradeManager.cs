@@ -1,4 +1,5 @@
-using FileFlows.Managers.Upgrades;
+using FileFlows.DataLayer.Upgrades;
+using FileFlows.Plugin;
 
 namespace FileFlows.Managers;
 
@@ -10,8 +11,8 @@ public class UpgradeManager
     /// <summary>
     /// Run upgrade from 24.03.2
     /// </summary>
-    public void Run_Upgrade_24_03_2(Settings settings)
+    public void Run_Upgrade_24_03_2(ILogger logger, DatabaseType dbType, string connectionString)
     {
-        new Upgrade_24_03_2().Run(settings);
+        new Upgrade_24_03_2().Run(logger, dbType, connectionString);
     }
 }

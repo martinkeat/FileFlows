@@ -3,6 +3,7 @@ using System.Text.RegularExpressions;
 using FileFlows.DataLayer.DatabaseConnectors;
 using FileFlows.DataLayer.Helpers;
 using FileFlows.DataLayer.Models;
+using FileFlows.Plugin;
 using FileFlows.ServerShared.Helpers;
 using FileFlows.ServerShared.Models;
 using FileFlows.Shared;
@@ -17,6 +18,10 @@ namespace FileFlows.DataLayer;
 public class LibraryFileManager
 {
     /// <summary>
+    /// The logger to use
+    /// </summary>
+    private readonly ILogger Logger;
+    /// <summary>
     /// The database connector
     /// </summary>
     private readonly IDatabaseConnector DbConnector;
@@ -28,10 +33,12 @@ public class LibraryFileManager
     /// <summary>
     /// Initializes a new instance of the LibraryFile manager
     /// </summary>
+    /// <param name="logger">the logger</param>
     /// <param name="dbType">the type of database</param>
     /// <param name="dbConnector">the database connector</param>
-    public LibraryFileManager(DatabaseType dbType, IDatabaseConnector dbConnector)
+    public LibraryFileManager(ILogger logger, DatabaseType dbType, IDatabaseConnector dbConnector)
     {
+        Logger = logger;
         DbType = dbType;
         DbConnector = dbConnector;
     }
@@ -816,7 +823,7 @@ end");
         }
         catch (Exception ex)
         {
-            Logger.Instance.ELog("Failed GetAll Files: " + ex.Message + "\n" + ex.StackTrace);
+            Logger.ELog("Failed GetAll Files: " + ex.Message + "\n" + ex.StackTrace);
             return string.Empty;
         }
     }
