@@ -32,7 +32,6 @@ public class DatabaseService
     /// <returns>the migration details, or null if no migration required</returns>
     private (DatabaseInfo Source, DatabaseInfo Destination)? GetMigrationDatabase()
     {
-
         var settings = ServiceAppSetting.Settings;
         bool nonSqlite = string.IsNullOrEmpty(settings.DatabaseConnection) == false &&
                          settings.DatabaseConnection.Contains(".sqlite") == false;
@@ -46,12 +45,12 @@ public class DatabaseService
             return (source, dest);
         }
         
-        if (string.IsNullOrEmpty(settings.DatabaseMigrateConnection))
+        if (settings.DatabaseMigrateType == null || string.IsNullOrEmpty(settings.DatabaseMigrateConnection))
             return null;
         
         {
             DatabaseInfo dest = new ()
-                { Type = settings.DatabaseMigrateType, ConnectionString = settings.DatabaseMigrateConnection };
+                { Type = settings.DatabaseMigrateType.Value, ConnectionString = settings.DatabaseMigrateConnection };
             return (source, dest);
         }
     }
@@ -144,4 +143,13 @@ public class DatabaseService
         var settings = ServiceAppSetting.Settings;
         return Managers.Initializer.Init(Logger.Instance, settings.DatabaseType, settings.DatabaseConnection, settings.EncryptionKey);
     }
+
+    /// <summary>
+    /// Tests a connection to a database
+    /// </summary>
+    /// <param name="type">the type of the database</param>
+    /// <param name="connectionString">the connection string to the database</param>
+    /// <returns>true if successfully connected, otherwise false</returns>
+    public Result<bool> TestConnection(DatabaseType type, string connectionString)
+        =>  MigrationManager.CanConnect(type, connectionString);
 }

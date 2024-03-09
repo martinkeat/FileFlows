@@ -16,3 +16,50 @@ public class DatabaseInfo
     /// </summary>
     public string ConnectionString { get; init; }
 }
+
+
+/// <summary>
+/// Database connection details
+/// </summary>
+public class DbConnectionInfo
+{
+    /// <summary>
+    /// Gets or sets the server address
+    /// </summary>
+    public string Server { get; set; }
+    /// <summary>
+    /// Gets or sets the database name
+    /// </summary>
+    public string Name { get; set; }
+    /// <summary>
+    /// Gets or sets the port
+    /// </summary>
+    public int Port { get; set; }
+    /// <summary>
+    /// Gets or sets the connecting user
+    /// </summary>
+    public string User { get; set; }
+    /// <summary>
+    /// Gets or sets the password used
+    /// </summary>
+    public string Password { get; set; }
+    /// <summary>
+    /// Gets or sets the database type
+    /// </summary>
+    public DatabaseType Type { get; set; }
+
+    /// <inheritdoc />
+    public override string ToString()
+    {
+        switch (Type)
+        {
+            case DatabaseType.Postgres: 
+                return $"Host={Server};Port={Port};Username={User};Password={Password};Database={Name};";
+            case DatabaseType.MySql:
+                return $"Server={Server};Port={Port};Database={Name};Uid={User};Pwd={Password};";
+            case DatabaseType.SqlServer:
+                return $"Server={Server};Port={Port};Database={Name};User Id={User};Password={Password};";
+        }
+        return Type.ToString();
+    }
+}

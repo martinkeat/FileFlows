@@ -58,8 +58,9 @@ public partial class Settings : InputRegister
     private readonly List<ListOption> DbTypes = new()
     {
         new() { Label = "SQLite", Value = DatabaseType.Sqlite },
-        //new() { Label = "SQL Server", Value = DatabaseType.SqlServer }, // not finished yet
-        new() { Label = "MySQL", Value = DatabaseType.MySql }
+        new() { Label = "MySQL", Value = DatabaseType.MySql },
+        new() { Label = "Postgres", Value = DatabaseType.Postgres }, 
+        new() { Label = "SQL Server", Value = DatabaseType.SqlServer }, 
     };
 
     /// <summary>
@@ -72,7 +73,7 @@ public partial class Settings : InputRegister
     };
 
     /// <summary>
-    /// Gets or sets the type of databsae to use
+    /// Gets or sets the type of database to use
     /// </summary>
     private object DbType
     {
@@ -252,14 +253,12 @@ public partial class Settings : InputRegister
         Blocker.Show(lblTestingDatabase);
         try
         {
-            var result = await HttpHelper.Post<string>("/api/settings/test-db-connection", new
+            var result = await HttpHelper.Post("/api/settings/test-db-connection", new
             {
                 server, name, port, user, password, Type = DbType
             });
             if (result.Success == false)
                 throw new Exception(result.Body);
-            if(result.Data != "OK")
-                throw new Exception(result.Data);
             Toast.ShowSuccess(Translater.Instant("Pages.Settings.Messages.Database.TestSuccess"));
         }
         catch (Exception ex)
@@ -373,5 +372,19 @@ public partial class Settings : InputRegister
                 Model.DisableTelemetry = false;
             }
         }
+    }
+
+    private string GetDatabasePortHelp()
+    {
+        switch (Model.DbType)
+        {
+            case DatabaseType.Postgres:
+                return Translater.Instant("Pages.Settings.Fields.Database.Port-Help-Postgres");
+            case DatabaseType.MySql:
+                return Translater.Instant("Pages.Settings.Fields.Database.Port-Help-MySql");
+            case DatabaseType.SqlServer:
+                return Translater.Instant("Pages.Settings.Fields.Database.Port-Help-SQLServer");
+        }
+        return string.Empty;
     }
 }

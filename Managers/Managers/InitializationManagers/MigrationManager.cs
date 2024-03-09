@@ -56,4 +56,13 @@ public class MigrationManager
         DbMigrator migrator = new(Logger);
         return migrator.DatabaseExists(Destination.Type, Destination.ConnectionString);
     }
+
+    /// <summary>
+    /// Tests a connection to a database
+    /// </summary>
+    /// <param name="type">the type of the database</param>
+    /// <param name="connectionString">the connection string to the database</param>
+    /// <returns>true if successfully connected, otherwise false</returns>
+    public static Result<bool> CanConnect(DatabaseType type, string connectionString)
+        => DatabaseAccessManager.CanConnect(type, connectionString);
 }

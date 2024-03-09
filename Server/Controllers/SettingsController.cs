@@ -1,13 +1,10 @@
-using FileFlows.Plugin;
 using Microsoft.AspNetCore.Mvc;
-using System.Runtime.InteropServices;
 using FileFlows.Shared.Models;
 using FileFlows.Server.Workers;
 using FileFlows.Server.Helpers;
 using FileFlows.Server.Services;
-using FileFlows.ServerShared.Services;
+using FileFlows.ServerShared.Models;
 using SettingsService = FileFlows.Server.Services.SettingsService;
-
 
 namespace FileFlows.Server.Controllers;
 /// <summary>
@@ -85,13 +82,10 @@ public class SettingsController : Controller
         uiModel.FileServerAllowedPathsString = uiModel.FileServerAllowedPaths?.Any() == true
             ? string.Join("\n", uiModel.FileServerAllowedPaths)
             : string.Empty;
-        
-        string dbConnStr = Settings.DatabaseMigrateConnection?.EmptyAsNull() ?? Settings.DatabaseConnection;
-        if (string.IsNullOrWhiteSpace(dbConnStr) || dbConnStr.ToLower().Contains("sqlite"))
-            uiModel.DbType = DatabaseType.Sqlite;
-        // REFACTOR: re-look into this
-        // else if (dbConnStr.Contains(";Uid="))
-        //     new MySqlDbManager(string.Empty).PopulateSettings(uiModel, dbConnStr);
+        uiModel.DbType = Settings.DatabaseMigrateType ?? Settings.DatabaseType;
+        if (uiModel.DbType != DatabaseType.Sqlite)
+            PopulateDbSettings(uiModel,
+                Settings.DatabaseMigrateConnection?.EmptyAsNull() ?? Settings.DatabaseConnection);
         uiModel.RecreateDatabase = Settings.RecreateDatabase;
         
         return uiModel;
@@ -213,17 +207,19 @@ public class SettingsController : Controller
     /// <param name="model">The database connection info</param>
     /// <returns>OK if successful, otherwise a failure message</returns>
     [HttpPost("test-db-connection")]
-    public string TestDbConnection([FromBody] DbConnectionInfo model)
+    public async Task<IActionResult> TestDbConnection([FromBody] DbConnectionInfo model)
     {
         if (model == null)
             throw new ArgumentException(nameof(model));
 
-        // REFACTOR: re-look into this
-        // if (model.Type == DatabaseType.MySql)
-        //     return new MySqlDbManager(string.Empty).Test(model.Server, model.Name, model.Port, model.User, model.Password)
-        //         ?.EmptyAsNull() ?? "OK";
-        
-        return "Unsupported database type";
+        if (model.Type == DatabaseType.Sqlite)
+            return BadRequest("Unsupport database type");
+
+        var dbService = ServiceLoader.Load<DatabaseService>();
+        var result = dbService.TestConnection(model.Type, model.ToString());
+        if(result.Failed(out string error))
+            return BadRequest(error);
+        return Ok();
     }
 
     /// <summary>
@@ -261,35 +257,51 @@ public class SettingsController : Controller
     [HttpGet("current-config")]
     public Task<ConfigurationRevision> GetCurrentConfig()
         => ServiceLoader.Load<SettingsService>().GetCurrentConfiguration();
-}
+    
+    
+    /// <summary>
+    /// Parses the connection string and populates the provided DbSettings object with server, user, password, database name, and port information.
+    /// </summary>
+    /// <param name="settings">The setting object to populate.</param>
+    /// <param name="connectionString">The connection string to parse.</param>
+    public void PopulateDbSettings(SettingsUiModel settings, string connectionString)
+    {
+        var parts = connectionString.Split(';');
 
-/// <summary>
-/// Database connection details
-/// </summary>
-public class DbConnectionInfo
-{
-    /// <summary>
-    /// Gets or sets the server address
-    /// </summary>
-    public string Server { get; set; }
-    /// <summary>
-    /// Gets or sets the database name
-    /// </summary>
-    public string Name { get; set; }
-    /// <summary>
-    /// Gets or sets the port
-    /// </summary>
-    public int Port { get; set; }
-    /// <summary>
-    /// Gets or sets the connecting user
-    /// </summary>
-    public string User { get; set; }
-    /// <summary>
-    /// Gets or sets the password used
-    /// </summary>
-    public string Password { get; set; }
-    /// <summary>
-    /// Gets or sets the database type
-    /// </summary>
-    public DatabaseType Type { get; set; }
+        foreach (var part in parts)
+        {
+            var keyValue = part.Split('=');
+            if (keyValue.Length != 2)
+                continue;
+
+            var key = keyValue[0].Trim().ToLowerInvariant();
+            var value = keyValue[1].Trim();
+
+            switch (key)
+            {
+                case "server":
+                case "host":
+                    settings.DbServer = value;
+                    break;
+                case "user":
+                case "uid":
+                case "username":
+                case "user id":
+                    settings.DbUser = value;
+                    break;
+                case "password":
+                case "pwd":
+                    settings.DbPassword = value;
+                    break;
+                case "database":
+                case "initial catalog": // SQL Server specific
+                    settings.DbName = value;
+                    break;
+                case "port":
+                    if(int.TryParse(value, out int port))
+                        settings.DbPort = port;
+                    break;
+            }
+        }
+    }
 }
