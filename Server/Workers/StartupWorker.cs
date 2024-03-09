@@ -29,8 +29,8 @@ public class StartupWorker:Worker
     /// </summary>
     private void UpdateInternalNode()
     {
-        var service = new NodeService();
-        var internalNode = service.GetByUid(Globals.InternalNodeUid);
+        var service = ServiceLoader.Load<NodeService>();
+        var internalNode = service.GetByUidAsync(Globals.InternalNodeUid).Result;
         if (internalNode == null)
             return;
         internalNode.Architecture = RuntimeInformation.ProcessArchitecture == Architecture.Arm ? ArchitectureType.Arm32 :

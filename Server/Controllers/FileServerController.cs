@@ -32,7 +32,7 @@ public class FileServerController : Controller
     public FileServerController()
     {
         var settings = new SettingsController().Get().Result;
-        var allowedPaths = new LibraryService().GetAll().Select(x => x.Path)
+        var allowedPaths = ServiceLoader.Load<LibraryService>().GetAllAsync().Result.Select(x => x.Path)
             .Union(settings.FileServerAllowedPaths ?? new string[] { })
             .Where(x => string.IsNullOrWhiteSpace(x) == false)
             .Distinct()
@@ -573,7 +573,7 @@ public class FileServerController : Controller
     //     if(string.IsNullOrWhiteSpace(path))
     //         return StatusCode(503, "No path specified to delete.");
     //
-    //     var libraryPaths = (await new LibraryService().GetAllAsync()).Select(x => x.Path).ToArray();
+    //     var libraryPaths = (await ServiceLoader.Load<LibraryService>().GetAllAsync()).Select(x => x.Path).ToArray();
     //
     //     try
     //     {

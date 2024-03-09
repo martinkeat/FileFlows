@@ -1,6 +1,10 @@
 ﻿using System.Dynamic;
+using FileFlows.DataLayer.Helpers;
+using FileFlows.Managers;
+using FileFlows.Plugin;
 using FileFlows.Server.Helpers;
 using FileFlows.Server.Controllers;
+using FileFlows.ServerShared.Models;
 using FileFlows.ServerShared.Services;
 using FileFlows.Shared.Models;
 
@@ -9,27 +13,35 @@ namespace FileFlows.Server.Services;
 /// <summary>
 /// Plugin service
 /// </summary>
-public class PluginService : CachedService<PluginInfo>, IPluginService
+public class PluginService : IPluginService
 {
-
     /// <summary>
     /// Get the plugin info for a specific plugin by package name
     /// </summary>
     /// <param name="name">The package name of the plugin</param>
     /// <returns>The plugin info for the plugin</returns>
-    public PluginInfo GetByPackageName(string name)
-    {
-        var pi = Data.FirstOrDefault(x => x.PackageName == name);  
-        return pi ?? new();
-    }
-    
+    public Task<PluginInfo?> GetByPackageName(string name)
+        => new PluginManager().GetByPackageName(name);
+
     /// <summary>
-    /// Updates plugin info
+    /// Gets a plugin by its UID
     /// </summary>
-    /// <param name="pluginInfo">the plugin info</param>
-    /// <returns>the updated plugininfo</returns>
-    public Task<PluginInfo> Update(PluginInfo pluginInfo)
-        => Update(pluginInfo, false);
+    /// <param name="uid">the UID of the plugin</param>
+    /// <returns>the plugin</returns>
+    public Task<PluginInfo?> GetByUid(Guid uid)
+        => new PluginManager().GetByUid(uid);
+
+
+    /// <inheritdoc />
+    public Task<List<PluginInfo>> GetAllAsync()
+        => new PluginManager().GetAll();
+    
+    /// <inheritdoc />
+    public async Task<PluginInfo> Update(PluginInfo pluginInfo)
+    {
+        var result = await new PluginManager().Update(pluginInfo, false);
+        return result.IsFailed ? null : result.Value;
+    }
 
     /// <summary>
     /// Download a plugin
@@ -48,22 +60,21 @@ public class PluginService : CachedService<PluginInfo>, IPluginService
     /// Deletes items matching the UIDs
     /// </summary>
     /// <param name="uids">the UIDs of the items to delete</param>
-    public override async Task Delete(params Guid[] uids)
+    public async Task Delete(params Guid[] uids)
     {
         if (uids?.Any() != true)
             return;
+
+        var manager = new PluginManager();
         
-        var deleting = Data.Where(x => uids.Contains(x.Uid));
-        await DbHelper.Delete(uids);
+        var deleting = (await manager.GetAll()).Where(x => uids.Contains(x.Uid));
+        await manager.Delete(uids);
         foreach(var item in deleting)
         {
             PluginScanner.Delete(item.PackageName);
-            // delete the plugin settings
-            await DbHelper.Execute( $"delete from DbObject where Type = '{typeof(PluginSettingsModel).FullName}' and Name = 'PluginSettings_{item.PackageName}'");
+            await manager.DeletePluginSettings(item.PackageName);
         }
-        IncrementConfigurationRevision();
-        
-        Refresh();
+        await manager.IncrementConfigurationRevision(force: true);
     }
 
     /// <summary>
@@ -73,15 +84,15 @@ public class PluginService : CachedService<PluginInfo>, IPluginService
     /// <returns>the settings json</returns>
     public async Task<string> GetSettingsJson(string pluginSettingsType)
     {
-        var obj = await DbHelper.SingleByName<Models.PluginSettingsModel>("PluginSettings_" + pluginSettingsType);
-        if (obj == null)
+        var result = await new PluginManager().GetPluginSettings("PluginSettings_" + pluginSettingsType);
+        if (result.IsFailed)
             return string.Empty;
-
+        PluginSettingsModel model = result.Value;
+        if (string.IsNullOrEmpty(model.Json))
+            return string.Empty;
+        
         // need to decode any passwords
-        if (string.IsNullOrEmpty(obj.Json) == false)
-            obj.Json = DecryptPluginJson(pluginSettingsType, obj.Json);
-
-        return obj.Json ?? string.Empty;
+        return await DecryptPluginJson(pluginSettingsType, model.Json);
     }
     
     
@@ -91,28 +102,25 @@ public class PluginService : CachedService<PluginInfo>, IPluginService
     /// <returns>all plugin settings with and the plugin settings</returns>
     internal async Task<Dictionary<string, string>> GetAllPluginSettings()
     {
-        string sqlPluginSettings = "select Name, " +
-                                   SqlHelper.JsonValue("Data", "Json") +
-                                   " from DbObject where Type = 'FileFlows.Server.Models.PluginSettingsModel'";
-        var plugins = (await DbHelper.GetDbManager()
-                .Fetch<(string Name, string Json)>(sqlPluginSettings))
+        var all = await new PluginManager().GetAllPluginSettings();
+        var plugins = all
             .DistinctBy(x => x.Name.Replace("PluginSettings_", string.Empty))
             .ToDictionary(x => x.Name.Replace("PluginSettings_", string.Empty), x => x.Json);
         foreach (var plg in plugins)
         {
             if (string.IsNullOrEmpty(plg.Value))
                 continue;
-            plugins[plg.Key] = DecryptPluginJson(plg.Key, plg.Value);
+            plugins[plg.Key] = await DecryptPluginJson(plg.Key, plg.Value);
         }
 
         return plugins;
     }
     
-    private string DecryptPluginJson(string packageName, string json)
+    private async Task<string> DecryptPluginJson(string packageName, string json)
     {   
         try
         {
-            var plugin = GetByPackageName(packageName);
+            var plugin = await GetByPackageName(packageName);
             if (string.IsNullOrEmpty(plugin?.Name))
                 return json;
             

@@ -2,7 +2,7 @@ using Avalonia;
 
 namespace FileFlows.Server.Gui.Avalon;
 
-internal class App : Application
+internal class App : Avalonia.Application
 {
     public override void Initialize()
     {

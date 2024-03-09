@@ -1,6 +1,5 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
-using FileFlows.Server.Database.Managers;
 using FileFlows.Server.Helpers;
 using FileFlows.ServerShared.Models;
 using FileFlows.Shared.Models;
@@ -56,13 +55,14 @@ public class SystemMonitor:FileFlows.ServerShared.Workers.Worker
         {
             Value = taskLogStorage.Result
         });
-        if (DbHelper.UseMemoryCache == false)
-        {
-            OpenDatabaseConnections.Enqueue(new()
-            {
-                Value = taskOpenDatabaseConnections.Result
-            });
-        }
+        // REFACTOR: re-look into this
+        // if (DbHelper.UseMemoryCache == false)
+        // {
+        //     OpenDatabaseConnections.Enqueue(new()
+        //     {
+        //         Value = taskOpenDatabaseConnections.Result
+        //     });
+        // }
     }
 
     private async Task<float> GetCpu()
@@ -98,22 +98,25 @@ public class SystemMonitor:FileFlows.ServerShared.Workers.Worker
 
     private async Task<int> GetOpenDatabaseConnections()
     {
-        if (DbHelper.UseMemoryCache)
-            return 0;
-        
-        await Task.Delay(1);
-        List<int> records = new List<int>();
-        int max = 70;
-        for (int i = 0; i <= max; i++)
-        {
-            int count = FlowDbConnection.GetOpenConnections;
-            records.Add(count);
-            if (i == max)
-                break;
-            await Task.Delay(100);
-        }
-
-        return records.Max();
+        // REFACTOR: re-look into this
+        return await Task.FromResult(0);
+        //
+        // if (DbHelper.UseMemoryCache)
+        //     return 0;
+        //
+        // await Task.Delay(1);
+        // List<int> records = new List<int>();
+        // int max = 70;
+        // for (int i = 0; i <= max; i++)
+        // {
+        //     int count = FlowDbConnection.GetOpenConnections;
+        //     records.Add(count);
+        //     if (i == max)
+        //         break;
+        //     await Task.Delay(100);
+        // }
+        //
+        // return records.Max();
     }
     private async Task<long> GetTempStorageSize()
     {

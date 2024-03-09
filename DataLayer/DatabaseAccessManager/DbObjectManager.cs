@@ -4,6 +4,7 @@ using FileFlows.DataLayer.DatabaseConnectors;
 using FileFlows.DataLayer.Converters;
 using FileFlows.DataLayer.Helpers;
 using FileFlows.DataLayer.Models;
+using FileFlows.Plugin;
 using FileFlows.Shared;
 using FileFlows.Shared.Models;
 
@@ -12,34 +13,16 @@ namespace FileFlows.DataLayer;
 /// <summary>
 /// Manages data access operations for the DbObject table
 /// </summary>
-public class DbObjectManager
+internal  class DbObjectManager : BaseManager
 {
-    /// <summary>
-    /// The database connector
-    /// </summary>
-    private readonly IDatabaseConnector DbConnector;
-    /// <summary>
-    /// The type of database
-    /// </summary>
-    private readonly DatabaseType DbType;
-    
-    /// <summary>
-    /// Wraps a field name
-    /// </summary>
-    /// <param name="name">the name to wrap</param>
-    /// <returns>the wrapped field name</returns>
-    private string Wrap(string name)
-        => DbConnector.WrapFieldName(name);
-    
     /// <summary>
     /// Initializes a new instance of the DbObject manager
     /// </summary>
+    /// <param name="logger">the logger</param>
     /// <param name="dbType">the type of database</param>
     /// <param name="dbConnector">the database connector</param>
-    public DbObjectManager(DatabaseType dbType, IDatabaseConnector dbConnector)
+    public DbObjectManager(ILogger logger, DatabaseType dbType, IDatabaseConnector dbConnector) : base(logger, dbType, dbConnector)
     {
-        DbType = dbType;
-        DbConnector = dbConnector;
     }
     
     /// <summary>
@@ -282,15 +265,81 @@ public class DbObjectManager
     /// Delete items from a database
     /// </summary>
     /// <param name="uids">the UIDs of the items to delete</param>
-    public virtual async Task Delete(params Guid[] uids)
+    public async Task Delete(params Guid[] uids)
     {
         if (uids?.Any() != true)
             return; // nothing to delete
 
-        string strUids = String.Join(",", uids.Select(x => "'" + x.ToString() + "'"));
+        string strUids = string.Join(",", uids.Select(x => "'" + x.ToString() + "'"));
         
         using var db = await DbConnector.GetDb(write: true);
-        await db.Db.ExecuteAsync($"delete from {DbConnector.WrapFieldName(nameof(DbObject))}" +
-                                 $" where {DbConnector.WrapFieldName("Uid")} in ({strUids})");
+        await db.Db.ExecuteAsync($"delete from {Wrap(nameof(DbObject))}" +
+                                 $" where {Wrap(nameof(DbObject.Uid))} in ({strUids})");
+    }
+    
+    /// <summary>
+    /// Delete items from a database
+    /// </summary>
+    /// <param name="typeName">the name of the type</param>
+    /// <param name="name">the name of the item being deleted</param>
+    /// <returns>true if any records were deleted</returns>
+    public async Task<bool> DeleteByTypeAndName(string typeName, string name)
+    {
+        string sql = $"delete from {Wrap(nameof(DbObject))} where " +
+                     $"{Wrap(nameof(DbObject.Type))} = @0 and " +
+                     $"{Wrap(nameof(DbObject.Name))} = @1";
+        using var db = await DbConnector.GetDb(write: true);
+        return await db.Db.ExecuteAsync(sql, typeName, name) > 0;
+    }
+
+    /// <summary>
+    /// Gets if there are any of the specified type in the system
+    /// </summary>
+    /// <returns>true if there are some, otherwise false</returns>
+    public async Task<bool> Any(string fullName)
+    {
+        using var db = await DbConnector.GetDb();
+        return (await db.Db.ExecuteScalarAsync<int>("select count(*) from " + 
+                Wrap(nameof(DbObject)) + " where " + Wrap(nameof(DbObject.Type)) + " = @0", fullName)) > 0;
+    }
+
+    /// <summary>
+    /// Gets if a UID is in use
+    /// </summary>
+    /// <param name="uid">the UID to check</param>
+    /// <returns>true if in use</returns>
+    public async Task<bool> UidInUse(Guid uid)
+    {
+        using var db = await DbConnector.GetDb();
+        return await db.Db.ExecuteScalarAsync<int>("select count(*) from " + Wrap(nameof(DbObject)) + " where " +
+                                               Wrap(nameof(DbObject.Uid)) + $" = '{uid}'") > 0;
+    }
+
+    /// <summary>
+    /// Updates all object references
+    /// </summary>
+    /// <param name="property">object reference name/property</param>
+    /// <param name="uid">the UID in the object reference to match again</param>
+    /// <param name="name">the new name to update</param>
+    /// <returns>true if any objects were updated, otherwise false</returns>
+    public async Task<bool> UpdateAllObjectReferences(string property, Guid uid, string name)
+    {
+        string sql = $"update {Wrap(nameof(DbObject))} ";
+
+        string dataColumnName = Wrap(nameof(DbObject.Data));
+        
+        if (DbType == DatabaseType.SqlServer)
+            sql += $" {dataColumnName} = json_modify({dataColumnName}, '$.{property}.Name', @0) " + 
+                   $" where JSON_VALUE({dataColumnName}, '$.{property}.Uid') = '{uid}";
+        else if (DbType == DatabaseType.Postgres)
+            sql = $" {dataColumnName} = jsonb_set({dataColumnName}::jsonb, '{{{property}.Name}}', @0::jsonb)::text " +
+                  $" where {dataColumnName}::json->>{property}->>'Uid' = '{uid}'";
+        else // mysql and sqlite are the same
+            sql += $" {dataColumnName} = json_set({dataColumnName}, '$.{property}.Name', @0) " + 
+                    $" where JSON_EXTRACT({dataColumnName},'$.{property}.Uid') = '{uid}'";
+        
+        using var db = await DbConnector.GetDb();
+        return await db.Db.ExecuteAsync(sql, name) > 0;
+
     }
 }

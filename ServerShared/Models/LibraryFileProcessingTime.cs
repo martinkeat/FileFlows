@@ -1,4 +1,4 @@
-namespace FileFlows.Server.Models;
+namespace FileFlows.ServerShared.Models;
 
 /// <summary>
 /// Time it took to process a library file

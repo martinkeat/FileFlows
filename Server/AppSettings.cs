@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using FileFlows.Shared.Models;
 
 namespace FileFlows.Server;
 
@@ -11,6 +12,11 @@ internal class AppSettings
     /// Gets or sets the database connection to use
     /// </summary>
     public string DatabaseConnection { get; set; }
+    
+    /// <summary>
+    /// Gets or sets the database type
+    /// </summary>
+    public DatabaseType DatabaseType { get; set; }
 
     /// <summary>
     /// Gets or sets if the database should recreate if it already exists

@@ -1,7 +1,6 @@
-﻿using Mysqlx.Datatypes;
-using Microsoft.AspNetCore.Mvc;
-using FileFlows.Server.Helpers;
+﻿using Microsoft.AspNetCore.Mvc;
 using FileFlows.Server.Services;
+using FileFlows.ServerShared.Models;
 
 namespace FileFlows.Server.Controllers;
 
@@ -58,19 +57,3 @@ public class StatisticsController : Controller
     }
 }
 
-
-/// <summary>
-/// A statistic
-/// </summary>
-public class Statistic
-{
-    /// <summary>
-    /// Gets or sets the name of the statistic
-    /// </summary>
-    public string Name { get; set; }
-
-    /// <summary>
-    /// Gets or sets the value
-    /// </summary>
-    public object Value { get; set; }
-}

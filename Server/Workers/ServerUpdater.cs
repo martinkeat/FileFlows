@@ -36,13 +36,13 @@ public class ServerUpdater : UpdaterWorker
     protected override void PreUpgradeArgumentsAdd(ProcessStartInfo startInfo)
     {
         Logger.Instance.ILog("Is MacOS: " + OperatingSystem.IsMacOS());
-        bool hasEntryPoint = string.IsNullOrWhiteSpace(Program.EntryPoint) == false;
+        bool hasEntryPoint = string.IsNullOrWhiteSpace(Application.EntryPoint) == false;
         Logger.Instance.ILog("Has Entry Point: " + hasEntryPoint);
         if (OperatingSystem.IsMacOS() && hasEntryPoint)
         {
             Logger.Instance.ILog("Upgrading Mac App");
             startInfo.ArgumentList.Add("mac");
-            startInfo.ArgumentList.Add(Program.EntryPoint);
+            startInfo.ArgumentList.Add(Application.EntryPoint);
             startInfo.ArgumentList.Add(Globals.Version.Split('.').Last());
         }
         base.PreUpgradeArgumentsAdd(startInfo);

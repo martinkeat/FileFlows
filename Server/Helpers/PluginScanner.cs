@@ -25,11 +25,11 @@ public class PluginScanner
         var pluginDir = GetPluginDirectory();
         Logger.Instance.DLog("Plugin path:" + pluginDir);
 
-        if (Program.Docker)
+        if (Application.Docker)
             EnsureDefaultsExist(pluginDir);
 
         var service = new PluginService();
-        var dbPluginInfos = service.GetAll().OrderBy(x => x.Name).ToList();
+        var dbPluginInfos = service.GetAllAsync().Result.OrderBy(x => x.Name).ToList();
 
         List<string> installed = new List<string>();
         var options = new JsonSerializerOptions

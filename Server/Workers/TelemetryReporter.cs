@@ -32,13 +32,14 @@ public class TelemetryReporter : Worker
             if (settings?.DisableTelemetry == true)
                 return; // they have turned it off, dont report anything
 
-            bool isDocker = Program.Docker;
+            bool isDocker = Application.Docker;
 
             TelemetryData data = new TelemetryData();
             data.ClientUid = settings.Uid;
             data.Version = Globals.Version.ToString();
-            data.DatabaseProvider = DbHelper.IsSqlLite ? "SQLite" : "MySQL";
-            var pNodes = new NodeService().GetAll().Where(x => x.Enabled);
+            // REFACTOR: re-look into this
+            //data.DatabaseProvider = DbHelper.IsSqlLite ? "SQLite" : "MySQL";
+            var pNodes = ServiceLoader.Load<NodeService>().GetAllAsync().Result.Where(x => x.Enabled);
             data.ProcessingNodes = pNodes.Count();
             data.ProcessingNodeData = pNodes.Select(x => new ProcessingNodeData()
             {
@@ -57,7 +58,7 @@ public class TelemetryReporter : Worker
             var libFiles = new LibraryFileController().GetAll(null).Result;
             data.FilesFailed = libFiles.Count(x => x.Status == FileStatus.ProcessingFailed);
             data.FilesProcessed = libFiles.Count(x => x.Status == FileStatus.Processed);
-            var flows = new FlowService().GetAll();
+            var flows = ServiceLoader.Load<FlowService>().GetAllAsync().Result;
             var dictNodes = new Dictionary<string, int>();
             foreach (var fp in flows?.SelectMany(x => x.Parts)?.ToArray() ?? new FlowPart[] { })
             {
@@ -75,7 +76,7 @@ public class TelemetryReporter : Worker
                 Count = x.Value
             }).ToList();
 
-            var libraries = new LibraryService().GetAll();
+            var libraries = ServiceLoader.Load<LibraryService>().GetAllAsync().Result;
             dictNodes.Clear();
             foreach (var lib in libraries?.Where(x => string.IsNullOrEmpty(x.Template) == false) ?? new List<Library>())
             {
@@ -85,7 +86,7 @@ public class TelemetryReporter : Worker
                     dictNodes.Add(lib.Template, 1);
             }
 
-            data.StorageSaved = new LibraryFileService().GetTotalStorageSaved();
+            data.StorageSaved = ServiceLoader.Load<LibraryFileService>().GetTotalStorageSaved().Result;
 
             data.LibraryTemplates = dictNodes.Select(x => new TelemetryDataSet
             {

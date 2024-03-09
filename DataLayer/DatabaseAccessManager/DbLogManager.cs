@@ -4,6 +4,7 @@ using FileFlows.DataLayer.DatabaseConnectors;
 using FileFlows.DataLayer.Converters;
 using FileFlows.DataLayer.Helpers;
 using FileFlows.DataLayer.Models;
+using FileFlows.Plugin;
 using FileFlows.Shared;
 using FileFlows.Shared.Models;
 
@@ -12,28 +13,16 @@ namespace FileFlows.DataLayer;
 /// <summary>
 /// Manages data access operations for the DbLogMessage table
 /// </summary>
-public class DbLogMessageManager
+internal  class DbLogMessageManager : BaseManager
 {
-    /// <summary>
-    /// The database connector
-    /// </summary>
-    private readonly IDatabaseConnector DbConnector;
-    /// <summary>
-    /// The type of database
-    /// </summary>
-    private readonly DatabaseType DbType; 
-    
     /// <summary>
     /// Initializes a new instance of the DbLogMessage manager
     /// </summary>
+    /// <param name="logger">the logger</param>
     /// <param name="dbType">the type of database</param>
     /// <param name="dbConnector">the database connector</param>
-    public DbLogMessageManager(DatabaseType dbType, IDatabaseConnector dbConnector)
-    {
-        DbType = dbType;
-        DbConnector = dbConnector;
+    public DbLogMessageManager(ILogger logger, DatabaseType dbType, IDatabaseConnector dbConnector) : base(logger, dbType, dbConnector) {
     }
-
 
     /// <summary>
     /// Inserts a new DbLogMessage

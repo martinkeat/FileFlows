@@ -63,7 +63,7 @@ public class RepositoryController : Controller
             .Where(x => new Version(Globals.Version) >= x.MinimumVersion);
         if (missing)
         {
-            var service = new FlowService();
+            var service = ServiceLoader.Load<FlowService>();
             var known = (await service.GetAllAsync()).Where(x => x.Type == FlowType.SubFlow).Select(x => x.Uid).ToList();
             subflows = subflows.Where(x => x.Uid != null && known.Contains(x.Uid.Value) == false).ToList();
         }
@@ -121,7 +121,7 @@ public class RepositoryController : Controller
         // always re-download all the shared scripts to ensure they are up to date
         var repoService = new RepositoryService();
         await repoService.Init();
-        var service = new FlowService();
+        var service = ServiceLoader.Load<FlowService>();
         
         foreach (string path in model.Scripts)
         {
@@ -140,7 +140,7 @@ public class RepositoryController : Controller
                 continue;
             }
 
-            if (await DbHelper.UidInUse(flow.Uid))
+            if (await ServiceLoader.Load<FlowService>().UidInUse(flow.Uid))
             {
                 Logger.Instance.WLog("Sub flow UID already in use.");
                 continue;

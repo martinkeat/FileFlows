@@ -96,6 +96,9 @@ public class Upgrade_24_03_2
             }
             db.Db.Execute(sql.ToString());
 
+            db.Db.ExecuteAsync(
+                "update DbObject set Type = 'FileFlows.ServerShared.Models.PluginSettingsModel' where Type = 'FileFlows.Server.Models.PluginSettingsModel'");
+
         db.Db.CompleteTransaction();
         return true;
         }
@@ -143,6 +146,9 @@ public class Upgrade_24_03_2
         ProcessingStarted = datetime(ProcessingStarted, 'utc'),
         ProcessingEnded = datetime(ProcessingEnded, 'utc')
         ");
+            
+            db.Db.ExecuteAsync(
+                "update DbObject set Type = 'FileFlows.ServerShared.Models.PluginSettingsModel' where Type = 'FileFlows.Server.Models.PluginSettingsModel'");
             
             return true;
         }

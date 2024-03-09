@@ -114,7 +114,7 @@ public class ClientServiceManager
     /// </summary>
     public void UpdateFileStatus()
     {
-        var status = new LibraryFileService().GetStatus().ToList();
+        var status = ServiceLoader.Load<LibraryFileService>().GetStatus().Result;
         _hubContext.Clients.All.SendAsync("UpdateFileStatus", status);
     }
     /// <summary>

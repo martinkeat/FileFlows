@@ -126,10 +126,10 @@ public class SqliteTests : DbLayerTest
             var created = db.FileFlowsObjectManager.Single<Library>(library.Uid).Result.Value;
             Assert.IsNotNull(created);
 
-            db.DbObjectManager.SetDataValue(library.Uid, TYPE_NAME, nameof(library.Description), "Updated String").Wait();
-            db.DbObjectManager.SetDataValue(library.Uid, TYPE_NAME, nameof(library.HoldMinutes), 123456).Wait();
-            db.DbObjectManager.SetDataValue(library.Uid, TYPE_NAME, nameof(library.LastScanned), new DateTime(2000,1,1)).Wait();
-            db.DbObjectManager.SetDataValue(library.Uid, TYPE_NAME, nameof(library.Enabled), false).Wait();
+            db.ObjectManager.SetDataValue(library.Uid, TYPE_NAME, nameof(library.Description), "Updated String").Wait();
+            db.ObjectManager.SetDataValue(library.Uid, TYPE_NAME, nameof(library.HoldMinutes), 123456).Wait();
+            db.ObjectManager.SetDataValue(library.Uid, TYPE_NAME, nameof(library.LastScanned), new DateTime(2000,1,1)).Wait();
+            db.ObjectManager.SetDataValue(library.Uid, TYPE_NAME, nameof(library.Enabled), false).Wait();
 
             var updated = db.FileFlowsObjectManager.Single<Library>(library.Uid).Result.Value;
             Assert.AreEqual("Updated String", updated.Description);
@@ -170,7 +170,7 @@ public class SqliteTests : DbLayerTest
                     {
                         for (int j = 0; j < TOTAL_J; j++)
                         {
-                            db.DbObjectManager.AddOrUpdate(new FileFlows.DataLayer.Models.DbObject()
+                            db.ObjectManager.AddOrUpdate(new FileFlows.DataLayer.Models.DbObject()
                             {
                                 Uid = Guid.NewGuid(),
                                 Name = $"TestObject_{i}_{j}",
@@ -191,7 +191,7 @@ public class SqliteTests : DbLayerTest
 
             Task.WhenAll(tasks).Wait();
 
-            var items = db.DbObjectManager.GetAll(TYPE_NAME).Result;
+            var items = db.ObjectManager.GetAll(TYPE_NAME).Result;
             Assert.AreEqual(TOTAL_I * TOTAL_J, items.Count);
         }
     }
@@ -237,7 +237,7 @@ public class SqliteTests : DbLayerTest
                             if (j > 1 && random.Next(2) == 0) // Randomly choose between read and write
                             {
                                 // Read operation
-                                var items = await db.DbObjectManager.GetAll(TYPE_NAME);
+                                var items = await db.ObjectManager.GetAll(TYPE_NAME);
                                 if (items.Count < 1)
                                     Interlocked.Increment(ref invalid);
                                 Assert.IsTrue(items.Count > 0);
@@ -247,7 +247,7 @@ public class SqliteTests : DbLayerTest
                             {
                                 // Write operation
                                 Interlocked.Increment(ref totalWrites); // Increment atomically
-                                await db.DbObjectManager.AddOrUpdate(new FileFlows.DataLayer.Models.DbObject()
+                                await db.ObjectManager.AddOrUpdate(new FileFlows.DataLayer.Models.DbObject()
                                 {
                                     Uid = Guid.NewGuid(),
                                     Name = $"TestObject_{i}_{j}",
@@ -271,7 +271,7 @@ public class SqliteTests : DbLayerTest
 
             Task.WhenAll(tasks).Wait();
 
-            var finalItems = db.DbObjectManager.GetAll(TYPE_NAME).Result;
+            var finalItems = db.ObjectManager.GetAll(TYPE_NAME).Result;
             Assert.IsTrue(totalWrites > 0);
             Assert.AreEqual(0, invalid);
             Assert.AreEqual(totalWrites, finalItems.Count);
@@ -283,12 +283,46 @@ public class SqliteTests : DbLayerTest
     public void BulkInsert()
     {
         var rand = new Random(DateTime.Now.Microsecond);
+        var library = new Library()
+        {
+            Uid = Guid.NewGuid(),
+            Name = "TestLibrary",
+            Enabled = true,
+            DateCreated = DateTime.UtcNow,
+            DateModified = DateTime.UtcNow,
+            Description = "this is a test description",
+            Path = "/a/b/c",
+            Scan = true,
+            HoldMinutes = 30,
+            LastScanned = DateTime.UtcNow
+        };
+
+        List<LibraryFile> files = new();
+        for (int i = 0; i < 1_000_000; i++)
+        {
+            files.Add(new()
+            {
+                DateCreated = DateTime.UtcNow,
+                DateModified = DateTime.UtcNow,
+                Uid = Guid.NewGuid(),
+                Name = "/unit-test/fake/file_" + (i + 1).ToString("D9") + ".mkv",
+                RelativePath = "file_" + (i + 1).ToString("D9") + ".mkv",
+                Fingerprint = "",
+                Flags = LibraryFileFlags.None,
+                LibraryName = library.Name,
+                LibraryUid = library.Uid,
+                OriginalSize = rand.NextInt64(1000, 1_000_000_000_000_000),
+                CreationTime = DateTime.UtcNow,
+                LastWriteTime = DateTime.UtcNow,
+            });
+        }
+        
         foreach (var dbType in new[]
                  {
                      DatabaseType.Sqlite, 
-                     // DatabaseType.Postgres,
-                     // DatabaseType.SqlServer,
-                     // DatabaseType.MySql,
+                     DatabaseType.Postgres,
+                     DatabaseType.SqlServer, 
+                     DatabaseType.MySql,
                  })
         {
             Logger.ILog("Database Type: " + dbType);
@@ -299,53 +333,20 @@ public class SqliteTests : DbLayerTest
             var dbCreator = GetCreator(dbType, dbName, out string connectionString);
             var dbCreateResult = dbCreator.CreateDatabase(true).Value;
 
-            
             Assert.AreNotEqual(DbCreateResult.Failed, dbCreateResult);
             if(dbCreateResult == DbCreateResult.Created)
                 Assert.AreEqual(true, dbCreator.CreateDatabaseStructure().Value);
             
             var db = new DatabaseAccessManager(Logger, dbType, connectionString);
             
-            var library = new Library()
-            {
-                Uid = Guid.NewGuid(),
-                Name = "TestLibrary",
-                Enabled = true,
-                DateCreated = DateTime.UtcNow,
-                DateModified = DateTime.UtcNow,
-                Description = "this is a test description",
-                Path = "/a/b/c",
-                Scan = true,
-                HoldMinutes = 30,
-                LastScanned = DateTime.UtcNow
-            };
-            
             db.FileFlowsObjectManager.AddOrUpdateObject(library).Wait();
 
             var created = db.FileFlowsObjectManager.Single<Library>(library.Uid).Result.Value;
             Assert.IsNotNull(created);
 
-            List<LibraryFile> files = new();
-            for (int i = 0; i < 10_000; i++)
-            {
-                files.Add(new()
-                {
-                    DateCreated = DateTime.UtcNow,
-                    DateModified = DateTime.UtcNow,
-                    Uid = Guid.NewGuid(),
-                    Name = "/unit-test/fake/file_" + (i + 1).ToString("D4") + ".mkv",
-                    RelativePath = "file_" + (i + 1).ToString("D4") + ".mkv",
-                    Fingerprint = "",
-                    Flags = LibraryFileFlags.None,
-                    LibraryName = library.Name,
-                    LibraryUid = library.Uid,
-                    OriginalSize = rand.NextInt64(1000, 1_000_000_000_000_000),
-                    CreationTime = DateTime.UtcNow,
-                    LastWriteTime = DateTime.UtcNow,
-                });
-            }
-
+            DateTime start = DateTime.Now;
             db.LibraryFileManager.InsertBulk(files).Wait();
+            Logger.ILog($"Time to insert {files.Count}: " + DateTime.Now.Subtract(start));
             //
             // if (dbType == DatabaseType.Sqlite)
             //     continue;
@@ -651,8 +652,8 @@ public class SqliteTests : DbLayerTest
             
             var dam = new DatabaseAccessManager(Logger, dbType, connectionString);
 
-            var dboOriginal = dam.DbObjectManager.GetAll().Result;
-            var roOriginal = dam.DbRevisionManager.GetAll().Result;
+            var dboOriginal = dam.ObjectManager.GetAll().Result;
+            var roOriginal = dam.RevisionManager.GetAll().Result;
             var lfOriginal = dam.LibraryFileManager.GetAll().Result;
 
             //  now upgrade the data
@@ -660,8 +661,8 @@ public class SqliteTests : DbLayerTest
             if(upgradeResult.Failed(out string error))
                 Assert.Fail(error);
 
-            var dboUpdated = dam.DbObjectManager.GetAll().Result;
-            var roUpdated = dam.DbRevisionManager.GetAll().Result;
+            var dboUpdated = dam.ObjectManager.GetAll().Result;
+            var roUpdated = dam.RevisionManager.GetAll().Result;
             var lfUpdated = dam.LibraryFileManager.GetAll().Result;
 
             foreach (var dbo in dboOriginal)

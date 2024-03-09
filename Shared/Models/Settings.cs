@@ -136,7 +136,8 @@ public class Settings : FileFlowObject
 /// <summary>
 /// Cache Settings
 /// </summary>
-public class CacheSettings {
+public class CacheSettings 
+{
     /// <summary>
     /// Gets or sets if the caching should be used
     /// </summary>

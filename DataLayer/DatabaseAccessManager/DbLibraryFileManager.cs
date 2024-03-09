@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using FileFlows.DataLayer.Converters;
 using FileFlows.DataLayer.DatabaseConnectors;
 using FileFlows.DataLayer.Helpers;
 using FileFlows.DataLayer.Models;
@@ -9,38 +10,24 @@ using FileFlows.ServerShared.Models;
 using FileFlows.Shared;
 using FileFlows.Shared.Json;
 using FileFlows.Shared.Models;
+using MySqlX.XDevAPI;
 
 namespace FileFlows.DataLayer;
 
 /// <summary>
 /// Manages data access operations for the LibraryFile table
 /// </summary>
-public class LibraryFileManager
+internal class DbLibraryFileManager : BaseManager
 {
-    /// <summary>
-    /// The logger to use
-    /// </summary>
-    private readonly ILogger Logger;
-    /// <summary>
-    /// The database connector
-    /// </summary>
-    private readonly IDatabaseConnector DbConnector;
-    /// <summary>
-    /// The type of database
-    /// </summary>
-    private readonly DatabaseType DbType;
-    
     /// <summary>
     /// Initializes a new instance of the LibraryFile manager
     /// </summary>
     /// <param name="logger">the logger</param>
     /// <param name="dbType">the type of database</param>
     /// <param name="dbConnector">the database connector</param>
-    public LibraryFileManager(ILogger logger, DatabaseType dbType, IDatabaseConnector dbConnector)
+    public DbLibraryFileManager(ILogger logger, DatabaseType dbType, IDatabaseConnector dbConnector)
+        : base(logger, dbType, dbConnector)
     {
-        Logger = logger;
-        DbType = dbType;
-        DbConnector = dbConnector;
     }
 
     /// <summary>
@@ -65,8 +52,8 @@ public class LibraryFileManager
     /// Inserts a new LibraryFile
     /// </summary>
     /// <param name="item">the new LibraryFile</param>
-    internal Task Insert(LibraryFile item)
-        => InsertBulk(new() { item });
+    public Task Insert(LibraryFile item)
+        => InsertBulk(new [] { item });
 
     private void EnsureValusAreAcceptable(LibraryFile file)
     {
@@ -88,10 +75,10 @@ public class LibraryFileManager
     }
 
     /// <summary>
-    /// Upates a LibraryFile
+    /// Updates a LibraryFile
     /// </summary>
-    /// <param name="item">the LibraryFile to update</param>
-    internal async Task Update(LibraryFile file)
+    /// <param name="file">the LibraryFile to update</param>
+    public async Task Update(LibraryFile file)
     {
         EnsureValusAreAcceptable(file);
 
@@ -193,119 +180,103 @@ public class LibraryFileManager
     /// Bulk insert many files
     /// </summary>
     /// <param name="files">the files to insert</param>
-    public async Task InsertBulk(List<LibraryFile> files)
+    public async Task InsertBulk(LibraryFile[] files)
     {
-        // Calculate the number of batches needed
-        int batchSize = 100;
-        int totalFiles = files.Count();
-        int numberOfBatches = (int)Math.Ceiling((double)totalFiles / batchSize);
-
-        // Group files into batches
-        var fileBatches = files
-            .Select((file, index) => new { file, groupIndex = index / batchSize })
-            .GroupBy(item => item.groupIndex)
-            .Select(group => group.Select(item => item.file).ToList())
-            .ToList();
-        foreach (var batch in fileBatches)
+        using var db = await DbConnector.GetDb(write: true);
+        db.Db.BeginTransaction();
+        foreach (var file in files)
         {
-            string sql = "";
+            EnsureValusAreAcceptable(file);
+
             List<object> parameters = new();
-            foreach (var file in batch)
-            {
-                EnsureValusAreAcceptable(file);
+            int offset = 0; //parameters.Count - 1;
 
-                int offset = parameters.Count - 1;
+            bool postgres = DbType == DatabaseType.Postgres;
 
-                bool postgres = DbType == DatabaseType.Postgres;
+            string sql = $"insert into {Wrap(nameof(LibraryFile))} ( " +
+                         $"{Wrap(nameof(LibraryFile.Uid))}, " +
+                         $"{Wrap(nameof(LibraryFile.Name))}, " +
+                         $"{Wrap(nameof(LibraryFile.Status))}, " +
+                         $"{Wrap(nameof(LibraryFile.Flags))}, " +
+                         $"{Wrap(nameof(LibraryFile.OriginalSize))}, " +
+                         $"{Wrap(nameof(LibraryFile.FinalSize))}, " +
+                         $"{Wrap("ProcessingOrder")}, " + // special case, since Order is reserved in sql
+                         $"{Wrap(nameof(LibraryFile.IsDirectory))}, " +
+                         $"{Wrap(nameof(LibraryFile.NoLongerExistsAfterProcessing))}, " +
 
+                         $"{Wrap(nameof(LibraryFile.DateCreated))}, " +
+                         $"{Wrap(nameof(LibraryFile.DateModified))}, " +
+                         $"{Wrap(nameof(LibraryFile.CreationTime))}, " +
+                         $"{Wrap(nameof(LibraryFile.LastWriteTime))}, " +
+                         $"{Wrap(nameof(LibraryFile.HoldUntil))}, " +
+                         $"{Wrap(nameof(LibraryFile.ProcessingStarted))}, " +
+                         $"{Wrap(nameof(LibraryFile.ProcessingEnded))}, " +
 
-                sql += $"insert into {Wrap(nameof(LibraryFile))} ( " +
-                       $"{Wrap(nameof(LibraryFile.Uid))}, " +
-                       $"{Wrap(nameof(LibraryFile.Name))}, " +
-                       $"{Wrap(nameof(LibraryFile.Status))}, " +
-                       $"{Wrap(nameof(LibraryFile.Flags))}, " +
-                       $"{Wrap(nameof(LibraryFile.OriginalSize))}, " +
-                       $"{Wrap(nameof(LibraryFile.FinalSize))}, " +
-                       $"{Wrap("ProcessingOrder")}, " + // special case, since Order is reserved in sql
-                       $"{Wrap(nameof(LibraryFile.IsDirectory))}, " +
-                       $"{Wrap(nameof(LibraryFile.NoLongerExistsAfterProcessing))}, " +
+                         $"{Wrap(nameof(LibraryFile.RelativePath))}, " +
+                         $"{Wrap(nameof(LibraryFile.Fingerprint))}, " +
+                         $"{Wrap(nameof(LibraryFile.FinalFingerprint))}, " +
+                         $"{Wrap(nameof(LibraryFile.LibraryUid))}, " +
+                         $"{Wrap(nameof(LibraryFile.LibraryName))}, " +
+                         $"{Wrap(nameof(LibraryFile.FlowUid))}, " +
+                         $"{Wrap(nameof(LibraryFile.FlowName))}, " +
+                         $"{Wrap(nameof(LibraryFile.DuplicateUid))}, " +
+                         $"{Wrap(nameof(LibraryFile.DuplicateName))}, " +
+                         $"{Wrap(nameof(LibraryFile.NodeUid))}, " +
+                         $"{Wrap(nameof(LibraryFile.NodeName))}, " +
+                         $"{Wrap(nameof(LibraryFile.WorkerUid))}, " +
+                         $"{Wrap(nameof(LibraryFile.ProcessOnNodeUid))}, " +
+                         $"{Wrap(nameof(LibraryFile.OutputPath))}, " +
+                         $"{Wrap(nameof(LibraryFile.OriginalMetadata))}, " +
+                         $"{Wrap(nameof(LibraryFile.FinalMetadata))}, " +
+                         $"{Wrap(nameof(LibraryFile.ExecutedNodes))}, " +
+                         $"{Wrap(nameof(LibraryFile.FailureReason))} " +
+                         " )" +
+                         $" values (@{offset++},@{offset++}," +
+                         ((int)file.Status) + ", " +
+                         ((int)file.Flags) + ", " +
+                         (file.OriginalSize) + ", " +
+                         (file.FinalSize) + ", " +
+                         (file.Order) + ", " +
+                         (file.IsDirectory ? (postgres ? "true" : "1") : (postgres ? "false" : "0")) + "," +
+                         (file.NoLongerExistsAfterProcessing ? (postgres ? "true" : "1") : (postgres ? "false" : "0")) +
+                         "," +
 
-                       $"{Wrap(nameof(LibraryFile.DateCreated))}, " +
-                       $"{Wrap(nameof(LibraryFile.DateModified))}, " +
-                       $"{Wrap(nameof(LibraryFile.CreationTime))}, " +
-                       $"{Wrap(nameof(LibraryFile.LastWriteTime))}, " +
-                       $"{Wrap(nameof(LibraryFile.HoldUntil))}, " +
-                       $"{Wrap(nameof(LibraryFile.ProcessingStarted))}, " +
-                       $"{Wrap(nameof(LibraryFile.ProcessingEnded))}, " +
+                         DbConnector.FormatDateQuoted(file.DateCreated) + "," + //$"@{++offset}," + // date created
+                         DbConnector.FormatDateQuoted(file.DateModified) + "," + //$"@{++offset}," + // date modified
+                         DbConnector.FormatDateQuoted(file.CreationTime) + ", " +
+                         DbConnector.FormatDateQuoted(file.LastWriteTime) + ", " +
+                         DbConnector.FormatDateQuoted(file.HoldUntil) + ", " +
+                         DbConnector.FormatDateQuoted(file.ProcessingStarted) + ", " +
+                         DbConnector.FormatDateQuoted(file.ProcessingEnded) + ", " +
+                         $"@{offset++},@{offset++},@{offset++},@{offset++},@{offset++},@{offset++}," +
+                         $"@{offset++},@{offset++},@{offset++},@{offset++},@{offset++},@{offset++}," +
+                         $"@{offset++},@{offset++},@{offset++},@{offset++},@{offset++},@{offset++});\n";
 
-                       $"{Wrap(nameof(LibraryFile.RelativePath))}, " +
-                       $"{Wrap(nameof(LibraryFile.Fingerprint))}, " +
-                       $"{Wrap(nameof(LibraryFile.FinalFingerprint))}, " +
-                       $"{Wrap(nameof(LibraryFile.LibraryUid))}, " +
-                       $"{Wrap(nameof(LibraryFile.LibraryName))}, " +
-                       $"{Wrap(nameof(LibraryFile.FlowUid))}, " +
-                       $"{Wrap(nameof(LibraryFile.FlowName))}, " +
-                       $"{Wrap(nameof(LibraryFile.DuplicateUid))}, " +
-                       $"{Wrap(nameof(LibraryFile.DuplicateName))}, " +
-                       $"{Wrap(nameof(LibraryFile.NodeUid))}, " +
-                       $"{Wrap(nameof(LibraryFile.NodeName))}, " +
-                       $"{Wrap(nameof(LibraryFile.WorkerUid))}, " +
-                       $"{Wrap(nameof(LibraryFile.ProcessOnNodeUid))}, " +
-                       $"{Wrap(nameof(LibraryFile.OutputPath))}, " +
-                       $"{Wrap(nameof(LibraryFile.OriginalMetadata))}, " +
-                       $"{Wrap(nameof(LibraryFile.FinalMetadata))}, " +
-                       $"{Wrap(nameof(LibraryFile.ExecutedNodes))}, " +
-                       $"{Wrap(nameof(LibraryFile.FailureReason))} " +
-                       " )" +
-                       $" values (@{++offset},@{++offset}," +
-                       ((int)file.Status) + ", " +
-                       ((int)file.Flags) + ", " +
-                       (file.OriginalSize) + ", " +
-                       (file.FinalSize) + ", " +
-                       (file.Order) + ", " +
-                       (file.IsDirectory ? (postgres ? "true" : "1") : (postgres ? "false" : "0")) + "," +
-                       (file.NoLongerExistsAfterProcessing ? (postgres ? "true" : "1") : (postgres ? "false" : "0")) +
-                       "," +
+            parameters.Add(DbType is DatabaseType.Sqlite ? file.Uid.ToString() : file.Uid);
+            parameters.Add(file.Name);
 
-                       DbConnector.FormatDateQuoted(file.DateCreated) + "," + //$"@{++offset}," + // date created
-                       DbConnector.FormatDateQuoted(file.DateModified) + "," + //$"@{++offset}," + // date modified
-                       DbConnector.FormatDateQuoted(file.CreationTime) + ", " +
-                       DbConnector.FormatDateQuoted(file.LastWriteTime) + ", " +
-                       DbConnector.FormatDateQuoted(file.HoldUntil) + ", " +
-                       DbConnector.FormatDateQuoted(file.ProcessingStarted) + ", " +
-                       DbConnector.FormatDateQuoted(file.ProcessingEnded) + ", " +
-                       $"@{++offset},@{++offset},@{++offset},@{++offset},@{++offset},@{++offset}," +
-                       $"@{++offset},@{++offset},@{++offset},@{++offset},@{++offset},@{++offset}," +
-                       $"@{++offset},@{++offset},@{++offset},@{++offset},@{++offset},@{++offset});\n";
-
-                parameters.Add(DbType is DatabaseType.Sqlite ? file.Uid.ToString() : file.Uid);
-                parameters.Add(file.Name);
-
-                // we have to always include every value for the migration, otherwise if we use default and the data is migrated that data will change
-                parameters.Add(file.RelativePath);
-                parameters.Add(file.Fingerprint);
-                parameters.Add(file.FinalFingerprint ?? string.Empty);
-                parameters.Add(file.LibraryUid?.ToString() ?? string.Empty);
-                parameters.Add(file.LibraryName);
-                parameters.Add(file.FlowUid?.ToString() ?? string.Empty);
-                parameters.Add(file.FlowName ?? string.Empty);
-                parameters.Add(file.DuplicateUid?.ToString() ?? string.Empty);
-                parameters.Add(file.DuplicateName ?? string.Empty);
-                parameters.Add(file.NodeUid?.ToString() ?? string.Empty);
-                parameters.Add(file.NodeName ?? string.Empty);
-                parameters.Add(file.WorkerUid?.ToString() ?? string.Empty);
-                parameters.Add(file.ProcessOnNodeUid?.ToString() ?? string.Empty);
-                parameters.Add(file.OutputPath ?? string.Empty);
-                parameters.Add(JsonEncode(file.OriginalMetadata));
-                parameters.Add(JsonEncode(file.FinalMetadata));
-                parameters.Add(JsonEncode(file.ExecutedNodes));
-                parameters.Add(file.FailureReason ?? string.Empty);
-            }
-
-            var array = parameters.ToArray();
-            using var db = await DbConnector.GetDb(write: true);
-            await db.Db.ExecuteAsync(sql, args: array);
+            // we have to always include every value for the migration, otherwise if we use default and the data is migrated that data will change
+            parameters.Add(file.RelativePath);
+            parameters.Add(file.Fingerprint);
+            parameters.Add(file.FinalFingerprint ?? string.Empty);
+            parameters.Add(file.LibraryUid?.ToString() ?? string.Empty);
+            parameters.Add(file.LibraryName);
+            parameters.Add(file.FlowUid?.ToString() ?? string.Empty);
+            parameters.Add(file.FlowName ?? string.Empty);
+            parameters.Add(file.DuplicateUid?.ToString() ?? string.Empty);
+            parameters.Add(file.DuplicateName ?? string.Empty);
+            parameters.Add(file.NodeUid?.ToString() ?? string.Empty);
+            parameters.Add(file.NodeName ?? string.Empty);
+            parameters.Add(file.WorkerUid?.ToString() ?? string.Empty);
+            parameters.Add(file.ProcessOnNodeUid?.ToString() ?? string.Empty);
+            parameters.Add(file.OutputPath ?? string.Empty);
+            parameters.Add(JsonEncode(file.OriginalMetadata));
+            parameters.Add(JsonEncode(file.FinalMetadata));
+            parameters.Add(JsonEncode(file.ExecutedNodes));
+            parameters.Add(file.FailureReason ?? string.Empty);
+            await db.Db.ExecuteAsync(sql, parameters.ToArray());
         }
+        db.Db.CompleteTransaction();
     }
 
     /// <summary>
@@ -369,6 +340,45 @@ public class LibraryFileManager
 
     #endregion
     
+    #region deletes
+
+    /// <summary>
+    /// Deletes files from the database
+    /// </summary>
+    /// <param name="uids">the UIDs of the files to remove</param>
+    public async Task Delete(params Guid[] uids)
+    {
+        if (uids?.Any() == false)
+            return;
+        
+        string inStr = string.Join(",", uids.Select(x => $"'{x}'"));
+        string sql = $"delete from  {Wrap(nameof(LibraryFile))} " +
+                     $" where {Wrap(nameof(LibraryFile.Uid))} in ({inStr})";
+        
+        using var db = await DbConnector.GetDb();
+        await db.Db.ExecuteAsync(sql);
+    }
+    
+    /// <summary>
+    /// Deletes files from the database
+    /// </summary>
+    /// <param name="nonProcessedOnly">if only non processed files should be delete</param>
+    /// <param name="libraryUids">the UIDs of the libraries to remove</param>
+    public async Task DeleteByLibrary(bool nonProcessedOnly, params Guid[] libraryUids)
+    {
+        if (libraryUids?.Any() == false)
+            return;   
+        string inStr = string.Join(",", libraryUids.Select(x => $"'{x}'"));
+        string sql = $"delete from  {Wrap(nameof(LibraryFile))} " +
+                     $" where {Wrap(nameof(LibraryFile.LibraryUid))} in ({inStr})";
+        if(nonProcessedOnly)
+            sql += $" and {Wrap(nameof(LibraryFile.Status))} != {(int)FileStatus.Processed}";
+        
+        using var db = await DbConnector.GetDb();
+        await db.Db.ExecuteAsync(sql);
+    }
+    #endregion
+    
     
     #region updates
     
@@ -414,11 +424,11 @@ public class LibraryFileManager
                      $" {Wrap(nameof(LibraryFile.OutputPath))} = '', " +
                      $" {Wrap(nameof(LibraryFile.FailureReason))} = '', " +
                      $" {Wrap(nameof(LibraryFile.ProcessOnNodeUid))} = '', " +
-                     $" {Wrap(nameof(LibraryFile.ProcessingEnded))} = @0 " +
+                     $" {Wrap(nameof(LibraryFile.ProcessingEnded))} = " + DbConnector.FormatDateQuoted(new DateTime(1970, 1, 1)) +
                      $" where {Wrap(nameof(LibraryFile.Uid))} = '{uid}'";
         
         using var db = await DbConnector.GetDb();
-        return await db.Db.ExecuteAsync(sql, new DateTime(1970, 1, 1)) > 0;
+        return await db.Db.ExecuteAsync(sql) > 0;
     }
     
     
@@ -455,6 +465,38 @@ public class LibraryFileManager
         return await db.Db.ExecuteAsync(sql, name) > 0;
     }
 
+    /// <summary>
+    /// Updates a library name in the database
+    /// </summary>
+    /// <param name="uid">the UID of the library</param>
+    /// <param name="name">the updated name of the library</param>
+    /// <returns>true if any rows were updated, otherwise false</returns>
+    public async Task<bool> UpdateLibraryName(Guid uid, string name)
+    {
+        string sql = $"update {Wrap(nameof(LibraryFile))} set " +
+                     $" {Wrap(nameof(LibraryFile.LibraryName))} = @0 " +
+                     $" where {Wrap(nameof(LibraryFile.LibraryUid))} = '{uid}'";
+        
+        using var db = await DbConnector.GetDb();
+        return await db.Db.ExecuteAsync(sql, name) > 0;
+    }
+    
+    /// <summary>
+    /// Updates a node name in the database
+    /// </summary>
+    /// <param name="uid">the UID of the node</param>
+    /// <param name="name">the updated name of the node</param>
+    /// <returns>true if any rows were updated, otherwise false</returns>
+    public async Task<bool> UpdateNodeName(Guid uid, string name)
+    {
+        string sql = $"update {Wrap(nameof(LibraryFile))} set " +
+                     $" {Wrap(nameof(LibraryFile.NodeName))} = @0 " +
+                     $" where {Wrap(nameof(LibraryFile.NodeUid))} = '{uid}'";
+        
+        using var db = await DbConnector.GetDb();
+        return await db.Db.ExecuteAsync(sql, name) > 0;
+    }
+    
     /// <summary>
     /// Force processing a set of files
     /// </summary>
@@ -517,7 +559,33 @@ public class LibraryFileManager
     #endregion
     
     #region get next file
-    
+
+    /// <summary>
+    /// Updates a file as started processing
+    /// </summary>
+    /// <param name="uid">the UID of the file</param>
+    /// <param name="nodeUid">the UID of the node processing this file</param>
+    /// <param name="nodeName">the name of the node processing this file</param>
+    /// <param name="workerUid">the UID of the worker processing this file</param>
+    /// <returns>true if successfully updated, otherwise false</returns>
+    public async Task<bool> StartProcessing(Guid uid, Guid nodeUid, string nodeName, Guid workerUid)
+    {
+        string sql = "update " + Wrap(nameof(LibraryFile)) + " set " +
+                     Wrap(nameof(LibraryFile.NodeUid)) + $" = '{nodeUid}', " +
+                     Wrap(nameof(LibraryFile.NodeName)) + " = @0, " +
+                     Wrap(nameof(LibraryFile.WorkerUid)) + $" = '{workerUid}', " +
+                     Wrap(nameof(LibraryFile.Status)) + $" = {(int)FileStatus.Processing}, " +
+                     Wrap(nameof(LibraryFile.ProcessingStarted)) + " = " + DbConnector.FormatDateQuoted(DateTime.UtcNow) + ", " +
+                     Wrap(nameof(LibraryFile.OriginalMetadata)) + " = '', " +
+                     Wrap(nameof(LibraryFile.FinalMetadata)) + " = '', " +
+                     Wrap(nameof(LibraryFile.ExecutedNodes)) + " = '' " +
+                     "where " + Wrap(nameof(LibraryFile.Uid)) + $" = '{uid}'";
+        
+        using var db = await DbConnector.GetDb();
+        return await db.Db.ExecuteAsync(sql, nodeName)  > 0;
+    }
+
+
     /// <summary>
     /// Constructs a next library file result
     /// </summary>
@@ -535,6 +603,102 @@ public class LibraryFileManager
     
     
 
+    /// <summary>
+    /// Gets the total items matching the filter
+    /// </summary>
+    /// <param name="allLibraries">all the libraries in the system</param>
+    /// <param name="status">the status</param>
+    /// <param name="filter">the filter</param>
+    /// <returns>the total number of items matching</returns>
+    public async Task<int> GetTotalMatchingItems(List<Library> allLibraries, FileStatus? status, string filter)
+    {
+        try
+        {
+            string filterWhere = $"lower({Wrap(nameof(LibraryFile.Name))}) like lower('%{filter.Replace("'", "''").Replace(" ", "%")}%')" ;
+            if(status == null)
+            {
+                using var db = await DbConnector.GetDb();
+                return await db.Db.ExecuteScalarAsync<int>($"select count({Wrap(nameof(LibraryFile.Uid))}) from {Wrap(nameof(LibraryFile))} where " + filterWhere);
+            }
+            if ((int)status > 0)
+            {
+                using var db = await DbConnector.GetDb();
+                return await db.Db.ExecuteScalarAsync<int>($"select count({Wrap(nameof(LibraryFile.Uid))}) " +
+                                                           $"from {Wrap(nameof(LibraryFile))} " +
+                                                           $"where {Wrap(nameof(LibraryFile.Status))} = {{(int)status}} and  " + filterWhere);
+            }
+
+            var disabled = string.Join(", ",
+                allLibraries.Where(x => x.Enabled == false).Select(x => "'" + x.Uid + "'"));
+            int quarter = TimeHelper.GetCurrentQuarter();
+            var outOfSchedule = string.Join(", ",
+                allLibraries.Where(x => x.Schedule?.Length != 672 || x.Schedule[quarter] == '0').Select(x => "'" + x.Uid + "'"));
+
+            string sql = $"select count(*) from {Wrap(nameof(LibraryFile))} where {Wrap(nameof(LibraryFile.Status))} = {(int)FileStatus.Unprocessed} and " + filterWhere;
+            
+            // add disabled condition
+            if(string.IsNullOrEmpty(disabled) == false)
+                sql += $" and {Wrap(nameof(LibraryFile.LibraryUid))} {(status == FileStatus.Disabled ? "" : "not")} in ({disabled})";
+            
+            if (status == FileStatus.Disabled)
+            {
+                if (string.IsNullOrEmpty(disabled))
+                    return 0;
+                using var db = await DbConnector.GetDb();
+                return await db.Db.ExecuteScalarAsync<int>(sql);
+            }
+            
+            // add out of schedule condition
+            if(string.IsNullOrEmpty(outOfSchedule) == false)
+                sql += $" and {Wrap(nameof(LibraryFile.LibraryUid))} {(status == FileStatus.OutOfSchedule ? "" : "not")} in ({outOfSchedule})";
+            
+            if (status == FileStatus.OutOfSchedule)
+            {
+                if (string.IsNullOrEmpty(outOfSchedule))
+                    return 0; // no out of schedule libraries
+                
+                using var db = await DbConnector.GetDb();
+                return await db.Db.ExecuteScalarAsync<int>(sql);
+            }
+            
+            // add on hold condition
+            sql += $" and {Wrap(nameof(LibraryFile.HoldUntil))} {(status == FileStatus.OnHold ? ">" : "<=")} " +
+                   DbConnector.FormatDateQuoted(DateTime.UtcNow);
+            if (status == FileStatus.OnHold)
+            {
+                using var db = await DbConnector.GetDb();
+                return await db.Db.ExecuteScalarAsync<int>(sql);
+            }
+
+            string libraryJoin = $"left join {Wrap(nameof(DbObject))}  on {Wrap(nameof(DbObject))}.{Wrap(nameof(DbObject.Type))}" +
+                                 $" = 'FileFlows.Shared.Models.Library' and {Wrap(nameof(LibraryFile))}.{Wrap(nameof(LibraryFile.LibraryUid))} " +
+                                 $" = {Wrap(nameof(DbObject))}.{Wrap(nameof(DbObject.Uid))} ";
+    
+            sql = sql.Replace($" from {Wrap(nameof(LibraryFile))}", $" from {Wrap(nameof(LibraryFile))} " + libraryJoin);
+            
+            {
+                using var db = await DbConnector.GetDb();
+                return await db.Db.ExecuteScalarAsync<int>(sql);
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.ELog("Failed GetTotalMatchingItems Files: " + ex.Message + "\n" + ex.StackTrace);
+            return 0;
+        }
+    }
+
+
+    /// <summary>
+    /// Gets all the UIDs for library files in the system
+    /// </summary>
+    /// <returns>the UIDs of known library files</returns>
+    public async Task<List<Guid>> GetUids()
+    {
+        using var db = await DbConnector.GetDb();
+        return await db.Db.FetchAsync<Guid>($"select {Wrap(nameof(LibraryFile.Uid))} from {Wrap(nameof(LibraryFile))}");
+    }
+    
     /// <summary>
     /// Gets all matching library files
     /// </summary>
@@ -591,11 +755,20 @@ public class LibraryFileManager
                 return sql + (orderBys.Any() == false ? "" : "order by \n" + string.Join(", \n", orderBys));
             }
 
+            int iStatus = 0;
+
             // the status in the db is correct and not a computed status
-            int iStatus = (int)args.Status;
-            if (iStatus < 0)
-                iStatus = 0;
-            sql = $"where {Wrap(nameof(LibraryFile.Status))} = {iStatus} ";
+            if (args.Status == null)
+            {
+                sql = "where 1 = 1 "; // need somethigng to start the where
+            }
+            else
+            {
+                iStatus = (int)args.Status;
+                if (iStatus < 0)
+                    iStatus = 0;
+                sql = $"where {Wrap(nameof(LibraryFile.Status))} = {iStatus} ";
+            }
 
             if (args.ForcedOnly)
                 sql += $" and {Wrap(nameof(LibraryFile.Flags))} & {(int)LibraryFileFlags.ForceProcessing} > 0";
@@ -921,5 +1094,235 @@ and {Wrap(nameof(LibraryFile.HoldUntil))} <= {Date(DateTime.UtcNow)}
         if (o == null)
             return string.Empty;
         return JsonSerializer.Serialize(o, JsonOptions);
+    }
+
+    /// <summary>
+    /// Gets the processing time for each library file 
+    /// </summary>
+    /// <returns>the processing time for each library file</returns>
+    public async Task<List<LibraryFileProcessingTime>> GetLibraryProcessingTimes()
+    {
+        string sql = @$"select 
+{Wrap(nameof(LibraryFile.LibraryName))} as {Wrap(nameof(LibraryFileProcessingTime.Library))},
+{Wrap(nameof(LibraryFile.OriginalSize))}, " +
+                     DbConnector.TimestampDiffSeconds(nameof(LibraryFile.ProcessingStarted), nameof(LibraryFile.ProcessingEnded), nameof(LibraryFileProcessingTime.Seconds)) + 
+                     $@" from {Wrap(nameof(LibraryFile))} 
+where {Wrap(nameof(LibraryFile.Status))} = 1 and {Wrap(nameof(LibraryFile.ProcessingEnded))} > {Wrap(nameof(LibraryFile.ProcessingStarted))}";
+
+        using var db = await DbConnector.GetDb();
+        return await db.Db.FetchAsync<LibraryFileProcessingTime>(sql);
+    }
+
+    /// <summary>
+    /// Gets data for a days/hours heatmap.  Where the list is the days, and the dictionary is the hours with the count as the values
+    /// </summary>
+    /// <returns>heatmap data</returns>
+    public async Task<List<Dictionary<int, int>>> GetHourProcessingTotals()
+    {
+        string sql = @"select " +
+                     DbConnector.DayOfWeek(nameof(LibraryFile.ProcessingStarted),"day") + ", " + 
+                     DbConnector.Hour(nameof(LibraryFile.ProcessingStarted),"hour") + ", " + 
+                     " count(Uid) as count " + 
+                     $" from {Wrap(nameof(LibraryFile))} where {Wrap(nameof(LibraryFile.Status))} = 1 AND {Wrap(nameof(LibraryFile.ProcessingStarted))} > '2000-01-01 00:00:00' " +
+                     " group by " + DbConnector.DayOfWeek(nameof(LibraryFile.ProcessingStarted)) + "," +
+                     DbConnector.Hour(nameof(LibraryFile.ProcessingStarted));
+
+        List<(int day, int hour, int count)> data;
+        using (var db = await DbConnector.GetDb())
+        {
+            data = (await db.Db.FetchAsync<(int day, int hour, int count)>(sql)).ToList();
+        }
+
+
+        var days = new List<Dictionary<int, int>>();
+        for (int i = 0; i < 7; i++)
+        {
+            var results = new Dictionary<int, int>();
+            for (int j = 0; j < 24; j++)
+            {
+                // sun=1, mon=2, sat =7
+                // so we use x.day - 1 here to convert sun=0
+                int count = data.Where(x => (x.day - 1) == i && x.hour == j).Select(x => x.count).FirstOrDefault();
+                results.Add(j, count);
+            }
+
+            days.Add(results);
+        }
+
+        return days;
+    }
+
+    /// <summary>
+    /// Resets any currently processing library files 
+    /// This will happen if a server or node is reset
+    /// </summary>
+    /// <param name="nodeUid">[Optional] the UID of the node</param>
+    /// <returns>true if any files were updated</returns>
+    public async Task<bool> ResetProcessingStatus(Guid? nodeUid)
+    {
+        string sql =
+            $"update {Wrap(nameof(LibraryFile))} set {Wrap(nameof(LibraryFile.Status))} = 0 where {Wrap(nameof(LibraryFile.Status))} = {(int)FileStatus.Processing}";
+        if (nodeUid != null && nodeUid != Guid.Empty)
+            sql += $" and {Wrap(nameof(LibraryFile.NodeUid))} = '{nodeUid}'";
+        var db = await DbConnector.GetDb();
+        return await db.Db.ExecuteAsync(sql) > 0;
+    }
+
+    /// <summary>
+    /// Gets the current status of a file
+    /// </summary>
+    /// <param name="uid">The UID of the file</param>
+    /// <returns>the current status of the file</returns>
+    public async Task<FileStatus?> GetFileStatus(Guid uid)
+    {
+        var db = await DbConnector.GetDb();
+        var istatus = await db.Db.ExecuteScalarAsync<int?>("select " + Wrap(nameof(LibraryFile.Status)) + " from " + Wrap(nameof(LibraryFile)) +
+                                  " where " + Wrap(nameof(LibraryFile.Uid)) + $" = '{uid}'");
+        if (istatus == null)
+            return null;
+        return (FileStatus)istatus.Value;
+    }
+
+    /// <summary>
+    /// Special case used by the flow runner to update a processing library file
+    /// </summary>
+    /// <param name="file">the processing library file</param>
+    public async Task UpdateWork(LibraryFile file)
+    {
+        if (file == null)
+            return;
+        
+        string sql = $"update {Wrap(nameof(LibraryFile))} set " +
+                     $" {Wrap(nameof(LibraryFile.Status))} = {((int)file.Status)}, " + 
+                     $" {Wrap(nameof(LibraryFile.FinalSize))} = {file.FinalSize}, " +
+                     (file.Node == null ? "" : (
+                         $" {Wrap(nameof(LibraryFile.NodeUid))} = '{file.NodeUid}', {Wrap(nameof(LibraryFile.NodeName))} = '{file.NodeName.Replace("'", "''")}', "
+                     )) +
+                     $" {Wrap(nameof(LibraryFile.WorkerUid))} = '{file.WorkerUid}', " +
+                     $" {Wrap(nameof(LibraryFile.ProcessingStarted))} = {DbConnector.FormatDateQuoted(file.ProcessingStarted)}, " +
+                     $" {Wrap(nameof(LibraryFile.ProcessingEnded))} = {DbConnector.FormatDateQuoted(file.ProcessingEnded)}, " +
+                     $" {Wrap(nameof(LibraryFile.WorkerUid))} = @0 " +
+                     (file.Status != FileStatus.Processing ? $", {Wrap(nameof(LibraryFile.Flags))} = 0 " : string.Empty) + // clear flags on processed files
+                     $" where {Wrap(nameof(LibraryFile.Uid))} = '{file.Uid}'";
+        
+        string executedJson = file.ExecutedNodes?.Any() != true
+            ? string.Empty
+            : JsonSerializer.Serialize(file.ExecutedNodes, CustomDbMapper.JsonOptions);
+        
+        var db = await DbConnector.GetDb();
+        await db.Db.ExecuteAsync(sql, executedJson);
+    }
+
+    /// <summary>
+    /// Moves the passed in UIDs to the top of the processing order
+    /// </summary>
+    /// <param name="uids">the UIDs to move</param>
+    public async Task MoveToTop(Guid[] uids)
+    {
+        if (uids?.Any() != true)
+            return;
+        string strUids = string.Join(", ", uids.Select(x => "'" + x + "'"));
+        // get existing order first so we can shift those if these uids change the order
+        // only get status == 0
+        List<Guid> indexed = uids.ToList();
+        var db = await DbConnector.GetDb();
+        var sorted = await db.Db.FetchAsync<LibraryFile>($"select * from {Wrap(nameof(LibraryFile))} where {Wrap(nameof(LibraryFile.Status))} = 0 and ( {Wrap("ProcessingOrder")} > 0 or  {Wrap(nameof(LibraryFile.Uid))} in ({strUids}))");
+        sorted = sorted.OrderBy(x =>
+        {
+            int index = indexed.IndexOf(x.Uid);
+            if (index < 0)
+                return 10000 + x.Order;
+            return index;
+        }).ToList();
+
+        var commands = new List<string>();
+        for(int i=0;i<sorted.Count;i++)
+        {
+            var file = sorted[i];
+            file.Order = i + 1;
+            commands.Add($"update {Wrap(nameof(LibraryFile))}  set {Wrap("ProcessingOrder")} = {file.Order} where {Wrap(nameof(LibraryFile.Uid))} = '{file.Uid}';");
+        }
+
+        await db.Db.ExecuteAsync(string.Join("\n", commands));
+    }
+
+    /// <summary>
+    /// Updates a moved file in the database
+    /// </summary>
+    /// <param name="file">the file to update</param>
+    /// <returns>true if any files were updated</returns>
+    public async Task<bool> UpdateMovedFile(LibraryFile file)
+    {
+        string sql = $"update {Wrap(nameof(LibraryFile))} set {Wrap(nameof(LibraryFile.Name))} = @0, " +
+                     $" {Wrap(nameof(LibraryFile.RelativePath))} = @1, " +
+                     $" {Wrap(nameof(LibraryFile.OutputPath))} = @2, " +
+                     $" {Wrap(nameof(LibraryFile.CreationTime))} = {DbConnector.FormatDateQuoted(file.CreationTime)}, " +
+                     $" {Wrap(nameof(LibraryFile.LastWriteTime))} = {DbConnector.FormatDateQuoted(file.LastWriteTime)}, " +
+                     $" where {Wrap(nameof(LibraryFile.Uid))} = '{file.Uid}'";
+        var db = await DbConnector.GetDb();
+        return await db.Db.ExecuteAsync(sql, file.Name, file.RelativePath, file.OutputPath) > 0;
+    }
+    
+    /// <summary>
+    /// Gets a list of all filenames and the file creation times
+    /// </summary>
+    /// <param name="includeOutput">if output names should be included</param>
+    /// <returns>a list of all filenames</returns>
+    public async Task<List<KnownFileInfo>> GetKnownLibraryFilesWithCreationTimes(bool includeOutput)
+    {
+        var db = await DbConnector.GetDb();
+        var list = await db.Db.FetchAsync<KnownFileInfo>(
+            $"select {Wrap(nameof(KnownFileInfo.Name))},{Wrap(nameof(KnownFileInfo.Status))}," +
+            $" {Wrap(nameof(KnownFileInfo.CreationTime))},{Wrap(nameof(KnownFileInfo.LastWriteTime))}" +
+            $" from {Wrap(nameof(LibraryFile))} ");
+        if (includeOutput)
+        {
+            var outputFiles = await db.Db.FetchAsync<KnownFileInfo>(
+                $"select {Wrap(nameof(LibraryFile.OutputPath))} as {Wrap(nameof(KnownFileInfo.Name))},{Wrap(nameof(KnownFileInfo.Status))}," +
+                $" {Wrap(nameof(KnownFileInfo.CreationTime))},{Wrap(nameof(KnownFileInfo.LastWriteTime))}" +
+                $" from {Wrap(nameof(LibraryFile))} " +
+                $" where {Wrap(nameof(LibraryFile.OutputPath))} != '' and {Wrap(nameof(LibraryFile.OutputPath))} != {Wrap(nameof(LibraryFile.Name))} ");
+
+            list = list.Union(outputFiles).Distinct().ToList();
+        }
+
+        return list;
+    }
+
+    /// <summary>
+    /// Gets the shrinkage groups for the files
+    /// </summary>
+    /// <returns>the shrinkage groups</returns>
+    public async Task<List<ShrinkageData>> GetShrinkageGroups()
+    {
+        string sql = @$"select {Wrap(nameof(LibraryFile.LibraryName))} as {Wrap(nameof(ShrinkageData.Library))},
+        count(*) as {Wrap(nameof(ShrinkageData.Items))},
+        sum({Wrap(nameof(LibraryFile.FinalSize))} as {Wrap(nameof(ShrinkageData.FinalSize))},
+        sum({Wrap(nameof(LibraryFile.OriginalSize))} as {Wrap(nameof(ShrinkageData.OriginalSize))},
+        from {Wrap(nameof(LibraryFile))}
+        group by {Wrap(nameof(LibraryFile.LibraryName))}";
+        
+        var db = await DbConnector.GetDb();
+        return await db.Db.FetchAsync<ShrinkageData>(sql);
+    }
+
+    /// <summary>
+    /// Gets the total storage saved
+    /// </summary>
+    /// <returns>the total storage saved</returns>
+    public async Task<long> GetTotalStorageSaved()
+    {
+        string sql = $@"SELECT SUM(
+    CASE 
+        WHEN {Wrap(nameof(LibraryFile.Status))} = {(int)FileStatus.Processed}' AND {Wrap(nameof(LibraryFile.FinalSize))} < {Wrap(nameof(LibraryFile.OriginalSize))} 
+            THEN {Wrap(nameof(LibraryFile.OriginalSize))} - {Wrap(nameof(LibraryFile.FinalSize))} 
+        ELSE 0 
+    END
+) 
+FROM {Wrap(nameof(LibraryFile))}";
+        
+        var db = await DbConnector.GetDb();
+        return await db.Db.ExecuteScalarAsync<long>(sql);
+
     }
 }

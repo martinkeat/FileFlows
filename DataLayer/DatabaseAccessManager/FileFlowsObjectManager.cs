@@ -14,7 +14,7 @@ namespace FileFlows.DataLayer;
 /// <summary>
 /// Manager for FileFlowsObject that are stored in the DbObject table
 /// </summary>
-public class FileFlowsObjectManager
+internal  class FileFlowsObjectManager
 {
     private readonly DbObjectManager dbom;
     internal FileFlowsObjectManager(DbObjectManager dbom)
@@ -27,7 +27,7 @@ public class FileFlowsObjectManager
     /// </summary>
     /// <typeparam name="T">the type of objects to select</typeparam>
     /// <returns>a list of objects</returns>
-    public virtual async Task<IEnumerable<T>> Select<T>() where T : FileFlowObject, new()
+    public virtual async Task<List<T>> Select<T>() where T : FileFlowObject, new()
     {
         var dbObjects = await dbom.GetAll(typeof(T).FullName);
         return ConvertFromDbObject<T>(dbObjects);
@@ -38,7 +38,7 @@ public class FileFlowsObjectManager
     /// </summary>
     /// <typeparam name="T">The type to select</typeparam>
     /// <returns>a single instance</returns>
-    public virtual async Task<Result<T>> Single<T>() where T : FileFlowObject, new()
+    public async Task<Result<T>> Single<T>() where T : FileFlowObject, new()
     {
         var fullName = typeof(T).FullName;
         if (fullName == null)
@@ -82,7 +82,7 @@ public class FileFlowsObjectManager
     /// <param name="ignoreCase">if casing should be ignored</param>
     /// <typeparam name="T">The type to get</typeparam>
     /// <returns>the item</returns>
-    public async Task<Result<T>> GetByName<T>(string name, bool ignoreCase) where T : FileFlowObject, new()
+    public async Task<Result<T>> GetByName<T>(string name, bool ignoreCase = false) where T : FileFlowObject, new()
     {
         var fullName = typeof(T).FullName;
         if (fullName == null)
@@ -229,7 +229,7 @@ public class FileFlowsObjectManager
     /// <param name="dbObjects">a collection of DbObjects</param>
     /// <typeparam name="T">The type to convert to</typeparam>
     /// <returns>A converted list of objects</returns>
-    internal IEnumerable<T> ConvertFromDbObject<T>(IEnumerable<DbObject> dbObjects) where T : FileFlowObject, new()
+    internal List<T> ConvertFromDbObject<T>(IEnumerable<DbObject> dbObjects) where T : FileFlowObject, new()
     {
         var list = dbObjects.ToList();
         T[] results = new T [list.Count];
@@ -239,7 +239,7 @@ public class FileFlowsObjectManager
             if (converted != null)
                 results[index] = converted;
         });
-        return results.Where(x => x != null);
+        return results.Where(x => x != null).ToList();
     }
     
     

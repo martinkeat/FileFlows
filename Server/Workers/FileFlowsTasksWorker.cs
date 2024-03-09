@@ -47,7 +47,7 @@ public class FileFlowsTasksWorker: Worker
     /// <returns>a dictionary of variables</returns>
     public static Dictionary<string, object> GetVariables()
     {
-        var list = new Services.VariableService().GetAll();
+        var list = ServiceLoader.Load<VariableService>().GetAllAsync().Result;
         var dict = new Dictionary<string, object>();
         foreach (var var in list)
         {
@@ -67,7 +67,7 @@ public class FileFlowsTasksWorker: Worker
             return;
         
         int quarter = TimeHelper.GetCurrentQuarter();
-        var tasks = new TaskService().GetAll();
+        var tasks = ServiceLoader.Load<TaskService>().GetAllAsync().Result;
         // 0, 1, 2, 3, 4
         foreach (var task in tasks)
         {
@@ -91,7 +91,7 @@ public class FileFlowsTasksWorker: Worker
     {
         if (LicenseHelper.IsLicensed(LicenseFlags.Tasks) == false) 
             return new() { Success = false, Log = "Not licensed" };
-        var task = new TaskService().GetByUid(uid);
+        var task = await ServiceLoader.Load<TaskService>().GetByUidAsync(uid);
         if (task == null)
             return new() { Success = false, Log = "Task not found" };
         return await RunTask(task);
@@ -136,7 +136,7 @@ public class FileFlowsTasksWorker: Worker
             while (task.RunHistory.Count > 10 && task.RunHistory.TryDequeue(out _));
         }
 
-        await new TaskService().Update(task);
+        await ServiceLoader.Load<TaskService>().Update(task);
         return result;
     }
     
@@ -144,7 +144,7 @@ public class FileFlowsTasksWorker: Worker
     {
         if (LicenseHelper.IsLicensed(LicenseFlags.Tasks) == false)
             return;
-        var tasks = new TaskService().GetAll().Where(x => x.Type == type).ToArray();
+        var tasks = ServiceLoader.Load<TaskService>().GetAllAsync().Result.Where(x => x.Type == type).ToArray();
         foreach (var task in tasks)
         {
             _ = RunTask(task, variables);

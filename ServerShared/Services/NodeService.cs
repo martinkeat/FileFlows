@@ -21,7 +21,7 @@ public interface INodeService
     /// </summary>
     /// <param name="uid">The UID of the node</param>
     /// <returns>An instance of the processing node</returns>
-    Task<ProcessingNode> GetByUidAsync(Guid uid);
+    Task<ProcessingNode?> GetByUidAsync(Guid uid);
     
     /// <summary>
     /// Gets a processing node by its physical address

@@ -8,12 +8,12 @@ namespace FileFlows.DataLayer;
 /// <summary>
 /// Manages data access operations by serving as a proxy for database commands.
 /// </summary>
-public class DatabaseAccessManager
+internal  class DatabaseAccessManager
 {
     /// <summary>
     /// The connector being used
     /// </summary>
-    private IDatabaseConnector DbConnector;
+    public IDatabaseConnector DbConnector { get; private set; }
     
     /// <summary>
     /// Gets or sets the singleton instance of the Database Access Manager
@@ -51,12 +51,12 @@ public class DatabaseAccessManager
         DbConnector = LoadConnector(logger, type, connectionString);
         // if (type == DatabaseType.Sqlite)
         //     return;
-        this.DbObjectManager = new (type, DbConnector);
-        this.DbStatisticManager = new (type, DbConnector);
-        this.DbRevisionManager = new (type, DbConnector);
-        this.DbLogMessageManager = new (type, DbConnector);
+        this.ObjectManager = new (logger, type, DbConnector);
+        this.StatisticManager = new (logger, type, DbConnector);
+        this.RevisionManager = new (logger, type, DbConnector);
+        this.LogMessageManager = new (logger, type, DbConnector);
         this.LibraryFileManager = new (logger, type, DbConnector);
-        this.FileFlowsObjectManager = new(this.DbObjectManager);
+        this.FileFlowsObjectManager = new(this.ObjectManager);
     }
 
     /// <summary>
@@ -122,22 +122,22 @@ public class DatabaseAccessManager
     /// <summary>
     /// Gets the DbObject manager to manage the database operations for the DbObject table
     /// </summary>
-    public DbObjectManager DbObjectManager { get; init; }
+    public DbObjectManager ObjectManager { get; init; }
     
     /// <summary>
     /// Gets the DbStatistic manager to manage the database operations for the DbStatistic table
     /// </summary>
-    public DbStatisticManager DbStatisticManager { get; init; }
+    public DbStatisticManager StatisticManager { get; init; }
     
     /// <summary>
     /// Gets the DbRevision manager to manage the database operations for the RevisionedObject table
     /// </summary>
-    public DbRevisionManager DbRevisionManager { get; init; }
+    public DbRevisionManager RevisionManager { get; init; }
     
     /// <summary>
     /// Gets the DbLogMessage manager to manage the database operations for the DbLogMessage table
     /// </summary>
-    public DbLogMessageManager DbLogMessageManager { get; init; }
+    public DbLogMessageManager LogMessageManager { get; init; }
 
     /// <summary>
     /// Gets the FileFlowsObject manager to manage the database operations for the FileFlowsObjects that are saved in the DbObject table
@@ -147,5 +147,5 @@ public class DatabaseAccessManager
     /// <summary>
     /// Gets the Library File manager to manage the database operations for the Library Files
     /// </summary>
-    public LibraryFileManager LibraryFileManager { get; init; }
+    public DbLibraryFileManager LibraryFileManager { get; init; }
 }

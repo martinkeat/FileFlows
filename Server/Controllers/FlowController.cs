@@ -33,7 +33,7 @@ public class FlowController : Controller
         get
         {
             if (_HasFlows == null)
-                UpdateHasFlows();
+                UpdateHasFlows().Wait();
             return _HasFlows == true;
         }
         private set => _HasFlows = value;
@@ -44,13 +44,13 @@ public class FlowController : Controller
     /// </summary>
     /// <returns>all flows in the system</returns>
     [HttpGet]
-    public IEnumerable<Flow> GetAll() => 
-        new FlowService().GetAll().OrderBy(x => x.Name.ToLowerInvariant());
+    public async Task<IEnumerable<Flow>> GetAll() => 
+        (await ServiceLoader.Load<FlowService>().GetAllAsync()).OrderBy(x => x.Name.ToLowerInvariant());
 
     [HttpGet("list-all")]
-    public IEnumerable<FlowListModel> ListAll()
+    public async Task<IEnumerable<FlowListModel>> ListAll()
     {
-        var flows = new FlowService().GetAll();
+        var flows = await ServiceLoader.Load<FlowService>().GetAllAsync();
         List<FlowListModel> list = new List<FlowListModel>();
 
         foreach(var item in flows)
@@ -102,7 +102,7 @@ public class FlowController : Controller
         }
 
         string libTypeName = typeof(Library).FullName ?? string.Empty;
-        var libraries = new LibraryService().GetAll();
+        var libraries = await ServiceLoader.Load<LibraryService>().GetAllAsync();
         foreach (var lib in libraries)
         {
             if (lib.Flow == null)
@@ -136,7 +136,7 @@ public class FlowController : Controller
     /// <returns>the failure flow</returns>
     [HttpGet("failure-flow/by-library/{libraryUid}")]
     public Task<Flow?> GetFailureFlow([FromRoute] Guid libraryUid)
-        => new FlowService().GetFailureFlow(libraryUid);
+        => ServiceLoader.Load<FlowService>().GetFailureFlow(libraryUid);
 
     /// <summary>
     /// Exports a flows
@@ -146,14 +146,14 @@ public class FlowController : Controller
     [HttpGet("export")]
     public async Task<IActionResult> Export([FromQuery(Name = "uid")] Guid[] uids)
     {
-        var service = new FlowService();
-        var flows = uids.Select(x => service.GetByUid(x))
-                                    .Where(x => x != null).ToList();
+        var service = ServiceLoader.Load<FlowService>();
+        var allFlows = await service.GetAllAsync();
+        var flows = allFlows.Where(flow => uids.Contains(flow.Uid)).ToList();
         
         if (flows.Any() == false)
             return NotFound();
 
-        var subFlows = service.GetAll().Where(x => x.Type == FlowType.SubFlow).ToList();
+        var subFlows = allFlows.Where(x => x.Type == FlowType.SubFlow).ToList();
             
         if (flows.Count() == 1)
         {
@@ -252,16 +252,16 @@ public class FlowController : Controller
         }
 
         // reparse with new UIDs
-        var service = new FlowService();
+        var service = ServiceLoader.Load<FlowService>();
         flow = JsonSerializer.Deserialize<Flow>(json);
-        if(flow.Type != FlowType.SubFlow || await DbHelper.UidInUse(flow.Uid))
+        if(flow.Type != FlowType.SubFlow || await service.UidInUse(flow.Uid))
             flow.Uid = Guid.Empty;
         
         flow.ReadOnly = false;
         flow.Default = false;
         flow.DateModified = DateTime.Now;
         flow.DateCreated = DateTime.Now;
-        flow.Name = service.GetNewUniqueName(flow.Name);
+        flow.Name = await service.GetNewUniqueName(flow.Name);
         return await service.Update(flow);
     }
 
@@ -272,9 +272,9 @@ public class FlowController : Controller
     /// <param name="uid">The UID of the flow</param>
     /// <returns>The duplicated flow</returns>
     [HttpGet("duplicate/{uid}")]
-    public Task<Flow> Duplicate([FromRoute] Guid uid)
+    public async Task<Flow> Duplicate([FromRoute] Guid uid)
     { 
-        var flow = new FlowService().GetByUid(uid);
+        var flow = await ServiceLoader.Load<FlowService>().GetByUidAsync(uid);
         if (flow == null)
             return null;
         
@@ -282,7 +282,7 @@ public class FlowController : Controller
         {
             WriteIndented = true
         });
-        return Import(json);
+        return await Import(json);
     }
 
     /// <summary>
@@ -294,8 +294,8 @@ public class FlowController : Controller
     [HttpPut("state/{uid}")]
     public async Task<Flow> SetState([FromRoute] Guid uid, [FromQuery] bool? enable)
     {
-        var service = new FlowService();
-        var flow = service.GetByUid(uid);
+        var service = ServiceLoader.Load<FlowService>();
+        var flow = await service.GetByUidAsync(uid);
         if (flow == null)
             throw new Exception("Flow not found.");
         if (enable != null)
@@ -313,10 +313,10 @@ public class FlowController : Controller
     /// <param name="uid">The flow UID</param>
     /// <param name="isDefault">Whether or not the flow should be the default</param>
     [HttpPut("set-default/{uid}")]
-    public void SetDefault([FromRoute] Guid uid, [FromQuery(Name = "default")] bool isDefault = true)
+    public async Task SetDefault([FromRoute] Guid uid, [FromQuery(Name = "default")] bool isDefault = true)
     {
-        var service = new FlowService();
-        var flow = service.GetByUid(uid);
+        var service = ServiceLoader.Load<FlowService>();
+        var flow = await service.GetByUidAsync(uid);
         if (flow == null)
             throw new Exception("Flow not found.");
         if(flow.Type != FlowType.Failure)
@@ -325,11 +325,11 @@ public class FlowController : Controller
         if (isDefault)
         {
             // make sure no others are defaults
-            var others = service.GetAll().Where(x => x.Type == FlowType.Failure && x.Default && x.Uid != uid).ToList();
+            var others = (await service.GetAllAsync()).Where(x => x.Type == FlowType.Failure && x.Default && x.Uid != uid).ToList();
             foreach (var other in others)
             {
                 other.Default = false;
-                service.Update(other);
+                await service.Update(other);
             }
         }
 
@@ -337,7 +337,7 @@ public class FlowController : Controller
             return;
 
         flow.Default = isDefault;
-        service.Update(flow);
+        await service.Update(flow);
     }
     /// <summary>
     /// Delete flows from the system
@@ -349,12 +349,12 @@ public class FlowController : Controller
     {
         if (model?.Uids?.Any() != true)
             return; // nothing to delete
-        await new FlowService().Delete(model.Uids);
-        UpdateHasFlows();
+        await ServiceLoader.Load<FlowService>().Delete(model.Uids);
+        await UpdateHasFlows();
     }
 
-    private static void UpdateHasFlows()
-        => _HasFlows = new FlowService().GetAll().Any();
+    private static async Task UpdateHasFlows()
+        => _HasFlows = await ServiceLoader.Load<FlowService>().HasAny();
 
 
     /// <summary>
@@ -367,14 +367,14 @@ public class FlowController : Controller
     {
         if (uid != Guid.Empty)
         {
-            var flow = new FlowService().GetByUid(uid);
+            var flow = await ServiceLoader.Load<FlowService>().GetByUidAsync(uid);
             if (flow == null)
                 return flow;
 
             var elements = await GetElements(uid);
 
             var scripts = (await new ScriptController().GetAll()).Select(x => x.Name).ToList();
-            var flows = (await new FlowService().GetAllAsync()).ToDictionary(x => x.Uid.ToString(), x => x.Name);
+            var flows = (await ServiceLoader.Load<FlowService>().GetAllAsync()).ToDictionary(x => x.Uid.ToString(), x => x.Name);
             foreach (var p in flow.Parts)
             {
                 if (p.Type == FlowElementType.Script && string.IsNullOrWhiteSpace(p.Name))
@@ -403,7 +403,7 @@ public class FlowController : Controller
         else
         {
             // create default flow
-            var flowNames = new FlowService().GetAll().Select(x => x.Name).ToList();
+            var flowNames = (await ServiceLoader.Load<FlowService>().GetAllAsync()).Select(x => x.Name).ToList();
             Flow flow = new Flow();
             flow.Parts = new();
             flow.Name = "New Flow";
@@ -517,7 +517,7 @@ public class FlowController : Controller
         
         if (type == FlowType.Standard || type == FlowType.SubFlow || type == null || (int)type == -1)
         {
-            var subflows = new FlowService().GetAll().Where(x => x.Type == FlowType.SubFlow && x.Uid != flowUid)
+            var subflows = (await ServiceLoader.Load<FlowService>().GetAllAsync()).Where(x => x.Type == FlowType.SubFlow && x.Uid != flowUid)
                 .OrderBy(x => x.Name)
                 .Select(SubFlowToElement);
             results.AddRange(subflows);
@@ -767,18 +767,18 @@ public class FlowController : Controller
             throw new Exception("ErrorMessages.NameRequired");
 
         
-        var service = new FlowService();
+        var service = ServiceLoader.Load<FlowService>();
         model.Name = model.Name.Trim();
         model.Revision++;
         if (uniqueName == false)
         {
-            bool inUse = service.NameInUse(model.Uid, model.Name);
+            bool inUse = await service.NameInUse(model.Uid, model.Name);
             if (inUse)
                 throw new Exception("ErrorMessages.NameInUse");
         }
         else
         {
-            model.Name = service.GetNewUniqueName(model.Name);
+            model.Name = await service.GetNewUniqueName(model.Name);
         }
 
         if (model.Parts?.Any() != true)
@@ -794,8 +794,7 @@ public class FlowController : Controller
                 p.Name = string.Empty; // fixes issue with flow part being named after the display
         }
 
-        int inputNodes = model.Parts
-            .Where(x => x.Type == FlowElementType.Input || x.Type == FlowElementType.Failure).Count();
+        int inputNodes = model.Parts.Count(x => x.Type == FlowElementType.Input || x.Type == FlowElementType.Failure);
         if (inputNodes == 0)
             throw new Exception("Flow.ErrorMessages.NoInput");
         if (inputNodes > 1)
@@ -838,8 +837,8 @@ public class FlowController : Controller
         if (uid == Guid.Empty)
             return; // renaming a new flow
 
-        var service = new FlowService();
-        var flow = service.GetByUid(uid);
+        var service = ServiceLoader.Load<FlowService>();
+        var flow = await service.GetByUidAsync(uid);
         if (flow == null)
             throw new Exception("Flow not found");
         if (flow.Name == name)
@@ -849,8 +848,9 @@ public class FlowController : Controller
         flow = await service.Update(flow);
 
         // update any object references
-        await new LibraryFileService().UpdateFlowName(flow.Uid, flow.Name);
-        new LibraryController().UpdateFlowName(flow.Uid, flow.Name);
+        var lfService = ServiceLoader.Load<LibraryFileService>();
+        await lfService.UpdateFlowName(flow.Uid, flow.Name);
+        await lfService.UpdateFlowName(flow.Uid, flow.Name);
     }
 
     /// <summary>

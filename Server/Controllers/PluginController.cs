@@ -4,6 +4,7 @@ using System.Text.RegularExpressions;
 using FileFlows.Plugin;
 using Microsoft.AspNetCore.Mvc;
 using FileFlows.Server.Helpers;
+using FileFlows.Server.Services;
 using FileFlows.Shared.Models;
 using FileFlows.Shared.Helpers;
 
@@ -36,7 +37,7 @@ public class PluginController : Controller
     [HttpGet]
     public async Task<IEnumerable<PluginInfoModel>> GetAll(bool includeElements = true)
     {
-        var plugins = new Services.PluginService().GetAll()
+        var plugins = (await new Services.PluginService().GetAllAsync())
             .Where(x => x.Deleted == false);
         List<PluginInfoModel> pims = new List<PluginInfoModel>();
         var packagesResult = await GetPluginPackagesActual();
@@ -73,7 +74,7 @@ public class PluginController : Controller
         }
 
         string flowTypeName = typeof(Flow).FullName ?? string.Empty;
-        var flows = new Services.FlowService().GetAll();
+        var flows = await new Services.FlowService().GetAllAsync();
         foreach (var flow in flows)
         {
             foreach (var p in flow.Parts)
@@ -101,8 +102,8 @@ public class PluginController : Controller
     /// <param name="uid">The uid of the plugin</param>
     /// <returns>The plugin info for the plugin</returns>
     [HttpGet("{uid}")]
-    public PluginInfo Get([FromRoute] Guid uid)
-        => new Services.PluginService().GetByUid(uid) ?? new();
+    public async Task<PluginInfo> Get([FromRoute] Guid uid)
+        => await new Services.PluginService().GetByUid(uid) ?? new();
 
     /// <summary>
     /// Get the plugin info for a specific plugin by package name
@@ -110,7 +111,7 @@ public class PluginController : Controller
     /// <param name="name">The package name of the plugin</param>
     /// <returns>The plugin info for the plugin</returns>
     [HttpGet("by-package-name/{name}")]
-    public PluginInfo GetByPackageName([FromRoute] string name)
+    public Task<PluginInfo?> GetByPackageName([FromRoute] string name)
         => new Services.PluginService().GetByPackageName(name);
 
     /// <summary>
@@ -182,7 +183,7 @@ public class PluginController : Controller
         if (missing)
         {
             // remove plugins already installed
-            var installed = new Services.PluginService().GetAll()
+            var installed = (await new Services.PluginService().GetAllAsync())
                 .Where(x => x.Deleted != true).Select(x => x.PackageName).ToList();
             data = data.Where(x => installed.Contains(x.Package) == false).ToList();
         }
@@ -205,7 +206,7 @@ public class PluginController : Controller
         var pluginDownloader = new PluginDownloader();
         foreach (var uid in model?.Uids ?? new Guid[] { })
         {
-            var plugin = new Services.PluginService().GetByUid(uid);
+            var plugin = await new Services.PluginService().GetByUid(uid);
             if (plugin == null)
                 continue;
 
@@ -303,7 +304,7 @@ public class PluginController : Controller
         if (package.EndsWith(".ffplugin") == false)
             package += ".ffplugin";
 
-        if(System.Text.RegularExpressions.Regex.IsMatch(package, "^[a-zA-Z0-9_\\-]+\\.ffplugin$") == false)
+        if(Regex.IsMatch(package, "^[a-zA-Z0-9_\\-]+\\.ffplugin$") == false)
         {
             Logger.Instance?.ELog("Download Package Error: invalid package: " + package);
             throw new Exception("Download Package Error: invalid package: " + package);
@@ -352,7 +353,7 @@ public class PluginController : Controller
         {
             try
             {
-                var plugin = GetByPackageName(packageName);
+                var plugin = await GetByPackageName(packageName);
                 if (string.IsNullOrEmpty(plugin?.Name) == false)
                 {
                     bool updated = false;
@@ -390,17 +391,21 @@ public class PluginController : Controller
             }
         }
 
-        var obj = await DbHelper.SingleByName<Models.PluginSettingsModel>("PluginSettings_" + packageName);
-        obj ??= new Models.PluginSettingsModel();
-        obj.Name = "PluginSettings_" + packageName;
-        var newJson = json ?? string.Empty;
-        if (newJson != obj.Json)
-        {
-            obj.Json = json ?? String.Empty;
-            await DbHelper.Update(obj);
-            // need to increment the revision increment so these plugin settings are pushed to the nodes
-            await new Services.SettingsService().RevisionIncrement();
-        }
+        
+        // REFACTOR: re-look into this
+        // refactor added1. var service = ServiceLoader.Load<PluginService>();
+        // refactor added2. var oldSettings = await service.GetSettingsJson(packageName);
+        // var obj = await DbHelper.SingleByName<Models.PluginSettingsModel>("PluginSettings_" + packageName);
+        // obj ??= new Models.PluginSettingsModel();
+        // obj.Name = "PluginSettings_" + packageName;
+        // var newJson = json ?? string.Empty;
+        // if (newJson != obj.Json)
+        // {
+        //     obj.Json = json ?? String.Empty;
+        //     await DbHelper.Update(obj);
+        //     // need to increment the revision increment so these plugin settings are pushed to the nodes
+        //     await new Services.SettingsService().RevisionIncrement();
+        // }
     }
 
     
@@ -414,7 +419,7 @@ public class PluginController : Controller
     public async Task<PluginInfo> SetState([FromRoute] Guid uid, [FromQuery] bool? enable)
     {
         var service = new Services.PluginService();
-        var plugin = service.GetByUid(uid);
+        var plugin = await service.GetByUid(uid);
         if (plugin == null)
             throw new Exception("Node not found.");
         if (enable != null && plugin.Enabled != enable.Value)

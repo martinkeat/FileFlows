@@ -12,7 +12,7 @@ public class LibraryFileFilter
     /// <summary>
     /// the status of the data
     /// </summary>
-    public FileStatus Status { get; set; }
+    public FileStatus? Status { get; set; }
     /// <summary>
     /// Gets or sets a list of libraries that are allowed, or null if any are allowed
     /// </summary>

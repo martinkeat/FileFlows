@@ -21,7 +21,7 @@ public class LibraryFileLogPruner:Worker
     /// </summary>
     protected override void Execute()
     {
-        var libFiles = new LibraryFileService().GetUids().Result.Select(x => x.ToString()).ToList();
+        var libFiles = ServiceLoader.Load<LibraryFileService>().GetUids().Result.Select(x => x.ToString()).ToList();
         var files = new DirectoryInfo(DirectoryHelper.LibraryFilesLoggingDirectory).GetFiles();
         foreach (var file in files)
         {

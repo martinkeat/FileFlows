@@ -45,7 +45,7 @@ public class SystemController:Controller
             return;
         if (url.ToLowerInvariant()?.StartsWith("http") != true)
             return; // dont allow
-        if (Program.UsingWebView == false)
+        if (Application.UsingWebView == false)
             return; // only open if using WebView
         
         if (OperatingSystem.IsWindows())
@@ -237,7 +237,7 @@ public class SystemController:Controller
     [HttpGet("history-data/library-processing-time")]
     public async Task<object> GetLibraryProcessingTime()
     {
-        var data = (await new LibraryFileService().GetLibraryProcessingTimes()).ToArray();
+        var data = (await ServiceLoader.Load<LibraryFileService>().GetLibraryProcessingTimes()).ToArray();
         var dict = data.Select(x => new
         {
             x.Library,
@@ -266,7 +266,7 @@ public class SystemController:Controller
     [HttpGet("history-data/processing-heatmap")]
     public async Task<object> GetProcessingHeatMap()
     {
-        var data = await new LibraryFileService().GetHourProcessingTotals();
+        var data = await ServiceLoader.Load<LibraryFileService>().GetHourProcessingTotals();
         var results = data.Select((x, index) => new
         {
             name = ((DayOfWeek)index).ToString()[..3],
@@ -315,7 +315,7 @@ public class SystemController:Controller
     [HttpPost("restart")]
     public void Restart()
     {
-        if (Program.Docker == false)
+        if (Application.Docker == false)
         {
             string script = Path.Combine(DirectoryHelper.BaseDirectory, "Server",
                 "restart." + (Globals.IsWindows ? "bat" : "sh"));

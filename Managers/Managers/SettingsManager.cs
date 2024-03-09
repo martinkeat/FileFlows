@@ -48,4 +48,23 @@ public class SettingsManager
             _semaphore.Release();
         }
     }
+
+    /// <summary>
+    /// Updates the settings
+    /// </summary>
+    /// <param name="model">the setings</param>
+    public async Task Update(Settings model)
+    {
+        await _semaphore.WaitAsync();
+        try
+        {
+            model.Revision = Math.Max(model.Revision, Instance.Revision) +  1;
+            Instance = model;
+            await DatabaseAccessManager.Instance.FileFlowsObjectManager.Update(Instance);
+        }
+        finally
+        {
+            _semaphore.Release();
+        }
+    }
 }

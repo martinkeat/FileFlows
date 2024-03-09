@@ -9,7 +9,7 @@ namespace FileFlows.DataLayer;
 /// <summary>
 /// Migrates one database to another database
 /// </summary>
-public class DbMigrator
+internal  class DbMigrator
 {
     /// <summary>
     /// The logger to use
@@ -82,7 +82,7 @@ public class DbMigrator
     /// <param name="dest">the destination database</param>
     private void MigrateDbObjects(DatabaseAccessManager source, DatabaseAccessManager dest)
     {
-        var dbObjects = source.DbObjectManager.GetAll().Result.ToArray();
+        var dbObjects = source.ObjectManager.GetAll().Result.ToArray();
         if (dbObjects?.Any() != true)
             return;
 
@@ -92,7 +92,7 @@ public class DbMigrator
 
             try
             {
-                dest.DbObjectManager.Insert(obj).Wait();
+                dest.ObjectManager.Insert(obj).Wait();
             }
             catch (Exception ex)
             {
@@ -110,7 +110,7 @@ public class DbMigrator
     /// <param name="dest">the destination database</param>
     private void MigrateDbStatistics(DatabaseAccessManager source, DatabaseAccessManager dest)
     {
-        var dbStatistics = source.DbStatisticManager.GetAll().Result;
+        var dbStatistics = source.StatisticManager.GetAll().Result;
         if (dbStatistics?.Any() != true)
             return;
 
@@ -118,7 +118,7 @@ public class DbMigrator
         {
             try
             {
-                dest.DbStatisticManager.Insert(obj).Wait();
+                dest.StatisticManager.Insert(obj).Wait();
             }
             catch (Exception ex)
             {
@@ -134,7 +134,7 @@ public class DbMigrator
     /// <param name="dest">the destination database</param>
     private void MigrateRevisions(DatabaseAccessManager source, DatabaseAccessManager dest)
     {
-        var dbRevisions = source.DbRevisionManager.GetAll().Result;
+        var dbRevisions = source.RevisionManager.GetAll().Result;
         if (dbRevisions?.Any() != true)
             return;
 
@@ -142,7 +142,7 @@ public class DbMigrator
         {
             try
             {
-                dest.DbRevisionManager.Insert(obj).Wait();
+                dest.RevisionManager.Insert(obj).Wait();
             }
             catch (Exception ex)
             {
@@ -162,7 +162,7 @@ public class DbMigrator
         if (source.Type == DatabaseType.Sqlite || dest.Type == DatabaseType.Sqlite)
             return;
         
-        var dbLogMessages = source.DbLogMessageManager.GetAll().Result;
+        var dbLogMessages = source.LogMessageManager.GetAll().Result;
         if (dbLogMessages?.Any() != true)
             return;
 
@@ -170,7 +170,7 @@ public class DbMigrator
         {
             try
             {
-                dest.DbLogMessageManager.Insert(obj).Wait();
+                dest.LogMessageManager.Insert(obj).Wait();
             }
             catch (Exception)
             {

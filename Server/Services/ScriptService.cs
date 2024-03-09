@@ -65,9 +65,9 @@ public class ScriptService:IScriptService
         
         scripts = scripts.DistinctBy(x => x.Name).ToList();
         var dictScripts = scripts.ToDictionary(x => x.Name.ToLower(), x => x);
-        var flows = new FlowController().GetAll();
+        var flows = (await ServiceLoader.Load<FlowService>().GetAllAsync()) ?? new ();
         string flowTypeName = typeof(Flow).FullName ?? string.Empty;
-        foreach (var flow in flows ?? new Flow[] {})
+        foreach (var flow in flows)
         {
             if (flow?.Parts?.Any() != true)
                 continue;
@@ -91,7 +91,7 @@ public class ScriptService:IScriptService
             }
         }
 
-        var tasks = new TaskController().GetAll();
+        var tasks = await ServiceLoader.Load<TaskService>().GetAllAsync();
         string taskTypeName = typeof(FileFlowsTask).FullName ?? string.Empty;
         foreach (var task in tasks)
         {
@@ -240,7 +240,7 @@ public class ScriptService:IScriptService
     /// </summary>
     /// <param name="script">The script to save</param>
     /// <returns>the saved script instance</returns>
-    public Script Save(Script script)
+    public async Task<Script> Save(Script script)
     {
         ValidateScript(script.Code, false, new Dictionary<string, object>());
         
@@ -258,7 +258,7 @@ public class ScriptService:IScriptService
         {
             if (DeleteScript(script.Uid, script.Type))
             {
-                UpdateScriptReferences(script.Uid, script.Name);
+                await UpdateScriptReferences(script.Uid, script.Name);
             }
             script.Uid = script.Name;
         }
@@ -440,10 +440,10 @@ public class ScriptService:IScriptService
     }
     
     
-    private void UpdateScriptReferences(string oldName, string newName)
+    private async Task UpdateScriptReferences(string oldName, string newName)
     {
-        var service = new FlowService();
-        var flows = service.GetAll();
+        var service = ServiceLoader.Load<FlowService>();
+        var flows = await service.GetAllAsync();
         foreach (var flow in flows)
         {
             if (flow.Parts?.Any() != true)
@@ -463,8 +463,8 @@ public class ScriptService:IScriptService
             }
         }
 
-        var taskService = new TaskService();
-        var tasks = taskService.GetAll();
+        var taskService = ServiceLoader.Load<TaskService>();
+        var tasks = await taskService.GetAllAsync();
         foreach (var task in tasks)
         {
             if (task.Script != oldName)

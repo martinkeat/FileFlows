@@ -1,3 +1,5 @@
+using FileFlows.ServerShared;
+
 namespace FileFlows.DataLayer.Models;
 
 /// <summary>

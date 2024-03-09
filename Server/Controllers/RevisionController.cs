@@ -18,16 +18,13 @@ public class RevisionController:Controller
     /// <param name="uid">The UID of the object</param>
     /// <returns>A list of revisions for an object</returns>
     [HttpGet("{uid}")]
-    public async Task<IEnumerable<RevisionedObject>> GetAll([FromRoute] Guid uid)
+    public Task<List<RevisionedObject>> GetAll([FromRoute] Guid uid)
     {
         if (LicenseHelper.IsLicensed() == false)
-            return new RevisionedObject[] { };
-        
-        var manager = DbHelper.GetDbManager();
-        using var db = await manager.GetDb();
-        var data = await db.Db.FetchAsync<RevisionedObject>(
-            "select Uid, RevisionName, RevisionDate, RevisionType from RevisionedObject where RevisionUid = @0 order by RevisionDate desc", uid);
-        return data.ToArray();
+            return Task.FromResult(new List<RevisionedObject>());
+
+        var service = ServiceLoader.Load<RevisionService>();
+        return service.GetAllAsync(uid);
     }
     
     /// <summary>
@@ -40,11 +37,8 @@ public class RevisionController:Controller
         if (LicenseHelper.IsLicensed() == false)
             return new RevisionedObject[] { };
         
-        var manager = DbHelper.GetDbManager();
-        using var db = await manager.GetDb();
-        var data = await db.Db.FetchAsync<RevisionedObject>(
-            "select distinct RevisionUid, Uid, RevisionType, RevisionName, RevisionDate from RevisionedObject group by RevisionUid order by RevisionType, RevisionName");
-        return data.ToArray();
+        var service = ServiceLoader.Load<RevisionService>();
+        return await service.ListAllAsync();
     }
 
     /// <summary>
@@ -58,10 +52,7 @@ public class RevisionController:Controller
     {
         if (LicenseHelper.IsLicensed() == false)
             return null;
-        var manager = DbHelper.GetDbManager();
-        using var db = await manager.GetDb();
-        var data = await db.Db.SingleOrDefaultAsync<RevisionedObject>("select * from RevisionedObject where RevisionUid = @0 and Uid = @1", uid, revisionUid);
-        return data;
+        return await ServiceLoader.Load<RevisionService>().Get(uid, revisionUid);
     }
 
     /// <summary>
@@ -74,30 +65,7 @@ public class RevisionController:Controller
     {
         if (LicenseHelper.IsLicensed() == false)
             return;
-        
-        var revision = await GetRevision(uid, revisionUid);
-        if (revision == null)
-            throw new Exception("Revision not found");
-        // here we run into problems when using sqlite caching...
-        // mysql is easy, just update the db, sqlite we have to update db and the cached instance
-
-        var dbo = new DbObject();
-        dbo.Data = revision.RevisionData;
-        dbo.Name = revision.RevisionName;
-        dbo.DateCreated = revision.RevisionCreated;
-        dbo.DateModified = revision.RevisionDate;
-        dbo.Uid = revision.RevisionUid;
-        dbo.Type = revision.RevisionType;
-        var manager = DbHelper.GetDbManager();
-        await manager.AddOrUpdateDbo(dbo);
-
-        // sqlite.. have to update any in memory objects...
-        if (dbo.Type == typeof(Library).FullName)
-            new LibraryService().Refresh();
-        else if (dbo.Type == typeof(Flow).FullName)
-            new FlowService().Refresh();
-        else if (dbo.Type == typeof(Dashboard).FullName)
-            new DashboardService().Refresh();
+        await ServiceLoader.Load<RevisionService>().Restore(uid, revisionUid);
     }
     
     
@@ -146,8 +114,7 @@ public class RevisionController:Controller
             return;
         if (ro.Uid == Guid.Empty)
             ro.Uid = Guid.NewGuid();
-        var manager = DbHelper.GetDbManager();
-        using var db = await manager.GetDb();
-        await db.Db.InsertAsync(ro);
+        var service = ServiceLoader.Load<RevisionService>();
+        await service.Insert(ro);
     }
 }

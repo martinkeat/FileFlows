@@ -22,11 +22,12 @@ public class DbLogPruner:Worker
     /// </summary>
     protected override void Execute()
     {
-        if (DbHelper.UseMemoryCache)
-            return; // nothing to do
-        var settings = new SettingsController().Get().Result;
-        if (settings == null)
-            return;
-        DbHelper.PruneOldLogs(Math.Max(1000, settings.LogDatabaseRetention)).Wait();
+        // REFACTOR: re-look into this
+        // if (DbHelper.UseMemoryCache)
+        //     return; // nothing to do
+        // var settings = new SettingsController().Get().Result;
+        // if (settings == null)
+        //     return;
+        // DbHelper.PruneOldLogs(Math.Max(1000, settings.LogDatabaseRetention)).Wait();
     }
 }

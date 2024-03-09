@@ -291,8 +291,8 @@ public class WebServer
             new FlowRunnerMonitor(),
             new ObjectReferenceUpdater(),
             new FileFlowsTasksWorker(),
-            new RepositoryUpdaterWorker(),
-            new LibraryFileServiceUpdater()
+            new RepositoryUpdaterWorker()
+            //new LibraryFileServiceUpdater()
         );
 
         Started = CheckServerListening(serverUrl.Replace("0.0.0.0", "localhost").TrimEnd('/') + "/api/status").Result;

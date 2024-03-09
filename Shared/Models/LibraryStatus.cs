@@ -16,11 +16,11 @@ public class LibraryStatus
     /// <summary>
     /// Gets or sets the file status
     /// </summary>
-    [Column("FileStatus")]
     public FileStatus Status { get; set; }
     
     /// <summary>
     /// Gets or sets the number of library files in this status
     /// </summary>
+    [Column("StatusCount")]
     public int Count { get; set; }
 }

@@ -24,7 +24,7 @@ public abstract class CachedManager<T> where T : FileFlowObject, new()
     /// <summary>
     /// Gets or sets the data
     /// </summary>
-    protected List<T> Data
+    private List<T> Data
     {
         get
         {
@@ -41,6 +41,17 @@ public abstract class CachedManager<T> where T : FileFlowObject, new()
             }
         }
         set => _Data = value;
+    }
+
+    /// <summary>
+    /// Gets all the data for this type
+    /// </summary>
+    /// <returns>the data</returns>
+    protected async Task<List<T>> GetData()
+    {
+        if (UseCache)
+            return Data;
+        return await LoadDataFromDatabase();
     }
 
     /// <summary>
@@ -102,7 +113,8 @@ public abstract class CachedManager<T> where T : FileFlowObject, new()
     /// </summary>
     /// <param name="item">the item being updated</param>
     /// <param name="dontIncrementConfigRevision">if this is a revision object, if the revision should be updated</param>
-    public async virtual Task<Result<T>> Update(T item, bool dontIncrementConfigRevision = false)
+    /// <returns>the result of the update, if successful the updated item</returns>
+    public async Task<Result<T>> Update(T item, bool dontIncrementConfigRevision = false)
     {
         if (item == null)
             return Result<T>.Fail("No model");
@@ -118,7 +130,7 @@ public abstract class CachedManager<T> where T : FileFlowObject, new()
         await UpdateActual(item, dontIncrementConfigRevision);
         
         if (dontIncrementConfigRevision == false)
-            IncrementConfigurationRevision();
+            await IncrementConfigurationRevision();
         
         if(UseCache)
             Refresh();
@@ -190,13 +202,13 @@ public abstract class CachedManager<T> where T : FileFlowObject, new()
     /// Deletes items matching the UIDs
     /// </summary>
     /// <param name="uids">the UIDs of the items to delete</param>
-    public virtual async Task Delete(params Guid[] uids)
+    public async Task Delete(params Guid[] uids)
     {
         if (uids?.Any() != true)
             return;
         
         await DatabaseAccessManager.Instance.FileFlowsObjectManager.Delete(uids);
-        IncrementConfigurationRevision();
+        await IncrementConfigurationRevision();
         
         if(UseCache)
             Refresh();
@@ -206,12 +218,13 @@ public abstract class CachedManager<T> where T : FileFlowObject, new()
     /// <summary>
     /// Increments the revision of the configuration
     /// </summary>
-    protected void IncrementConfigurationRevision()
+    /// <param name="force">If we are forcing a configuration revision increment</param>
+    public async Task IncrementConfigurationRevision(bool force = false)
     {
-        if (IncrementsConfiguration == false)
+        if (force == false && IncrementsConfiguration == false)
             return;
         var service = new SettingsManager();
-        _ = service.RevisionIncrement();
+        await service.RevisionIncrement();
     }
     
     
@@ -256,4 +269,12 @@ public abstract class CachedManager<T> where T : FileFlowObject, new()
             return existing.IsFailed == false && existing.ValueOrDefault != null;
         }
     }
+
+    /// <summary>
+    /// Gets if a UID is in use
+    /// </summary>
+    /// <param name="uid">the UID to check</param>
+    /// <returns>true if in use</returns>
+    public virtual Task<bool> UidInUse(Guid uid)
+        => DatabaseAccessManager.Instance.ObjectManager.UidInUse(uid);
 }

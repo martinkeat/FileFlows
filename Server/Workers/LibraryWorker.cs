@@ -96,7 +96,7 @@ public class LibraryWorker : Worker
     private void UpdateLibrariesInstance()
     {
         Logger.Instance.DLog("LibraryWorker: Updating Libraries");
-        var libraries = new Services.LibraryService().GetAll();
+        var libraries = new Services.LibraryService().GetAllAsync().Result;
         var libraryUids = libraries.Select(x => x.Uid + ":" + x.Path).ToList();            
 
         Watch(libraries.Where(x => WatchedLibraries.ContainsKey(x.Uid + ":" + x.Path) == false).ToArray());
@@ -173,15 +173,6 @@ public class LibraryWorker : Worker
     internal static void ResetProcessing(bool internalOnly = true)
     {
         var service = new Server.Services.LibraryFileService();
-        if (internalOnly)
-        {
-            service.ResetProcessingStatus(Globals.InternalNodeUid).Wait();
-        }
-        else
-        {
-            // special case can use dbhelper directly
-            // this is called at the start up of FileFlows
-            service.ResetProcessingStatus().Wait();
-        }
+        service.ResetProcessingStatus(internalOnly ? Globals.InternalNodeUid : null).Wait();
     }
 }

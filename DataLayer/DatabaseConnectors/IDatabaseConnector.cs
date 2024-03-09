@@ -33,4 +33,29 @@ public interface IDatabaseConnector
     /// <param name="date">the date to convert</param>
     /// <returns>the converted data as a string</returns>
     string FormatDateQuoted(DateTime date);
+
+    /// <summary>
+    /// Creates a time difference sql select
+    /// </summary>
+    /// <param name="start">the start column</param>
+    /// <param name="end">the end column</param>
+    /// <param name="asColumn">the name of the result</param>
+    /// <returns>the sql select statement</returns>
+    string TimestampDiffSeconds(string start, string end, string asColumn);
+
+    /// <summary>
+    /// Creates a day of week sql select
+    /// </summary>
+    /// <param name="column">the date column</param>
+    /// <param name="asColumn">the name of the result</param>
+    /// <returns>the sql select statement</returns>
+    string DayOfWeek(string column, string asColumn = null);
+
+    /// <summary>
+    /// Creates a hour sql select
+    /// </summary>
+    /// <param name="column">the date column</param>
+    /// <param name="asColumn">the name of the result</param>
+    /// <returns>the sql select statement</returns>
+    string Hour(string column, string asColumn = null);
 }

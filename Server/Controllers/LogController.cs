@@ -1,12 +1,12 @@
 ﻿using FileFlows.Plugin;
-using FileFlows.Server.Database;
-using FileFlows.Server.Database.Managers;
 using FileFlows.Server.Helpers;
 using FileFlows.Server.Middleware;
+using FileFlows.Server.Services;
 using FileFlows.ServerShared.Services;
 using FileFlows.Shared.Models;
 using FileFlows.Shared.Helpers;
 using Microsoft.AspNetCore.Mvc;
+using NodeService = FileFlows.Server.Services.NodeService;
 
 namespace FileFlows.Server.Controllers;
 
@@ -51,7 +51,7 @@ public class LogController : Controller
         if(settings.LogEveryRequest)
             sources.Add(new() { Value = "HTTP", Label = "HTTP Requests" });
 
-        var nodes = new NodeController().GetAll();
+        var nodes = await ServiceLoader.Load<NodeService>().GetAllAsync();
         foreach (var node in nodes)
         {
             if(node.Uid != Globals.InternalNodeUid) // internal logs to system log
@@ -69,30 +69,32 @@ public class LogController : Controller
     [HttpPost("search")]
     public async Task<string> Search([FromBody] LogSearchModel filter)
     {
-        if (DbHelper.UseMemoryCache)
-            return "Not using external database, cannot search";
-
-        if (filter.Source == "HTTP")
-            return LogToHtml.Convert(LoggingMiddleware.RequestLogger.GetTail(1000));
-        if (filter.Source == "DATABASE")
-            return LogToHtml.Convert(FlowDatabase.Logger.GetTail(1000));
-        
-        var messages = await DbHelper.SearchLog(filter);
-        string log = string.Join("\n", messages.Select(x =>
-        {
-            string prefix = x.Type switch
-            {
-                LogType.Info => "INFO",
-                LogType.Error => "ERRR",
-                LogType.Warning => "WARN",
-                LogType.Debug => "DBUG",
-                _ => ""
-            };
-
-            return x.LogDate.ToString("yyyy-MM-dd HH:mm:ss.fff") + " [" + prefix + "] -> " + x.Message;
-        }));
-        string html = LogToHtml.Convert(log);
-        return FixLog(html);
+        // REFACTOR: re-look into this
+        throw new NotImplementedException();
+        // if (DbHelper.UseMemoryCache)
+        //     return "Not using external database, cannot search";
+        //
+        // if (filter.Source == "HTTP")
+        //     return LogToHtml.Convert(LoggingMiddleware.RequestLogger.GetTail(1000));
+        // if (filter.Source == "DATABASE")
+        //     return LogToHtml.Convert(FlowDatabase.Logger.GetTail(1000));
+        //
+        // var messages = await DbHelper.SearchLog(filter);
+        // string log = string.Join("\n", messages.Select(x =>
+        // {
+        //     string prefix = x.Type switch
+        //     {
+        //         LogType.Info => "INFO",
+        //         LogType.Error => "ERRR",
+        //         LogType.Warning => "WARN",
+        //         LogType.Debug => "DBUG",
+        //         _ => ""
+        //     };
+        //
+        //     return x.LogDate.ToString("yyyy-MM-dd HH:mm:ss.fff") + " [" + prefix + "] -> " + x.Message;
+        // }));
+        // string html = LogToHtml.Convert(log);
+        // return FixLog(html);
     }
 
     /// <summary>
@@ -105,9 +107,11 @@ public class LogController : Controller
     {
         if (source == "DATABASE")
         {
-            string filename = FlowDatabase.Logger.GetLogFilename();
-            byte[] content = System.IO.File.ReadAllBytes(filename);
-            return File(content, "application/octet-stream", new FileInfo(filename).Name);
+            // REFACTOR: relook into this
+            throw new NotImplementedException();
+            // string filename = FlowDatabase.Logger.GetLogFilename();
+            // byte[] content = System.IO.File.ReadAllBytes(filename);
+            // return File(content, "application/octet-stream", new FileInfo(filename).Name);
         }
         if (source == "HTTP")
         {
@@ -146,7 +150,7 @@ public class LogController : Controller
 
         if(ClientUids.TryGetValue(message.NodeAddress.ToLower(), out Guid clientUid) == false)
         {
-            var nodes = new Services.NodeService().GetAll();
+            var nodes = await new Services.NodeService().GetAllAsync();
             foreach (var node in nodes)
             {
                 if (node.Address.ToLower() == message.NodeAddress.ToLower())
@@ -165,9 +169,10 @@ public class LogController : Controller
             return;
         }
 
-        if (Logger.Instance.TryGetLogger(out DatabaseLogger logger))
-        {
-            await logger.Log(clientUid, message.Type, message.Arguments);
-        }
+        // REFACTOR: Relook into this
+        // if (Logger.Instance.TryGetLogger(out DatabaseLogger logger))
+        // {
+        //     await logger.Log(clientUid, message.Type, message.Arguments);
+        // }
     }
 }

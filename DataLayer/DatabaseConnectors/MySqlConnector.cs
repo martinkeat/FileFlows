@@ -30,6 +30,18 @@ public class MySqlConnector : IDatabaseConnector
     /// <inheritdoc />
     public string FormatDateQuoted(DateTime date)
         => "'" + date.ToString("yyyy-MM-dd HH:mm:ss.fff") + "'";
+    
+    /// <inheritdoc />
+    public string TimestampDiffSeconds(string start, string end, string asColumn)
+        => $" timestampdiff(second, {start}, {end}) AS {asColumn} ";
+    
+    /// <inheritdoc />
+    public string DayOfWeek(string column, string asColumn = null)
+        => $"DAYOFWEEK({column})" + (string.IsNullOrEmpty(asColumn) ? string.Empty : $" as {asColumn}");
+    
+    /// <inheritdoc />
+    public string Hour(string column, string asColumn = null)
+        => $"hour({column})" + (string.IsNullOrEmpty(asColumn) ? string.Empty : $" as {asColumn}");
 
     /// <summary>
     /// Initialises a MySQL Connector

@@ -1,8 +1,5 @@
-﻿using FileFlows.Server.Database;
-using FileFlows.Server.Database.Managers;
-using FileFlows.Server.Helpers;
+﻿using FileFlows.Server.Helpers;
 using FileFlows.Shared.Models;
-using MySql.Data.MySqlClient;
 
 namespace FileFlows.Server.Upgrade;
 
@@ -51,32 +48,7 @@ public class Upgrader
                     }
                 }
             }
-            
-            if (currentVersion < new Version(0, 8, 3))
-                new Upgrade_0_8_3().Run(settings);
-            if (currentVersion < new Version(0, 8, 4))
-                new Upgrade_0_8_4().Run(settings);
-            if (currentVersion < new Version(0, 9, 0))
-                new Upgrade_0_9_0().Run(settings);
-            if (currentVersion < new Version(0, 9, 1))
-                new Upgrade_0_9_1().Run(settings);
-            if (currentVersion < new Version(0, 9, 2, 1792))
-                new Upgrade_0_9_2().Run(settings);
-            if (currentVersion < new Version(0, 9, 4)) // 0.9.4 because 1.0.0 was originally 0.9.4 
-                new Upgrade_1_0_0().Run(settings);
-            if (currentVersion < new Version(1, 0, 2))  
-                new Upgrade_1_0_2().Run(settings);
-            if (currentVersion < new Version(1, 0, 5))  
-                new Upgrade_1_0_5().Run(settings);
-            if (currentVersion < new Version(1, 0, 5, 2060))  
-                new Upgrade_1_0_5().Run2ndUpgrade(settings);
-            if (currentVersion < new Version(1, 0, 9, 2190))  
-                new Upgrade_1_0_9().Run(settings);
-            if (currentVersion < new Version(1, 0, 10))  
-                new Upgrade_1_0_10().Run(settings);
-            if (currentVersion < new Version(1, 1, 0, 2246))  
-                new Upgrade_1_1_0().Run(settings);
-            if (currentVersion < new Version(24, 2, 6, 2772)) // dev needs this 24.2.6, can change to 24.3 once in march  
+            if (currentVersion < new Version(24, 3, 0))  
                 new Upgrade_24_02().Run(settings);
         }
 

@@ -6,6 +6,7 @@ using System.Text.RegularExpressions;
 using System.Timers;
 using FileFlows.Server.Hubs;
 using FileFlows.Server.Services;
+using FileFlows.ServerShared.Models;
 using FileHelper = FileFlows.ServerShared.Helpers.FileHelper;
 
 namespace FileFlows.Server.Workers;
@@ -240,11 +241,12 @@ public class WatchedLibrary:IDisposable
             if (knownFile)
             {
                 // update the known file, we can't add it again
-                result = new LibraryFileService().Update(lf).Result;
+                result = ServiceLoader.Load<LibraryFileService>().Update(lf).Result;
             }
             else
             {
-                result = new LibraryFileService().Add(lf).Result;
+                ServiceLoader.Load<LibraryFileService>().Insert(lf).Wait();
+                result = lf;
             }
 
             if (result != null && result.Uid != Guid.Empty)
@@ -322,15 +324,15 @@ public class WatchedLibrary:IDisposable
 
     private (bool known, string? fingerprint, ObjectReference? duplicate) IsKnownFile(string fullpath, FileSystemInfo fsInfo)
     {
-        var service = new LibraryFileService();
-        var knownFile = service.GetFileIfKnown(fullpath);
+        var service = ServiceLoader.Load<LibraryFileService>();
+        var knownFile = service.GetFileIfKnown(fullpath).Result;
         string? fingerprint = null;
         if (knownFile != null)
         {
             if (Library.DownloadsDirectory && knownFile.Status == FileStatus.Processed)
             {
                 Logger.Instance.DLog("Processed file found in download library, reprocessing: " + fullpath);
-                new LibraryFileService().SetStatus(FileStatus.Unprocessed, knownFile.Uid).Wait();
+                ServiceLoader.Load<LibraryFileService>().SetStatus(FileStatus.Unprocessed, knownFile.Uid).Wait();
                 return (true, null, null);
             }
             // FF-393 - check to see if the file has been modified
@@ -387,7 +389,7 @@ public class WatchedLibrary:IDisposable
             fingerprint = FileHelper.CalculateFingerprint(fullpath);
             if (string.IsNullOrEmpty(fingerprint) == false)
             {
-                knownFile = service.GetFileByFingerprint(fingerprint);
+                knownFile = service.GetFileByFingerprint(fingerprint).Result;
                 if (knownFile != null)
                 {
                     if (knownFile.Name != fullpath && Library.UpdateMovedFiles && knownFile.LibraryUid == Library.Uid)
@@ -402,7 +404,7 @@ public class WatchedLibrary:IDisposable
                                 knownFile.OutputPath = fullpath;
                             knownFile.Name = fullpath;
                             knownFile.RelativePath = GetRelativePath(fullpath);
-                            new LibraryFileService().UpdateMovedFile(knownFile).Wait();
+                            service.UpdateMovedFile(knownFile).Wait();
                             // new LibraryFileController().Update(knownFile).Wait();
                             // file has been updated, we return this is known and tell the scanner to just continue
                             return (true, null, null);
@@ -689,7 +691,7 @@ public class WatchedLibrary:IDisposable
             else
             {
                 var service = new Server.Services.LibraryFileService();
-                var knownFiles = service.GetKnownLibraryFilesWithCreationTimes();
+                var knownFiles = service.GetKnownLibraryFilesWithCreationTimes().Result;
 
                 var files = GetFiles(new DirectoryInfo(Library.Path));
                 var settings = new SettingsService().Get().Result;
@@ -724,7 +726,7 @@ public class WatchedLibrary:IDisposable
             ScanComplete = true;
             
             Library.LastScanned = DateTime.Now;
-            new LibraryService().UpdateLastScanned(Library.Uid);
+            ServiceLoader.Load<LibraryService>().UpdateLastScanned(Library.Uid).Wait();
         }
         catch(Exception ex)
         {
