@@ -151,6 +151,7 @@ public class WebServer
         builder.Services.AddSingleton<PluginService>(x => ServiceLoader.Load<PluginService>());
         builder.Services.AddSingleton<TaskService>(x => ServiceLoader.Load<TaskService>());
         builder.Services.AddSingleton<VariableService>(x => ServiceLoader.Load<VariableService>());
+        builder.Services.AddSingleton<RevisionService>(x => ServiceLoader.Load<RevisionService>());
         builder.Services.AddSingleton<FlowRunnerService>(x => ServiceLoader.Load<FlowRunnerService>());
         
         builder.Services.AddControllersWithViews();

@@ -242,7 +242,7 @@ public class LibraryFile : FileFlowObject
             if (Status == FileStatus.Unprocessed)
                 return new TimeSpan();
             if (Status == FileStatus.Processing)
-                return DateTime.Now.Subtract(ProcessingStarted);
+                return DateTime.UtcNow.Subtract(ProcessingStarted);
             if (ProcessingEnded < new DateTime(2000, 1, 1))
                 return new TimeSpan();
             return ProcessingEnded.Subtract(ProcessingStarted);

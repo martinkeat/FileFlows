@@ -45,7 +45,7 @@ internal class TestDataHelper
 
     public BulkInsertResult BulkInsert(int count = 10_000)
     {
-        var rand = new Random(DateTime.Now.Microsecond);
+        var rand = new Random(DateTime.UtcNow.Microsecond);
 
 
         var libDisabled = InsertLibrary(Dam, "Disabled", enabled: false);

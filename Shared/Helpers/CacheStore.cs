@@ -25,7 +25,7 @@ public class CacheStore
     {
         if (Cache.ContainsKey(uid) == false)
             return default;
-        if (Cache[uid].Expiry < DateTime.Now)
+        if (Cache[uid].Expiry < DateTime.UtcNow)
         {
             lock (Cache)
             {
@@ -58,7 +58,7 @@ public class CacheStore
     {
         var co = new CachedObject()
         {
-            Expiry = DateTime.Now.AddSeconds(expirySeconds),
+            Expiry = DateTime.UtcNow.AddSeconds(expirySeconds),
             Value = value
         };
         lock(Cache)

@@ -138,7 +138,7 @@ public class Application
             else if (minimalGui)
             {
 
-                DateTime dt = DateTime.Now;
+                DateTime dt = DateTime.UtcNow;
                 try
                 {
                     var appBuilder = Gui.Avalon.App.BuildAvaloniaApp();
@@ -146,7 +146,7 @@ public class Application
                 }
                 catch (Exception ex)
                 {
-                    if (DateTime.Now.Subtract(dt) < new TimeSpan(0, 0, 2))
+                    if (DateTime.UtcNow.Subtract(dt) < new TimeSpan(0, 0, 2))
                         Console.WriteLine("Failed to launch GUI: " + ex.Message + Environment.NewLine + ex.StackTrace);
                     else
                         Console.WriteLine("Error: " + ex.Message + Environment.NewLine + ex.StackTrace);

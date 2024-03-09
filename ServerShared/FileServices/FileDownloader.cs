@@ -83,7 +83,7 @@ public class FileDownloader
                 url += "/";
             url += "api/file-server";
             
-            DateTime start = DateTime.Now;
+            DateTime start = DateTime.UtcNow;
             
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, url + "/download");
             request.Headers.Add("x-executor", executorUid.ToString());
@@ -131,7 +131,7 @@ public class FileDownloader
             int percent = 0;
             
             // Calculate ETA variables
-            DateTime startTime = DateTime.Now;
+            DateTime startTime = DateTime.UtcNow;
             TimeSpan elapsed;
             TimeSpan eta;
             double speed = 0; // Download speed in bytes per second
@@ -143,7 +143,7 @@ public class FileDownloader
                 bytesReadTotal += bytesRead;
                 
                 // Calculate elapsed time and download speed
-                elapsed = DateTime.Now - startTime;
+                elapsed = DateTime.UtcNow - startTime;
                 double bytesPerSecond = bytesReadTotal / elapsed.TotalSeconds;
                 speed = bytesPerSecond;
                 
@@ -165,7 +165,7 @@ public class FileDownloader
             }
             OnProgress?.Invoke(100, null, null);
 
-            var timeTaken = DateTime.Now.Subtract(start);
+            var timeTaken = DateTime.UtcNow.Subtract(start);
             var size = new FileInfo(destinationPath).Length;
             logger.ILog(
                 $"Time taken to download file: {timeTaken}, bytes read: {bytesReadTotal}, expected size: {fileSize}, size on disk: {size})");

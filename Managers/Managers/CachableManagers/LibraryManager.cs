@@ -11,7 +11,7 @@ public class LibraryManager : CachedManager<Library>
     /// <param name="uid">the UID of the library</param>
     public async Task UpdateLastScanned(Guid uid)
     {
-        DateTime lastScanned = DateTime.Now;
+        DateTime lastScanned = DateTime.UtcNow;
         if (UseCache)
         {
             var lib = await GetByUid(uid);

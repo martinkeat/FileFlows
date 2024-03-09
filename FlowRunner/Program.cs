@@ -316,7 +316,7 @@ public class Program
             libfileService.Update(libFile).Wait();
         }
 
-        libFile.ProcessingStarted = DateTime.Now;
+        libFile.ProcessingStarted = DateTime.UtcNow;
         libfileService.Update(libFile).Wait();
         Config = args.Config;
         ConfigDirectory = args.ConfigDirectory;
@@ -335,7 +335,7 @@ public class Program
             CurrentPart = 0,
             CurrentPartPercent = 0,
             CurrentPartName = string.Empty,
-            StartedAt = DateTime.Now,
+            StartedAt = DateTime.UtcNow,
             WorkingFile = workingFile,
             IsDirectory = lib.Folders,
             LibraryPath = lib.Path, 

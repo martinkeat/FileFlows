@@ -112,7 +112,7 @@ public class SystemController:Controller
         }
         else
         {
-            settings.PausedUntil = DateTime.Now.AddMinutes(duration);
+            settings.PausedUntil = DateTime.UtcNow.AddMinutes(duration);
             ClientServiceManager.Instance.SystemPaused(duration);
         }
 
@@ -212,7 +212,7 @@ public class SystemController:Controller
     private IEnumerable<SystemValue<T>> EaseData<T>(IEnumerable<SystemValue<T>> data)
     {
         List<SystemValue<T>> eased = new();
-        var dtCutoff = DateTime.Now.AddMinutes(-5);
+        var dtCutoff = DateTime.UtcNow.AddMinutes(-5);
         var recent = data.Where(x => x.Time > dtCutoff);
         var older = data.Where(x => x.Time <= dtCutoff)
             .GroupBy(x => new DateTime(x.Time.Year, x.Time.Month, x.Time.Day, x.Time.Hour, x.Time.Minute, 0))

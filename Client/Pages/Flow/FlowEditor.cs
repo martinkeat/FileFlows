@@ -47,7 +47,7 @@ public class FlowEditor : IDisposable
     /// </summary>
     public async Task Initialize()
     {
-        LoadedAt = DateTime.Now;
+        LoadedAt = DateTime.UtcNow;
         if (Flow.Uid == Guid.Empty)
             Flow.Uid = Guid.NewGuid();
         ffFlow = await ffFlowWrapper.Create(jsRuntime, Flow.Uid, Flow.ReadOnly);
@@ -266,7 +266,7 @@ public class FlowEditor : IDisposable
     /// </summary>
     public void MarkDirty()
     {
-        if (LoadedAt > DateTime.Now.AddSeconds(-1))
+        if (LoadedAt > DateTime.UtcNow.AddSeconds(-1))
             return; // this can be triggered when some values are defaulted on bound controls, dont mark it as dirty this soon
         this.IsDirty = true;
         FlowPage.TriggerStateHasChanged();

@@ -56,7 +56,7 @@ internal  class DbRevisionManager : BaseManager
     internal async Task<List<RevisionedObject>> GetAll(Guid uid)
     {
         using var db = await DbConnector.GetDb();
-        return (await db.Db.FetchAsync<RevisionedObject>($"where {Wrap(nameof(RevisionedObject.Uid))} = '{uid}'" +
+        return (await db.Db.FetchAsync<RevisionedObject>($"where {Wrap(nameof(RevisionedObject.RevisionUid))} = '{uid}'" +
                                                          $" order by {Wrap(nameof(RevisionedObject.RevisionDate))} desc"))
             .ToList();
     }
@@ -94,7 +94,7 @@ internal  class DbRevisionManager : BaseManager
         if (uids?.Any() != true)
             return; // nothing to delete
 
-        string strUids = string.Join(",", uids.Select(x => "'" + x.ToString() + "'"));
+        string strUids = string.Join(",", uids.Select(x => "'" + x + "'"));
         
         using var db = await DbConnector.GetDb(write: true);
         await db.Db.ExecuteAsync($"delete from {Wrap(nameof(RevisionedObject))}" +

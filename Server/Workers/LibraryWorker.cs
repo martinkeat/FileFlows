@@ -110,12 +110,12 @@ public class LibraryWorker : Worker
             libwatcher.UpdateLibrary(library);
         }
      
-        LibrariesLastUpdated = DateTime.Now;
+        LibrariesLastUpdated = DateTime.UtcNow;
     }
 
     protected override void Execute()
     {
-        if(LibrariesLastUpdated < DateTime.Now.AddHours(-1))
+        if(LibrariesLastUpdated < DateTime.UtcNow.AddHours(-1))
             UpdateLibrariesInstance();
 
         foreach(var libwatcher in WatchedLibraries.Values)

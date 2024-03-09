@@ -38,7 +38,7 @@ public partial class ClientService
     /// <summary>
     /// Gets if this system is paused
     /// </summary>
-    public bool IsPaused => PausedUntil != null && PausedUntil > DateTime.Now;
+    public bool IsPaused => PausedUntil != null && PausedUntil > DateTime.UtcNow;
 
     /// <summary>
     /// The paused timer that will trigger when the system is no longer paused
@@ -153,7 +153,7 @@ public partial class ClientService
             PausedUntil = DateTime.MaxValue;
         else
         {
-            PausedUntil = DateTime.Now.AddMinutes(minutes);
+            PausedUntil = DateTime.UtcNow.AddMinutes(minutes);
             PausedTimer = new Timer();
             PausedTimer.Interval = minutes * 1000;
             PausedTimer.Elapsed += PausedTimerOnElapsed;

@@ -88,7 +88,7 @@ public class Settings : FileFlowObject
     /// <summary>
     /// Gets if the system is paused
     /// </summary>
-    public bool IsPaused => DateTime.Now < PausedUntil;
+    public bool IsPaused => DateTime.UtcNow < PausedUntil;
 
     /// <summary>
     /// Gets or sets the number of log files to keep

@@ -30,6 +30,7 @@ public static class ServiceLoader
             .AddSingleton<PluginService>()
             .AddSingleton<TaskService>()
             .AddSingleton<VariableService>()
+            .AddSingleton<RevisionService>()
             .AddSingleton<FlowRunnerService>()
             .BuildServiceProvider(); // Build the service provider
     }

@@ -223,7 +223,7 @@ public class SqliteTests : DbLayerTest
             const int TOTAL_THREADS = 1000;
 
             int totalWrites = 0;
-            Random random = new Random(DateTime.Now.Millisecond);
+            Random random = new Random(DateTime.UtcNow.Millisecond);
 
             int invalid = 0;
             for (int i = 0; i < TOTAL_THREADS; i++)
@@ -282,7 +282,7 @@ public class SqliteTests : DbLayerTest
     [TestMethod]
     public void BulkInsert()
     {
-        var rand = new Random(DateTime.Now.Microsecond);
+        var rand = new Random(DateTime.UtcNow.Microsecond);
         var library = new Library()
         {
             Uid = Guid.NewGuid(),
@@ -344,9 +344,9 @@ public class SqliteTests : DbLayerTest
             var created = db.FileFlowsObjectManager.Single<Library>(library.Uid).Result.Value;
             Assert.IsNotNull(created);
 
-            DateTime start = DateTime.Now;
+            DateTime start = DateTime.UtcNow;
             db.LibraryFileManager.InsertBulk(files.ToArray()).Wait();
-            Logger.ILog($"Time to insert {files.Count}: " + DateTime.Now.Subtract(start));
+            Logger.ILog($"Time to insert {files.Count}: " + DateTime.UtcNow.Subtract(start));
             //
             // if (dbType == DatabaseType.Sqlite)
             //     continue;
@@ -412,7 +412,7 @@ public class SqliteTests : DbLayerTest
     [TestMethod]
     public void OneBillionDollars()
     {
-        var rand = new Random(DateTime.Now.Microsecond);
+        var rand = new Random(DateTime.UtcNow.Microsecond);
         foreach (var dbType in new[]
                  {
                      //DatabaseType.Sqlite, 
@@ -529,46 +529,46 @@ public class SqliteTests : DbLayerTest
             Assert.AreEqual(expected.Held.Count, statusList[FileStatus.OnHold]);
             Assert.AreEqual(expected.Active.Count, statusList[FileStatus.Unprocessed]);
 
-            DateTime start = DateTime.Now;
+            DateTime start = DateTime.UtcNow;
             var actualDisabled  = dam.LibraryFileManager.GetAll(new LibraryFileFilter()
             {
                 Status = FileStatus.Disabled,
                 Rows = max,
                 SysInfo = sysInfo
             }).Result;
-            Logger.ILog($"Disabled time taken [{statusList[FileStatus.Disabled]}]: " + (DateTime.Now.Subtract(start)));
+            Logger.ILog($"Disabled time taken [{statusList[FileStatus.Disabled]}]: " + (DateTime.UtcNow.Subtract(start)));
             Assert.AreEqual(Math.Min(max, expected.Disabled.Count), actualDisabled.Count);
             
-            start = DateTime.Now;
+            start = DateTime.UtcNow;
             var actualOutOfSchedule = dam.LibraryFileManager.GetAll(new LibraryFileFilter()
             {
                 Status = FileStatus.OutOfSchedule,
                 Rows = max,
                 SysInfo = sysInfo
             }).Result;
-            Logger.ILog($"Out of schedule time taken [{statusList[FileStatus.OutOfSchedule]}]: " + (DateTime.Now.Subtract(start)));
+            Logger.ILog($"Out of schedule time taken [{statusList[FileStatus.OutOfSchedule]}]: " + (DateTime.UtcNow.Subtract(start)));
             Assert.AreEqual(Math.Min(max, expected.OutOfSchedule.Count), actualOutOfSchedule.Count);
             
             
-            start = DateTime.Now;
+            start = DateTime.UtcNow;
             var actualOnHold = dam.LibraryFileManager.GetAll(new LibraryFileFilter()
             {
                 Status = FileStatus.OnHold,
                 Rows = max,
                 SysInfo = sysInfo
             }).Result;
-            Logger.ILog($"On Hold time taken [{statusList[FileStatus.OnHold]}]: " + (DateTime.Now.Subtract(start)));
+            Logger.ILog($"On Hold time taken [{statusList[FileStatus.OnHold]}]: " + (DateTime.UtcNow.Subtract(start)));
             Assert.AreEqual(Math.Min(max, expected.Held.Count), actualOnHold.Count);
             
             
-            start = DateTime.Now;
+            start = DateTime.UtcNow;
             var actualUnprocessed  = dam.LibraryFileManager.GetAll(new LibraryFileFilter()
             {
                 Status = FileStatus.Unprocessed,
                 Rows = max,
                 SysInfo = sysInfo
             }).Result;
-            Logger.ILog($"Unprocessed time taken [{statusList[FileStatus.Unprocessed]}]: " + (DateTime.Now.Subtract(start)));
+            Logger.ILog($"Unprocessed time taken [{statusList[FileStatus.Unprocessed]}]: " + (DateTime.UtcNow.Subtract(start)));
             Assert.AreEqual(Math.Min(max, expected.Active.Count), actualUnprocessed.Count);
             
         }
@@ -580,8 +580,8 @@ public class SqliteTests : DbLayerTest
     [TestMethod]
     public void UpgradeTest()
     {
-        var rand = new Random(DateTime.Now.Microsecond);
-        DateTime nowDate = DateTime.Now;
+        var rand = new Random(DateTime.UtcNow.Microsecond);
+        DateTime nowDate = DateTime.UtcNow;
         DateTime utcDate = nowDate.ToUniversalTime();
         foreach (var dbType in new[]
                  {

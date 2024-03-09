@@ -360,9 +360,9 @@ public class LibraryFileService : ILibraryFileService
             }
 
             // check the last time this node was seen to make sure its not disconnected
-            if (other.LastSeen < DateTime.Now.AddMinutes(10))
+            if (other.LastSeen < DateTime.UtcNow.AddMinutes(10))
             {
-                string lastSeen = DateTime.Now.Subtract(other.LastSeen)+ " ago";
+                string lastSeen = DateTime.UtcNow.Subtract(other.LastSeen)+ " ago";
                 try
                 {
                     lastSeen = other.LastSeen.Humanize() + " ago";

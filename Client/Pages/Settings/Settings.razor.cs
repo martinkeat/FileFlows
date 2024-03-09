@@ -143,7 +143,7 @@ public partial class Settings : InputRegister
     protected override void OnAfterRender(bool firstRender)
     {
         if (firstRender)
-            firstRenderedAt = DateTime.Now;
+            firstRenderedAt = DateTime.UtcNow;
         base.OnAfterRender(firstRender);
     }
 
@@ -364,7 +364,7 @@ public partial class Settings : InputRegister
     
     private async Task OnTelemetryChange(bool disabled)
     {
-        if (firstRenderedAt < DateTime.Now.AddSeconds(-1) && disabled)
+        if (firstRenderedAt < DateTime.UtcNow.AddSeconds(-1) && disabled)
         {
             if (await Confirm.Show("Pages.Settings.Messages.DisableTelemetryConfirm.Title",
                     "Pages.Settings.Messages.DisableTelemetryConfirm.Message",

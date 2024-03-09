@@ -14,7 +14,7 @@ namespace FileFlows.Server.Workers;
 public class FlowRunnerMonitor:Worker
 {
     private List<Guid> StartUpRunningFiles;
-    private DateTime StartedAt = DateTime.Now;
+    private DateTime StartedAt = DateTime.UtcNow;
 
     /// <summary>
     /// Constructs a Flow Runner Monitor worker
@@ -36,7 +36,7 @@ public class FlowRunnerMonitor:Worker
             {
                 if (service.IsLibraryFileRunning(lf))
                     StartUpRunningFiles.Remove(lf);
-                else if(DateTime.Now > StartedAt.AddMinutes(2))
+                else if(DateTime.UtcNow > StartedAt.AddMinutes(2))
                 {
                     // no update in 2minutes, kill it
                     try

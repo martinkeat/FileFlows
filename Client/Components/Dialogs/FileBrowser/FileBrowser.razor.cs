@@ -127,7 +127,7 @@ public partial class FileBrowser : ComponentBase, IDisposable
 
         if (DirectoryMode == false)
         {
-            var random = new Random(DateTime.Now.Millisecond);
+            var random = new Random(DateTime.UtcNow.Millisecond);
             items.AddRange(Enumerable.Range(1, 5).Select(x =>
             {
                 string extension = "." + (Extensions?.Any() != true ? "mkv" : Extensions[random.Next(0, Extensions.Length)]);

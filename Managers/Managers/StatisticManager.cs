@@ -44,7 +44,7 @@ public class StatisticManager
             {
                 Type = StatisticType.Number,
                 Name = statistic.Name,
-                LogDate = DateTime.Now,
+                LogDate = DateTime.UtcNow,
                 NumberValue = number,
                 StringValue = string.Empty
             };
@@ -56,7 +56,7 @@ public class StatisticManager
             {
                 Type = StatisticType.String,
                 Name = statistic.Name,
-                LogDate = DateTime.Now,
+                LogDate = DateTime.UtcNow,
                 NumberValue = 0,
                 StringValue = statistic.Value.ToString()
             };

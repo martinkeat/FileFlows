@@ -118,7 +118,7 @@ public class PluginScanner
                 plugin.Uid = pi.Uid;
                 plugin.PackageName = pi.PackageName;
                 plugin.Version = pi.Version;
-                plugin.DateModified = DateTime.Now;
+                plugin.DateModified = DateTime.UtcNow;
                 plugin.Deleted = false;
                 plugin.Elements = pi.Elements;
                 plugin.Authors = pi.Authors;
@@ -143,8 +143,8 @@ public class PluginScanner
                     // new dll
                     Logger.Instance.ILog("Adding new plugin: " + pi.Name);
                     plugin.Name = pi.Name;
-                    plugin.DateCreated = DateTime.Now;
-                    plugin.DateModified = DateTime.Now;
+                    plugin.DateCreated = DateTime.UtcNow;
+                    plugin.DateModified = DateTime.UtcNow;
                     plugin.Enabled = true;
                     service.Update(plugin).Wait();
                 }
@@ -168,7 +168,7 @@ public class PluginScanner
                 Logger.Instance.DLog("Missing plugin: " + plugin.Name);
                 // mark as deleted.
                 plugin.Deleted = true;
-                plugin.DateModified = DateTime.Now;
+                plugin.DateModified = DateTime.UtcNow;
                 service.Update(plugin).Wait();
             }
         }

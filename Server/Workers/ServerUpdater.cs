@@ -167,7 +167,7 @@ public class ServerUpdater : UpdaterWorker
         Logger.Instance.ILog($"{UpdaterName}: Downloading update: " + onlineVersion);
         
         
-        string url = $"{UpdateUrl}/download/{onlineVersion}?ts={DateTime.Now.Ticks}";
+        string url = $"{UpdateUrl}/download/{onlineVersion}?ts={DateTime.UtcNow.Ticks}";
         HttpHelper.DownloadFile(url, file).Wait();
         if (File.Exists(file) == false)
         {

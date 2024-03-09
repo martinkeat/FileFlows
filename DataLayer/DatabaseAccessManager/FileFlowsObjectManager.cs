@@ -174,7 +174,7 @@ internal  class FileFlowsObjectManager
     /// <param name="item">the item to update</param>
     public async Task Update(FileFlowObject item)
     {
-        item.DateModified = DateTime.Now;
+        item.DateModified = DateTime.UtcNow;
         if (item.Uid == Guid.Empty)
             item.Uid = Guid.NewGuid();
         var dbo = ConvertToDbObject(item);

@@ -45,7 +45,7 @@ public class ObjectReferenceUpdater:Worker
         IsRunning = true;
         try
         {
-            DateTime start = DateTime.Now;
+            DateTime start = DateTime.UtcNow;
             var lfService = ServiceLoader.Load<LibraryFileService>();
             var libService = ServiceLoader.Load<LibraryService>();
             //var libFiles = lfService.GetAll(null).Result;
@@ -55,7 +55,7 @@ public class ObjectReferenceUpdater:Worker
             var dictLibraries = libraries.ToDictionary(x => x.Uid, x => x.Name);
             var dictFlows = flows.ToDictionary(x => x.Uid, x => x.Name);
             
-            Logger.Instance.ILog("Time Taken to prepare for ObjectReference rename: "+ DateTime.Now.Subtract(start));
+            Logger.Instance.ILog("Time Taken to prepare for ObjectReference rename: "+ DateTime.UtcNow.Subtract(start));
             
 
             // foreach (var lf in libFiles)
@@ -93,7 +93,7 @@ public class ObjectReferenceUpdater:Worker
                 libService.UpdateFlowName(flow.Uid, flow.Name).Wait();
                 lfService.UpdateFlowName(flow.Uid, flow.Name).Wait();
             }
-            Logger.Instance.ILog("Time Taken to complete for ObjectReference rename: "+ DateTime.Now.Subtract(start));
+            Logger.Instance.ILog("Time Taken to complete for ObjectReference rename: "+ DateTime.UtcNow.Subtract(start));
         }
         finally
         {

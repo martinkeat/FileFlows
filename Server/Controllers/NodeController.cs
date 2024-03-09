@@ -41,7 +41,7 @@ public class NodeController : Controller
                 node.Status = ProcessingNodeStatus.OutOfSchedule;
             else if (node.Version != Globals.Version)
                 node.Status = ProcessingNodeStatus.VersionMismatch;
-            else if (node.LastSeen < DateTime.Now.AddMinutes(-5))
+            else if (node.LastSeen < DateTime.UtcNow.AddMinutes(-5))
                 node.Status = ProcessingNodeStatus.Offline;
             else if (FlowRunnerService.Executors.Any(x => x.Value.NodeUid == node.Uid))
                 node.Status = ProcessingNodeStatus.Processing;

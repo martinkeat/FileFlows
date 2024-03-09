@@ -26,7 +26,7 @@ public class LibraryFileLogPruner:Worker
         foreach (var file in files)
         {
             // first check if the file is somewhat new, if it is, dont delete just yet
-            if (file.LastWriteTime > DateTime.Now.AddHours(-1))
+            if (file.LastWriteTimeUtc > DateTime.UtcNow.AddHours(-1))
                 continue;
             
             string shortName = file.Name;

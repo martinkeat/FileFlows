@@ -5,7 +5,7 @@
 // /// </summary>
 // public abstract class LibraryFileTest
 // {
-//     protected Random rand = new Random(DateTime.Now.Millisecond);
+//     protected Random rand = new Random(DateTime.UtcNow.Millisecond);
 //     protected Settings Settings { get; set; }
 //     protected ProcessingNode Node { get; set; }
 //     protected ProcessingNode InternalNode { get; set; }
@@ -139,10 +139,10 @@
 //             Type = library.GetType().FullName
 //         };
 //         file.OriginalSize = rand.NextInt64(1_000_0000, 10_000_000_000);
-//         file.DateCreated = DateTime.Now.AddSeconds(-rand.Next(0, 1000 * 60));
-//         file.DateModified = DateTime.Now.AddSeconds(-rand.Next(0, 1000 * 60));
-//         file.CreationTime = DateTime.Now.AddSeconds(-rand.Next(0, 1000 * 60));
-//         file.LastWriteTime = DateTime.Now.AddSeconds(-rand.Next(0, 1000 * 60));
+//         file.DateCreated = DateTime.UtcNow.AddSeconds(-rand.Next(0, 1000 * 60));
+//         file.DateModified = DateTime.UtcNow.AddSeconds(-rand.Next(0, 1000 * 60));
+//         file.CreationTime = DateTime.UtcNow.AddSeconds(-rand.Next(0, 1000 * 60));
+//         file.LastWriteTime = DateTime.UtcNow.AddSeconds(-rand.Next(0, 1000 * 60));
 //         return file;
 //     }
 // }

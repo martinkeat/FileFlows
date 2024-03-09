@@ -14,7 +14,7 @@ public class RevisionService
     /// <param name="uid">the UID of the object to get revisions for</param>
     /// <returns>all the revisions for the object</returns>
     public Task<List<RevisionedObject>> GetAllAsync(Guid uid)
-        => new RevisionManager().GetAll();
+        => new RevisionManager().GetAll(uid);
 
     /// <summary>
     /// Deletes the given revisions

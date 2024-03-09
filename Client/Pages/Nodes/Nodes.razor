@@ -34,7 +34,7 @@
                         {
                             <i title="Disconnected" class="processing-node status-error fas fa-times-circle"></i>
                         }
-                        else if (item.Address != FileFlowsServer && item.LastSeen < DateTime.Now.AddMinutes(-1))
+                        else if (item.Address != FileFlowsServer && item.LastSeen < DateTime.UtcNow.AddMinutes(-1))
                         {
                             <i title="Possibly disconnected" class="processing-node status-warning fas fa-exclamation-circle"></i>
                         }

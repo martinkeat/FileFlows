@@ -101,7 +101,7 @@ public class FlowExecutorInfo
     /// <summary>
     /// Gets the total processing time of the flow
     /// </summary>
-    public TimeSpan ProcessingTime => StartedAt > new DateTime(2000, 1, 1) ? DateTime.Now.Subtract(StartedAt) : new TimeSpan();
+    public TimeSpan ProcessingTime => StartedAt > new DateTime(2000, 1, 1) ? DateTime.UtcNow.Subtract(StartedAt) : new TimeSpan();
     
     /// <summary>
     /// Gets or sets any additional info to pass to the runner
@@ -185,7 +185,7 @@ public class FlowExecutorInfoMinified
     /// <summary>
     /// Gets the total processing time of the flow
     /// </summary>
-    public TimeSpan ProcessingTime => StartedAt > new DateTime(2000, 1, 1) ? DateTime.Now.Subtract(StartedAt) : new TimeSpan();
+    public TimeSpan ProcessingTime => StartedAt > new DateTime(2000, 1, 1) ? DateTime.UtcNow.Subtract(StartedAt) : new TimeSpan();
     
     /// <summary>
     /// Gets or sets a special variable for frames per second

@@ -162,7 +162,7 @@ public class SystemMonitor:FileFlows.ServerShared.Workers.Worker
             {
                 foreach (var nts in NodeStatistics.Values)
                 {
-                    if (nts.RecordedAt > DateTime.Now.AddMinutes(-5))
+                    if (nts.RecordedAt > DateTime.UtcNow.AddMinutes(-5))
                     {
                         var npath = logginDir ? nts.LogDirectorySize : nts.TemporaryDirectorySize;
                         size += npath.Size;
@@ -184,7 +184,7 @@ public class SystemMonitor:FileFlows.ServerShared.Workers.Worker
     /// <param name="args">the node system statistics</param>
     public void Record(NodeSystemStatistics args)
     {
-        args.RecordedAt = DateTime.Now;
+        args.RecordedAt = DateTime.UtcNow;
         lock (NodeStatistics)
         {
             if (NodeStatistics.ContainsKey(args.Uid))

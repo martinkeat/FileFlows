@@ -259,8 +259,8 @@ public class FlowController : Controller
         
         flow.ReadOnly = false;
         flow.Default = false;
-        flow.DateModified = DateTime.Now;
-        flow.DateCreated = DateTime.Now;
+        flow.DateModified = DateTime.UtcNow;
+        flow.DateCreated = DateTime.UtcNow;
         flow.Name = await service.GetNewUniqueName(flow.Name);
         return await service.Update(flow);
     }
@@ -873,10 +873,10 @@ public class FlowController : Controller
         {
             variables.Add("folder.Name", "FolderName");
             variables.Add("folder.FullName", windows ? @"C:\Folder\SubFolder" : "/folder/subfolder");
-            variables.Add("folder.Date", DateTime.Now);
-            variables.Add("folder.Date.Day", DateTime.Now.Day);
-            variables.Add("folder.Date.Month", DateTime.Now.Month);
-            variables.Add("folder.Date.Year", DateTime.Now.Year);
+            variables.Add("folder.Date", DateTime.UtcNow);
+            variables.Add("folder.Date.Day", DateTime.UtcNow.Day);
+            variables.Add("folder.Date.Month", DateTime.UtcNow.Month);
+            variables.Add("folder.Date.Year", DateTime.UtcNow.Year);
             variables.Add("folder.OrigName", "FolderOriginalName");
             variables.Add("folder.OrigFullName",
                 windows ? @"C:\OriginalFolder\SubFolder" : "/originalFolder/subfolder");
@@ -898,14 +898,14 @@ public class FlowController : Controller
                 windows ? @"C:\Folder\files\filename.ext" : "/media/files/filename.ext");
             variables.Add("file.Orig.Size", 1000);
 
-            variables.Add("file.Create", DateTime.Now);
-            variables.Add("file.Create.Day", DateTime.Now.Day);
-            variables.Add("file.Create.Month", DateTime.Now.Month);
-            variables.Add("file.Create.Year", DateTime.Now.Year);
-            variables.Add("file.Modified", DateTime.Now);
-            variables.Add("file.Modified.Day", DateTime.Now.Day);
-            variables.Add("file.Modified.Month", DateTime.Now.Month);
-            variables.Add("file.Modified.Year", DateTime.Now.Year);
+            variables.Add("file.Create", DateTime.UtcNow);
+            variables.Add("file.Create.Day", DateTime.UtcNow.Day);
+            variables.Add("file.Create.Month", DateTime.UtcNow.Month);
+            variables.Add("file.Create.Year", DateTime.UtcNow.Year);
+            variables.Add("file.Modified", DateTime.UtcNow);
+            variables.Add("file.Modified.Day", DateTime.UtcNow.Day);
+            variables.Add("file.Modified.Month", DateTime.UtcNow.Month);
+            variables.Add("file.Modified.Year", DateTime.UtcNow.Year);
 
             variables.Add("folder.Name", "FolderName");
             variables.Add("folder.FullName", windows ? @"C:\Folder\SubFolder" : "/folder/subfolder");

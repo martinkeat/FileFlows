@@ -112,7 +112,7 @@ public class FileFlowsTasksWorker: Worker
             return new() { Success = false, Log = msg };
         }
         Logger.Instance.ILog("Executing task: " + task.Name);
-        DateTime dtStart = DateTime.Now;
+        DateTime dtStart = DateTime.UtcNow;
 
         var variables = GetVariables();
         if (additionalVariables?.Any() == true)
@@ -125,10 +125,10 @@ public class FileFlowsTasksWorker: Worker
 
         var result = ScriptExecutor.Execute(code, variables);
         if(result.Success)
-            Logger.Instance.ILog($"Task '{task.Name}' completed in: " + (DateTime.Now.Subtract(dtStart)) + "\n" + result.Log);
+            Logger.Instance.ILog($"Task '{task.Name}' completed in: " + (DateTime.UtcNow.Subtract(dtStart)) + "\n" + result.Log);
         else
             Logger.Instance.ELog($"Error executing task '{task.Name}: " + result.ReturnValue + "\n" + result.Log);
-        task.LastRun = DateTime.Now;
+        task.LastRun = DateTime.UtcNow;
         task.RunHistory ??= new Queue<FileFlowsTaskRun>(10);
         lock (task.RunHistory)
         {

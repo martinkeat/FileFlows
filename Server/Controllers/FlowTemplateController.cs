@@ -30,7 +30,7 @@ public class FlowTemplateController : Controller
     public async Task<List<FlowTemplateModel>> GetAll([FromQuery] FlowType? type)
     {
         List<FlowTemplateModel> templates = new();
-        if (true || Templates == null || FetchedAt < DateTime.Now.AddMinutes(-10))
+        if (true || Templates == null || FetchedAt < DateTime.UtcNow.AddMinutes(-10))
             await RefreshTemplates();
         FlowType any = (FlowType)(-1);
         if (type == null)
@@ -291,7 +291,7 @@ public class FlowTemplateController : Controller
             if (Templates == null)
                 return;
             
-            FetchedAt = DateTime.Now;
+            FetchedAt = DateTime.UtcNow;
 
             // save to disk
             string json = JsonSerializer.Serialize(result.Data);
@@ -317,7 +317,7 @@ public class FlowTemplateController : Controller
         {
             string json = System.IO.File.ReadAllText(FlowTemplatesFile);
             Templates = JsonSerializer.Deserialize<List<FlowTemplateModel>>(json);
-            FetchedAt = DateTime.Now;
+            FetchedAt = DateTime.UtcNow;
         }
         catch (Exception ex)
         {

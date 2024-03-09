@@ -60,7 +60,7 @@ public class Decrypter
     public static string Encrypt(string text)
     {
         byte[] clearBytes = Encoding.Unicode.GetBytes(text);
-        Random rand= new Random(DateTime.Now.Millisecond);
+        Random rand= new Random(DateTime.UtcNow.Millisecond);
         using (Aes encryptor = Aes.Create())
         {
             byte[] IV = new byte[15];

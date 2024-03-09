@@ -110,7 +110,7 @@ public class PausedService : IPausedService
             lblPaused = Translater.Instant("Labels.Paused");
             lblPausedWithTime = Translater.Instant("Labels.PausedWithTime");
         }
-        if (LastUpdated < DateTime.Now.AddSeconds(-5))
+        if (LastUpdated < DateTime.UtcNow.AddSeconds(-5))
         {
             await Refresh();
         }
@@ -137,7 +137,7 @@ public class PausedService : IPausedService
         }
         
         var pausedToLocal = SystemInfo.PausedUntil.Add(TimeDiff);
-        var time = pausedToLocal.Subtract(DateTime.Now);
+        var time = pausedToLocal.Subtract(DateTime.UtcNow);
         PausedLabel = lblPausedWithTime + " " + time.ToString(@"h\:mm\:ss");
     }
     
@@ -156,7 +156,7 @@ public class PausedService : IPausedService
             
             if (systemInfoResult.Success)
             {
-                TimeDiff = DateTime.Now - systemInfoResult.Data.CurrentTime;
+                TimeDiff = DateTime.UtcNow - systemInfoResult.Data.CurrentTime;
                 this.SystemInfo = systemInfoResult.Data;
                 UpdateTime();
             }
@@ -167,7 +167,7 @@ public class PausedService : IPausedService
         }
         finally
         {
-            LastUpdated = DateTime.Now;
+            LastUpdated = DateTime.UtcNow;
             Refreshing = false;
         }
     }
@@ -219,7 +219,7 @@ public class PausedService : IPausedService
         var systemInfoResult = await GetSystemInfo();
         if (systemInfoResult.Success)
         {
-            TimeDiff = DateTime.Now - systemInfoResult.Data.CurrentTime;
+            TimeDiff = DateTime.UtcNow - systemInfoResult.Data.CurrentTime;
             SystemInfo = systemInfoResult.Data;
             this.UpdateTime();
             

@@ -47,7 +47,7 @@ public class FlowRunnerService : IFlowRunnerService
 
         if (info.Uid == Guid.Empty)
             throw new Exception("No UID specified for flow execution info");
-        info.LastUpdate = DateTime.Now;
+        info.LastUpdate = DateTime.UtcNow;
         lock (Executors)
         {
             Logger.Instance.ILog($"Adding executor: {info.Uid} = {info.LibraryFile.Name}");
@@ -198,7 +198,7 @@ public class FlowRunnerService : IFlowRunnerService
                 if (info.LibraryFile.ProcessingEnded > new DateTime(2020, 1, 1))
                     libfile.ProcessingEnded = info.LibraryFile.ProcessingEnded;
                 if (libfile.ProcessingEnded < new DateTime(2020, 1, 1))
-                    libfile.ProcessingEnded = DateTime.Now; // this avoid a "2022 years ago" issue
+                    libfile.ProcessingEnded = DateTime.UtcNow; // this avoid a "2022 years ago" issue
                 if(libfile.Flow == null)
                     libfile.Flow = info.LibraryFile.Flow;
                 await lfService.Update(libfile);
@@ -346,7 +346,7 @@ public class FlowRunnerService : IFlowRunnerService
             {
                 if (Executors.TryGetValue(uid, out FlowExecutorInfo? info))
                 {
-                    if (info == null || info.LastUpdate < DateTime.Now.AddMinutes(-1))
+                    if (info == null || info.LastUpdate < DateTime.UtcNow.AddMinutes(-1))
                     {
                         // its gone quiet, kill it
                         Executors.Remove(uid);
@@ -383,7 +383,7 @@ public class FlowRunnerService : IFlowRunnerService
             ClientServiceManager.Instance.UpdateExecutors(Executors);
 
             if(executorInfo != null)
-                executorInfo.LastUpdate = DateTime.Now;
+                executorInfo.LastUpdate = DateTime.UtcNow;
 
             if (info.LibraryFile != null)
             {
@@ -462,7 +462,7 @@ public class FlowRunnerService : IFlowRunnerService
             }
         }
 
-        info.LastUpdate = DateTime.Now;
+        info.LastUpdate = DateTime.UtcNow;
         lock (Executors)
         {
             if (CompletedExecutors.Contains(info.Uid))
@@ -499,7 +499,7 @@ public class FlowRunnerService : IFlowRunnerService
 
         foreach (var executor in executors ?? new FlowExecutorInfo[] {})
         {
-            if (executor != null && executor.LastUpdate < DateTime.Now.AddSeconds(-60))
+            if (executor != null && executor.LastUpdate < DateTime.UtcNow.AddSeconds(-60))
             {
                 Logger.Instance?.ILog($"Aborting disconnected runner[{executor.NodeName}]: {executor.LibraryFile.Name}");
                 Abort(executor.Uid, executor.LibraryFile.Uid).Wait();

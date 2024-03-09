@@ -111,7 +111,7 @@ class LicenseHelper
             return;
         }
 
-        if (_LastLicenseEmail == email && _LastLicenseKey == key && _LastUpdate > DateTime.Now.AddMinutes(-5))
+        if (_LastLicenseEmail == email && _LastLicenseKey == key && _LastUpdate > DateTime.UtcNow.AddMinutes(-5))
             return; // last update wasn't long ago, can skip it
         try
         {
@@ -137,7 +137,7 @@ class LicenseHelper
             _License = license;
             _LastLicenseEmail = email;
             _LastLicenseKey = key;
-            _LastUpdate = DateTime.Now;
+            _LastUpdate = DateTime.UtcNow;
 
             // code is good, save it
             service.Settings.LicenseCode = licenseCode;

@@ -28,5 +28,5 @@ public class SystemInfo
     /// <summary>
     /// Gets the current time on the server
     /// </summary>
-    public DateTime CurrentTime => DateTime.Now;
+    public DateTime CurrentTime => DateTime.UtcNow;
 }

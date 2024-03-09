@@ -155,7 +155,7 @@ public class PluginController : Controller
         List<PluginPackageInfo> data = new List<PluginPackageInfo>();
             try
             {
-                string url = Globals.PluginBaseUrl + $"?version={Globals.Version}&rand={DateTime.Now.ToFileTime()}";
+                string url = Globals.PluginBaseUrl + $"?version={Globals.Version}&rand={DateTime.UtcNow.ToFileTime()}";
                 var plugins = await HttpHelper.Get<IEnumerable<PluginPackageInfo>>(url);
                 if (plugins.Success == false)
                 {

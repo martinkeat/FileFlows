@@ -115,7 +115,7 @@ public class Runner
             communicator.OnCancel += Communicator_OnCancel;
             logger.SetCommunicator(communicator);
             bool finished = false;
-            DateTime lastSuccessHello = DateTime.Now;
+            DateTime lastSuccessHello = DateTime.UtcNow;
             var task = Task.Run(async () =>
             {
                 while (finished == false)
@@ -125,7 +125,7 @@ public class Runner
                         bool success = await communicator.Hello(Program.Uid, this.Info, nodeParameters);
                         if (success == false)
                         {
-                            if (lastSuccessHello < DateTime.Now.AddMinutes(-2))
+                            if (lastSuccessHello < DateTime.UtcNow.AddMinutes(-2))
                             {
                                 nodeParameters?.Logger?.ELog("Hello failed, cancelling flow");
                                 Communicator_OnCancel();
@@ -136,7 +136,7 @@ public class Runner
                         }
                         else
                         {
-                            lastSuccessHello = DateTime.Now;
+                            lastSuccessHello = DateTime.UtcNow;
                         }
                     }
 
@@ -269,7 +269,7 @@ public class Runner
     /// </summary>
     private async Task Complete(string log)
     {
-        DateTime start = DateTime.Now;
+        DateTime start = DateTime.UtcNow;
         do
         {
             try
@@ -278,13 +278,13 @@ public class Runner
                     CalculateFinalSize();
 
                 var service = FlowRunnerService.Load();
-                Info.LibraryFile.ProcessingEnded = DateTime.Now;
+                Info.LibraryFile.ProcessingEnded = DateTime.UtcNow;
                 await service.Complete(Info, log);
                 return;
             }
             catch (Exception) { }
             await Task.Delay(30_000);
-        } while (DateTime.Now.Subtract(start) < new TimeSpan(0, 10, 0));
+        } while (DateTime.UtcNow.Subtract(start) < new TimeSpan(0, 10, 0));
         Program.Logger?.ELog("Failed to inform server of flow completion");
     }
 
@@ -369,7 +369,7 @@ public class Runner
         {
             if(waitMilliseconds != 1000) // 1000 is the delay for finishing / step changes
                 await Task.Delay(500);
-            LastUpdate = DateTime.Now;
+            LastUpdate = DateTime.UtcNow;
             var service = FlowRunnerService.Load();
             if(nodeParameters?.OriginalMetadata != null)
                 Info.LibraryFile.OriginalMetadata = nodeParameters.OriginalMetadata;
@@ -390,15 +390,15 @@ public class Runner
     /// <param name="status">the status</param>
     private void SetStatus(FileStatus status)
     {
-        DateTime start = DateTime.Now;
+        DateTime start = DateTime.UtcNow;
         Info.LibraryFile.Status = status;
         if (status == FileStatus.Processed || status == FileStatus.ReprocessByFlow)
         {
-            Info.LibraryFile.ProcessingEnded = DateTime.Now;
+            Info.LibraryFile.ProcessingEnded = DateTime.UtcNow;
         }
         else if(status == FileStatus.ProcessingFailed)
         {
-            Info.LibraryFile.ProcessingEnded = DateTime.Now;
+            Info.LibraryFile.ProcessingEnded = DateTime.UtcNow;
             if (string.IsNullOrWhiteSpace(nodeParameters.FailureReason) == false)
                 Info.LibraryFile.FailureReason = nodeParameters.FailureReason;
         }
@@ -417,7 +417,7 @@ public class Runner
                 Program.Logger?.WLog("Failed to set status on server: " + ex.Message);
             }
             Thread.Sleep(5_000);
-        } while (DateTime.Now.Subtract(start) < new TimeSpan(0, 3, 0));
+        } while (DateTime.UtcNow.Subtract(start) < new TimeSpan(0, 3, 0));
     }
 
     /// <summary>

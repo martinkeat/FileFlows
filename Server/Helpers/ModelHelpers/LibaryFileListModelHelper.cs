@@ -42,7 +42,7 @@ public class LibaryFileListModelHelper
             {
                 var lib = dictLibraries[x.Library.Uid];
                 var scheduledAt = x.DateCreated.AddMinutes(lib.HoldMinutes);
-                item.ProcessingTime = scheduledAt.Subtract(DateTime.Now);
+                item.ProcessingTime = scheduledAt.Subtract(DateTime.UtcNow);
             }
 
             if (status == FileStatus.Processing)
