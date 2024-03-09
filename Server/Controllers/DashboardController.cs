@@ -14,6 +14,25 @@ namespace FileFlows.Server.Controllers;
 public class DashboardController : Controller
 {
     /// <summary>
+    /// The settings for the application
+    /// </summary>
+    private AppSettings Settings;
+    /// <summary>
+    /// The settings for the application
+    /// </summary>
+    private AppSettingsService SettingsService;
+    
+    /// <summary>
+    /// Initializes a new instance of the controller
+    /// </summary>
+    /// <param name="appSettingsService">the application settings service</param>
+    public DashboardController(AppSettingsService appSettingsService)
+    {
+        SettingsService = appSettingsService;
+        Settings = appSettingsService.Settings;
+    }
+    
+    /// <summary>
     /// Get all dashboards in the system
     /// </summary>
     /// <returns>all dashboards in the system</returns>
@@ -74,7 +93,7 @@ public class DashboardController : Controller
         if ((db == null || db.Uid == Guid.Empty) && uid == Dashboard.DefaultDashboardUid)
         {
             var nodes = (await ServiceLoader.Load<NodeService>().GetAllAsync()).Count(x => x.Enabled);
-            db = Dashboard.GetDefaultDashboard(AppSettings.Instance.DatabaseType == DatabaseType.Sqlite, nodes);
+            db = Dashboard.GetDefaultDashboard(Settings.DatabaseType == DatabaseType.Sqlite, nodes);
         }
         else if (db == null)
             throw new Exception("Dashboard not found");

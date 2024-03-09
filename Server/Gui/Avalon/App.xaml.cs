@@ -1,4 +1,5 @@
 using Avalonia;
+using FileFlows.Server.Services;
 
 namespace FileFlows.Server.Gui.Avalon;
 
@@ -9,7 +10,8 @@ internal class App : Avalonia.Application
         base.Initialize();
         
         var window = new MainWindow();
-        if(AppSettings.Instance.StartMinimized == false)
+        var settings = ServiceLoader.Load<AppSettingsService>().Settings;
+        if(settings.StartMinimized == false)
             window.Show();
     }
     

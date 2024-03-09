@@ -256,7 +256,7 @@ public class NodeController : Controller
             existing.SignalrUrl = "flow";
             return existing;
         }
-        var settings = await new SettingsController().Get();
+
         // doesnt exist, register a new node.
         var variables = await ServiceLoader.Load<VariableService>().GetAllAsync();
         bool isSystem = address == Globals.InternalNodeName;

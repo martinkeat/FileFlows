@@ -1,9 +1,5 @@
-using System.Collections;
-using System.Net;
-using Avalonia;
-using FileFlows.Server.Helpers;
+using FileFlows.Server.Services;
 using FileFlows.Shared.Helpers;
-using FileFlows.Shared.Models;
 
 namespace FileFlows.Server;
 
@@ -45,8 +41,7 @@ public class Program
             return;
         }
         
-        
-        Application app = Services.ServiceLoader.Provider.GetRequiredService<Application>();
+        Application app = ServiceLoader.Provider.GetRequiredService<Application>();
         app.Run(args);
     }
     

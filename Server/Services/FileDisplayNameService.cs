@@ -23,11 +23,16 @@ public class FileDisplayNameService
     /// </summary>
     public static void Initialize()
     {
-        string code;
+        string code = null;
         try
         {
-            var script = new ScriptService().Get(Globals.FileDisplayNameScript, ScriptType.System).Result;
-            code = script.Code;
+            var service = new ScriptService();
+            bool exists = service.Exists(Globals.FileDisplayNameScript, ScriptType.System);
+            if (exists)
+            {
+                var script = service.Get(Globals.FileDisplayNameScript, ScriptType.System).Result;
+                code = script.Code;
+            }
         }
         catch(Exception)
         {

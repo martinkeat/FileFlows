@@ -1,7 +1,9 @@
 ﻿using FileFlows.DataLayer.Converters;
 using FileFlows.DataLayer.DatabaseConnectors;
+using FileFlows.DataLayer.DatabaseCreators;
 using FileFlows.Plugin;
 using FileFlows.Shared.Models;
+using Org.BouncyCastle.Ocsp;
 
 namespace FileFlows.DataLayer;
 
@@ -48,7 +50,7 @@ internal  class DatabaseAccessManager
     {
         Logger = logger;
         Type = type;
-        DbConnector = LoadConnector(logger, type, connectionString);
+        DbConnector = DatabaseConnectorLoader.LoadConnector(logger, type, connectionString);
         // if (type == DatabaseType.Sqlite)
         //     return;
         this.ObjectManager = new (logger, type, DbConnector);
@@ -83,7 +85,7 @@ internal  class DatabaseAccessManager
     /// <param name="type">the type of database</param>
     /// <param name="connectionString">the connection string</param>
     /// <returns>the database access manager instance</returns>
-    public static DatabaseAccessManager FromType(ILogger logger, DatabaseType type, string connectionString)
+    internal static DatabaseAccessManager FromType(ILogger logger, DatabaseType type, string connectionString)
     {
         switch (type)
         {
@@ -98,26 +100,54 @@ internal  class DatabaseAccessManager
     }
 
     /// <summary>
-    /// Loads a database connector 
+    /// Initializes the database access manager instance
     /// </summary>
-    /// <param name="logger">The logger to used for logging</param>
-    /// <param name="type">The type of connector to load</param>
-    /// <param name="connectionString">The connection string of the database</param>
-    /// <returns>The initialized connector</returns>
-    private IDatabaseConnector LoadConnector(ILogger logger, DatabaseType type, string connectionString)
+    /// <param name="logger">the logger to use</param>
+    /// <param name="type">the type of database</param>
+    /// <param name="connectionString">the connection string</param>
+    /// <returns>true if initialized and can connect</returns>
+    internal static Result<bool> Initialize(ILogger logger, DatabaseType type, string connectionString)
     {
-        switch (type)
+        try
         {
-            case DatabaseType.MySql:
-                return new FileFlows.DataLayer.DatabaseConnectors.MySqlConnector(logger, connectionString);
-            case DatabaseType.SqlServer:
-                return new SqlServerConnector(logger, connectionString);
-            case DatabaseType.Postgres:
-                return new PostgresConnector(logger, connectionString);
-            default:
-                return new SQLiteConnector(logger, connectionString);
+            Instance= FromType(logger, type, connectionString);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            return Result<bool>.Fail("Failed connecting to database: " + ex.Message);
         }
     }
+
+    /// <summary>
+    /// Tests it eh database can be reached
+    /// </summary>
+    /// <param name="type">the database type</param>
+    /// <param name="connectionString">the connection string</param>
+    /// <returns>true if can be reached, otherwise false</returns>
+    internal static Result<bool> CanConnect(DatabaseType type, string connectionString)
+    {
+        try
+        {
+            switch (type)
+            {
+                case DatabaseType.SqlServer:
+                    return SqlServerDatabaseCreator.DatabaseExists(connectionString);
+                case DatabaseType.MySql:
+                    return MySqlDatabaseCreator.DatabaseExists(connectionString);
+                case DatabaseType.Postgres:
+                    return PostgresDatabaseCreator.DatabaseExists(connectionString);
+                case DatabaseType.Sqlite:
+                    return true; // ? do we need to do more here?
+            }
+            return Result<bool>.Fail("Unsupported database type");
+        }
+        catch (Exception ex)
+        {
+            return Result<bool>.Fail("Failed connecting to database: " + ex.Message);
+        }
+    }
+
 
     /// <summary>
     /// Gets the DbObject manager to manage the database operations for the DbObject table

@@ -3,6 +3,7 @@ using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using FileFlows.DataLayer.Helpers;
 using FileFlows.Plugin;
+using FileFlows.ServerShared.Helpers;
 using NPoco;
 using DatabaseType = FileFlows.Shared.Models.DatabaseType;
 
@@ -67,18 +68,6 @@ public class SQLiteConnector : IDatabaseConnector
         return new DatabaseConnection(db, false);
     }
 
-    
-    /// <summary>
-    /// Gets a sqlite connection string for a db file
-    /// </summary>
-    /// <param name="dbFile">the filename of the sqlite db file</param>
-    /// <returns>a sqlite connection string</returns>
-    public static string GetConnectionString(string dbFile)
-    {
-        if (PlatformHelper.IsArm)
-            return $"Data Source={dbFile}";
-        return $"Data Source={dbFile};Version=3;PRAGMA journal_mode=WAL;";
-    }
 
     /// <inheritdoc />
     public DatabaseType Type => DatabaseType.Sqlite;

@@ -483,4 +483,16 @@ public class ScriptService:IScriptService
         var service = new SettingsService();
         _ = service.RevisionIncrement();
     }
+
+    /// <summary>
+    /// Checks if a script exists
+    /// </summary>
+    /// <param name="name">the name of the script</param>
+    /// <param name="type">the type of script</param>
+    /// <returns>true if exists, otherwise false</returns>
+    public bool Exists(string name, ScriptType type)
+    {
+        string file = GetFullFilename(name, type);
+        return File.Exists(file);
+    }
 }

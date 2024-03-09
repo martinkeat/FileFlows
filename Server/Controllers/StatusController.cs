@@ -1,5 +1,6 @@
 ﻿using FileFlows.Server.Helpers;
-using FileFlows.ServerShared.Services;
+using FileFlows.Server.Services;
+using SettingsService = FileFlows.ServerShared.Services.SettingsService;
 
 namespace FileFlows.Server.Controllers
 {
@@ -19,7 +20,7 @@ namespace FileFlows.Server.Controllers
         [HttpGet("update-available")]
         public async Task<object> UpdateAvailable()
         {
-            var settings = await new SettingsController().Get();
+            var settings = await ServiceLoader.Load<SettingsService>().Get();
             if (settings?.DisableTelemetry != false)
                 return new { UpdateAvailable = false };
             var result = Workers.ServerUpdater.GetLatestOnlineVersion();

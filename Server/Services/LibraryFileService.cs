@@ -53,7 +53,8 @@ public class LibraryFileService : ILibraryFileService
             Status = status,
             Skip = skip,
             Rows = rows,
-            Filter = filter
+            Filter = filter,
+            SysInfo = sysInfo
         });
     }
 

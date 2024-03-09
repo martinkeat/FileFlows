@@ -28,7 +28,7 @@ public class TelemetryReporter : Worker
 #if (DEBUG && false)
             return;
 #else
-            var settings = new SettingsController().Get().Result;
+            var settings = ServiceLoader.Load<SettingsService>().Get().Result;
             if (settings?.DisableTelemetry == true)
                 return; // they have turned it off, dont report anything
 

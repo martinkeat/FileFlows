@@ -3,6 +3,7 @@ using System.Text.RegularExpressions;
 using FileFlows.DataLayer.DatabaseConnectors;
 using FileFlows.DataLayer.Helpers;
 using FileFlows.Plugin;
+using FileFlows.ServerShared.Helpers;
 
 namespace FileFlows.DataLayer.DatabaseCreators;
 
@@ -55,7 +56,7 @@ public class SQLiteDatabaseCreator : IDatabaseCreator
     /// <inheritdoc />
     public Result<bool> CreateDatabaseStructure()
     {
-        string connString = SQLiteConnector.GetConnectionString(DbFilename);
+        string connString = SqliteHelper.GetConnectionString(DbFilename);
         using DbConnection con = PlatformHelper.IsArm ? new Microsoft.Data.Sqlite.SqliteConnection(connString) :
             new System.Data.SQLite.SQLiteConnection(connString);
         con.Open();

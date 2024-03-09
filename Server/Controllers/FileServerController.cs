@@ -29,9 +29,9 @@ public class FileServerController : Controller
     /// <summary>
     /// Constructs the controller
     /// </summary>
-    public FileServerController()
+    public FileServerController(SettingsService settingsService)
     {
-        var settings = new SettingsController().Get().Result;
+        var settings = settingsService.Get().Result;
         var allowedPaths = ServiceLoader.Load<LibraryService>().GetAllAsync().Result.Select(x => x.Path)
             .Union(settings.FileServerAllowedPaths ?? new string[] { })
             .Where(x => string.IsNullOrWhiteSpace(x) == false)
@@ -86,7 +86,7 @@ public class FileServerController : Controller
         if (LicenseHelper.IsLicensed(LicenseFlags.FileServer) == false)
             return false;
         
-        var settings = new SettingsController().Get().Result;
+        var settings = ServiceLoader.Load<SettingsService>().Get().Result;
         return settings.FileServerDisabled == false;
     }
 

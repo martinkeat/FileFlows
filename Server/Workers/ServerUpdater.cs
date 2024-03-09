@@ -2,6 +2,7 @@
 using FileFlows.Server.Helpers;
 using FileFlows.Shared.Formatters;
 using FileFlows.Server.Controllers;
+using FileFlows.Server.Services;
 using FileFlows.ServerShared.Workers;
 using FileFlows.Shared.Helpers;
 
@@ -87,7 +88,7 @@ public class ServerUpdater : UpdaterWorker
     /// <returns>if auto updates are enabled</returns>
     protected override bool GetAutoUpdatesEnabled()
     {
-        var settings = new SettingsController().Get().Result;
+        var settings = ServiceLoader.Load<SettingsService>().Get().Result;
         return settings?.AutoUpdate == true;
     }
 

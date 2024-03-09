@@ -1,5 +1,6 @@
 ﻿using FileFlows.Server.Helpers;
 using FileFlows.Server.Controllers;
+using FileFlows.Server.Services;
 using FileFlows.ServerShared.Workers;
 
 namespace FileFlows.Server.Workers;
@@ -22,7 +23,7 @@ public class PluginUpdaterWorker : Worker
     /// </summary>
     protected override void Execute()
     {
-        var settings = new SettingsController().Get().Result;
+        var settings = ServiceLoader.Load<SettingsService>().Get().Result;
 #if (DEBUG)
         settings = null;
 #endif

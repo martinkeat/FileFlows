@@ -857,7 +857,7 @@ internal class DbLibraryFileManager : BaseManager
             if (args.AllowedLibraries?.Any() == true)
             {
                 string alllowedLibraries = string.Join(",", args.AllowedLibraries.Select(x => $"'{x}'"));
-                sql += $"$ and {Wrap(nameof(LibraryFile.Uid))} in ({alllowedLibraries}) ";
+                sql += $" and {Wrap(nameof(LibraryFile.Uid))} in ({alllowedLibraries}) ";
             }
 
             sql += $" and {Wrap(nameof(LibraryFile.HoldUntil))} <= {Date(DateTime.UtcNow)} ";
@@ -868,7 +868,7 @@ internal class DbLibraryFileManager : BaseManager
             if (args.ExclusionUids?.Any() == true)
             {
                 string unwanted = string.Join(",", args.ExclusionUids.Select(x => $"'{x}'"));
-                sql += $"$ and {Wrap(nameof(LibraryFile))}.{Wrap(nameof(LibraryFile.Uid))} not in ({unwanted}) ";
+                sql += $" and {Wrap(nameof(LibraryFile))}.{Wrap(nameof(LibraryFile.Uid))} not in ({unwanted}) ";
             }
 
             orderBys.Add($"case " +

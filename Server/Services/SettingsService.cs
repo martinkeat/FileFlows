@@ -1,15 +1,11 @@
 ﻿using FileFlows.Managers;
 using FileFlows.Plugin;
 using FileFlows.Server.Helpers;
-using FileFlows.ServerShared.Models;
-
-namespace FileFlows.Server.Services;
-
 using FileFlows.Server.Controllers;
 using FileFlows.ServerShared.Services;
 using FileFlows.Shared.Models;
-using System;
-using System.Threading.Tasks;
+
+namespace FileFlows.Server.Services;
 
 /// <summary>
 /// An instance of the Settings Service which allows accessing of the system settings
@@ -64,9 +60,9 @@ public class SettingsService : ISettingsService
         var license = LicenseHelper.GetLicense();
         if (license?.Status == LicenseStatus.Valid)
         {
+            var settings = ServiceLoader.Load<AppSettingsService>().Settings;
             status.Licensed = true;
-            string dbConnStr = AppSettings.Instance.DatabaseConnection;
-            status.ExternalDatabase = (string.IsNullOrWhiteSpace(dbConnStr) || dbConnStr.ToLower().Contains("sqlite")) == false;
+            status.ExternalDatabase = settings.DatabaseType != DatabaseType.Sqlite;
             status.LicenseDashboards = (license.Flags & LicenseFlags.Dashboards) == LicenseFlags.Dashboards;
             status.LicenseRevisions = (license.Flags & LicenseFlags.Revisions) == LicenseFlags.Revisions;
             status.LicenseTasks = (license.Flags & LicenseFlags.Tasks) == LicenseFlags.Tasks;

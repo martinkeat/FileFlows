@@ -2,7 +2,7 @@ using FileFlows.DataLayer;
 
 namespace FileFlowTests.Tests.DataLayerTests;
 
-public class TestDataHelper
+internal class TestDataHelper
 {
     private ILogger Logger;
     private DatabaseAccessManager Dam;
@@ -94,7 +94,7 @@ public class TestDataHelper
                 result.Active.Add(file);
         }
 
-        Dam.LibraryFileManager.InsertBulk(files).Wait();
+        Dam.LibraryFileManager.InsertBulk(files.ToArray()).Wait();
         //
         // if (dbType == DatabaseType.Sqlite)
         //     continue;

@@ -7,6 +7,7 @@ using FileFlows.Shared.Models;
 using FileFlows.Shared.Helpers;
 using Microsoft.AspNetCore.Mvc;
 using NodeService = FileFlows.Server.Services.NodeService;
+using SettingsService = FileFlows.Server.Services.SettingsService;
 
 namespace FileFlows.Server.Controllers;
 
@@ -47,7 +48,7 @@ public class LogController : Controller
         sources.Add(new() { Value = "", Label = "Server" });
         sources.Add(new() { Value = "DATABASE", Label = "Database" });
 
-        var settings = await new SettingsController().Get();
+        var settings = await ServiceLoader.Load<SettingsService>().Get();
         if(settings.LogEveryRequest)
             sources.Add(new() { Value = "HTTP", Label = "HTTP Requests" });
 

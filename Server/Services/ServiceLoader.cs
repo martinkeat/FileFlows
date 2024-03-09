@@ -13,24 +13,24 @@ public static class ServiceLoader
     /// <summary>
     /// Configures and initializes the services.
     /// </summary>
-    static void Services()
+    static ServiceLoader()
     {
+        // Add to WebServer to if needed
         Provider = new ServiceCollection()
-            // Add logging service
-            .AddLogging(options =>
-            {
-                options.ClearProviders(); // Clear existing logging providers
-                options.AddConsole(); // Add console logging provider
-            })
-            // Add singleton instance of Application class
-            .AddSingleton(new Application())
-            .AddSingleton(new DashboardService())
-            .AddSingleton(ServiceLoader.Load<FlowService>())
-            .AddSingleton(ServiceLoader.Load<LibraryService>())
-            .AddSingleton(ServiceLoader.Load<NodeService>())
-            .AddSingleton(new PluginService())
-            .AddSingleton(ServiceLoader.Load<TaskService>())
-            .AddSingleton(ServiceLoader.Load<VariableService>())
+            .AddSingleton<Application>()
+            .AddSingleton<AppSettingsService>()
+            .AddSingleton<StartupService>()
+            .AddSingleton<DatabaseService>()
+            .AddSingleton<SettingsService>()
+            .AddSingleton<DashboardService>()
+            .AddSingleton<FlowService>()
+            .AddSingleton<LibraryService>()
+            .AddSingleton<LibraryFileService>()
+            .AddSingleton<NodeService>()
+            .AddSingleton<PluginService>()
+            .AddSingleton<TaskService>()
+            .AddSingleton<VariableService>()
+            .AddSingleton<FlowRunnerService>()
             .BuildServiceProvider(); // Build the service provider
     }
     

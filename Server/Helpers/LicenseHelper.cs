@@ -1,5 +1,6 @@
 using System.Security.Cryptography;
 using System.Text;
+using FileFlows.Server.Services;
 using FileFlows.Shared.Helpers;
 
 namespace FileFlows.Server.Helpers;
@@ -70,8 +71,12 @@ class LicenseHelper
     /// <returns>the license</returns>
     internal static License GetLicense()
     {
-        if(_License == null)
-            _License = FromCode(AppSettings.Instance.LicenseCode);
+        if (_License == null)
+        {
+            var settings = ServiceLoader.Load<AppSettingsService>().Settings;
+            _License = FromCode(settings.LicenseCode);
+        }
+
         return _License;
     }
     
@@ -96,12 +101,13 @@ class LicenseHelper
     /// </summary>
     internal static async Task Update()
     {
-        var email = AppSettings.Instance.LicenseEmail;
-        var key = AppSettings.Instance.LicenseKey;
+        var service = ServiceLoader.Load<AppSettingsService>();
+        var email = service.Settings.LicenseEmail;
+        var key = service.Settings.LicenseKey;
         if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(key))
         {
-            AppSettings.Instance.LicenseCode = string.Empty;
-            AppSettings.Instance.Save();
+            service.Settings.LicenseCode = string.Empty;
+            service.Save();
             return;
         }
 
@@ -134,8 +140,8 @@ class LicenseHelper
             _LastUpdate = DateTime.Now;
 
             // code is good, save it
-            AppSettings.Instance.LicenseCode = licenseCode;
-            AppSettings.Instance.Save();
+            service.Settings.LicenseCode = licenseCode;
+            service.Save();
         }
 #if(DEBUG)
         catch (Exception ex)

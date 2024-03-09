@@ -103,8 +103,8 @@ public class SystemController:Controller
     [HttpPost("pause")]
     public async Task Pause([FromQuery] int duration)
     {
-        var controller = new SettingsController();
-        var settings = await controller.Get();
+        var service = ServiceLoader.Load<SettingsService>();
+        var settings = await service.Get();
         if (duration < 1)
         {
             settings.PausedUntil = DateTime.MinValue;
@@ -116,7 +116,7 @@ public class SystemController:Controller
             ClientServiceManager.Instance.SystemPaused(duration);
         }
 
-        await controller.Save(settings);
+        await service.Save(settings);
     }
 
 
@@ -133,7 +133,7 @@ public class SystemController:Controller
         //info.MemoryUsage = proc.PrivateMemorySize64;
         info.MemoryUsage = GC.GetTotalMemory(true);
         info.CpuUsage = await GetCpuPercentage();
-        var settings = await new SettingsController().Get();
+        var settings = await ServiceLoader.Load<SettingsService>().Get();
         info.IsPaused = settings.IsPaused;
         info.PausedUntil = settings.PausedUntil;
         return info;

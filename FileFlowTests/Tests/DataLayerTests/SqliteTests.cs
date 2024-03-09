@@ -24,7 +24,7 @@ public class SqliteTests : DbLayerTest
                 var file = Path.Combine(TempPath, dbName + ".sqlite");
                 if (File.Exists(file))
                     File.Delete(file);
-                return SQLiteConnector.GetConnectionString(file);
+                return SqliteHelper.GetConnectionString(file);
             }
             case DatabaseType.SqlServer:
                 return $@"Server={IP_ADDRESS};Database={dbName};User Id=sa;Password=Password123;";
@@ -345,7 +345,7 @@ public class SqliteTests : DbLayerTest
             Assert.IsNotNull(created);
 
             DateTime start = DateTime.Now;
-            db.LibraryFileManager.InsertBulk(files).Wait();
+            db.LibraryFileManager.InsertBulk(files.ToArray()).Wait();
             Logger.ILog($"Time to insert {files.Count}: " + DateTime.Now.Subtract(start));
             //
             // if (dbType == DatabaseType.Sqlite)
@@ -475,7 +475,7 @@ public class SqliteTests : DbLayerTest
                 });
             }
 
-            db.LibraryFileManager.InsertBulk(files).Wait();
+            db.LibraryFileManager.InsertBulk(files.ToArray()).Wait();
             
             var total = db.LibraryFileManager.GetTotal().Result;
             Assert.AreEqual(files.Count, total);

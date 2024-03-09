@@ -71,7 +71,7 @@ public class WorkerController : Controller
     {
         if (HttpContext?.Response != null)
         {
-            var settings = await new SettingsController().Get();
+            var settings = await ServiceLoader.Load<SettingsService>().Get();
             if (settings.IsPaused)
             {
                 HttpContext.Response.Headers.TryAdd("x-paused", "1");

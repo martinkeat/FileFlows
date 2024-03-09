@@ -1,5 +1,6 @@
 using System.Text.Json;
 using FileFlows.DataLayer.DatabaseConnectors;
+using FileFlows.DataLayer.DatabaseCreators;
 using FileFlows.Plugin;
 using FileFlows.ServerShared.Models;
 using FileFlows.Shared.Models;
@@ -71,6 +72,7 @@ internal  class DbMigrator
         }
         catch (Exception ex)
         {
+            Logger?.ELog("Failed to migrate data: " + ex.Message + Environment.NewLine + ex.StackTrace);
             return Result<bool>.Fail("Failed to migrate data: " + ex.Message);
         }
     }
@@ -201,5 +203,26 @@ internal  class DbMigrator
                 Logger.ELog($"Failed migrating library file '{obj.Name}': " + ex.Message);
             }
         }
+    }
+
+    /// <summary>
+    /// Checks if a database exists
+    /// </summary>
+    /// <param name="type">the type of database to check</param>
+    /// <param name="connectionString">the connection string</param>
+    /// <returns>true if exists, otherwise false</returns>
+    public Result<bool> DatabaseExists(DatabaseType type, string connectionString)
+    {
+        switch (type)
+        {
+            case DatabaseType.MySql:
+                return MySqlDatabaseCreator.DatabaseExists(connectionString);
+            case DatabaseType.SqlServer:
+                return SqlServerDatabaseCreator.DatabaseExists(connectionString);
+            case DatabaseType.Postgres:
+                return PostgresDatabaseCreator.DatabaseExists(connectionString);
+        }
+
+        return Result<bool>.Fail("Unsupported database type");
     }
 }

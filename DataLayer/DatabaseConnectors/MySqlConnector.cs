@@ -1,6 +1,8 @@
+using System.Text.RegularExpressions;
 using FileFlows.DataLayer.Converters;
 using FileFlows.Plugin;
-using FileFlows.Shared.Models;
+using NPoco;
+using DatabaseType = FileFlows.Shared.Models.DatabaseType;
 using MySqlConnectorFactory = MySqlConnector.MySqlConnectorFactory;
 
 namespace FileFlows.DataLayer.DatabaseConnectors;
@@ -80,4 +82,11 @@ public class MySqlConnector : IDatabaseConnector
 
     /// <inheritdoc />
     public string WrapFieldName(string name) => name;
+    
+    /// <summary>
+    /// Gets the database name from the connection string
+    /// </summary>
+    /// <returns>the database name</returns>
+    internal string GetDatabaseName()
+        => Regex.Match(ConnectionString, @"(?<=(Database=))[a-zA-Z0-9_\-]+").Value;
 }

@@ -4,6 +4,34 @@ using FileFlows.Shared.Models;
 namespace FileFlows.DataLayer.DatabaseConnectors;
 
 /// <summary>
+/// Loads a database connector
+/// </summary>
+internal static class DatabaseConnectorLoader
+{
+    /// <summary>
+    /// Loads a database connector 
+    /// </summary>
+    /// <param name="logger">The logger to used for logging</param>
+    /// <param name="type">The type of connector to load</param>
+    /// <param name="connectionString">The connection string of the database</param>
+    /// <returns>The initialized connector</returns>
+    internal static IDatabaseConnector LoadConnector(ILogger logger, DatabaseType type, string connectionString)
+    {
+        switch (type)
+        {
+            case DatabaseType.MySql:
+                return new MySqlConnector(logger, connectionString);
+            case DatabaseType.SqlServer:
+                return new SqlServerConnector(logger, connectionString);
+            case DatabaseType.Postgres:
+                return new PostgresConnector(logger, connectionString);
+            default:
+                return new SQLiteConnector(logger, connectionString);
+        }
+    }
+}
+
+/// <summary>
 /// Interface for different database connection types
 /// </summary>
 public interface IDatabaseConnector

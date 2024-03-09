@@ -65,81 +65,11 @@ internal class AppSettings
     /// </summary>
     public string DatabaseMigrateConnection { get; set; }
 
-
-    private static AppSettings? _Instance;
-
     /// <summary>
-    /// The AppSettings instance
+    /// Gets or sets the connection string of where to migrate the data to
+    /// This will be checked at startup and if found, the data will be migrated then this
+    /// setting will be reset
     /// </summary>
-    public static AppSettings Instance
-    {
-        get
-        {
-            _Instance ??= Load();
-            return _Instance;
-        }
-    }
+    public DatabaseType DatabaseMigrateType { get; set; }
 
-    /// <summary>
-    /// Saves the app settings
-    /// </summary>
-    public void Save()
-    {
-        if (ServerPort != null && (ServerPort < 1 || ServerPort > 65535))
-            ServerPort = null;
-        
-        var serializerOptions = new JsonSerializerOptions
-        {
-            WriteIndented = true,
-            DefaultIgnoreCondition  = JsonIgnoreCondition.WhenWritingDefault | JsonIgnoreCondition.WhenWritingNull
-        };
-        
-        string json = JsonSerializer.Serialize(this, serializerOptions);
-        File.WriteAllText(DirectoryHelper.ServerConfigFile, json);
-    }
-    
-    /// <summary>
-    /// Loads the app settings
-    /// </summary>
-    /// <returns>the app settings</returns>
-    public static AppSettings Load()
-    {
-        string file = DirectoryHelper.ServerConfigFile;
-        if (File.Exists(file) == false)
-        {
-            AppSettings settings = new();
-            if (File.Exists(DirectoryHelper.EncryptionKeyFile))
-            {
-                settings.EncryptionKey = File.ReadAllText(DirectoryHelper.EncryptionKeyFile);
-                File.Delete(DirectoryHelper.EncryptionKeyFile);
-            }
-
-            if (string.IsNullOrWhiteSpace(settings.EncryptionKey))
-                settings.EncryptionKey = Guid.NewGuid().ToString();
-            
-            settings.Save();
-            
-            return settings;
-        }
-
-        AppSettings? result = null;
-        try
-        {
-            string json = File.ReadAllText(file);
-            var settings = JsonSerializer.Deserialize<AppSettings>(json);
-            result = settings ?? new ();
-        }
-        catch (Exception) { }
-
-        result ??= new();
-
-
-        if (string.IsNullOrWhiteSpace(result.EncryptionKey))
-        {
-            result.EncryptionKey = Guid.NewGuid().ToString();
-            result.Save();
-        }
-
-        return result;
-    }
 }

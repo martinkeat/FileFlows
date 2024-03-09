@@ -25,7 +25,6 @@ namespace FileFlows.DataLayer.DatabaseConnectors;
             this.createConnectionFunc = createConnectionFunc ?? throw new ArgumentNullException(nameof(createConnectionFunc));
             semaphore = new FairSemaphore(poolSize);
             this.connectionLifetime = connectionLifetime ?? TimeSpan.Zero; // Default to zero if not provided
-            // InitializePool(poolSize);
         }
 
         private void InitializePool(int poolSize)

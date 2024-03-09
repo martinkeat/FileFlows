@@ -16,6 +16,24 @@ namespace FileFlows.Server.Controllers;
 [Route("/api/settings")]
 public class SettingsController : Controller
 {
+    /// <summary>
+    /// The settings for the application
+    /// </summary>
+    private AppSettings Settings;
+    /// <summary>
+    /// The settings for the application
+    /// </summary>
+    private AppSettingsService SettingsService;
+    
+    /// <summary>
+    /// Initializes a new instance of the controller
+    /// </summary>
+    /// <param name="appSettingsService">the application settings service</param>
+    public SettingsController(AppSettingsService appSettingsService)
+    {
+        SettingsService = appSettingsService;
+        Settings = appSettingsService.Settings;
+    }
 
     /// <summary>
     /// Gets the system status of FileFlows
@@ -32,7 +50,7 @@ public class SettingsController : Controller
     [HttpGet("check-update-available")]
     public async Task<string> CheckLatestVersion()
     {
-        var settings = await new SettingsController().Get();
+        var settings = await Get();
         if (settings.DisableTelemetry)
             return string.Empty; 
         try
@@ -58,7 +76,7 @@ public class SettingsController : Controller
     {
         var settings = await Get();
         var license = LicenseHelper.GetLicense();
-        if ((license == null || license.Status == LicenseStatus.Unlicensed) && string.IsNullOrWhiteSpace(AppSettings.Instance.LicenseKey) == false)
+        if ((license == null || license.Status == LicenseStatus.Unlicensed) && string.IsNullOrWhiteSpace(Settings.LicenseKey) == false)
             license.Status = LicenseStatus.Invalid;
         // clone it so we can remove some properties we dont want passed to the UI
         string json = JsonSerializer.Serialize(settings);
@@ -68,13 +86,13 @@ public class SettingsController : Controller
             ? string.Join("\n", uiModel.FileServerAllowedPaths)
             : string.Empty;
         
-        string dbConnStr = AppSettings.Instance.DatabaseMigrateConnection?.EmptyAsNull() ?? AppSettings.Instance.DatabaseConnection;
+        string dbConnStr = Settings.DatabaseMigrateConnection?.EmptyAsNull() ?? Settings.DatabaseConnection;
         if (string.IsNullOrWhiteSpace(dbConnStr) || dbConnStr.ToLower().Contains("sqlite"))
             uiModel.DbType = DatabaseType.Sqlite;
         // REFACTOR: re-look into this
         // else if (dbConnStr.Contains(";Uid="))
         //     new MySqlDbManager(string.Empty).PopulateSettings(uiModel, dbConnStr);
-        uiModel.RecreateDatabase = AppSettings.Instance.RecreateDatabase;
+        uiModel.RecreateDatabase = Settings.RecreateDatabase;
         
         return uiModel;
     }
@@ -89,8 +107,8 @@ public class SettingsController : Controller
 
     private void SetLicenseFields(SettingsUiModel settings, License license)
     {
-        settings.LicenseKey = AppSettings.Instance.LicenseKey;
-        settings.LicenseEmail  = AppSettings.Instance.LicenseEmail;
+        settings.LicenseKey = Settings.LicenseKey;
+        settings.LicenseEmail  = Settings.LicenseEmail;
         settings.LicenseFiles = license == null ? string.Empty :
             license.Files >= 1_000_000_000 ? "Unlimited" : license.Files.ToString();
         settings.LicenseFlags = license == null ? 0 : license.Flags;
@@ -133,23 +151,23 @@ public class SettingsController : Controller
             FileServerAllowedPaths = model.FileServerAllowedPathsString?.Split(new [] { "\r\n", "\r", "\n"}, StringSplitOptions.RemoveEmptyEntries)
         });
         // validate license it
-        AppSettings.Instance.LicenseKey = model.LicenseKey?.Trim();
-        AppSettings.Instance.LicenseEmail = model.LicenseEmail?.Trim();
+        Settings.LicenseKey = model.LicenseKey?.Trim();
+        Settings.LicenseEmail = model.LicenseEmail?.Trim();
         await LicenseHelper.Update();
         
         TranslaterHelper.InitTranslater(model.Language?.EmptyAsNull() ?? "en");
         
         // REFACTOR: re-look into this
         // var newConnectionString = GetConnectionString(model, model.DbType);
-        // if (IsConnectionSame(AppSettings.Instance.DatabaseConnection, newConnectionString) == false)
+        // if (IsConnectionSame(Settings.DatabaseConnection, newConnectionString) == false)
         // {
         //     // need to migrate the database
-        //     AppSettings.Instance.DatabaseMigrateConnection = newConnectionString?.EmptyAsNull() ?? DbManager.GetDefaultConnectionString();
+        //     Settings.DatabaseMigrateConnection = newConnectionString?.EmptyAsNull() ?? DbManager.GetDefaultConnectionString();
         // }
 
-        AppSettings.Instance.RecreateDatabase = model.RecreateDatabase; 
+        Settings.RecreateDatabase = model.RecreateDatabase; 
         // save AppSettings with updated license and db migration if set
-        AppSettings.Instance.Save();
+        SettingsService.Save();
     }
     /// <summary>
     /// Save the system settings

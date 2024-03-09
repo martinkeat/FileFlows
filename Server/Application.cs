@@ -2,6 +2,7 @@ using System.Collections;
 using System.Net;
 using Avalonia;
 using FileFlows.Server.Helpers;
+using FileFlows.Server.Services;
 using FileFlows.Shared.Helpers;
 
 namespace FileFlows.Server;
@@ -99,21 +100,9 @@ public class Application
 
             InitializeLoggers();
 
-            // must be done after directory helper otherwise will fail 
-            Globals.CustomFileFlowsDotComUrl = AppSettings.Instance.FileFlowsDotComUrl;
-
             WriteLogHeader(args);
-            Logger.Instance.DLog("GUI: " + fullGui);
-            Logger.Instance.DLog("Minimal GUI: " + minimalGui);
-
-            CleanDefaultTempDirectory();
 
             HttpHelper.Client = HttpHelper.GetDefaultHttpHelper(string.Empty);
-
-            CheckLicense();
-
-            if (PrepareDatabase() == false)
-                return;
 
             if (Docker || noGui)
             {
@@ -122,7 +111,6 @@ public class Application
             }
             else if (fullGui)
             {
-
                 UsingWebView = true;
 
                 var webview = new Gui.Photino.WebView();
@@ -208,10 +196,6 @@ public class Application
         Thread.Sleep(1); // so log message can be written
     }
 
-    private void CheckLicense()
-    {
-        LicenseHelper.Update().Wait();
-    }
 
     private void InitializeLoggers()
     {
@@ -219,99 +203,5 @@ public class Application
         new ConsoleLogger();
     }
 
-    private bool PrepareDatabase()
-    {
-        if (string.IsNullOrEmpty(AppSettings.Instance.DatabaseConnection) == false &&
-            AppSettings.Instance.DatabaseConnection.Contains(".sqlite") == false)
-        {
-            // check if licensed for external db, if not force migrate to sqlite
-            if (LicenseHelper.IsLicensed(LicenseFlags.ExternalDatabase) == false)
-            {
-#if(DEBUG)
-                // twice for debugging so we can step into it and see why
-                if (LicenseHelper.IsLicensed(LicenseFlags.ExternalDatabase) == false)
-                {
-                }
-#endif
-
-                FlowDbConnection.Initialize(true);
-                Logger.Instance.WLog("No longer licensed for external database, migrating to SQLite database.");
-                AppSettings.Instance.DatabaseMigrateConnection = SqliteDbManager.GetDefaultConnectionString();
-            }
-            else
-            {
-                FlowDbConnection.Initialize(false);
-            }
-        }
-        else
-            FlowDbConnection.Initialize(true);
-
-        if (string.IsNullOrEmpty(AppSettings.Instance.DatabaseMigrateConnection) == false)
-        {
-            if (AppSettings.Instance.DatabaseConnection == AppSettings.Instance.DatabaseMigrateConnection)
-            {
-                AppSettings.Instance.DatabaseMigrateConnection = null;
-                AppSettings.Instance.Save();
-            }
-            else if (AppSettings.Instance.RecreateDatabase == false &&
-                     DbMigrater.ExternalDatabaseExists(AppSettings.Instance.DatabaseMigrateConnection))
-            {
-                Logger.Instance.ILog("Switching to existing database");
-                AppSettings.Instance.DatabaseConnection = AppSettings.Instance.DatabaseMigrateConnection;
-                AppSettings.Instance.DatabaseMigrateConnection = null;
-                AppSettings.Instance.RecreateDatabase = false;
-                AppSettings.Instance.Save();
-            }
-            else
-            {
-                Logger.Instance.ILog("Database migration starting");
-                bool migrated = DbMigrater.Migrate(AppSettings.Instance.DatabaseConnection,
-                    AppSettings.Instance.DatabaseMigrateConnection);
-                if (migrated)
-                    AppSettings.Instance.DatabaseConnection = AppSettings.Instance.DatabaseMigrateConnection;
-                else
-                {
-                    Logger.Instance.ELog("Database migration failed, reverting to previous database settings");
-#if(DEBUG)
-                    throw new Exception("Migration failed");
-#endif
-                }
-
-                AppSettings.Instance.DatabaseMigrateConnection = null;
-                AppSettings.Instance.RecreateDatabase = false;
-                AppSettings.Instance.Save();
-            }
-        }
-
-        Logger.Instance.ILog("About to initialize Database");
-        // initialize the database
-        if (DbHelper.Initialize().Result == false)
-        {
-            Logger.Instance.ELog("Failed initializing database");
-            return false;
-        }
-
-        Logger.Instance.ILog("Database initialized");
-
-        // run any upgrade code that may need to be run
-        var settings = DbHelper.Single<Settings>().Result;
-        new Upgrade.Upgrader().Run(settings);
-        DbHelper.RestoreDefaults();
-
-        new DatabaseLogger();
-
-        return true;
-    }
-
-    /// <summary>
-    /// Clean the default temp directory on startup
-    /// </summary>
-    private void CleanDefaultTempDirectory()
-    {
-        string tempDir = Docker
-            ? Path.Combine(DirectoryHelper.DataDirectory, "temp")
-            : Path.Combine(DirectoryHelper.BaseDirectory, "Temp");
-        DirectoryHelper.CleanDirectory(tempDir);
-    }
 
 }
