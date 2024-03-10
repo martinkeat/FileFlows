@@ -117,10 +117,12 @@ public class WebServer
     /// <param name="args">command line arguments</param>
     public static void Start(string[] args)
     {
-        if (RunStartupCode().IsFailed)
+        if (RunStartupCode().Failed(out string error))
         {
-            if(Application.UsingWebView)
+            Logger.Instance.ELog("Startup failed: " + error);
+            if (Application.UsingWebView)
                 Thread.Sleep(10_000);
+
             return;
         }
         

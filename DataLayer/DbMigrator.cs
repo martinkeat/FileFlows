@@ -60,9 +60,16 @@ internal  class DbMigrator
             if(structureResult.Value == false)
                 return Result<bool>.Fail("Failed creating destination database structure");
             
+            Logger?.ILog("Migrating database objects");
             MigrateDbObjects(source, dest);
+            
+            Logger?.ILog("Migrating library files");
             MigrateLibraryFiles(source, dest);
+            
+            Logger?.ILog("Migrating statistics");
             MigrateDbStatistics(source, dest);
+            
+            Logger?.ILog("Migrating revisions");
             MigrateRevisions(source, dest);
             // log messages, we dont care if these are migrated
             //MigrateDbLogs(source, dest);
@@ -116,16 +123,13 @@ internal  class DbMigrator
         if (dbStatistics?.Any() != true)
             return;
 
-        foreach (var obj in dbStatistics)
+        try
         {
-            try
-            {
-                dest.StatisticManager.Insert(obj).Wait();
-            }
-            catch (Exception ex)
-            {
-                Logger?.WLog("Failed migrating database statistic: " + ex.Message);
-            }
+            dest.StatisticManager.InsertBulk(dbStatistics.ToArray()).Wait();
+        }
+        catch (Exception ex)
+        {
+            Logger?.WLog("Failed migrating database statistic: " + ex.Message);
         }
     }
     

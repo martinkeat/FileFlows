@@ -1,3 +1,4 @@
+using System.Text.Json;
 using FileFlows.DataLayer.Models;
 using FileFlows.ServerShared;
 using FileFlows.ServerShared.Models;
@@ -10,24 +11,23 @@ namespace FileFlows.Managers;
 public class StatisticManager
 {
     /// <summary>
-    /// Gets statistics by name
+    /// Gets statistic by name
     /// </summary>
-    /// <returns>the matching statistics</returns>
-    public async Task<IEnumerable<Statistic>> GetStatisticsByName(string name)
+    /// <returns>the matching statistic</returns>
+    public async Task<T?> GetByName<T>(string name)
     {
-        List<DbStatistic> stats = await DatabaseAccessManager.Instance.StatisticManager.GetStatisticsByName(name);
-
-        var results = new List<Statistic>();
-        foreach (var stat in stats)
+        var stat = await DatabaseAccessManager.Instance.StatisticManager.GetStatisticByName(name);
+        if (stat == null)
+            return default;
+        try
         {
-            if(stat.Type == StatisticType.Number)
-                results.Add(new () { Name = stat.Name, Value = stat.NumberValue});
-            if(stat.Type == StatisticType.String)
-                results.Add(new () { Name = stat.Name, Value = stat.StringValue});
+            var data = JsonSerializer.Deserialize<T>(stat.Data);
+            return data;
         }
-
-        return results;
-
+        catch (Exception)
+        {
+            return default;
+        }
 
     }
     
@@ -38,29 +38,11 @@ public class StatisticManager
     public async Task Insert(Statistic statistic)
     {
         DbStatistic stat;
-        if (double.TryParse(statistic.Value.ToString(), out double number))
+        stat = new DbStatistic()
         {
-            stat = new DbStatistic()
-            {
-                Type = StatisticType.Number,
-                Name = statistic.Name,
-                LogDate = DateTime.UtcNow,
-                NumberValue = number,
-                StringValue = string.Empty
-            };
-        }
-        else
-        {
-            // treat as string
-            stat = new DbStatistic()
-            {
-                Type = StatisticType.String,
-                Name = statistic.Name,
-                LogDate = DateTime.UtcNow,
-                NumberValue = 0,
-                StringValue = statistic.Value.ToString()
-            };
-        }
+            Name = statistic.Name,
+            Data = JsonSerializer.Serialize(statistic.Value)
+        };
         await DatabaseAccessManager.Instance.StatisticManager.Insert(stat);
     }
 
@@ -68,8 +50,6 @@ public class StatisticManager
     /// Clears DbStatistics based on specified conditions.
     /// </summary>
     /// <param name="name">Optional. The name for which DbStatistics should be cleared.</param>
-    /// <param name="before">Optional. The date before which DbStatistics should be cleared.</param>
-    /// <param name="after">Optional. The date after which DbStatistics should be cleared.</param>
-    public Task Clear(string? name, DateTime? before, DateTime? after)
-        => DatabaseAccessManager.Instance.StatisticManager.Clear(name, before, after);
+    public Task Clear(string? name)
+        => DatabaseAccessManager.Instance.StatisticManager.Clear(name);
 }

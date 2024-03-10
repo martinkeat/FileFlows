@@ -18,7 +18,7 @@ public class Decoders:WidgetDefinition
     /// <summary>
     /// Gets the URL
     /// </summary>
-    public override string Url => "/api/statistics/by-name/Decoder";
+    public override string Url => "/api/statistics/running-totals/Decoder";
     
     /// <summary>
     /// Gets the Icon

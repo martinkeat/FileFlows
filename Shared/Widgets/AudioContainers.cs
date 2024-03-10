@@ -20,7 +20,7 @@ public class AudioContainers:WidgetDefinition
     /// <summary>
     /// Gets the URL
     /// </summary>
-    public override string Url => "/api/statistics/by-name/AUDIO_CONTAINER";
+    public override string Url => "/api/statistics/running-totals/AUDIO_CONTAINER";
     
     /// <summary>
     /// Gets the Icon

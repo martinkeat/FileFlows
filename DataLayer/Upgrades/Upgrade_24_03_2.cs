@@ -1,7 +1,11 @@
+using System.Data.Common;
 using System.Text;
+using System.Text.Json;
+using System.Text.RegularExpressions;
 using FileFlows.DataLayer.DatabaseConnectors;
 using FileFlows.DataLayer.Helpers;
 using FileFlows.Plugin;
+using FileFlows.ServerShared.Models.StatisticModels;
 using FileFlows.Shared.Models;
 
 namespace FileFlows.DataLayer.Upgrades;
@@ -36,10 +40,6 @@ public class Upgrade_24_03_2
     /// <returns>the upgrade result</returns>
     private Result<bool> RunMySql(ILogger logger, string connectionString)
     {
-        // Get the local timezone of the machine
-        TimeZoneInfo localTimeZone = TimeZoneInfo.Local;
-        string localTimeZoneName = localTimeZone.Id;
-
         var connector = new DatabaseConnectors.MySqlConnector(logger, connectionString);
         using var db = connector.GetDb(true).Result;
         
@@ -57,9 +57,10 @@ public class Upgrade_24_03_2
                                ", DateModified = " + connector.FormatDateQuoted(dbo.DateModified) +
                                $" where Uid = '{dbo.Uid}';");
             }
+
             db.Db.Execute(sql.ToString());
-            
-            
+
+
             // DbRevision
             var dbr = db.Db.Fetch<RevisionedObject>("select * from RevisionedObject");
             sql.Clear();
@@ -67,14 +68,17 @@ public class Upgrade_24_03_2
             {
                 r.RevisionDate = DateTimeHelper.LocalToUtc(r.RevisionDate);
                 r.RevisionCreated = DateTimeHelper.LocalToUtc(r.RevisionCreated);
-                sql.AppendLine("update RevisionedObject set RevisionDate = " + connector.FormatDateQuoted(r.RevisionDate) +
+                sql.AppendLine("update RevisionedObject set RevisionDate = " +
+                               connector.FormatDateQuoted(r.RevisionDate) +
                                ", RevisionCreated = " + connector.FormatDateQuoted(r.RevisionCreated) +
                                $" where Uid = '{r.Uid}';");
             }
+
             db.Db.Execute(sql.ToString());
-            
+
             // LibraryFiles
-            var libFiles = db.Db.Fetch<LibraryFileUpgrade>("select Uid, DateCreated, DateModified, ProcessingStarted, ProcessingEnded, HoldUntil, CreationTime, LastWriteTime from LibraryFile");
+            var libFiles = db.Db.Fetch<LibraryFileUpgrade>(
+                "select Uid, DateCreated, DateModified, ProcessingStarted, ProcessingEnded, HoldUntil, CreationTime, LastWriteTime from LibraryFile");
             sql.Clear();
             foreach (var lf in libFiles)
             {
@@ -94,22 +98,26 @@ public class Upgrade_24_03_2
                                ", LastWriteTime = " + connector.FormatDateQuoted(lf.LastWriteTime) +
                                $" where Uid = '{lf.Uid}';");
             }
+
             db.Db.Execute(sql.ToString());
 
             db.Db.ExecuteAsync(
                 "update DbObject set Type = 'FileFlows.ServerShared.Models.PluginSettingsModel' where Type = 'FileFlows.Server.Models.PluginSettingsModel'");
 
-        db.Db.CompleteTransaction();
-        return true;
+            UpgradeStatistics(db, true);
+
+            db.Db.CompleteTransaction();
+
+            return true;
         }
         catch (Exception ex)
         {
             db.Db.AbortTransaction();
-            #if(DEBUG)
+#if(DEBUG)
             return Result<bool>.Fail(ex.Message + Environment.NewLine + ex.StackTrace);
-            #else
+#else
             return Result<bool>.Fail(ex.Message);
-            #endif
+#endif
         }
 
     }
@@ -149,6 +157,8 @@ public class Upgrade_24_03_2
             
             db.Db.ExecuteAsync(
                 "update DbObject set Type = 'FileFlows.ServerShared.Models.PluginSettingsModel' where Type = 'FileFlows.Server.Models.PluginSettingsModel'");
+
+            UpgradeStatistics(db, false);
             
             return true;
         }
@@ -159,6 +169,37 @@ public class Upgrade_24_03_2
 #else
             return Result<bool>.Fail(ex.Message);
 #endif
+        }
+    }
+
+    private void UpgradeStatistics(DatabaseConnection connector, bool mySql)
+    {
+        var old = connector.Db.Fetch<DbStatisticOld>("select * from DbStatistic")
+            .GroupBy(x => x.Name)
+            .ToDictionary(x => x.Key, x => x.ToList());
+
+        Dictionary<string, object> newStats = new();
+        foreach (string key in old.Keys)
+        {
+            var totals = new RunningTotals();
+            foreach (var stat in old[key])
+            {
+                if (totals.Totals.TryAdd(stat.StringValue, 1) == false)
+                    totals.Totals[stat.StringValue] += 1;
+            }
+            newStats.Add(key, totals);
+        }
+
+        string newTable = $@"DROP TABLE DbStatistic; CREATE TABLE DbStatistic
+(
+    Name            varchar(255)       {(mySql ? "COLLATE utf8_unicode_ci" : "")}      NOT NULL,
+    Data            TEXT               {(mySql ? "COLLATE utf8_unicode_ci" : "")}      NOT NULL
+)";
+        connector.Db.Execute(newTable);
+        foreach (var key in newStats.Keys)
+        {
+            connector.Db.Execute("insert into DbStatistic (Name, Data) values (@0, @1)",
+                key, JsonSerializer.Serialize(newStats[key]));
         }
     }
     
@@ -227,5 +268,52 @@ public class Upgrade_24_03_2
         /// Gets or sets the date and time when the file was last written to in the filesystem.
         /// </summary>
         public DateTime LastWriteTime { get; set; }
+    }
+    
+    
+    /// <summary>
+    /// Statistic saved in the database
+    /// </summary>
+    public class DbStatisticOld
+    {
+        /// <summary>
+        /// Gets or sets when the statistic was recorded
+        /// </summary>
+        public DateTime LogDate { get; set; }
+
+        /// <summary>
+        /// Gets or sets the name of the statistic
+        /// </summary>
+        public string Name { get; set; }
+
+        /// <summary>
+        /// Gets or sets the type
+        /// </summary>
+        public StatisticType Type { get; set; }
+    
+        /// <summary>
+        /// Gets or sets the string value
+        /// </summary>
+        public string StringValue { get; set; }
+    
+        /// <summary>
+        /// Gets or sets the number value
+        /// </summary>
+        public double NumberValue { get; set; }
+        
+        /// <summary>
+        /// Statistic types
+        /// </summary>
+        public enum StatisticType
+        {
+            /// <summary>
+            /// String statistic
+            /// </summary>
+            String = 0,
+            /// <summary>
+            /// Number statistic
+            /// </summary>
+            Number = 1
+        }
     }
 }

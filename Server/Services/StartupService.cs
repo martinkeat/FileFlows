@@ -51,6 +51,7 @@ public class StartupService
         }
         catch (Exception ex)
         {
+            Logger.Instance.ELog("Startup failure: " + ex.Message + Environment.NewLine + ex.StackTrace);
             #if(DEBUG)
             UpdateStatus("Startup failure: " + ex.Message + Environment.NewLine + ex.StackTrace);
             #else
@@ -102,6 +103,12 @@ public class StartupService
         var upgradeRequired = upgrader.UpgradeRequired(appSettingsService.Settings);
         if (upgradeRequired.Failed(out error))
             return Result<bool>.Fail(error);
+
+        if (upgradeRequired.Value.Required == false)
+            return true;
+        
+        UpdateStatus("Backing up old database...");
+        upgrader.Backup(upgradeRequired.Value.Current, appSettingsService.Settings);
         
         UpdateStatus("Upgrading Please Wait...");
         var upgradeResult = upgrader.Run(upgradeRequired.Value.Current, appSettingsService);

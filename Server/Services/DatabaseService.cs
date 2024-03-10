@@ -65,6 +65,7 @@ public class DatabaseService
         {
             // migration and current databases match, nothing to do
             ServiceAppSetting.Settings.DatabaseMigrateConnection = null;
+            ServiceAppSetting.Settings.DatabaseMigrateType = null;
             ServiceAppSetting.Save();
             return true; 
         }
@@ -82,6 +83,7 @@ public class DatabaseService
             Logger.Instance.ILog("Switching to existing database");
             ServiceAppSetting.Settings.DatabaseConnection = ServiceAppSetting.Settings.DatabaseMigrateConnection;
             ServiceAppSetting.Settings.DatabaseMigrateConnection = null;
+            ServiceAppSetting.Settings.DatabaseMigrateType = null;
             ServiceAppSetting.Settings.RecreateDatabase = false;
             ServiceAppSetting.Save();
             return true;
@@ -93,6 +95,7 @@ public class DatabaseService
             ServiceAppSetting.Settings.DatabaseConnection = ServiceAppSetting.Settings.DatabaseMigrateConnection;
         
         ServiceAppSetting.Settings.DatabaseMigrateConnection = null;
+        ServiceAppSetting.Settings.DatabaseMigrateType = null;
         ServiceAppSetting.Settings.RecreateDatabase = false;
         ServiceAppSetting.Save();
         if (migratedResult.IsFailed)

@@ -20,7 +20,7 @@ public class ComicFormats:WidgetDefinition
     /// <summary>
     /// Gets the URL
     /// </summary>
-    public override string Url => "/api/statistics/by-name/COMIC_FORMAT";
+    public override string Url => "/api/statistics/running-totals/COMIC_FORMAT";
     
     /// <summary>
     /// Gets the Icon

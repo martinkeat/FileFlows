@@ -32,10 +32,27 @@ internal  class DbStatisticManager : BaseManager
     /// Inserts a new DbStatistic
     /// </summary>
     /// <param name="dbStatistic">the new DbStatistic</param>
-    public async Task Insert(DbStatistic dbStatistic)
+    public Task Insert(DbStatistic dbStatistic)
+        => InsertBulk(dbStatistic);
+    
+    
+    /// <summary>
+    /// Bulk insert many statistics
+    /// </summary>
+    /// <param name="stats">the stats to insert</param>
+    public async Task InsertBulk(params DbStatistic[] stats)
     {
         using var db = await DbConnector.GetDb(write: true);
-        await db.Db.InsertAsync(dbStatistic);
+        db.Db.BeginTransaction();
+        foreach (var stat in stats)
+        {
+            string sql = "insert into " + Wrap(nameof(DbStatistic)) + " ( " +
+                         Wrap(nameof(stat.Name)) + ", " +
+                         Wrap(nameof(stat.Data)) + ") " +
+                         " values (@0, @1)";
+            await db.Db.ExecuteAsync(sql, stat.Name, stat.Data);
+        }
+        db.Db.CompleteTransaction();
     }
 
 
@@ -53,21 +70,20 @@ internal  class DbStatisticManager : BaseManager
     /// Gets statistics by name
     /// </summary>
     /// <returns>the matching statistics</returns>
-    public async Task<List<DbStatistic>> GetStatisticsByName(string name)
+    public async Task<DbStatistic> GetStatisticByName(string name)
     {
         using var db = await DbConnector.GetDb();
-        return (await db.Db.FetchAsync<DbStatistic>("where " + Wrap(nameof(DbStatistic.Name)) + " = @0", name)).ToList();
+        return await db.Db.SingleAsync<DbStatistic>
+            ("where " + Wrap(nameof(DbStatistic.Name)) + " = @0", name);
     }
 
     /// <summary>
     /// Clears DbStatistics based on specified conditions.
     /// </summary>
     /// <param name="name">Optional. The name for which DbStatistics should be cleared.</param>
-    /// <param name="before">Optional. The date before which DbStatistics should be cleared.</param>
-    /// <param name="after">Optional. The date after which DbStatistics should be cleared.</param>
-    public async Task Clear(string? name = null, DateTime? before = null, DateTime? after = null)
+    public async Task Clear(string? name = null)
     {
-        if (string.IsNullOrWhiteSpace(name) && before == null && after == null)
+        if (string.IsNullOrWhiteSpace(name))
         {
             Logger.ILog("Deleting ALL DbStatistics");
             using var db = await DbConnector.GetDb();
@@ -76,12 +92,6 @@ internal  class DbStatisticManager : BaseManager
         else
         {
             string whereClause = "";
-
-            if (before != null)
-                whereClause += " " + Wrap(nameof(DbStatistic.LogDate)) + " < " + DbConnector.FormatDateQuoted(before.Value) + " ";
-
-            if (after != null)
-                whereClause += (string.IsNullOrWhiteSpace(whereClause) ? " " : " AND ") + Wrap(nameof(DbStatistic.LogDate)) + " > " + DbConnector.FormatDateQuoted(after.Value) + " ";
 
             if (string.IsNullOrWhiteSpace(name) == false)
                 whereClause += (string.IsNullOrWhiteSpace(whereClause) ? " " : " AND ") + Wrap(nameof(DbStatistic.Name)) + " = @0";

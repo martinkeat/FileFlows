@@ -22,11 +22,8 @@ CREATE INDEX ix_LogDate ON DbLogMessage (LogDate);
 
 CREATE TABLE DbStatistic
 (
-    LogDate         datetime           default           getdate(),
-    Name            varchar(100)       NOT NULL,
-    Type            int                NOT NULL,
-    StringValue     NVARCHAR(MAX)      NOT NULL,
-    NumberValue     float              NOT NULL
+    Name            varchar(255)       NOT NULL,
+    Data            NVARCHAR(MAX)      NOT NULL
 );
 
 

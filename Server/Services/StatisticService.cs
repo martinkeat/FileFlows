@@ -1,10 +1,7 @@
-﻿using FileFlows.DataLayer;
-using FileFlows.Managers;
-using FileFlows.Server.Controllers;
-using FileFlows.Server.Helpers;
+﻿using FileFlows.Managers;
 using FileFlows.ServerShared.Models;
+using FileFlows.ServerShared.Models.StatisticModels;
 using FileFlows.ServerShared.Services;
-using DbStatistic = FileFlows.DataLayer.Models.DbStatistic;
 
 namespace FileFlows.Server.Services;
 
@@ -32,44 +29,26 @@ public class StatisticService : IStatisticService
     }
 
     /// <summary>
-    /// Gets statistics by name
-    /// </summary>
-    /// <returns>the matching statistics</returns>
-    public Task<IEnumerable<Statistic>> GetStatisticsByName(string name)
-        => new StatisticManager().GetStatisticsByName(name);
-
-    /// <summary>
-    /// Gets statistics totaled by their name
-    /// </summary>
-    /// <returns>the matching statistics</returns>
-    public async Task<Dictionary<string, int>> GetTotalsByName( string name)
-    {
-        var stats = await new StatisticManager().GetStatisticsByName(name);
-        var groupedStats = stats.GroupBy(stat => stat.Value.ToString());
-
-        // Create a dictionary to store the counts
-        var resultDictionary = new Dictionary<string, int>();
-
-        // Iterate through the grouped stats and count the occurrences
-        foreach (var group in groupedStats)
-        {
-            // group.Key is the unique value, group.Count() is the count
-            resultDictionary.Add(group.Key, group.Count());
-        }
-
-        // Order the dictionary by count in descending order
-        resultDictionary = resultDictionary.OrderByDescending(kv => kv.Value)
-            .ToDictionary(kv => kv.Key, kv => kv.Value);
-
-        return resultDictionary;
-    }
-
-    /// <summary>
     /// Clears DbStatistics based on specified conditions.
     /// </summary>
     /// <param name="name">Optional. The name for which DbStatistics should be cleared.</param>
-    /// <param name="before">Optional. The date before which DbStatistics should be cleared.</param>
-    /// <param name="after">Optional. The date after which DbStatistics should be cleared.</param>
-    public Task Clear(string? name = null, DateTime? before = null, DateTime? after = null)
-        => new StatisticManager().Clear(name, before, after);
+    public Task Clear(string? name = null)
+        => new StatisticManager().Clear(name);
+
+    /// <summary>
+    /// Gets statistics by name
+    /// </summary>
+    /// <returns>the matching statistics</returns>
+    public async Task<IEnumerable<Statistic>> GetRunningTotals(string name)
+    {
+        var stat = await new StatisticManager().GetByName<RunningTotals>(name);
+        if (stat == null)
+            return new List<Statistic>();
+        return stat.Totals.Select(x => new Statistic()
+        {
+            Name = x.Key,
+            Value = x.Value
+        });
+
+    }
 }

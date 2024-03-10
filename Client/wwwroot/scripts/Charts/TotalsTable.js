@@ -65,7 +65,7 @@ export class TotalsTable extends FFChart
         if(json === this.existing)
             return;
         this.existing = json; // so we dont refresh if we don't have to
-        if(data && Object.keys(data).length > 0)
+        if(data && data.length > 0)
             this.createTableData(data);
         else
             this.createNoData();
@@ -107,22 +107,22 @@ export class TotalsTable extends FFChart
         
         let tbody = document.createElement('tbody');
         table.appendChild(tbody);
-        Object.keys(data).forEach(key =>
+        for(let i=0;i<data.length;i++)
         {
             let tr = document.createElement('tr');
             tbody.appendChild(tr);
 
             let tdLabel = document.createElement('td');
             tr.appendChild(tdLabel);
-            tdLabel.innerText = key;
+            tdLabel.innerText = data[i].Name;
 
             let tdTotal = document.createElement('td');
             tdTotal.style.width = '6rem';
             tdTotal.style.minWidth = '6rem';
             tdTotal.style.maxWidth = '6rem';
-            tdTotal.innerText = data[key];
+            tdTotal.innerText = data[i].Value;
             tr.appendChild(tdTotal);
-        });
+        }
         let chartDiv = document.getElementById(this.chartUid);
         chartDiv.textContent = '';
         chartDiv.appendChild(table);

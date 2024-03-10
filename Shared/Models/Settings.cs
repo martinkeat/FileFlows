@@ -154,15 +154,15 @@ public enum DatabaseType
     /// </summary>
     Sqlite = 0,
     /// <summary>
-    /// Microsoft SQL Server
-    /// </summary>
-    SqlServer = 1,
-    /// <summary>
     /// MySql / MariaDB
     /// </summary>
-    MySql = 2,
+    MySql = 1,
     /// <summary>
     /// Postgres
     /// </summary>
-    Postgres = 3
+    Postgres = 2,
+    /// <summary>
+    /// Microsoft SQL Server
+    /// </summary>
+    SqlServer = 3
 }

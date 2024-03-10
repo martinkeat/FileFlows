@@ -13,11 +13,8 @@ CREATE INDEX IF NOT EXISTS idx_DbObject_Name ON DbObject (Name);
 
 CREATE TABLE DbStatistic
 (
-    LogDate         datetime,
-    Name            varchar(100)       NOT NULL,
-    Type            int                NOT NULL,
-    StringValue     TEXT               NOT NULL,
-    NumberValue     REAL               NOT NULL
+    Name            varchar(255)       NOT NULL,
+    Data            TEXT               NOT NULL
 );
 
 

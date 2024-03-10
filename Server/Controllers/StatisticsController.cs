@@ -23,31 +23,21 @@ public class StatisticsController : Controller
     /// Gets statistics by name
     /// </summary>
     /// <returns>the matching statistics</returns>
-    [HttpGet("by-name/{name}")]
-    public Task<IEnumerable<Statistic>> GetStatisticsByName([FromRoute] string name)
-        => new StatisticService().GetStatisticsByName(name);
-
-    /// <summary>
-    /// Gets statistics totaled by their name
-    /// </summary>
-    /// <returns>the matching statistics</returns>
-    [HttpGet("totals-by-name/{name}")]
-    public Task<Dictionary<string, int>> GetTotalsByName([FromRoute] string name)
-        => new StatisticService().GetTotalsByName(name);
+    [HttpGet("running-totals/{name}")]
+    public Task<IEnumerable<Statistic>> GetRunningTotals([FromRoute] string name)
+        => new StatisticService().GetRunningTotals(name);
     
     /// <summary>
     /// Clears statistics for
     /// </summary>
     /// <param name="name">Optional. The name for which DbStatistics should be cleared.</param>
-    /// <param name="before">Optional. The date before which DbStatistics should be cleared.</param>
-    /// <param name="after">Optional. The date after which DbStatistics should be cleared.</param>
     /// <returns>the response</returns>
     [HttpPost("clear")]
-    public IActionResult Clear([FromQuery] string? name = null, DateTime? before = null, DateTime? after = null)
+    public IActionResult Clear([FromQuery] string? name = null)
     {
         try
         {
-            new StatisticService().Clear(name, before, after);
+            new StatisticService().Clear(name);
             return Ok();
         }
         catch (Exception)

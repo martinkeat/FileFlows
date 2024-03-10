@@ -275,7 +275,10 @@
     "ProcessingTimes": "Verarbeitungszeiten",
     "VideoContainers": "Video-Container",
     "AudioContainers": "Audio-Container",
-    "StorageSaved": "Gespeicherter Speicherplatz"
+    "StorageSaved": "Gespeicherter Speicherplatz",
+    "Decoders": "Decoders",
+    "Encoders": "Encoders",
+    "DecoderParameters": "Decoder Parameters"
   },
   "Flow": {
     "ErrorMessages":{

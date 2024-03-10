@@ -30,12 +30,40 @@ internal  class DbRevisionManager : BaseManager
     /// Inserts a new revision
     /// </summary>
     /// <param name="dbRevision">the new revision</param>
-    internal async Task Insert(RevisionedObject dbRevision)
+    internal Task Insert(RevisionedObject dbRevision)
+        => InsertBulk(dbRevision);
+
+    
+    /// <summary>
+    /// Bulk insert many revisions
+    /// </summary>
+    /// <param name="items">the revisions to insert</param>
+    public async Task InsertBulk(params RevisionedObject[] items)
     {
         using var db = await DbConnector.GetDb(write: true);
-        await db.Db.InsertAsync(dbRevision);
+        db.Db.BeginTransaction();
+        foreach (var item in items)
+        {
+            string sql = "insert into " + Wrap(nameof(RevisionedObject)) + " ( " +
+                         Wrap(nameof(item.Uid)) + ", " +
+                         Wrap(nameof(item.RevisionUid)) + ", " +
+                         Wrap(nameof(item.RevisionName)) + ", " +
+                         Wrap(nameof(item.RevisionType)) + ", " +
+                         Wrap(nameof(item.RevisionDate)) + ", " +
+                         Wrap(nameof(item.RevisionCreated)) + ", " +
+                         Wrap(nameof(item.RevisionData)) + ") " +
+                         " values (" +
+                         $"'{item.Uid}', " +
+                         $"'{item.RevisionUid}', " +
+                         "@0, " +
+                         "@1, " +
+                         DbConnector.FormatDateQuoted(item.RevisionDate) + ", " +
+                         DbConnector.FormatDateQuoted(item.RevisionCreated) + ", " +
+                         "@2)";
+            await db.Db.ExecuteAsync(sql, item.RevisionName, item.RevisionType, item.RevisionData);
+        }
+        db.Db.CompleteTransaction();
     }
-
 
     /// <summary>
     /// Fetches all items

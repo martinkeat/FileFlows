@@ -151,13 +151,13 @@ public class SettingsController : Controller
         
         TranslaterHelper.InitTranslater(model.Language?.EmptyAsNull() ?? "en");
         
-        // REFACTOR: re-look into this
-        // var newConnectionString = GetConnectionString(model, model.DbType);
-        // if (IsConnectionSame(Settings.DatabaseConnection, newConnectionString) == false)
-        // {
-        //     // need to migrate the database
-        //     Settings.DatabaseMigrateConnection = newConnectionString?.EmptyAsNull() ?? DbManager.GetDefaultConnectionString();
-        // }
+        var newConnectionString = GetConnectionString(model, model.DbType);
+        if (IsConnectionSame(Settings.DatabaseConnection, newConnectionString) == false)
+        {
+             // need to migrate the database
+             Settings.DatabaseMigrateConnection = newConnectionString;
+             Settings.DatabaseMigrateType = model.DbType;
+        }
 
         Settings.RecreateDatabase = model.RecreateDatabase; 
         // save AppSettings with updated license and db migration if set
@@ -189,16 +189,18 @@ public class SettingsController : Controller
         return connString.IndexOf("FileFlows.sqlite") > 0;
     }
 
-    // private string GetConnectionString(SettingsUiModel settings, DatabaseType dbType)
-    // {
-    //     // if (dbType == DatabaseType.SqlServer)
-    //     //     return new SqlServerDbManager(string.Empty).GetConnectionString(settings.DbServer, settings.DbName, settings.DbUser,
-    //     //         settings.DbPassword);
-    //     if (dbType == DatabaseType.MySql)
-    //         return new MySqlDbManager(string.Empty).GetConnectionString(settings.DbServer, settings.DbName, settings.DbPort, settings.DbUser,
-    //             settings.DbPassword);
-    //     return string.Empty;
-    // }
+    private string GetConnectionString(SettingsUiModel settings, DatabaseType dbType)
+    {
+        return new DbConnectionInfo()
+        {
+            Type = dbType,
+            Server = settings.DbServer,
+            Name = settings.DbName,
+            Port = settings.DbPort,
+            User = settings.DbUser,
+            Password = settings.DbPassword
+        }.ToString();
+    }
     
 
     /// <summary>

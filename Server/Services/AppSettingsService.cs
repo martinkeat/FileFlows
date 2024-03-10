@@ -11,7 +11,7 @@ public class AppSettingsService
     public AppSettingsService()
     {
         Settings = Load();
-        if (Settings.DatabaseType == DatabaseType.Sqlite && Settings.DatabaseConnection.Contains("Server"))
+        if (Settings.DatabaseType == DatabaseType.Sqlite && Settings.DatabaseConnection?.Contains("Server") == true)
         {
             // this should only happen if they upgraded from 24.03.1 which did not store the database type in the database
             // and only MySQL was supported as an external database up until 24.03.2
@@ -71,10 +71,17 @@ public class AppSettingsService
         try
         {
             string json = File.ReadAllText(file);
-            var settings = JsonSerializer.Deserialize<AppSettings>(json);
-            result = settings ?? new ();
+            var options = new JsonSerializerOptions
+            {
+                AllowTrailingCommas = true
+            };
+            var settings = JsonSerializer.Deserialize<AppSettings>(json, options);
+            result = settings ?? new();
         }
-        catch (Exception) { }
+        catch (Exception ex)
+        {
+            Logger.Instance.WLog("Failed reading application settings file: " + ex.Message);
+        }
 
         result ??= new();
 

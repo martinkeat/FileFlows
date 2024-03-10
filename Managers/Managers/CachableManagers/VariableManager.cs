@@ -14,7 +14,7 @@ public class VariableManager : CachedManager<Variable>
     /// </summary>
     public void RestoreDefault()
     {
-        var variables = GetAll().Result;
+        var variables = LoadDataFromDatabase().Result;
 
         string programFiles = Environment.ExpandEnvironmentVariables("%ProgramW6432%");
 

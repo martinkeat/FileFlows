@@ -20,7 +20,7 @@ public class VideoResolution:WidgetDefinition
     /// <summary>
     /// Gets the URL
     /// </summary>
-    public override string Url => "/api/statistics/by-name/VIDEO_RESOLUTION";
+    public override string Url => "/api/statistics/running-totals/VIDEO_RESOLUTION";
 
     /// <summary>
     /// Gets the Name

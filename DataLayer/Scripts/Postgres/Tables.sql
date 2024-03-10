@@ -23,11 +23,8 @@ CREATE INDEX ON "DbLogMessage" ("LogDate");
 
 CREATE TABLE "DbStatistic"
 (
-    "LogDate"         TIMESTAMP           DEFAULT CURRENT_TIMESTAMP,
-    "Name"            VARCHAR(100)       NOT NULL,
-    "Type"            INT                NOT NULL,
-    "StringValue"     TEXT               NOT NULL,
-    "NumberValue"     DOUBLE PRECISION   NOT NULL
+    "Name"            VARCHAR(255)       NOT NULL,
+    "Data"            TEXT               NOT NULL
 );
 
 

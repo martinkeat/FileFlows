@@ -506,38 +506,23 @@ export class PieChartChart extends FFChart
     }
 
     fixData(data) {
-        if (!data?.length || (data[0].Name && data[0].Value) === false)
+        if (!data?.length)
             return data;
 
-        //statistic data, convert it
-        let newData = {};
-        for (let d of data) {
-            if (newData[d.Value])
-                newData[d.Value] = newData[d.Value] + 1;
-            else
-                newData[d.Value] = 1;
-        }
-        let temp = [];
-        Object.keys(newData).forEach(x => {
-            temp.push({
-                label: x,
-                value: newData[x]
-            })
+        data.sort((a, b) => {
+            return b.Value - a.Value;
         });
-        temp.sort((a, b) => {
-            return b.value - a.value
-        });
-
-        data = {
+        
+        let series = {
             labels: [],
             series: []
         };
-        for(let v of temp)
+        for(let v of data)
         {
-            data.labels.push(v.label);
-            data.series.push(v.value);
+            series.labels.push(v.Name);
+            series.series.push(v.Value);
         }
-        return data;
+        return series;
     }
 
 
@@ -588,20 +573,12 @@ export class TreeMapChart extends FFChart
         if (!data?.length || (data[0].Name && data[0].Value) === false)
             return data;
 
-        //statistic data, convert it
-        let newData = {};
-        for (let d of data) {
-            if (d.Value === 'mpeg2video')
-                d.Value = 'mpeg2'; // too long
-            if (newData[d.Value])
-                newData[d.Value] = newData[d.Value] + 1;
-            else
-                newData[d.Value] = 1;
+        for(let i=0;i<data.length;i++){
+            let name = data[i].Name;
+            if (name=== 'mpeg2video')
+                name = 'mpeg2'; // too long
+            data[i] = {x: name, y: data[i].Value};
         }
-        data = [];
-        Object.keys(newData).forEach(x => {
-            data.push({x: x, y: newData[x]});
-        });
         return data;
     }
 
