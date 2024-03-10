@@ -42,6 +42,7 @@ public partial class Settings : InputRegister
         lblCheckNow, lblTestingDatabase, lblFileServer;
 
     private string OriginalDatabase, OriginalServer;
+    private DatabaseType OriginalDbType;
 
     private SettingsUiModel Model { get; set; } = new ();
     private string LicenseFlagsString = string.Empty;
@@ -161,6 +162,7 @@ public partial class Settings : InputRegister
             LicenseFlagsString = LicenseFlagsToString(Model.LicenseFlags);
             this.OriginalServer = this.Model?.DbServer;
             this.OriginalDatabase = this.Model?.DbName;
+            this.OriginalDbType = this.Model?.DbType ?? DatabaseType.Sqlite;
             if (this.Model != null && this.Model.DbPort < 1)
                 this.Model.DbPort = 3306;
         }

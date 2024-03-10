@@ -60,6 +60,12 @@ public class StatisticService : IStatisticService
         var data = await new StatisticManager().GetByName<Heatmap>(name);
         return (data ?? new()).ConvertData();
     }
-    
-    
+
+
+    /// <summary>
+    /// Gets storage saved
+    /// </summary>
+    /// <returns>the storage saved</returns>
+    public async Task<List<StorageSavedData>> GetStorageSaved()
+        => (await new StatisticManager().GetByName<StorageSaved>(Globals.STAT_STORAGE_SAVED))?.Data ?? new();
 }

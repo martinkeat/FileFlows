@@ -61,7 +61,9 @@ public class DatabaseService
     /// <returns>the result of the migration</returns>
     public Result<bool> MigrateDatabase()
     {
-        if (ServiceAppSetting.Settings.DatabaseConnection == ServiceAppSetting.Settings.DatabaseMigrateConnection)
+        if (ServiceAppSetting.Settings.DatabaseConnection == ServiceAppSetting.Settings.DatabaseMigrateConnection
+            || string.IsNullOrWhiteSpace(ServiceAppSetting.Settings.DatabaseMigrateConnection)
+            || ServiceAppSetting.Settings.DatabaseMigrateType == null) // invalid migration details
         {
             // migration and current databases match, nothing to do
             ServiceAppSetting.Settings.DatabaseMigrateConnection = null;
@@ -92,8 +94,11 @@ public class DatabaseService
         Logger.Instance.ILog("Database migration starting");
         var migratedResult = manager.Migrate();
         if (migratedResult.IsFailed == false)
+        {
             ServiceAppSetting.Settings.DatabaseConnection = ServiceAppSetting.Settings.DatabaseMigrateConnection;
-        
+            ServiceAppSetting.Settings.DatabaseType = ServiceAppSetting.Settings.DatabaseMigrateType.Value;
+        }
+
         ServiceAppSetting.Settings.DatabaseMigrateConnection = null;
         ServiceAppSetting.Settings.DatabaseMigrateType = null;
         ServiceAppSetting.Settings.RecreateDatabase = false;

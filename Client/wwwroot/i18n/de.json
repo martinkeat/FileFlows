@@ -278,7 +278,13 @@
     "StorageSaved": "Gespeicherter Speicherplatz",
     "Decoders": "Decoders",
     "Encoders": "Encoders",
-    "DecoderParameters": "Decoder Parameters"
+    "DecoderParameters": "Decoder Parameters",
+    "LogStorage": "Log Storage",
+    "LibraryProcessingTimes":"Library Processing Times",
+    "ImageFormats": "Image Formats",
+    "ComicFormats": "Comic Formats",
+    "ComicPages": "Comic Pages",
+    "NVIDIASMI": "NVIDIA SMI"
   },
   "Flow": {
     "ErrorMessages":{
