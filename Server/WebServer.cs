@@ -145,6 +145,7 @@ public class WebServer
         // Dynamically register services from the console application's service provider
         builder.Services.AddSingleton<AppSettingsService>(x => ServiceLoader.Load<AppSettingsService>());
         builder.Services.AddSingleton<SettingsService>(x => ServiceLoader.Load<SettingsService>());
+        builder.Services.AddSingleton<StatisticService>(x => ServiceLoader.Load<StatisticService>());
         builder.Services.AddSingleton<DashboardService>(x => ServiceLoader.Load<DashboardService>());
         builder.Services.AddSingleton<FlowService>(x => ServiceLoader.Load<FlowService>());
         builder.Services.AddSingleton<LibraryService>(x => ServiceLoader.Load<LibraryService>());

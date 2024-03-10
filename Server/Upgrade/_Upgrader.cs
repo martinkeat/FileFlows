@@ -1,11 +1,13 @@
-﻿using FileFlows.Managers;
-using FileFlows.Managers.InitializationManagers;
+﻿using FileFlows.Managers.InitializationManagers;
 using FileFlows.Plugin;
 using FileFlows.Server.Services;
 using FileFlows.Shared.Models;
 
 namespace FileFlows.Server.Upgrade;
 
+/// <summary>
+/// Runs the upgrades
+/// </summary>
 public class Upgrader
 {
     // update this with the latest db version

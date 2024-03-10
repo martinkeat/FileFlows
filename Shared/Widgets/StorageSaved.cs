@@ -18,7 +18,7 @@ public class StorageSaved:WidgetDefinition
     /// <summary>
     /// Gets the URL
     /// </summary>
-    public override string Url => "/api/library-file/shrinkage-bar-chart";
+    public override string Url => "/api/statistics/running-totals/STORAGE_SAVED";
     
     /// <summary>
     /// Gets the Icon

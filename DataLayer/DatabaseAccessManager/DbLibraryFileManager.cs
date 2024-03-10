@@ -1112,46 +1112,7 @@ where {Wrap(nameof(LibraryFile.Status))} = 1 and {Wrap(nameof(LibraryFile.Proces
         using var db = await DbConnector.GetDb();
         return await db.Db.FetchAsync<LibraryFileProcessingTime>(sql);
     }
-
-    /// <summary>
-    /// Gets data for a days/hours heatmap.  Where the list is the days, and the dictionary is the hours with the count as the values
-    /// </summary>
-    /// <returns>heatmap data</returns>
-    public async Task<List<Dictionary<int, int>>> GetHourProcessingTotals()
-    {
-        string sql = @"select " +
-                     DbConnector.DayOfWeek(nameof(LibraryFile.ProcessingStarted),"day") + ", " + 
-                     DbConnector.Hour(nameof(LibraryFile.ProcessingStarted),"hour") + ", " + 
-                     " count(Uid) as count " + 
-                     $" from {Wrap(nameof(LibraryFile))} where {Wrap(nameof(LibraryFile.Status))} = 1 AND {Wrap(nameof(LibraryFile.ProcessingStarted))} > '2000-01-01 00:00:00' " +
-                     " group by " + DbConnector.DayOfWeek(nameof(LibraryFile.ProcessingStarted)) + "," +
-                     DbConnector.Hour(nameof(LibraryFile.ProcessingStarted));
-
-        List<(int day, int hour, int count)> data;
-        using (var db = await DbConnector.GetDb())
-        {
-            data = (await db.Db.FetchAsync<(int day, int hour, int count)>(sql)).ToList();
-        }
-
-
-        var days = new List<Dictionary<int, int>>();
-        for (int i = 0; i < 7; i++)
-        {
-            var results = new Dictionary<int, int>();
-            for (int j = 0; j < 24; j++)
-            {
-                // sun=1, mon=2, sat =7
-                // so we use x.day - 1 here to convert sun=0
-                int count = data.Where(x => (x.day - 1) == i && x.hour == j).Select(x => x.count).FirstOrDefault();
-                results.Add(j, count);
-            }
-
-            days.Add(results);
-        }
-
-        return days;
-    }
-
+    
     /// <summary>
     /// Resets any currently processing library files 
     /// This will happen if a server or node is reset

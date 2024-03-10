@@ -1,11 +1,12 @@
-using System.Data.Common;
 using System.Text;
 using System.Text.Json;
-using System.Text.RegularExpressions;
 using FileFlows.DataLayer.DatabaseConnectors;
 using FileFlows.DataLayer.Helpers;
 using FileFlows.Plugin;
+using FileFlows.ServerShared;
+using FileFlows.ServerShared.Helpers;
 using FileFlows.ServerShared.Models.StatisticModels;
+using FileFlows.Shared;
 using FileFlows.Shared.Models;
 
 namespace FileFlows.DataLayer.Upgrades;
@@ -46,65 +47,67 @@ public class Upgrade_24_03_2
         db.Db.BeginTransaction();
         try
         {
-            // DbObject
-            var dbos = db.Db.Fetch<DbObjectUpgrade>("select * from DbObject");
-            StringBuilder sql = new();
-            foreach (var dbo in dbos)
-            {
-                dbo.DateCreated = DateTimeHelper.LocalToUtc(dbo.DateCreated);
-                dbo.DateModified = DateTimeHelper.LocalToUtc(dbo.DateModified);
-                sql.AppendLine("update DbObject set DateCreated = " + connector.FormatDateQuoted(dbo.DateCreated) +
-                               ", DateModified = " + connector.FormatDateQuoted(dbo.DateModified) +
-                               $" where Uid = '{dbo.Uid}';");
-            }
+                // DbObject
+                var dbos = db.Db.Fetch<DbObjectUpgrade>("select * from DbObject");
+                StringBuilder sql = new();
+                foreach (var dbo in dbos)
+                {
+                    dbo.DateCreated = DateTimeHelper.LocalToUtc(dbo.DateCreated);
+                    dbo.DateModified = DateTimeHelper.LocalToUtc(dbo.DateModified);
+                    sql.AppendLine("update DbObject set DateCreated = " + connector.FormatDateQuoted(dbo.DateCreated) +
+                                   ", DateModified = " + connector.FormatDateQuoted(dbo.DateModified) +
+                                   $" where Uid = '{dbo.Uid}';");
+                }
 
-            db.Db.Execute(sql.ToString());
+                db.Db.Execute(sql.ToString());
 
 
-            // DbRevision
-            var dbr = db.Db.Fetch<RevisionedObject>("select * from RevisionedObject");
-            sql.Clear();
-            foreach (var r in dbr)
-            {
-                r.RevisionDate = DateTimeHelper.LocalToUtc(r.RevisionDate);
-                r.RevisionCreated = DateTimeHelper.LocalToUtc(r.RevisionCreated);
-                sql.AppendLine("update RevisionedObject set RevisionDate = " +
-                               connector.FormatDateQuoted(r.RevisionDate) +
-                               ", RevisionCreated = " + connector.FormatDateQuoted(r.RevisionCreated) +
-                               $" where Uid = '{r.Uid}';");
-            }
+                // DbRevision
+                var dbr = db.Db.Fetch<RevisionedObject>("select * from RevisionedObject");
+                sql.Clear();
+                foreach (var r in dbr)
+                {
+                    r.RevisionDate = DateTimeHelper.LocalToUtc(r.RevisionDate);
+                    r.RevisionCreated = DateTimeHelper.LocalToUtc(r.RevisionCreated);
+                    sql.AppendLine("update RevisionedObject set RevisionDate = " +
+                                   connector.FormatDateQuoted(r.RevisionDate) +
+                                   ", RevisionCreated = " + connector.FormatDateQuoted(r.RevisionCreated) +
+                                   $" where Uid = '{r.Uid}';");
+                }
 
-            db.Db.Execute(sql.ToString());
+                db.Db.Execute(sql.ToString());
 
-            // LibraryFiles
-            var libFiles = db.Db.Fetch<LibraryFileUpgrade>(
-                "select Uid, DateCreated, DateModified, ProcessingStarted, ProcessingEnded, HoldUntil, CreationTime, LastWriteTime from LibraryFile");
-            sql.Clear();
-            foreach (var lf in libFiles)
-            {
-                lf.DateCreated = DateTimeHelper.LocalToUtc(lf.DateCreated);
-                lf.DateModified = DateTimeHelper.LocalToUtc(lf.DateModified);
-                lf.ProcessingStarted = DateTimeHelper.LocalToUtc(lf.ProcessingStarted);
-                lf.ProcessingEnded = DateTimeHelper.LocalToUtc(lf.ProcessingEnded);
-                lf.HoldUntil = DateTimeHelper.LocalToUtc(lf.HoldUntil);
-                lf.CreationTime = DateTimeHelper.LocalToUtc(lf.CreationTime);
-                lf.LastWriteTime = DateTimeHelper.LocalToUtc(lf.LastWriteTime);
-                sql.AppendLine("update LibraryFile set DateCreated = " + connector.FormatDateQuoted(lf.DateCreated) +
-                               ", DateModified = " + connector.FormatDateQuoted(lf.DateModified) +
-                               ", ProcessingStarted = " + connector.FormatDateQuoted(lf.ProcessingStarted) +
-                               ", ProcessingEnded = " + connector.FormatDateQuoted(lf.ProcessingEnded) +
-                               ", HoldUntil = " + connector.FormatDateQuoted(lf.HoldUntil) +
-                               ", CreationTime = " + connector.FormatDateQuoted(lf.CreationTime) +
-                               ", LastWriteTime = " + connector.FormatDateQuoted(lf.LastWriteTime) +
-                               $" where Uid = '{lf.Uid}';");
-            }
+                // LibraryFiles
+                var libFiles = db.Db.Fetch<LibraryFileUpgrade>(
+                    "select Uid, DateCreated, DateModified, ProcessingStarted, ProcessingEnded, HoldUntil, CreationTime, LastWriteTime from LibraryFile");
+                sql.Clear();
+                foreach (var lf in libFiles)
+                {
+                    lf.DateCreated = DateTimeHelper.LocalToUtc(lf.DateCreated);
+                    lf.DateModified = DateTimeHelper.LocalToUtc(lf.DateModified);
+                    lf.ProcessingStarted = DateTimeHelper.LocalToUtc(lf.ProcessingStarted);
+                    lf.ProcessingEnded = DateTimeHelper.LocalToUtc(lf.ProcessingEnded);
+                    lf.HoldUntil = DateTimeHelper.LocalToUtc(lf.HoldUntil);
+                    lf.CreationTime = DateTimeHelper.LocalToUtc(lf.CreationTime);
+                    lf.LastWriteTime = DateTimeHelper.LocalToUtc(lf.LastWriteTime);
+                    sql.AppendLine("update LibraryFile set DateCreated = " +
+                                   connector.FormatDateQuoted(lf.DateCreated) +
+                                   ", DateModified = " + connector.FormatDateQuoted(lf.DateModified) +
+                                   ", ProcessingStarted = " + connector.FormatDateQuoted(lf.ProcessingStarted) +
+                                   ", ProcessingEnded = " + connector.FormatDateQuoted(lf.ProcessingEnded) +
+                                   ", HoldUntil = " + connector.FormatDateQuoted(lf.HoldUntil) +
+                                   ", CreationTime = " + connector.FormatDateQuoted(lf.CreationTime) +
+                                   ", LastWriteTime = " + connector.FormatDateQuoted(lf.LastWriteTime) +
+                                   $" where Uid = '{lf.Uid}';");
+                }
 
-            db.Db.Execute(sql.ToString());
+                db.Db.Execute(sql.ToString());
 
-            db.Db.ExecuteAsync(
-                "update DbObject set Type = 'FileFlows.ServerShared.Models.PluginSettingsModel' where Type = 'FileFlows.Server.Models.PluginSettingsModel'");
+                db.Db.ExecuteAsync(
+                    "update DbObject set Type = 'FileFlows.ServerShared.Models.PluginSettingsModel' where Type = 'FileFlows.Server.Models.PluginSettingsModel'");
+           
 
-            UpgradeStatistics(db, true);
+            UpgradeStatistics(logger, db, true);
 
             db.Db.CompleteTransaction();
 
@@ -158,7 +161,7 @@ public class Upgrade_24_03_2
             db.Db.ExecuteAsync(
                 "update DbObject set Type = 'FileFlows.ServerShared.Models.PluginSettingsModel' where Type = 'FileFlows.Server.Models.PluginSettingsModel'");
 
-            UpgradeStatistics(db, false);
+            UpgradeStatistics(logger, db, false);
             
             return true;
         }
@@ -172,8 +175,15 @@ public class Upgrade_24_03_2
         }
     }
 
-    private void UpgradeStatistics(DatabaseConnection connector, bool mySql)
+    /// <summary>
+    /// Upgrades the statistics table to the new format
+    /// </summary>
+    /// <param name="logger">the logger</param>
+    /// <param name="connector">the database connector</param>
+    /// <param name="mySql">true if using mysql, otherwise false</param>
+    private void UpgradeStatistics(ILogger logger, DatabaseConnection connector, bool mySql)
     {
+        logger.ILog("Convert old statistics data");
         var old = connector.Db.Fetch<DbStatisticOld>("select * from DbStatistic")
             .GroupBy(x => x.Name)
             .ToDictionary(x => x.Key, x => x.ToList());
@@ -187,6 +197,7 @@ public class Upgrade_24_03_2
                 if (totals.Totals.TryAdd(stat.StringValue, 1) == false)
                     totals.Totals[stat.StringValue] += 1;
             }
+
             newStats.Add(key, totals);
         }
 
@@ -201,6 +212,69 @@ public class Upgrade_24_03_2
             connector.Db.Execute("insert into DbStatistic (Name, Data) values (@0, @1)",
                 key, JsonSerializer.Serialize(newStats[key]));
         }
+
+
+        // processing heatmap, after upgrade, so now UTC dates
+        logger.ILog("Creating processing heatmap data");
+
+        var processedDates =
+            connector.Db.Fetch<DateTime>($"select ProcessingStarted from LibraryFile where Status = 1");
+        Heatmap heatmap = new();
+        foreach (var dt in processedDates)
+        {
+            int quarter = TimeHelper.GetQuarter(dt);
+            if (heatmap.Data.TryAdd(quarter, 1) == false)
+                heatmap.Data[quarter] += 1;
+        }
+
+        connector.Db.Execute("insert into DbStatistic (Name, Data) values (@0, @1)",
+            Globals.STAT_PROCESSING_TIMES_HEATMAP, JsonSerializer.Serialize(heatmap));
+
+        // storage saved
+        logger.ILog("Creating storage saved data");
+        string sql = $@"select LibraryName,
+    sum( case when Status = 1 AND FinalSize < OriginalSize THEN CAST(OriginalSize AS {(mySql ? "SIGNED" : "INTEGER")}) - CAST(FinalSize AS {(mySql ? "SIGNED" : "INTEGER")})
+         else 0 end
+    ) as TotalSaved from LibraryFile group by LibraryName";
+        var storageSaved = connector.Db.Fetch<StorageSaved>(sql).Where(x => x.TotalSaved > 0)
+            .ToDictionary(x => x.LibraryName, x => x.TotalSaved);
+
+        connector.Db.Execute("insert into DbStatistic (Name, Data) values (@0, @1)",
+            Globals.STAT_STORAGE_SAVED, JsonSerializer.Serialize(new RunningTotals()
+            {
+                Totals = storageSaved
+            }));
+
+        // total files
+        logger.ILog("Creating total files data");
+        int totalProcessed = connector.Db.ExecuteScalar<int>("select count(*) from LibraryFile where Status = 1");
+        int totalFailed = connector.Db.ExecuteScalar<int>("select count(*) from LibraryFile where Status = 4");
+
+        connector.Db.Execute("insert into DbStatistic (Name, Data) values (@0, @1)",
+            Globals.STAT_TOTAL_FILES, JsonSerializer.Serialize(new RunningTotals()
+            {
+                Totals = new()
+                {
+                    { nameof(FileStatus.Processed), totalProcessed },
+                    { nameof(FileStatus.ProcessingFailed), totalFailed },
+                }
+            }));
+    }
+
+    /// <summary>
+    /// Represents the total saved storage per library.
+    /// </summary>
+    private class StorageSaved
+    {
+        /// <summary>
+        /// Gets or sets the name of the library.
+        /// </summary>
+        public string LibraryName { get; set; }
+
+        /// <summary>
+        /// Gets or sets the total saved storage in bytes.
+        /// </summary>
+        public long TotalSaved { get; set; }
     }
     
     /// <summary>

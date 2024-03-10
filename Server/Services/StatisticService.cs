@@ -49,6 +49,17 @@ public class StatisticService : IStatisticService
             Name = x.Key,
             Value = x.Value
         });
-
     }
+
+    /// <summary>
+    /// Gets heatmap by name
+    /// </summary>
+    /// <returns>the heatmap</returns>
+    public async Task<List<HeatmapData>> GetHeatMap(string name)
+    {
+        var data = await new StatisticManager().GetByName<Heatmap>(name);
+        return (data ?? new()).ConvertData();
+    }
+    
+    
 }

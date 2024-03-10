@@ -4,6 +4,7 @@ using FileFlows.Server.Hubs;
 using FileFlows.Server.Services;
 using FileFlows.Server.Workers;
 using FileFlows.ServerShared.Models;
+using FileFlows.ServerShared.Models.StatisticModels;
 using FileFlows.Shared.Models;
 using Microsoft.AspNetCore.Mvc;
 using FileHelper = FileFlows.ServerShared.Helpers.FileHelper;
@@ -264,29 +265,8 @@ public class SystemController:Controller
     /// </summary>
     /// <returns></returns>
     [HttpGet("history-data/processing-heatmap")]
-    public async Task<object> GetProcessingHeatMap()
-    {
-        var data = await ServiceLoader.Load<LibraryFileService>().GetHourProcessingTotals();
-        var results = data.Select((x, index) => new
-        {
-            name = ((DayOfWeek)index).ToString()[..3],
-            data = x.Select(y => new
-            {
-                x = y.Key == 0 ? "12am" : y.Key == 12 ? "12pm" : y.Key > 12 ? (y.Key - 12) + "pm" : y.Key + "am",
-                y = y.Value
-            })
-        }).OrderBy(x =>
-            // arrange the data so its shows monday -> sunday visually
-            x.name == "Mon" ? 7 :
-            x.name == "Tue" ? 6 :
-            x.name == "Wed" ? 5 :
-            x.name == "Thu" ? 4 :
-            x.name == "Fri" ? 3 :
-            x.name == "Sat" ? 2 :
-            1
-        );
-        return results;
-    }
+    public Task<List<HeatmapData>> GetProcessingHeatMap()
+        => ServiceLoader.Load<StatisticService>().GetHeatMap(Globals.STAT_PROCESSING_TIMES_HEATMAP);
 
     private async Task<float> GetCpuPercentage()
     {

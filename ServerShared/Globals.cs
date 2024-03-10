@@ -112,4 +112,19 @@ public class Globals
     /// The base url for Plugin 
     /// </summary>
     public static readonly string PluginBaseUrl = FileFlowsDotComUrl + "/api/plugin";
+
+    /// <summary>
+    /// The processing time heat map statistic
+    /// </summary>
+    public const string STAT_PROCESSING_TIMES_HEATMAP = "PROCESSING_TIMES_HEATMAP";
+
+    /// <summary>
+    /// The processing storage saved statistic
+    /// </summary>
+    public const string STAT_STORAGE_SAVED = "STORAGE_SAVED";
+
+    /// <summary>
+    /// The processing total files statistic
+    /// </summary>
+    public const string STAT_TOTAL_FILES = "TOTAL_FILES";
 }

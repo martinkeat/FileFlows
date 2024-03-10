@@ -10,5 +10,5 @@ public class RunningTotals
     /// <summary>
     /// Running totals for the statistic
     /// </summary>
-    public Dictionary<string, int> Totals { get; set; } = new();
+    public Dictionary<string, long> Totals { get; set; } = new();
 }

@@ -171,12 +171,6 @@ public class LibraryFileManager
     public Task<List<LibraryFileProcessingTime>> GetLibraryProcessingTimes()
         => DatabaseAccessManager.Instance.LibraryFileManager.GetLibraryProcessingTimes();
 
-    /// <summary>
-    /// Gets data for a days/hours heatmap.  Where the list is the days, and the dictionary is the hours with the count as the values
-    /// </summary>
-    /// <returns>heatmap data</returns>
-    public Task<List<Dictionary<int, int>>> GetHourProcessingTotals()
-        => DatabaseAccessManager.Instance.LibraryFileManager.GetHourProcessingTotals();
 
     /// <summary>
     /// Updates the original size of a file
