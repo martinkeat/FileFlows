@@ -16,6 +16,11 @@ public class SQLiteDatabaseCreator : IDatabaseCreator
     public SQLiteDatabaseCreator(ILogger logger, string connectionString)
     {
         Logger = logger;
+        
+        // if connection string is using relative file, update with full path
+        connectionString = connectionString.Replace($"Data Source=FileFlows.sqlite",
+            $"Data Source={Path.Combine(DirectoryHelper.DatabaseDirectory, "FileFlows.sqlite")}");
+        
         ConnectionString = connectionString;
         DbFilename = GetFilenameFromConnectionString(connectionString);
     }
@@ -39,6 +44,13 @@ public class SQLiteDatabaseCreator : IDatabaseCreator
         var info = new FileInfo(DbFilename);
         if(info.Exists && info.Length < 0)
             info.Delete();
+
+        if (info.Exists && recreate)
+        {
+            // move to a backup file
+            info.MoveTo(DbFilename + ".backup", true);
+            info = new FileInfo(DbFilename);
+        }
         
         if(info.Exists == false)
         {
@@ -47,8 +59,6 @@ public class SQLiteDatabaseCreator : IDatabaseCreator
             return DbCreateResult.Created;
         }
         
-        // create backup 
-        File.Copy(DbFilename, DbFilename + ".backup", true);
         return DbCreateResult.AlreadyExisted;
     }
     

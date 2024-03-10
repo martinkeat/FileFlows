@@ -36,7 +36,7 @@ public class FlowRunnerService : IFlowRunnerService
             ClientServiceManager.Instance.SendToast(LogType.Info, "Started processing: " +
                                                                   FileDisplayNameService.GetDisplayName(info.LibraryFile));
         ClientServiceManager.Instance.StartProcessing(info.LibraryFile);
-        ClientServiceManager.Instance.UpdateFileStatus();
+        await ClientServiceManager.Instance.UpdateFileStatus();
         
         try
         {
@@ -128,8 +128,8 @@ public class FlowRunnerService : IFlowRunnerService
                 Logger.Instance?.DLog("Could not remove as not in list of Executors [2]: " + info.Uid + ", file: " + info.LibraryFile.Name);
             }
         }
-        ClientServiceManager.Instance.UpdateExecutors(Executors);
-        ClientServiceManager.Instance.UpdateFileStatus();
+        await ClientServiceManager.Instance.UpdateExecutors(Executors);
+        await ClientServiceManager.Instance.UpdateFileStatus();
 
         if (info.LibraryFile != null)
         {

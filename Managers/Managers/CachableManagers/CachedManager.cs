@@ -21,38 +21,27 @@ public abstract class CachedManager<T> where T : FileFlowObject, new()
     private FairSemaphore GetDataSemaphore = new(1);
     
     protected static List<T> _Data;
+    
     /// <summary>
-    /// Gets or sets the data
+    /// Gets the data
     /// </summary>
-    private List<T> Data
-    {
-        get
-        {
-            GetDataSemaphore.WaitAsync().Wait();
-            try
-            {
-                if (_Data == null)
-                    Refresh();
-                return _Data;
-            }
-            finally
-            {
-                GetDataSemaphore.Release();
-            }
-        }
-        set => _Data = value;
-    }
-
-    /// <summary>
-    /// Gets all the data for this type
-    /// </summary>
-    /// <returns>the data</returns>
     protected async Task<List<T>> GetData()
     {
-        if (UseCache)
-            return Data;
-        return await LoadDataFromDatabase();
+        if (UseCache == false)
+            return await LoadDataFromDatabase();
+        GetDataSemaphore.WaitAsync().Wait();
+        try
+        {
+            if (_Data == null)
+                await Refresh();
+            return _Data;
+        }
+        finally
+        {
+            GetDataSemaphore.Release();
+        }
     }
+
 
     /// <summary>
     /// Sets the data
@@ -67,12 +56,8 @@ public abstract class CachedManager<T> where T : FileFlowObject, new()
     /// Gets the data
     /// </summary>
     /// <returns>the data</returns>
-    public virtual async Task<List<T>> GetAll()
-    {
-        if(UseCache)
-            return Data;
-        return await LoadDataFromDatabase();
-    }
+    public virtual Task<List<T>> GetAll()
+        => GetData();
 
     /// <summary>
     /// Gets an item by its UID
@@ -82,7 +67,7 @@ public abstract class CachedManager<T> where T : FileFlowObject, new()
     public virtual async Task<T?> GetByUid(Guid uid)
     {
         if(SettingsManager.UseCache)
-            return Data.FirstOrDefault(x => x.Uid == uid);
+            return (await GetData()).FirstOrDefault(x => x.Uid == uid);
         return await DatabaseAccessManager.Instance.FileFlowsObjectManager.Single<T>(uid);
     }
 
@@ -99,10 +84,10 @@ public abstract class CachedManager<T> where T : FileFlowObject, new()
             if (ignoreCase)
             {
                 name = name.ToLowerInvariant();
-                return Data.FirstOrDefault(x => x.Name.ToLowerInvariant() == name);
+                return (await GetData()).FirstOrDefault(x => x.Name.ToLowerInvariant() == name);
             }
 
-            return Data.FirstOrDefault(x => x.Name == name);
+            return (await GetData()).FirstOrDefault(x => x.Name == name);
         }
 
         return await DatabaseAccessManager.Instance.FileFlowsObjectManager.GetByName<T>(name, ignoreCase);
@@ -150,13 +135,13 @@ public abstract class CachedManager<T> where T : FileFlowObject, new()
     /// <summary>
     /// Refreshes the data
     /// </summary>
-    public virtual void Refresh()
+    public async Task Refresh()
     {
         if (UseCache == false)
             return;
         
         Logger.Instance.ILog($"Refreshing Data for '{typeof(T).Name}'");
-        var newData = LoadDataFromDatabase().Result;
+        var newData = await LoadDataFromDatabase();
         if (_Data?.Any() != true)
         {
             _Data = newData;
@@ -238,7 +223,7 @@ public abstract class CachedManager<T> where T : FileFlowObject, new()
         List<string> names;
         if (UseCache)
         {
-             names = Data.Select(x => x.Name.ToLowerInvariant()).ToList();
+             names = (await GetData()).Select(x => x.Name.ToLowerInvariant()).ToList();
         }
         else
         {
@@ -260,7 +245,7 @@ public abstract class CachedManager<T> where T : FileFlowObject, new()
         if (UseCache)
         {
             name = name.ToLowerInvariant().Trim();
-            return Data.Any(x => uid != x.Uid && x.Name.ToLowerInvariant() == name);
+            return (await GetData()).Any(x => uid != x.Uid && x.Name.ToLowerInvariant() == name);
         }
         else
         {

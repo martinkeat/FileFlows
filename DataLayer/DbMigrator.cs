@@ -10,7 +10,7 @@ namespace FileFlows.DataLayer;
 /// <summary>
 /// Migrates one database to another database
 /// </summary>
-internal  class DbMigrator
+internal class DbMigrator
 {
     /// <summary>
     /// The logger to use
@@ -47,7 +47,7 @@ internal  class DbMigrator
                 SQLiteConnector.MoveFileFromConnectionString(destinationInfo.ConnectionString);
             }
 
-            var destCreator = DatabaseCreators.DatabaseCreator.Get(dest.Type, Logger!, destinationInfo.ConnectionString);
+            var destCreator = DatabaseCreator.Get(dest.Type, Logger!, destinationInfo.ConnectionString);
             var result = destCreator.CreateDatabase(recreate: true);
             if (result.Failed(out string error))
                 return Result<bool>.Fail("Failed creating destination database: " + error);

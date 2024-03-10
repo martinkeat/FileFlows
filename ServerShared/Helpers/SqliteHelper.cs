@@ -12,7 +12,7 @@ public class SqliteHelper
     /// <returns>a sqlite connection string</returns>
     public static string GetConnectionString(string? dbFile = null)
     {
-        dbFile ??= Path.Combine(DirectoryHelper.DatabaseDirectory, "FileFlows.sqlite");
+        dbFile ??= "FileFlows.sqlite";
         if (PlatformHelper.IsArm)
             return $"Data Source={dbFile}";
         return $"Data Source={dbFile};Version=3;PRAGMA journal_mode=WAL;";

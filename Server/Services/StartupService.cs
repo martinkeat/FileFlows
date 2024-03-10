@@ -1,5 +1,6 @@
 using FileFlows.Plugin;
 using FileFlows.Server.Helpers;
+using FileFlows.Shared.Models;
 using Microsoft.AspNetCore.Components;
 
 namespace FileFlows.Server.Services;
@@ -35,6 +36,8 @@ public class StartupService
 
             CleanDefaultTempDirectory();
 
+            BackupSqlite();
+
             if (Upgrade().Failed(out error))
             {
                 UpdateStatus(error);
@@ -58,6 +61,27 @@ public class StartupService
             UpdateStatus("Startup failure: " + ex.Message);
             #endif
             return Result<bool>.Fail(ex.Message);
+        }
+    }
+
+    /// <summary>
+    /// Backups the database file if using SQLite and not migrating
+    /// </summary>
+    private void BackupSqlite()
+    {
+        if (appSettingsService.Settings.DatabaseType != DatabaseType.Sqlite)
+            return;
+        if (appSettingsService.Settings.DatabaseMigrateType != null)
+            return;
+        try
+        {
+            string dbfile = Path.Combine(DirectoryHelper.DatabaseDirectory, "FileFlows.sqlite");
+            if (File.Exists(dbfile))
+                File.Copy(dbfile, dbfile + ".backup", true);
+        }
+        catch (Exception ex)
+        {
+            Logger.Instance.WLog("Failed to backup SQLite database file: " + ex.Message);
         }
     }
 

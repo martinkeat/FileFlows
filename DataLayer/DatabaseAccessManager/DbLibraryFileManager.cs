@@ -1125,7 +1125,7 @@ where {Wrap(nameof(LibraryFile.Status))} = 1 and {Wrap(nameof(LibraryFile.Proces
             $"update {Wrap(nameof(LibraryFile))} set {Wrap(nameof(LibraryFile.Status))} = 0 where {Wrap(nameof(LibraryFile.Status))} = {(int)FileStatus.Processing}";
         if (nodeUid != null && nodeUid != Guid.Empty)
             sql += $" and {Wrap(nameof(LibraryFile.NodeUid))} = '{nodeUid}'";
-        var db = await DbConnector.GetDb();
+        using var db = await DbConnector.GetDb();
         return await db.Db.ExecuteAsync(sql) > 0;
     }
 
@@ -1136,7 +1136,7 @@ where {Wrap(nameof(LibraryFile.Status))} = 1 and {Wrap(nameof(LibraryFile.Proces
     /// <returns>the current status of the file</returns>
     public async Task<FileStatus?> GetFileStatus(Guid uid)
     {
-        var db = await DbConnector.GetDb();
+        using var db = await DbConnector.GetDb();
         var istatus = await db.Db.ExecuteScalarAsync<int?>("select " + Wrap(nameof(LibraryFile.Status)) + " from " + Wrap(nameof(LibraryFile)) +
                                   " where " + Wrap(nameof(LibraryFile.Uid)) + $" = '{uid}'");
         if (istatus == null)
@@ -1170,7 +1170,7 @@ where {Wrap(nameof(LibraryFile.Status))} = 1 and {Wrap(nameof(LibraryFile.Proces
             ? string.Empty
             : JsonSerializer.Serialize(file.ExecutedNodes, CustomDbMapper.JsonOptions);
         
-        var db = await DbConnector.GetDb();
+        using var db = await DbConnector.GetDb();
         await db.Db.ExecuteAsync(sql, executedJson);
     }
 
@@ -1186,7 +1186,7 @@ where {Wrap(nameof(LibraryFile.Status))} = 1 and {Wrap(nameof(LibraryFile.Proces
         // get existing order first so we can shift those if these uids change the order
         // only get status == 0
         List<Guid> indexed = uids.ToList();
-        var db = await DbConnector.GetDb();
+        using var db = await DbConnector.GetDb();
         var sorted = await db.Db.FetchAsync<LibraryFile>($"select * from {Wrap(nameof(LibraryFile))} where {Wrap(nameof(LibraryFile.Status))} = 0 and ( {Wrap("ProcessingOrder")} > 0 or  {Wrap(nameof(LibraryFile.Uid))} in ({strUids}))");
         sorted = sorted.OrderBy(x =>
         {
@@ -1220,7 +1220,7 @@ where {Wrap(nameof(LibraryFile.Status))} = 1 and {Wrap(nameof(LibraryFile.Proces
                      $" {Wrap(nameof(LibraryFile.CreationTime))} = {DbConnector.FormatDateQuoted(file.CreationTime)}, " +
                      $" {Wrap(nameof(LibraryFile.LastWriteTime))} = {DbConnector.FormatDateQuoted(file.LastWriteTime)}, " +
                      $" where {Wrap(nameof(LibraryFile.Uid))} = '{file.Uid}'";
-        var db = await DbConnector.GetDb();
+        using var db = await DbConnector.GetDb();
         return await db.Db.ExecuteAsync(sql, file.Name, file.RelativePath, file.OutputPath) > 0;
     }
     
@@ -1231,7 +1231,7 @@ where {Wrap(nameof(LibraryFile.Status))} = 1 and {Wrap(nameof(LibraryFile.Proces
     /// <returns>a list of all filenames</returns>
     public async Task<List<KnownFileInfo>> GetKnownLibraryFilesWithCreationTimes(bool includeOutput)
     {
-        var db = await DbConnector.GetDb();
+        using var db = await DbConnector.GetDb();
         var list = await db.Db.FetchAsync<KnownFileInfo>(
             $"select {Wrap(nameof(KnownFileInfo.Name))},{Wrap(nameof(KnownFileInfo.Status))}," +
             $" {Wrap(nameof(KnownFileInfo.CreationTime))},{Wrap(nameof(KnownFileInfo.LastWriteTime))}" +
@@ -1263,7 +1263,7 @@ where {Wrap(nameof(LibraryFile.Status))} = 1 and {Wrap(nameof(LibraryFile.Proces
         from {Wrap(nameof(LibraryFile))}
         group by {Wrap(nameof(LibraryFile.LibraryName))}";
         
-        var db = await DbConnector.GetDb();
+        using var db = await DbConnector.GetDb();
         return await db.Db.FetchAsync<ShrinkageData>(sql);
     }
 
@@ -1282,7 +1282,7 @@ where {Wrap(nameof(LibraryFile.Status))} = 1 and {Wrap(nameof(LibraryFile.Proces
 ) 
 FROM {Wrap(nameof(LibraryFile))}";
         
-        var db = await DbConnector.GetDb();
+        using var db = await DbConnector.GetDb();
         return await db.Db.ExecuteScalarAsync<long>(sql);
 
     }

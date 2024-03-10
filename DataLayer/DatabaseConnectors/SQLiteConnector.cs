@@ -1,10 +1,6 @@
-using System.ComponentModel;
-using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
-using FileFlows.DataLayer.Helpers;
 using FileFlows.Plugin;
 using FileFlows.ServerShared.Helpers;
-using NPoco;
 using DatabaseType = FileFlows.Shared.Models.DatabaseType;
 
 namespace FileFlows.DataLayer.DatabaseConnectors;
@@ -43,6 +39,11 @@ public class SQLiteConnector : IDatabaseConnector
     public SQLiteConnector(ILogger logger, string connectionString)
     {
         Logger = logger;
+
+        // if connection string is using relative file, update with full path
+        connectionString = connectionString.Replace($"Data Source=FileFlows.sqlite",
+            $"Data Source={Path.Combine(DirectoryHelper.DatabaseDirectory, "FileFlows.sqlite")}");
+        
         dbConnectionWrite = CreateConnection(connectionString);
         dbConnectionWrite.OnDispose += Dispose;
         // readPool = new(() => CreateConnection(connectionString), 5);

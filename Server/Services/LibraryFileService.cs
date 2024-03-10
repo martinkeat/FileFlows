@@ -413,7 +413,7 @@ public class LibraryFileService : ILibraryFileService
         if (uids?.Any() != true)
             return;
         await new LibraryFileManager().DeleteByLibrary(uids, nonProcessedOnly);
-        ClientServiceManager.Instance.UpdateFileStatus();
+        await ClientServiceManager.Instance.UpdateFileStatus();
     }
 
     /// <summary>
@@ -424,7 +424,7 @@ public class LibraryFileService : ILibraryFileService
     public async Task ReprocessByLibraryUid(Guid[] uids)
     {
         await new LibraryFileManager().ReprocessByLibraryUid(uids);
-        ClientServiceManager.Instance.UpdateFileStatus();
+        await ClientServiceManager.Instance.UpdateFileStatus();
     }
 
     /// <summary>
@@ -466,7 +466,7 @@ public class LibraryFileService : ILibraryFileService
     public async Task ResetProcessingStatus(Guid? nodeUid)
     {
         await new LibraryFileManager().ResetProcessingStatus(nodeUid);
-        ClientServiceManager.Instance?.UpdateFileStatus();
+        await ClientServiceManager.Instance?.UpdateFileStatus();
     }
 
     /// <summary>
@@ -498,7 +498,7 @@ public class LibraryFileService : ILibraryFileService
     public async Task Reprocess(params Guid[] uids)
     { 
         await new LibraryFileManager().SetStatus(FileStatus.Unprocessed, uids);
-        ClientServiceManager.Instance.UpdateFileStatus();
+        await ClientServiceManager.Instance.UpdateFileStatus();
     }
 
     /// <summary>
