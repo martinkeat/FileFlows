@@ -33,10 +33,9 @@ public class FlowHub : Hub
     /// <param name="runnerUid">the UID of the flow runner</param>
     /// <param name="infoJson">the flow execution info serialized</param>
     /// <returns>if the hello was successful or not</returns>
-    public Task<bool> Hello(Guid runnerUid, string infoJson)
+    public async Task<bool> Hello(Guid runnerUid, string infoJson)
     {
         FlowExecutorInfo? info = string.IsNullOrEmpty(infoJson) ? null : JsonSerializer.Deserialize<FlowExecutorInfo>(infoJson);
-        var result = new WorkerController(null).Hello(runnerUid, info);
-        return Task.FromResult(result);
+        return await new WorkerController(null).Hello(runnerUid, info);
     }
 }

@@ -38,10 +38,13 @@ public class StartupService
 
             BackupSqlite();
 
-            if (Upgrade().Failed(out error))
+            if (DatabaseExists()) // only upgrade if it does exist
             {
-                UpdateStatus(error);
-                return Result<bool>.Fail(error);
+                if (Upgrade().Failed(out error))
+                {
+                    UpdateStatus(error);
+                    return Result<bool>.Fail(error);
+                }
             }
 
             if (PrepareDatabase().Failed(out error))
@@ -62,6 +65,16 @@ public class StartupService
             #endif
             return Result<bool>.Fail(ex.Message);
         }
+    }
+
+    /// <summary>
+    /// Checks if the database exists
+    /// </summary>
+    /// <returns>true if it exists, otherwise false</returns>
+    private bool DatabaseExists()
+    {
+        var service = ServiceLoader.Load<DatabaseService>();
+        return service.DatabaseExists();
     }
 
     /// <summary>

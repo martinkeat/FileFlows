@@ -21,13 +21,13 @@ public class FlowRunnerMonitor:Worker
     /// </summary>
     public FlowRunnerMonitor() : base(ScheduleType.Second, 10)
     {
-        StartUpRunningFiles = FlowRunnerService.ExecutingLibraryFiles().ToList();
+        StartUpRunningFiles = FlowRunnerService.ExecutingLibraryFiles().Result;
     }
 
     protected override void Execute()
     {
         var service = ServiceLoader.Load<FlowRunnerService>();
-        service.AbortDisconnectedRunners();
+        service.AbortDisconnectedRunners().Wait();
         if (StartUpRunningFiles?.Any() == true)
         {
             var array = StartUpRunningFiles.ToArray();

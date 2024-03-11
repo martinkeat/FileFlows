@@ -20,7 +20,7 @@ public interface IFlowRunnerService
     /// <param name="info">The information about the flow execution</param>
     /// <param name="log">the full log for the file</param>
     /// <returns>a completed task</returns>
-    Task Complete(FlowExecutorInfo info, string log);
+    Task Finish(FlowExecutorInfo info, string log);
     /// <summary>
     /// Called to update the status of the flow execution on the server
     /// </summary>
@@ -58,7 +58,7 @@ public class FlowRunnerService : Service, IFlowRunnerService
     /// <param name="info">The information about the flow execution</param>
     /// <param name="log">the full log for the file</param>
     /// <returns>The updated information</returns>
-    public async Task Complete(FlowExecutorInfo info, string log)
+    public async Task Finish(FlowExecutorInfo info, string log)
     {
         try
         {

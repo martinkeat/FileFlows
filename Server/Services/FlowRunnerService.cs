@@ -1,4 +1,5 @@
 ﻿using System.Text.RegularExpressions;
+using FileFlows.DataLayer;
 using FileFlows.Plugin;
 using FileFlows.Server.Helpers;
 using FileFlows.Server.Hubs;
@@ -21,7 +22,11 @@ public class FlowRunnerService : IFlowRunnerService
     /// The running executors
     /// </summary>
     internal readonly static Dictionary<Guid, FlowExecutorInfo> Executors = new();
-    private static readonly Queue<Guid> CompletedExecutors = new (50);
+
+    /// <summary>
+    /// The semaphore that locks the executors list
+    /// </summary>
+    private static FairSemaphore executorsSempahore = new(1);
     
     /// <summary>
     /// Called when the flow execution has completed
@@ -30,7 +35,11 @@ public class FlowRunnerService : IFlowRunnerService
     /// <returns>a completed task</returns>
     public async Task<FlowExecutorInfo> Start(FlowExecutorInfo info)
     {
-        _ = ServiceLoader.Load<NodeService>().UpdateLastSeen(info.NodeUid);
+        await ServiceLoader.Load<NodeService>().UpdateLastSeen(info.NodeUid);
+        
+        if (info.Uid == Guid.Empty)
+            throw new Exception("No UID specified for flow execution info");
+        
         
         if (new SettingsService().Get()?.Result?.HideProcessingStartedNotifications != true)
             ClientServiceManager.Instance.SendToast(LogType.Info, "Started processing: " +
@@ -45,31 +54,25 @@ public class FlowRunnerService : IFlowRunnerService
         }
         catch (Exception) { }
 
-        if (info.Uid == Guid.Empty)
-            throw new Exception("No UID specified for flow execution info");
         info.LastUpdate = DateTime.UtcNow;
-        lock (Executors)
+        Logger.Instance.ILog($"Adding executor: {info.Uid} = {info.LibraryFile.Name}");
+        await executorsSempahore.WaitAsync();
+        try
         {
-            Logger.Instance.ILog($"Adding executor: {info.Uid} = {info.LibraryFile.Name}");
             Executors.Add(info.Uid, info);
         }
+        finally
+        {
+            executorsSempahore.Release();
+        }
         await ClientServiceManager.Instance.UpdateExecutors(Executors);
+        
         Logger.Instance.ILog($"Starting processing on {info.NodeName}: {info.LibraryFile.Name}");
+        var service = ServiceLoader.Load<LibraryFileService>();
+        await service.ResetFileInfoForProcessing(info.LibraryFile.Uid);
         if (info.LibraryFile != null)
         {
             var lf = info.LibraryFile;
-            var service = ServiceLoader.Load<LibraryFileService>();
-            await service.ResetFileInfoForProcessing(lf.Uid);
-            
-            if (lf.ExecutedNodes?.Any() == true)
-            {
-                lf.ExecutedNodes.Clear();
-            }
-            // delete the old log file
-            LibraryFileLogHelper.DeleteLogs(lf.Uid);
-
-            if (lf.OriginalSize > 0)
-                _ = service.UpdateOriginalSize(lf.Uid, lf.OriginalSize);
             if (lf.LibraryUid != null)
             {
                 var library = await ServiceLoader.Load<LibraryService>().GetByUidAsync(lf.LibraryUid.Value);
@@ -78,9 +81,86 @@ public class FlowRunnerService : IFlowRunnerService
             }
         }
         return info;
-        
     }
-    
+
+
+    /// <summary>
+    /// Called to update the status of the flow execution on the server
+    /// </summary>
+    /// <param name="info">The information about the flow execution</param>
+    /// <returns>a completed task</returns>
+    public async Task Update(FlowExecutorInfo info)
+    {
+        await ServiceLoader.Load<NodeService>().UpdateLastSeen(info.NodeUid);
+        
+        // if (info.LibraryFile != null)
+        // {
+        //     var libFileService = ServiceLoader.Load<LibraryFileService>();
+        //     var libFile = await libFileService.Get(info.LibraryFile.Uid);
+        //     var originalStatus = libFile.Status;
+        //     if (info.LibraryFile.Status == FileStatus.Processing && libFile.OriginalMetadata?.Any() != true &&
+        //         info.LibraryFile.OriginalMetadata?.Any() == true)
+        //     {
+        //         // we have the original metadata, update
+        //         libFile.OriginalMetadata = info.LibraryFile.OriginalMetadata;
+        //     }
+        //     if (info.LibraryFile != libFile)
+        //         ObjectHelper.CopyProperties(info.LibraryFile, libFile,
+        //             nameof(LibraryFile.OriginalSize),
+        //             nameof(LibraryFile.Fingerprint),
+        //             nameof(LibraryFile.Library),
+        //             nameof(LibraryFile.Duplicate),
+        //             nameof(LibraryFile.Node), // set when runner grabs the file
+        //             nameof(LibraryFile.CreationTime),
+        //             nameof(LibraryFile.DuplicateName),
+        //             nameof(LibraryFile.HoldUntil),
+        //             nameof(LibraryFile.IsDirectory),
+        //             nameof(LibraryFile.LibraryName),
+        //             nameof(LibraryFile.LibraryUid),
+        //             nameof(LibraryFile.NodeName),
+        //             nameof(LibraryFile.NodeUid),
+        //             nameof(LibraryFile.ProcessOnNodeUid),
+        //             nameof(LibraryFile.OriginalMetadata),
+        //             nameof(LibraryFile.RelativePath),
+        //             nameof(LibraryFile.Name),
+        //             nameof(LibraryFile.Uid));
+        //     
+        //     if (libFile.Status != FileStatus.Processing)
+        //     {
+        //         Logger.Instance.DLog(
+        //             $"Updating non-processing library file [{info.LibraryFile.Status}]: {info.LibraryFile.Name}");
+        //     }
+        //
+        //     if (originalStatus == FileStatus.Unprocessed)
+        //     {
+        //         // this can happen if the server is restarted but the node is still processing, update the status
+        //         await libFileService.Update(libFile);
+        //     }
+        //     if (originalStatus == FileStatus.ProcessingFailed || info.LibraryFile.Status == FileStatus.Processed)
+        //     {
+        //         lock (Executors)
+        //         {
+        //             CompletedExecutors.Append(info.Uid);
+        //             Executors.Remove(info.Uid);
+        //             _ = ClientServiceManager.Instance.UpdateExecutors(Executors);
+        //             return;
+        //         }
+        //     }
+        // }
+
+        info.LastUpdate = DateTime.UtcNow;
+        await executorsSempahore.WaitAsync();
+        try
+        {
+            Executors[info.Uid] = info;
+        }
+        finally
+        {
+            executorsSempahore.Release();
+        }
+        await ClientServiceManager.Instance.UpdateExecutors(Executors);
+    }
+
     
     /// <summary>
     /// Called when a flow execution starts
@@ -88,9 +168,9 @@ public class FlowRunnerService : IFlowRunnerService
     /// <param name="info">The information about the flow execution</param>
     /// <param name="log">The full log for the file</param>
     /// <returns>The updated information</returns>
-    public async Task Complete(FlowExecutorInfo info, string log)
+    public async Task Finish(FlowExecutorInfo info, string log)
     {
-        _ = ServiceLoader.Load<NodeService>().UpdateLastSeen(info.NodeUid);
+        await ServiceLoader.Load<NodeService>().UpdateLastSeen(info.NodeUid);
         
         Logger.Instance.ILog($"Finishing executor: {info.Uid} = {info.LibraryFile?.Name ?? string.Empty}");
         
@@ -104,32 +184,16 @@ public class FlowRunnerService : IFlowRunnerService
             catch (Exception) { }
         }
 
-        lock (Executors)
+        await executorsSempahore.WaitAsync();
+        try
         {
-            CompletedExecutors.Append(info.Uid);
-            if (Executors.ContainsKey(info.Uid))
-                Executors.Remove(info.Uid);
-            else if (string.IsNullOrEmpty(info.LibraryFile?.Name) == false)
-            {
-                var fileExecutor = Executors.Where(x => 
-                    x.Value.LibraryFile.Name == info.LibraryFile.Name)
-                    .Select(x => x.Key).FirstOrDefault();
-                if (Executors.ContainsKey(fileExecutor)) // could be Guid.Empty if default
-                {
-                    Executors.Remove(fileExecutor);
-                }
-                else
-                {
-                    Logger.Instance?.DLog("Could not remove as not in list of Executors [1]: " + info.Uid + ", file: " + info.LibraryFile.Name);
-                }
-            }
-            else
-            {   
-                Logger.Instance?.DLog("Could not remove as not in list of Executors [2]: " + info.Uid + ", file: " + info.LibraryFile.Name);
-            }
+            Executors.Remove(info.Uid);
+        }
+        finally
+        {
+            executorsSempahore.Release();
         }
         await ClientServiceManager.Instance.UpdateExecutors(Executors);
-        await ClientServiceManager.Instance.UpdateFileStatus();
 
         if (info.LibraryFile != null)
         {
@@ -220,17 +284,8 @@ public class FlowRunnerService : IFlowRunnerService
                 SystemEvents.TriggerLibraryFileProcessed(libfile, library);
             }
         }
-    }
-
-
-    /// <summary>
-    /// Called to update the status of the flow execution on the server
-    /// </summary>
-    /// <param name="info">The information about the flow execution</param>
-    /// <returns>a completed task</returns>
-    public async Task Update(FlowExecutorInfo info)
-    {
-        await new WorkerController(null).UpdateWork(info);
+        
+        await ClientServiceManager.Instance.UpdateFileStatus();
     }
 
     /// <summary>
@@ -241,12 +296,17 @@ public class FlowRunnerService : IFlowRunnerService
     /// <returns>an awaited task</returns>
     public async Task Clear(Guid nodeUid)
     {
-        lock (Executors)
+        Logger.Instance.ILog("Clearing workers");
+        await executorsSempahore.WaitAsync();
+        try
         {
-            Logger.Instance.ILog("Clearing workers");
             var toRemove = Executors.Where(x => x.Value.NodeUid == nodeUid).ToArray();
             foreach (var item in toRemove)
                 Executors.Remove(item.Key);
+        }
+        finally
+        {
+            executorsSempahore.Release();
         }
 
         await ServiceLoader.Load<LibraryFileService>().ResetProcessingStatus(nodeUid);
@@ -261,11 +321,16 @@ public class FlowRunnerService : IFlowRunnerService
     public async Task AbortByFile(Guid uid)
     {
         Guid executorId;
-        lock (Executors)
+        await executorsSempahore.WaitAsync();
+        try
         {
             executorId = Executors.Where(x => x.Value?.LibraryFile?.Uid == uid).Select(x => x.Key).FirstOrDefault();
             if (executorId == Guid.Empty)
                 executorId = Executors.Where(x => x.Value == null).Select(x => x.Key).FirstOrDefault();
+        }
+        finally
+        {
+            executorsSempahore.Release();
         }
         if (executorId == Guid.Empty || Executors.TryGetValue(executorId, out FlowExecutorInfo? info) == false || info == null)
         {
@@ -288,7 +353,7 @@ public class FlowRunnerService : IFlowRunnerService
                 return;
         }
         await Abort(executorId, uid);
-        ClientServiceManager.Instance.UpdateExecutors(Executors);
+        await ClientServiceManager.Instance.UpdateExecutors(Executors);
     }
     
     
@@ -342,7 +407,8 @@ public class FlowRunnerService : IFlowRunnerService
             
             await Task.Delay(6_000);
             Logger.Instance?.DLog("Removing from list of executors: " + uid);
-            lock (Executors)
+            await executorsSempahore.WaitAsync();
+            try
             {
                 if (Executors.TryGetValue(uid, out FlowExecutorInfo? info))
                 {
@@ -352,6 +418,10 @@ public class FlowRunnerService : IFlowRunnerService
                         Executors.Remove(uid);
                     }
                 }
+            }
+            finally
+            {
+                executorsSempahore.Release();
             }
             await ClientServiceManager.Instance.UpdateExecutors(Executors);
             Logger.Instance?.DLog("Abortion complete: " + uid);
@@ -366,116 +436,21 @@ public class FlowRunnerService : IFlowRunnerService
     /// </summary>
     /// <param name="runnerUid">the UID of the flow runner</param>
     /// <param name="info">the flow execution info</param>
-    internal bool Hello(Guid runnerUid, FlowExecutorInfo info)
+    internal async Task<bool> Hello(Guid runnerUid, FlowExecutorInfo info)
     {
-        lock (Executors)
-        {
-            if (Executors.TryGetValue(runnerUid, out var executorInfo) == false)
-            {
-                Logger.Instance?.WLog("Unable to find executor from helloer: " + runnerUid);
-                foreach (var executor in Executors.Values)
-                    Logger.Instance?.WLog("Executor: " + executor.Uid + " = " + executor.LibraryFile.Name);
-                
-                // unknown executor, the server may have restarted
-                if(Executors.TryAdd(runnerUid, info) == false)
-                    return false; 
-            }
-            ClientServiceManager.Instance.UpdateExecutors(Executors);
-
-            if(executorInfo != null)
-                executorInfo.LastUpdate = DateTime.UtcNow;
-
-            if (info.LibraryFile != null)
-            {
-                var service = ServiceLoader.Load<LibraryFileService>();
-                var current = service.GetFileStatus(info.LibraryFile.Uid).Result;
-                if (current != null && current == FileStatus.Unprocessed)
-                {
-                    // can happen if server was restarted
-                    service.UpdateWork(info.LibraryFile).Wait();
-                }
-            }
-            return true;
-        }
-    }
-
-    /// <summary>
-    /// Update work, tells the server about updated work on a flow runner
-    /// </summary>
-    /// <param name="info">The updated work information</param>
-    public async Task UpdateWork(FlowExecutorInfo info)
-    {
-        _ = ServiceLoader.Load<NodeService>().UpdateLastSeen(info.NodeUid);
-        
-        if (info.LibraryFile != null)
-        {
-            var libFileService = ServiceLoader.Load<LibraryFileService>();
-            var libFile = await libFileService.Get(info.LibraryFile.Uid);
-            var originalStatus = libFile.Status;
-            if (info.LibraryFile.Status == FileStatus.Processing && libFile.OriginalMetadata?.Any() != true &&
-                info.LibraryFile.OriginalMetadata?.Any() == true)
-            {
-                // we have the original metadata, update
-                libFile.OriginalMetadata = info.LibraryFile.OriginalMetadata;
-            }
-            if (info.LibraryFile != libFile)
-                ObjectHelper.CopyProperties(info.LibraryFile, libFile,
-                    nameof(LibraryFile.OriginalSize),
-                    nameof(LibraryFile.Fingerprint),
-                    nameof(LibraryFile.Library),
-                    nameof(LibraryFile.Duplicate),
-                    nameof(LibraryFile.Node), // set when runner grabs the file
-                    nameof(LibraryFile.CreationTime),
-                    nameof(LibraryFile.DuplicateName),
-                    nameof(LibraryFile.HoldUntil),
-                    nameof(LibraryFile.IsDirectory),
-                    nameof(LibraryFile.LibraryName),
-                    nameof(LibraryFile.LibraryUid),
-                    nameof(LibraryFile.NodeName),
-                    nameof(LibraryFile.NodeUid),
-                    nameof(LibraryFile.ProcessOnNodeUid),
-                    nameof(LibraryFile.OriginalMetadata),
-                    nameof(LibraryFile.RelativePath),
-                    nameof(LibraryFile.Name),
-                    nameof(LibraryFile.Uid));
-            
-            if (libFile.Status != FileStatus.Processing)
-            {
-                Logger.Instance.DLog(
-                    $"Updating non-processing library file [{info.LibraryFile.Status}]: {info.LibraryFile.Name}");
-            }
-
-            if (originalStatus == FileStatus.Unprocessed)
-            {
-                // this can happen if the server is restarted but the node is still processing, update the status
-                await libFileService.Update(libFile);
-            }
-            if (originalStatus == FileStatus.ProcessingFailed || info.LibraryFile.Status == FileStatus.Processed)
-            {
-                lock (Executors)
-                {
-                    CompletedExecutors.Append(info.Uid);
-                    Executors.Remove(info.Uid);
-                    _ = ClientServiceManager.Instance.UpdateExecutors(Executors);
-                    return;
-                }
-            }
-        }
-
         info.LastUpdate = DateTime.UtcNow;
-        lock (Executors)
+        await executorsSempahore.WaitAsync();
+        try
         {
-            if (CompletedExecutors.Contains(info.Uid))
-                return; // this call was delayed for some reason
-
-            if (Executors.ContainsKey(info.Uid))
-                Executors[info.Uid] = info;
-            //else // this is causing a finished executors to stick around.
-            //    Executors.Add(info.Uid, info);
+            Executors[runnerUid] = info;
+        }
+        finally
+        {
+            executorsSempahore.Release();
         }
         await ClientServiceManager.Instance.UpdateExecutors(Executors);
+        return true;
     }
-
 
     /// <summary>
     /// Gets if a library file is executing
@@ -489,17 +464,22 @@ public class FlowRunnerService : IFlowRunnerService
     /// <summary>
     /// Aborts any runners that have stopped communicating
     /// </summary>
-    internal void AbortDisconnectedRunners()
+    internal async Task AbortDisconnectedRunners()
     {
         FlowExecutorInfo[] executors;
-        lock (Executors)
+        await executorsSempahore.WaitAsync();
+        try
         {
             executors = Executors?.Select(x => x.Value)?.ToArray() ?? new FlowExecutorInfo[] { };
+        }
+        finally
+        {
+            executorsSempahore.Release();
         }
 
         foreach (var executor in executors ?? new FlowExecutorInfo[] {})
         {
-            if (executor != null && executor.LastUpdate < DateTime.UtcNow.AddSeconds(-60))
+            if (executor != null && executor.LastUpdate < DateTime.UtcNow.AddSeconds(-120))
             {
                 Logger.Instance?.ILog($"Aborting disconnected runner[{executor.NodeName}]: {executor.LibraryFile.Name}");
                 Abort(executor.Uid, executor.LibraryFile.Uid).Wait();
@@ -511,8 +491,39 @@ public class FlowRunnerService : IFlowRunnerService
     /// Get UIDs of executing library files
     /// </summary>
     /// <returns>UIDs of executing library files</returns>
-    internal static Guid[] ExecutingLibraryFiles()
-        => Executors?.Select(x => x.Value?.LibraryFile?.Uid)?
-               .Where(x => x != null)?.Select(x => x!.Value)?.ToArray() ??
-           new Guid[] { };
+    internal static async Task<List<Guid>> ExecutingLibraryFiles()
+    {
+        await executorsSempahore.WaitAsync();
+        try
+        {
+            return Executors?.Select(x => x.Value?.LibraryFile?.Uid)?
+                       .Where(x => x != null)?.Select(x => x!.Value)?.ToList() ??
+                   new List<Guid>();
+        }
+        finally
+        {
+            executorsSempahore.Release();
+        }
+    }
+
+    /// <summary>
+    /// Tries and gets a file from the running executor list
+    /// </summary>
+    /// <param name="libraryFileUid">the UID of the library file to get</param>
+    /// <returns>true if it is currently executing, otherwise false</returns>
+    public async Task<LibraryFile?> TryGetFile(Guid libraryFileUid)
+    {
+        await executorsSempahore.WaitAsync();
+        try
+        {
+            return Executors
+                .Where(x => x.Value?.LibraryFile?.Uid == libraryFileUid)
+                .Select(x => x.Value?.LibraryFile)
+                .FirstOrDefault();
+        }
+        finally
+        {
+            executorsSempahore.Release();
+        }
+    }
 }

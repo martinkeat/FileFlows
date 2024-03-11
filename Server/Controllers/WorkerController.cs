@@ -41,8 +41,8 @@ public class WorkerController : Controller
     /// </summary>
     /// <param name="args">the complete args</param>
     [HttpPost("work/finish")]
-    public void FinishWork([FromBody] FinishWorkArgs args)
-        => ServiceLoader.Load<FlowRunnerService>().Complete(args.Info, args.Log);
+    public Task FinishWork([FromBody] FinishWorkArgs args)
+        => ServiceLoader.Load<FlowRunnerService>().Finish(args.Info, args.Log);
     
     /// <summary>
     /// Update work, tells the server about updated work on a flow runner
@@ -50,7 +50,7 @@ public class WorkerController : Controller
     /// <param name="info">The updated work information</param>
     [HttpPost("work/update")]
     public Task UpdateWork([FromBody] FlowExecutorInfo info)
-        => ServiceLoader.Load<FlowRunnerService>().UpdateWork(info);
+        => ServiceLoader.Load<FlowRunnerService>().Update(info);
 
     /// <summary>
     /// Clear all workers from a node.  Intended for clean up in case a node restarts.  
@@ -150,7 +150,7 @@ public class WorkerController : Controller
     /// </summary>
     /// <param name="runnerUid">the UID of the flow runner</param>
     /// <param name="info">the flow execution info</param>
-    internal bool Hello(Guid runnerUid, FlowExecutorInfo info)
+    internal Task<bool> Hello(Guid runnerUid, FlowExecutorInfo info)
         => ServiceLoader.Load<FlowRunnerService>().Hello(runnerUid, info);
 }
 

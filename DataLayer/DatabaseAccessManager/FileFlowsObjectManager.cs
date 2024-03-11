@@ -118,21 +118,12 @@ internal  class FileFlowsObjectManager
     /// <summary>
     /// Adds or updates an object in the database
     /// </summary>
-    /// <param name="db">The IDatabase used for this operation</param>
     /// <param name="obj">The object being added or updated</param>
     /// <typeparam name="T">The type of object being added or updated</typeparam>
     /// <returns>The updated object</returns>
     public async Task<T> AddOrUpdateObject<T>(T obj) where T : FileFlowObject, new()
     {
-        var serializerOptions = new JsonSerializerOptions
-        {
-            Converters = { new DataConverter(), new DataConverter<FlowPart>(), new BoolConverter(), new ValidatorConverter() }
-        };
-        // need to case obj to (ViObject) here so the DataConverter is used
-        string json = JsonSerializer.Serialize((FileFlowObject)obj, serializerOptions);
-
-        var type = obj.GetType();
-        obj.Name = obj.Name?.EmptyAsNull() ?? type.Name;
+        var dbo = ConvertToDbObject(obj);
         var dbObject = obj.Uid == Guid.Empty ? null : await dbom.Single(obj.Uid);
         
         if (dbObject == null)
@@ -148,9 +139,8 @@ internal  class FileFlowsObjectManager
                 Name = obj.Name,
                 DateCreated = obj.DateCreated,
                 DateModified = obj.DateModified,
-
-                Type = type.FullName!,
-                Data = json
+                Type = dbo.Type,
+                Data = dbo.Data
             };
             await dbom.Insert(dbObject);
         }
@@ -161,7 +151,7 @@ internal  class FileFlowsObjectManager
             dbObject.DateModified = obj.DateModified;
             if (obj.DateCreated != dbObject.DateCreated && obj.DateCreated > new DateTime(2020, 1, 1))
                 dbObject.DateCreated = obj.DateCreated; // OnHeld moving to process now can change this date
-            dbObject.Data = json;
+            dbObject.Data = dbo.Data;
             await dbom.Update(dbObject); 
         }
 

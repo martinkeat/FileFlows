@@ -29,6 +29,7 @@ public class Upgrader
     internal Result<(bool Required, Version Current)> UpgradeRequired(AppSettings settings)
     {
         var manager = GetUpgradeManager(settings);
+        
         var versionResult = manager.GetCurrentVersion().Result;
         if (versionResult.Failed(out string error))
             return Result<(bool Required, Version Current)>.Fail(error);

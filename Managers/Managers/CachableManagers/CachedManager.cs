@@ -129,7 +129,7 @@ public abstract class CachedManager<T> where T : FileFlowObject, new()
     /// <param name="item">the item being updated</param>
     /// <param name="dontIncrementConfigRevision">if this is a revision object, if the revision should be updated</param>
     protected virtual Task UpdateActual(T item, bool dontIncrementConfigRevision = false)
-        => DatabaseAccessManager.Instance.FileFlowsObjectManager.Update(item);
+        => DatabaseAccessManager.Instance.FileFlowsObjectManager.AddOrUpdateObject(item);
 
 
     /// <summary>

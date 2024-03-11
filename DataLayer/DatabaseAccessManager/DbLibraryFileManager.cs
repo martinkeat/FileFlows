@@ -612,9 +612,10 @@ internal class DbLibraryFileManager : BaseManager
     /// <returns>the total number of items matching</returns>
     public async Task<int> GetTotalMatchingItems(List<Library> allLibraries, FileStatus? status, string filter)
     {
+        string sql;
         try
         {
-            string filterWhere = $"lower({Wrap(nameof(LibraryFile.Name))}) like lower('%{filter.Replace("'", "''").Replace(" ", "%")}%')" ;
+            string filterWhere = $"lower({Wrap(nameof(LibraryFile))}.{Wrap(nameof(LibraryFile.Name))}) like lower('%{filter.Replace("'", "''").Replace(" ", "%")}%')" ;
             if(status == null)
             {
                 using var db = await DbConnector.GetDb();
@@ -634,7 +635,7 @@ internal class DbLibraryFileManager : BaseManager
             var outOfSchedule = string.Join(", ",
                 allLibraries.Where(x => x.Schedule?.Length != 672 || x.Schedule[quarter] == '0').Select(x => "'" + x.Uid + "'"));
 
-            string sql = $"select count(*) from {Wrap(nameof(LibraryFile))} where {Wrap(nameof(LibraryFile.Status))} = {(int)FileStatus.Unprocessed} and " + filterWhere;
+            sql = $"select count(*) from {Wrap(nameof(LibraryFile))} where {Wrap(nameof(LibraryFile.Status))} = {(int)FileStatus.Unprocessed} and " + filterWhere;
             
             // add disabled condition
             if(string.IsNullOrEmpty(disabled) == false)
@@ -1144,35 +1145,36 @@ where {Wrap(nameof(LibraryFile.Status))} = 1 and {Wrap(nameof(LibraryFile.Proces
         return (FileStatus)istatus.Value;
     }
 
-    /// <summary>
-    /// Special case used by the flow runner to update a processing library file
-    /// </summary>
-    /// <param name="file">the processing library file</param>
-    public async Task UpdateWork(LibraryFile file)
-    {
-        if (file == null)
-            return;
-        
-        string sql = $"update {Wrap(nameof(LibraryFile))} set " +
-                     $" {Wrap(nameof(LibraryFile.Status))} = {((int)file.Status)}, " + 
-                     $" {Wrap(nameof(LibraryFile.FinalSize))} = {file.FinalSize}, " +
-                     (file.Node == null ? "" : (
-                         $" {Wrap(nameof(LibraryFile.NodeUid))} = '{file.NodeUid}', {Wrap(nameof(LibraryFile.NodeName))} = '{file.NodeName.Replace("'", "''")}', "
-                     )) +
-                     $" {Wrap(nameof(LibraryFile.WorkerUid))} = '{file.WorkerUid}', " +
-                     $" {Wrap(nameof(LibraryFile.ProcessingStarted))} = {DbConnector.FormatDateQuoted(file.ProcessingStarted)}, " +
-                     $" {Wrap(nameof(LibraryFile.ProcessingEnded))} = {DbConnector.FormatDateQuoted(file.ProcessingEnded)}, " +
-                     $" {Wrap(nameof(LibraryFile.WorkerUid))} = @0 " +
-                     (file.Status != FileStatus.Processing ? $", {Wrap(nameof(LibraryFile.Flags))} = 0 " : string.Empty) + // clear flags on processed files
-                     $" where {Wrap(nameof(LibraryFile.Uid))} = '{file.Uid}'";
-        
-        string executedJson = file.ExecutedNodes?.Any() != true
-            ? string.Empty
-            : JsonSerializer.Serialize(file.ExecutedNodes, CustomDbMapper.JsonOptions);
-        
-        using var db = await DbConnector.GetDb();
-        await db.Db.ExecuteAsync(sql, executedJson);
-    }
+    // dont want to have to update the db while a file is processing, this adds too much strain
+    // /// <summary>
+    // /// Special case used by the flow runner to update a processing library file
+    // /// </summary>
+    // /// <param name="file">the processing library file</param>
+    // public async Task UpdateWork(LibraryFile file)
+    // {
+    //     if (file == null)
+    //         return;
+    //     
+    //     string sql = $"update {Wrap(nameof(LibraryFile))} set " +
+    //                  $" {Wrap(nameof(LibraryFile.Status))} = {((int)file.Status)}, " + 
+    //                  $" {Wrap(nameof(LibraryFile.FinalSize))} = {file.FinalSize}, " +
+    //                  (file.Node == null ? "" : (
+    //                      $" {Wrap(nameof(LibraryFile.NodeUid))} = '{file.NodeUid}', {Wrap(nameof(LibraryFile.NodeName))} = '{file.NodeName.Replace("'", "''")}', "
+    //                  )) +
+    //                  $" {Wrap(nameof(LibraryFile.WorkerUid))} = '{file.WorkerUid}', " +
+    //                  $" {Wrap(nameof(LibraryFile.ProcessingStarted))} = {DbConnector.FormatDateQuoted(file.ProcessingStarted)}, " +
+    //                  $" {Wrap(nameof(LibraryFile.ProcessingEnded))} = {DbConnector.FormatDateQuoted(file.ProcessingEnded)}, " +
+    //                  $" {Wrap(nameof(LibraryFile.WorkerUid))} = @0 " +
+    //                  (file.Status != FileStatus.Processing ? $", {Wrap(nameof(LibraryFile.Flags))} = 0 " : string.Empty) + // clear flags on processed files
+    //                  $" where {Wrap(nameof(LibraryFile.Uid))} = '{file.Uid}'";
+    //     
+    //     string executedJson = file.ExecutedNodes?.Any() != true
+    //         ? string.Empty
+    //         : JsonSerializer.Serialize(file.ExecutedNodes, CustomDbMapper.JsonOptions);
+    //     
+    //     using var db = await DbConnector.GetDb();
+    //     await db.Db.ExecuteAsync(sql, executedJson);
+    // }
 
     /// <summary>
     /// Moves the passed in UIDs to the top of the processing order

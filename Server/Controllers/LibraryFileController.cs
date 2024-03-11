@@ -1,5 +1,3 @@
-using System.Globalization;
-using System.Reflection.Metadata.Ecma335;
 using Microsoft.AspNetCore.Mvc;
 using FileFlows.Server.Helpers;
 using FileFlows.Shared.Models;
@@ -7,7 +5,6 @@ using FileFlows.Server.Helpers.ModelHelpers;
 using FileFlows.Server.Services;
 using FileFlows.Server.Workers;
 using FileFlows.ServerShared.Models;
-using FileFlows.ServerShared.Services;
 using FileFlows.Shared.Helpers;
 using Humanizer;
 using LibraryFileService = FileFlows.Server.Services.LibraryFileService;
@@ -33,8 +30,6 @@ public class LibraryFileController : Controller //ControllerStore<LibraryFile>
     public async Task<NextLibraryFileResult> GetNext([FromBody] NextLibraryFileArgs args)
     {
         var service = ServiceLoader.Load<LibraryFileService>();
-        // var node = ServiceLoader.Load<NodeService>().GetByUid(args.NodeUid);
-        // var result = await service.GetNextLibraryFile(node, args.WorkerUid);
         var result = await service.GetNext(args.NodeName, args.NodeUid, args.NodeVersion, args.WorkerUid);
         if (result == null)
             return result;
@@ -158,16 +153,17 @@ public class LibraryFileController : Controller //ControllerStore<LibraryFile>
     [HttpGet("{uid}")]
     public async Task<LibraryFile> Get(Guid uid)
     {
-        var result = await ServiceLoader.Load<LibraryFileService>().Get(uid);
-        // if(DbHelper.UseMemoryCache == false && result != null)
-        //     CacheStore.Store(result.Uid, result);
-        if(result != null && (result.Status == FileStatus.ProcessingFailed || result.Status == FileStatus.Processed))
+        // first see if the file is currently processing, if it is, return that in memory 
+        var file = await ServiceLoader.Load<FlowRunnerService>().TryGetFile(uid) ?? 
+                   await ServiceLoader.Load<LibraryFileService>().Get(uid);
+        
+        if(file != null && (file.Status == FileStatus.ProcessingFailed || file.Status == FileStatus.Processed))
         {
             if (LibraryFileLogHelper.HtmlLogExists(uid))
-                return result;
+                return file;
             LibraryFileLogHelper.CreateHtmlOfLog(uid);
         }
-        return result;
+        return file;
     }
 
 

@@ -72,22 +72,6 @@ public interface IDatabaseConnector
     string TimestampDiffSeconds(string start, string end, string asColumn);
 
     /// <summary>
-    /// Creates a day of week sql select
-    /// </summary>
-    /// <param name="column">the date column</param>
-    /// <param name="asColumn">the name of the result</param>
-    /// <returns>the sql select statement</returns>
-    string DayOfWeek(string column, string asColumn = null);
-
-    /// <summary>
-    /// Creates a hour sql select
-    /// </summary>
-    /// <param name="column">the date column</param>
-    /// <param name="asColumn">the name of the result</param>
-    /// <returns>the sql select statement</returns>
-    string Hour(string column, string asColumn = null);
-
-    /// <summary>
     /// Check to see if a column exists
     /// </summary>
     /// <param name="table">the table to check</param>

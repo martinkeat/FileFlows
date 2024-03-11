@@ -199,12 +199,12 @@ public class LibraryFileManager
     public Task<FileStatus?> GetFileStatus(Guid uid)
         => DatabaseAccessManager.Instance.LibraryFileManager.GetFileStatus(uid);
 
-    /// <summary>
-    /// Special case used by the flow runner to update a processing library file
-    /// </summary>
-    /// <param name="file">the processing library file</param>
-    public Task UpdateWork(LibraryFile file)
-        => DatabaseAccessManager.Instance.LibraryFileManager.UpdateWork(file);
+    // /// <summary>
+    // /// Special case used by the flow runner to update a processing library file
+    // /// </summary>
+    // /// <param name="file">the processing library file</param>
+    // public Task UpdateWork(LibraryFile file)
+    //     => DatabaseAccessManager.Instance.LibraryFileManager.UpdateWork(file);
 
     /// <summary>
     /// Moves the passed in UIDs to the top of the processing order

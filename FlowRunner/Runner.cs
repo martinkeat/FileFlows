@@ -158,9 +158,6 @@ public class Runner
                     nodeParameters.FailureReason = "Error in runner: " + ex.Message;
                 if (Info.LibraryFile?.Status == FileStatus.Processing)
                     SetStatus(FileStatus.ProcessingFailed);
-                    //Info.LibraryFile.Status = FileStatus.ProcessingFailed;
-
-                //throw;
             }
             finally
             {
@@ -279,7 +276,7 @@ public class Runner
 
                 var service = FlowRunnerService.Load();
                 Info.LibraryFile.ProcessingEnded = DateTime.UtcNow;
-                await service.Complete(Info, log);
+                await service.Finish(Info, log);
                 return;
             }
             catch (Exception) { }

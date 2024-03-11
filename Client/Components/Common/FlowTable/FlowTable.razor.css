@@ -33,7 +33,7 @@
 }
 .flowtable-toolbar .flowtable-toolbar-filter input {
   background-color: transparent !important;
-  width: 100%;
+  width: calc(100% - 2px);
   line-height: 1rem;
   padding-right: 1.75rem;
   border: 1px solid var(--input-background) !important;

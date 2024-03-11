@@ -215,7 +215,7 @@ internal class DbMigrator
     /// <param name="type">the type of database to check</param>
     /// <param name="connectionString">the connection string</param>
     /// <returns>true if exists, otherwise false</returns>
-    public Result<bool> DatabaseExists(DatabaseType type, string connectionString)
+    public static Result<bool> DatabaseExists(DatabaseType type, string connectionString)
     {
         switch (type)
         {
@@ -225,6 +225,8 @@ internal class DbMigrator
                 return SqlServerDatabaseCreator.DatabaseExists(connectionString);
             case DatabaseType.Postgres:
                 return PostgresDatabaseCreator.DatabaseExists(connectionString);
+            case DatabaseType.Sqlite:
+                return SQLiteDatabaseCreator.DatabaseExists(connectionString);
         }
 
         return Result<bool>.Fail("Unsupported database type");

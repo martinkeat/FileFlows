@@ -138,7 +138,7 @@ internal  class DatabaseAccessManager
                 case DatabaseType.Postgres:
                     return PostgresDatabaseCreator.DatabaseExists(connectionString);
                 case DatabaseType.Sqlite:
-                    return true; // ? do we need to do more here?
+                    return SQLiteDatabaseCreator.DatabaseExists(connectionString);
             }
             return Result<bool>.Fail("Unsupported database type");
         }

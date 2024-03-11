@@ -266,7 +266,7 @@ public class LibraryFileService : ILibraryFileService
                 return nodeLibraries.Contains(x.Uid);
             return nodeLibraries.Contains(x.Uid) == false;
         }).Select(x => x.Uid).ToList();
-        var executing = FlowRunnerService.ExecutingLibraryFiles()?.ToList() ?? new List<Guid>();
+        var executing = await FlowRunnerService.ExecutingLibraryFiles();
 
         await NextFileSemaphore.WaitAsync();
         try
@@ -463,10 +463,20 @@ public class LibraryFileService : ILibraryFileService
     /// This will happen if a server or node is reset
     /// </summary>
     /// <param name="nodeUid">[Optional] the UID of the node</param>
-    public async Task ResetProcessingStatus(Guid? nodeUid)
+    /// <returns>true if successfully reset, otherwise false</returns>
+    public async Task<bool> ResetProcessingStatus(Guid? nodeUid)
     {
-        await new LibraryFileManager().ResetProcessingStatus(nodeUid);
-        await ClientServiceManager.Instance?.UpdateFileStatus();
+        try
+        {
+            await new LibraryFileManager().ResetProcessingStatus(nodeUid);
+            await ClientServiceManager.Instance?.UpdateFileStatus();
+            return true;
+        }
+        catch (Exception ex)
+        {
+            Logger.Instance.ELog("Failed to reset processing status: " + ex.Message + Environment.NewLine + ex.StackTrace);
+            return false;
+        }
     }
 
     /// <summary>
@@ -477,12 +487,12 @@ public class LibraryFileService : ILibraryFileService
     public Task<FileStatus?> GetFileStatus(Guid uid)
         => new LibraryFileManager().GetFileStatus(uid);
 
-    /// <summary>
-    /// Special case used by the flow runner to update a processing library file
-    /// </summary>
-    /// <param name="file">the processing library file</param>
-    public Task UpdateWork(LibraryFile file)
-        => new LibraryFileManager().UpdateWork(file);
+    // /// <summary>
+    // /// Special case used by the flow runner to update a processing library file
+    // /// </summary>
+    // /// <param name="file">the processing library file</param>
+    // public Task UpdateWork(LibraryFile file)
+    //     => new LibraryFileManager().UpdateWork(file);
 
     /// <summary>
     /// Moves the passed in UIDs to the top of the processing order

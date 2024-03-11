@@ -25,15 +25,8 @@ public class SQLiteConnector : IDatabaseConnector
     
     /// <inheritdoc />
     public string TimestampDiffSeconds(string start, string end, string asColumn)
-       => $" timestampdiff(second, {start}, {end}) AS {asColumn} ";
+       => $"(strftime('%s', {end}) - strftime('%s', {start})) AS {asColumn}";
     
-    /// <inheritdoc />
-    public string DayOfWeek(string column, string asColumn = null)
-        => $"(strftime('%w', {column}) + 1)" + (string.IsNullOrEmpty(asColumn) ? string.Empty : $" as {asColumn}");
-    
-    /// <inheritdoc />
-    public string Hour(string column, string asColumn = null)
-        => $"strftime('%H', {column})" + (string.IsNullOrEmpty(asColumn) ? string.Empty : $" as {asColumn}");
     
     
     public SQLiteConnector(ILogger logger, string connectionString)

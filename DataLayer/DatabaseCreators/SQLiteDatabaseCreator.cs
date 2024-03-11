@@ -99,4 +99,20 @@ public class SQLiteDatabaseCreator : IDatabaseCreator
             con.Close();
         }
     }
+
+    /// <summary>
+    /// Checks if the MySql database exists
+    /// </summary>
+    /// <param name="connectionString">the connection string</param>
+    /// <returns>true if exists, otherwise false</returns>
+    public static Result<bool> DatabaseExists(string connectionString)
+    {
+        string dbFile = GetFilenameFromConnectionString(connectionString);
+        if (File.Exists(dbFile))
+            return new FileInfo(dbFile).Length> 0;
+        dbFile = Path.Combine(DirectoryHelper.DatabaseDirectory, dbFile);
+        if (File.Exists(dbFile))
+            return new FileInfo(dbFile).Length > 0;
+        return false;
+    }
 }

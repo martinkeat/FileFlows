@@ -39,14 +39,6 @@ public class SqlServerConnector : IDatabaseConnector
     public string TimestampDiffSeconds(string start, string end, string asColumn)
         => $" DATEDIFF(second, {start}, {end}) AS {asColumn} ";
     
-    /// <inheritdoc />
-    public string DayOfWeek(string column, string asColumn = null)
-        => $"DATEPART(dw, {column})" + (string.IsNullOrEmpty(asColumn) ? string.Empty : $" as {asColumn}");
-    
-    /// <inheritdoc />
-    public string Hour(string column, string asColumn = null)
-        => $"DATEPART(hour, {column})" + (string.IsNullOrEmpty(asColumn) ? string.Empty : $" as {asColumn}");
-    
     /// <summary>
     /// Initialises a SQL Server Connector
     /// </summary>

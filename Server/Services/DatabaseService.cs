@@ -108,6 +108,15 @@ public class DatabaseService
 
         return true;
     }
+
+    /// <summary>
+    /// Check the database exists
+    /// </summary>
+    /// <returns>the result</returns>
+    public Result<bool> DatabaseExists()
+        => MigrationManager.DatabaseExists(
+            ServiceAppSetting.Settings.DatabaseType,
+            ServiceAppSetting.Settings.DatabaseConnection);
     
     /// <summary>
     /// Prepares the database
@@ -149,7 +158,7 @@ public class DatabaseService
     private Result<bool> InitialiseManagers()
     {
         var settings = ServiceAppSetting.Settings;
-        return Managers.Initializer.Init(Logger.Instance, settings.DatabaseType, settings.DatabaseConnection, settings.EncryptionKey);
+        return Initializer.Init(Logger.Instance, settings.DatabaseType, settings.DatabaseConnection, settings.EncryptionKey);
     }
 
     /// <summary>

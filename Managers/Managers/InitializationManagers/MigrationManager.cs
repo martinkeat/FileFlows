@@ -52,11 +52,19 @@ public class MigrationManager
     {
         if (Destination.Type == DatabaseType.Sqlite)
             return false;
-        
-        DbMigrator migrator = new(Logger);
-        return migrator.DatabaseExists(Destination.Type, Destination.ConnectionString);
+        return DbMigrator.DatabaseExists(Destination.Type, Destination.ConnectionString);
     }
 
+
+    /// <summary>
+    /// Checks if the database exists
+    /// </summary>
+    /// <param name="type">the type of the database</param>
+    /// <param name="connectionString">the connection string to the database</param>
+    /// <returns>true if successfully connected, otherwise false</returns>
+    public static Result<bool> DatabaseExists(DatabaseType type, string connectionString)
+        => DbMigrator.DatabaseExists(type, connectionString);
+    
     /// <summary>
     /// Tests a connection to a database
     /// </summary>

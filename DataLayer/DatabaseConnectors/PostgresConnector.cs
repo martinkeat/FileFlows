@@ -41,14 +41,6 @@ public class PostgresConnector : IDatabaseConnector
     /// <inheritdoc />
     public string TimestampDiffSeconds(string start, string end, string asColumn)
         => $" EXTRACT(epoch FROM {end} - {start}) AS {asColumn} ";
-    
-    /// <inheritdoc />
-    public string DayOfWeek(string column, string asColumn = null)
-        => $"EXTRACT(ISODOW FROM {WrapFieldName(column)})" + (string.IsNullOrEmpty(asColumn) ? string.Empty : $" as {WrapFieldName(asColumn)}");
-    
-    /// <inheritdoc />
-    public string Hour(string column, string asColumn = null)
-        => $"EXTRACT(HOUR FROM {WrapFieldName(column)})" + (string.IsNullOrEmpty(asColumn) ? string.Empty : $" as {WrapFieldName(asColumn)}");
 
     /// <summary>
     /// Initialises a Postgres Connector
