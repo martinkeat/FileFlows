@@ -530,8 +530,10 @@ public class Runner
             return json;
         };
         var statService = StatisticService.Load();
-        nodeParameters.StatisticRecorder = (name, value) =>
-            statService.Record(name, value);
+        nodeParameters.StatisticRecorderRunningTotals = (name, value) =>
+            statService.RecordRunningTotal(name, value);
+        nodeParameters.StatisticRecorderAverage = (name, value) =>
+            statService.RecordAverage(name, value);
         nodeParameters.AdditionalInfoRecorder = RecordAdditionalInfo;
 
         var flow = FlowHelper.GetStartupFlow(Info.IsRemote, Flow);

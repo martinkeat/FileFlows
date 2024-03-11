@@ -506,10 +506,18 @@ export class PieChartChart extends FFChart
     }
 
     fixData(data) {
-        if (!data?.length)
-            return data;
+        if(!data || !Object.keys(data).length)
+            return [];
 
-        data.sort((a, b) => {
+        let results = [];
+        Object.keys(data).forEach(x => {
+            results.push({
+                Name: x,
+                Value: data[x]
+            })
+        });
+
+        results.sort((a, b) => {
             return b.Value - a.Value;
         });
         
@@ -517,7 +525,7 @@ export class PieChartChart extends FFChart
             labels: [],
             series: []
         };
-        for(let v of data)
+        for(let v of results)
         {
             series.labels.push(v.Name);
             series.series.push(v.Value);
@@ -570,16 +578,21 @@ export class TreeMapChart extends FFChart
     }
 
     fixData(data) {
-        if (!data?.length || (data[0].Name && data[0].Value) === false)
-            return data;
-
-        for(let i=0;i<data.length;i++){
-            let name = data[i].Name;
+        if(!data || !Object.keys(data).length)
+            return [];
+        
+        let results = [];
+        Object.keys(data).forEach(x => {
+            let name = x;
             if (name=== 'mpeg2video')
                 name = 'mpeg2'; // too long
-            data[i] = {x: name, y: data[i].Value};
-        }
-        return data;
+            results.push({
+                x: name,
+                y: data[x]
+            })
+        });
+        
+        return results;
     }
 
     getChartOptions(data)

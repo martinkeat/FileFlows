@@ -67,7 +67,7 @@ public class FileServerController : Controller
             return false;
         }
 
-        if (WorkerController.Executors.ContainsKey(executorUid) == false)
+        if (FlowRunnerService.Executors.ContainsKey(executorUid) == false)
         {
             message = "Unknown executor identifier given.";
             return false;

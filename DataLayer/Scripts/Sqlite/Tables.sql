@@ -14,6 +14,7 @@ CREATE INDEX IF NOT EXISTS idx_DbObject_Name ON DbObject (Name);
 CREATE TABLE DbStatistic
 (
     Name            varchar(255)       NOT NULL          PRIMARY KEY,
+    Type            int                NOT NULL,
     Data            TEXT               NOT NULL
 );
 

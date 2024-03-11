@@ -13,6 +13,11 @@ public class DbStatistic
     public string Name { get; set; }
     
     /// <summary>
+    /// Gets or sets the type of statistic
+    /// </summary>
+    public StatisticType Type { get; set; }
+    
+    /// <summary>
     /// Gets or sets the number value
     /// </summary>
     public string Data { get; set; }

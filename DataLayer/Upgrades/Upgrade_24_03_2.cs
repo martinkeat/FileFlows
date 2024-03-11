@@ -196,26 +196,44 @@ public class Upgrade_24_03_2
         Dictionary<string, object> newStats = new();
         foreach (string key in old.Keys)
         {
-            var totals = new RunningTotals();
-            foreach (var stat in old[key])
+            if (key == "COMIC_PAGES")
             {
-                if (totals.Totals.TryAdd(stat.StringValue, 1) == false)
-                    totals.Totals[stat.StringValue] += 1;
-            }
+                var totals = new Average();
+                foreach (var stat in old[key])
+                {
+                    if (totals.Data.TryAdd((int)stat.NumberValue, 1) == false)
+                        totals.Data[(int)stat.NumberValue] += 1;
+                }
 
-            newStats.Add(key, totals);
+                newStats.Add(key, totals);
+            }
+            else
+            {
+                
+                var totals = new RunningTotals();
+                foreach (var stat in old[key])
+                {
+                    if (totals.Data.TryAdd(stat.StringValue, 1) == false)
+                        totals.Data[stat.StringValue] += 1;
+                }
+
+                newStats.Add(key, totals);
+            }
         }
 
         string newTable = $@"DROP TABLE DbStatistic; CREATE TABLE DbStatistic
 (
     Name            varchar(255)       {(mySql ? "COLLATE utf8_unicode_ci" : "")}      NOT NULL          PRIMARY KEY,
+    Type            int                NOT NULL,
     Data            TEXT               {(mySql ? "COLLATE utf8_unicode_ci" : "")}      NOT NULL
 )";
         connector.Db.Execute(newTable);
         foreach (var key in newStats.Keys)
         {
-            connector.Db.Execute("insert into DbStatistic (Name, Data) values (@0, @1)",
-                key, JsonSerializer.Serialize(newStats[key]));
+            connector.Db.Execute("insert into DbStatistic (Name, Type, Data) values (@0, @1, @2)",
+                key, 
+                (int)(key == "COMIC_PAGES" ? StatisticType.Average : StatisticType.RunningTotals), 
+                JsonSerializer.Serialize(newStats[key]));
         }
 
 
@@ -257,7 +275,7 @@ public class Upgrade_24_03_2
         connector.Db.Execute("insert into DbStatistic (Name, Data) values (@0, @1)",
             Globals.STAT_TOTAL_FILES, JsonSerializer.Serialize(new RunningTotals()
             {
-                Totals = new()
+                Data = new()
                 {
                     { nameof(FileStatus.Processed), totalProcessed },
                     { nameof(FileStatus.ProcessingFailed), totalFailed },

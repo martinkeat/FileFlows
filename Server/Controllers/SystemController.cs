@@ -275,7 +275,7 @@ public class SystemController:Controller
     /// </summary>
     /// <returns></returns>
     [HttpGet("history-data/processing-heatmap")]
-    public Task<List<HeatmapData>> GetProcessingHeatMap()
+    public List<HeatmapData> GetProcessingHeatMap()
         => ServiceLoader.Load<StatisticService>().GetHeatMap(Globals.STAT_PROCESSING_TIMES_HEATMAP);
 
     private async Task<float> GetCpuPercentage()

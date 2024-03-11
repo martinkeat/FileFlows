@@ -38,7 +38,7 @@ public class FlowRunnerService : IFlowRunnerService
     {
         await ServiceLoader.Load<NodeService>().UpdateLastSeen(info.NodeUid);
 
-        await new StatisticManager().RecordFileStarted();
+        await ServiceLoader.Load<StatisticService>().RecordFileStarted();
         
         if (info.Uid == Guid.Empty)
             throw new Exception("No UID specified for flow execution info");
@@ -273,8 +273,6 @@ public class FlowRunnerService : IFlowRunnerService
                 await lfService.Update(libfile);
                 var library = await ServiceLoader.Load<LibraryService>().GetByUidAsync(libfile.Library.Uid);
                 
-                await new StatisticManager().RecordStorageSaved(library.Name, libfile.OriginalSize, libfile.FinalSize);
-                
                 if (libfile.Status == FileStatus.ProcessingFailed)
                 {
                     SystemEvents.TriggerLibraryFileProcessedFailed(libfile, library);
@@ -290,6 +288,10 @@ public class FlowRunnerService : IFlowRunnerService
                 }
 
                 SystemEvents.TriggerLibraryFileProcessed(libfile, library);
+
+                await ServiceLoader.Load<StatisticService>()
+                    .RecordStorageSaved(library.Name, libfile.OriginalSize, libfile.FinalSize);
+
             }
         }
         

@@ -1,10 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using FileFlows.Server.Services;
-using FileFlows.ServerShared.Models;
 using FileFlows.ServerShared.Models.StatisticModels;
 
 namespace FileFlows.Server.Controllers;
-
 
 /// <summary>
 /// Status controller
@@ -13,29 +11,48 @@ namespace FileFlows.Server.Controllers;
 public class StatisticsController : Controller
 {
     /// <summary>
-    /// Records a statistic
+    /// Records a running total statistic
     /// </summary>
-    /// <param name="statistic">the statistic to record</param>
-    [HttpPost("record")]
-    public Task Record([FromBody] Statistic statistic)
-        => new StatisticService().Record(statistic);
+    /// <param name="name">the name of the statistic</param>
+    /// <param name="value">the value of the statistic</param>
+    [HttpPost("record-running-total")]
+    public Task RecordRunningTotals([FromQuery] string name, [FromQuery] string value)
+        => new StatisticService().RecordRunningTotal(name, value);
+    
+    /// <summary>
+    /// Records a average 
+    /// </summary>
+    /// <param name="name">the name of the statistic</param>
+    /// <param name="value">the value of the statistic</param>
+    [HttpPost("record-average")]
+    public Task RecordAverage([FromQuery] string name, [FromQuery] int value)
+        => new StatisticService().RecordAverage(name, value);
 
     /// <summary>
     /// Gets statistics by name
     /// </summary>
     /// <returns>the matching statistics</returns>
     [HttpGet("running-totals/{name}")]
-    public Task<IEnumerable<Statistic>> GetRunningTotals([FromRoute] string name)
+    public Dictionary<string, long> GetRunningTotals([FromRoute] string name)
         => new StatisticService().GetRunningTotals(name);
 
+
+    /// <summary>
+    /// Gets average statistics by name
+    /// </summary>
+    /// <returns>the matching statistics</returns>
+    [HttpGet("average/{name}")]
+    public Dictionary<int, int> GetAverage([FromRoute] string name)
+        => new StatisticService().GetAverage(name);
+    
     /// <summary>
     /// Gets storage saved
     /// </summary>
     /// <returns>the storage saved</returns>
     [HttpGet("storage-saved")]
-    public async Task<object> GetStorageSaved()
+    public object GetStorageSaved()
     {
-        var data = await new StatisticService().GetStorageSaved();
+        var data = new StatisticService().GetStorageSaved();
         data = data.OrderByDescending(x => x.FinalSize - x.OriginalSize).ToList();
         if (data.Count > 5)
         {

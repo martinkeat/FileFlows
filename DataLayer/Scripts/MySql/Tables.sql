@@ -24,6 +24,7 @@ ALTER TABLE DbLogMessage ADD INDEX (LogDate);
 CREATE TABLE DbStatistic
 (
     Name            varchar(255)       COLLATE utf8_unicode_ci      NOT NULL          PRIMARY KEY,
+    Type            int                NOT NULL,
     Data            TEXT               COLLATE utf8_unicode_ci      NOT NULL
 );
 

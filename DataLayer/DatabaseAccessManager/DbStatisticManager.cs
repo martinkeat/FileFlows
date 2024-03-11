@@ -1,6 +1,7 @@
 using FileFlows.DataLayer.DatabaseConnectors;
 using FileFlows.DataLayer.Models;
 using FileFlows.Plugin;
+using FileFlows.ServerShared;
 using FileFlows.Shared.Models;
 
 namespace FileFlows.DataLayer;
@@ -41,9 +42,10 @@ internal  class DbStatisticManager : BaseManager
         {
             string sql = "insert into " + Wrap(nameof(DbStatistic)) + " ( " +
                          Wrap(nameof(stat.Name)) + ", " +
+                         Wrap(nameof(stat.Type)) + ", " +
                          Wrap(nameof(stat.Data)) + ") " +
-                         " values (@0, @1)";
-            await db.Db.ExecuteAsync(sql, stat.Name, stat.Data);
+                         " values (@0, @1, @2)";
+            await db.Db.ExecuteAsync(sql, stat.Name, (int)stat.Type, stat.Data);
         }
         db.Db.CompleteTransaction();
     }
@@ -53,13 +55,15 @@ internal  class DbStatisticManager : BaseManager
     /// Updates the data for a statistic
     /// </summary>
     /// <param name="name">the name of the statistic</param>
+    /// <param name="type">the type of statistic</param>
     /// <param name="data">the data to update</param>
     /// <returns>true if updated, otherwise false</returns>
-    public async Task<bool> Update(string name, string data)
+    public async Task<bool> Update(string name, StatisticType type, string data)
     {
         using var db = await DbConnector.GetDb(write: true);
         return await db.Db.ExecuteAsync("update " + Wrap(nameof(DbStatistic)) +
-                                 " set " + Wrap(nameof(DbStatistic.Data)) + " = @1 " +
+                                 " set " + Wrap(nameof(DbStatistic.Data)) + " = @1," +
+                                 Wrap(nameof(DbStatistic.Type)) + " = " + ((int)type) + 
                                  " where " + Wrap(nameof(DbStatistic.Name)) + " = @0",
             name, data) > 0;
     }

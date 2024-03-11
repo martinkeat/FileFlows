@@ -24,6 +24,7 @@ CREATE INDEX ON "DbLogMessage" ("LogDate");
 CREATE TABLE "DbStatistic"
 (
     "Name"            VARCHAR(255)       NOT NULL          PRIMARY KEY,
+    "Type"            int                NOT NULL,
     "Data"            TEXT               NOT NULL
 );
 

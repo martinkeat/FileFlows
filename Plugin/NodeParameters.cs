@@ -116,9 +116,14 @@ public class NodeParameters
     public Func<string, string>? RenderTemplate { get; set; }
     
     /// <summary>
-    /// Gets or sets the action that records statistics
+    /// Gets or sets the action that records running totals statistics
     /// </summary>
-    public Action<string, object>? StatisticRecorder { get; set; }
+    public Action<string, string>? StatisticRecorderRunningTotals { get; set; }
+    
+    /// <summary>
+    /// Gets or sets the action that records average statistics
+    /// </summary>
+    public Action<string, int>? StatisticRecorderAverage { get; set; }
     
     /// <summary>
     /// Gets or sets the action that records additional info
@@ -1091,11 +1096,20 @@ public class NodeParameters
     }
 
     /// <summary>
-    /// Records a statistic with the server
+    /// Records a running totals statistic with the server
     /// </summary>
     /// <param name="name">the name of the statistic</param>
     /// <param name="value">the value of the statistic</param>
-    public void RecordStatistic(string name, object value) => StatisticRecorder?.Invoke(name, value);
+    public void RecordStatisticRunningTotals(string name, string value) 
+        => StatisticRecorderRunningTotals?.Invoke(name, value);
+
+    /// <summary>
+    /// Records a average statistic with the server
+    /// </summary>
+    /// <param name="name">the name of the statistic</param>
+    /// <param name="value">the value of the statistic</param>
+    public void RecordStatisticAverage(string name, int value) 
+        => StatisticRecorderAverage?.Invoke(name, value);
     
     /// <summary>
     /// Records a memory statistics that is not saved anywhere and will expire

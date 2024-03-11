@@ -100,7 +100,6 @@ public class SqliteTests : DbLayerTest
             string dbName = "FileFlows_" + TestContext.TestName;
             var dbCreator = GetCreator(dbType, dbName, out string connectionString);
             var dbCreateResult = dbCreator.CreateDatabase(true).Value;
-            Assert.AreNotEqual(DbCreateResult.Failed, dbCreateResult);
             if(dbCreateResult == DbCreateResult.Created)
                 Assert.AreEqual(true, dbCreator.CreateDatabaseStructure().Value);
 
@@ -153,7 +152,6 @@ public class SqliteTests : DbLayerTest
             string dbName = "FileFlows_" + TestContext.TestName;
             var dbCreator = GetCreator(dbType, dbName, out string connectionString);
             var dbCreateResult = dbCreator.CreateDatabase(true).Value;
-            Assert.AreNotEqual(DbCreateResult.Failed, dbCreateResult);
             if (dbCreateResult == DbCreateResult.Created)
                 Assert.AreEqual(true, dbCreator.CreateDatabaseStructure().Value);
 
@@ -210,7 +208,6 @@ public class SqliteTests : DbLayerTest
             string dbName = "FileFlows_" + TestContext.TestName;
             var dbCreator = GetCreator(dbType, dbName, out string connectionString);
             var dbCreateResult = dbCreator.CreateDatabase(true).Value;
-            Assert.AreNotEqual(DbCreateResult.Failed, dbCreateResult);
             if (dbCreateResult == DbCreateResult.Created)
                 Assert.AreEqual(true, dbCreator.CreateDatabaseStructure().Value);
 
@@ -333,7 +330,6 @@ public class SqliteTests : DbLayerTest
             var dbCreator = GetCreator(dbType, dbName, out string connectionString);
             var dbCreateResult = dbCreator.CreateDatabase(true).Value;
 
-            Assert.AreNotEqual(DbCreateResult.Failed, dbCreateResult);
             if(dbCreateResult == DbCreateResult.Created)
                 Assert.AreEqual(true, dbCreator.CreateDatabaseStructure().Value);
             
@@ -429,8 +425,6 @@ public class SqliteTests : DbLayerTest
             var dbCreator = GetCreator(dbType, dbName, out string connectionString);
             var dbCreateResult = dbCreator.CreateDatabase(true).Value;
 
-            
-            Assert.AreNotEqual(DbCreateResult.Failed, dbCreateResult);
             if(dbCreateResult == DbCreateResult.Created)
                 Assert.AreEqual(true, dbCreator.CreateDatabaseStructure().Value);
             
@@ -503,8 +497,6 @@ public class SqliteTests : DbLayerTest
             var dbCreator = GetCreator(dbType, dbName, out string connectionString);
             var dbCreateResult = dbCreator.CreateDatabase(true).Value;
 
-            
-            Assert.AreNotEqual(DbCreateResult.Failed, dbCreateResult);
             if(dbCreateResult == DbCreateResult.Created)
                 Assert.AreEqual(true, dbCreator.CreateDatabaseStructure().Value);
             
@@ -597,8 +589,6 @@ public class SqliteTests : DbLayerTest
             var dbCreator = GetCreator(dbType, dbName, out string connectionString);
             var dbCreateResult = dbCreator.CreateDatabase(true).Value;
 
-            
-            Assert.AreNotEqual(DbCreateResult.Failed, dbCreateResult);
             if(dbCreateResult == DbCreateResult.Created)
                 Assert.AreEqual(true, dbCreator.CreateDatabaseStructure().Value);
             

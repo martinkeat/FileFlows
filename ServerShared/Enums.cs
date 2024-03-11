@@ -1,17 +1,24 @@
 namespace FileFlows.ServerShared;
 
-
 /// <summary>
-/// Statistic types
+/// Statistic type
 /// </summary>
 public enum StatisticType
 {
     /// <summary>
-    /// String statistic
+    /// Running totals
     /// </summary>
-    String = 0,
+    RunningTotals = 1,
     /// <summary>
-    /// Number statistic
+    /// Heatmap
     /// </summary>
-    Number = 1
+    Heatmap = 2,
+    /// <summary>
+    /// Storage Saved
+    /// </summary>
+    StorageSaved = 3,
+    /// <summary>
+    /// Average
+    /// </summary>
+    Average = 4
 }
