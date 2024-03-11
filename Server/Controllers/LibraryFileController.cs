@@ -175,6 +175,7 @@ public class LibraryFileController : Controller //ControllerStore<LibraryFile>
     [HttpPut]
     public async Task<LibraryFile> Update([FromBody] LibraryFile file)
     {
+        throw new Exception("Obsolete method");
         var existing = await ServiceLoader.Load<LibraryFileService>().Get(file.Uid);
 
         if (existing == null)
@@ -407,9 +408,8 @@ public class LibraryFileController : Controller //ControllerStore<LibraryFile>
     /// <param name="filter">the search filter</param>
     /// <returns>a list of matching library files</returns>
     [HttpPost("search")]
-    public Task<IEnumerable<LibraryFile>> Search([FromBody] LibraryFileSearchModel filter)
-        => throw new NotImplementedException(); // REFACTOR: re-look into this
-        // => ServiceLoader.Load<LibraryFileService>().Search(filter);
+    public Task<List<LibraryFile>> Search([FromBody] LibraryFileSearchModel filter)
+        => ServiceLoader.Load<LibraryFileService>().Search(filter);
 
 
     /// <summary>

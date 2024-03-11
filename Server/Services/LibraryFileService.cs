@@ -601,4 +601,12 @@ public class LibraryFileService : ILibraryFileService
     /// <returns>the total storage saved</returns>
     public Task<long> GetTotalStorageSaved()
         => new LibraryFileManager().GetTotalStorageSaved();
+
+    /// <summary>
+    /// Performs a search for files
+    /// </summary>
+    /// <param name="filter">the search filter</param>
+    /// <returns>the matching files</returns>
+    public Task<List<LibraryFile>> Search(LibraryFileSearchModel filter)
+        => new LibraryFileManager().Search(filter);
 }

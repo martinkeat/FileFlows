@@ -1,6 +1,5 @@
 using System.Text.Json;
 using System.Text.RegularExpressions;
-using FileFlows.DataLayer.Converters;
 using FileFlows.DataLayer.DatabaseConnectors;
 using FileFlows.DataLayer.Helpers;
 using FileFlows.DataLayer.Models;
@@ -10,7 +9,6 @@ using FileFlows.ServerShared.Models;
 using FileFlows.Shared;
 using FileFlows.Shared.Json;
 using FileFlows.Shared.Models;
-using MySqlX.XDevAPI;
 
 namespace FileFlows.DataLayer;
 
@@ -1290,5 +1288,47 @@ FROM {Wrap(nameof(LibraryFile))}";
         using var db = await DbConnector.GetDb();
         return await db.Db.ExecuteScalarAsync<long>(sql);
 
+    }
+
+    /// <summary>
+    /// Performs a search for files
+    /// </summary>
+    /// <param name="filter">the search filter</param>
+    /// <returns>the matching files</returns>
+    public async Task<List<LibraryFile>> Search(LibraryFileSearchModel filter)
+    {
+        List<string> wheres = new();
+
+        wheres.Add(Wrap(nameof(LibraryFile.CreationTime)) + " between " +
+                   DbConnector.FormatDateQuoted(filter.FromDate.Year > 1970 ? filter.FromDate : new DateTime(1970,1,1)) + " and " +
+                   DbConnector.FormatDateQuoted(filter.ToDate.Year < 2200 ? filter.ToDate : new DateTime(2200,12, 31)));
+
+        if (string.IsNullOrWhiteSpace(filter.LibraryName) == false)
+        {
+            wheres.Add("lower(" + Wrap(nameof(LibraryFile.LibraryName)) + ") " +
+                       $"like lower('%{filter.LibraryName.Replace("'", "''").Replace(" ", "%")}%')");
+        }
+        
+
+        if (string.IsNullOrWhiteSpace(filter.Path) == false)
+        {
+            wheres.Add("( lower(" + Wrap(nameof(LibraryFile.Name)) + ") " +
+                       $"like lower('%{filter.Path.Replace("'", "''").Replace(" ", "%")}%')" +
+                       " or lower(" + Wrap(nameof(LibraryFile.OutputPath)) + ")" +
+                       $"like lower('%{filter.Path.Replace("'", "''").Replace(" ", "%")}%')" +
+                       ")");
+        }
+
+        string sql = "select * from " + Wrap(nameof(LibraryFile)) + " " +
+                     "where " + string.Join(" and ", wheres);
+        
+        sql += DbType switch
+        {
+            DatabaseType.SqlServer => $" OFFSET 0 ROWS FETCH NEXT {filter.Limit} ROWS ONLY",
+            _ => $" LIMIT {filter.Limit}",
+        };
+        
+        using var db = await DbConnector.GetDb();
+        return await db.Db.FetchAsync<LibraryFile>(sql);
     }
 }

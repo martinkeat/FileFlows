@@ -268,4 +268,12 @@ public class LibraryFileManager
     /// <returns>the total storage saved</returns>
     public Task<long> GetTotalStorageSaved()
         => DatabaseAccessManager.Instance.LibraryFileManager.GetTotalStorageSaved();
+
+    /// <summary>
+    /// Performs a search for files
+    /// </summary>
+    /// <param name="filter">the search filter</param>
+    /// <returns>the matching files</returns>
+    public Task<List<LibraryFile>> Search(LibraryFileSearchModel filter)
+        => DatabaseAccessManager.Instance.LibraryFileManager.Search(filter);
 }

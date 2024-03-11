@@ -385,8 +385,8 @@ public class FlowRunnerService : IFlowRunnerService
             {
 
                 Logger.Instance?.DLog("Getting library file to update processing status");
-                var libController = new LibraryFileController();
-                var libfile = await libController.Get(flowinfo.LibraryFile.Uid);
+                var service = ServiceLoader.Load<LibraryFileService>();
+                var libfile = await service.Get(flowinfo.LibraryFile.Uid);
                 if (libfile != null)
                 {
                     Logger.Instance?.DLog("Current library file processing status: " + libfile.Status);
@@ -395,7 +395,7 @@ public class FlowRunnerService : IFlowRunnerService
                         libfile.Status = FileStatus.ProcessingFailed;
                         Logger.Instance?.ILog("Library file setting status to failed: " + libfile.Status + " => " +
                                               libfile.RelativePath);
-                        await libController.Update(libfile);
+                        await service.Update(libfile);
                     }
                     else
                     {
