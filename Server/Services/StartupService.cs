@@ -1,3 +1,4 @@
+using FileFlows.Managers.InitializationManagers;
 using FileFlows.Plugin;
 using FileFlows.Server.Helpers;
 using FileFlows.Shared.Models;
@@ -38,6 +39,12 @@ public class StartupService
 
             BackupSqlite();
 
+            if (CanConnectToDatabase().Failed(out error))
+            {
+                UpdateStatus(error);
+                return Result<bool>.Fail(error);
+            }
+
             if (DatabaseExists()) // only upgrade if it does exist
             {
                 if (Upgrade().Failed(out error))
@@ -45,6 +52,11 @@ public class StartupService
                     UpdateStatus(error);
                     return Result<bool>.Fail(error);
                 }
+            }
+            else if (CreateDatabase().Failed(out error))
+            {
+                UpdateStatus(error);
+                return Result<bool>.Fail(error);
             }
 
             if (PrepareDatabase().Failed(out error))
@@ -68,14 +80,27 @@ public class StartupService
     }
 
     /// <summary>
+    /// Tests a connection to a database
+    /// </summary>
+    private Result<bool> CanConnectToDatabase()
+        => MigrationManager.CanConnect(appSettingsService.Settings.DatabaseType,
+            appSettingsService.Settings.DatabaseConnection);
+
+    /// <summary>
     /// Checks if the database exists
     /// </summary>
     /// <returns>true if it exists, otherwise false</returns>
-    private bool DatabaseExists()
-    {
-        var service = ServiceLoader.Load<DatabaseService>();
-        return service.DatabaseExists();
-    }
+    private Result<bool> DatabaseExists()
+        => MigrationManager.DatabaseExists(appSettingsService.Settings.DatabaseType,
+            appSettingsService.Settings.DatabaseConnection);
+
+    /// <summary>
+    /// Creates the database
+    /// </summary>
+    /// <returns>true if it exists, otherwise false</returns>
+    private Result<bool> CreateDatabase()
+        => MigrationManager.CreateDatabase(Logger.Instance, appSettingsService.Settings.DatabaseType,
+            appSettingsService.Settings.DatabaseConnection);
 
     /// <summary>
     /// Backups the database file if using SQLite and not migrating

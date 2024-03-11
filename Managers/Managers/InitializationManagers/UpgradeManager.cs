@@ -34,6 +34,19 @@ public class UpgradeManager
         DbType = dbType;
         ConnectionString = connectionString;
     }
+
+    /// <summary>
+    /// Checks if a database exists
+    /// </summary>
+    /// <returns>true if it exists</returns>
+    public Result<bool> DatabaseExists()
+        => MigrationManager.DatabaseExists(DbType, ConnectionString);
+
+    /// <summary>
+    /// Tests a connection to a database
+    /// </summary>
+    public Result<bool> CanConnectToServer()
+        => MigrationManager.CanConnect(DbType, ConnectionString);
     
     /// <summary>
     /// Gets the current version from the database
@@ -48,7 +61,7 @@ public class UpgradeManager
             if (DatabaseAccessManager.CanConnect(DbType, ConnectionString).Failed(out error))
                 return Result<Version?>.Fail(error);
             var settings = await dam.FileFlowsObjectManager.Single<Settings>();
-            if (settings.Failed(out error))
+            if (settings.Failed(out error) || settings.Value == null)
                 return null;
             return Version.Parse(settings.Value.Version);
         }

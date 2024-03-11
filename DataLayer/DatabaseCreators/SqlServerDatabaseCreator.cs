@@ -60,7 +60,7 @@ public class SqlServerDatabaseCreator : IDatabaseCreator
         catch (Exception ex)
         {
             Logger.ELog("Error creating SQL Server database: " + ex.Message);
-            return DbCreateResult.Failed;
+            return Result<DbCreateResult>.Fail(ex.Message);
         }
     }
     

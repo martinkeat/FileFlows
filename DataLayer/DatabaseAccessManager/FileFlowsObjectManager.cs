@@ -45,6 +45,9 @@ internal  class FileFlowsObjectManager
             return Result<T>.Fail("Type FullName was null");
         
         DbObject dbObject = await dbom.Single(fullName);
+        if (dbObject == null)
+            return default;
+        
         if (string.IsNullOrEmpty(dbObject?.Data))
             return Result<T>.Fail($"Object found with no data");
         return Convert<T>(dbObject);
@@ -56,21 +59,21 @@ internal  class FileFlowsObjectManager
     /// <param name="uid">the UID of the item to select</param>
     /// <typeparam name="T">the type of item to select</typeparam>
     /// <returns>a single instance</returns>
-    public virtual async Task<Result<T>> Single<T>(Guid uid) where T : FileFlowObject, new()
+    public virtual async Task<Result<T?>> Single<T>(Guid uid) where T : FileFlowObject, new()
     {
         var fullName = typeof(T).FullName;
         if (fullName == null)
-            return Result<T>.Fail("Type FullName was null");
+            return Result<T?>.Fail("Type FullName was null");
         
         DbObject dbObject = await dbom.Single(uid);
         if (dbObject == null)
-            return Result<T>.Fail("Not found");
+            return null;
         
         if (dbObject.Type != fullName)
-            return Result<T>.Fail($"Object found but was the wrong type '{dbObject.Type}' expected '{fullName}'");
+            return Result<T?>.Fail($"Object found but was the wrong type '{dbObject.Type}' expected '{fullName}'");
         
         if (string.IsNullOrEmpty(dbObject?.Data))
-            return Result<T>.Fail($"Object found with no data");
+            return Result<T?>.Fail($"Object found with no data");
         
         return Convert<T>(dbObject);
     }

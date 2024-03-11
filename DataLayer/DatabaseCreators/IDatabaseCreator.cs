@@ -27,11 +27,11 @@ internal static class DatabaseCreator
     /// <summary>
     /// Gets a database creator from its type 
     /// </summary>
-    /// <param name="type">the type of database to use</param>
     /// <param name="logger">the logger to use</param>
+    /// <param name="type">the type of database to use</param>
     /// <param name="connectionString">the connection string to the database</param>
     /// <returns>the database creator</returns>
-    internal static IDatabaseCreator Get(DatabaseType type, ILogger logger, string connectionString)
+    internal static IDatabaseCreator Get(ILogger logger, DatabaseType type, string connectionString)
     {
         switch (type)
         {

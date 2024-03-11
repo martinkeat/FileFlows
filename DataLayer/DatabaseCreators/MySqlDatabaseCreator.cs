@@ -76,8 +76,10 @@ public class MySqlDatabaseCreator : IDatabaseCreator
         }
 
         Logger.ILog("Creating Database");
-        return db.Execute("create database " + dbName + " character set utf8 collate 'utf8_unicode_ci';") > 0 ? 
-            DbCreateResult.Created : DbCreateResult.Failed;
+        bool created = db.Execute("create database " + dbName + " character set utf8 collate 'utf8_unicode_ci';") > 0;
+        if (created)
+            return DbCreateResult.Created;
+        return Result<DbCreateResult>.Fail("Failed to create database");
     }
     
     /// <summary>

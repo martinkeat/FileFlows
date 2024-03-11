@@ -1,4 +1,6 @@
-﻿namespace FileFlows.Managers;
+﻿using FileFlows.ServerShared;
+
+namespace FileFlows.Managers;
 
 /// <summary>
 /// An instance of the Settings Service which allows accessing of the system settings
@@ -12,6 +14,16 @@ public class SettingsManager
     static SettingsManager()
     {
         Instance = DatabaseAccessManager.Instance.FileFlowsObjectManager.Single<Settings>().Result;
+        if (Instance != null)
+            return;
+        Instance = new Settings
+        {
+            Name = "Settings",
+            AutoUpdatePlugins = true,
+            DateCreated = DateTime.Now,
+            DateModified = DateTime.Now
+        };
+        DatabaseAccessManager.Instance.FileFlowsObjectManager.AddOrUpdateObject(Instance).Wait();
     }
 
     /// <summary>

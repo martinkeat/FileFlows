@@ -1,3 +1,4 @@
+using FileFlows.DataLayer.DatabaseCreators;
 using FileFlows.Plugin;
 using FileFlows.ServerShared.Models;
 
@@ -55,7 +56,6 @@ public class MigrationManager
         return DbMigrator.DatabaseExists(Destination.Type, Destination.ConnectionString);
     }
 
-
     /// <summary>
     /// Checks if the database exists
     /// </summary>
@@ -73,4 +73,24 @@ public class MigrationManager
     /// <returns>true if successfully connected, otherwise false</returns>
     public static Result<bool> CanConnect(DatabaseType type, string connectionString)
         => DatabaseAccessManager.CanConnect(type, connectionString);
+
+    /// <summary>
+    /// Creates the database and the database structure
+    /// </summary>
+    /// <param name="logger">the logger</param>
+    /// <param name="type">the database type</param>
+    /// <param name="connectionString">the database connection string</param>
+    /// <returns>true if successfully created the database</returns>
+    public static Result<bool> CreateDatabase(Logger logger, DatabaseType type, string connectionString)
+    {
+        string error;
+        var creator = DatabaseCreator.Get(logger, type, connectionString);
+        if (creator.CreateDatabase(false).Failed(out error))
+            return Result<bool>.Fail(error);
+
+        if (creator.CreateDatabaseStructure().Failed(out error))
+            return Result<bool>.Fail(error);
+        
+        return true;;
+    }
 }

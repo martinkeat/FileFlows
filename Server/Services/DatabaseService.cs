@@ -108,15 +108,6 @@ public class DatabaseService
 
         return true;
     }
-
-    /// <summary>
-    /// Check the database exists
-    /// </summary>
-    /// <returns>the result</returns>
-    public Result<bool> DatabaseExists()
-        => MigrationManager.DatabaseExists(
-            ServiceAppSetting.Settings.DatabaseType,
-            ServiceAppSetting.Settings.DatabaseConnection);
     
     /// <summary>
     /// Prepares the database
@@ -149,7 +140,8 @@ public class DatabaseService
     /// </summary>
     private void RestoreDefaults()
     {
-         new VariableManager().RestoreDefault();
+        new NodeManager().EnsureInternalNodeExists();
+        new VariableManager().RestoreDefault();
     }
 
     /// <summary>

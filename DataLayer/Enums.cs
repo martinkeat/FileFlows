@@ -7,10 +7,6 @@ namespace FileFlows.DataLayer;
 public enum DbCreateResult
 {
     /// <summary>
-    /// Failed to create
-    /// </summary>
-    Failed = 0,
-    /// <summary>
     /// Database created
     /// </summary>
     Created = 1,

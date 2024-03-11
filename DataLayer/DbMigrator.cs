@@ -47,12 +47,10 @@ internal class DbMigrator
                 SQLiteConnector.MoveFileFromConnectionString(destinationInfo.ConnectionString);
             }
 
-            var destCreator = DatabaseCreator.Get(dest.Type, Logger!, destinationInfo.ConnectionString);
+            var destCreator = DatabaseCreator.Get(Logger!, dest.Type, destinationInfo.ConnectionString);
             var result = destCreator.CreateDatabase(recreate: true);
             if (result.Failed(out string error))
                 return Result<bool>.Fail("Failed creating destination database: " + error);
-            if(result.Value == DbCreateResult.Failed)
-                return Result<bool>.Fail("Failed creating destination database");
             
             var structureResult = destCreator.CreateDatabaseStructure();
             if(structureResult.Failed(out error))
