@@ -257,7 +257,7 @@ public class PluginController : Controller
     /// <returns>an awaited task</returns>
     [HttpDelete]
     public Task Delete([FromBody] ReferenceModel<Guid> model)
-        => new Services.PluginService().Delete(model.Uids);
+        => new PluginService().Delete(model.Uids);
 
     /// <summary>
     /// Download plugins into the FileFlows system
@@ -337,7 +337,7 @@ public class PluginController : Controller
     /// <returns>the plugin settings json</returns>
     [HttpGet("{packageName}/settings")]
     public Task<string> GetPluginSettings([FromRoute] string packageName)
-        => new Services.PluginService().GetSettingsJson(packageName);
+        => new PluginService().GetSettingsJson(packageName);
 
     /// <summary>
     /// Sets the json plugin settings for a plugin
@@ -348,7 +348,7 @@ public class PluginController : Controller
     [HttpPost("{packageName}/settings")]
     public async Task SetPluginSettingsJson([FromRoute] string packageName, [FromBody] string json)
     {
-        // need to decode any passwords
+        // need to encrypt any passwords
         if (string.IsNullOrEmpty(json) == false)
         {
             try
@@ -377,7 +377,7 @@ public class PluginController : Controller
                             if (string.IsNullOrEmpty(text))
                                 continue;
 
-                            dict[key] = Helpers.Decrypter.Encrypt(text);
+                            dict[key] = Decrypter.Encrypt(text);
                             updated = true;
                         }
                     }
@@ -391,21 +391,12 @@ public class PluginController : Controller
             }
         }
 
-        
-        // REFACTOR: re-look into this
-        // refactor added1. var service = ServiceLoader.Load<PluginService>();
-        // refactor added2. var oldSettings = await service.GetSettingsJson(packageName);
-        // var obj = await DbHelper.SingleByName<Models.PluginSettingsModel>("PluginSettings_" + packageName);
-        // obj ??= new Models.PluginSettingsModel();
-        // obj.Name = "PluginSettings_" + packageName;
-        // var newJson = json ?? string.Empty;
-        // if (newJson != obj.Json)
-        // {
-        //     obj.Json = json ?? String.Empty;
-        //     await DbHelper.Update(obj);
-        //     // need to increment the revision increment so these plugin settings are pushed to the nodes
-        //     await new Services.SettingsService().RevisionIncrement();
-        // }
+        var service = ServiceLoader.Load<PluginService>();
+        var oldSettings = await service.GetSettingsJson(packageName);
+        var newJson = json ?? string.Empty;
+        if (newJson == oldSettings)
+            return;
+        await service.SetSettingsJson(packageName, newJson);
     }
 
     

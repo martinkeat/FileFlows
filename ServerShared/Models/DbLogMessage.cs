@@ -1,6 +1,6 @@
 using FileFlows.Plugin;
 
-namespace FileFlows.Server.Models;
+namespace FileFlows.ServerShared.Models;
 
 /// <summary>
 /// Message that is saved to the database

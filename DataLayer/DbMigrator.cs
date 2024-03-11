@@ -31,12 +31,13 @@ internal class DbMigrator
     /// </summary>
     /// <param name="sourceInfo">the source database</param>
     /// <param name="destinationInfo">the destination database</param>
+    /// <param name="backingUp">true if performing a backup, otherwise false</param>
     /// <returns>if the migration was successful</returns>
-    public Result<bool> Migrate(DatabaseInfo sourceInfo, DatabaseInfo destinationInfo)
+    public Result<bool> Migrate(DatabaseInfo sourceInfo, DatabaseInfo destinationInfo, bool backingUp = false)
     {
         try
         {
-            Logger?.ILog("Database Migration started");
+            Logger?.ILog($"Database {(backingUp ? "Backup" : "Migration")} started");
 
             var source = DatabaseAccessManager.FromType(Logger!, sourceInfo.Type, sourceInfo.ConnectionString);
             var dest = DatabaseAccessManager.FromType(Logger!, destinationInfo.Type, destinationInfo.ConnectionString);
@@ -58,27 +59,25 @@ internal class DbMigrator
             if(structureResult.Value == false)
                 return Result<bool>.Fail("Failed creating destination database structure");
             
-            Logger?.ILog("Migrating database objects");
+            Logger?.ILog((backingUp ? "Backing up" : "Migrating") + " database objects");
             MigrateDbObjects(source, dest);
             
-            Logger?.ILog("Migrating library files");
+            Logger?.ILog((backingUp ? "Backing up" : "Migrating") + " library files");
             MigrateLibraryFiles(source, dest);
             
-            Logger?.ILog("Migrating statistics");
+            Logger?.ILog((backingUp ? "Backing up" : "Migrating") + " statistics");
             MigrateDbStatistics(source, dest);
             
-            Logger?.ILog("Migrating revisions");
+            Logger?.ILog((backingUp ? "Backing up" : "Migrating") + " revisions");
             MigrateRevisions(source, dest);
-            // log messages, we dont care if these are migrated
-            //MigrateDbLogs(source, dest);
 
-            Logger?.ILog("Database Migration complete");
+            Logger?.ILog($"Database {(backingUp ? "backup" : "migration")} complete");
             return true;
         }
         catch (Exception ex)
         {
-            Logger?.ELog("Failed to migrate data: " + ex.Message + Environment.NewLine + ex.StackTrace);
-            return Result<bool>.Fail("Failed to migrate data: " + ex.Message);
+            Logger?.ELog($"Failed to {(backingUp ? "backup" : "migrate")} data: " + ex.Message + Environment.NewLine + ex.StackTrace);
+            return Result<bool>.Fail($"Failed to {(backingUp ? "backup" : "migrate")} data: " + ex.Message);
         }
     }
 
@@ -151,34 +150,6 @@ internal class DbMigrator
             catch (Exception ex)
             {
                 Logger?.WLog("Failed migrating object revision: " + ex.Message);
-            }
-        }
-    }
-
-    
-    /// <summary>
-    /// Migrates database log messages from one database to another
-    /// </summary>
-    /// <param name="source">the source database</param>
-    /// <param name="dest">the destination database</param>
-    private void MigrateDbLogs(DatabaseAccessManager source, DatabaseAccessManager dest)
-    {
-        if (source.Type == DatabaseType.Sqlite || dest.Type == DatabaseType.Sqlite)
-            return;
-        
-        var dbLogMessages = source.LogMessageManager.GetAll().Result;
-        if (dbLogMessages?.Any() != true)
-            return;
-
-        foreach (var obj in dbLogMessages)
-        {
-            try
-            {
-                dest.LogMessageManager.Insert(obj).Wait();
-            }
-            catch (Exception)
-            {
-                // we really dont care if these arent migrated
             }
         }
     }

@@ -51,6 +51,10 @@ public class SqlServerConnector : IDatabaseConnector
         connectionPool = new(CreateConnection, 20, connectionLifetime: new TimeSpan(0, 10, 0));
     }
 
+    /// <inheritdoc />
+    public int GetOpenedConnections()
+        => connectionPool.OpenedConnections;
+    
     /// <summary>
     /// Create a new database connection
     /// </summary>

@@ -27,6 +27,9 @@ public class SQLiteConnector : IDatabaseConnector
     public string TimestampDiffSeconds(string start, string end, string asColumn)
        => $"(strftime('%s', {end}) - strftime('%s', {start})) AS {asColumn}";
     
+    /// <inheritdoc />
+    public int GetOpenedConnections()
+        => writeSemaphore.CurrentInUse;
     
     
     public SQLiteConnector(ILogger logger, string connectionString)

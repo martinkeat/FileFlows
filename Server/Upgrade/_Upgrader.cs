@@ -67,21 +67,26 @@ public class Upgrader
         }
         else
         {
-            // REFACTOR: re-look into this
-
-            //
-            // // backup a MySQL db using the migrator
-            // try
-            // {
-            //     Logger.Instance.ILog("Backing up database, please wait this may take a while");
-            //     string dbBackup = DatabaseBackupManager.CreateBackup(AppSettings.Instance.DatabaseConnection,
-            //         DirectoryHelper.DatabaseDirectory, currentVersion);
-            //     Logger.Instance.ILog("Backed up database to: " + dbBackup);
-            // }
-            // catch (Exception ex)
-            // {
-            //     Logger.Instance.ELog("Failed creating database backup: " + ex.Message);
-            // }
+            try
+            {
+                Logger.Instance.ILog("Backing up database, please wait this may take a while");
+                string dbBackup = Path.Combine(DirectoryHelper.DatabaseDirectory, "FileFlow-" +
+                    currentVersion.Major + "." + currentVersion.Minor + "." + currentVersion.Build +
+                    ".sqlite.backup");
+                var manager = new MigrationManager(Logger.Instance,
+                    new() { Type = settings.DatabaseType, ConnectionString = settings.DatabaseConnection },
+                    new () { Type = DatabaseType.Sqlite, ConnectionString = SqliteHelper.GetConnectionString(dbBackup) }
+                );
+                var result = manager.Migrate(backingUp: true);
+                if(result.Failed(out string error))
+                    Logger.Instance.ILog("Failed to backup database: " + error);
+                else
+                    Logger.Instance.ILog("Backed up database to: " + dbBackup);
+            }
+            catch (Exception ex)
+            {
+                Logger.Instance.ELog("Failed creating database backup: " + ex.Message);
+            }
         }
     }
 

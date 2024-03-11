@@ -22,9 +22,16 @@ public class FairSemaphore
     public int CurrentQueueLength => queue.Count();
 
     /// <summary>
+    /// Gets the number currently in use
+    /// </summary>
+    public int CurrentInUse => max - semaphore.CurrentCount;
+
+    /// <summary>
     /// Gets if the current semaphore is locked and no more available
     /// </summary>
     public bool IsLocked => semaphore.CurrentCount < 1;
+
+    private int max;
     
     /// <summary>
     /// Initializes a new instance of the FairSemaphore class with the specified initial count.
@@ -32,6 +39,7 @@ public class FairSemaphore
     /// <param name="initialCount">The initial number of slots that can be acquired concurrently.</param>
     public FairSemaphore(int initialCount)
     {
+        max = initialCount;
         semaphore = new SemaphoreSlim(initialCount);
     }
 

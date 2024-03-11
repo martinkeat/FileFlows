@@ -133,7 +133,7 @@ public partial class Log : ComponentBase
     async Task Refresh()
     {
         bool nearBottom = string.IsNullOrWhiteSpace(LogText) == false && await jsRuntime.InvokeAsync<bool>("ff.nearBottom", new object[]{ ".page .content"});
-        if (App.Instance.FileFlowsSystem.ExternalDatabase)
+        if (App.Instance.FileFlowsSystem.LicenseExternalDatabase)
         {
             var response = await HttpHelper.Post<string>("/api/fileflows-log/search", SearchModel);
             if (response.Success)

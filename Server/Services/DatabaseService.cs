@@ -2,6 +2,7 @@ using FileFlows.Managers;
 using FileFlows.Managers.InitializationManagers;
 using FileFlows.Plugin;
 using FileFlows.Server.Helpers;
+using FileFlows.Server.Utils;
 using FileFlows.ServerShared.Models;
 using FileFlows.Shared.Models;
 
@@ -129,8 +130,7 @@ public class DatabaseService
 
         RestoreDefaults();
 
-        // REFACTOR: re-look into this
-        // new DatabaseLogger();
+        _ = new DatabaseLogger();
 
         return true;
     }
@@ -160,5 +160,12 @@ public class DatabaseService
     /// <param name="connectionString">the connection string to the database</param>
     /// <returns>true if successfully connected, otherwise false</returns>
     public Result<bool> TestConnection(DatabaseType type, string connectionString)
-        =>  MigrationManager.CanConnect(type, connectionString);
+        => MigrationManager.CanConnect(type, connectionString);
+
+    /// <summary>
+    /// Gets the open number of database connections
+    /// </summary>
+    /// <returns>the number of connections</returns>
+    public int GetOpenConnections()
+        => new SettingsManager().GetOpenConnections();
 }

@@ -80,4 +80,11 @@ public class SettingsManager
             _semaphore.Release();
         }
     }
+    
+    /// <summary>
+    /// Gets the open number of database connections
+    /// </summary>
+    /// <returns>the number of connections</returns>
+    public int GetOpenConnections()
+        => DatabaseAccessManager.Instance.GetOpenConnections();
 }

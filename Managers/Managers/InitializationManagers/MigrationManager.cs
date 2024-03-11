@@ -38,11 +38,12 @@ public class MigrationManager
     /// <summary>
     /// Migrates a database
     /// </summary>
+    /// <param name="backingUp">true if performing a backup, otherwise false</param>
     /// <returns>the result of the migration</returns>
-    public Result<bool> Migrate()
+    public Result<bool> Migrate(bool backingUp = false)
     {
         DbMigrator migrator = new(Logger);
-        return migrator.Migrate(Source, Destination);
+        return migrator.Migrate(Source, Destination, backingUp);
     }
 
     /// <summary>

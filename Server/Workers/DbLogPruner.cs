@@ -1,5 +1,7 @@
+using FileFlows.Managers;
 using FileFlows.Server.Controllers;
 using FileFlows.Server.Helpers;
+using FileFlows.Server.Services;
 using FileFlows.ServerShared.Workers;
 
 namespace FileFlows.Server.Workers;
@@ -22,12 +24,7 @@ public class DbLogPruner:Worker
     /// </summary>
     protected override void Execute()
     {
-        // REFACTOR: re-look into this
-        // if (DbHelper.UseMemoryCache)
-        //     return; // nothing to do
-        // var settings = new SettingsController().Get().Result;
-        // if (settings == null)
-        //     return;
-        // DbHelper.PruneOldLogs(Math.Max(1000, settings.LogDatabaseRetention)).Wait();
+        var retention = ServiceLoader.Load<SettingsService>().Get().Result?.LogDatabaseRetention ?? 1000;
+        new DatabaseLogManager().PruneOldLogs(Math.Max(1000, retention)).Wait();
     }
 }

@@ -87,4 +87,10 @@ public interface IDatabaseConnector
     /// <param name="type">The data type of the column.</param>
     /// <param name="defaultValue">The default value for the column.</param>
     Task CreateColumn(string table, string column, string type, string defaultValue);
+
+    /// <summary>
+    /// Gets the number of opened connections
+    /// </summary>
+    /// <returns>the number of opened connections</returns>
+    int GetOpenedConnections();
 }

@@ -36,10 +36,9 @@ public class TelemetryReporter : Worker
 
             TelemetryData data = new TelemetryData();
             data.ClientUid = settings.Uid;
-            data.Version = Globals.Version.ToString();
-            // REFACTOR: re-look into this
-            //data.DatabaseProvider = DbHelper.IsSqlLite ? "SQLite" : "MySQL";
-            var pNodes = ServiceLoader.Load<NodeService>().GetAllAsync().Result.Where(x => x.Enabled);
+            data.Version = Globals.Version;
+            data.DatabaseProvider = ServiceLoader.Load<AppSettingsService>().Settings.DatabaseType.ToString();
+            var pNodes = ServiceLoader.Load<NodeService>().GetAllAsync().Result.Where(x => x.Enabled).ToList();
             data.ProcessingNodes = pNodes.Count();
             data.ProcessingNodeData = pNodes.Select(x => new ProcessingNodeData()
             {
@@ -50,10 +49,10 @@ public class TelemetryReporter : Worker
             }).ToList();
             data.Architecture = RuntimeInformation.ProcessArchitecture.ToString();
             data.OS = isDocker ? "Docker" :
-                Globals.IsLinux ? "MacOS" :
-                Globals.IsLinux ? "Linux" :
-                Globals.IsFreeBsd ? "FreeBSD" :
-                Globals.IsWindows ? "Windows" :
+                OperatingSystem.IsMacOS() ? "MacOS" :
+                OperatingSystem.IsLinux() ? "Linux" :
+                OperatingSystem.IsFreeBSD() ? "FreeBSD" :
+                OperatingSystem.IsWindows() ? "Windows" :
                 RuntimeInformation.OSDescription;
             var libFiles = new LibraryFileController().GetAll(null).Result;
             data.FilesFailed = libFiles.Count(x => x.Status == FileStatus.ProcessingFailed);
@@ -64,10 +63,8 @@ public class TelemetryReporter : Worker
             {
                 if (fp == null)
                     continue;
-                if (dictNodes.ContainsKey(fp.FlowElementUid))
-                    dictNodes[fp.FlowElementUid] = dictNodes[fp.FlowElementUid] + 1;
-                else
-                    dictNodes.Add(fp.FlowElementUid, 1);
+                if (!dictNodes.TryAdd(fp.FlowElementUid, 1))
+                    dictNodes[fp.FlowElementUid] += 1;
             }
 
             data.Nodes = dictNodes.Select(x => new TelemetryDataSet
@@ -80,10 +77,8 @@ public class TelemetryReporter : Worker
             dictNodes.Clear();
             foreach (var lib in libraries?.Where(x => string.IsNullOrEmpty(x.Template) == false) ?? new List<Library>())
             {
-                if (dictNodes.ContainsKey(lib.Template))
-                    dictNodes[lib.Template] = dictNodes[lib.Template] + 1;
-                else
-                    dictNodes.Add(lib.Template, 1);
+                if (!dictNodes.TryAdd(lib.Template, 1))
+                    dictNodes[lib.Template] += 1;
             }
 
             data.StorageSaved = ServiceLoader.Load<LibraryFileService>().GetTotalStorageSaved().Result;
@@ -98,10 +93,8 @@ public class TelemetryReporter : Worker
             dictNodes.Clear();
             foreach (var lib in flows?.Where(x => string.IsNullOrEmpty(x.Template) == false) ?? new List<Flow>())
             {
-                if (dictNodes.ContainsKey(lib.Template))
-                    dictNodes[lib.Template] = dictNodes[lib.Template] + 1;
-                else
-                    dictNodes.Add(lib.Template, 1);
+                if (!dictNodes.TryAdd(lib.Template, 1))
+                    dictNodes[lib.Template] += 1;
             }
 
             data.FlowTemplates = dictNodes.Select(x => new TelemetryDataSet

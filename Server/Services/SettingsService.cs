@@ -65,6 +65,7 @@ public class SettingsService : ISettingsService
             status.ExternalDatabase = settings.DatabaseType != DatabaseType.Sqlite;
             status.LicenseDashboards = (license.Flags & LicenseFlags.Dashboards) == LicenseFlags.Dashboards;
             status.LicenseRevisions = (license.Flags & LicenseFlags.Revisions) == LicenseFlags.Revisions;
+            status.LicenseExternalDatabase = (license.Flags & LicenseFlags.ExternalDatabase) == LicenseFlags.ExternalDatabase;
             status.LicenseTasks = (license.Flags & LicenseFlags.Tasks) == LicenseFlags.Tasks;
             status.LicenseAutoUpdates = (license.Flags & LicenseFlags.AutoUpdates) == LicenseFlags.AutoUpdates;
             status.LicenseWebhooks = (license.Flags & LicenseFlags.Webhooks) == LicenseFlags.Webhooks;

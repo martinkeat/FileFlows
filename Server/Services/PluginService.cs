@@ -84,7 +84,7 @@ public class PluginService : IPluginService
     /// <returns>the settings json</returns>
     public async Task<string> GetSettingsJson(string pluginSettingsType)
     {
-        var result = await new PluginManager().GetPluginSettings("PluginSettings_" + pluginSettingsType);
+        var result = await new PluginManager().GetPluginSettings(pluginSettingsType);
         if (result.IsFailed)
             return string.Empty;
         PluginSettingsModel model = result.Value;
@@ -104,8 +104,8 @@ public class PluginService : IPluginService
     {
         var all = await new PluginManager().GetAllPluginSettings();
         var plugins = all
-            .DistinctBy(x => x.Name.Replace("PluginSettings_", string.Empty))
-            .ToDictionary(x => x.Name.Replace("PluginSettings_", string.Empty), x => x.Json);
+            .DistinctBy(x => x.Name)
+            .ToDictionary(x => x.Name, x => x.Json);
         foreach (var plg in plugins)
         {
             if (string.IsNullOrEmpty(plg.Value))
@@ -165,4 +165,13 @@ public class PluginService : IPluginService
 
         return json;
     }
+
+    /// <summary>
+    /// Sets the plugin settings
+    /// </summary>
+    /// <param name="name">the name of the plugin</param>
+    /// <param name="json">the plugin json</param>
+    public Task SetSettingsJson(string name, string json)
+        => new PluginManager().SetPluginSettings(name, json);
+        
 }

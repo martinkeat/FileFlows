@@ -178,4 +178,11 @@ internal  class DatabaseAccessManager
     /// Gets the Library File manager to manage the database operations for the Library Files
     /// </summary>
     public DbLibraryFileManager LibraryFileManager { get; init; }
+
+    /// <summary>
+    /// Gets the open number of database connections
+    /// </summary>
+    /// <returns>the number of connections</returns>
+    public int GetOpenConnections()
+        => DbConnector.GetOpenedConnections();
 }

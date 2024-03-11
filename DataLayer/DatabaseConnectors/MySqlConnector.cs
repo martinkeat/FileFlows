@@ -105,4 +105,8 @@ public class MySqlConnector : IDatabaseConnector
         using var db = await GetDb(false);
         await db.Db.ExecuteAsync(sql);
     }
+
+    /// <inheritdoc />
+    public int GetOpenedConnections()
+        => connectionPool.OpenedConnections;
 }
