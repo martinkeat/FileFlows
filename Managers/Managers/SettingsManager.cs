@@ -21,7 +21,8 @@ public class SettingsManager
             Name = "Settings",
             AutoUpdatePlugins = true,
             DateCreated = DateTime.Now,
-            DateModified = DateTime.Now
+            DateModified = DateTime.Now,
+            Version = Globals.Version
         };
         DatabaseAccessManager.Instance.FileFlowsObjectManager.AddOrUpdateObject(Instance).Wait();
     }

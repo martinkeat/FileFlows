@@ -842,10 +842,13 @@ internal class DbLibraryFileManager : BaseManager
                 : new();
 
 
-            string unwantedLibraries = string.Join(",",
-                disabled.Union(outOfSchedule).Union(maxedOutLibraries).Distinct().Select(x => $"'{x}'"));
-            sql += $" and ( {Wrap(nameof(LibraryFile.Flags))} & {(int)LibraryFileFlags.ForceProcessing} > 0 or " +
-                   $" {Wrap(nameof(LibraryFile.LibraryUid))} not in ({unwantedLibraries}) ) ";
+            if (outOfSchedule.Any() || disabled.Any() || maxedOutLibraries.Any())
+            {
+                string unwantedLibraries = string.Join(",",
+                    disabled.Union(outOfSchedule).Union(maxedOutLibraries).Distinct().Select(x => $"'{x}'"));
+                sql += $" and ( {Wrap(nameof(LibraryFile.Flags))} & {(int)LibraryFileFlags.ForceProcessing} > 0 or " +
+                       $" {Wrap(nameof(LibraryFile.LibraryUid))} not in ({unwantedLibraries}) ) ";
+            }
 
             if (args.Status == FileStatus.OnHold)
             {
@@ -858,7 +861,7 @@ internal class DbLibraryFileManager : BaseManager
             if (args.AllowedLibraries?.Any() == true)
             {
                 string alllowedLibraries = string.Join(",", args.AllowedLibraries.Select(x => $"'{x}'"));
-                sql += $" and {Wrap(nameof(LibraryFile.Uid))} in ({alllowedLibraries}) ";
+                sql += $" and {Wrap(nameof(LibraryFile.LibraryUid))} in ({alllowedLibraries}) ";
             }
 
             sql += $" and {Wrap(nameof(LibraryFile.HoldUntil))} <= {Date(DateTime.UtcNow)} ";
