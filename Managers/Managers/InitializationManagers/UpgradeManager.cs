@@ -83,10 +83,14 @@ public class UpgradeManager
     }
     
     /// <summary>
+    /// Run upgrade from 24.02
+    /// </summary>
+    public Task Run_Upgrade_24_02(ILogger logger, DatabaseType dbType, string connectionString)
+        => new Upgrade_24_02().Run(logger, dbType, connectionString);
+    
+    /// <summary>
     /// Run upgrade from 24.03.2
     /// </summary>
     public void Run_Upgrade_24_03_2(ILogger logger, DatabaseType dbType, string connectionString)
-    {
-        new Upgrade_24_03_2().Run(logger, dbType, connectionString);
-    }
+        => new Upgrade_24_03_2().Run(logger, dbType, connectionString);
 }

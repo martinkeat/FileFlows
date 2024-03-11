@@ -17,6 +17,9 @@ public class AppSettingsService
             // and only MySQL was supported as an external database up until 24.03.2
             Settings.DatabaseType = DatabaseType.MySql;
         }
+
+        if (string.IsNullOrWhiteSpace(Settings.DatabaseConnection))
+            Settings.DatabaseConnection = SqliteHelper.GetConnectionString();
         Save();
  
         Globals.CustomFileFlowsDotComUrl = Settings.FileFlowsDotComUrl;

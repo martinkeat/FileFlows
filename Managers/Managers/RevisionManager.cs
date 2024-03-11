@@ -51,7 +51,7 @@ public class RevisionManager
     /// <param name="uid">The UID of the object</param>
     /// <param name="revisionUid">the UID of the revision</param>
     /// <returns>The specific revision</returns>
-    public Task<RevisionedObject> Get(Guid uid, Guid revisionUid)
+    public Task<RevisionedObject?> Get(Guid uid, Guid revisionUid)
         => DatabaseAccessManager.Instance.RevisionManager.Get(uid, revisionUid);
 
     /// <summary>

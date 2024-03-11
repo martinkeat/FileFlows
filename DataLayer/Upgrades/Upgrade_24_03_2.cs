@@ -146,6 +146,7 @@ public class Upgrade_24_03_2
         RevisionDate = datetime(RevisionDate, 'utc'),
         RevisionCreated = datetime(RevisionCreated, 'utc')
         ");
+        
             db.Db.Execute(@"
         UPDATE LibraryFile SET 
         DateCreated = datetime(DateCreated, 'utc'),
@@ -156,6 +157,11 @@ public class Upgrade_24_03_2
         ProcessingStarted = datetime(ProcessingStarted, 'utc'),
         ProcessingEnded = datetime(ProcessingEnded, 'utc')
         ");
+
+            string minDate = connector.FormatDateQuoted(new DateTime(1970, 1, 1));
+            db.Db.Execute($"UPDATE LibraryFile SET HoldUntil = {minDate} where HoldUntil < '1970-01-01'");
+            db.Db.Execute($"UPDATE LibraryFile SET ProcessingStarted = {minDate} where ProcessingStarted < '1970-01-01'");
+            db.Db.Execute($"UPDATE LibraryFile SET ProcessingEnded =  {minDate} where ProcessingEnded < '1970-01-01'");
             
             db.Db.ExecuteAsync(
                 "update DbObject set Type = 'FileFlows.ServerShared.Models.PluginSettingsModel' where Type = 'FileFlows.Server.Models.PluginSettingsModel'");

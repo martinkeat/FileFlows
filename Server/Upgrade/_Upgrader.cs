@@ -93,13 +93,15 @@ public class Upgrader
         Logger.Instance.ILog("Current version: " + currentVersion);
         // check if current version is even set, and only then do we run the upgrades
         // so on a clean install these do not run
-        if (currentVersion < new Version(24, 2))  
-            new Upgrade_24_02().Run(appSettingsService);
+        if (currentVersion < new Version(23, 0))
+            return true; // way to old, or new install
         
         var manager = GetUpgradeManager(appSettingsService.Settings);
+        if(currentVersion < new Version(24, 2))
+            new Upgrade_24_02(Logger.Instance, appSettingsService, manager).Run();
+        
         if(currentVersion < new Version(24, 3, 2))
-            manager.Run_Upgrade_24_03_2(Logger.Instance, appSettingsService.Settings.DatabaseType, appSettingsService.Settings.DatabaseConnection);
-
+            new Upgrade_24_03_2(Logger.Instance, appSettingsService, manager).Run();
 
         // save the settings
         Logger.Instance.ILog("Saving version to database");

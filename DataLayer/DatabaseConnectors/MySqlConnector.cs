@@ -79,14 +79,38 @@ public class MySqlConnector : IDatabaseConnector
         return await connectionPool.AcquireConnectionAsync();
     }
 
-
     /// <inheritdoc />
     public string WrapFieldName(string name) => name;
     
     /// <summary>
     /// Gets the database name from the connection string
     /// </summary>
+    /// <param name="connectionString">the connection string</param>
     /// <returns>the database name</returns>
-    internal string GetDatabaseName()
-        => Regex.Match(ConnectionString, @"(?<=(Database=))[a-zA-Z0-9_\-]+").Value;
+    private static string GetDatabaseName(string connectionString)
+        => Regex.Match(connectionString, @"(?<=(Database=))[a-zA-Z0-9_\-]+").Value;
+
+    /// <inheritdoc />
+    public async Task<bool> ColumnExists(string table, string column)
+    {
+        string dbName = GetDatabaseName(this.ConnectionString);
+        using var db = await GetDb(false);
+        var result = db.Db.ExecuteScalar<int>($@"SELECT count(*) 
+        FROM information_schema.COLUMNS 
+        WHERE 
+            TABLE_SCHEMA = @0 
+        AND TABLE_NAME = @1 
+        AND COLUMN_NAME = @2", dbName, table, column);
+        return result > 0;
+    }
+
+    /// <inheritdoc />
+    public async Task CreateColumn(string table, string column, string type, string defaultValue)
+    {
+        if (type.ToLowerInvariant().IndexOf("varchar", StringComparison.InvariantCulture) > 0)
+            type += " COLLATE utf8_unicode_ci";
+        string sql = $@"ALTER TABLE {table} ADD COLUMN {column} {type}" + (string.IsNullOrWhiteSpace(defaultValue) ? "" : $" DEFAULT {defaultValue}");
+        using var db = await GetDb(false);
+        await db.Db.ExecuteAsync(sql);
+    }
 }

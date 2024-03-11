@@ -48,7 +48,7 @@ public class RevisionController:Controller
     /// <param name="revisionUid">the UID of the revision</param>
     /// <returns>The specific revision</returns>
     [HttpGet("{uid}/revision/{revisionUid}")]
-    public async Task<RevisionedObject> GetRevision([FromRoute] Guid uid, [FromRoute] Guid revisionUid)
+    public async Task<RevisionedObject?> GetRevision([FromRoute] Guid uid, [FromRoute] Guid revisionUid)
     {
         if (LicenseHelper.IsLicensed() == false)
             return null;

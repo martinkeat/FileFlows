@@ -1,16 +1,27 @@
 using System.Data.Common;
 using System.Text.RegularExpressions;
-using FileFlows.DataLayer.DatabaseConnectors;
 using FileFlows.DataLayer.Helpers;
 using FileFlows.Plugin;
 using FileFlows.ServerShared.Helpers;
 
 namespace FileFlows.DataLayer.DatabaseCreators;
 
+/// <summary>
+/// SQLite Database Creator
+/// </summary>
 public class SQLiteDatabaseCreator : IDatabaseCreator
 {
+    /// <summary>
+    /// The connection string to the database
+    /// </summary>
     private string ConnectionString { get; init; }
+    /// <summary>
+    /// The logger to use
+    /// </summary>
     private ILogger Logger;
+    /// <summary>
+    /// The filename of the database file
+    /// </summary>
     private readonly string DbFilename;
     
     public SQLiteDatabaseCreator(ILogger logger, string connectionString)

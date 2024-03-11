@@ -135,10 +135,10 @@ internal  class DbRevisionManager : BaseManager
     /// <param name="uid">The UID of the object</param>
     /// <param name="revisionUid">the UID of the revision</param>
     /// <returns>The specific revision</returns>
-    public async Task<RevisionedObject> Get(Guid uid, Guid revisionUid)
+    public async Task<RevisionedObject?> Get(Guid uid, Guid revisionUid)
     {
         using var db = await DbConnector.GetDb();
-        return await db.Db.SingleAsync<RevisionedObject>(
+        return await db.Db.SingleOrDefaultAsync<RevisionedObject>(
             $"where {Wrap(nameof(RevisionedObject.RevisionUid))} = '{revisionUid}' and {Wrap(nameof(RevisionedObject.Uid))} = '{uid}'");
     }
 }

@@ -67,7 +67,7 @@ internal  class DbStatisticManager : BaseManager
     public async Task<DbStatistic> GetStatisticByName(string name)
     {
         using var db = await DbConnector.GetDb();
-        return await db.Db.SingleAsync<DbStatistic>
+        return await db.Db.SingleOrDefaultAsync<DbStatistic>
             ("where " + Wrap(nameof(DbStatistic.Name)) + " = @0", name);
     }
 

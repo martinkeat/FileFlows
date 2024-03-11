@@ -870,7 +870,7 @@
           "Port-Help":"The default port for MySQL is 3306",
           "Port-Help-Postgres": "The default port for Postgres is 5432",
           "Port-Help-MySql":"The default port for MySQL is 3306",
-          "Port-Help-SqlServer": "The default port for SQL Server is 1433",
+          "Port-Help-SQLServer": "The default port for SQL Server is 1433",
           "Name":"Name",
           "Name-Help":"The name of the database to created, if left blank ''FileFlows'' will be used",
           "User":"User",

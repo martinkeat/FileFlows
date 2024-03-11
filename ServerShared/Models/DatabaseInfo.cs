@@ -54,11 +54,11 @@ public class DbConnectionInfo
         switch (Type)
         {
             case DatabaseType.Postgres: 
-                return $"Host={Server};Port={Port};Username={User};Password={Password};Database={Name};";
-            case DatabaseType.MySql:
-                return $"Server={Server};Port={Port};Database={Name};Uid={User};Pwd={Password};";
-            case DatabaseType.SqlServer:
                 return $"Server={Server};Port={Port};Database={Name};User Id={User};Password={Password};";
+            case DatabaseType.MySql:
+                return $"Server={Server};Port={Port};Database={Name};User Id={User};Password={Password};";
+            case DatabaseType.SqlServer:
+                return $"Server={Server},{Port};Database={Name};User Id={User};Password={Password};";
             case DatabaseType.Sqlite:
                 return SqliteHelper.GetConnectionString("FileFlows.sqlite");
         }

@@ -16,6 +16,8 @@ class DateTimeHelper
             .SpecifyKind(
                 new DateTime(dt.Year, dt.Month, dt.Day, dt.Hour, dt.Minute, dt.Second, dt.Millisecond),
                 DateTimeKind.Local).ToUniversalTime();
+        if (correctedDateTime.Year < 1970)
+            return new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
         return correctedDateTime;
     }
 }

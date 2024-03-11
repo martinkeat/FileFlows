@@ -91,4 +91,25 @@ public class PostgresConnector : IDatabaseConnector
 
     /// <inheritdoc />
     public string WrapFieldName(string name) => "\"" + name + "\"";
+
+    /// <inheritdoc />
+    public async Task<bool> ColumnExists(string table, string column)
+    {
+        using var db = await GetDb(false);
+        var result = db.Db.ExecuteScalar<int>(@"
+        SELECT COUNT(*)
+        FROM information_schema.columns
+        WHERE
+            table_name = @0
+        AND column_name = @1", table, column);
+        return result > 0;
+    }
+
+    /// <inheritdoc />
+    public async Task CreateColumn(string table, string column, string type, string defaultValue)
+    {
+        string sql = $@"ALTER TABLE {WrapFieldName(table)} ADD COLUMN {WrapFieldName(column)} {type}" + (string.IsNullOrWhiteSpace(defaultValue) ? "" : $" DEFAULT {defaultValue}");
+        using var db = await GetDb(false);
+        await db.Db.ExecuteAsync(sql);
+    }
 }

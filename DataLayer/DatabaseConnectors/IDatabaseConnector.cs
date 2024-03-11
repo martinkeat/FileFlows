@@ -86,4 +86,21 @@ public interface IDatabaseConnector
     /// <param name="asColumn">the name of the result</param>
     /// <returns>the sql select statement</returns>
     string Hour(string column, string asColumn = null);
+
+    /// <summary>
+    /// Check to see if a column exists
+    /// </summary>
+    /// <param name="table">the table to check</param>
+    /// <param name="column">the name of the column</param>
+    /// <returns>true if the column exists, otherwise false</returns>
+    Task<bool> ColumnExists(string table, string column);
+
+    /// <summary>
+    /// Creates a column with the given name, data type, and default value.
+    /// </summary>
+    /// <param name="table">The name of the table.</param>
+    /// <param name="column">The name of the column to create.</param>
+    /// <param name="type">The data type of the column.</param>
+    /// <param name="defaultValue">The default value for the column.</param>
+    Task CreateColumn(string table, string column, string type, string defaultValue);
 }

@@ -82,17 +82,27 @@ public class SQLiteConnector : IDatabaseConnector
             return dbConnectionWrite;
         }
         
-        
-
         //return await readPool.AcquireConnectionAsync();
     }
 
     /// <inheritdoc />
     public string WrapFieldName(string name) => name;
     
+    /// <inheritdoc />
+    public async Task<bool> ColumnExists(string table, string column)
+    {
+        using var db = await GetDb(false);
+        bool exists = db.Db.ExecuteScalar<int>("SELECT COUNT(*) AS CNTREC FROM pragma_table_info(@0) WHERE name=@1", table, column) > 0;
+        return exists;
+    }
     
-    
-    
+    /// <inheritdoc />
+    public async Task CreateColumn(string table, string column, string type, string defaultValue)
+    {
+        string sql = $@"ALTER TABLE {table} ADD COLUMN {column} {type}" + (string.IsNullOrWhiteSpace(defaultValue) ? "" : $" DEFAULT {defaultValue}");
+        using var db = await GetDb(false);
+        await db.Db.ExecuteAsync(sql);
+    }
     
     /// <summary>
     /// Looks to see if the file in the specified connection string exists, and if so, moves it
