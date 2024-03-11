@@ -148,6 +148,8 @@ public class SystemController:Controller
     [HttpGet("history-data/cpu")]
     public IEnumerable<SystemValue<float>> GetCpuData([FromQuery] DateTime? since = null)
     {
+        if (SystemMonitor.Instance == null)
+            return new SystemValue<float>[] { };
         if (since != null)
             return SystemMonitor.Instance.CpuUsage.Where(x => x.Time > since);
         var data = SystemMonitor.Instance.CpuUsage;
@@ -162,6 +164,8 @@ public class SystemController:Controller
     [HttpGet("history-data/memory")]
     public IEnumerable<SystemValue<float>> GetMemoryData([FromQuery] DateTime? since = null)
     {
+        if (SystemMonitor.Instance == null)
+            return new SystemValue<float>[] { };
         if (since != null)
             return SystemMonitor.Instance.MemoryUsage.Where(x => x.Time > since);
         var data = SystemMonitor.Instance.MemoryUsage;
@@ -176,6 +180,8 @@ public class SystemController:Controller
     [HttpGet("history-data/database-connections")]
     public IEnumerable<SystemValue<float>> GetOpenDatabaseConnectionsData([FromQuery] DateTime? since = null)
     {
+        if (SystemMonitor.Instance == null)
+            return new SystemValue<float>[] { };
         if (since != null)
             return SystemMonitor.Instance.OpenDatabaseConnections.Where(x => x.Time > since);
         var data = SystemMonitor.Instance.OpenDatabaseConnections;
@@ -190,6 +196,8 @@ public class SystemController:Controller
     [HttpGet("history-data/temp-storage")]
     public IEnumerable<SystemValue<long>> GetTempStorageData([FromQuery] DateTime? since = null)
     {
+        if (SystemMonitor.Instance == null)
+            return new SystemValue<long>[] { };
         if (since != null)
             return SystemMonitor.Instance.TempStorageUsage.Where(x => x.Time > since);
         var data = SystemMonitor.Instance.TempStorageUsage;
@@ -204,6 +212,8 @@ public class SystemController:Controller
     [HttpGet("history-data/log-storage")]
     public IEnumerable<SystemValue<long>> GetLoggingStorageData([FromQuery] DateTime? since = null)
     {
+        if (SystemMonitor.Instance == null)
+            return new SystemValue<long>[] { };
         if (since != null)
             return SystemMonitor.Instance.LogStorageUsage.Where(x => x.Time > since);
         var data = SystemMonitor.Instance.LogStorageUsage;

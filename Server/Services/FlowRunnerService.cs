@@ -1,5 +1,6 @@
 ﻿using System.Text.RegularExpressions;
 using FileFlows.DataLayer;
+using FileFlows.Managers;
 using FileFlows.Plugin;
 using FileFlows.Server.Helpers;
 using FileFlows.Server.Hubs;
@@ -36,6 +37,8 @@ public class FlowRunnerService : IFlowRunnerService
     public async Task<FlowExecutorInfo> Start(FlowExecutorInfo info)
     {
         await ServiceLoader.Load<NodeService>().UpdateLastSeen(info.NodeUid);
+
+        await new StatisticManager().RecordFileStarted();
         
         if (info.Uid == Guid.Empty)
             throw new Exception("No UID specified for flow execution info");
@@ -196,7 +199,7 @@ public class FlowRunnerService : IFlowRunnerService
         await ClientServiceManager.Instance.UpdateExecutors(Executors);
 
         if (info.LibraryFile != null)
-        {
+        {   
             ClientServiceManager.Instance.FinishProcessing(info.LibraryFile);
             var lfService= ServiceLoader.Load<LibraryFileService>();
             var libfile = await lfService.Get(info.LibraryFile.Uid);
@@ -207,7 +210,9 @@ public class FlowRunnerService : IFlowRunnerService
                     $"Recording final size for '{info.LibraryFile.FinalSize}' for '{info.LibraryFile.Name}' status: {info.LibraryFile.Status}");
                 if (info.LibraryFile.FinalSize > 0)
                     libfile.FinalSize = info.LibraryFile.FinalSize;
-
+                if (info.LibraryFile.OriginalSize > 0)
+                    libfile.OriginalSize = info.LibraryFile.OriginalSize;
+                
                 if (info.WorkingFile == libfile.Name)
                 {
                     var file = new FileInfo(info.WorkingFile);
@@ -267,6 +272,9 @@ public class FlowRunnerService : IFlowRunnerService
                     libfile.Flow = info.LibraryFile.Flow;
                 await lfService.Update(libfile);
                 var library = await ServiceLoader.Load<LibraryService>().GetByUidAsync(libfile.Library.Uid);
+                
+                await new StatisticManager().RecordStorageSaved(library.Name, libfile.OriginalSize, libfile.FinalSize);
+                
                 if (libfile.Status == FileStatus.ProcessingFailed)
                 {
                     SystemEvents.TriggerLibraryFileProcessedFailed(libfile, library);

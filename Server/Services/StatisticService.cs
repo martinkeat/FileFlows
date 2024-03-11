@@ -25,7 +25,7 @@ public class StatisticService : IStatisticService
     {
         if (statistic == null)
             return;
-        await new StatisticManager().Insert(statistic);
+        await new StatisticManager().Update(statistic);
     }
 
     /// <summary>

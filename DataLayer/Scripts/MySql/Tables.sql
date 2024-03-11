@@ -23,7 +23,7 @@ ALTER TABLE DbLogMessage ADD INDEX (LogDate);
 
 CREATE TABLE DbStatistic
 (
-    Name            varchar(255)       COLLATE utf8_unicode_ci      NOT NULL,
+    Name            varchar(255)       COLLATE utf8_unicode_ci      NOT NULL          PRIMARY KEY,
     Data            TEXT               COLLATE utf8_unicode_ci      NOT NULL
 );
 

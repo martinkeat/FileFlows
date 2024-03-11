@@ -188,53 +188,53 @@ public class Upgrade_24_03_2
     /// <param name="mySql">true if using mysql, otherwise false</param>
     private void UpgradeStatistics(ILogger logger, DatabaseConnection connector, bool mySql)
     {
-            logger.ILog("Convert old statistics data");
-            var old = connector.Db.Fetch<DbStatisticOld>("select * from DbStatistic")
-                .GroupBy(x => x.Name)
-                .ToDictionary(x => x.Key, x => x.ToList());
+        logger.ILog("Convert old statistics data");
+        var old = connector.Db.Fetch<DbStatisticOld>("select * from DbStatistic")
+            .GroupBy(x => x.Name)
+            .ToDictionary(x => x.Key, x => x.ToList());
 
-            Dictionary<string, object> newStats = new();
-            foreach (string key in old.Keys)
+        Dictionary<string, object> newStats = new();
+        foreach (string key in old.Keys)
+        {
+            var totals = new RunningTotals();
+            foreach (var stat in old[key])
             {
-                var totals = new RunningTotals();
-                foreach (var stat in old[key])
-                {
-                    if (totals.Totals.TryAdd(stat.StringValue, 1) == false)
-                        totals.Totals[stat.StringValue] += 1;
-                }
-
-                newStats.Add(key, totals);
+                if (totals.Totals.TryAdd(stat.StringValue, 1) == false)
+                    totals.Totals[stat.StringValue] += 1;
             }
 
-            string newTable = $@"DROP TABLE DbStatistic; CREATE TABLE DbStatistic
+            newStats.Add(key, totals);
+        }
+
+        string newTable = $@"DROP TABLE DbStatistic; CREATE TABLE DbStatistic
 (
-    Name            varchar(255)       {(mySql ? "COLLATE utf8_unicode_ci" : "")}      NOT NULL,
+    Name            varchar(255)       {(mySql ? "COLLATE utf8_unicode_ci" : "")}      NOT NULL          PRIMARY KEY,
     Data            TEXT               {(mySql ? "COLLATE utf8_unicode_ci" : "")}      NOT NULL
 )";
-            connector.Db.Execute(newTable);
-            foreach (var key in newStats.Keys)
-            {
-                connector.Db.Execute("insert into DbStatistic (Name, Data) values (@0, @1)",
-                    key, JsonSerializer.Serialize(newStats[key]));
-            }
-
-
-            // processing heatmap, after upgrade, so now UTC dates
-            logger.ILog("Creating processing heatmap data");
-
-            var processedDates =
-                connector.Db.Fetch<DateTime>($"select ProcessingStarted from LibraryFile where Status = 1");
-            Heatmap heatmap = new();
-            foreach (var dt in processedDates)
-            {
-                int quarter = TimeHelper.GetQuarter(dt);
-                if (heatmap.Data.TryAdd(quarter, 1) == false)
-                    heatmap.Data[quarter] += 1;
-            }
-
+        connector.Db.Execute(newTable);
+        foreach (var key in newStats.Keys)
+        {
             connector.Db.Execute("insert into DbStatistic (Name, Data) values (@0, @1)",
-                Globals.STAT_PROCESSING_TIMES_HEATMAP, JsonSerializer.Serialize(heatmap));
-        
+                key, JsonSerializer.Serialize(newStats[key]));
+        }
+
+
+        // processing heatmap, after upgrade, so now UTC dates
+        logger.ILog("Creating processing heatmap data");
+
+        var processedDates =
+            connector.Db.Fetch<DateTime>($"select ProcessingStarted from LibraryFile where Status = 1");
+        Heatmap heatmap = new();
+        foreach (var dt in processedDates)
+        {
+            int quarter = TimeHelper.GetQuarter(dt);
+            if (heatmap.Data.TryAdd(quarter, 1) == false)
+                heatmap.Data[quarter] += 1;
+        }
+
+        connector.Db.Execute("insert into DbStatistic (Name, Data) values (@0, @1)",
+            Globals.STAT_PROCESSING_TIMES_HEATMAP, JsonSerializer.Serialize(heatmap));
+
 
         // storage saved
         logger.ILog("Creating storage saved data");
@@ -264,7 +264,7 @@ public class Upgrade_24_03_2
                 }
             }));
     }
-    
+
     /// <summary>
     /// Represents an object in the database that will be upgraded.
     /// </summary>

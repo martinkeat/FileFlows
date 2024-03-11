@@ -29,7 +29,6 @@ internal  class DbStatisticManager : BaseManager
     public Task Insert(DbStatistic dbStatistic)
         => InsertBulk(dbStatistic);
     
-    
     /// <summary>
     /// Bulk insert many statistics
     /// </summary>
@@ -51,6 +50,21 @@ internal  class DbStatisticManager : BaseManager
 
 
     /// <summary>
+    /// Updates the data for a statistic
+    /// </summary>
+    /// <param name="name">the name of the statistic</param>
+    /// <param name="data">the data to update</param>
+    /// <returns>true if updated, otherwise false</returns>
+    public async Task<bool> Update(string name, string data)
+    {
+        using var db = await DbConnector.GetDb(write: true);
+        return await db.Db.ExecuteAsync("update " + Wrap(nameof(DbStatistic)) +
+                                 " set " + Wrap(nameof(DbStatistic.Data)) + " = @1 " +
+                                 " where " + Wrap(nameof(DbStatistic.Name)) + " = @0",
+            name, data) > 0;
+    }
+
+    /// <summary>
     /// Fetches all items
     /// </summary>
     /// <returns>the items</returns>
@@ -64,10 +78,10 @@ internal  class DbStatisticManager : BaseManager
     /// Gets statistics by name
     /// </summary>
     /// <returns>the matching statistics</returns>
-    public async Task<DbStatistic> GetStatisticByName(string name)
+    public async Task<DbStatistic?> GetStatisticByName(string name)
     {
         using var db = await DbConnector.GetDb();
-        return await db.Db.SingleOrDefaultAsync<DbStatistic>
+        return await db.Db.FirstOrDefaultAsync<DbStatistic>
             ("where " + Wrap(nameof(DbStatistic.Name)) + " = @0", name);
     }
 
