@@ -19,7 +19,15 @@ public class NodeManager : CachedManager<ProcessingNode>
     /// <returns>a task to await</returns>
     public async Task UpdateLastSeen(Guid nodeUid)
     {
-        string dt = DateTime.UtcNow.ToString("o"); // same format as json
+        var lastSeen = DateTime.UtcNow;
+        if (UseCache)
+        {
+            var node = _Data.FirstOrDefault(x => x.Uid == nodeUid);
+            if(node != null)
+                node.LastSeen = lastSeen;
+        }
+
+        string dt = lastSeen.ToString("o"); // same format as json
         await DatabaseAccessManager.Instance.ObjectManager.SetDataValue(nodeUid, typeof(ProcessingNode).FullName,
             nameof(ProcessingNode.LastSeen), dt);
     }

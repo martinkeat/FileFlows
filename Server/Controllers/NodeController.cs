@@ -58,7 +58,9 @@ public class NodeController : Controller
     [HttpGet("overview")]
     public async Task<IActionResult> Overview()
     {
-        var data = (await GetAll()).OrderBy(x => x.Enabled ? 1 : 2).ThenBy(x => x.Uid == Globals.InternalNodeUid ? 1 : 2)
+        var data = (await GetAll())
+            .OrderBy(x => x.Enabled ? 1 : 2)
+            .ThenBy(x => x.Uid == Globals.InternalNodeUid ? 1 : 2)
             .ThenBy(x => x.Name)
             .Select(x => new
             {
