@@ -43,7 +43,6 @@ public class FlowRunnerService : IFlowRunnerService
         if (info.Uid == Guid.Empty)
             throw new Exception("No UID specified for flow execution info");
         
-        
         if (new SettingsService().Get()?.Result?.HideProcessingStartedNotifications != true)
             ClientServiceManager.Instance.SendToast(LogType.Info, "Started processing: " +
                                                                   FileDisplayNameService.GetDisplayName(info.LibraryFile));
@@ -268,7 +267,7 @@ public class FlowRunnerService : IFlowRunnerService
                     libfile.ProcessingEnded = info.LibraryFile.ProcessingEnded;
                 if (libfile.ProcessingEnded < new DateTime(2020, 1, 1))
                     libfile.ProcessingEnded = DateTime.UtcNow; // this avoid a "2022 years ago" issue
-                if(libfile.Flow == null)
+                if(string.IsNullOrWhiteSpace(libfile.Flow?.Name))
                     libfile.Flow = info.LibraryFile.Flow;
                 await lfService.Update(libfile);
                 var library = await ServiceLoader.Load<LibraryService>().GetByUidAsync(libfile.Library.Uid);

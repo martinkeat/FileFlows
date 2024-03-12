@@ -240,6 +240,26 @@ public class Program
         bool fileExists = file.Exists; // set to variable so we can set this to false in debugging easily
         bool remoteFile = false;
         
+
+        var flow = args.Config.Flows.FirstOrDefault(x => x.Uid == (lib.Flow?.Uid ?? Guid.Empty));
+        if (flow == null || flow.Uid == Guid.Empty)
+        {
+            LogInfo("Flow not found, cannot process file: " + file.FullName);
+            libFile.Status = FileStatus.FlowNotFound;
+            FinishEarly(libFile);
+            return libFile.Status;
+        }
+        // update the library file to reference the updated flow (if changed)
+        if (libFile.Flow?.Name != flow.Name || libFile.Flow?.Uid != flow.Uid)
+        {
+            libFile.Flow = new ObjectReference
+            {
+                Uid = flow.Uid,
+                Name = flow.Name,
+                Type = typeof(Flow)?.FullName ?? string.Empty
+            };
+            // libfileService.Update(libFile).Wait();
+        }
         
         
         IFileService _fileService;
@@ -297,28 +317,8 @@ public class Program
 
         FileService.Instance = _fileService;
 
-        var flow = args.Config.Flows.FirstOrDefault(x => x.Uid == (lib.Flow?.Uid ?? Guid.Empty));
-        if (flow == null || flow.Uid == Guid.Empty)
-        {
-            LogInfo("Flow not found, cannot process file: " + file.FullName);
-            libFile.Status = FileStatus.FlowNotFound;
-            FinishEarly(libFile);
-            return libFile.Status;
-        }
-
         libFile.Status = FileStatus.Processing;
         
-        // update the library file to reference the updated flow (if changed)
-        if (libFile.Flow?.Name != flow.Name || libFile.Flow?.Uid != flow.Uid)
-        {
-            libFile.Flow = new ObjectReference
-            {
-                Uid = flow.Uid,
-                Name = flow.Name,
-                Type = typeof(Flow)?.FullName ?? String.Empty
-            };
-            // libfileService.Update(libFile).Wait();
-        }
 
         libFile.ProcessingStarted = DateTime.UtcNow;
         // libfileService.Update(libFile).Wait();
