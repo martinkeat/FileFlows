@@ -260,16 +260,16 @@ public abstract class ListPage<U, T> : ComponentBase where T : IUniqueObject<U>
     /// <summary>
     /// Humanizes a date, eg 11 hours ago
     /// </summary>
-    /// <param name="date">the date</param>
+    /// <param name="dateUtc">the date</param>
     /// <returns>the humanized date</returns>
-    protected string DateString(DateTime? date)
+    protected string DateString(DateTime? dateUtc)
     {
-        if (date == null) return string.Empty;
-        if (date.Value.Year < 2020) return string.Empty; // fixes 0000-01-01 issue
+        if (dateUtc == null) return string.Empty;
+        if (dateUtc.Value.Year < 2020) return string.Empty; // fixes 0000-01-01 issue
         // var localDate = new DateTime(date.Value.Year, date.Value.Month, date.Value.Day, date.Value.Hour,
         //     date.Value.Minute, date.Value.Second);
 
-        return FormatHelper.HumanizeDate(date.Value);
+        return FormatHelper.HumanizeDate(dateUtc.Value);
     }
 
 }
