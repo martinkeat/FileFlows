@@ -120,7 +120,8 @@ public class LibraryFileController : Controller //ControllerStore<LibraryFile>
             all = all.Take(10).ToArray();
         var data = all.Select(x =>
         {
-            var when = x.ProcessingEnded.ToLocalTime().Humanize(false, DateTime.UtcNow);
+            var date = x.ProcessingEnded.Year > 2000 ? x.ProcessingEnded : x.ProcessingStarted;
+            var when = date.ToLocalTime().Humanize(false, DateTime.UtcNow);
             return new
             {
                 x.Uid,
