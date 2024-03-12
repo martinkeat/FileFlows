@@ -339,7 +339,7 @@ public class SystemController:Controller
     [HttpPost("node-system-statistics")]
     public async Task RecordNodeSystemStatistics([FromBody] NodeSystemStatistics args)
     {
-        await ServiceLoader.Load<NodeService>().UpdateLastSeen(args.Uid);
-        SystemMonitor.Instance.Record(args);
+        await ServiceLoader.Load<NodeService>()?.UpdateLastSeen(args.Uid);
+        SystemMonitor.Instance?.Record(args);
     }
 }
