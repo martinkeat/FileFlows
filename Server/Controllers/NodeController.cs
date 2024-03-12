@@ -3,7 +3,6 @@ using FileFlows.Shared.Models;
 using FileFlows.Server.Helpers;
 using FileFlows.Server.Services;
 using FileFlows.ServerShared.Models;
-using Humanizer;
 
 namespace FileFlows.Server.Controllers;
 
