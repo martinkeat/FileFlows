@@ -56,6 +56,14 @@ export class TotalsTable extends FFChart
         super.getData();
     }
 
+    fixData(data) {
+        let fixed = [];
+        Object.keys(data).forEach(x => {
+            fixed.push({Name: x, Value: data[x]});
+        });
+        return fixed;
+    }
+    
     /**
      * Create the chart for the data 
      * @param data the data of hte chart
