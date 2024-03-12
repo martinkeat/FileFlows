@@ -71,7 +71,6 @@ internal  class DbObjectManager : BaseManager
     {
         using var db = await DbConnector.GetDb(write: true);
         await db.Db.ExecuteAsync("update " + Wrap(nameof(DbObject)) + " set " +
-                                 
                                  Wrap(nameof(DbObject.Name)) + " = @1, " +
                                  Wrap(nameof(DbObject.Type)) + " = @2, " +
                                  Wrap(nameof(DbObject.Data)) + " = @3, " +

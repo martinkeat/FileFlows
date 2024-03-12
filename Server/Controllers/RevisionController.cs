@@ -44,15 +44,15 @@ public class RevisionController:Controller
     /// <summary>
     /// Gets a specific revision
     /// </summary>
-    /// <param name="uid">The UID of the object</param>
-    /// <param name="revisionUid">the UID of the revision</param>
+    /// <param name="uid">The UID of the revision object</param>
+    /// <param name="dboUid">the UID of the DbObject</param>
     /// <returns>The specific revision</returns>
-    [HttpGet("{uid}/revision/{revisionUid}")]
-    public async Task<RevisionedObject?> GetRevision([FromRoute] Guid uid, [FromRoute] Guid revisionUid)
+    [HttpGet("{dboUid}/revision/{uid}")]
+    public async Task<RevisionedObject?> GetRevision([FromRoute] Guid uid, [FromRoute] Guid dboUid)
     {
         if (LicenseHelper.IsLicensed() == false)
             return null;
-        return await ServiceLoader.Load<RevisionService>().Get(uid, revisionUid);
+        return await ServiceLoader.Load<RevisionService>().Get(uid, dboUid);
     }
 
     /// <summary>
@@ -60,12 +60,12 @@ public class RevisionController:Controller
     /// </summary>
     /// <param name="uid">The UID of the object</param>
     /// <param name="revisionUid">the UID of the revision</param>
-    [HttpPut("{uid}/restore/{revisionUid}")]
-    public async Task Restore([FromRoute] Guid uid, [FromRoute] Guid revisionUid)
+    [HttpPut("{revisionUid}/restore/{uid}")]
+    public async Task Restore([FromRoute] Guid revisionUid, [FromRoute] Guid uid)
     {
         if (LicenseHelper.IsLicensed() == false)
             return;
-        await ServiceLoader.Load<RevisionService>().Restore(uid, revisionUid);
+        await ServiceLoader.Load<RevisionService>().Restore(revisionUid, uid);
     }
     
     

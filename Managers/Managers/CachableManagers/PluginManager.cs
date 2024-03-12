@@ -61,6 +61,6 @@ public class PluginManager : CachedManager<PluginInfo>
             Name = name,
             DateCreated = DateTime.UtcNow,
             Json = json
-        });
+        }, saveRevision: true);
     }
 }

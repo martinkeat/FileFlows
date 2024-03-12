@@ -48,18 +48,18 @@ public class RevisionManager
     /// <summary>
     /// Gets a specific revision
     /// </summary>
-    /// <param name="uid">The UID of the object</param>
-    /// <param name="revisionUid">the UID of the revision</param>
+    /// <param name="uid">The UID of the revision object</param>
+    /// <param name="dboUid">the UID of the DbObject</param>
     /// <returns>The specific revision</returns>
-    public Task<RevisionedObject?> Get(Guid uid, Guid revisionUid)
-        => DatabaseAccessManager.Instance.RevisionManager.Get(uid, revisionUid);
+    public Task<RevisionedObject?> Get(Guid uid, Guid dboUid)
+        => DatabaseAccessManager.Instance.RevisionManager.Get(uid, dboUid);
 
     /// <summary>
     /// Restores a revision
     /// </summary>
-    /// <param name="uid">The UID of the object</param>
     /// <param name="revisionUid">the UID of the revision</param>
-    public async Task<Result<bool>> Restore(Guid uid, Guid revisionUid)
+    /// <param name="uid">The UID of the object</param>
+    public async Task<Result<bool>> Restore(Guid revisionUid, Guid uid)
     {
         var revision = await Get(uid, revisionUid);
         if (revision == null)
@@ -77,11 +77,11 @@ public class RevisionManager
 
         // have to update any in memory objects
         if (dbo.Type == typeof(Library).FullName)
-            new LibraryManager().Refresh();
+            await new LibraryManager().Refresh();
         else if (dbo.Type == typeof(Flow).FullName)
-            new FlowManager().Refresh();
+            await new FlowManager().Refresh();
         else if (dbo.Type == typeof(Dashboard).FullName)
-            new DashboardManager().Refresh();
+            await new DashboardManager().Refresh();
 
         return true;
     }

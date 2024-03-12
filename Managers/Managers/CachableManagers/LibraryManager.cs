@@ -5,6 +5,9 @@
 /// </summary>
 public class LibraryManager : CachedManager<Library>
 {
+    /// <inheritdoc />
+    protected override bool SaveRevisions => true;
+    
     /// <summary>
     /// Updates the last scanned of a library to now
     /// </summary>

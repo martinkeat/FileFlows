@@ -6,7 +6,10 @@
 public class FlowManager : CachedManager<Flow>
 {
     static FlowManager()
-        => new FlowManager().Refresh();
+        => new FlowManager().Refresh().Wait();
+    
+    /// <inheritdoc />
+    protected override bool SaveRevisions => true;
 
     /// <summary>
     /// Gets the Failure Flow for a specific library

@@ -44,6 +44,9 @@ internal  class DbRevisionManager : BaseManager
         db.Db.BeginTransaction();
         foreach (var item in items)
         {
+            if (item.Uid == Guid.Empty)
+                item.Uid = Guid.NewGuid();
+            
             string sql = "insert into " + Wrap(nameof(RevisionedObject)) + " ( " +
                          Wrap(nameof(item.Uid)) + ", " +
                          Wrap(nameof(item.RevisionUid)) + ", " +
@@ -132,13 +135,15 @@ internal  class DbRevisionManager : BaseManager
     /// <summary>
     /// Gets a specific revision
     /// </summary>
-    /// <param name="uid">The UID of the object</param>
-    /// <param name="revisionUid">the UID of the revision</param>
+    /// <param name="uid">The UID of the revision object</param>
+    /// <param name="dboUid">the UID of the DbObject</param>
     /// <returns>The specific revision</returns>
-    public async Task<RevisionedObject?> Get(Guid uid, Guid revisionUid)
+    public async Task<RevisionedObject?> Get(Guid uid, Guid dboUid)
     {
+        string sql = "select * from " + Wrap(nameof(RevisionedObject)) +
+                     $" where {Wrap(nameof(RevisionedObject.Uid))} = '{uid}' " +
+                     $" and {Wrap(nameof(RevisionedObject.RevisionUid))} = '{dboUid}'";
         using var db = await DbConnector.GetDb();
-        return await db.Db.SingleOrDefaultAsync<RevisionedObject>(
-            $"where {Wrap(nameof(RevisionedObject.RevisionUid))} = '{revisionUid}' and {Wrap(nameof(RevisionedObject.Uid))} = '{uid}'");
+        return await db.Db.FirstOrDefaultAsync<RevisionedObject>(sql);
     }
 }

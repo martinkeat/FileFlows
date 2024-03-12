@@ -34,18 +34,18 @@ public class RevisionService
     /// <summary>
     /// Gets a specific revision
     /// </summary>
-    /// <param name="uid">The UID of the object</param>
-    /// <param name="revisionUid">the UID of the revision</param>
+    /// <param name="uid">The UID of the revision object</param>
+    /// <param name="dboUid">the UID of the DbObject</param>
     /// <returns>The specific revision</returns>
-    public Task<RevisionedObject?> Get(Guid uid, Guid revisionUid)
-        => new RevisionManager().Get(uid, revisionUid);
+    public Task<RevisionedObject?> Get(Guid uid, Guid dboUid)
+        => new RevisionManager().Get(uid, dboUid);
 
     /// <summary>
     /// Restores a revision
     /// </summary>
-    /// <param name="uid">The UID of the object</param>
     /// <param name="revisionUid">the UID of the revision</param>
-    public Task Restore(Guid uid, Guid revisionUid)
+    /// <param name="uid">The UID of the object</param>
+    public Task Restore(Guid revisionUid, Guid uid)
         => new RevisionManager().Restore(uid, revisionUid);
 
     /// <summary>

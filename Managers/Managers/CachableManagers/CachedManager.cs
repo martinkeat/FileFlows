@@ -1,3 +1,4 @@
+using FileFlows.DataLayer.Models;
 using FileFlows.Plugin;
 using FileFlows.Shared.Helpers;
 
@@ -17,6 +18,11 @@ public abstract class CachedManager<T> where T : FileFlowObject, new()
     /// Gets if the cache should be used
     /// </summary>
     protected bool UseCache => SettingsManager.UseCache;
+
+    /// <summary>
+    /// Gets if the revisions should be saved
+    /// </summary>
+    protected virtual bool SaveRevisions => false;
 
     private FairSemaphore GetDataSemaphore = new(1);
     
@@ -112,24 +118,17 @@ public abstract class CachedManager<T> where T : FileFlowObject, new()
             return Result<T>.Fail("ErrorMessages.NameInUse");
         
         Logger.Instance.ILog($"Updating {item.GetType().Name}: '{item.Name}'");
-        await UpdateActual(item, dontIncrementConfigRevision);
+        var dbo = await DatabaseAccessManager.Instance.FileFlowsObjectManager
+            .AddOrUpdateObject(item, saveRevision: SaveRevisions);
         
         if (dontIncrementConfigRevision == false)
             await IncrementConfigurationRevision();
         
         if(UseCache)
-            Refresh();
+            await Refresh();
 
         return (await GetByUid(item.Uid))!;
     }
-
-    /// <summary>
-    /// Actual update method
-    /// </summary>
-    /// <param name="item">the item being updated</param>
-    /// <param name="dontIncrementConfigRevision">if this is a revision object, if the revision should be updated</param>
-    protected virtual Task UpdateActual(T item, bool dontIncrementConfigRevision = false)
-        => DatabaseAccessManager.Instance.FileFlowsObjectManager.AddOrUpdateObject(item);
 
 
     /// <summary>

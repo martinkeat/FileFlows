@@ -122,9 +122,10 @@ internal  class FileFlowsObjectManager
     /// Adds or updates an object in the database
     /// </summary>
     /// <param name="obj">The object being added or updated</param>
+    /// <param name="saveRevision">if the revision should be saved</param>
     /// <typeparam name="T">The type of object being added or updated</typeparam>
     /// <returns>The updated object</returns>
-    public async Task<T> AddOrUpdateObject<T>(T obj) where T : FileFlowObject, new()
+    public async Task<DbObject> AddOrUpdateObject<T>(T obj, bool saveRevision = false) where T : FileFlowObject, new()
     {
         var dbo = ConvertToDbObject(obj);
         var dbObject = obj.Uid == Guid.Empty ? null : await dbom.Single(obj.Uid);
@@ -157,8 +158,21 @@ internal  class FileFlowsObjectManager
             dbObject.Data = dbo.Data;
             await dbom.Update(dbObject); 
         }
+        
+        if (saveRevision)
+        {
+            await DatabaseAccessManager.Instance.RevisionManager.Insert(new()
+            {
+                RevisionDate = DateTime.UtcNow,
+                RevisionUid = dbo.Uid,
+                RevisionCreated = dbo.DateCreated,
+                RevisionName = dbo.Name,
+                RevisionType = dbo.Type,
+                RevisionData = dbo.Data
+            });
+        }
 
-        return obj;
+        return dbObject;
     }
     
     /// <summary>
