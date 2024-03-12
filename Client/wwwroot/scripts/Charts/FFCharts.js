@@ -3,6 +3,7 @@ import { Processing } from './Processing.js';
 import { LibraryFileTable } from "./LibraryFileTable.js";
 import { ProcessingNodes } from './ProcessingNodes.js';
 import { TotalsTable } from './TotalsTable.js';
+import { Counter } from './Counter.js';
 
 export function initDashboard(uid, Widgets, csharp, isReadOnly){
     if(!Widgets)
@@ -227,6 +228,8 @@ function newChart(type, uid, args){
         window.FlowCharts[uid] = new BarChart(uid, args);
     else if(type == 'BellCurve' || type === 107)
         window.FlowCharts[uid] = new BellCurve(uid, args);
+    else if(type == 'Counter' || type === 108)
+        window.FlowCharts[uid] = new Counter(uid, args);
     else if(type == 'TotalsTable' || type === 110)
         window.FlowCharts[uid] = new TotalsTable(uid, args);
     else if(type == 'Nvidia' || type === 121)

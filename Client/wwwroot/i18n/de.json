@@ -284,7 +284,8 @@
     "ImageFormats": "Image Formats",
     "ComicFormats": "Comic Formats",
     "ComicPages": "Comic Pages",
-    "NVIDIASMI": "NVIDIA SMI"
+    "NVIDIASMI": "NVIDIA SMI",
+    "CurrentRevision": "Current Revision"
   },
   "Flow": {
     "ErrorMessages":{
