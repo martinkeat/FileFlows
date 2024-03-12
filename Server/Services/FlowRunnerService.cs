@@ -357,7 +357,9 @@ public class FlowRunnerService : IFlowRunnerService
             if (libFile is { Status: FileStatus.Processing })
             {
                 libFile.Status = FileStatus.ProcessingFailed;
-                await libfileController.Update(libFile);
+                
+                await ServiceLoader.Load<LibraryFileService>().Update(libFile);
+                //await libfileController.Update(libFile);
             }
             if(executorId == Guid.Empty)
                 return;

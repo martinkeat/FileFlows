@@ -327,7 +327,7 @@ public class FlowWorker : Worker
                     {
                         Logger.Instance?.ELog("Error executing runner: Invalid exit code: " + process.ExitCode);
                         libFile.Status = FileStatus.ProcessingFailed;
-                        libFileService.Update(libFile);
+                        FinishWork(processUid, node2, libFile, completeLog.ToString());
                     }
                 #endif
                 }
@@ -335,7 +335,7 @@ public class FlowWorker : Worker
                 {
                     AppendToCompleteLog(completeLog, "Error executing runner: " + ex.Message + Environment.NewLine + ex.StackTrace, type: "ERR");
                     libFile.Status = FileStatus.ProcessingFailed;
-                    libFileService.Update(libFile);
+                    FinishWork(processUid, node2, libFile, completeLog.ToString());
                     exitCode = -999;
                 }
             }
@@ -370,6 +370,20 @@ public class FlowWorker : Worker
                 Trigger();
             }
         });
+    }
+
+    private void FinishWork(Guid processUid, ProcessingNode node, LibraryFile libFile, string log)
+    {
+        FlowExecutorInfo info = new()
+        {
+            Uid = processUid,
+            LibraryFile = libFile,
+            NodeUid = node.Uid,
+            NodeName = node.Name,
+            RelativeFile = libFile.RelativePath,
+            Library = libFile.Library
+        };
+        new FlowRunnerService().Finish(info, log).Wait();
     }
 
     /// <summary>

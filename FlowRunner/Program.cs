@@ -239,6 +239,9 @@ public class Program
         FileSystemInfo file = lib.Folders ? new DirectoryInfo(workingFile) : new FileInfo(workingFile);
         bool fileExists = file.Exists; // set to variable so we can set this to false in debugging easily
         bool remoteFile = false;
+        
+        
+        
         IFileService _fileService;
         if (fileExists)
         {
@@ -249,6 +252,7 @@ public class Program
             // doesnt exist
             LogInfo("Library file does not exist, deleting from library files: " + file.FullName);
             libfileService.Delete(libFile.Uid).Wait();
+            FinishEarly(libFile);
             return libFile.Status;
         }
         else
@@ -270,7 +274,7 @@ public class Program
                     LogError(libFile.FailureReason);
                     libFile.Status = FileStatus.MappingIssue;
                     libFile.ExecutedNodes = new List<ExecutedNode>();
-                    libfileService.Update(libFile).Wait();
+                    FinishEarly(libFile);
                     return libFile.Status;
                 }
 
@@ -281,7 +285,7 @@ public class Program
                         "Library folder exists, but remote file server is not available for folders: " + file.FullName;
                     LogError(libFile.FailureReason);
                     libFile.ExecutedNodes = new List<ExecutedNode>();
-                    libfileService.Update(libFile).Wait();
+                    FinishEarly(libFile);
                     return libFile.Status;
                 }
             
@@ -298,7 +302,7 @@ public class Program
         {
             LogInfo("Flow not found, cannot process file: " + file.FullName);
             libFile.Status = FileStatus.FlowNotFound;
-            libfileService.Update(libFile).Wait();
+            FinishEarly(libFile);
             return libFile.Status;
         }
 
@@ -313,11 +317,11 @@ public class Program
                 Name = flow.Name,
                 Type = typeof(Flow)?.FullName ?? String.Empty
             };
-            libfileService.Update(libFile).Wait();
+            // libfileService.Update(libFile).Wait();
         }
 
         libFile.ProcessingStarted = DateTime.UtcNow;
-        libfileService.Update(libFile).Wait();
+        // libfileService.Update(libFile).Wait();
         Config = args.Config;
         ConfigDirectory = args.ConfigDirectory;
 
@@ -352,6 +356,21 @@ public class Program
         var runner = new Runner(info, flow, node, args.WorkingDirectory);
         runner.Run(Logger);
         return libFile.Status;
+    }
+
+    private static void FinishEarly(LibraryFile libFile)
+    {
+        FlowExecutorInfo info = new()
+        {
+            Uid = Program.Uid,
+            LibraryFile = libFile,
+            NodeUid = Program.ProcessingNode.Uid,
+            NodeName = Program.ProcessingNode.Name,
+            RelativeFile = libFile.RelativePath,
+            Library = libFile.Library
+        };
+        var log = Logger.ToString();
+        new FlowRunnerService().Finish(info, log).Wait();
     }
 
     private static long GetDirectorySize(string path)

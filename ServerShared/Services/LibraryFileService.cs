@@ -35,13 +35,6 @@ public interface ILibraryFileService
     Task Delete(params Guid[] uids);
 
     /// <summary>
-    /// Updates a library file
-    /// </summary>
-    /// <param name="libraryFile">The library file to update</param>
-    /// <returns>The newly updated library file</returns>
-    Task<LibraryFile> Update(LibraryFile libraryFile);
-
-    /// <summary>
     /// Saves the full library file log
     /// </summary>
     /// <param name="uid">The UID of the library file</param>
