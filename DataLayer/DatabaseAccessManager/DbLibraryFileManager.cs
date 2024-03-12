@@ -67,6 +67,10 @@ internal class DbLibraryFileManager : BaseManager
         file.DuplicateName ??= string.Empty;
         file.FailureReason ??= string.Empty;
 
+        if (file.DateCreated.Year < 2000)
+            file.DateCreated = DateTime.UtcNow;
+        
+        file.DateModified = DateTime.UtcNow;
         file.HoldUntil = file.HoldUntil.EnsureNotLessThan1970();
         file.ProcessingStarted = file.ProcessingStarted.EnsureNotLessThan1970();
         file.ProcessingEnded = file.ProcessingEnded.EnsureNotLessThan1970();
@@ -751,6 +755,8 @@ internal class DbLibraryFileManager : BaseManager
                     sql = sql.Replace($" {keyword} ", $"\n {keyword} ");
                 }
 #endif
+                if (sql.StartsWith("select") == false)
+                    sql = $"select {Wrap(nameof(LibraryFile))}.* from {Wrap(nameof(LibraryFile))} " + sql;
                 return sql + (orderBys.Any() == false ? "" : "order by \n" + string.Join(", \n", orderBys));
             }
 
@@ -1278,7 +1284,7 @@ where {Wrap(nameof(LibraryFile.Status))} = 1 and {Wrap(nameof(LibraryFile.Proces
     {
         string sql = $@"SELECT SUM(
     CASE 
-        WHEN {Wrap(nameof(LibraryFile.Status))} = {(int)FileStatus.Processed}' AND {Wrap(nameof(LibraryFile.FinalSize))} < {Wrap(nameof(LibraryFile.OriginalSize))} 
+        WHEN {Wrap(nameof(LibraryFile.Status))} = {(int)FileStatus.Processed} AND {Wrap(nameof(LibraryFile.FinalSize))} < {Wrap(nameof(LibraryFile.OriginalSize))} 
             THEN {Wrap(nameof(LibraryFile.OriginalSize))} - {Wrap(nameof(LibraryFile.FinalSize))} 
         ELSE 0 
     END

@@ -129,6 +129,10 @@
 .page.collapsed .bubbles .bubble + .bubble {
   display: none;
 }
+.page.collapsed .paused-indicator {
+  font-size: 2rem !important;
+  bottom: 0.5rem !important;
+}
 
 .version-info {
   display: none;

@@ -392,7 +392,12 @@ export class BellCurve extends FFChart
     }
     
     fixData(data) {
-        data = data.map((x, index) => ({ x: index, y: x.Value}));
+        let fixed = [];
+        Object.keys(data).forEach(x => {
+            fixed.push({ x: x, y: data[x]});
+        })
+        data = fixed;
+        
         const mean = this.calcMean(data, true);
         const tmp = data.map(p => Math.pow(p.y - mean, 2));
         const variance = this.calcMean(data.map(p => Math.pow(p.y - mean, 2)));

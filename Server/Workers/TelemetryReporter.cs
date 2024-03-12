@@ -2,9 +2,16 @@
 using FileFlows.Server.Controllers;
 using FileFlows.Server.Helpers;
 using FileFlows.Server.Services;
+using FileFlows.ServerShared.Services;
 using FileFlows.ServerShared.Workers;
 using FileFlows.Shared.Helpers;
 using FileFlows.Shared.Models;
+using FlowService = FileFlows.Server.Services.FlowService;
+using LibraryFileService = FileFlows.Server.Services.LibraryFileService;
+using LibraryService = FileFlows.Server.Services.LibraryService;
+using NodeService = FileFlows.Server.Services.NodeService;
+using SettingsService = FileFlows.Server.Services.SettingsService;
+using StatisticService = FileFlows.Server.Services.StatisticService;
 #if(!DEBUG)
 using System.Runtime.InteropServices;
 using FileFlows.Server.Controllers;
@@ -54,9 +61,21 @@ public class TelemetryReporter : Worker
                 OperatingSystem.IsFreeBSD() ? "FreeBSD" :
                 OperatingSystem.IsWindows() ? "Windows" :
                 RuntimeInformation.OSDescription;
-            var libFiles = new LibraryFileController().GetAll(null).Result;
-            data.FilesFailed = libFiles.Count(x => x.Status == FileStatus.ProcessingFailed);
-            data.FilesProcessed = libFiles.Count(x => x.Status == FileStatus.Processed);
+
+            var lfService = ServiceLoader.Load<LibraryFileService>();
+            var libFileStatus = lfService.GetStatus().Result;
+
+            int filesFailed = libFileStatus
+                .Where(x => x.Status == FileStatus.ProcessingFailed)
+                .Select(x =>x.Count)
+                .FirstOrDefault();
+            int filesProcessed = libFileStatus
+                .Where(x => x.Status == FileStatus.Processed)
+                .Select(x =>x.Count)
+                .FirstOrDefault();
+            
+            data.FilesFailed = filesFailed;
+            data.FilesProcessed = filesProcessed;
             var flows = ServiceLoader.Load<FlowService>().GetAllAsync().Result;
             var dictNodes = new Dictionary<string, int>();
             foreach (var fp in flows?.SelectMany(x => x.Parts)?.ToArray() ?? new FlowPart[] { })
@@ -81,7 +100,7 @@ public class TelemetryReporter : Worker
                     dictNodes[lib.Template] += 1;
             }
 
-            data.StorageSaved = ServiceLoader.Load<LibraryFileService>().GetTotalStorageSaved().Result;
+            data.StorageSaved = lfService.GetTotalStorageSaved().Result;
 
             data.LibraryTemplates = dictNodes.Select(x => new TelemetryDataSet
             {

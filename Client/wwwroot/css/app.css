@@ -3210,7 +3210,7 @@ hr {
 .widget .runner .buttons {
   position: absolute;
   bottom: 0;
-  background: var(--base);
+  background: var(--base-darker);
   left: 11rem;
   right: 0;
   display: none;

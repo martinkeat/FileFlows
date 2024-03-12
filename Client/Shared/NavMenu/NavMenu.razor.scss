@@ -130,7 +130,12 @@
         right: unset;
         left:2rem;
     }
+    .paused-indicator {
+        font-size:2rem !important;
+        bottom:0.5rem !important;
+    }
 }
+
 .version-info { 
     display:none;
     a {
