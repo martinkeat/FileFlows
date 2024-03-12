@@ -53,19 +53,28 @@ public class StatisticsController : Controller
     public object GetStorageSaved()
     {
         var data = new StatisticService().GetStorageSaved();
-        data = data.OrderByDescending(x => x.FinalSize - x.OriginalSize).ToList();
-        if (data.Count > 5)
+        data = data.OrderByDescending(x => x.OriginalSize - x.FinalSize).ToList();
+        const int MAX = 5;
+        if (data.Count > MAX)
         {
-            var total = new StorageSavedData
+            var other = new StorageSavedData
             {
-                Library = "Total",
-                TotalFiles = data.Skip(4).Sum(x => x.TotalFiles),
-                FinalSize = data.Skip(4).Sum(x => x.FinalSize),
-                OriginalSize = data.Skip(4).Sum(x => x.OriginalSize)
+                Library = "Other",
+                TotalFiles = data.Skip(MAX).Sum(x => x.TotalFiles),
+                FinalSize = data.Skip(MAX).Sum(x => x.FinalSize),
+                OriginalSize = data.Skip(MAX).Sum(x => x.OriginalSize)
             };
-            data = data.Take(4).ToList();
-            data.Add(total);
+            data = data.Take(MAX).ToList();
+            data.Add(other);
         }
+        var total = new StorageSavedData
+        {
+            Library = "Total",
+            TotalFiles = data.Sum(x => x.TotalFiles),
+            FinalSize = data.Sum(x => x.FinalSize),
+            OriginalSize = data.Sum(x => x.OriginalSize)
+        };
+        data.Add(total);
         
         return new
         {
