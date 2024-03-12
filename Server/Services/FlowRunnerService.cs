@@ -93,67 +93,18 @@ public class FlowRunnerService : IFlowRunnerService
     /// <returns>a completed task</returns>
     public async Task Update(FlowExecutorInfo info)
     {
-        await ServiceLoader.Load<NodeService>().UpdateLastSeen(info.NodeUid);
-        
-        // if (info.LibraryFile != null)
-        // {
-        //     var libFileService = ServiceLoader.Load<LibraryFileService>();
-        //     var libFile = await libFileService.Get(info.LibraryFile.Uid);
-        //     var originalStatus = libFile.Status;
-        //     if (info.LibraryFile.Status == FileStatus.Processing && libFile.OriginalMetadata?.Any() != true &&
-        //         info.LibraryFile.OriginalMetadata?.Any() == true)
-        //     {
-        //         // we have the original metadata, update
-        //         libFile.OriginalMetadata = info.LibraryFile.OriginalMetadata;
-        //     }
-        //     if (info.LibraryFile != libFile)
-        //         ObjectHelper.CopyProperties(info.LibraryFile, libFile,
-        //             nameof(LibraryFile.OriginalSize),
-        //             nameof(LibraryFile.Fingerprint),
-        //             nameof(LibraryFile.Library),
-        //             nameof(LibraryFile.Duplicate),
-        //             nameof(LibraryFile.Node), // set when runner grabs the file
-        //             nameof(LibraryFile.CreationTime),
-        //             nameof(LibraryFile.DuplicateName),
-        //             nameof(LibraryFile.HoldUntil),
-        //             nameof(LibraryFile.IsDirectory),
-        //             nameof(LibraryFile.LibraryName),
-        //             nameof(LibraryFile.LibraryUid),
-        //             nameof(LibraryFile.NodeName),
-        //             nameof(LibraryFile.NodeUid),
-        //             nameof(LibraryFile.ProcessOnNodeUid),
-        //             nameof(LibraryFile.OriginalMetadata),
-        //             nameof(LibraryFile.RelativePath),
-        //             nameof(LibraryFile.Name),
-        //             nameof(LibraryFile.Uid));
-        //     
-        //     if (libFile.Status != FileStatus.Processing)
-        //     {
-        //         Logger.Instance.DLog(
-        //             $"Updating non-processing library file [{info.LibraryFile.Status}]: {info.LibraryFile.Name}");
-        //     }
-        //
-        //     if (originalStatus == FileStatus.Unprocessed)
-        //     {
-        //         // this can happen if the server is restarted but the node is still processing, update the status
-        //         await libFileService.Update(libFile);
-        //     }
-        //     if (originalStatus == FileStatus.ProcessingFailed || info.LibraryFile.Status == FileStatus.Processed)
-        //     {
-        //         lock (Executors)
-        //         {
-        //             CompletedExecutors.Append(info.Uid);
-        //             Executors.Remove(info.Uid);
-        //             _ = ClientServiceManager.Instance.UpdateExecutors(Executors);
-        //             return;
-        //         }
-        //     }
-        // }
-
-        info.LastUpdate = DateTime.UtcNow;
         await executorsSempahore.WaitAsync();
         try
         {
+            if (Executors.TryGetValue(info.Uid, out FlowExecutorInfo? existing) && existing != null)
+            {
+                if (existing.CurrentPart == info.CurrentPart && info.AdditionalInfos?.Any() != true)
+                    info.AdditionalInfos = existing.AdditionalInfos; // in case an update cleared this 
+            }
+            info.LastUpdate = DateTime.UtcNow;
+            // dont record this here, it can hammer it 
+            // await ServiceLoader.Load<NodeService>().UpdateLastSeen(info.NodeUid);
+
             Executors[info.Uid] = info;
         }
         finally
@@ -176,15 +127,16 @@ public class FlowRunnerService : IFlowRunnerService
         
         Logger.Instance.ILog($"Finishing executor: {info.Uid} = {info.LibraryFile?.Name ?? string.Empty}");
         
-        if (string.IsNullOrEmpty(log) == false)
-        {
-            // this contains the full log file, save it in case a message was lost or received out of order during processing
-            try
-            {
-                _ = LibraryFileLogHelper.SaveLog(info.LibraryFile.Uid, log, saveHtml: true);
-            }
-            catch (Exception) { }
-        }
+        // dont save log here, the flow runner will save a more complete log very shortly after this call
+        // if (string.IsNullOrEmpty(log) == false)
+        // {
+        //     // this contains the full log file, save it in case a message was lost or received out of order during processing
+        //     try
+        //     {
+        //         _ = LibraryFileLogHelper.SaveLog(info.LibraryFile.Uid, log, saveHtml: true);
+        //     }
+        //     catch (Exception) { }
+        // }
 
         await executorsSempahore.WaitAsync();
         try
@@ -198,98 +150,99 @@ public class FlowRunnerService : IFlowRunnerService
         await ClientServiceManager.Instance.UpdateExecutors(Executors);
 
         if (info.LibraryFile != null)
-        {   
-            ClientServiceManager.Instance.FinishProcessing(info.LibraryFile);
+        {
+            var updated = info.LibraryFile;
+            ClientServiceManager.Instance.FinishProcessing(updated);
             var lfService= ServiceLoader.Load<LibraryFileService>();
-            var libfile = await lfService.Get(info.LibraryFile.Uid);
-            if (libfile != null)
+            var existing = await lfService.Get(updated.Uid);
+            if (existing != null)
             {
-                libfile.OutputPath = info.LibraryFile.OutputPath?.EmptyAsNull() ?? libfile.OutputPath;
+                existing.OutputPath = updated.OutputPath?.EmptyAsNull() ?? existing.OutputPath;
                 Logger.Instance.ILog(
-                    $"Recording final size for '{info.LibraryFile.FinalSize}' for '{info.LibraryFile.Name}' status: {info.LibraryFile.Status}");
-                if (info.LibraryFile.FinalSize > 0)
-                    libfile.FinalSize = info.LibraryFile.FinalSize;
-                if (info.LibraryFile.OriginalSize > 0)
-                    libfile.OriginalSize = info.LibraryFile.OriginalSize;
+                    $"Recording final size for '{updated.FinalSize}' for '{updated.Name}' status: {updated.Status}");
+                if (updated.FinalSize > 0)
+                    existing.FinalSize = updated.FinalSize;
+                if (updated.OriginalSize > 0)
+                    existing.OriginalSize = updated.OriginalSize;
                 
-                if (info.WorkingFile == libfile.Name)
+                if (info.WorkingFile == existing.Name)
                 {
                     var file = new FileInfo(info.WorkingFile);
                     if (file.Exists)
                     {
                         // if file replaced original update the creation time to match
-                        if (libfile.CreationTime != file.CreationTime)
-                            libfile.CreationTime = file.CreationTime;
-                        if (libfile.LastWriteTime != file.LastWriteTime)
-                            libfile.LastWriteTime = file.LastWriteTime;
+                        if (existing.CreationTime != file.CreationTimeUtc)
+                            existing.CreationTime = file.CreationTimeUtc;
+                        if (existing.LastWriteTime != file.LastWriteTimeUtc)
+                            existing.LastWriteTime = file.LastWriteTimeUtc;
                     }
                 }
 
 
-                libfile.NoLongerExistsAfterProcessing = new FileInfo(libfile.Name).Exists == false;
-                if (info.LibraryFile.FinalSize > 0)
-                    libfile.FinalSize = info.LibraryFile.FinalSize;
-                libfile.OutputPath = info.LibraryFile.OutputPath;
+                existing.NoLongerExistsAfterProcessing = new FileInfo(existing.Name).Exists == false;
+                if (updated.FinalSize > 0)
+                    existing.FinalSize = updated.FinalSize;
+                existing.OutputPath = updated.OutputPath;
 
-                if (string.IsNullOrWhiteSpace(libfile.OutputPath) == false)
+                if (string.IsNullOrWhiteSpace(existing.OutputPath) == false)
                 {
-                    if (libfile.Name.StartsWith("/"))
+                    if (existing.Name.StartsWith("/"))
                     {
                         // start file was a linux file
                         // check if libfile.OutputPath is using \ instead of / for linux filenames
-                        if (libfile.OutputPath.StartsWith(@"\\") == false)
+                        if (existing.OutputPath.StartsWith(@"\\") == false)
                         {
-                            libfile.OutputPath = libfile.OutputPath.Replace(@"\", "/");
+                            existing.OutputPath = existing.OutputPath.Replace(@"\", "/");
                         }
                     }
-                    else if (Regex.IsMatch(libfile.Name, "^[a-zA-Z]:") || libfile.Name.StartsWith(@"\\")
-                                                                       || libfile.Name.StartsWith(@"//"))
+                    else if (Regex.IsMatch(existing.Name, "^[a-zA-Z]:") || existing.Name.StartsWith(@"\\")
+                                                                       || existing.Name.StartsWith(@"//"))
                     {
                         // Windows-style path in Name or UNC path
-                        libfile.OutputPath = libfile.OutputPath.Replace("/", @"\");
+                        existing.OutputPath = existing.OutputPath.Replace("/", @"\");
                     }
                 }
 
-                libfile.Fingerprint = info.LibraryFile.Fingerprint;
-                libfile.FinalFingerprint = info.LibraryFile.FinalFingerprint;
-                libfile.ExecutedNodes = info.LibraryFile.ExecutedNodes ?? new List<ExecutedNode>();
+                existing.Fingerprint = updated.Fingerprint;
+                existing.FinalFingerprint = updated.FinalFingerprint;
+                existing.ExecutedNodes = updated.ExecutedNodes ?? new List<ExecutedNode>();
                 Logger.Instance.DLog("WorkerController.FinishWork: Executed flow elements: " +
-                                     string.Join(", ", libfile.ExecutedNodes.Select(x => x.NodeUid)));
+                                     string.Join(", ", existing.ExecutedNodes.Select(x => x.NodeUid)));
                 
-                if (info.LibraryFile.OriginalMetadata != null)
-                    libfile.OriginalMetadata = info.LibraryFile.OriginalMetadata;
-                if (info.LibraryFile.FinalMetadata != null)
-                    libfile.FinalMetadata = info.LibraryFile.FinalMetadata;
-                libfile.Status = info.LibraryFile.Status;
-                if (info.LibraryFile.ProcessingStarted > new DateTime(2020, 1, 1))
-                    libfile.ProcessingStarted = info.LibraryFile.ProcessingStarted;
-                if (info.LibraryFile.ProcessingEnded > new DateTime(2020, 1, 1))
-                    libfile.ProcessingEnded = info.LibraryFile.ProcessingEnded;
-                if (libfile.ProcessingEnded < new DateTime(2020, 1, 1))
-                    libfile.ProcessingEnded = DateTime.UtcNow; // this avoid a "2022 years ago" issue
-                if(string.IsNullOrWhiteSpace(libfile.Flow?.Name))
-                    libfile.Flow = info.LibraryFile.Flow;
-                await lfService.Update(libfile);
-                var library = await ServiceLoader.Load<LibraryService>().GetByUidAsync(libfile.Library.Uid);
+                if (updated.OriginalMetadata != null)
+                    existing.OriginalMetadata = updated.OriginalMetadata;
+                if (updated.FinalMetadata != null)
+                    existing.FinalMetadata = updated.FinalMetadata;
+                existing.Status = updated.Status;
+                if (updated.ProcessingStarted > new DateTime(2020, 1, 1))
+                    existing.ProcessingStarted = updated.ProcessingStarted;
+                if (updated.ProcessingEnded > new DateTime(2020, 1, 1))
+                    existing.ProcessingEnded = updated.ProcessingEnded;
+                if (existing.ProcessingEnded < new DateTime(2020, 1, 1))
+                    existing.ProcessingEnded = DateTime.UtcNow; // this avoid a "2022 years ago" issue
+                if(string.IsNullOrWhiteSpace(existing.Flow?.Name))
+                    existing.Flow = updated.Flow;
+                await lfService.Update(existing);
+                var library = await ServiceLoader.Load<LibraryService>().GetByUidAsync(existing.Library.Uid);
                 
-                if (libfile.Status == FileStatus.ProcessingFailed)
+                if (existing.Status == FileStatus.ProcessingFailed)
                 {
-                    SystemEvents.TriggerLibraryFileProcessedFailed(libfile, library);
+                    SystemEvents.TriggerLibraryFileProcessedFailed(existing, library);
                     
                     if(new SettingsService().Get()?.Result?.HideProcessingFinishedNotifications != true)
                         ClientServiceManager.Instance.SendToast(LogType.Error, "Failed processing: " + FileDisplayNameService.GetDisplayName(info.LibraryFile));
                 }
                 else
                 {
-                    SystemEvents.TriggerLibraryFileProcessedSuccess(libfile, library);
+                    SystemEvents.TriggerLibraryFileProcessedSuccess(existing, library);
                     if(new SettingsService().Get()?.Result?.HideProcessingFinishedNotifications != true)
                         ClientServiceManager.Instance.SendToast(LogType.Info, "Finished processing: " + FileDisplayNameService.GetDisplayName(info.LibraryFile));
                 }
 
-                SystemEvents.TriggerLibraryFileProcessed(libfile, library);
+                SystemEvents.TriggerLibraryFileProcessed(existing, library);
 
                 await ServiceLoader.Load<StatisticService>()
-                    .RecordStorageSaved(library.Name, libfile.OriginalSize, libfile.FinalSize);
+                    .RecordStorageSaved(library.Name, existing.OriginalSize, existing.FinalSize);
 
             }
         }

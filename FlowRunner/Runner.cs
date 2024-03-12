@@ -101,7 +101,7 @@ public class Runner
     /// <summary>
     /// Starts the flow runner processing
     /// </summary>
-    public void Run(FlowLogger logger)
+    public bool Run(FlowLogger logger)
     {
         var systemHelper = new SystemHelper();
         try
@@ -110,7 +110,7 @@ public class Runner
             var service = FlowRunnerService.Load();
             var updated = service.Start(Info).Result;
             if (updated == null)
-                return; // failed to update
+                return false; // failed to update
             var communicator = FlowRunnerCommunicator.Load(Info.LibraryFile.Uid);
             communicator.OnCancel += Communicator_OnCancel;
             logger.SetCommunicator(communicator);
@@ -153,7 +153,7 @@ public class Runner
                 task.Wait();
 
                 nodeParameters?.Logger?.ELog("Error in runner: " + ex.Message + Environment.NewLine + ex.StackTrace);
-                
+
                 if (string.IsNullOrWhiteSpace(nodeParameters.FailureReason))
                     nodeParameters.FailureReason = "Error in runner: " + ex.Message;
                 if (Info.LibraryFile?.Status == FileStatus.Processing)
@@ -171,19 +171,20 @@ public class Runner
         {
             Program.Logger.ELog("Failure in runner: " + ex.Message + Environment.NewLine + ex.StackTrace);
         }
-        finally
-        {
-            try
-            {
-                Finish().Wait();
-            }
-            catch (Exception ex)
-            {
-                Program.Logger.ELog("Failed 'Finishing' runner: " + ex.Message + Environment.NewLine + ex.StackTrace);
-            }
 
-            systemHelper.Stop();
+        bool success = false;
+        try
+        {
+            Finish().Wait();
+            success = true;
         }
+        catch (Exception ex)
+        {
+            Program.Logger.ELog("Failed 'Finishing' runner: " + ex.Message + Environment.NewLine + ex.StackTrace);
+        }
+
+        systemHelper.Stop();
+        return success;
     }
 
     /// <summary>
