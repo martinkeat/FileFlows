@@ -12,6 +12,9 @@ namespace FileFlows.Server.Services;
 /// </summary>
 public class NodeService : INodeService
 {
+    /// <summary>
+    /// Initializes the node service
+    /// </summary>
     static NodeService()
     {
         if (Globals.IsUnitTesting)

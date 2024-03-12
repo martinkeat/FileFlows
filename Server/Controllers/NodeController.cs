@@ -126,7 +126,7 @@ public class NodeController : Controller
                 
                 internalNode.Libraries = node.Libraries;
                 internalNode = await service.Update(internalNode);
-                CheckLicensedNodes(internalNode.Uid, internalNode.Enabled);
+                await CheckLicensedNodes(internalNode.Uid, internalNode.Enabled);
                 
                 await RevisionIncrement();
                 return Ok(internalNode);
@@ -140,7 +140,7 @@ public class NodeController : Controller
             node.Mappings = null; // no mappings for internal
             node.Variables ??= new();
             node = await service.Update(node);
-            CheckLicensedNodes(node.Uid, node.Enabled);
+            await CheckLicensedNodes(node.Uid, node.Enabled);
             await RevisionIncrement();
             return Ok(node);
         }
@@ -153,7 +153,7 @@ public class NodeController : Controller
             node.Variables ??= new();
             node = await service.Update(node);
             Logger.Instance.ILog("Updated external processing node: " + node.Name);
-            CheckLicensedNodes(node.Uid, node.Enabled);
+            await CheckLicensedNodes(node.Uid, node.Enabled);
             await RevisionIncrement();
             return Ok(node);
         }
@@ -199,7 +199,7 @@ public class NodeController : Controller
             node.Enabled = enable.Value;
             node = await service.Update(node);
         }
-        CheckLicensedNodes(uid, enable == true);
+        await CheckLicensedNodes(uid, enable == true);
         return Ok(node);
     }
 
@@ -275,7 +275,7 @@ public class NodeController : Controller
         };
         node = await service.Update(node);
         node.SignalrUrl = "flow";
-        CheckLicensedNodes(Guid.Empty, false);
+        await CheckLicensedNodes(Guid.Empty, false);
         return node;
     }
 

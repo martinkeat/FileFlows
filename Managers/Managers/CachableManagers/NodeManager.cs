@@ -59,40 +59,47 @@ public class NodeManager : CachedManager<ProcessingNode>
         var node = await manager.Single<ProcessingNode>(Globals.InternalNodeUid);
         if (node.Failed(out string error))
             return Result<bool>.Fail(error);
-        
-        string tempPath;
-        if (DirectoryHelper.IsDocker)
-            tempPath = "/temp";
-        else
-            tempPath = Path.Combine(DirectoryHelper.BaseDirectory, "Temp");
-
-        if (Directory.Exists(tempPath) == false)
-            Directory.CreateDirectory(tempPath);
-
-        node = new ProcessingNode
+        if (node.Value == null)
         {
-            Uid = Globals.InternalNodeUid,
-            Name = Globals.InternalNodeName,
-            Address = Globals.InternalNodeName,
-            AllLibraries = ProcessingLibraries.All,
-            OperatingSystem = Globals.IsDocker ? OperatingSystemType.Docker :
-                Globals.IsWindows ? OperatingSystemType.Windows :
-                Globals.IsLinux ? OperatingSystemType.Linux :
-                Globals.IsMac ? OperatingSystemType.Mac :
-                OperatingSystemType.Unknown,
-            Architecture = RuntimeInformation.ProcessArchitecture == Architecture.Arm ? ArchitectureType.Arm32 :
-                RuntimeInformation.ProcessArchitecture == Architecture.Arm64 ? ArchitectureType.Arm64 :
-                RuntimeInformation.ProcessArchitecture == Architecture.Arm ? ArchitectureType.Arm64 :
-                RuntimeInformation.ProcessArchitecture == Architecture.X64 ? ArchitectureType.x64 :
-                RuntimeInformation.ProcessArchitecture == Architecture.X86 ? ArchitectureType.x86 :
-                ArchitectureType.Unknown,
-            Schedule = new string('1', 672),
-            Enabled = true,
-            FlowRunners = 1,
-            TempPath = tempPath,
-        };
-        
-        await manager.AddOrUpdateObject((FileFlowObject)node);
+
+            string tempPath;
+            if (DirectoryHelper.IsDocker)
+                tempPath = "/temp";
+            else
+                tempPath = Path.Combine(DirectoryHelper.BaseDirectory, "Temp");
+
+            if (Directory.Exists(tempPath) == false)
+                Directory.CreateDirectory(tempPath);
+
+            node = new ProcessingNode
+            {
+                Uid = Globals.InternalNodeUid,
+                Name = Globals.InternalNodeName,
+                Address = Globals.InternalNodeName,
+                AllLibraries = ProcessingLibraries.All,
+                OperatingSystem = Globals.IsDocker ? OperatingSystemType.Docker :
+                    Globals.IsWindows ? OperatingSystemType.Windows :
+                    Globals.IsLinux ? OperatingSystemType.Linux :
+                    Globals.IsMac ? OperatingSystemType.Mac :
+                    OperatingSystemType.Unknown,
+                Architecture = RuntimeInformation.ProcessArchitecture == Architecture.Arm ? ArchitectureType.Arm32 :
+                    RuntimeInformation.ProcessArchitecture == Architecture.Arm64 ? ArchitectureType.Arm64 :
+                    RuntimeInformation.ProcessArchitecture == Architecture.Arm ? ArchitectureType.Arm64 :
+                    RuntimeInformation.ProcessArchitecture == Architecture.X64 ? ArchitectureType.x64 :
+                    RuntimeInformation.ProcessArchitecture == Architecture.X86 ? ArchitectureType.x86 :
+                    ArchitectureType.Unknown,
+                Schedule = new string('1', 672),
+                Enabled = true,
+                FlowRunners = 1,
+                TempPath = tempPath,
+            };
+        }
+        else
+        {
+            node.Value.Version = Globals.Version;
+        }
+
+        await manager.AddOrUpdateObject((FileFlowObject)node.Value!);
 
         return true;
     }
