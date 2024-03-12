@@ -60,11 +60,11 @@ public class StatisticsController : Controller
             var other = new StorageSavedData
             {
                 Library = "Other",
-                TotalFiles = data.Skip(MAX).Sum(x => x.TotalFiles),
-                FinalSize = data.Skip(MAX).Sum(x => x.FinalSize),
-                OriginalSize = data.Skip(MAX).Sum(x => x.OriginalSize)
+                TotalFiles = data.Skip(MAX - 1).Sum(x => x.TotalFiles),
+                FinalSize = data.Skip(MAX - 1).Sum(x => x.FinalSize),
+                OriginalSize = data.Skip(MAX - 1).Sum(x => x.OriginalSize)
             };
-            data = data.Take(MAX).ToList();
+            data = data.Take(MAX - 1).ToList();
             data.Add(other);
         }
         var total = new StorageSavedData
