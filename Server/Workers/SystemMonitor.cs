@@ -200,10 +200,7 @@ public class SystemMonitor:FileFlows.ServerShared.Workers.Worker
         args.RecordedAt = DateTime.UtcNow;
         lock (NodeStatistics)
         {
-            if (NodeStatistics.ContainsKey(args.Uid))
-                NodeStatistics[args.Uid] = args;
-            else
-                NodeStatistics.Add(args.Uid, args);
+            NodeStatistics[args.Uid] = args;
         }
     }
 }

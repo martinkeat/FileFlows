@@ -5,9 +5,14 @@ using FileFlows.Server.Services;
 using FileFlows.Server.Workers;
 using FileFlows.ServerShared.Models;
 using FileFlows.ServerShared.Models.StatisticModels;
+using FileFlows.ServerShared.Services;
 using FileFlows.Shared.Models;
 using Microsoft.AspNetCore.Mvc;
 using FileHelper = FileFlows.ServerShared.Helpers.FileHelper;
+using LibraryFileService = FileFlows.Server.Services.LibraryFileService;
+using NodeService = FileFlows.Server.Services.NodeService;
+using SettingsService = FileFlows.Server.Services.SettingsService;
+using StatisticService = FileFlows.Server.Services.StatisticService;
 
 namespace FileFlows.Server.Controllers;
 
@@ -332,8 +337,9 @@ public class SystemController:Controller
     /// </summary>
     /// <param name="args">the node system statistics</param>
     [HttpPost("node-system-statistics")]
-    public void RecordNodeSystemStatistics([FromBody] NodeSystemStatistics args)
+    public async Task RecordNodeSystemStatistics([FromBody] NodeSystemStatistics args)
     {
+        await ServiceLoader.Load<NodeService>().UpdateLastSeen(args.Uid);
         SystemMonitor.Instance.Record(args);
     }
 }

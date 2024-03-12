@@ -16,7 +16,7 @@ public class SystemStatisticsWorker:Worker
     private ProcessingNode? processingNode; 
     
     /// <summary>
-    /// Constructs an instance of hte System Statistcs worker
+    /// Constructs an instance of hte System Statistics worker
     /// </summary>
     public SystemStatisticsWorker() : base(ScheduleType.Second, 10)
     {
