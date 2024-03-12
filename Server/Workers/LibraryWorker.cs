@@ -121,6 +121,8 @@ public class LibraryWorker : Worker
         foreach(var libwatcher in WatchedLibraries.Values)
         {
             var library = libwatcher.Library;
+            if (library.Enabled == false)
+                continue; // dont scan a disabled library
             if (library.FullScanIntervalMinutes == 0)
                 library.FullScanIntervalMinutes = 60;
             bool scan = library.Scan;
@@ -158,9 +160,8 @@ public class LibraryWorker : Worker
                                  $"(last scanned: {library.LastScannedAgo}) " +
                                  $"(Full Scan interval: {library.FullScanIntervalMinutes})");
 
-            Task.Run(async () =>
+            Task.Run(() =>
             {
-                await Task.Delay(1);
                 libwatcher.Scan();
             });
         }
