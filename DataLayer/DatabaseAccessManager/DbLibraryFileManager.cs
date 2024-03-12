@@ -909,7 +909,7 @@ internal class DbLibraryFileManager : BaseManager
             // check if any of the complex sorting libraries have any unprocessed files
             string inStr = string.Join(",", possibleComplexSortingLibraries.Select(x => $"'{x}'"));
             using var db = await DbConnector.GetDb();
-            int unprocessedFiles = await db.Db.ExecuteScalarAsync<int>("select count(*) form " + Wrap(nameof(LibraryFile)) + " where " +
+            int unprocessedFiles = await db.Db.ExecuteScalarAsync<int>("select count(*) from " + Wrap(nameof(LibraryFile)) + " where " +
                                   Wrap(nameof(LibraryFile.Status)) + " = 0 and " +
                                   Wrap(nameof(LibraryFile.LibraryUid)) + $" in ({inStr})");
             

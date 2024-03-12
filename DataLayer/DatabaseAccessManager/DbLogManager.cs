@@ -115,8 +115,8 @@ and {DbConnector.FormatDateQuoted(filter.ToDate)} )
 
         sql += DbType switch
         {
-            DatabaseType.SqlServer => $" OFFSET 0 ROWS FETCH NEXT 1000 ROWS ONLY",
-            _ => $" LIMIT 1000",
+            DatabaseType.SqlServer => $" OFFSET 0 ROWS FETCH NEXT 10000 ROWS ONLY",
+            _ => $" LIMIT 10000",
         };
 
         using var db = await DbConnector.GetDb();

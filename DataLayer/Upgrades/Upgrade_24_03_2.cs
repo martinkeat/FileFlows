@@ -166,8 +166,19 @@ public class Upgrade_24_03_2
             db.Db.Execute(
                 "update DbObject set Name = REPLACE(Name, 'PluginsSettings_', ''), Type = 'FileFlows.ServerShared.Models.PluginSettingsModel' where Type = 'FileFlows.Server.Models.PluginSettingsModel'");
 
-            UpgradeStatistics(logger, db, false);
+            db.Db.Execute(@"
+CREATE TABLE DbLogMessage
+(
+    ClientUid       VARCHAR(36)        NOT NULL,
+    LogDate         datetime,
+    Type            int                NOT NULL,
+    Message         TEXT               NOT NULL
+);");
+            db.Db.Execute("CREATE INDEX IF NOT EXISTS idx_DbLogMessage_ClientUid ON DbLogMessage (ClientUid)");
+            db.Db.Execute("CREATE INDEX IF NOT EXISTS idx_DbLogMessage_LogDate ON DbLogMessage (LogDate);");
             
+            UpgradeStatistics(logger, db, false);
+
             return true;
         }
         catch (Exception ex)
@@ -250,7 +261,8 @@ public class Upgrade_24_03_2
                 heatmap.Data[quarter] += 1;
         }
 
-        connector.Db.Execute("insert into DbStatistic (Name, Data) values (@0, @1)",
+        connector.Db.Execute($"insert into DbStatistic (Name, Type, Data) " +
+                             $" values (@0, {((int)StatisticType.Heatmap)}, @1)",
             Globals.STAT_PROCESSING_TIMES_HEATMAP, JsonSerializer.Serialize(heatmap));
 
 
@@ -264,7 +276,8 @@ public class Upgrade_24_03_2
         GROUP BY LibraryName";
         var storageSaved = new StorageSaved() { Data = connector.Db.Fetch<StorageSavedData>(sql) };
 
-        connector.Db.Execute("insert into DbStatistic (Name, Data) values (@0, @1)",
+        connector.Db.Execute("insert into DbStatistic (Name, Type, Data) values " +
+                             $" (@0, {((int)StatisticType.StorageSaved)}, @1)",
             Globals.STAT_STORAGE_SAVED, JsonSerializer.Serialize(storageSaved));
 
         // total files
@@ -272,7 +285,8 @@ public class Upgrade_24_03_2
         int totalProcessed = connector.Db.ExecuteScalar<int>("select count(*) from LibraryFile where Status = 1");
         int totalFailed = connector.Db.ExecuteScalar<int>("select count(*) from LibraryFile where Status = 4");
 
-        connector.Db.Execute("insert into DbStatistic (Name, Data) values (@0, @1)",
+        connector.Db.Execute("insert into DbStatistic (Name, Type, Data)" +
+                             $" values (@0, {(int)StatisticType.RunningTotals}, @1)",
             Globals.STAT_TOTAL_FILES, JsonSerializer.Serialize(new RunningTotals()
             {
                 Data = new()
