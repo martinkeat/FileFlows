@@ -1,11 +1,12 @@
 ﻿using System.Dynamic;
-using FileFlows.DataLayer.Helpers;
+using System.Net;
 using FileFlows.Managers;
 using FileFlows.Plugin;
 using FileFlows.Server.Helpers;
 using FileFlows.Server.Controllers;
 using FileFlows.ServerShared.Models;
 using FileFlows.ServerShared.Services;
+using FileFlows.Shared.Helpers;
 using FileFlows.Shared.Models;
 
 
@@ -173,5 +174,119 @@ public class PluginService : IPluginService
     /// <param name="json">the plugin json</param>
     public Task SetSettingsJson(string name, string json)
         => new PluginManager().SetPluginSettings(name, json);
+    
+    
+    /// <summary>
+    /// Get a list of all plugins in the system
+    /// </summary>
+    /// <param name="includeElements">If data should contain all the elements for the plugins</param>
+    /// <returns>a list of plugins</returns>
+    public async Task<IEnumerable<PluginInfoModel>> GetPluginInfoModels(bool includeElements = true)
+    {
+        var plugins = (await new Services.PluginService().GetAllAsync())
+            .Where(x => x.Deleted == false);
+        List<PluginInfoModel> pims = new List<PluginInfoModel>();
+        var packagesResult = await GetPluginPackagesActual();
+        var packages = packagesResult.IsFailed ? new () : packagesResult.Value;
         
+        Dictionary<string, PluginInfoModel> pluginDict = new();
+        foreach (var plugin in plugins)
+        {
+            var pim = new PluginInfoModel
+            {
+                Uid = plugin.Uid,
+                Name = plugin.Name,
+                DateCreated = plugin.DateCreated,
+                DateModified = plugin.DateModified,
+                Enabled = plugin.Enabled,
+                Version = plugin.Version,
+                Deleted = plugin.Deleted,
+                Settings = plugin.Settings,
+                Authors = plugin.Authors,
+                Url = plugin.Url,
+                PackageName = plugin.PackageName,
+                Description = plugin.Description,   
+                Elements = includeElements ? plugin.Elements : null
+            };
+            var package = packages.FirstOrDefault(x => x.Name.ToLower().Replace(" ", "") == plugin.Name.ToLower().Replace(" ", ""));
+            pim.LatestVersion = VersionHelper.VersionDateString(package?.Version ?? string.Empty);
+            pims.Add(pim);
+
+            foreach (var ele in plugin.Elements)
+            {
+                if (pluginDict.ContainsKey(ele.Uid) == false)
+                    pluginDict.Add(ele.Uid, pim);
+            }
+        }
+
+        string flowTypeName = typeof(Flow).FullName ?? string.Empty;
+        var flows = await new Services.FlowService().GetAllAsync();
+        foreach (var flow in flows)
+        {
+            foreach (var p in flow.Parts)
+            {
+                if (pluginDict.ContainsKey(p.FlowElementUid) == false)
+                    continue;
+                var plugin = pluginDict[p.FlowElementUid];
+                if (plugin.UsedBy != null && plugin.UsedBy.Any(x => x.Uid == flow.Uid))
+                    continue;
+                plugin.UsedBy ??= new();
+                plugin.UsedBy.Add(new ()
+                {
+                    Name = flow.Name,
+                    Type = flowTypeName,
+                    Uid = flow.Uid
+                });
+            }
+        }
+        return pims.OrderBy(x => x.Name.ToLowerInvariant());
+    }
+        
+    
+    /// <summary>
+    /// Get the available plugin packages 
+    /// </summary>
+    /// <param name="missing">If only missing plugins should be included, ie plugins not installed</param>
+    /// <returns>a list of plugins</returns>
+    internal async Task<Result<List<PluginPackageInfo>>> GetPluginPackagesActual(bool missing = false)
+    {
+        Version ffVersion = new Version(Globals.Version);
+        List<PluginPackageInfo> data = new List<PluginPackageInfo>();
+        try
+        {
+            string url = Globals.PluginBaseUrl + $"?version={Globals.Version}&rand={DateTime.UtcNow.ToFileTime()}";
+            var plugins = await HttpHelper.Get<IEnumerable<PluginPackageInfo>>(url);
+            if (plugins.Success == false)
+            {
+                if (plugins.StatusCode == HttpStatusCode.PreconditionFailed)
+                    return Result<List<PluginPackageInfo>>.Fail("To access additional plugins, you must upgrade FileFlows to the latest version.");
+            }
+            foreach(var plugin in plugins.Data)
+            {
+                if (data.Any(x => x.Name == plugin.Name))
+                    continue;
+
+#if (!DEBUG)
+                    if(string.IsNullOrWhiteSpace(plugin.MinimumVersion) == false)
+                    {
+                        if (ffVersion < new Version(plugin.MinimumVersion))
+                            continue;
+                    }
+#endif
+                data.Add(plugin);
+            }
+        }
+        catch (Exception) { }
+        
+
+        if (missing)
+        {
+            // remove plugins already installed
+            var installed = (await new Services.PluginService().GetAllAsync())
+                .Where(x => x.Deleted != true).Select(x => x.PackageName).ToList();
+            data = data.Where(x => installed.Contains(x.Package) == false).ToList();
+        }
+
+        return data.OrderBy(x => x.Name).ToList();
+    }
 }
