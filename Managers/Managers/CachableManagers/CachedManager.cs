@@ -118,10 +118,10 @@ public abstract class CachedManager<T> where T : FileFlowObject, new()
             return Result<T>.Fail("ErrorMessages.NameInUse");
         
         Logger.Instance.ILog($"Updating {item.GetType().Name}: '{item.Name}'");
-        var dbo = await DatabaseAccessManager.Instance.FileFlowsObjectManager
+        var result = await DatabaseAccessManager.Instance.FileFlowsObjectManager
             .AddOrUpdateObject(item, saveRevision: SaveRevisions);
         
-        if (dontIncrementConfigRevision == false)
+        if (result.changed && dontIncrementConfigRevision == false)
             await IncrementConfigurationRevision();
         
         if(UseCache)

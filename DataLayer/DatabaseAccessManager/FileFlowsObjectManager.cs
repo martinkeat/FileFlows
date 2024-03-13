@@ -125,10 +125,11 @@ internal  class FileFlowsObjectManager
     /// <param name="saveRevision">if the revision should be saved</param>
     /// <typeparam name="T">The type of object being added or updated</typeparam>
     /// <returns>The updated object</returns>
-    public async Task<DbObject> AddOrUpdateObject<T>(T obj, bool saveRevision = false) where T : FileFlowObject, new()
+    public async Task<(DbObject dbo, bool changed)> AddOrUpdateObject<T>(T obj, bool saveRevision = false) where T : FileFlowObject, new()
     {
         var dbo = ConvertToDbObject(obj);
         var dbObject = obj.Uid == Guid.Empty ? null : await dbom.Single(obj.Uid);
+        bool changed = false;
         
         if (dbObject == null)
         {
@@ -147,19 +148,24 @@ internal  class FileFlowsObjectManager
                 Data = dbo.Data
             };
             await dbom.Insert(dbObject);
+            changed = true;
         }
-        else
+        else if(dbo.Name != dbObject.Name || dbo.Data != dbObject.Data)
         {
             obj.DateModified = DateTime.UtcNow;
             dbObject.Name = obj.Name;
             dbObject.DateModified = obj.DateModified;
             if (obj.DateCreated != dbObject.DateCreated && obj.DateCreated > new DateTime(2020, 1, 1))
+            {
                 dbObject.DateCreated = obj.DateCreated; // OnHeld moving to process now can change this date
+            }
+
+            changed = true;
             dbObject.Data = dbo.Data;
             await dbom.Update(dbObject); 
         }
         
-        if (saveRevision)
+        if (changed && saveRevision)
         {
             await DatabaseAccessManager.Instance.RevisionManager.Insert(new()
             {
@@ -172,7 +178,7 @@ internal  class FileFlowsObjectManager
             });
         }
 
-        return dbObject;
+        return (dbObject, changed);
     }
     
     /// <summary>
