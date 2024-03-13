@@ -42,6 +42,21 @@
   }
 }
 
+.indicators {
+  > span {
+    border: solid 1px var(--flow-process);
+    padding: 0.15rem 0.25rem;
+    margin-right: 0.5rem;
+    font-size: 0.8rem;
+    &.offline {
+      border-color: var(--danger);
+    }
+    &.possibly-disconnected {
+      border-color: var(--warning);
+    }
+  }
+}
+
 .btn-download-node {
   width:auto !important;
 }
@@ -53,14 +68,17 @@
   width:8rem;
   min-width: 8rem;
 }
-.version-mismatch {
-  font-size: .9rem;
-  border: solid 1px var(--warning);
-  padding: 0.25rem 0.5rem;
+.version {
+  display: block;
+  font-weight: var(--bold, 600);
   position: absolute;
+  top: 0;
   right: 0;
-  line-height: 1.25;
-  color: var(--warning);
+  background: rgba(63, 63, 63, 0.5490196078);
+  padding: 0.25rem 0.75rem 0;
+  font-size: 0.9rem;
+  border-top-right-radius: 0.5rem;
+  border-bottom-left-radius: 0.5rem;;
 }
 .name {
   font-size:1.2rem;

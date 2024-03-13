@@ -180,6 +180,10 @@ public partial class FlowTable<TItem>: FlowTableBase,IDisposable, INotifyPropert
     /// </summary>
     [Parameter] public EventCallback<TItem> DoubleClick { get; set; }
 
+    /// <summary>
+    /// Gets or sets if the head row should be hidden
+    /// </summary>
+    [Parameter] public bool HideHead { get; set; }
 
     private Dictionary<TItem, string> DisplayData { get; set; } = new ();
 

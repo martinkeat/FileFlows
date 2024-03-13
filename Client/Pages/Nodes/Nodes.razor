@@ -16,12 +16,12 @@
 
     <Body>
         <FlowTable @ref="Table" Data="@Data" TItem="ProcessingNode" Selection="SelectionMode.Multiple" TableIdentifier="Nodes"
-            DoubleClick="@OnDoubleClick">
+            DoubleClick="@OnDoubleClick" HideHead="true">
             <ToolBar>            
                 <FlowTableButton Clicked=Edit SelectedOne="true" Icon="fas fa-edit" Label="Labels.Edit" />
                 <FlowTableButton Clicked=Delete SelectedOneOrMore="true" Icon="fas fa-trash" Label="Labels.Delete" />    
                 <FlowTableButtonSeparator />            
-                <FlowTableHelpButton  HelpUrl="nodes" />
+                <FlowTableHelpButton HelpUrl="nodes" />
             </ToolBar>
 
             <Columns>
@@ -34,16 +34,20 @@
                             @{
                                 string statusIcon = "status-ok";
                                 string statusTitle = lblRunning;
+                                bool offline = false;
+                                bool possiblyDisconnected = false;
                                 
                                 if (item.Address != FileFlowsServer && item.LastSeen < DateTime.UtcNow.AddMinutes(-10))
                                 {
                                     statusIcon = "status-error";
                                     statusTitle = lblDisconnected;
+                                    offline = true;
                                 }
                                 else if (item.Address != FileFlowsServer && item.LastSeen < DateTime.UtcNow.AddMinutes(-5))
                                 {
                                     statusIcon = "status-warning";
                                     statusTitle = lblPossiblyDisconnected;
+                                    offline = true;
                                 }
                             }    
                             <div class="node-icon @statusIcon" title="@statusTitle">
@@ -79,10 +83,25 @@
                                         <span class="label">@lblRunners</span>
                                         <span class="value">@item.FlowRunners</span>
                                     </div>
-                                    <div>
-                                        <span class="label">@lblVersion</span>
-                                        <span class="value">@item.Version</span>
-                                    </div>
+                                </div>
+                                <div class="indicators">
+                                    @if (offline)
+                                    {
+                                        <span class="offline">
+                                            @statusTitle
+                                        </span>
+                                    }
+                                    else if (possiblyDisconnected)
+                                    {
+                                        <span class="possibly-disconnected">
+                                            @statusTitle
+                                        </span>
+                                    }
+
+                                    @if (item.Status == ProcessingNodeStatus.VersionMismatch)
+                                    {
+                                        <span class="version-mismatch" title="@lblUpgradeRequiredHint">@lblUpgradeRequired</span>
+                                    }
                                 </div>
                             </div>
                             
@@ -90,11 +109,7 @@
                                 <FlowSwitch Value="@item.Enabled" ValueChanged="@(args => { item.Enabled = args; Enable(args, item); })"/>
                             </div>
                             
-                    
-                            @if (item.Status == ProcessingNodeStatus.VersionMismatch)
-                            {
-                                <span class="version-mismatch" title="@lblUpgradeRequiredHint">@lblUpgradeRequired</span>
-                            }
+                            <span class="version">@item.Version</span>
                         </div>
                     </Cell>
                 </FlowTableColumn>
