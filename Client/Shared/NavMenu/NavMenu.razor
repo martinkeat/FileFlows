@@ -36,6 +36,10 @@
                 {
                     continue;
                 }
+                if (item == nmiPause && App.Instance.IsMobile == false)
+                {
+                    continue;
+                }
                 <li class="nav-item @(item.Url == ""  ? "dashboard" : item.Url.Replace("/", ""))">
                     <a class="nav-link @(Active == item  ? "active": "")" href="@item.Url" @onclick:preventDefault @onclick:stopPropagation
                                                                                            @onclick="() => Click(item)">

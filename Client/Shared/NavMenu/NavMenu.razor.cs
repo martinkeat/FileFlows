@@ -103,7 +103,7 @@ public partial class NavMenu : IDisposable
             {
                 new ("Pages.Dashboard.Title", "fas fa-chart-pie", ""),
                 new ("Pages.LibraryFiles.Title", "fas fa-copy", "library-files"),
-                //nmiPause
+                nmiPause
             }
         });
 
