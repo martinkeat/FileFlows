@@ -277,7 +277,7 @@ public class Runner
 
                 var service = FlowRunnerService.Load();
                 Info.LibraryFile.ProcessingEnded = DateTime.UtcNow;
-                await service.Finish(Info, log);
+                await service.Finish(Info);
                 return;
             }
             catch (Exception) { }

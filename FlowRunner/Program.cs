@@ -386,7 +386,7 @@ public class Program
             Library = libFile.Library
         };
         var log = Logger.ToString();
-        new FlowRunnerService().Finish(info, log).Wait();
+        new FlowRunnerService().Finish(info).Wait();
     }
 
     private static long GetDirectorySize(string path)

@@ -14,7 +14,14 @@
 
         [Parameter]
         public bool Hidden { get; set; }
+        /// <summary>
+        /// Gets or sets if this is a pre-field
+        /// </summary>
         [Parameter] public bool Pre { get; set; }
+        /// <summary>
+        /// Gets or sets if this has no height field set
+        /// </summary>
+        [Parameter] public bool NoHeight { get; set; }
 
         string _Width = string.Empty;
         string className = "fillspace";

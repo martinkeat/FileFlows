@@ -39,10 +39,10 @@ public class WorkerController : Controller
     /// <summary>
     /// Finish work, tells the server work has finished on a flow runner
     /// </summary>
-    /// <param name="args">the complete args</param>
+    /// <param name="info">the flow executor info</param>
     [HttpPost("work/finish")]
-    public Task FinishWork([FromBody] FinishWorkArgs args)
-        => ServiceLoader.Load<FlowRunnerService>().Finish(args.Info, args.Log);
+    public Task FinishWork([FromBody] FlowExecutorInfo info)
+        => ServiceLoader.Load<FlowRunnerService>().Finish(info);
     
     /// <summary>
     /// Update work, tells the server about updated work on a flow runner
@@ -152,20 +152,4 @@ public class WorkerController : Controller
     /// <param name="info">the flow execution info</param>
     internal Task<bool> Hello(Guid runnerUid, FlowExecutorInfo info)
         => ServiceLoader.Load<FlowRunnerService>().Hello(runnerUid, info);
-}
-
-/// <summary>
-/// Arguments for FinishWork call
-/// </summary>
-public class FinishWorkArgs
-{
-    /// <summary>
-    /// Gets or sets the information for the work
-    /// </summary>
-    public FlowExecutorInfo Info { get; set; }
-    
-    /// <summary>
-    /// Gets or sets the full log for the file
-    /// </summary>
-    public string Log { get; set; }
 }

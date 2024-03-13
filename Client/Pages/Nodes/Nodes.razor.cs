@@ -12,7 +12,8 @@ public partial class Nodes : ListPage<Guid, ProcessingNode>
 
     private ProcessingNode EditingItem = null;
 
-    private string lblInternal, lblAddress, lblRunners, lblVersion, lblDownloadNode, lblUpgradeRequired, lblUpgradeRequiredHint;
+    private string lblInternal, lblAddress, lblRunners, lblVersion, lblDownloadNode, lblUpgradeRequired, 
+        lblUpgradeRequiredHint, lblRunning, lblDisconnected, lblPossiblyDisconnected;
      
 #if(DEBUG)
     string DownloadUrl = "http://localhost:6868/download";
@@ -29,6 +30,10 @@ public partial class Nodes : ListPage<Guid, ProcessingNode>
         lblDownloadNode = Translater.Instant("Pages.Nodes.Labels.DownloadNode");
         lblUpgradeRequired = Translater.Instant("Pages.Nodes.Labels.UpgradeRequired");
         lblUpgradeRequiredHint = Translater.Instant("Pages.Nodes.Labels.UpgradeRequiredHint");
+
+        lblRunning = Translater.Instant("Labels.Running");
+        lblPossiblyDisconnected = Translater.Instant("Labels.PossiblyDisconnected");
+        lblDisconnected = Translater.Instant("Labels.Disconnected");
     }
 
 

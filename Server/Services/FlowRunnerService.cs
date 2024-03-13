@@ -102,8 +102,6 @@ public class FlowRunnerService : IFlowRunnerService
                     info.AdditionalInfos = existing.AdditionalInfos; // in case an update cleared this 
             }
             info.LastUpdate = DateTime.UtcNow;
-            // dont record this here, it can hammer it 
-            // await ServiceLoader.Load<NodeService>().UpdateLastSeen(info.NodeUid);
 
             Executors[info.Uid] = info;
         }
@@ -119,25 +117,13 @@ public class FlowRunnerService : IFlowRunnerService
     /// Called when a flow execution starts
     /// </summary>
     /// <param name="info">The information about the flow execution</param>
-    /// <param name="log">The full log for the file</param>
     /// <returns>The updated information</returns>
-    public async Task Finish(FlowExecutorInfo info, string log)
+    public async Task Finish(FlowExecutorInfo info)
     {
         await ServiceLoader.Load<NodeService>().UpdateLastSeen(info.NodeUid);
         
         Logger.Instance.ILog($"Finishing executor: {info.Uid} = {info.LibraryFile?.Name ?? string.Empty}");
         
-        // dont save log here, the flow runner will save a more complete log very shortly after this call
-        // if (string.IsNullOrEmpty(log) == false)
-        // {
-        //     // this contains the full log file, save it in case a message was lost or received out of order during processing
-        //     try
-        //     {
-        //         _ = LibraryFileLogHelper.SaveLog(info.LibraryFile.Uid, log, saveHtml: true);
-        //     }
-        //     catch (Exception) { }
-        // }
-
         await executorsSempahore.WaitAsync();
         try
         {

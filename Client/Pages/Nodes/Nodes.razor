@@ -25,93 +25,77 @@
             </ToolBar>
 
             <Columns>
-                <FlowTableColumn TItem="ProcessingNode" MinWidth="14rem">
+                <FlowTableColumn TItem="ProcessingNode" NoHeight="true">
                     <Header>
                         @Globals.lblName
                     </Header>
                     <Cell Context="item">
-                        @if (item.Address != FileFlowsServer && item.Status == ProcessingNodeStatus.Offline)
-                        {
-                            <i title="Disconnected" class="processing-node status-error fas fa-times-circle"></i>
-                        }
-                        else if (item.Address != FileFlowsServer && item.LastSeen < DateTime.UtcNow.AddMinutes(-1))
-                        {
-                            <i title="Possibly disconnected" class="processing-node status-warning fas fa-exclamation-circle"></i>
-                        }
-                        else
-                        {
-                            <i title="Running" class="processing-node status-ok fas fa-check-circle"></i>
-                        }
-                        <span>@item.Name</span>
-                    </Cell>
-                </FlowTableColumn>
-                <FlowTableColumn TItem="ProcessingNode" Width="15rem" Align="FlowTableAlignment.Center" MobileWidth="0">
-                    <Header>
-                        Status
-                    </Header>
-                    <Cell Context="item">
-                        @if (item.Status == ProcessingNodeStatus.VersionMismatch)
-                        {
-                            <span style="font-style: italic;color: var(--warning);" title="@lblUpgradeRequiredHint">@lblUpgradeRequired</span>
-                        }
-                        else
-                        {
-                            <span>@item.Status.ToString().Humanize()</span>
-                        }
-                    </Cell>
-                </FlowTableColumn>
-                <FlowTableColumn TItem="ProcessingNode" MobileWidth="0" Width="12rem" LargeWidth="14rem" Align="FlowTableAlignment.Center">
-                    <Header>
-                        @lblAddress
-                    </Header>
-                    <Cell Context="item">
-                        @if(item.Address != FileFlowsServer)
-                        {
-                            <span>@item.Address</span>
-                        }else
-                        {
-                            <span>@lblInternal</span>
-                        }
-                    </Cell>
-                </FlowTableColumn>
-                <FlowTableColumn TItem="ProcessingNode" Width="9rem" LargeWidth="14rem" Align="FlowTableAlignment.Center" MobileWidth="0">
-                    <Header>
-                        OS
-                    </Header>
-                    <Cell Context="item">
-                        <span>@item.OperatingSystem</span>
-                    </Cell>
-                </FlowTableColumn>
-                <FlowTableColumn TItem="ProcessingNode" Width="8rem" Align="FlowTableAlignment.Center" MobileWidth="0">
-                    <Header>
-                        Architecture
-                    </Header>
-                    <Cell Context="item">
-                        <span>@item.Architecture</span>
-                    </Cell>
-                </FlowTableColumn>
-                <FlowTableColumn TItem="ProcessingNode" Width="8rem" Align="FlowTableAlignment.Center" MobileWidth="0">
-                    <Header>
-                        @lblVersion
-                    </Header>
-                    <Cell Context="item">
-                        <span>@item.Version</span>
-                    </Cell>
-                </FlowTableColumn>
-                <FlowTableColumn TItem="ProcessingNode" Width="8rem" Align="FlowTableAlignment.Center" MobileWidth="0">
-                    <Header>
-                        @lblRunners
-                    </Header>
-                    <Cell Context="item">
-                        <span>@item.FlowRunners</span>
-                    </Cell>
-                </FlowTableColumn>
-                <FlowTableColumn TItem="ProcessingNode" Width="8rem" Align="FlowTableAlignment.Center">
-                    <Header>
-                        @Globals.lblEnabled
-                    </Header>
-                    <Cell Context="item">
-                        <FlowSwitch Value="@item.Enabled" ValueChanged="@(args => { item.Enabled= args; _ = Enable(args, item); })"  />
+                        <div class="node-wrapper @(item.Enabled == false ? "disabled" : "")">
+                            @{
+                                string statusIcon = "status-ok";
+                                string statusTitle = lblRunning;
+                                
+                                if (item.Address != FileFlowsServer && item.LastSeen < DateTime.UtcNow.AddMinutes(-10))
+                                {
+                                    statusIcon = "status-error";
+                                    statusTitle = lblDisconnected;
+                                }
+                                else if (item.Address != FileFlowsServer && item.LastSeen < DateTime.UtcNow.AddMinutes(-5))
+                                {
+                                    statusIcon = "status-warning";
+                                    statusTitle = lblPossiblyDisconnected;
+                                }
+                            }    
+                            <div class="node-icon @statusIcon" title="@statusTitle">
+                                @if (item.OperatingSystem == OperatingSystemType.Mac)
+                                {
+                                    <i class="fab fa-apple"></i>
+                                }
+                                else if (item.OperatingSystem == OperatingSystemType.Docker)
+                                {
+                                    <i class="fab fa-docker"></i>
+                                }
+                                else if (item.OperatingSystem == OperatingSystemType.Windows)
+                                {
+                                    <i class="fab fa-windows"></i>
+                                }
+                                else if (item.OperatingSystem == OperatingSystemType.Linux)
+                                {
+                                    <i class="fab fa-linux"></i>
+                                }
+                                <div class="architecture">@item.Architecture</div>
+                            </div>
+                            
+                            <div class="info">
+                                <div class="name">
+                                    @item.Name
+                                </div>
+                                <div class="sub-info">
+                                    <div>
+                                        <span class="label">@lblAddress</span>
+                                        <span class="value">@(item.Address != FileFlowsServer ? item.Address : lblInternal)</span>
+                                    </div>
+                                    <div>
+                                        <span class="label">@lblRunners</span>
+                                        <span class="value">@item.FlowRunners</span>
+                                    </div>
+                                    <div>
+                                        <span class="label">@lblVersion</span>
+                                        <span class="value">@item.Version</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="enabled">
+                                <FlowSwitch Value="@item.Enabled" ValueChanged="@(args => { item.Enabled = args; Enable(args, item); })"/>
+                            </div>
+                            
+                    
+                            @if (item.Status == ProcessingNodeStatus.VersionMismatch)
+                            {
+                                <span class="version-mismatch" title="@lblUpgradeRequiredHint">@lblUpgradeRequired</span>
+                            }
+                        </div>
                     </Cell>
                 </FlowTableColumn>
             </Columns>

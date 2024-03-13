@@ -121,6 +121,9 @@
     "Pixels": "Pixels",
     "ReadOnly": "Nur lesen",
     "InUse": "Benutzung",
+    "Running": "Running",
+    "PossibilityDisconnected": "Possibly Disconnected",
+    "Disconnected": "Disconnected",
     "ObsoleteConfirm": {
       "Title": "Veralteter Node",
       "Message": "Es wird empfohlen, zu einem anderen Node zu wechseln.",

@@ -130,7 +130,7 @@
                         @foreach (var col in ColumnList)
                         {
                             string hashcode = "col-" + col.GetHashCode();
-                            <span class="column @col.ClassName @hashcode @(col.Pre ? "pre-text" : "") @(col.Hidden ? "hidden": "")" style="@col.Style">
+                            <span class="column @col.ClassName @hashcode @(col.Pre ? "pre-text" : "") @(col.NoHeight ? "no-height" : "") @(col.Hidden ? "hidden": "")" style="@col.Style">
                                 @col.Cell(item.Key)
                             </span>
                         }
