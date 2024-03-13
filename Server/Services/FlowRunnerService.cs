@@ -183,6 +183,7 @@ public class FlowRunnerService : IFlowRunnerService
                     }
                 }
 
+                existing.ProcessingEnded = updated.ProcessingEnded;
                 existing.Fingerprint = updated.Fingerprint;
                 existing.FinalFingerprint = updated.FinalFingerprint;
                 existing.ExecutedNodes = updated.ExecutedNodes ?? new List<ExecutedNode>();

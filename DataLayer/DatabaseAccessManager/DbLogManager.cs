@@ -118,10 +118,19 @@ and {DbConnector.FormatDateQuoted(filter.ToDate)} )
             DatabaseType.SqlServer => $" OFFSET 0 ROWS FETCH NEXT 10000 ROWS ONLY",
             _ => $" LIMIT 10000",
         };
+        
+        Logger.ILog("DBLogManager: " + sql);
 
-        using var db = await DbConnector.GetDb();
-        var results = await db.Db.FetchAsync<DbLogMessage>(sql);
-        results.Reverse();
-        return results;
+        try
+        {
+            using var db = await DbConnector.GetDb();
+            var results = await db.Db.FetchAsync<DbLogMessage>(sql);
+            results.Reverse();
+            return results;
+        }
+        catch (Exception ex)
+        {
+            Logger.ELog("LogMessage Error: " + ex.Message);
+        }
     }
 }
