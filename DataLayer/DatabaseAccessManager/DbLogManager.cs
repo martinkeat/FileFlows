@@ -129,6 +129,7 @@ and {DbConnector.FormatDateQuoted(filter.ToDate)} )
         catch (Exception ex)
         {
             Logger.ELog("LogMessage Error: " + ex.Message + Environment.NewLine + sql);
+            return new List<DbLogMessage>();
         }
     }
 }
