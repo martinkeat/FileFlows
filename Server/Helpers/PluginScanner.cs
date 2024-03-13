@@ -115,17 +115,55 @@ public class PluginScanner
                 bool isNew = plugin == null;
                 plugin ??= new();
                 installed.Add(pi.Name);
+
+                bool isDifferent = false;
+                
                 plugin.Uid = pi.Uid;
-                plugin.PackageName = pi.PackageName;
-                plugin.Version = pi.Version;
-                plugin.DateModified = DateTime.UtcNow;
-                plugin.Deleted = false;
-                plugin.Elements = pi.Elements;
-                plugin.Authors = pi.Authors;
-                plugin.Url = pi.Url;
-                plugin.Description = pi.Description;
-                plugin.Settings = pi.Settings;
-                plugin.HasSettings = pi.Settings?.Any() == true;
+                if (isNew || plugin.PackageName != pi.PackageName)
+                {
+                    plugin.PackageName = pi.PackageName;
+                    isDifferent = true;
+                }
+                if (isNew || plugin.Version != pi.Version)
+                {
+                    plugin.Version = pi.Version;
+                    isDifferent = true;
+                }
+                if (isNew || plugin.Deleted == false)
+                {
+                    plugin.Deleted = false;
+                    isDifferent = true;
+                }
+                if (isNew || 
+                    JsonSerializer.Serialize(plugin.Elements ?? new ()) != 
+                    JsonSerializer.Serialize(pi.Elements ?? new ()))
+                {
+                    plugin.Elements = pi.Elements;
+                    isDifferent = true;
+                }
+                if (isNew || plugin.Authors != pi.Authors)
+                {
+                    plugin.Authors = pi.Authors;
+                    isDifferent = true;
+                }
+                if (isNew || plugin.Url != pi.Url)
+                {
+                    plugin.Url = pi.Url;
+                    isDifferent = true;
+                }
+                if (isNew || plugin.Description != pi.Description)
+                {
+                    plugin.Description = pi.Description;
+                    isDifferent = true;
+                }
+                if (isNew || 
+                    JsonSerializer.Serialize(plugin.Settings ?? new ()) != 
+                    JsonSerializer.Serialize(pi.Settings ?? new ()))
+                {
+                    plugin.Settings = pi.Settings;
+                    plugin.HasSettings = pi.Settings?.Any() == true;
+                    isDifferent = true;
+                }
 
                 Logger.Instance.DLog("Plugin.Name: " + plugin.Name);
                 Logger.Instance.DLog("Plugin.PackageName: " + plugin.PackageName);
@@ -135,12 +173,18 @@ public class PluginScanner
 
                 if (isNew == false)
                 {
-                    Logger.Instance.ILog("Updating plugin: " + pi.Name);
-                    service.Update(plugin).Wait();
+                    if (isDifferent)
+                    {
+                        Logger.Instance.ILog("Updating plugin: " + pi.Name);
+                        plugin.DateModified = DateTime.UtcNow;
+                        service.Update(plugin).Wait();
+                    }
                 }
                 else
                 {
                     // new dll
+
+                    plugin.DateModified = DateTime.UtcNow;
                     Logger.Instance.ILog("Adding new plugin: " + pi.Name);
                     plugin.Name = pi.Name;
                     plugin.DateCreated = DateTime.UtcNow;
