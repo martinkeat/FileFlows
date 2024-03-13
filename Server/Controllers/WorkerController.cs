@@ -19,9 +19,15 @@ namespace FileFlows.Server.Controllers;
 [Route("/api/worker")]
 public class WorkerController : Controller
 {
-
+    /// <summary>
+    /// the flow hub context
+    /// </summary>
     private IHubContext<FlowHub> Context;
     
+    /// <summary>
+    /// Initialises a new worker controller
+    /// </summary>
+    /// <param name="context">the flow hub context</param>
     public WorkerController(IHubContext<FlowHub> context)
     {
         this.Context = context;
@@ -106,7 +112,8 @@ public class WorkerController : Controller
     /// <param name="lineCount">The number of lines to fetch, 0 to fetch them all</param>
     /// <returns>The log of a library file</returns>
     [HttpGet("{uid}/log")]
-    public string Log([FromRoute] Guid uid, [FromQuery] int lineCount = 0) => LibraryFileLogHelper.GetLog(uid);
+    public string Log([FromRoute] Guid uid, [FromQuery] int lineCount = 0)
+        => LibraryFileLogHelper.GetLog(uid);
 
     /// <summary>
     /// Abort work by library file

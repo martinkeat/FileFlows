@@ -96,11 +96,6 @@ public class FlowRunnerService : IFlowRunnerService
         await executorsSempahore.WaitAsync();
         try
         {
-            // if (Executors.TryGetValue(info.Uid, out FlowExecutorInfo? existing) && existing != null)
-            // {
-            //     if (existing.CurrentPart == info.CurrentPart && info.AdditionalInfos?.Any() != true)
-            //         info.AdditionalInfos = existing.AdditionalInfos; // in case an update cleared this 
-            // }
             info.LastUpdate = DateTime.UtcNow;
             Executors[info.Uid] = info;
         }
