@@ -1,11 +1,5 @@
-using System.Text;
-using System.Text.Json;
 using FileFlows.DataLayer.DatabaseConnectors;
-using FileFlows.DataLayer.Converters;
-using FileFlows.DataLayer.Helpers;
-using FileFlows.DataLayer.Models;
 using FileFlows.Plugin;
-using FileFlows.Shared;
 using FileFlows.Shared.Models;
 
 namespace FileFlows.DataLayer;
@@ -100,7 +94,6 @@ internal  class DbRevisionManager : BaseManager
     {
         using var db = await DbConnector.GetDb();
         string sql = "select distinct " +
-                     Wrap(nameof(RevisionedObject.RevisionUid)) + ", " +
                      Wrap(nameof(RevisionedObject.RevisionUid)) + ", " +
                      Wrap(nameof(RevisionedObject.Uid)) + ", " +
                      Wrap(nameof(RevisionedObject.RevisionType)) + ", " +

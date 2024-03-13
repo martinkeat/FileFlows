@@ -32,7 +32,7 @@ CREATE TABLE "DbStatistic"
 CREATE TABLE "RevisionedObject"
 (
     "Uid"             uuid               NOT NULL          PRIMARY KEY,
-    "RevisionUid"     VARCHAR(36)        NOT NULL,
+    "RevisionUid"     uuid               NOT NULL,
     "RevisionName"    VARCHAR(1024)      NOT NULL,
     "RevisionType"    VARCHAR(255)       NOT NULL,
     "RevisionDate"    TIMESTAMP           DEFAULT CURRENT_TIMESTAMP,
