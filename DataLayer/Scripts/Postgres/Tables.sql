@@ -13,8 +13,8 @@ CREATE INDEX NameIndex ON "DbObject" ("Name");
 
 CREATE TABLE "DbLogMessage"
 (
-    "ClientUid"       uuid                NOT NULL,
-    "LogDate"         TIMESTAMP           DEFAULT CURRENT_TIMESTAMP,
+    "ClientUid"       VARCHAR(36)        NOT NULL,
+    "LogDate"         TIMESTAMP          DEFAULT CURRENT_TIMESTAMP,
     "Type"            INT                NOT NULL,
     "Message"         TEXT               NOT NULL
 );
