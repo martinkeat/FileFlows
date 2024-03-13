@@ -1,5 +1,6 @@
 ﻿using FileFlows.Server.Controllers;
 using FileFlows.Server.Helpers;
+using FileFlows.Server.Services;
 using FileFlows.Shared.Models;
 using Microsoft.AspNetCore.SignalR;
 
@@ -35,7 +36,17 @@ public class FlowHub : Hub
     /// <returns>if the hello was successful or not</returns>
     public async Task<bool> Hello(Guid runnerUid, string infoJson)
     {
-        FlowExecutorInfo? info = string.IsNullOrEmpty(infoJson) ? null : JsonSerializer.Deserialize<FlowExecutorInfo>(infoJson);
-        return await new WorkerController(null).Hello(runnerUid, info);
+        try
+        {
+            FlowExecutorInfo? info = string.IsNullOrEmpty(infoJson)
+                ? null
+                : JsonSerializer.Deserialize<FlowExecutorInfo>(infoJson);
+            return await ServiceLoader.Load<FlowRunnerService>().Hello(runnerUid, info);
+        }
+        catch(Exception ex)
+        {
+            Logger.Instance.ELog("Error in hello: " + ex.Message + Environment.NewLine + ex.StackTrace);
+            return false;
+        }
     }
 }

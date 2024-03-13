@@ -387,17 +387,17 @@ public class FlowRunnerService : IFlowRunnerService
     /// <param name="info">the flow execution info</param>
     internal async Task<bool> Hello(Guid runnerUid, FlowExecutorInfo info)
     {
-        info.LastUpdate = DateTime.UtcNow;
         await executorsSempahore.WaitAsync();
         try
         {
-            Executors[runnerUid] = info;
+            Executors.TryAdd(runnerUid, info);
+            Executors[runnerUid].LastUpdate = DateTime.UtcNow;
         }
         finally
         {
             executorsSempahore.Release();
         }
-        await ClientServiceManager.Instance.UpdateExecutors(Executors);
+        _ = ClientServiceManager.Instance.UpdateExecutors(Executors);
         return true;
     }
 

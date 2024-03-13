@@ -131,11 +131,30 @@ public class FlowRunnerCommunicator : IFlowRunnerCommunicator
     /// </summary>
     /// <param name="runnerUid">the UID of the flow runner</param>
     /// <param name="info">The flow execution info</param>
+    /// <param name="args">the node parameters</param>
     public async Task<bool> Hello(Guid runnerUid, FlowExecutorInfo info, NodeParameters args)
     {
         try
         {
-            bool helloResult = await connection.InvokeAsync<bool>("Hello", runnerUid, info);
+            bool helloResult = await connection.InvokeAsync<bool>("Hello", runnerUid, JsonSerializer.Serialize(new
+            {
+                info.Library,
+                info.Uid,
+                info.CurrentPart,
+                info.InitialSize,
+                info.IsDirectory,
+                info.LastUpdate,
+                info.LibraryFile,
+                info.LibraryPath,
+                info.NodeName,
+                info.NodeUid,
+                info.RelativeFile,
+                info.StartedAt,
+                info.TotalParts,
+                info.WorkingFile,
+                info.CurrentPartName,
+                info.CurrentPartPercent
+            }));
             if(helloResult == false)
                 args?.Logger?.WLog("Received a false from the hello request to the server");
             return helloResult;
