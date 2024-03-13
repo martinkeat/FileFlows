@@ -93,7 +93,7 @@ public class ClientServiceManager
                     TotalParts = executor.Value.TotalParts,
                     CurrentPartPercent = executor.Value.CurrentPartPercent,
                     Additional = executor.Value.AdditionalInfos
-                        // ?.Where(x => x.Value.Expired == false)
+                        ?.Where(x => x.Value.Expired == false)
                         ?.Select(x => new object[]
                         {
                             x.Key, x.Value.Value
