@@ -124,6 +124,9 @@
     "Running": "Running",
     "PossibilityDisconnected": "Possibly Disconnected",
     "Disconnected": "Disconnected",
+    "LastScanned": "Last Scanned",
+    "Savings": "Savings",
+    "Flow": "Flow",
     "ObsoleteConfirm": {
       "Title": "Obsolete Node",
       "Message": "It is recommended you switch to a different node.",

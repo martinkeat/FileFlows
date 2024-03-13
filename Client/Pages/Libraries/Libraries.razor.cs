@@ -9,6 +9,16 @@ public partial class Libraries : ListPage<Guid, Library>
 
     private Library EditingItem = null;
 
+    private string lblLastScanned, lblFlow, lblSavings;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        lblLastScanned = Translater.Instant("Labels.LastScanned");
+        lblFlow = Translater.Instant("Labels.Flow");
+        lblSavings = Translater.Instant("Labels.Savings");
+    }
+
     private async Task Add()
     {
         await Edit(new ()
@@ -24,7 +34,17 @@ public partial class Libraries : ListPage<Guid, Library>
 
     private Task<RequestResult<FileFlows.Shared.Models.Flow[]>> GetFlows()
         => HttpHelper.Get<FileFlows.Shared.Models.Flow[]>("/api/flow");
-    
+
+    private Dictionary<string, StorageSavedData> StorageSaved = new ();
+
+    /// <inheritdoc />
+    protected override async Task<RequestResult<List<Library>>> FetchData()
+    {
+        StorageSaved =
+            (await HttpHelper.Get<List<StorageSavedData>>("/api/statistics/storage-saved-raw"))
+            .Data?.ToDictionary(x => x.Library, x => x) ?? new ();
+        return await base.FetchData();
+    }
 
     public override async Task<bool> Edit(Library library)
     {
@@ -208,5 +228,36 @@ public partial class Libraries : ListPage<Guid, Library>
             this.StateHasChanged();
         }
     }
+
+    /// <summary>
+    /// Get priority icon
+    /// </summary>
+    /// <param name="library">the library</param>
+    /// <returns>the priority icon class</returns>
+    private string GetPriorityIcon(Library library)
+    {
+        switch (library.Priority)
+        {
+            case ProcessingPriority.Highest:
+                return "fas fa-angle-double-up";
+            case ProcessingPriority.High:
+                return "fas fa-angle-up";
+            case ProcessingPriority.Low:
+                return "fas fa-angle-down";
+            case ProcessingPriority.Lowest:
+                return "fas fa-angle-double-down";
+            default:
+                return "fas fa-folder";
+        }
+    }
+
+    /// <summary>
+    /// Gets the storage saved
+    /// </summary>
+    /// <param name="libraryName">the name of the library</param>
+    /// <param name="storageSavedData">the savings if found</param>
+    /// <returns>if the storage savings were in the dictionary</returns>
+    private bool GetStorageSaved(string libraryName, out StorageSavedData storageSavedData)
+        => StorageSaved.TryGetValue(libraryName, out storageSavedData);
 }
 

@@ -1,0 +1,15 @@
+@namespace FileFlows.Client.Components.Common
+@{
+    var percent = (FinalSize / (float)OriginalSize) * 100f;
+    if (percent > 100)
+        percent = 100;
+    else if (percent < 0)
+        percent = 0;
+}
+<div class="flow-savings-bar">
+    <div class="final-size" style="width:@percent%">@FileSizeHelper.Humanize(FinalSize, 0)</div>
+    @if (FinalSize < OriginalSize)
+    {
+        <div class="original-size">@FileSizeHelper.Humanize(OriginalSize, 0)</div>
+    }
+</div>

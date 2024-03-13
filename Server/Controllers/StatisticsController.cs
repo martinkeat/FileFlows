@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using FileFlows.Server.Services;
 using FileFlows.ServerShared.Models.StatisticModels;
+using FileFlows.Shared.Models;
 
 namespace FileFlows.Server.Controllers;
 
@@ -44,6 +45,14 @@ public class StatisticsController : Controller
     [HttpGet("average/{name}")]
     public Dictionary<int, int> GetAverage([FromRoute] string name)
         => new StatisticService().GetAverage(name);
+
+    /// <summary>
+    /// Gets storage saved
+    /// </summary>
+    /// <returns>the storage saved</returns>
+    [HttpGet("storage-saved-raw")]
+    public object GetStorageSavedRaw()
+        => new StatisticService().GetStorageSaved();
     
     /// <summary>
     /// Gets storage saved

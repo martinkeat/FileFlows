@@ -2,6 +2,7 @@
 using FileFlows.Managers;
 using FileFlows.ServerShared.Models.StatisticModels;
 using FileFlows.ServerShared.Services;
+using FileFlows.Shared.Models;
 
 namespace FileFlows.Server.Services;
 
