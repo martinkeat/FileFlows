@@ -128,8 +128,18 @@ and {DbConnector.FormatDateQuoted(filter.ToDate)} )
         }
         catch (Exception ex)
         {
-            Logger.ELog("LogMessage Error: " + ex.Message + Environment.NewLine + sql);
-            return new List<DbLogMessage>();
+            string message = "LogMessage Error: " + ex.Message + Environment.NewLine + sql;
+            Logger.ELog(message);
+            return new List<DbLogMessage>()
+            {
+                new ()
+                {
+                    Message = message,
+                    Type = LogType.Error,
+                    ClientUid = Guid.Empty,
+                    LogDate = DateTime.UtcNow
+                }
+            };
         }
     }
 }
