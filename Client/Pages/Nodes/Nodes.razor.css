@@ -5,6 +5,7 @@
   background: var(--base-lighter);
   margin-bottom: 0.5rem;
   border-radius: 0.5rem;
+  height: 8rem;
 }
 .node-wrapper.disabled {
   background: var(--base);
@@ -122,6 +123,7 @@
 .actions {
   display: grid;
   width: 3rem;
+  min-width: 3rem;
   grid-template-rows: auto auto;
   justify-items: center;
   align-items: center;
@@ -162,6 +164,37 @@
   display: inline-block;
   line-height: 4rem;
   margin-top: 1rem;
+}
+
+@media screen and (max-width: 700px) {
+  .indicators {
+    display: none;
+  }
+}
+@media screen and (max-width: 580px) {
+  .node-wrapper {
+    height: 7rem;
+  }
+  .sub-info {
+    display: none;
+  }
+  .priority {
+    display: none;
+  }
+  .info {
+    align-self: center;
+  }
+  .node-icon {
+    width: 5rem;
+    height: 5rem;
+  }
+  .node-icon .icon {
+    max-width: 2.5rem;
+    height: 2rem;
+  }
+  .node-icon .architecture {
+    font-size: 0.7rem;
+  }
 }
 
 /*# sourceMappingURL=Nodes.razor.css.map */
