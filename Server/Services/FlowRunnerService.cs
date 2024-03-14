@@ -36,57 +36,72 @@ public class FlowRunnerService : IFlowRunnerService
     /// <returns>a completed task</returns>
     public async Task<FlowExecutorInfo> Start(FlowExecutorInfo info)
     {
-        await ServiceLoader.Load<NodeService>().UpdateLastSeen(info.NodeUid);
-
-        await ServiceLoader.Load<StatisticService>().RecordFileStarted();
-        
-        if (info.Uid == Guid.Empty)
-            throw new Exception("No UID specified for flow execution info");
-        
-        if (new SettingsService().Get()?.Result?.HideProcessingStartedNotifications != true)
-            ClientServiceManager.Instance.SendToast(LogType.Info, "Started processing: " +
-                                                                  FileDisplayNameService.GetDisplayName(info.LibraryFile));
-        ClientServiceManager.Instance.StartProcessing(info.LibraryFile);
-        await ClientServiceManager.Instance.UpdateFileStatus();
-        
         try
         {
-            // try to delete a log file for this library file if one already exists (in case the flow was cancelled and now its being re-run)                
-            LibraryFileLogHelper.DeleteLogs(info.LibraryFile.Uid);
-        }
-        catch (Exception) { }
+            await ServiceLoader.Load<NodeService>().UpdateLastSeen(info.NodeUid);
 
-        info.LastUpdate = DateTime.UtcNow;
-        Logger.Instance.ILog($"Adding executor: {info.Uid} = {info.LibraryFile.Name}");
-        await executorsSempahore.WaitAsync();
-        try
-        {
-            Executors.Add(info.Uid, info);
-        }
-        finally
-        {
-            executorsSempahore.Release();
-        }
-        await ClientServiceManager.Instance.UpdateExecutors(Executors);
-        
-        Logger.Instance.ILog($"Starting processing on {info.NodeName}: {info.LibraryFile.Name}");
-        if (info.LibraryFile != null)
-        {
-            var service = ServiceLoader.Load<LibraryFileService>();
-            var lf = info.LibraryFile;
-            if (lf.LibraryUid != null)
+            await ServiceLoader.Load<StatisticService>().RecordFileStarted();
+
+            if (info.Uid == Guid.Empty)
+                throw new Exception("No UID specified for flow execution info");
+
+            if (new SettingsService().Get()?.Result?.HideProcessingStartedNotifications != true)
+                ClientServiceManager.Instance.SendToast(LogType.Info, "Started processing: " +
+                                                                      FileDisplayNameService.GetDisplayName(
+                                                                          info.LibraryFile));
+            ClientServiceManager.Instance.StartProcessing(info.LibraryFile);
+            await ClientServiceManager.Instance.UpdateFileStatus();
+
+            try
             {
-                var library = await ServiceLoader.Load<LibraryService>().GetByUidAsync(lf.LibraryUid.Value);
-                if (library != null)
-                {
-                    SystemEvents.TriggerLibraryFileProcessingStarted(lf, library);
-                    await service.ResetFileInfoForProcessing(info.LibraryFile.Uid, library.Flow?.Uid, library.Flow?.Name);
-                }
-            }else{
-                await service.ResetFileInfoForProcessing(info.LibraryFile.Uid, null, string.Empty);
+                // try to delete a log file for this library file if one already exists (in case the flow was cancelled and now its being re-run)                
+                LibraryFileLogHelper.DeleteLogs(info.LibraryFile.Uid);
             }
+            catch (Exception)
+            {
+            }
+
+            info.LastUpdate = DateTime.UtcNow;
+            Logger.Instance.ILog($"Adding executor: {info.Uid} = {info.LibraryFile.Name}");
+            await executorsSempahore.WaitAsync();
+            try
+            {
+                Executors[info.Uid] = info;
+            }
+            finally
+            {
+                executorsSempahore.Release();
+            }
+
+            await ClientServiceManager.Instance.UpdateExecutors(Executors);
+
+            Logger.Instance.ILog($"Starting processing on {info.NodeName}: {info.LibraryFile.Name}");
+            if (info.LibraryFile != null)
+            {
+                var service = ServiceLoader.Load<LibraryFileService>();
+                var lf = info.LibraryFile;
+                if (lf.LibraryUid != null)
+                {
+                    var library = await ServiceLoader.Load<LibraryService>().GetByUidAsync(lf.LibraryUid.Value);
+                    if (library != null)
+                    {
+                        SystemEvents.TriggerLibraryFileProcessingStarted(lf, library);
+                        await service.ResetFileInfoForProcessing(info.LibraryFile.Uid, library.Flow?.Uid,
+                            library.Flow?.Name);
+                    }
+                }
+                else
+                {
+                    await service.ResetFileInfoForProcessing(info.LibraryFile.Uid, null, string.Empty);
+                }
+            }
+
+            return info;
         }
-        return info;
+        catch (Exception ex)
+        {
+            throw ex;
+        }
     }
 
 
