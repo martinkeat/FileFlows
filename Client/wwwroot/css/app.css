@@ -3296,6 +3296,7 @@ hr {
     color: var(--color);
     animation: bounce 1.75s infinite;
     box-shadow: 0 3px 10px rgba(var(--accent-rgb), 0.2);
+    font-weight: var(--bold, 600);
   }
   .not-configured-pointer:before {
     content: "";
@@ -3320,7 +3321,7 @@ hr {
 }
 @media screen and (max-height: 856px) {
   .not-configured-pointer {
-    top: 3px;
+    top: 1px;
   }
 }
 /** step pointer end */
