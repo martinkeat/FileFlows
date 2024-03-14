@@ -121,11 +121,15 @@
                 <Virtualize Items="@DisplayData" Context="item" ItemSize="25"  OverscanCount="4">
                     @{
                         bool selected = Selection != SelectionMode.None && SelectedItems?.Contains(item.Key) == true;
+                        bool disabled = DisableColumn?.Invoke(item.Key) ?? false;
                     }
-                    <div class="flowtable-row @(selected ? "selected" : "")" @ondblclick="() => OnDoubleClick(item.Key)" @onclick="(e) => OnClick(e, item.Key)" @onclick:preventDefault @onclick:stopPropagation>
+                    <div class="flowtable-row @(selected ? "selected" : "") @(disabled ? "disabled" : "")" 
+                         @ondblclick="() => OnDoubleClick(item.Key)" 
+                         @onclick="(e) => OnClick(e, item.Key)" 
+                         @onclick:preventDefault @onclick:stopPropagation>
                         @if(Selection!= SelectionMode.None)
                         {
-                            <label class="flowtable-select" style="width:2rem;min-width:2rem;max-width:2rem">
+                            <label class="flowtable-select" style="width:2rem;min-width:2rem;max-width:2rem;align-self: center;">
                                 <input type="checkbox" @onchange="(e) => CheckItem(e, item.Key)" checked="@(SelectedItems?.Contains(item.Key) == true)"
                                        onclick="ff.stopSelectPropagation(event)" />                        
                             </label>

@@ -12,7 +12,7 @@
     <Body>
         
         <FlowTable @ref="Table" Data="@Data" TItem="Library" Selection="SelectionMode.Multiple"
-            DoubleClick="@OnDoubleClick" TableIdentifier="Libraries">
+            DoubleClick="@OnDoubleClick" TableIdentifier="Libraries"  DisableColumn="(item) => !item.Enabled">
             <ToolBar>            
                 <FlowTableButton Clicked=Add Icon="fas fa-plus" Label="Labels.Add" />
                 <FlowTableButton Clicked=Edit SelectedOne="true" Icon="fas fa-edit" Label="Labels.Edit" />

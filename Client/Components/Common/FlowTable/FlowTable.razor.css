@@ -107,6 +107,9 @@
   border-right: none;
   border-left: none;
 }
+.flowtable-row.disabled ::deep .column > span, .flowtable-row.disabled ::deep .column > div {
+  opacity: 0.5;
+}
 .flowtable-row > span {
   text-overflow: ellipsis;
   overflow: hidden;

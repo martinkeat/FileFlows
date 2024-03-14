@@ -54,10 +54,10 @@ public class LibraryController : Controller
     /// <param name="library">The library to save</param>
     /// <returns>the saved library instance</returns>
     [HttpPost]
-    public async Task<Library> Save([FromBody] Library library)
+    public async Task<IActionResult> Save([FromBody] Library library)
     {
         if (library?.Flow == null)
-            throw new Exception("ErrorMessages.NoFlowSpecified");
+            return BadRequest("ErrorMessages.NoFlowSpecified");
         if (library.Uid == Guid.Empty)
             library.LastScanned = DateTime.MinValue; // never scanned
         if (Regex.IsMatch(library.Schedule, "^[01]{672}$") == false)
@@ -73,8 +73,12 @@ public class LibraryController : Controller
         }
         
         bool newLib = library.Uid == Guid.Empty;
-        library = await service.Update(library);
+        var result  = await service.Update(library);
+        if (result.Failed(out string error))
+            return BadRequest(error);
 
+        library = result.Value;
+        
         _ = Task.Run(async () =>
         {
             await Task.Delay(1);
@@ -87,7 +91,7 @@ public class LibraryController : Controller
                 Rescan(new() { Uids = new[] { library.Uid } });
         });
         
-        return library;
+        return Ok(library);
     }
 
     /// <summary>

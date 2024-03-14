@@ -76,6 +76,11 @@ public partial class FlowTable<TItem>: FlowTableBase,IDisposable, INotifyPropert
     /// Gets or sets the callback for the filter
     /// </summary>
     [Parameter] public EventCallback<FilterEventArgs> OnFilter { get; set; }
+    
+    /// <summary>
+    /// Gets or sets a disable column function 
+    /// </summary>
+    [Parameter] public Func<TItem, bool> DisableColumn { get; set; } 
 
     private int _TotalItems;
 

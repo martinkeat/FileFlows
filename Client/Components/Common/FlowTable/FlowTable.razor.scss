@@ -122,6 +122,12 @@
         border-right: none;
         border-left: none;
     }
+    
+    &.disabled ::deep .column {
+        > span, > div {
+            opacity: 0.5;
+        }
+    }
 
     > span {
         text-overflow: ellipsis;
