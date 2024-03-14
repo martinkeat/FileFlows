@@ -152,4 +152,24 @@ public partial class Nodes : ListPage<Guid, ProcessingNode>
         }
     }
 
+    /// <summary>
+    /// Checks if two versions are the same
+    /// </summary>
+    /// <param name="versionA">the first version</param>
+    /// <param name="versionB">the second version</param>
+    /// <returns>true if same, otherwise false</returns>
+    private bool VersionsAreSame(string versionA, string versionB)
+    {
+        if (versionA == versionB)
+            return true;
+        if(versionA == null || versionB == null)
+            return false;
+        if (string.Equals(versionA, versionB, StringComparison.InvariantCultureIgnoreCase))
+            return true;
+        if (Version.TryParse(versionA, out Version va) == false)
+            return false;
+        if (Version.TryParse(versionB, out Version vb) == false)
+            return false;
+        return va == vb;
+    }
 }

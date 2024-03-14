@@ -335,6 +335,7 @@ public class LibraryFileService : ILibraryFileService
         var allLibrariesUids = allLibraries.Select(x => x.Uid).ToList();
         var executors = FlowRunnerService.Executors.Values.GroupBy(x => x.NodeUid)
             .ToDictionary(x => x.Key, x => x.Count());
+        
         foreach (var other in allNodes)
         {
             // first check if its in schedule
@@ -360,12 +361,12 @@ public class LibraryFileService : ILibraryFileService
             }
 
             // check the last time this node was seen to make sure its not disconnected
-            if (other.LastSeen < DateTime.UtcNow.AddMinutes(10))
+            if (other.LastSeen < DateTime.UtcNow.AddMinutes(-10))
             {
                 string lastSeen = DateTime.UtcNow.Subtract(other.LastSeen)+ " ago";
                 try
                 {
-                    lastSeen = other.LastSeen.Humanize() + " ago";
+                    lastSeen = other.LastSeen.Humanize();
                 }
                 catch (Exception)
                 {

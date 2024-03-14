@@ -138,7 +138,7 @@
                         <span style="border-color: @color">@item.Priority</span>
                     </div>
 
-                    <span class="version @(item.Status == ProcessingNodeStatus.VersionMismatch ? "version-mismatch" : "")">@item.Version</span>
+                    <span class="version @(VersionsAreSame(item.Version, Globals.Version) ? "" : "version-mismatch")">@item.Version</span>
                 </div>
             }
         </div>
