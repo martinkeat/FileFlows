@@ -18,7 +18,7 @@ public partial class Nodes : ListPage<Guid, ProcessingNode>
     private ProcessingNode SelectedItem = null;
 
     private string lblInternal, lblAddress, lblRunners, lblVersion, lblDownloadNode, lblUpgradeRequired, 
-        lblUpgradeRequiredHint, lblRunning, lblDisconnected, lblPossiblyDisconnected;
+        lblUpgradeRequiredHint, lblRunning, lblDisconnected, lblPossiblyDisconnected, lblHelp;
      
 #if(DEBUG)
     string DownloadUrl = "http://localhost:6868/download";
@@ -35,6 +35,7 @@ public partial class Nodes : ListPage<Guid, ProcessingNode>
         lblDownloadNode = Translater.Instant("Pages.Nodes.Labels.DownloadNode");
         lblUpgradeRequired = Translater.Instant("Pages.Nodes.Labels.UpgradeRequired");
         lblUpgradeRequiredHint = Translater.Instant("Pages.Nodes.Labels.UpgradeRequiredHint");
+        lblHelp = Translater.Instant("Labels.Help");
 
         lblRunning = Translater.Instant("Labels.Running");
         lblPossiblyDisconnected = Translater.Instant("Labels.PossiblyDisconnected");
@@ -70,6 +71,12 @@ public partial class Nodes : ListPage<Guid, ProcessingNode>
 
         return base.PostLoad();
     }
+    
+    /// <summary>
+    /// Opens the help page
+    /// </summary>
+    void OpenHelp()
+        => App.Instance.OpenHelp("https://fileflows.com/docs/webconsole/nodes");
 
     /// <summary>
     /// if currently enabling, this prevents double calls to this method during the updated list binding

@@ -11,6 +11,7 @@
         {
             <a class="btn btn-download-node" target="_blank" href="@DownloadUrl">@lblDownloadNode</a>
         }
+        <a class="btn" @onclick:preventDefault @onclick="() => OpenHelp()">@lblHelp</a>
     </Head>
 
     <Body>
@@ -139,7 +140,7 @@
                         <span style="border-color: @color">@item.Priority</span>
                     </div>
 
-                    <span class="version @(internalNode == false && VersionsAreSame(item.Version, Globals.Version) ? "" : "version-mismatch")">@item.Version</span>
+                    <span class="version @(internalNode || VersionsAreSame(item.Version, Globals.Version) ? "" : "version-mismatch")">@item.Version</span>
                 </div>
             }
         </div>
