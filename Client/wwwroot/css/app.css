@@ -3274,6 +3274,7 @@ hr {
     bottom: unset;
     top: unset;
     margin-bottom: 1rem;
+    height: 100%;
   }
 }
 @media screen and (min-width: 850px) {
@@ -3641,12 +3642,7 @@ hr {
     height: 25rem !important;
   }
   .grid-stack-item:not(.chart-type-105) .content {
-    height: fit-content;
     flex-grow: 1;
-  }
-  .grid-stack-item:not(.chart-type-105) .content > div {
-    height: unset !important;
-    max-height: unset !important;
   }
   .grid-stack-item:not(.chart-type-105) .content .no-data {
     height: unset !important;
