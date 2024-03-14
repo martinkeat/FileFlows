@@ -120,6 +120,8 @@ public class LibraryFileService : ILibraryFileService
         {
         }
 
+        var library = await ServiceLoader.Load<LibraryService>().GetByUidAsync(file.LibraryUid!.Value);
+
         Logger.Instance.ILog("Resetting file info for: " + file.Name);
         file.FinalSize = 0;
         file.FailureReason = string.Empty;
@@ -129,7 +131,7 @@ public class LibraryFileService : ILibraryFileService
         file.ExecutedNodes = new();
         file.FinalMetadata = new();
         file.OriginalMetadata= new();
-        await new LibraryFileManager().ResetFileInfoForProcessing(file.Uid);
+        await new LibraryFileManager().ResetFileInfoForProcessing(file.Uid, library?.Flow?.Uid, library?.Flow?.Name);
         #endregion
         
         return NextFileResult(NextLibraryFileStatus.Success, file);
@@ -446,9 +448,11 @@ public class LibraryFileService : ILibraryFileService
     /// Clears the executed nodes, metadata, final size etc for a file
     /// </summary>
     /// <param name="uid">The UID of the file</param>
+    /// <param name="flowUid">the UID of the flow that will be executed</param>
+    /// <param name="flowName">the name of the flow that will be executed</param>
     /// <returns>true if a row was updated, otherwise false</returns>
-    public Task ResetFileInfoForProcessing(Guid uid)
-        => new LibraryFileManager().ResetFileInfoForProcessing(uid);
+    public Task ResetFileInfoForProcessing(Guid uid, Guid? flowUid, string flowName)
+        => new LibraryFileManager().ResetFileInfoForProcessing(uid, flowUid, flowName);
 
     /// <summary>
     /// Updates the original size of a file

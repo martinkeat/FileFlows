@@ -70,16 +70,20 @@ public class FlowRunnerService : IFlowRunnerService
         await ClientServiceManager.Instance.UpdateExecutors(Executors);
         
         Logger.Instance.ILog($"Starting processing on {info.NodeName}: {info.LibraryFile.Name}");
-        var service = ServiceLoader.Load<LibraryFileService>();
-        await service.ResetFileInfoForProcessing(info.LibraryFile.Uid);
         if (info.LibraryFile != null)
         {
+            var service = ServiceLoader.Load<LibraryFileService>();
             var lf = info.LibraryFile;
             if (lf.LibraryUid != null)
             {
                 var library = await ServiceLoader.Load<LibraryService>().GetByUidAsync(lf.LibraryUid.Value);
                 if (library != null)
+                {
                     SystemEvents.TriggerLibraryFileProcessingStarted(lf, library);
+                    await service.ResetFileInfoForProcessing(info.LibraryFile.Uid, library.Flow?.Uid, library.Flow?.Name);
+                }
+            }else{
+                await service.ResetFileInfoForProcessing(info.LibraryFile.Uid, null, string.Empty);
             }
         }
         return info;
@@ -187,7 +191,7 @@ public class FlowRunnerService : IFlowRunnerService
                 existing.Fingerprint = updated.Fingerprint;
                 existing.FinalFingerprint = updated.FinalFingerprint;
                 existing.ExecutedNodes = updated.ExecutedNodes ?? new List<ExecutedNode>();
-                Logger.Instance.DLog("WorkerController.FinishWork: Executed flow elements: " +
+                Logger.Instance.DLog("FinishWork: Executed flow elements: " +
                                      string.Join(", ", existing.ExecutedNodes.Select(x => x.NodeUid)));
                 
                 if (updated.OriginalMetadata != null)

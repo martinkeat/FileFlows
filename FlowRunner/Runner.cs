@@ -269,18 +269,21 @@ public class Runner
     {
         DateTime start = DateTime.UtcNow;
         Info.LibraryFile.ProcessingEnded = DateTime.UtcNow;
+        if(nodeParameters != null) // this is null if it fails to remotely download the file
+            CalculateFinalSize();
         do
         {
             try
             {
-                if(nodeParameters != null) // this is null if it fails to remotely download the file
-                    CalculateFinalSize();
 
                 var service = FlowRunnerService.Load();
                 await service.Finish(Info);
                 return;
             }
-            catch (Exception) { }
+            catch (Exception ex)
+            {
+                
+            }
             await Task.Delay(30_000);
         } while (DateTime.UtcNow.Subtract(start) < new TimeSpan(0, 10, 0));
         Program.Logger?.ELog("Failed to inform server of flow completion");

@@ -66,9 +66,11 @@ public class LibraryFileManager
     /// Clears the executed nodes, metadata, final size etc for a file
     /// </summary>
     /// <param name="uid">The UID of the file</param>
+    /// <param name="flowUid">the UID of the flow that will be executed</param>
+    /// <param name="flowName">the name of the flow that will be executed</param>
     /// <returns>true if a row was updated, otherwise false</returns>
-    public Task ResetFileInfoForProcessing(Guid uid)
-        => DatabaseAccessManager.Instance.LibraryFileManager.ResetFileInfoForProcessing(uid);
+    public Task ResetFileInfoForProcessing(Guid uid, Guid? flowUid, string flowName)
+        => DatabaseAccessManager.Instance.LibraryFileManager.ResetFileInfoForProcessing(uid, flowUid, flowName);
 
     /// <summary>
     /// Deletes files from the database

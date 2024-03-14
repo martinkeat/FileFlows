@@ -199,7 +199,10 @@ public class ExecuteFlow : Node
                 
                 if (outputNode == null)
                 {
-                    args.Logger?.ILog($"Flow '{Flow.Name}' completed");
+                    if(string.IsNullOrWhiteSpace(Flow.Name) == false)
+                        args.Logger?.ILog($"Flow '{Flow.Name}' completed");
+                    else
+                        args.Logger?.ILog($"Flow completed");
                     // flow has completed
                     return COMPLETED_OUTPUT;
                 }

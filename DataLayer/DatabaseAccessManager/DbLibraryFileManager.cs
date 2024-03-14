@@ -89,40 +89,40 @@ internal class DbLibraryFileManager : BaseManager
         string strExecutedNodes = JsonEncode(file.ExecutedNodes);
         string sql =
             $"update {Wrap(nameof(LibraryFile))} set " +
-            $" {Wrap(nameof(LibraryFile.Name))} = @1, " +
-            $" {Wrap(nameof(LibraryFile.DateCreated))} = @2, " +
-            $" {Wrap(nameof(LibraryFile.DateModified))}=@3, " +
-            $" {Wrap(nameof(LibraryFile.RelativePath))}=@4, " +
-            $" {Wrap(nameof(LibraryFile.Status))}=@5, " +
-            $" {Wrap("ProcessingOrder")}=@6, " + // special case, since Order is reserved in sql
-            $" {Wrap(nameof(LibraryFile.Fingerprint))}=@7, " +
-            $" {Wrap(nameof(LibraryFile.FinalFingerprint))}=@8, " +
-            $" {Wrap(nameof(LibraryFile.IsDirectory))}=@9, " +
-            $" {Wrap(nameof(LibraryFile.Flags))}=@10, " +
-            $" {Wrap(nameof(LibraryFile.OriginalSize))}=@11, " +
-            $" {Wrap(nameof(LibraryFile.FinalSize))}=@12, " +
-            $" {Wrap(nameof(LibraryFile.CreationTime))}=@13, " +
-            $" {Wrap(nameof(LibraryFile.LastWriteTime))}=@14, " +
-            $" {Wrap(nameof(LibraryFile.HoldUntil))}=@15, " +
-            $" {Wrap(nameof(LibraryFile.ProcessingStarted))}=@16, " +
-            $" {Wrap(nameof(LibraryFile.ProcessingEnded))}=@17, " +
-            $" {Wrap(nameof(LibraryFile.LibraryUid))}=@18, " +
-            $" {Wrap(nameof(LibraryFile.LibraryName))}=@19, " +
-            $" {Wrap(nameof(LibraryFile.FlowUid))}=@20, " +
-            $" {Wrap(nameof(LibraryFile.FlowName))}=@21, " +
-            $" {Wrap(nameof(LibraryFile.DuplicateUid))}=@22, " +
-            $" {Wrap(nameof(LibraryFile.DuplicateName))}=@23, " +
-            $" {Wrap(nameof(LibraryFile.NodeUid))}=@24, " +
-            $" {Wrap(nameof(LibraryFile.NodeName))}=@25, " +
-            $" {Wrap(nameof(LibraryFile.WorkerUid))}=@26, " +
-            $" {Wrap(nameof(LibraryFile.ProcessOnNodeUid))}=@27, " +
-            $" {Wrap(nameof(LibraryFile.OutputPath))}=@28, " +
-            $" {Wrap(nameof(LibraryFile.NoLongerExistsAfterProcessing))}=@29, " +
-            $" {Wrap(nameof(LibraryFile.OriginalMetadata))}=@30, " +
-            $" {Wrap(nameof(LibraryFile.FinalMetadata))}=@31, " +
-            $" {Wrap(nameof(LibraryFile.ExecutedNodes))}=@32, " +
-            $" {Wrap(nameof(LibraryFile.FailureReason))}=@33 " +
-            $" where {Wrap(nameof(LibraryFile.Uid))} = @0";
+            $" {Wrap(nameof(LibraryFile.Name))} = @0, " +
+            $" {Wrap(nameof(LibraryFile.RelativePath))}=@1, " +
+            $" {Wrap(nameof(LibraryFile.Fingerprint))}=@2, " +
+            $" {Wrap(nameof(LibraryFile.FinalFingerprint))}=@3, " +
+            $" {Wrap(nameof(LibraryFile.IsDirectory))}=@4, " +
+            $" {Wrap(nameof(LibraryFile.LibraryUid))}=@5, " +
+            $" {Wrap(nameof(LibraryFile.LibraryName))}=@6, " +
+            $" {Wrap(nameof(LibraryFile.FlowUid))}=@7, " +
+            $" {Wrap(nameof(LibraryFile.FlowName))}=@8, " +
+            $" {Wrap(nameof(LibraryFile.DuplicateUid))}=@9, " +
+            $" {Wrap(nameof(LibraryFile.DuplicateName))}=@10, " +
+            $" {Wrap(nameof(LibraryFile.NodeUid))}=@11, " +
+            $" {Wrap(nameof(LibraryFile.NodeName))}=@12, " +
+            $" {Wrap(nameof(LibraryFile.WorkerUid))}=@13, " +
+            $" {Wrap(nameof(LibraryFile.ProcessOnNodeUid))}=@14, " +
+            $" {Wrap(nameof(LibraryFile.OutputPath))}=@15, " +
+            $" {Wrap(nameof(LibraryFile.NoLongerExistsAfterProcessing))}=@16, " +
+            $" {Wrap(nameof(LibraryFile.OriginalMetadata))}=@17, " +
+            $" {Wrap(nameof(LibraryFile.FinalMetadata))}=@18, " +
+            $" {Wrap(nameof(LibraryFile.ExecutedNodes))}=@19, " +
+            $" {Wrap(nameof(LibraryFile.FailureReason))}=@20, " +
+            $" {Wrap("ProcessingOrder")}={file.Order}, " + // special case, since Order is reserved in sql
+            $" {Wrap(nameof(LibraryFile.Status))}={(int)file.Status}, " +
+            $" {Wrap(nameof(LibraryFile.Flags))} = {(int)file.Flags}, " +
+            $" {Wrap(nameof(LibraryFile.OriginalSize))} = {file.OriginalSize}," +
+            $" {Wrap(nameof(LibraryFile.FinalSize))} = {file.FinalSize}," +
+            $" {Wrap(nameof(LibraryFile.DateCreated))} = {DbConnector.FormatDateQuoted(file.DateCreated)}," +
+            $" {Wrap(nameof(LibraryFile.DateModified))} = {DbConnector.FormatDateQuoted(file.DateModified)}," +
+            $" {Wrap(nameof(LibraryFile.CreationTime))}={DbConnector.FormatDateQuoted(file.CreationTime)}, " +
+            $" {Wrap(nameof(LibraryFile.LastWriteTime))}={DbConnector.FormatDateQuoted(file.LastWriteTime)}, " +
+            $" {Wrap(nameof(LibraryFile.HoldUntil))}={DbConnector.FormatDateQuoted(file.HoldUntil)}, " +
+            $" {Wrap(nameof(LibraryFile.ProcessingStarted))}={DbConnector.FormatDateQuoted(file.ProcessingStarted)}, " +
+            $" {Wrap(nameof(LibraryFile.ProcessingEnded))}={DbConnector.FormatDateQuoted(file.ProcessingEnded)} " +
+            $" where {Wrap(nameof(LibraryFile.Uid))} = '{file.Uid}'";
 
         try
         {
@@ -130,25 +130,12 @@ internal class DbLibraryFileManager : BaseManager
             bool useDateTime = DbType is DatabaseType.Postgres or DatabaseType.SqlServer or DatabaseType.MySql;
             using var db = await DbConnector.GetDb(write: true);
             await db.Db.ExecuteAsync(sql,
-                useDateTime ? file.Uid : file.Uid.ToString(),
                 file.Name,
-                useDateTime ? file.DateCreated : file.DateCreated.ToString("yyyy-MM-dd HH:mm:ss.fffZ"),
-                useDateTime ? file.DateModified : file.DateModified.ToString("yyyy-MM-dd HH:mm:ss.fffZ"),
                 file.RelativePath,
-                (int)file.Status,
-                file.Order, file.Fingerprint, file.FinalFingerprint,
+                file.Fingerprint, 
+                file.FinalFingerprint,
                 postgres ? file.IsDirectory : file.IsDirectory ? 1 : 0,
-                (int)file.Flags,
-                file.OriginalSize,
-                file.FinalSize,
-
-                useDateTime ? file.CreationTime : file.CreationTime.ToString("yyyy-MM-dd HH:mm:ss.fffZ"),
-                useDateTime ? file.LastWriteTime : file.LastWriteTime.ToString("yyyy-MM-dd HH:mm:ss.fffZ"),
-                useDateTime ? file.HoldUntil : file.HoldUntil.ToString("yyyy-MM-dd HH:mm:ss.fffZ"),
-                useDateTime ? file.ProcessingStarted : file.ProcessingStarted.ToString("yyyy-MM-dd HH:mm:ss.fffZ"),
-                useDateTime ? file.ProcessingEnded : file.ProcessingEnded.ToString("yyyy-MM-dd HH:mm:ss.fffZ"),
                 file.LibraryUid?.ToString() ?? string.Empty,
-
                 file.LibraryName,
                 file.FlowUid?.ToString() ?? string.Empty,
                 file.FlowName,
@@ -158,7 +145,6 @@ internal class DbLibraryFileManager : BaseManager
                 file.NodeName,
                 file.WorkerUid?.ToString() ?? string.Empty,
                 file.ProcessOnNodeUid?.ToString() ?? string.Empty,
-
                 file.OutputPath,
                 postgres ? file.NoLongerExistsAfterProcessing : file.NoLongerExistsAfterProcessing ? 1 : 0,
                 strOriginalMetadata,
@@ -415,8 +401,10 @@ internal class DbLibraryFileManager : BaseManager
     /// Clears the executed nodes, metadata, final size etc for a file
     /// </summary>
     /// <param name="uid">The UID of the file</param>
+    /// <param name="flowUid">the UID of the flow that will be executed</param>
+    /// <param name="flowName">the name of the flow that will be executed</param>
     /// <returns>true if a row was updated, otherwise false</returns>
-    public async Task<bool> ResetFileInfoForProcessing(Guid uid)
+    public async Task<bool> ResetFileInfoForProcessing(Guid uid, Guid? flowUid, string? flowName)
     {
         string sql = $"update {Wrap(nameof(LibraryFile))} set " +
                      $" {Wrap(nameof(LibraryFile.ExecutedNodes))} = '', " +
@@ -426,6 +414,8 @@ internal class DbLibraryFileManager : BaseManager
                      $" {Wrap(nameof(LibraryFile.OutputPath))} = '', " +
                      $" {Wrap(nameof(LibraryFile.FailureReason))} = '', " +
                      $" {Wrap(nameof(LibraryFile.ProcessOnNodeUid))} = '', " +
+                     $" {Wrap(nameof(LibraryFile.FlowUid))} = '{flowUid?.ToString() ?? ""}', " +
+                     $" {Wrap(nameof(LibraryFile.FlowName))} = '{flowName ?? string.Empty}', " +
                      $" {Wrap(nameof(LibraryFile.ProcessingEnded))} = " + DbConnector.FormatDateQuoted(new DateTime(1970, 1, 1)) +
                      $" where {Wrap(nameof(LibraryFile.Uid))} = '{uid}'";
         
@@ -1063,24 +1053,27 @@ and {Wrap(nameof(LibraryFile.LibraryUid))} in ({inStr})
         }
 
         string disabledOutOfScheduled = string.Join(",", disabled.Union(outOfSchedule).Select(x => $"'{x}'"));
+
+        string FORCED_OR_LIBRARY = disabledOutOfScheduled == ""
+            ? string.Empty
+            : " and ( ({Wrap(nameof(LibraryFile.Flags))} & {(int)LibraryFileFlags.ForceProcessing} > 0) or " +
+              $"({Wrap(nameof(LibraryFile.LibraryUid))} not in ({disabledOutOfScheduled})) )";
         
-        string FORCED_OR_LIBRARY =
-            $" and ( ({Wrap(nameof(LibraryFile.Flags))} & {(int)LibraryFileFlags.ForceProcessing} > 0) or ({Wrap(nameof(LibraryFile.LibraryUid))} not in ({disabledOutOfScheduled})) )";
-        
-        var onHoldCount = await db.Db.ExecuteScalarAsync<int>($@"select count(*)
+        string onHoldCountSql = $@"select count(*)
 from {Wrap(nameof(LibraryFile))}
 where {Wrap(nameof(LibraryFile.Status))} = 0
 and {Wrap(nameof(LibraryFile.HoldUntil))} > {Date(DateTime.UtcNow)}
-{FORCED_OR_LIBRARY}
-");
+{FORCED_OR_LIBRARY}";
+        var onHoldCount = await db.Db.ExecuteScalarAsync<int>(onHoldCountSql);
         results.Add(new () { Count = onHoldCount, Status = FileStatus.OnHold});
-        
-        var unProcessedCount = await db.Db.ExecuteScalarAsync<int>($@"select count(*)
+
+        string sqlUnprocesed = $@"select count(*)
 from {Wrap(nameof(LibraryFile))}
 where {Wrap(nameof(LibraryFile.Status))} = 0
 and {Wrap(nameof(LibraryFile.HoldUntil))} <= {Date(DateTime.UtcNow)}
 {FORCED_OR_LIBRARY}
-");
+";
+        var unProcessedCount = await db.Db.ExecuteScalarAsync<int>(sqlUnprocesed);
         results.Add(new () { Count = unProcessedCount, Status = FileStatus.Unprocessed});
 
         return results;

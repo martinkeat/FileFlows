@@ -25,6 +25,7 @@
             }
             @foreach (var item in Data)
             {
+                bool internalNode = item.Address == FileFlowsServer;
                 string color;
                 if (item.Priority <= lowestPriority)
                 {
@@ -52,13 +53,13 @@
                         bool offline = false;
                         bool possiblyDisconnected = false;
 
-                        if (item.Address != FileFlowsServer && item.LastSeen < DateTime.UtcNow.AddMinutes(-10))
+                        if (internalNode == false && item.LastSeen < DateTime.UtcNow.AddMinutes(-10))
                         {
                             statusIcon = "status-error";
                             statusTitle = lblDisconnected;
                             offline = true;
                         }
-                        else if (item.Address != FileFlowsServer && item.LastSeen < DateTime.UtcNow.AddMinutes(-5))
+                        else if (internalNode == false && item.LastSeen < DateTime.UtcNow.AddMinutes(-5))
                         {
                             statusIcon = "status-warning";
                             statusTitle = lblPossiblyDisconnected;
@@ -123,7 +124,7 @@
                                 </span>
                             }
 
-                            @if (item.Status == ProcessingNodeStatus.VersionMismatch)
+                            @if (internalNode == false && item.Status == ProcessingNodeStatus.VersionMismatch)
                             {
                                 <span class="version-mismatch" title="@lblUpgradeRequiredHint">@lblUpgradeRequired</span>
                             }
@@ -138,7 +139,7 @@
                         <span style="border-color: @color">@item.Priority</span>
                     </div>
 
-                    <span class="version @(VersionsAreSame(item.Version, Globals.Version) ? "" : "version-mismatch")">@item.Version</span>
+                    <span class="version @(internalNode == false && VersionsAreSame(item.Version, Globals.Version) ? "" : "version-mismatch")">@item.Version</span>
                 </div>
             }
         </div>
