@@ -114,7 +114,7 @@ public class FlowRunnerService : IFlowRunnerService
     /// <returns>The updated information</returns>
     public async Task Finish(FlowExecutorInfo info)
     {
-        await ServiceLoader.Load<NodeService>().UpdateLastSeen(info.NodeUid);
+        // await ServiceLoader.Load<NodeService>().UpdateLastSeen(info.NodeUid);
         
         Logger.Instance.ILog($"Finishing executor: {info.Uid} = {info.LibraryFile?.Name ?? string.Empty}");
         
@@ -201,6 +201,8 @@ public class FlowRunnerService : IFlowRunnerService
                     existing.ProcessingEnded = updated.ProcessingEnded;
                 if (existing.ProcessingEnded < new DateTime(2020, 1, 1))
                     existing.ProcessingEnded = DateTime.UtcNow; // this avoid a "2022 years ago" issue
+                if(existing.ProcessingEnded > DateTime.UtcNow)
+                    existing.ProcessingEnded = DateTime.UtcNow;
                 if(string.IsNullOrWhiteSpace(existing.Flow?.Name))
                     existing.Flow = updated.Flow;
                 await lfService.Update(existing);

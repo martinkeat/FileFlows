@@ -268,6 +268,7 @@ public class Runner
     private async Task Complete(string log)
     {
         DateTime start = DateTime.UtcNow;
+        Info.LibraryFile.ProcessingEnded = DateTime.UtcNow;
         do
         {
             try
@@ -276,7 +277,6 @@ public class Runner
                     CalculateFinalSize();
 
                 var service = FlowRunnerService.Load();
-                Info.LibraryFile.ProcessingEnded = DateTime.UtcNow;
                 await service.Finish(Info);
                 return;
             }
