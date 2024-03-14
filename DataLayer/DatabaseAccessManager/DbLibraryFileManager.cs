@@ -1056,7 +1056,7 @@ and {Wrap(nameof(LibraryFile.LibraryUid))} in ({inStr})
 
         string FORCED_OR_LIBRARY = disabledOutOfScheduled == ""
             ? string.Empty
-            : " and ( ({Wrap(nameof(LibraryFile.Flags))} & {(int)LibraryFileFlags.ForceProcessing} > 0) or " +
+            : $" and ( ({Wrap(nameof(LibraryFile.Flags))} & {(int)LibraryFileFlags.ForceProcessing} > 0) or " +
               $"({Wrap(nameof(LibraryFile.LibraryUid))} not in ({disabledOutOfScheduled})) )";
         
         string onHoldCountSql = $@"select count(*)
