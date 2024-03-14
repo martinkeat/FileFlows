@@ -93,18 +93,30 @@ internal  class DbRevisionManager : BaseManager
     internal async Task<List<RevisionedObject>> ListAll()
     {
         using var db = await DbConnector.GetDb();
-        string sql = "select distinct " +
+        string sql = "SELECT " +
+                     "DISTINCT " +
                      Wrap(nameof(RevisionedObject.RevisionUid)) + ", " +
                      Wrap(nameof(RevisionedObject.Uid)) + ", " +
                      Wrap(nameof(RevisionedObject.RevisionType)) + ", " +
                      Wrap(nameof(RevisionedObject.RevisionName)) + ", " +
-                     Wrap(nameof(RevisionedObject.RevisionDate)) + "  " +
-                     " from " + Wrap(nameof(RevisionedObject)) + " " +
-                     " group by " +
+                     Wrap(nameof(RevisionedObject.RevisionDate)) + " " +
+                     "FROM " +
+                     Wrap(nameof(RevisionedObject)) + " " +
+                     "WHERE " +
+                     "(" + Wrap(nameof(RevisionedObject.RevisionUid)) + ", " +
+                     Wrap(nameof(RevisionedObject.RevisionDate)) + ") IN (" +
+                     "SELECT " +
+                     Wrap(nameof(RevisionedObject.RevisionUid)) + ", " +
+                     "MAX(" + Wrap(nameof(RevisionedObject.RevisionDate)) + ") " +
+                     "FROM " +
+                     Wrap(nameof(RevisionedObject)) + " " +
+                     "GROUP BY " +
                      Wrap(nameof(RevisionedObject.RevisionUid)) +
-                     " order by " +
+                     ") " +
+                     "ORDER BY " +
                      Wrap(nameof(RevisionedObject.RevisionType)) + ", " +
                      Wrap(nameof(RevisionedObject.RevisionName));
+
 
         return await db.Db.FetchAsync<RevisionedObject>(sql);
     }
