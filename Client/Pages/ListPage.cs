@@ -85,7 +85,7 @@ public abstract class ListPage<U, T> : ComponentBase where T : IUniqueObject<U>
     /// Sets the table data, virtual so a filter can be set if needed
     /// </summary>
     /// <param name="data">the data to set</param>
-    protected virtual void SetTableData(List<T> data) => Table.SetData(data, clearSelected: false);
+    protected virtual void SetTableData(List<T> data) => Table?.SetData(data, clearSelected: false);
 
     public virtual async Task Load(U selectedUid, bool showBlocker = true)
     {
@@ -141,7 +141,7 @@ public abstract class ListPage<U, T> : ComponentBase where T : IUniqueObject<U>
 
     public async Task Edit()
     {
-        var items = Table.GetSelected();
+        var items = Table?.GetSelected();
         if (items?.Any() != true)
             return;
         var selected = items.First();
@@ -207,7 +207,6 @@ public abstract class ListPage<U, T> : ComponentBase where T : IUniqueObject<U>
 
         try
         {
-#if (!DEMO)
             var deleteResult = await HttpHelper.Delete(DeleteUrl, new ReferenceModel<U> { Uids = uids });
             if (deleteResult.Success == false)
             {
@@ -217,7 +216,6 @@ public abstract class ListPage<U, T> : ComponentBase where T : IUniqueObject<U>
                     Toast.ShowError( Translater.Instant("ErrorMessages.DeleteFailed"));
                 return;
             }
-#endif
 
             this.Data = this.Data.Where(x => uids.Contains(x.Uid) == false).ToList();
 

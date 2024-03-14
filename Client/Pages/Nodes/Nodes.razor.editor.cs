@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using System.Linq.Expressions;
 using FileFlows.Client.Components;
 using FileFlows.Client.Components.Dialogs;
 using FileFlows.Client.Components.Inputs;
@@ -16,21 +17,30 @@ public partial class Nodes : ListPage<Guid, ProcessingNode>
         node.Mappings ??= new();
         this.EditingItem = node;
 
-        var scripts = (await HttpHelper.Get<List<Script>>("/api/script")).Data ?? new List<Script>();
-
+        List<Script> scripts;
         var tabs = new Dictionary<string, List<ElementField>>();
-        tabs.Add("General", TabGeneral(node, isServerProcessingNode, scripts));
-        tabs.Add("Schedule", TabSchedule(node, isServerProcessingNode));
-        if(isServerProcessingNode == false)
-            tabs.Add("Mappings", TabMappings(node));
-        tabs.Add("Processing", await TabProcessing(node));
-        if (node.OperatingSystem != OperatingSystemType.Windows)
-            tabs.Add("Advanced", TabAdvanced(node));
-        tabs.Add("Variables", TabVariables(node));
+        Blocker.Show();
+        try
+        {
+            scripts = (await HttpHelper.Get<List<Script>>("/api/script")).Data ?? new List<Script>();
+            tabs.Add("General", TabGeneral(node, isServerProcessingNode, scripts));
+            tabs.Add("Schedule", TabSchedule(node, isServerProcessingNode));
+            if (isServerProcessingNode == false)
+                tabs.Add("Mappings", TabMappings(node));
+            tabs.Add("Processing", await TabProcessing(node));
+            if (node.OperatingSystem != OperatingSystemType.Windows)
+                tabs.Add("Advanced", TabAdvanced(node));
+            tabs.Add("Variables", TabVariables(node));
+        }
+        finally
+        {
+            Blocker.Hide();
+        }
 
         string helpUrl = isServerProcessingNode
             ? string.Empty
             : "https://fileflows.com/docs/guides/external-processing-node";
+
 
         var result = await Editor.Open(new()
         {

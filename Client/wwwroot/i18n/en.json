@@ -658,6 +658,9 @@
         "UpgradeRequired": "Upgrade Required",
         "UpgradeRequiredHint": "The Server and Nodes must be on the same version"
       },
+      "Messages": {
+        "DeleteNode": "Are you sure you want to delete ''{name}''?"
+      },
       "Fields": {
         "FlowRunners": "Flow Runners",
         "Address": "Address",

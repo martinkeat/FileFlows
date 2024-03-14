@@ -1,6 +1,5 @@
 @namespace FileFlows.Client.Pages
 @using FileFlows.Shared.Models
-@using Humanizer
 @inherits ListPage<Guid, ProcessingNode>
 
 @page "/nodes"
@@ -15,106 +14,131 @@
     </Head>
 
     <Body>
-        <FlowTable @ref="Table" Data="@Data" TItem="ProcessingNode" Selection="SelectionMode.Multiple" TableIdentifier="Nodes"
-            DoubleClick="@OnDoubleClick" HideHead="true">
-            <ToolBar>            
-                <FlowTableButton Clicked=Edit SelectedOne="true" Icon="fas fa-edit" Label="Labels.Edit" />
-                <FlowTableButton Clicked=Delete SelectedOneOrMore="true" Icon="fas fa-trash" Label="Labels.Delete" />    
-                <FlowTableButtonSeparator />            
-                <FlowTableHelpButton HelpUrl="nodes" />
-            </ToolBar>
+    <div class="node-list">
+        @{
+            int highestPriority = Data.Max(x => x.Priority);
+            int lowestPriority = Data.Min(x => x.Priority);
+            string lowestColor = "#ea0000";  // Red
+            string highestColor = "#00ca00";  // Green
+        }
+        @foreach (var item in Data)
+        {
+            string color;
+            if (item.Priority <= lowestPriority)
+            {
+                color = lowestColor;
+            }
+            else if (item.Priority  >= highestPriority)
+            {
+                color = highestColor;
+            }
+            else
+            {
+                // Interpolate between lowestColor and highestColor based on priority value
+                double ratio = (double)(item.Priority  - lowestPriority) / (highestPriority - lowestPriority);
+                int red = (int)(255 * (1 - ratio) + 255 * ratio);
+                int green = (int)(255 * ratio + 255 * (1 - ratio) * 0.75); // Adjusted to make more orange
+                int blue = 0; // Assuming no blue component for simplicity
+                color = $"#{red:X2}{green:X2}{blue:X2}";
+            }
+            <div class="node-wrapper @(item.Enabled == false ? "disabled" : "")"
+                 @ondblclick="() => Edit(item)">
+                @{
+                    string statusIcon = "status-ok";
+                    string statusTitle = lblRunning;
+                    bool offline = false;
+                    bool possiblyDisconnected = false;
 
-            <Columns>
-                <FlowTableColumn TItem="ProcessingNode" NoHeight="true">
-                    <Header>
-                        @Globals.lblName
-                    </Header>
-                    <Cell Context="item">
-                        <div class="node-wrapper @(item.Enabled == false ? "disabled" : "")">
-                            @{
-                                string statusIcon = "status-ok";
-                                string statusTitle = lblRunning;
-                                bool offline = false;
-                                bool possiblyDisconnected = false;
-                                
-                                if (item.Address != FileFlowsServer && item.LastSeen < DateTime.UtcNow.AddMinutes(-10))
-                                {
-                                    statusIcon = "status-error";
-                                    statusTitle = lblDisconnected;
-                                    offline = true;
-                                }
-                                else if (item.Address != FileFlowsServer && item.LastSeen < DateTime.UtcNow.AddMinutes(-5))
-                                {
-                                    statusIcon = "status-warning";
-                                    statusTitle = lblPossiblyDisconnected;
-                                    offline = true;
-                                }
-                            }    
-                            <div class="node-icon @statusIcon" title="@statusTitle">
-                                @if (item.OperatingSystem == OperatingSystemType.Mac)
-                                {
-                                    <i class="fab fa-apple"></i>
-                                }
-                                else if (item.OperatingSystem == OperatingSystemType.Docker)
-                                {
-                                    <i class="fab fa-docker"></i>
-                                }
-                                else if (item.OperatingSystem == OperatingSystemType.Windows)
-                                {
-                                    <i class="fab fa-windows"></i>
-                                }
-                                else if (item.OperatingSystem == OperatingSystemType.Linux)
-                                {
-                                    <i class="fab fa-linux"></i>
-                                }
-                                <div class="architecture">@item.Architecture</div>
-                            </div>
-                            
-                            <div class="info">
-                                <div class="name">
-                                    @item.Name
-                                </div>
-                                <div class="sub-info">
-                                    <div>
-                                        <span class="label">@lblAddress</span>
-                                        <span class="value">@(item.Address != FileFlowsServer ? item.Address : lblInternal)</span>
-                                    </div>
-                                    <div>
-                                        <span class="label">@lblRunners</span>
-                                        <span class="value">@item.FlowRunners</span>
-                                    </div>
-                                </div>
-                                <div class="indicators">
-                                    @if (offline)
-                                    {
-                                        <span class="offline">
-                                            @statusTitle
-                                        </span>
-                                    }
-                                    else if (possiblyDisconnected)
-                                    {
-                                        <span class="possibly-disconnected">
-                                            @statusTitle
-                                        </span>
-                                    }
+                    if (item.Address != FileFlowsServer && item.LastSeen < DateTime.UtcNow.AddMinutes(-10))
+                    {
+                        statusIcon = "status-error";
+                        statusTitle = lblDisconnected;
+                        offline = true;
+                    }
+                    else if (item.Address != FileFlowsServer && item.LastSeen < DateTime.UtcNow.AddMinutes(-5))
+                    {
+                        statusIcon = "status-warning";
+                        statusTitle = lblPossiblyDisconnected;
+                        offline = true;
+                    }
+                }
+                
+                <div class="actions">
+                    <span title="@lblEdit" @onclick="() => Edit(item)">
+                        <i class="fas fa-pencil-alt"></i>
+                    </span>
+                    <span title="@lblDelete" @onclick="() => DeleteItem(item)">
+                        <i class="fas fa-trash"></i>
+                    </span>
+                </div>
 
-                                    @if (item.Status == ProcessingNodeStatus.VersionMismatch)
-                                    {
-                                        <span class="version-mismatch" title="@lblUpgradeRequiredHint">@lblUpgradeRequired</span>
-                                    }
-                                </div>
-                            </div>
-                            
-                            <div class="enabled">
-                                <FlowSwitch Value="@item.Enabled" ValueChanged="@(args => { item.Enabled = args; Enable(args, item); })"/>
-                            </div>
-                            
-                            <span class="version">@item.Version</span>
+                <div class="node-icon @statusIcon" title="@statusTitle">
+                    @if (item.OperatingSystem == OperatingSystemType.Mac)
+                    {
+                        <img class="icon" src="/icons/apple.svg"/>
+                    }
+                    else if (item.OperatingSystem == OperatingSystemType.Docker)
+                    {
+                        <img class="icon" src="/icons/docker.svg"/>
+                    }
+                    else if (item.OperatingSystem == OperatingSystemType.Windows)
+                    {
+                        <img class="icon" src="/icons/windows.svg"/>
+                    }
+                    else if (item.OperatingSystem == OperatingSystemType.Linux)
+                    {
+                        <img class="icon" src="/icons/linux.svg"/>
+                    }
+                    <div class="architecture @(item.Architecture is ArchitectureType.Arm32 or ArchitectureType.Arm64 ? "arm" : "")">@item.Architecture</div>
+                </div>
+
+                <div class="info">
+                    <div class="name">
+                        @item.Name
+                    </div>
+                    <div class="sub-info">
+                        <div>
+                            <span class="label">@lblAddress</span>
+                            <span class="value">@(item.Address != FileFlowsServer ? item.Address : lblInternal)</span>
                         </div>
-                    </Cell>
-                </FlowTableColumn>
-            </Columns>
-        </FlowTable>
+                        <div>
+                            <span class="label">@lblRunners</span>
+                            <span class="value">@item.FlowRunners</span>
+                        </div>
+                    </div>
+                    <div class="indicators">
+                        @if (offline)
+                        {
+                            <span class="offline">
+                                @statusTitle
+                            </span>
+                        }
+                        else if (possiblyDisconnected)
+                        {
+                            <span class="possibly-disconnected">
+                                @statusTitle
+                            </span>
+                        }
+
+                        @if (item.Status == ProcessingNodeStatus.VersionMismatch)
+                        {
+                            <span class="version-mismatch" title="@lblUpgradeRequiredHint">@lblUpgradeRequired</span>
+                        }
+                    </div>
+                </div>
+
+                <div class="enabled">
+                    <FlowSwitch Value="@item.Enabled"  ValueChanged="@(args => { Enable(args, item); })"/>
+                </div>
+
+                <div class="priority">
+                    <span style="border-color: @color">@item.Priority</span>
+                </div>
+
+                <span class="version @(item.Status == ProcessingNodeStatus.VersionMismatch ? "version-mismatch" :"")">@item.Version</span>
+            </div>
+        }
+    </div>
 
     </Body>
 

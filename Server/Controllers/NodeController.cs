@@ -308,7 +308,7 @@ public class NodeController : Controller
                 if (current >= licensedNodes)
                 {
                     node.Enabled = false;
-                    service.Update(node);
+                    await service.Update(node);
                     Logger.Instance.ILog($"Disabled processing node '{node.Name}' due to license restriction");
                 }
                 else

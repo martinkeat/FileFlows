@@ -1,3 +1,6 @@
+using BlazorContextMenu;
+using FileFlows.Client.Components.Dialogs;
+
 namespace FileFlows.Client.Pages;
 
 using FileFlows.Client.Components;
@@ -11,6 +14,8 @@ public partial class Nodes : ListPage<Guid, ProcessingNode>
     const string FileFlowsServer = "FileFlowsServer";
 
     private ProcessingNode EditingItem = null;
+
+    private ProcessingNode SelectedItem = null;
 
     private string lblInternal, lblAddress, lblRunners, lblVersion, lblDownloadNode, lblUpgradeRequired, 
         lblUpgradeRequiredHint, lblRunning, lblDisconnected, lblPossiblyDisconnected;
@@ -36,10 +41,12 @@ public partial class Nodes : ListPage<Guid, ProcessingNode>
         lblDisconnected = Translater.Instant("Labels.Disconnected");
     }
 
-
-    private Task Add()
-        => Edit(new ProcessingNode());
-
+    /// <summary>
+    /// we only want to do the sort the first time, otherwise the list will jump around for the user
+    /// </summary>
+    private List<Guid> initialSortOrder;
+    
+    /// <inheritdoc />
     public override Task PostLoad()
     {
         var serverNode = this.Data?.Where(x => x.Address == FileFlowsServer).FirstOrDefault();
@@ -47,13 +54,33 @@ public partial class Nodes : ListPage<Guid, ProcessingNode>
         {
             serverNode.Name = Translater.Instant("Pages.Nodes.Labels.FileFlowsServer");                
         }
+
+        if (initialSortOrder == null)
+        {
+            Data = Data?.OrderByDescending(x => x.Enabled)?.ThenByDescending(x => x.Priority).ThenBy(x => x.Name)
+                ?.ToList();
+            initialSortOrder = Data?.Select(x => x.Uid)?.ToList();
+        }
+        else
+        {
+            Data = Data?.OrderBy(x => initialSortOrder.Contains(x.Uid) ? initialSortOrder.IndexOf(x.Uid) : 1000000)
+                .ThenByDescending(x => x.Priority).ThenBy(x => x.Name)
+                ?.ToList();
+        }
+
         return base.PostLoad();
     }
 
-
+    /// <summary>
+    /// if currently enabling, this prevents double calls to this method during the updated list binding
+    /// </summary>
+    private bool enabling = false;
     async Task Enable(bool enabled, ProcessingNode node)
     {
+        if(enabling || node.Enabled == enabled)
+            return;
         Blocker.Show();
+        enabling = true;
         try
         {
             await HttpHelper.Put<ProcessingNode>($"{ApiUrl}/state/{node.Uid}?enable={enabled}");
@@ -61,6 +88,7 @@ public partial class Nodes : ListPage<Guid, ProcessingNode>
         }
         finally
         {
+            enabling = false;
             Blocker.Hide();
         }
     }
@@ -87,6 +115,35 @@ public partial class Nodes : ListPage<Guid, ProcessingNode>
             await this.Load(saveResult.Data.Uid);
 
             return true;
+        }
+        finally
+        {
+            Blocker.Hide();
+            this.StateHasChanged();
+        }
+    }
+
+    public async Task DeleteItem(ProcessingNode item)
+    {
+        if (await Confirm.Show("Labels.Delete",
+                Translater.Instant("Pages.Nodes.Messages.DeleteNode", new { name = item.Name })) == false)
+            return; // rejected the confirm
+
+        Blocker.Show();
+        this.StateHasChanged();
+
+        try
+        {
+            var deleteResult = await HttpHelper.Delete(DeleteUrl, new ReferenceModel<Guid> { Uids = new [] { item.Uid } });
+            if (deleteResult.Success == false)
+            {
+                if(Translater.NeedsTranslating(deleteResult.Body))
+                    Toast.ShowError( Translater.Instant(deleteResult.Body));
+                else
+                    Toast.ShowError( Translater.Instant("ErrorMessages.DeleteFailed"));
+                return;
+            }
+            this.Data.Remove(item);
         }
         finally
         {

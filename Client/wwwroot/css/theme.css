@@ -9,6 +9,8 @@ body {
   --base-lighter-rgb: 28, 28, 28;
   --base-lightest: rgb(35, 35, 35);
   --base-lightest-rgb: 35, 35, 35;
+  --base-lightest-2: rgb(42, 42, 42);
+  --base-lightest-2-rgb: 42, 42, 42;
   --color: rgb(240, 240, 240);
   --color-rgb: 240, 240, 240;
   --color-darker: rgb(220, 220, 220);
