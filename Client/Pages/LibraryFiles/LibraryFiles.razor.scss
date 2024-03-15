@@ -4,6 +4,12 @@
     top: 10px;
     width:calc(100% - 10px);
 }
+.header {
+    display:flex;
+    span {
+        flex-grow:1;
+    }
+}
 
 @media (max-width: 849.99px)
 {

@@ -1,0 +1,48 @@
+@namespace FileFlows.Client.Components.Common
+@implements IDisposable
+
+<div id="@Uid" class="flow-drop-down">
+    <span class="dd-btn" @onclick="() => Toggle()">
+        <span class="icon">
+            @{
+                string icon = Selected?.Icon ?? PlaceholderIcon;
+            }
+            @if (icon.StartsWith("fa"))
+            {
+                <i class="@icon"></i>
+            }
+            else
+            {
+                <img src="@icon"/>
+            }
+        </span>
+        <span class="label">
+            @(Selected?.Label ?? Placeholder)
+        </span>
+        @if (Selected != null)
+        {
+            <span class="clear" @onclick="() => Clear()" @onclick:stopPropagation>
+                <i class="fas fa-times"></i>
+            </span>
+        }
+    </span>
+
+    <div class="dropdown-content @(Opened ? "opened" : "")">
+        @foreach (var opt in Options)
+        {
+            <span class="option" @onclick="() => Select(opt)">
+                <span class="icon">
+                    @if (opt.Icon.StartsWith("fa"))
+                    {
+                        <i class="@opt.Icon"></i>
+                    }
+                    else
+                    {
+                        <img src="@opt.Icon"/>
+                    }
+                </span>
+                @opt.Label
+            </span>
+        }
+    </div>
+</div>

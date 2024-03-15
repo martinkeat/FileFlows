@@ -340,3 +340,13 @@ public enum FlowFieldType
     /// </summary>
     Slider = 6,
 }
+
+public enum FilesSortBy
+{
+    Size = 1,
+    SizeDesc = 2,
+    Savings = 3,
+    SavingsDesc = 4,
+    Time = 5,
+    TimeDesc = 6
+}

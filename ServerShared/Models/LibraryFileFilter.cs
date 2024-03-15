@@ -44,6 +44,26 @@ public class LibraryFileFilter
     /// Gets or sets a filter text the file name must contain
     /// </summary>
     public string Filter { get; set; }
+    
+    /// <summary>
+    /// Gets or sets a Node UID to filter by
+    /// </summary>
+    public Guid? NodeUid { get; set; }
+    
+    /// <summary>
+    /// Gets or sets a Library UID to filter by
+    /// </summary>
+    public Guid? LibraryUid { get; set; }
+    
+    /// <summary>
+    /// Gets or sets a Flow UID to filter by
+    /// </summary>
+    public Guid? FlowUid { get; set; }
+    
+    /// <summary>
+    /// Gets or sets a specific sort by to sort by
+    /// </summary>
+    public FilesSortBy? SortBy { get; set; }
 
     /// <summary>
     /// Gets or sets the system info

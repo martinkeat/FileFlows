@@ -27,7 +27,7 @@
 }
 
 <FlowTable @ref="Table" Data="@Data" TItem="LibaryFileListModel" Selection="SelectionMode.Multiple"
-           TableIdentifier=@TableIdentifier DoubleClick="@OnDoubleClick" MinWidth="@NameMinWidth"
+           TableIdentifier=@TableIdentifier DoubleClick="@OnDoubleClick"
            ShowPager=@true TotalItems=@TotalItems OnPageChange=@PageChange OnPageSizeChange=@PageSizeChange
            OnFilter="OnFilter" 
            >
@@ -60,7 +60,29 @@
     <Columns>
         <FlowTableColumn TItem="LibaryFileListModel" NoHeight="true">
             <Header>
-                File
+                <div class="header">
+                    <span class="">File</span>
+                @if (SelectedStatus is not FileStatus.Unprocessed and not FileStatus.Processing)
+                {
+                    <FlowDropDown Options="optionsSortBy" OnSelected="SelectSortBy"
+                                  Placeholder="Sort By" PlaceholderIcon="fas fa-sort"/>
+                }
+                @if (optionsNodes?.Any() == true && SelectedStatus is FileStatus.Processed or FileStatus.ProcessingFailed)
+                {
+                    <FlowDropDown Options="optionsNodes" OnSelected="SelectNode"
+                                  Placeholder="Node" PlaceholderIcon="fas fa-desktop"/>
+                }
+                @if (optionsFlows?.Any() == true && SelectedStatus is not FileStatus.Unprocessed and not FileStatus.Disabled and not FileStatus.OnHold)
+                {
+                    <FlowDropDown Options="optionsFlows" OnSelected="SelectFlow"
+                                  Placeholder="Flow" PlaceholderIcon="fas fa-sitemap"/>
+                }
+                @if (optionsLibraries?.Any() == true)
+                {
+                    <FlowDropDown Options="optionsLibraries" OnSelected="SelectLibrary"
+                                  Placeholder="Library" PlaceholderIcon="fas fa-folder"/>
+                }
+                </div>
             </Header>
             <Cell Context="item">
                 <div class="library-file">
@@ -98,7 +120,7 @@
                         @if (string.IsNullOrWhiteSpace(item.Node) == false)
                         {
                             <div class="icon-value node">
-                                <i class="fas fa-desktop"></i>
+                                <i class="@GetNodeIcon(item.Node)"></i>
                                 <span class="value">@(item.Node == "FileFlowsServer" ? lblFileFlowsServer : item.Node)</span>
                             </div>
                         }

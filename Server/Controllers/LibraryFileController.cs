@@ -49,18 +49,47 @@ public class LibraryFileController : Controller //ControllerStore<LibraryFile>
     /// <param name="page">The page to get</param>
     /// <param name="pageSize">The number of items to fetch</param>
     /// <param name="filter">[Optional] filter text</param>
+    /// <param name="node">[Optional] node to filter by</param>
+    /// <param name="library">[Optional] library to filter by</param>
+    /// <param name="flow">[Optional] flow to filter by</param>
+    /// <param name="sortBy">[Optional] sort by method</param>
     /// <returns>a slimmed down list of files with only needed information</returns>
     [HttpGet("list-all")]
-    public async Task<LibraryFileDatalistModel> ListAll([FromQuery] FileStatus status, [FromQuery] int page = 0, [FromQuery] int pageSize = 0, [FromQuery] string filter = null)
+    public async Task<LibraryFileDatalistModel> ListAll([FromQuery] FileStatus status, [FromQuery] int page = 0, 
+        [FromQuery] int pageSize = 0, [FromQuery] string filter = null, [FromQuery] Guid? node = null, 
+        [FromQuery] Guid? library = null, [FromQuery] Guid? flow = null, [FromQuery] FilesSortBy? sortBy = null)
     {
         var service = ServiceLoader.Load<LibraryFileService>();
         var lfStatus = await service.GetStatus();
         var libraries = await ServiceLoader.Load<LibraryService>().GetAllAsync();
-        List<LibraryFile> files = await service.GetAll(status, page * pageSize, pageSize, filter, allLibraries: libraries);
-        if (string.IsNullOrWhiteSpace(filter) == false)
+        
+        
+        var allLibraries = (await ServiceLoader.Load<LibraryService>().GetAllAsync());
+        
+        var sysInfo = new LibraryFilterSystemInfo()
+        {
+            AllLibraries = allLibraries.ToDictionary(x => x.Uid, x => x),
+            Executors = FlowRunnerService.Executors.Values.ToList(),
+            LicensedForProcessingOrder = LicenseHelper.IsLicensed(LicenseFlags.ProcessingOrder)
+        };
+        var lfFilter = new LibraryFileFilter()
+        {
+            Status = status,
+            Skip = page * pageSize,
+            Rows = pageSize,
+            Filter = filter,
+            NodeUid = node,
+            LibraryUid = library,
+            FlowUid = flow,
+            SortBy = sortBy,
+            SysInfo = sysInfo,
+        };
+        
+        List<LibraryFile> files = await service.GetAll(lfFilter);
+        if (string.IsNullOrWhiteSpace(filter) == false || node != null || flow != null || library != null)
         {
             // need to get total number of items matching filter as well
-            int total = await service.GetTotalMatchingItems(status, filter);
+            int total = await service.GetTotalMatchingItems(lfFilter);
             HttpContext?.Response?.Headers?.TryAdd("x-total-items", total.ToString());
         }
 

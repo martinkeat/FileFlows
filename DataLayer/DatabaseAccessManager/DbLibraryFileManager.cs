@@ -9,6 +9,7 @@ using FileFlows.ServerShared.Models;
 using FileFlows.Shared;
 using FileFlows.Shared.Json;
 using FileFlows.Shared.Models;
+using SQLitePCL;
 
 namespace FileFlows.DataLayer;
 
@@ -598,67 +599,83 @@ internal class DbLibraryFileManager : BaseManager
     /// <summary>
     /// Gets the total items matching the filter
     /// </summary>
-    /// <param name="allLibraries">all the libraries in the system</param>
-    /// <param name="status">the status</param>
     /// <param name="filter">the filter</param>
     /// <returns>the total number of items matching</returns>
-    public async Task<int> GetTotalMatchingItems(List<Library> allLibraries, FileStatus? status, string filter)
+    public async Task<int> GetTotalMatchingItems(LibraryFileFilter filter)
     {
         string sql;
         try
         {
-            string filterWhere = $"lower({Wrap(nameof(LibraryFile))}.{Wrap(nameof(LibraryFile.Name))}) like lower('%{filter.Replace("'", "''").Replace(" ", "%")}%')" ;
-            if(status == null)
+            List<string> wheres = new();
+            if(filter.LibraryUid != null)
+                wheres.Add($"{Wrap(nameof(LibraryFile.LibraryUid))} = '{filter.LibraryUid}'");
+            if(string.IsNullOrWhiteSpace(filter.Filter) == false)
+                wheres.Add($"lower({Wrap(nameof(LibraryFile))}.{Wrap(nameof(LibraryFile.Name))}) like lower('%{filter.Filter.Replace("'", "''").Replace(" ", "%")}%')");
+            
+            if(filter.Status == null)
             {
                 using var db = await DbConnector.GetDb();
-                return await db.Db.ExecuteScalarAsync<int>($"select count({Wrap(nameof(LibraryFile.Uid))}) from {Wrap(nameof(LibraryFile))} where " + filterWhere);
+                sql =
+                    $"select count({Wrap(nameof(LibraryFile.Uid))}) from {Wrap(nameof(LibraryFile))} " +
+                    $"where " + string.Join(" and ", wheres);
+                return await db.Db.ExecuteScalarAsync<int>(sql);
             }
-            if ((int)status > 0)
+            if ((int)filter.Status > 0)
             {
+                wheres.Add($"{Wrap(nameof(LibraryFile.Status))} = {(int)filter.Status}");
+                if(filter.NodeUid != null)
+                    wheres.Add($"{Wrap(nameof(LibraryFile.NodeUid))} = '{filter.NodeUid}'");
+                if(filter.FlowUid != null)
+                    wheres.Add($"{Wrap(nameof(LibraryFile.FlowUid))} = '{filter.FlowUid}'");
+                sql = $"select count({Wrap(nameof(LibraryFile.Uid))}) " +
+                      $"from {Wrap(nameof(LibraryFile))} " +
+                      $"where " + string.Join(" and ", wheres);
                 using var db = await DbConnector.GetDb();
-                return await db.Db.ExecuteScalarAsync<int>($"select count({Wrap(nameof(LibraryFile.Uid))}) " +
-                                                           $"from {Wrap(nameof(LibraryFile))} " +
-                                                           $"where {Wrap(nameof(LibraryFile.Status))} = {(int)status} and  " + filterWhere);
+                return await db.Db.ExecuteScalarAsync<int>(sql);
             }
 
             var disabled = string.Join(", ",
-                allLibraries.Where(x => x.Enabled == false).Select(x => "'" + x.Uid + "'"));
+                filter.SysInfo.AllLibraries.Values.Where(x => x.Enabled == false).Select(x => "'" + x.Uid + "'"));
             int quarter = TimeHelper.GetCurrentQuarter();
             var outOfSchedule = string.Join(", ",
-                allLibraries.Where(x => x.Schedule?.Length != 672 || x.Schedule[quarter] == '0').Select(x => "'" + x.Uid + "'"));
+                filter.SysInfo.AllLibraries.Values.Where(x => x.Schedule?.Length != 672 || x.Schedule[quarter] == '0').Select(x => "'" + x.Uid + "'"));
+            
+            wheres.Insert(0, $"{Wrap(nameof(LibraryFile.Status))} = {(int)FileStatus.Unprocessed}");
 
-            sql = $"select count(*) from {Wrap(nameof(LibraryFile))} where {Wrap(nameof(LibraryFile.Status))} = {(int)FileStatus.Unprocessed} and " + filterWhere;
+            sql = $"select count(*) from {Wrap(nameof(LibraryFile))}";
             
             // add disabled condition
-            if(string.IsNullOrEmpty(disabled) == false)
-                sql += $" and {Wrap(nameof(LibraryFile.LibraryUid))} {(status == FileStatus.Disabled ? "" : "not")} in ({disabled})";
+            if (string.IsNullOrEmpty(disabled) == false)
+                wheres.Add($" {Wrap(nameof(LibraryFile.LibraryUid))} {(filter.Status == FileStatus.Disabled ? "" : "not")} in ({disabled})");
             
-            if (status == FileStatus.Disabled)
+            if (filter.Status == FileStatus.Disabled)
             {
                 if (string.IsNullOrEmpty(disabled))
                     return 0;
+                sql = sql + $"where " + string.Join(" and ", wheres);
                 using var db = await DbConnector.GetDb();
                 return await db.Db.ExecuteScalarAsync<int>(sql);
             }
             
             // add out of schedule condition
             if(string.IsNullOrEmpty(outOfSchedule) == false)
-                sql += $" and {Wrap(nameof(LibraryFile.LibraryUid))} {(status == FileStatus.OutOfSchedule ? "" : "not")} in ({outOfSchedule})";
+                wheres.Add($"{Wrap(nameof(LibraryFile.LibraryUid))} {(filter.Status == FileStatus.OutOfSchedule ? "" : "not")} in ({outOfSchedule})");
             
-            if (status == FileStatus.OutOfSchedule)
+            if (filter.Status == FileStatus.OutOfSchedule)
             {
                 if (string.IsNullOrEmpty(outOfSchedule))
                     return 0; // no out of schedule libraries
-                
+                sql = sql + $"where " + string.Join(" and ", wheres);
                 using var db = await DbConnector.GetDb();
                 return await db.Db.ExecuteScalarAsync<int>(sql);
             }
             
             // add on hold condition
-            sql += $" and {Wrap(nameof(LibraryFile.HoldUntil))} {(status == FileStatus.OnHold ? ">" : "<=")} " +
-                   DbConnector.FormatDateQuoted(DateTime.UtcNow);
-            if (status == FileStatus.OnHold)
+            wheres.Add($"{Wrap(nameof(LibraryFile.HoldUntil))} {(filter.Status == FileStatus.OnHold ? ">" : "<=")} " +
+                   DbConnector.FormatDateQuoted(DateTime.UtcNow));
+            if (filter.Status == FileStatus.OnHold)
             {
+                sql = sql + $"where " + string.Join(" and ", wheres);
                 using var db = await DbConnector.GetDb();
                 return await db.Db.ExecuteScalarAsync<int>(sql);
             }
@@ -668,7 +685,7 @@ internal class DbLibraryFileManager : BaseManager
                                  $" = {Wrap(nameof(DbObject))}.{Wrap(nameof(DbObject.Uid))} ";
     
             sql = sql.Replace($" from {Wrap(nameof(LibraryFile))}", $" from {Wrap(nameof(LibraryFile))} " + libraryJoin);
-            
+            sql = sql + $"where " + string.Join(" and ", wheres);
             {
                 using var db = await DbConnector.GetDb();
                 return await db.Db.ExecuteScalarAsync<int>(sql);
@@ -755,7 +772,7 @@ internal class DbLibraryFileManager : BaseManager
             // the status in the db is correct and not a computed status
             if (args.Status == null)
             {
-                sql = "where 1 = 1 "; // need somethigng to start the where
+                sql = "where 1 = 1 "; // need something to start the where
             }
             else
             {
@@ -775,8 +792,81 @@ internal class DbLibraryFileManager : BaseManager
                        SqlHelper.Escape("%" + filter + "%");
             }
 
+            if (args.LibraryUid != null)
+                sql += $" and {Wrap(nameof(LibraryFile.LibraryUid))} = '{args.LibraryUid.Value}'";
+            
             if (iStatus > 0)
             {
+                if (args.SortBy != null)
+                {
+                    switch (args.SortBy)
+                    {
+                        case FilesSortBy.Size:
+                            orderBys.Add(Wrap(nameof(LibraryFile.OriginalSize)));
+                            break;
+                        case FilesSortBy.SizeDesc:
+                            orderBys.Add(Wrap(nameof(LibraryFile.OriginalSize)) + " desc");
+                            break;
+                        case FilesSortBy.Savings:
+                            orderBys.Add(
+                                $"case when {Wrap(nameof(LibraryFile.FinalSize))} > 0 then {Wrap(nameof(LibraryFile.OriginalSize))} - {Wrap(nameof(LibraryFile.FinalSize))} else {long.MaxValue} end");
+                            break;
+                        case FilesSortBy.SavingsDesc:
+                            orderBys.Add(
+                                $"case when {Wrap(nameof(LibraryFile.FinalSize))} > 0 then ({Wrap(nameof(LibraryFile.OriginalSize))} - {Wrap(nameof(LibraryFile.FinalSize))}) * -1 else 0 end");
+                            break;
+                        case FilesSortBy.Time:
+                            switch (DbConnector.Type)
+                            {
+                                case DatabaseType.MySql:
+                                    orderBys.Add(
+                                        $"TIMESTAMPDIFF(SECOND, {Wrap(nameof(LibraryFile.ProcessingStarted))}, {Wrap(nameof(LibraryFile.ProcessingEnded))})");
+                                    break;
+                                case DatabaseType.Postgres:
+                                    orderBys.Add(
+                                        $"EXTRACT(EPOCH FROM {Wrap(nameof(LibraryFile.ProcessingEnded))} - {Wrap(nameof(LibraryFile.ProcessingStarted))})");
+                                    break;
+                                case DatabaseType.Sqlite:
+                                    orderBys.Add(
+                                        $"julianday({Wrap(nameof(LibraryFile.ProcessingEnded))}) - julianday({Wrap(nameof(LibraryFile.ProcessingStarted))})");
+                                    break;
+                                case DatabaseType.SqlServer:
+                                    orderBys.Add(
+                                        $"DATEDIFF(second, {Wrap(nameof(LibraryFile.ProcessingStarted))}, {Wrap(nameof(LibraryFile.ProcessingEnded))})");
+                                    break;
+                            }
+
+                            break;
+                        case FilesSortBy.TimeDesc:
+                            switch (DbConnector.Type)
+                            {
+                                case DatabaseType.MySql:
+                                    orderBys.Add(
+                                        $"TIMESTAMPDIFF(SECOND, {Wrap(nameof(LibraryFile.ProcessingStarted))}, {Wrap(nameof(LibraryFile.ProcessingEnded))}) DESC");
+                                    break;
+                                case DatabaseType.Postgres:
+                                    orderBys.Add(
+                                        $"EXTRACT(EPOCH FROM {Wrap(nameof(LibraryFile.ProcessingEnded))} - {Wrap(nameof(LibraryFile.ProcessingStarted))}) DESC");
+                                    break;
+                                case DatabaseType.Sqlite:
+                                    orderBys.Add(
+                                        $"julianday({Wrap(nameof(LibraryFile.ProcessingEnded))}) - julianday({Wrap(nameof(LibraryFile.ProcessingStarted))}) DESC");
+                                    break;
+                                case DatabaseType.SqlServer:
+                                    orderBys.Add(
+                                        $"DATEDIFF(second, {Wrap(nameof(LibraryFile.ProcessingStarted))}, {Wrap(nameof(LibraryFile.ProcessingEnded))}) DESC");
+                                    break;
+                            }
+                            break;
+                    }
+                }
+                
+                if (args.NodeUid != null)
+                    sql += $" and {Wrap(nameof(LibraryFile.NodeUid))} = '{args.NodeUid.Value}'";
+                
+                if (args.FlowUid != null)
+                    sql += $" and {Wrap(nameof(LibraryFile.FlowUid))} = '{args.FlowUid.Value}'";
+
                 if (args.Status is FileStatus.Processed or FileStatus.ProcessingFailed)
                 {
                     orderBys.Add($" case " +

@@ -1,4 +1,3 @@
-using System.Text.RegularExpressions;
 using System.Timers;
 using FileFlows.Client.Components.Common;
 using Microsoft.AspNetCore.Components;
@@ -8,6 +7,9 @@ using FileFlows.Client.Components.Dialogs;
 
 namespace FileFlows.Client.Pages;
 
+/// <summary>
+/// Library Files Page
+/// </summary>
 public partial class LibraryFiles : ListPage<Guid, LibaryFileListModel>, IDisposable
 {
     private string filter = string.Empty;
@@ -29,6 +31,9 @@ public partial class LibraryFiles : ListPage<Guid, LibaryFileListModel>, IDispos
 
     private int PageIndex;
 
+    private Guid? SelectedNode, SelectedLibrary, SelectedFlow;
+    private FilesSortBy? SelectedSortBy;
+
     private string lblMoveToTop = "";
 
     private int Count;
@@ -47,6 +52,8 @@ public partial class LibraryFiles : ListPage<Guid, LibaryFileListModel>, IDispos
     private int TotalItems;
     private List<FlowExecutorInfo> WorkerStatus = new ();
     private Timer AutoRefreshTimer;
+    private Dictionary<string, ProcessingNode> Nodes = new();
+    private List<DropDownOption> optionsLibraries, optionsNodes, optionsFlows, optionsSortBy;
 
     protected override string DeleteMessage => "Labels.DeleteLibraryFiles";
     
@@ -60,16 +67,14 @@ public partial class LibraryFiles : ListPage<Guid, LibaryFileListModel>, IDispos
     }
 
     public override string FetchUrl => $"{ApiUrl}/list-all?status={SelectedStatus}&page={PageIndex}&pageSize={App.PageSize}" +
-                                       $"&filter={Uri.EscapeDataString(filterStatus == SelectedStatus ? filter ?? string.Empty : string.Empty)}";
-
-    private string NameMinWidth = "20ch";
+                                       $"&filter={Uri.EscapeDataString(filterStatus == SelectedStatus ? filter ?? string.Empty : string.Empty)}" +
+                                       (SelectedNode == null ? "" : $"&node={SelectedNode}") + 
+                                       (SelectedFlow == null ? "" : $"&flow={SelectedFlow}") + 
+                                       (SelectedSortBy == null ? "" : $"&sortBy={(int)SelectedSortBy}") + 
+                                       (SelectedLibrary == null ? "" : $"&library={SelectedLibrary}");
 
     public override async Task PostLoad()
     {
-        if(App.Instance.IsMobile)
-            this.NameMinWidth = this.Data?.Any() == true ? Math.Min(120, Math.Max(20, this.Data.Max(x => (x.Name?.Length / 2) ?? 0))) + "ch" : "20ch";
-        else
-            this.NameMinWidth = this.Data?.Any() == true ? Math.Min(120, Math.Max(20, this.Data.Max(x => (x.Name?.Length) ?? 0))) + "ch" : "20ch";
         await jsRuntime.InvokeVoidAsync("ff.scrollTableToTop");
     }
 
@@ -90,7 +95,57 @@ public partial class LibraryFiles : ListPage<Guid, LibaryFileListModel>, IDispos
         this.lblDeleteSwitch = Translater.Instant("Labels.DeleteLibraryFilesPhysicallySwitch");
         base.OnInitialized(true);
         
+        optionsSortBy = new ()
+        {
+            new () { Icon = "fas fa-sort-numeric-up", Label = Translater.Instant("Enums.FilesSortBy.Size"), Value = FilesSortBy.Size },
+            new () { Icon = "fas fa-sort-numeric-down-alt", Label = Translater.Instant("Enums.FilesSortBy.SizeDesc"), Value = FilesSortBy.SizeDesc },
+            new () { Icon = "fas fa-sort-amount-down-alt", Label = Translater.Instant("Enums.FilesSortBy.Savings"), Value = FilesSortBy.Savings },
+            new () { Icon = "fas fa-sort-amount-up", Label = Translater.Instant("Enums.FilesSortBy.SavingsDesc"), Value = FilesSortBy.SavingsDesc },
+            new () { Icon = "fas fa-hourglass-start", Label = Translater.Instant("Enums.FilesSortBy.Time"), Value = FilesSortBy.Time },
+            new () { Icon = "fas fa-hourglass-end", Label = Translater.Instant("Enums.FilesSortBy.TimeDesc"), Value = FilesSortBy.TimeDesc }
+        };
+
+        var nodesResult = await HttpHelper.Get<List<ProcessingNode>>("/api/node/list");
+        if (nodesResult.Success)
+        {
+            Nodes = nodesResult.Data.DistinctBy(x => x.Name.ToLowerInvariant())
+                .ToDictionary(x => x.Name.ToLowerInvariant(), x => x);
+            optionsNodes = nodesResult.Data.OrderBy(x => x.Name.ToLowerInvariant()).Select(x => new DropDownOption()
+            {
+                Icon = x.OperatingSystem switch
+                {
+                    OperatingSystemType.Docker => "/icons/docker.svg",
+                    OperatingSystemType.Linux => "/icons/linux.svg",
+                    OperatingSystemType.Mac => "/icons/apple.svg",
+                    OperatingSystemType.Windows => "/icons/windows.svg",
+                    _ => ""
+                },
+                Value = x.Uid,
+                Label = x.Name == "FileFlowsServer" ? "Internal Node" : x.Name
+            }).ToList();
+        }
         
+        var libraryResult = await HttpHelper.Get<List<Library>>("/api/library");
+        if (libraryResult.Success)
+        {
+            optionsLibraries = libraryResult.Data.OrderBy(x => x.Name.ToLowerInvariant()).Select(x => new DropDownOption()
+            {
+                Icon = "fas fa-folder",
+                Value = x.Uid,
+                Label = x.Name
+            }).ToList();
+        }
+        var flowResult = await HttpHelper.Get<List<FlowListModel>>("/api/flow/list-all");
+        if (flowResult.Success)
+        {
+            optionsFlows = flowResult.Data.OrderBy(x => x.Name.ToLowerInvariant()).Select(x => new DropDownOption()
+            {
+                Icon = "fas fa-sitemap",
+                Value = x.Uid,
+                Label = x.Name
+            }).ToList();
+        }
+
         AutoRefreshTimer = new Timer();
         AutoRefreshTimer.Elapsed += AutoRefreshTimerElapsed;
         AutoRefreshTimer.Interval = 10_000;
@@ -534,8 +589,6 @@ public partial class LibraryFiles : ListPage<Guid, LibaryFileListModel>, IDispos
         }
     }
 
-    static string[] IconTypes = new [] { "3g2", "3ga", "3gp", "7z", "aac", "aa", "accdb", "accdt", "ac", "adn", "aifc", "aiff", "aif", "ai", "ait", "amr", "ani", "apk", "applescript", "app", "asax", "asc", "ascx", "asf", "ash", "ashx", "asmx", "asp", "aspx", "asx", "aup", "au", "avi", "axd", "aze", "bak", "bash", "bat", "bin", "bmp", "bowerrc", "bpg", "browser", "bz2", "cab", "cad", "caf", "cal", "catalog", "cd", "cer", "cfg", "cfml", "cfm", "cgi", "class", "cmd", "codekit", "coffeelintignore", "coffee", "compile", "com", "config", "conf", "cpp", "cptx", "cr2", "crdownload", "crt", "crypt", "csh", "cson", "csproj", "css", "cs", "c", "csv", "cue", "dat", "dbf", "db", "deb", "dgn", "dist", "diz", "dll", "dmg", "dng", "docb", "docm", "doc", "docx", "dotm", "dot", "dotx", "download", "dpj", "ds_store", "dtd", "dwg", "dxf", "editorconfig", "el", "enc", "eot", "eps", "epub", "eslintignore", "exe", "f4v", "fax", "fb2", "filenames", "flac", "fla", "flv", "gadget", "gdp", "gem", "gif", "gitattributes", "gitignore", "go", "gpg", "gz", "handlebars", "hbs", "heic", "hsl", "hs", "h", "html", "htm", "ibooks", "icns", "ico", "ics", "idx", "iff", "ifo", "image", "img", "indd", "inf", "ini", "in", "iso", "j2", "jar", "java", "jpeg", "jpe", "jpg", "json", "jsp", "js", "jsx", "key", "kf8", "kmk", "ksh", "kup", "less", "lex", "licx", "lisp", "lit", "lnk", "lock", "log", "lua", "m2v", "m3u8", "m3u", "m4a", "m4r", "m4", "m4v", "map", "master", "mc", "mdb", "mdf", "md", "me", "midi", "mid", "mi", "mk", "mkv", "mm", "mobi", "mod", "mo", "mov", "mp2", "mp3", "mp4", "mpa", "mpd", "mpeg", "mpe", "mpga", "mpg", "mpp", "mpt", "msi", "msu", "m", "nef", "nes", "nfo", "nix", "npmignore", "odb", "ods", "odt", "ogg", "ogv", "ost", "otf", "ott", "ova", "ovf", "p12", "p7b", "pages", "part", "pcd", "pdb", "pdf", "pem", "pfx", "pgp", "phar", "php", "ph", "pkg", "plist", "pl", "pm", "png", "pom", "po", "pot", "potx", "pps", "ppsx", "pptm", "ppt", "pptx", "prop", "ps1", "psd", "psp", "ps", "pst", "pub", "pyc", "py", "qt", "ram", "rar", "ra", "raw", "rb", "rdf", "resx", "retry", "rm", "rom", "rpm", "rsa", "rss", "rtf", "rub", "ru", "sass", "scss", "sdf", "sed", "sh", "sitemap", "skin", "sldm", "sldx", "sln", "sol", "sqlite", "sql", "step", "stl", "svg", "swd", "swf", "swift", "sys", "tar", "tcsh", "tex", "tfignore", "tga", "tgz", "tiff", "tif", "tmp", "torrent", "ts", "tsv", "ttf", "twig", "txt", "udf", "vbproj", "vbs", "vb", "vcd", "vcs", "vdi", "vdx", "vmdk", "vob", "vscodeignore", "vsd", "vss", "vst", "vsx", "vtx", "war", "wav", "wbk", "webinfo", "webm", "webp", "wma", "wmf", "wmv", "woff2", "woff", "wps", "wsf", "xaml", "xcf", "xlm", "xlsm", "xls", "xlsx", "xltm", "xlt", "xltx", "xml", "xpi", "xps", "xrb", "xsd", "xsl", "xspf", "xz", "yaml", "yml", "zip", "zsh", "z" };
-
     private static string[] BasicExtensions = new[] { "doc", "iso", "pdf", "svg", "xml", "zip" };
     private static string[] VideoExtensions = new[] { "avi", "mkv", "mov", "mp4", "mpeg", "mpg", "ts", "webm" };
     private static string[] ImageExtensions = new[] { "bmp", "gif", "gif", "jpg", "png", "tiff", "webp" };
@@ -567,5 +620,64 @@ public partial class LibraryFiles : ListPage<Guid, LibaryFileListModel>, IDispos
             return $"filetypes/video/{extension}.svg";
         
         return "blank.svg";
+    }
+
+    /// <summary>
+    /// Gets the icon to show for the node
+    /// </summary>
+    /// <param name="node">the node</param>
+    /// <returns>the node icon</returns>
+    private string GetNodeIcon(string node)
+    {
+        if(Nodes.TryGetValue(node.ToLowerInvariant(), out ProcessingNode n) == false)
+            return "fas fa-desktop";
+        if (n.OperatingSystem == OperatingSystemType.Docker)
+            return "fab fa-docker";
+        if (n.OperatingSystem == OperatingSystemType.Windows)
+            return "fab fa-windows";
+        if (n.OperatingSystem == OperatingSystemType.Mac)
+            return "fab fa-apple";
+        if (n.OperatingSystem == OperatingSystemType.Linux)
+            return "fab fa-linux";
+        return "fas fa-desktop";
+    }
+
+    /// <summary>
+    /// Sets the selected node
+    /// </summary>
+    /// <param name="node">the node</param>
+    private void SelectNode(object node)
+    {
+        SelectedNode = node as Guid?;
+        _ = Refresh();
+    }
+
+    /// <summary>
+    /// Sets the sort by
+    /// </summary>
+    /// <param name="sortBy">the sort by</param>
+    private void SelectSortBy(object sortBy)
+    {
+        SelectedSortBy = sortBy as FilesSortBy?;
+        _ = Refresh();
+    }
+    /// <summary>
+    /// Sets the selected library
+    /// </summary>
+    /// <param name="library">the library</param>
+    private void SelectLibrary(object library)
+    {
+        SelectedLibrary = library as Guid?;
+        _ = Refresh();
+    }
+
+    /// <summary>
+    /// Sets the selected flow
+    /// </summary>
+    /// <param name="flow">the flow</param>
+    private void SelectFlow(object flow)
+    {
+        SelectedFlow = flow as Guid?;
+        _ = Refresh();
     }
 }

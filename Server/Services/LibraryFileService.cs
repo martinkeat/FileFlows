@@ -27,7 +27,7 @@ public class LibraryFileService : ILibraryFileService
         result.File = file;
         return result;
     }
-    
+
 
     /// <summary>
     /// Get all matching files
@@ -36,12 +36,19 @@ public class LibraryFileService : ILibraryFileService
     /// <param name="skip">how many files to skip</param>
     /// <param name="rows">the rows to get</param>
     /// <param name="filter">a text filter</param>
-    /// <param name="allLibraries">all libraries in the systemZ</param>
+    /// <param name="allLibraries">all libraries in the system</param>
+    /// <param name="node">[Optional] a specific node to match against</param>
+    /// <param name="library">[Optional] library to filter by</param>
+    /// <param name="flow">[Optional] flow to filter by</param>
+    /// <param name="sortBy">[Optional] sort by method</param>
     /// <returns>the matching files</returns>
-    public async Task<List<LibraryFile>> GetAll(FileStatus? status = null, int skip = 0, int rows = 0, string filter = null, List<Library>? allLibraries = null)
+    public async Task<List<LibraryFile>> GetAll(FileStatus? status = null, int skip = 0, int rows = 0,
+        string filter = null,
+        List<Library>? allLibraries = null, Guid? node = null, Guid? library = null, Guid? flow = null,
+        FilesSortBy? sortBy = null)
     {
         allLibraries ??= (await ServiceLoader.Load<LibraryService>().GetAllAsync());
-        
+
         var sysInfo = new LibraryFilterSystemInfo()
         {
             AllLibraries = allLibraries.ToDictionary(x => x.Uid, x => x),
@@ -54,20 +61,31 @@ public class LibraryFileService : ILibraryFileService
             Skip = skip,
             Rows = rows,
             Filter = filter,
-            SysInfo = sysInfo
+            SysInfo = sysInfo,
+            NodeUid = node,
+            LibraryUid = library,
+            FlowUid = flow,
+            SortBy = sortBy
         });
     }
+   
+    /// <summary>
+    /// Gets all files using the given filter
+    /// </summary>
+    /// <param name="filter">the filter</param>
+    /// <returns>all matching files</returns>
+    public Task<List<LibraryFile>> GetAll(LibraryFileFilter filter)
+        => new LibraryFileManager().GetAll(filter);
 
     /// <summary>
     /// Gets the total items matching the filter
     /// </summary>
-    /// <param name="status">the status</param>
     /// <param name="filter">the filter</param>
     /// <returns>the total number of items matching</returns>
-    public async Task<int> GetTotalMatchingItems(FileStatus? status, string filter)
+    public async Task<int> GetTotalMatchingItems(LibraryFileFilter filter)
     {
         var allLibraries = await ServiceLoader.Load<LibraryService>().GetAllAsync();
-        return await new LibraryFileManager().GetTotalMatchingItems(allLibraries, status, filter);
+        return await new LibraryFileManager().GetTotalMatchingItems(filter);
     }
 
     /// <inheritdoc />

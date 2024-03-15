@@ -90,12 +90,10 @@ public class LibraryFileManager
     /// <summary>
     /// Gets the total items matching the filter
     /// </summary>
-    /// <param name="allLibraries">all the libraries in the system</param>
-    /// <param name="status">the status</param>
     /// <param name="filter">the filter</param>
     /// <returns>the total number of items matching</returns>
-    public Task<int> GetTotalMatchingItems(List<Library> allLibraries, FileStatus? status, string filter)
-        => DatabaseAccessManager.Instance.LibraryFileManager.GetTotalMatchingItems(allLibraries, status, filter);
+    public Task<int> GetTotalMatchingItems(LibraryFileFilter filter)
+        => DatabaseAccessManager.Instance.LibraryFileManager.GetTotalMatchingItems(filter);
 
     /// <summary>
     /// Updates a file as started processing

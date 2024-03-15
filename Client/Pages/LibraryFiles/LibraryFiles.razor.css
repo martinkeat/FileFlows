@@ -5,6 +5,13 @@
   width: calc(100% - 10px);
 }
 
+.header {
+  display: flex;
+}
+.header span {
+  flex-grow: 1;
+}
+
 @media (max-width: 849.99px) {
   .btn-search {
     position: fixed;

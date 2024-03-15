@@ -51,6 +51,25 @@ public class NodeController : Controller
         return nodes.OrderBy(x => x.Name.ToLowerInvariant());
     }
 
+
+    /// <summary>
+    /// Gets a list of all processing nodes in the system
+    /// </summary>
+    /// <returns>a list of processing node</returns>
+    [HttpGet("list")]
+    public async Task<IEnumerable<ProcessingNode>> ListAll()
+    {
+        var service = ServiceLoader.Load<NodeService>();
+        var nodes = (await service.GetAllAsync()).Select(x => new ProcessingNode()
+        {
+            Uid = x.Uid,
+            Name = x.Name,
+            OperatingSystem = x.OperatingSystem,
+            Architecture = x.Architecture
+        }).ToList();
+        return nodes;
+    }
+
     /// <summary>
     /// Gets an overview of the nodes
     /// </summary>

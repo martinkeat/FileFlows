@@ -1219,21 +1219,21 @@ input[type=file]{
             font-weight: var(--bold, 600);
             position: absolute;
             top: 0;
-            padding: 0 0.65rem;
+            padding: 0 0.75rem;
             border-bottom-left-radius: 0.5rem;
-            width: 7rem;
+            width: fit-content;
             text-align: center;
         }
         .finished {
             background: #303030;
             right: 0;
-            z-index:2;
+            //z-index:2;
         }
         .time {
             display:none;
             right: 5rem;
             background: #464545;
-            z-index: 1;
+            //z-index: 1;
             padding-right: 2.5rem;
             width: 8rem;
         }
@@ -1272,5 +1272,20 @@ input[type=file]{
             font-weight: var(--bold, 600);
             padding: 0 0.5rem;
         }        
+    }
+}
+
+@media screen and (max-width: $mobile_width){
+    .library-file {
+        .icon {
+            display:none;
+        }
+        .right {
+            min-width:8rem;
+            width:8rem;
+        }
+        .time, .node {
+            display:none;
+        }
     }
 }

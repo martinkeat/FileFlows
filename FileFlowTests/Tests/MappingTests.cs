@@ -8,7 +8,7 @@ public class MappingTests
     private ProcessingNode GetProcessingNode()
     {
         var node = new ProcessingNode();
-        node.DirectorySeperatorChar = '/';
+        node.DirectorySeparatorChar = '/';
         node.Mappings = new List<KeyValuePair<string, string>>
             {
                 new KeyValuePair<string, string>("/usr/local/bin/ffmeg", "/Applications/ffmpeg"),

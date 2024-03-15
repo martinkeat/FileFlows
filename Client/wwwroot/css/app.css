@@ -107,7 +107,7 @@ input[type=checkbox]:disabled {
   cursor: not-allowed;
 }
 
-button:not(.flowtable-button):not(.navbar-toggler), a.btn, .btn-select {
+button:not(.flowtable-button):not(.navbar-toggler):not(.dd-btn), a.btn, .btn-select {
   font-size: 0.8rem !important;
   text-transform: uppercase;
   border-radius: unset !important;
@@ -124,15 +124,15 @@ button:not(.flowtable-button):not(.navbar-toggler), a.btn, .btn-select {
   color: var(--color);
   overflow: hidden;
 }
-button:not(.flowtable-button):not(.navbar-toggler):hover:not(:disabled), button:not(.flowtable-button):not(.navbar-toggler):active:not(:disabled), a.btn:hover:not(:disabled), a.btn:active:not(:disabled), .btn-select:hover:not(:disabled), .btn-select:active:not(:disabled) {
+button:not(.flowtable-button):not(.navbar-toggler):not(.dd-btn):hover:not(:disabled), button:not(.flowtable-button):not(.navbar-toggler):not(.dd-btn):active:not(:disabled), a.btn:hover:not(:disabled), a.btn:active:not(:disabled), .btn-select:hover:not(:disabled), .btn-select:active:not(:disabled) {
   background-image: linear-gradient(rgba(var(--accent-rgb), 0.3), rgba(var(--accent-rgb), 0.3)) !important;
   box-shadow: inset 0 -3px 0 0 var(--accent) !important;
 }
-button:not(.flowtable-button):not(.navbar-toggler):disabled, a.btn:disabled, .btn-select:disabled {
+button:not(.flowtable-button):not(.navbar-toggler):not(.dd-btn):disabled, a.btn:disabled, .btn-select:disabled {
   border-color: var(--input-background);
   color: var(--input-background);
 }
-button:not(.flowtable-button):not(.navbar-toggler):focus, a.btn:focus, .btn-select:focus {
+button:not(.flowtable-button):not(.navbar-toggler):not(.dd-btn):focus, a.btn:focus, .btn-select:focus {
   background: rgba(var(--accent-rgb), 0.2) !important;
 }
 
@@ -3709,21 +3709,19 @@ hr {
   font-weight: var(--bold, 600);
   position: absolute;
   top: 0;
-  padding: 0 0.65rem;
+  padding: 0 0.75rem;
   border-bottom-left-radius: 0.5rem;
-  width: 7rem;
+  width: fit-content;
   text-align: center;
 }
 .library-file .right .finished {
   background: #303030;
   right: 0;
-  z-index: 2;
 }
 .library-file .right .time {
   display: none;
   right: 5rem;
   background: #464545;
-  z-index: 1;
   padding-right: 2.5rem;
   width: 8rem;
 }
@@ -3760,6 +3758,19 @@ hr {
 .library-file .icon-value .value {
   font-weight: var(--bold, 600);
   padding: 0 0.5rem;
+}
+
+@media screen and (max-width: 850px) {
+  .library-file .icon {
+    display: none;
+  }
+  .library-file .right {
+    min-width: 8rem;
+    width: 8rem;
+  }
+  .library-file .time, .library-file .node {
+    display: none;
+  }
 }
 
 /*# sourceMappingURL=app.css.map */
