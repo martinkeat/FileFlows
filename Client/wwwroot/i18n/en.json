@@ -127,6 +127,7 @@
     "LastScanned": "Last Scanned",
     "Savings": "Savings",
     "Flow": "Flow",
+    "ForceProcessing": "Force Processing",
     "ObsoleteConfirm": {
       "Title": "Obsolete Node",
       "Message": "It is recommended you switch to a different node.",

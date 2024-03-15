@@ -114,15 +114,21 @@
     user-select: none;
     position: relative;
     width: 100%;
-    &:hover {
-        background: rgba(var(--accent-rgb), 0.3);
-    }
+    padding-left: 0.25rem;
     &:not(.flowtable-header-row) {
-        border-top: none;
-        border-right: none;
-        border-left: none;
+        border-top-color: transparent;
+        border-right-color: transparent;
+        border-left-color: transparent;
+        &:hover {
+            background: var(--base-lighter);
+        }
     }
-    
+
+    &.selected {
+        border-left:solid 3px var(--accent);
+        padding-left:calc(0.25rem - 2px);
+        background: var(--base);
+    }
     &.disabled ::deep .column {
         > span, > div {
             opacity: 0.5;
@@ -150,10 +156,6 @@
             height: unset;
             line-height: unset;
         }
-    }
-
-    &.selected {
-        background: rgba(var(--accent-rgb), 0.3);
     }
 }
 .flowtable-header-row {
@@ -289,7 +291,7 @@
 }
 
 .column {
-    pointer-events: none;
+    // pointer-events: none;
     align-self: center;
     ::deep label {
         pointer-events: auto;

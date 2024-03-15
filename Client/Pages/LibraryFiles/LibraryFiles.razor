@@ -29,7 +29,7 @@
 <FlowTable @ref="Table" Data="@Data" TItem="LibaryFileListModel" Selection="SelectionMode.Multiple"
            TableIdentifier=@TableIdentifier DoubleClick="@OnDoubleClick" MinWidth="@NameMinWidth"
            ShowPager=@true TotalItems=@TotalItems OnPageChange=@PageChange OnPageSizeChange=@PageSizeChange
-           OnFilter="OnFilter"
+           OnFilter="OnFilter" 
            >
     <ToolBar>
         <FlowTableButton Clicked=Edit SelectedOne="true" Icon="fas fa-file" Label="Labels.View" />
@@ -58,160 +58,114 @@
     </ToolBar>
 
     <Columns>
-        <FlowTableColumn TItem="LibaryFileListModel" Hidden="(SelectedStatus == FileStatus.Duplicate)">
+        <FlowTableColumn TItem="LibaryFileListModel" NoHeight="true">
             <Header>
-                @Globals.lblName
+                File
             </Header>
             <Cell Context="item">
-                @if (item.Forced)
-                {
-                    <span class="flags">
-                        <i class="fas fa-hammer" title="Force Processing" />
+                <div class="library-file">
+                    <span class="icon">
+                        <img src="/icons/@GetExtensionImage(item.Name.ToLowerInvariant())"/>
                     </span>
-                }
-                <span title="@item.Name">@item.RelativePath</span>
-            </Cell>
-        </FlowTableColumn>
-        <FlowTableColumn TItem="LibaryFileListModel" Hidden="(SelectedStatus != FileStatus.Duplicate)" Pre="true">
-            <Header>
-                @Globals.lblName
-            </Header>
-            <Cell Context="item">@item.Name
-                @item.Duplicate</Cell>
-        </FlowTableColumn>
-        <FlowTableColumn TItem="LibaryFileListModel" Width="10rem" MobileWidth="0" Hidden="@(Client.App.Instance.IsMobile || (SelectedStatus == FileStatus.Unprocessed || SelectedStatus == FileStatus.Processed || SelectedStatus == FileStatus.Processing || SelectedStatus == FileStatus.ProcessingFailed || SelectedStatus == FileStatus.OutOfSchedule || SelectedStatus == FileStatus.Disabled) == false)">
-            <Header>
-                @if (SelectedStatus == FileStatus.Unprocessed || SelectedStatus == FileStatus.OutOfSchedule || SelectedStatus == FileStatus.Disabled)
-                {
-                    <span>Found</span>
-                }
-                else if (SelectedStatus == FileStatus.Processing)
-                {
-                    <span>Started</span>
-                }
-                else if (SelectedStatus == FileStatus.Processed)
-                {
-                    <span>Finished</span>
-                }
-                else if (SelectedStatus == FileStatus.ProcessingFailed)
-                {
-                    <span>Failed</span>
-                }
-            </Header>
-            <Cell Context="item">
-                <span>@DateString(item.Date)</span>
-            </Cell>
-        </FlowTableColumn>
-        <FlowTableColumn TItem="LibaryFileListModel" Width="12rem" MobileWidth="0" Hidden="@(Client.App.Instance.IsMobile || (int)SelectedStatus < 1 || SelectedStatus == FileStatus.Duplicate || SelectedStatus == FileStatus.MissingLibrary)">
-            <Header>
-                Flow
-            </Header>
-            <Cell Context="item">
-                <span>@item.Flow</span>
-            </Cell>
-        </FlowTableColumn>
-        <FlowTableColumn TItem="LibaryFileListModel" Width="12rem" MobileWidth="0" Hidden="(Client.App.Instance.IsMobile || SelectedStatus == FileStatus.Processing || SelectedStatus == FileStatus.MissingLibrary)">
-            <Header>
-                Library
-            </Header>
-            <Cell Context="item">
-                <span>@item.Library</span>
-            </Cell>
-        </FlowTableColumn>
-        <FlowTableColumn TItem="LibaryFileListModel" Width="12rem" MobileWidth="0" Hidden="(Client.App.Instance.IsMobile || 
-                                                                                            (SelectedStatus != FileStatus.Processing && 
-                                                                                             SelectedStatus != FileStatus.ProcessingFailed &&
-                                                                                             SelectedStatus != FileStatus.Processed &&
-                                                                                             SelectedStatus != FileStatus.ReprocessByFlow
-                                                                                            ))">
-            <Header>
-                Node
-            </Header>
-            <Cell Context="item">
-                @if (item.Node == "FileFlowsServer")
-                {
-                    <span>@lblFileFlowsServer</span>
-                }
-                else
-                {
-                    <span>@item.Node</span>
-                }
-            </Cell>
-        </FlowTableColumn>
-        <FlowTableColumn TItem="LibaryFileListModel" Width="7rem" Hidden="((SelectedStatus == FileStatus.Processed || SelectedStatus == FileStatus.Processing || SelectedStatus == FileStatus.OnHold) == false)" MobileWidth="5rem">
-            <Header>
-                Time
-            </Header>
-            <Cell Context="item">
-                @if (item.ProcessingTime == null)
-                {
-                    <span></span>
-                }
-                else if (SelectedStatus == FileStatus.OnHold)
-                {
-                    <span>@FormatHelper.HumanizeTime(item.ProcessingTime.Value)</span>
-                }
-                else
-                {
-                    <span>@String.Format(@"{0:hh\:mm\:ss}", item.ProcessingTime)</span>
-                }
-            </Cell>
-        </FlowTableColumn>
-        <FlowTableColumn TItem="LibaryFileListModel" Width="6rem" Hidden="SelectedStatus != FileStatus.MissingLibrary" MobileWidth="10rem">
-            <Header>
-                Status
-            </Header>
-            <Cell Context="item">
-                <span>@(item.Status == null ? string.Empty : Translater.Instant("Enums.FileStatus." + item.Status))</span>
-            </Cell>
-        </FlowTableColumn>
-        <FlowTableColumn TItem="LibaryFileListModel" Width="min(6rem, 10vw)" Hidden="@(SelectedStatus == FileStatus.Processing || SelectedStatus == FileStatus.ReprocessByFlow || App.Instance.IsMobile)">
-            <Header>
-                Size
-            </Header>
-            <Cell Context="item">
-                @if (SelectedStatus == FileStatus.Processed)
-                {
-                    long fs = item.FinalSize ?? 0;
-                    long os = item.OriginalSize ?? 0;
-                    int width = (int)((((double)fs) / os) * 100);
-                    bool bigger = width > 100;
-                    if (width > 100)
-                        width = 100;
-                    string toolTip = Helpers.FileSizeFormatter.FormatShrinkage(os, fs);
-                    if (fs > 0)
+                    <div class="center">
+                    <span class="name">
+                        <span>@item.DisplayName</span>
+                        @if (SelectedStatus == FileStatus.Duplicate)
+                        {
+                            <span class="duplicate">@item.Duplicate</span>
+                        }
+                        else if (SelectedStatus == FileStatus.Processed && string.IsNullOrWhiteSpace(item.OutputPath) == false && item.OutputPath != item.Name)
+                        {
+                            <span class="output-path">@item.OutputPath</span>
+                        }
+                    </span>
+                    
+                    <div class="info">
+                        @if (string.IsNullOrWhiteSpace(item.Library) == false)
+                        {
+                            <div class="icon-value library">
+                                <i class="fas fa-folder"></i>
+                                <span class="value">@item.Library</span>
+                            </div>
+                        }
+                        @if (string.IsNullOrWhiteSpace(item.Flow) == false)
+                        {
+                            <div class="icon-value flow">
+                                <i class="fas fa-sitemap"></i>
+                                <span class="value">@item.Flow</span>
+                            </div>
+                        }
+                        @if (string.IsNullOrWhiteSpace(item.Node) == false)
+                        {
+                            <div class="icon-value node">
+                                <i class="fas fa-desktop"></i>
+                                <span class="value">@(item.Node == "FileFlowsServer" ? lblFileFlowsServer : item.Node)</span>
+                            </div>
+                        }
+                        @if (item.Forced && SelectedStatus == FileStatus.Unprocessed)
+                        {
+                            <div class="icon-value flag">
+                                <i class="fas fa-hammer"></i>
+                                <span class="value">@lblForcedProcessing</span>
+                            </div>
+                        }
+                        @if (item.ProcessingTime != null && SelectedStatus is FileStatus.Processed or FileStatus.ProcessingFailed or FileStatus.OnHold)
+                        {
+                            <div class="icon-value time">
+                                <i class="fas fa-clock"></i>
+                                @if (SelectedStatus == FileStatus.OnHold)
+                                {
+                                    <span class="value">@FormatHelper.HumanizeTime(item.ProcessingTime.Value)</span>
+                                }
+                                else
+                                {
+                                    <span class="value">@($@"{item.ProcessingTime:hh\:mm\:ss}")</span>
+                                }
+                            </div>
+                        }
+                    </div>
+                    </div>
+                    @if (SelectedStatus != FileStatus.Processing && SelectedStatus != FileStatus.ReprocessByFlow)
                     {
-                        <div class="flow-bar @(bigger ? "grew" : "")" title="@toolTip">
-                            <div class="bar-value" style="width:calc(@(width)% - 2px)"></div>
-                        </div>
-                    }
-                }
-                else if(item.OriginalSize != null)
-                {
-                    <span>@Helpers.FileSizeFormatter.FormatSize(item.OriginalSize.Value)</span>
-                }
-            </Cell>
-        </FlowTableColumn>
-        <FlowTableColumn TItem="LibaryFileListModel" Width="8rem" Hidden="@(SelectedStatus != FileStatus.Processing)">
-            <Header>
-                Progress
-            </Header>
-            <Cell Context="item">
-                @{
-                    var worker = WorkerStatus?.FirstOrDefault(x => x.LibraryFile?.Uid == item.Uid);
-                    if (worker != null)
-                    {
-                        var overall = worker.TotalParts == 0 ? 100 : ((worker.CurrentPart / (double)worker.TotalParts)) * 100;
-                        var current = worker.CurrentPartPercent;
-                        <div class="flow-bar worker-progress @(current > 0 ? "has-current" : "")">
-                            @if (current > 0)
+                        <div class="right savings">
+                            <span class="finished">@DateString(item.Date)</span>
+                            @if (item.OriginalSize != null && item.FinalSize != null)
                             {
-                                <div class="current-progress bar-value" style="width:@current%"></div>
+                                <div class="right-inner">
+                                    <FlowSavings FinalSize="@item.FinalSize.Value" OriginalSize="@item.OriginalSize.Value"/>
+                                </div>
                             }
-                            <div class="overall-progress  bar-value" style="width:@overall%"></div>
+                            @if (SelectedStatus == FileStatus.OnHold)
+                            {
+                                <span class="time">@FormatHelper.HumanizeTime(item.ProcessingTime.Value)</span>
+                            }
+                            else
+                            {
+                                <span class="time">@($@"{item.ProcessingTime:hh\:mm\:ss}")</span>
+                            }
                         </div>
                     }
-                }
+                    else if (SelectedStatus == FileStatus.Processing)
+                    {
+                        <div class="right processing">
+                        @{
+                            var worker = WorkerStatus?.FirstOrDefault(x => x.LibraryFile?.Uid == item.Uid);
+                            if (worker != null)
+                            {
+                                var overall = worker.TotalParts == 0 ? 100 : ((worker.CurrentPart / (double)worker.TotalParts)) * 100;
+                                var current = worker.CurrentPartPercent;
+                                <div class="flow-bar worker-progress @(current > 0 ? "has-current" : "")">
+                                    @if (current > 0)
+                                    {
+                                        <div class="current-progress bar-value" style="width:@current%"></div>
+                                    }
+                                    <div class="overall-progress  bar-value" style="width:@overall%"></div>
+                                </div>
+                            }
+                        }
+                        </div>
+                    }
+                </div>
             </Cell>
         </FlowTableColumn>
     </Columns>

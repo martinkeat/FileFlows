@@ -618,7 +618,7 @@ internal class DbLibraryFileManager : BaseManager
                 using var db = await DbConnector.GetDb();
                 return await db.Db.ExecuteScalarAsync<int>($"select count({Wrap(nameof(LibraryFile.Uid))}) " +
                                                            $"from {Wrap(nameof(LibraryFile))} " +
-                                                           $"where {Wrap(nameof(LibraryFile.Status))} = {{(int)status}} and  " + filterWhere);
+                                                           $"where {Wrap(nameof(LibraryFile.Status))} = {(int)status} and  " + filterWhere);
             }
 
             var disabled = string.Join(", ",

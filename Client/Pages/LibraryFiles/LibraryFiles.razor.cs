@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using System.Timers;
 using FileFlows.Client.Components.Common;
 using Microsoft.AspNetCore.Components;
@@ -31,7 +32,7 @@ public partial class LibraryFiles : ListPage<Guid, LibaryFileListModel>, IDispos
     private string lblMoveToTop = "";
 
     private int Count;
-    private string lblSearch, lblDeleteSwitch;
+    private string lblSearch, lblDeleteSwitch, lblForcedProcessing;
 
     private string TableIdentifier => "LibraryFiles_" + this.SelectedStatus; 
 
@@ -80,6 +81,7 @@ public partial class LibraryFiles : ListPage<Guid, LibaryFileListModel>, IDispos
     protected async override Task OnInitializedAsync()
     {
         this.SelectedStatus = FileFlows.Shared.Models.FileStatus.Unprocessed;
+        lblForcedProcessing = Translater.Instant("Labels.ForceProcessing");
         lblMoveToTop = Translater.Instant("Pages.LibraryFiles.Buttons.MoveToTop");
         lblLibraryFiles = Translater.Instant("Pages.LibraryFiles.Title");
         lblFileFlowsServer = Translater.Instant("Pages.Nodes.Labels.FileFlowsServer");
@@ -530,5 +532,40 @@ public partial class LibraryFiles : ListPage<Guid, LibaryFileListModel>, IDispos
             Blocker.Hide();
             this.StateHasChanged();
         }
+    }
+
+    static string[] IconTypes = new [] { "3g2", "3ga", "3gp", "7z", "aac", "aa", "accdb", "accdt", "ac", "adn", "aifc", "aiff", "aif", "ai", "ait", "amr", "ani", "apk", "applescript", "app", "asax", "asc", "ascx", "asf", "ash", "ashx", "asmx", "asp", "aspx", "asx", "aup", "au", "avi", "axd", "aze", "bak", "bash", "bat", "bin", "bmp", "bowerrc", "bpg", "browser", "bz2", "cab", "cad", "caf", "cal", "catalog", "cd", "cer", "cfg", "cfml", "cfm", "cgi", "class", "cmd", "codekit", "coffeelintignore", "coffee", "compile", "com", "config", "conf", "cpp", "cptx", "cr2", "crdownload", "crt", "crypt", "csh", "cson", "csproj", "css", "cs", "c", "csv", "cue", "dat", "dbf", "db", "deb", "dgn", "dist", "diz", "dll", "dmg", "dng", "docb", "docm", "doc", "docx", "dotm", "dot", "dotx", "download", "dpj", "ds_store", "dtd", "dwg", "dxf", "editorconfig", "el", "enc", "eot", "eps", "epub", "eslintignore", "exe", "f4v", "fax", "fb2", "filenames", "flac", "fla", "flv", "gadget", "gdp", "gem", "gif", "gitattributes", "gitignore", "go", "gpg", "gz", "handlebars", "hbs", "heic", "hsl", "hs", "h", "html", "htm", "ibooks", "icns", "ico", "ics", "idx", "iff", "ifo", "image", "img", "indd", "inf", "ini", "in", "iso", "j2", "jar", "java", "jpeg", "jpe", "jpg", "json", "jsp", "js", "jsx", "key", "kf8", "kmk", "ksh", "kup", "less", "lex", "licx", "lisp", "lit", "lnk", "lock", "log", "lua", "m2v", "m3u8", "m3u", "m4a", "m4r", "m4", "m4v", "map", "master", "mc", "mdb", "mdf", "md", "me", "midi", "mid", "mi", "mk", "mkv", "mm", "mobi", "mod", "mo", "mov", "mp2", "mp3", "mp4", "mpa", "mpd", "mpeg", "mpe", "mpga", "mpg", "mpp", "mpt", "msi", "msu", "m", "nef", "nes", "nfo", "nix", "npmignore", "odb", "ods", "odt", "ogg", "ogv", "ost", "otf", "ott", "ova", "ovf", "p12", "p7b", "pages", "part", "pcd", "pdb", "pdf", "pem", "pfx", "pgp", "phar", "php", "ph", "pkg", "plist", "pl", "pm", "png", "pom", "po", "pot", "potx", "pps", "ppsx", "pptm", "ppt", "pptx", "prop", "ps1", "psd", "psp", "ps", "pst", "pub", "pyc", "py", "qt", "ram", "rar", "ra", "raw", "rb", "rdf", "resx", "retry", "rm", "rom", "rpm", "rsa", "rss", "rtf", "rub", "ru", "sass", "scss", "sdf", "sed", "sh", "sitemap", "skin", "sldm", "sldx", "sln", "sol", "sqlite", "sql", "step", "stl", "svg", "swd", "swf", "swift", "sys", "tar", "tcsh", "tex", "tfignore", "tga", "tgz", "tiff", "tif", "tmp", "torrent", "ts", "tsv", "ttf", "twig", "txt", "udf", "vbproj", "vbs", "vb", "vcd", "vcs", "vdi", "vdx", "vmdk", "vob", "vscodeignore", "vsd", "vss", "vst", "vsx", "vtx", "war", "wav", "wbk", "webinfo", "webm", "webp", "wma", "wmf", "wmv", "woff2", "woff", "wps", "wsf", "xaml", "xcf", "xlm", "xlsm", "xls", "xlsx", "xltm", "xlt", "xltx", "xml", "xpi", "xps", "xrb", "xsd", "xsl", "xspf", "xz", "yaml", "yml", "zip", "zsh", "z" };
+
+    private static string[] BasicExtensions = new[] { "doc", "iso", "pdf", "svg", "xml", "zip" };
+    private static string[] VideoExtensions = new[] { "avi", "mkv", "mov", "mp4", "mpeg", "mpg", "ts", "webm" };
+    private static string[] ImageExtensions = new[] { "bmp", "gif", "gif", "jpg", "png", "tiff", "webp" };
+    private static string[] TextExtensions = new[] { "srt", "sub", "sup", "txt" };
+    private static string[] ComicExtensions = new[] { "cb7", "cbr", "cbz" };
+
+    /// <summary>
+    /// Gets the image for the file
+    /// </summary>
+    /// <param name="path">the path of the file</param>
+    /// <returns>the image to show</returns>
+    private string GetExtensionImage(string path)
+    {
+        int index = path.LastIndexOf(".", StringComparison.Ordinal);
+        if (index < 0)
+            return "";
+        
+        
+        string extension = path[(index + 1)..].ToLowerInvariant();
+        if (BasicExtensions.Contains(extension))
+            return $"filetypes/{extension}.svg";
+        if (ComicExtensions.Contains(extension))
+            return $"filetypes/comic/{extension}.svg";
+        if (ImageExtensions.Contains(extension))
+            return $"filetypes/image/{extension}.svg";
+        if (TextExtensions.Contains(extension))
+            return $"filetypes/text/{extension}.svg";
+        if (VideoExtensions.Contains(extension))
+            return $"filetypes/video/{extension}.svg";
+        
+        return "blank.svg";
     }
 }
