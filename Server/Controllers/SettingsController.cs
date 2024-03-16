@@ -270,7 +270,7 @@ public class SettingsController : Controller
     public IActionResult DownloadPlugin(string name)
     {
         Logger.Instance?.ILog("DownloadPlugin: " + name);
-        if (Regex.IsMatch(name, @"^[a-zA-Z0-9\-\._+]\.ffplugin$", RegexOptions.CultureInvariant) == false)
+        if (Regex.IsMatch(name, @"^[a-zA-Z][a-zA-Z0-9\-\._+]+\.ffplugin$", RegexOptions.CultureInvariant) == false)
         {
             Logger.Instance?.WLog("DownloadPlugin.Invalid Plugin: " + name);
             return BadRequest("Invalid plugin: " + name);

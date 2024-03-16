@@ -593,14 +593,6 @@ public partial class LibraryFiles : ListPage<Guid, LibaryFileListModel>, IDispos
         }
     }
 
-    private static string[] BasicExtensions = new[] { "doc", "iso", "pdf", "svg", "xml", "zip" };
-    private static string[] VideoExtensions = new[] { "avi", "mkv", "mov", "mp4", "mpeg", "mpg", "ts", "webm", "wmv" };
-    private static string[] ImageExtensions = new[] { "bmp", "gif", "gif", "heic", "jpg", "png", "tiff", "webp" };
-    private static string[] TextExtensions = new[] { "srt", "sub", "sup", "txt" };
-    private static string[] ComicExtensions = new[] { "cb7", "cbr", "cbz" };
-    private static string[] ArchiveExtensions = new[] { "zip", "7z", "rar", "gz", "tar" };
-    private static string[] AudioExtensions = new[] { "aac", "flac", "m4a", "mp3", "ogg", "wav" };
-
     /// <summary>
     /// Gets the image for the file
     /// </summary>
@@ -610,25 +602,14 @@ public partial class LibraryFiles : ListPage<Guid, LibaryFileListModel>, IDispos
     {
         int index = path.LastIndexOf(".", StringComparison.Ordinal);
         if (index < 0)
-            return "filetypes/folder.svg";
+            return "/icons/filetypes/folder.svg";
+        string prefix = "/icon/filetype";
+#if (DEBUG)
+        prefix = "http://localhost:6868/icon/filetype";
+#endif
         
         string extension = path[(index + 1)..].ToLowerInvariant();
-        if (BasicExtensions.Contains(extension))
-            return $"filetypes/{extension}.svg";
-        if (ArchiveExtensions.Contains(extension))
-            return $"filetypes/archive/{extension}.svg";
-        if (AudioExtensions.Contains(extension))
-            return $"filetypes/audio/{extension}.svg";
-        if (ComicExtensions.Contains(extension))
-            return $"filetypes/comic/{extension}.svg";
-        if (ImageExtensions.Contains(extension))
-            return $"filetypes/image/{extension}.svg";
-        if (TextExtensions.Contains(extension))
-            return $"filetypes/text/{extension}.svg";
-        if (VideoExtensions.Contains(extension))
-            return $"filetypes/video/{extension}.svg";
-        
-        return "filetypes/blank.svg";
+        return $"{prefix}/{extension}.svg";
     }
 
     /// <summary>
