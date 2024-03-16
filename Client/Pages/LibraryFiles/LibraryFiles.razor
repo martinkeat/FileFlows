@@ -107,21 +107,21 @@
                     <div class="info">
                         @if (string.IsNullOrWhiteSpace(item.Library) == false)
                         {
-                            <div class="icon-value library">
+                            <div class="icon-value library clickable" @onclick="() => SelectLibrary(item.Library)">
                                 <i class="fas fa-folder"></i>
                                 <span class="value">@item.Library</span>
                             </div>
                         }
                         @if (string.IsNullOrWhiteSpace(item.Flow) == false)
                         {
-                            <div class="icon-value flow">
+                            <div class="icon-value flow clickable" @onclick="() => SelectFlow(item.Flow)">
                                 <i class="fas fa-sitemap"></i>
                                 <span class="value">@item.Flow</span>
                             </div>
                         }
                         @if (string.IsNullOrWhiteSpace(item.Node) == false)
                         {
-                            <div class="icon-value node">
+                            <div class="icon-value node clickable" @onclick="() => SelectNode(item.Node)">
                                 <i class="@GetNodeIcon(item.Node)"></i>
                                 <span class="value">@(item.Node == "FileFlowsServer" ? lblFileFlowsServer : item.Node)</span>
                             </div>

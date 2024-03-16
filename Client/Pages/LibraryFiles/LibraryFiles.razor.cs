@@ -53,6 +53,8 @@ public partial class LibraryFiles : ListPage<Guid, LibaryFileListModel>, IDispos
     private List<FlowExecutorInfo> WorkerStatus = new ();
     private Timer AutoRefreshTimer;
     private Dictionary<string, ProcessingNode> Nodes = new();
+    private List<Library> Libraries = new();
+    private List<FlowListModel> Flows = new();
     private List<DropDownOption> optionsLibraries, optionsNodes, optionsFlows, optionsSortBy;
 
     protected override string DeleteMessage => "Labels.DeleteLibraryFiles";
@@ -128,6 +130,7 @@ public partial class LibraryFiles : ListPage<Guid, LibaryFileListModel>, IDispos
         var libraryResult = await HttpHelper.Get<List<Library>>("/api/library");
         if (libraryResult.Success)
         {
+            Libraries = libraryResult.Data;
             optionsLibraries = libraryResult.Data.OrderBy(x => x.Name.ToLowerInvariant()).Select(x => new DropDownOption()
             {
                 Icon = "fas fa-folder",
@@ -138,6 +141,7 @@ public partial class LibraryFiles : ListPage<Guid, LibaryFileListModel>, IDispos
         var flowResult = await HttpHelper.Get<List<FlowListModel>>("/api/flow/list-all");
         if (flowResult.Success)
         {
+            Flows = flowResult.Data;
             optionsFlows = flowResult.Data.OrderBy(x => x.Name.ToLowerInvariant()).Select(x => new DropDownOption()
             {
                 Icon = "fas fa-sitemap",
@@ -653,7 +657,15 @@ public partial class LibraryFiles : ListPage<Guid, LibaryFileListModel>, IDispos
     /// <param name="node">the node</param>
     private void SelectNode(object node)
     {
-        SelectedNode = node as Guid?;
+        if (node is string str)
+        {
+            var n = Nodes?.Values?.FirstOrDefault(x => x.Name?.ToLowerInvariant() == str.ToLowerInvariant());
+            if (n == null)
+                return;
+            SelectedNode = n.Uid;
+        }
+        else
+            SelectedNode = node as Guid?;
         _ = Refresh();
     }
 
@@ -672,7 +684,15 @@ public partial class LibraryFiles : ListPage<Guid, LibaryFileListModel>, IDispos
     /// <param name="library">the library</param>
     private void SelectLibrary(object library)
     {
-        SelectedLibrary = library as Guid?;
+        if (library is string str)
+        {
+            var l = Libraries?.FirstOrDefault(x => x.Name?.ToLowerInvariant() == str.ToLowerInvariant());
+            if (l == null)
+                return;
+            SelectedLibrary = l.Uid;
+        }
+        else
+            SelectedLibrary = library as Guid?;
         _ = Refresh();
     }
 
@@ -682,7 +702,15 @@ public partial class LibraryFiles : ListPage<Guid, LibaryFileListModel>, IDispos
     /// <param name="flow">the flow</param>
     private void SelectFlow(object flow)
     {
-        SelectedFlow = flow as Guid?;
+        if (flow is string str)
+        {
+            var f = Flows?.FirstOrDefault(x => x.Name?.ToLowerInvariant() == str.ToLowerInvariant());
+            if (f == null)
+                return;
+            SelectedFlow = f.Uid;
+        }
+        else
+            SelectedFlow = flow as Guid?;
         _ = Refresh();
     }
 }

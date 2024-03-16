@@ -131,7 +131,6 @@
   width: 8rem;
 }
 .library-file .icon-value {
-  cursor: pointer;
   border: solid 1px var(--iv-color);
   border-radius: 0.5rem;
   overflow: hidden;
@@ -154,6 +153,9 @@
 }
 .library-file .icon-value.time {
   --iv-color: #ac6300;
+}
+.library-file .icon-value.clickable {
+  cursor: pointer;
 }
 .library-file .icon-value i {
   padding: 0 0.5rem;

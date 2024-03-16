@@ -151,7 +151,6 @@
         &.time {
             --iv-color: #ac6300;
         }
-        cursor: pointer;
         border: solid 1px var(--iv-color);
         border-radius: 0.5rem;
         overflow: hidden;
@@ -159,6 +158,9 @@
         font-size:0.7rem;
         margin:0.25rem 0.5rem 0.25rem 0;
         height: 1.5rem;
+        &.clickable {
+            cursor: pointer;
+        }
         i {
             padding: 0 0.5rem;
             background:var(--iv-color);
