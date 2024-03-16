@@ -83,6 +83,7 @@
 .library-file .center .info {
   display: flex;
   flex-direction: row;
+  flex-grow: 1;
 }
 .library-file .center .name {
   flex-grow: 1;
@@ -90,6 +91,7 @@
   text-overflow: ellipsis;
   display: flex;
   flex-direction: column;
+  justify-content: center;
 }
 .library-file .center .name span {
   overflow: hidden;
@@ -136,6 +138,7 @@
   display: flex;
   font-size: 0.7rem;
   margin: 0.25rem 0.5rem 0.25rem 0;
+  height: 1.5rem;
 }
 .library-file .icon-value.flow {
   --iv-color: #345772;

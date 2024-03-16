@@ -83,6 +83,7 @@
         .info {
             display:flex;
             flex-direction: row;
+            flex-grow: 1;
         }
         .name {
             flex-grow: 1;
@@ -90,6 +91,7 @@
             text-overflow: ellipsis;
             display:flex;
             flex-direction: column;
+            justify-content: center;
             span {
                 overflow: hidden;
                 text-overflow: ellipsis;
@@ -156,6 +158,7 @@
         display: flex;
         font-size:0.7rem;
         margin:0.25rem 0.5rem 0.25rem 0;
+        height: 1.5rem;
         i {
             padding: 0 0.5rem;
             background:var(--iv-color);

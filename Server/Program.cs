@@ -17,7 +17,7 @@ public class Program
     public static void Main(string[] args)
     {
 #if DEBUG
-        args = new[] { "--minimal-gui" };    
+        // args = new[] { "--minimal-gui" };    
 #endif
         if (args.Any(x =>
                 x.ToLower() == "--help" || x.ToLower() == "-?" || x.ToLower() == "/?" || x.ToLower() == "/help" ||
