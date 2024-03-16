@@ -137,7 +137,21 @@ public class Application
             }
             else if (minimalGui)
             {
-
+                // do this first, to populate the Port so the Minimal UI shows the correct url
+                string serverUrl = WebServer.GetServerUrl(args);
+                _ = Task.Run(() =>
+                {
+                    try
+                    {
+                        Logger.Instance.ILog("Starting FileFlows Server...");
+                        WebServer.Start(args);
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.Instance.ELog("Failed starting server: " + ex.Message + Environment.NewLine +
+                                             ex.StackTrace);
+                    }
+                });
                 DateTime dt = DateTime.UtcNow;
                 try
                 {
