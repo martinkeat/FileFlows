@@ -465,10 +465,10 @@ public class FileServerController : Controller
 
         Logger.Instance?.ILog("FileServer: Save: " + path);
 
-        StringBuilder log = new StringBuilder();
+        StringBuilder log = new StringBuilder(); 
         try
         {
-            var stream = Request.Body;
+            await using var stream = Request.Body;
 
             if (stream == null || stream.CanRead == false)
             {
@@ -491,7 +491,7 @@ public class FileServerController : Controller
             string outFile = Path.Combine(dirPath, "_TEMP_" + fileInfo.Name + ".FFTEMP");
             log.AppendLine("Writing file to temporary filename: " + outFile);
 
-            using (var fileStream = new FileStream(outFile, FileMode.Create))
+            await using (var fileStream = new FileStream(outFile, FileMode.Create))
             {
                 await stream.CopyToAsync(fileStream);
             }
