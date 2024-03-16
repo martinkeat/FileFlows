@@ -1,5 +1,6 @@
 using System.Security.Cryptography;
 using System.Text;
+using FileFlows.Server.Services;
 using FileFlows.Shared.Helpers;
 
 namespace FileFlows.Server.Helpers;
@@ -70,8 +71,12 @@ class LicenseHelper
     /// <returns>the license</returns>
     internal static License GetLicense()
     {
-        if(_License == null)
-            _License = FromCode(AppSettings.Instance.LicenseCode);
+        if (_License == null)
+        {
+            var settings = ServiceLoader.Load<AppSettingsService>().Settings;
+            _License = FromCode(settings.LicenseCode);
+        }
+
         return _License;
     }
     
@@ -96,16 +101,17 @@ class LicenseHelper
     /// </summary>
     internal static async Task Update()
     {
-        var email = AppSettings.Instance.LicenseEmail;
-        var key = AppSettings.Instance.LicenseKey;
+        var service = ServiceLoader.Load<AppSettingsService>();
+        var email = service.Settings.LicenseEmail;
+        var key = service.Settings.LicenseKey;
         if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(key))
         {
-            AppSettings.Instance.LicenseCode = string.Empty;
-            AppSettings.Instance.Save();
+            service.Settings.LicenseCode = string.Empty;
+            service.Save();
             return;
         }
 
-        if (_LastLicenseEmail == email && _LastLicenseKey == key && _LastUpdate > DateTime.Now.AddMinutes(-5))
+        if (_LastLicenseEmail == email && _LastLicenseKey == key && _LastUpdate > DateTime.UtcNow.AddMinutes(-5))
             return; // last update wasn't long ago, can skip it
         try
         {
@@ -131,11 +137,11 @@ class LicenseHelper
             _License = license;
             _LastLicenseEmail = email;
             _LastLicenseKey = key;
-            _LastUpdate = DateTime.Now;
+            _LastUpdate = DateTime.UtcNow;
 
             // code is good, save it
-            AppSettings.Instance.LicenseCode = licenseCode;
-            AppSettings.Instance.Save();
+            service.Settings.LicenseCode = licenseCode;
+            service.Save();
         }
 #if(DEBUG)
         catch (Exception ex)

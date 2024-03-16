@@ -1,7 +1,7 @@
-﻿namespace FileFlows.ServerShared.Services;
-
+﻿using System.Web;
 using FileFlows.Shared.Helpers;
-using FileFlows.Shared.Models;
+
+namespace FileFlows.ServerShared.Services;
 
 /// <summary>
 /// Statistic Service interface
@@ -9,10 +9,16 @@ using FileFlows.Shared.Models;
 public interface IStatisticService
 {
     /// <summary>
-    /// Records a statistic value
+    /// Records a running total value
     /// </summary>
     /// <returns>a task to await</returns>
-    Task Record(string name, object value);
+    Task RecordRunningTotal(string name, string value);
+    
+    /// <summary>
+    /// Records a average value
+    /// </summary>
+    /// <returns>a task to await</returns>
+    Task RecordAverage(string name, int value);
 }
 
 /// <summary>
@@ -37,19 +43,28 @@ public class StatisticService : Service, IStatisticService
         return Loader.Invoke();
     }
 
-    /// <summary>
-    /// Records a statistic value
-    /// </summary>
-    /// <returns>a task to await</returns>
-    public async Task Record(string name, object value)
+    /// <inheritdoc />
+    public async Task RecordRunningTotal(string name, string value)
     {
         try
         {
-            await HttpHelper.Post($"{ServiceBaseUrl}/api/statistics/record", new
-            {
-                Name = name,
-                Value = value
-            });
+            await HttpHelper.Post($"{ServiceBaseUrl}/api/statistics/record-running-total" +
+                                  $"?name={HttpUtility.UrlEncode(name)}" +
+                                  $"&value={HttpUtility.UrlEncode(value)}");
+        }
+        catch (Exception)
+        {
+        }
+    }
+
+    /// <inheritdoc />
+    public async Task RecordAverage(string name, int value)
+    {
+        try
+        {
+            await HttpHelper.Post($"{ServiceBaseUrl}/api/statistics/record-average" +
+                                  $"?name={HttpUtility.UrlEncode(name)}" +
+                                  $"&value={value}");
         }
         catch (Exception)
         {

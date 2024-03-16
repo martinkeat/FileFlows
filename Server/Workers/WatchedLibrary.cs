@@ -6,6 +6,7 @@ using System.Text.RegularExpressions;
 using System.Timers;
 using FileFlows.Server.Hubs;
 using FileFlows.Server.Services;
+using FileFlows.ServerShared.Models;
 using FileHelper = FileFlows.ServerShared.Helpers.FileHelper;
 
 namespace FileFlows.Server.Workers;
@@ -163,7 +164,7 @@ public class WatchedLibrary:IDisposable
             }
 
             StringBuilder scanLog = new StringBuilder();
-            DateTime dtTotal = DateTime.Now;
+            DateTime dtTotal = DateTime.UtcNow;
 
             FileSystemInfo fsInfo = Library.Folders ? new DirectoryInfo(fullpath) : new FileInfo(fullpath);
 
@@ -181,8 +182,8 @@ public class WatchedLibrary:IDisposable
                     var files = di.GetFiles("*.*", SearchOption.AllDirectories);
                     if (files.Any())
                     {
-                        var lastWriteTime = files.Select(x => x.LastWriteTime).Max();
-                        if (lastWriteTime > DateTime.Now.AddSeconds(-Library.WaitTimeSeconds))
+                        var lastWriteTime = files.Select(x => x.LastWriteTimeUtc).Max();
+                        if (lastWriteTime > DateTime.UtcNow.AddSeconds(-Library.WaitTimeSeconds))
                         {
                             Logger.Instance.ILog(
                                 $"Changes recently written to folder '{di.FullName}' cannot add to library yet");
@@ -223,10 +224,10 @@ public class WatchedLibrary:IDisposable
                 IsDirectory = fsInfo is DirectoryInfo,
                 Fingerprint = fingerprint ?? string.Empty,
                 OriginalSize = size,
-                CreationTime = fsInfo.CreationTime,
-                LastWriteTime = fsInfo.LastWriteTime,
+                CreationTime = fsInfo.CreationTimeUtc,
+                LastWriteTime = fsInfo.LastWriteTimeUtc,
                 Duplicate = duplicate,
-                HoldUntil = Library.HoldMinutes > 0 ? DateTime.Now.AddMinutes(Library.HoldMinutes) : DateTime.MinValue,
+                HoldUntil = Library.HoldMinutes > 0 ? DateTime.UtcNow.AddMinutes(Library.HoldMinutes) : DateTime.MinValue,
                 Library = new ObjectReference
                 {
                     Name = Library.Name,
@@ -240,18 +241,19 @@ public class WatchedLibrary:IDisposable
             if (knownFile)
             {
                 // update the known file, we can't add it again
-                result = new LibraryFileService().Update(lf).Result;
+                result = ServiceLoader.Load<LibraryFileService>().Update(lf).Result;
             }
             else
             {
-                result = new LibraryFileService().Add(lf).Result;
+                ServiceLoader.Load<LibraryFileService>().Insert(lf).Wait();
+                result = lf;
             }
 
             if (result != null && result.Uid != Guid.Empty)
             {
                 SystemEvents.TriggerFileAdded(result, Library);
                 Logger.Instance.DLog(
-                    $"Time taken \"{(DateTime.Now.Subtract(dtTotal))}\" to successfully add new library file: \"{fullpath}\"");
+                    $"Time taken \"{(DateTime.UtcNow.Subtract(dtTotal))}\" to successfully add new library file: \"{fullpath}\"");
                 
                 if (new SettingsService().Get()?.Result?.ShowFileAddedNotifications == true)
                     ClientServiceManager.Instance.SendToast(LogType.Info, "New File: " + result.RelativePath);
@@ -259,7 +261,7 @@ public class WatchedLibrary:IDisposable
             else
             {
                 Logger.Instance.ELog(
-                    $"Time taken \"{(DateTime.Now.Subtract(dtTotal))}\" to fail to add new library file: \"{fullpath}\"");
+                    $"Time taken \"{(DateTime.UtcNow.Subtract(dtTotal))}\" to fail to add new library file: \"{fullpath}\"");
             }
         }
         catch (Exception ex)
@@ -294,10 +296,10 @@ public class WatchedLibrary:IDisposable
     /// <returns>true if matches detection, otherwise false</returns>
     public static bool MatchesDetection(Library library, FileSystemInfo info, long size)
     {
-        if(MatchesValue((int)DateTime.Now.Subtract(info.CreationTime).TotalMinutes, library.DetectFileCreation, library.DetectFileCreationLower, library.DetectFileCreationUpper) == false)
+        if(MatchesValue((int)DateTime.UtcNow.Subtract(info.CreationTimeUtc).TotalMinutes, library.DetectFileCreation, library.DetectFileCreationLower, library.DetectFileCreationUpper) == false)
             return false;
 
-        if(MatchesValue((int)DateTime.Now.Subtract(info.LastWriteTime).TotalMinutes, library.DetectFileLastWritten, library.DetectFileLastWrittenLower, library.DetectFileLastWrittenUpper) == false)
+        if(MatchesValue((int)DateTime.UtcNow.Subtract(info.LastWriteTimeUtc).TotalMinutes, library.DetectFileLastWritten, library.DetectFileLastWrittenLower, library.DetectFileLastWrittenUpper) == false)
             return false;
         
         if(MatchesValue(size, library.DetectFileSize, library.DetectFileSizeLower, library.DetectFileSizeUpper) == false)
@@ -322,20 +324,20 @@ public class WatchedLibrary:IDisposable
 
     private (bool known, string? fingerprint, ObjectReference? duplicate) IsKnownFile(string fullpath, FileSystemInfo fsInfo)
     {
-        var service = new LibraryFileService();
-        var knownFile = service.GetFileIfKnown(fullpath);
+        var service = ServiceLoader.Load<LibraryFileService>();
+        var knownFile = service.GetFileIfKnown(fullpath).Result;
         string? fingerprint = null;
         if (knownFile != null)
         {
             if (Library.DownloadsDirectory && knownFile.Status == FileStatus.Processed)
             {
                 Logger.Instance.DLog("Processed file found in download library, reprocessing: " + fullpath);
-                new LibraryFileService().SetStatus(FileStatus.Unprocessed, knownFile.Uid).Wait();
+                ServiceLoader.Load<LibraryFileService>().SetStatus(FileStatus.Unprocessed, knownFile.Uid).Wait();
                 return (true, null, null);
             }
             // FF-393 - check to see if the file has been modified
-            var creationDiff = Math.Abs(fsInfo.CreationTime.Subtract(knownFile.CreationTime).TotalSeconds);
-            var writeDiff = Math.Abs(fsInfo.LastWriteTime.Subtract(knownFile.LastWriteTime).TotalSeconds);
+            var creationDiff = Math.Abs(fsInfo.CreationTimeUtc.Subtract(knownFile.CreationTime).TotalSeconds);
+            var writeDiff = Math.Abs(fsInfo.LastWriteTimeUtc.Subtract(knownFile.LastWriteTime).TotalSeconds);
             bool needsReprocessing = false;
             if (Library.UseFingerprinting && (creationDiff > 5 || writeDiff > 5))
             {
@@ -369,11 +371,11 @@ public class WatchedLibrary:IDisposable
                 }
 
                 Logger.Instance.DLog(
-                    $"{Library.Name} file '{fullpath}' creation time has changed, reprocessing file '{fsInfo.CreationTime}' vs '{knownFile.CreationTime}'");
+                    $"{Library.Name} file '{fullpath}' creation time has changed, reprocessing file '{fsInfo.CreationTimeUtc}' vs '{knownFile.CreationTime}'");
             }
 
-            knownFile.CreationTime = fsInfo.CreationTime;
-            knownFile.LastWriteTime = fsInfo.LastWriteTime;
+            knownFile.CreationTime = fsInfo.CreationTimeUtc;
+            knownFile.LastWriteTime = fsInfo.LastWriteTimeUtc;
             knownFile.Status = FileStatus.Unprocessed;
             knownFile.Fingerprint = fingerprint?.EmptyAsNull() ?? FileHelper.CalculateFingerprint(fullpath);
             //new LibraryFileController().Update(knownFile).Wait();
@@ -387,7 +389,7 @@ public class WatchedLibrary:IDisposable
             fingerprint = FileHelper.CalculateFingerprint(fullpath);
             if (string.IsNullOrEmpty(fingerprint) == false)
             {
-                knownFile = service.GetFileByFingerprint(fingerprint);
+                knownFile = service.GetFileByFingerprint(fingerprint).Result;
                 if (knownFile != null)
                 {
                     if (knownFile.Name != fullpath && Library.UpdateMovedFiles && knownFile.LibraryUid == Library.Uid)
@@ -396,13 +398,13 @@ public class WatchedLibrary:IDisposable
                         if (File.Exists(knownFile.Name) == false)
                         {
                             // original no longer exists, update the original to be this file
-                            knownFile.CreationTime = fsInfo.CreationTime;
-                            knownFile.LastWriteTime = fsInfo.LastWriteTime;
+                            knownFile.CreationTime = fsInfo.CreationTimeUtc;
+                            knownFile.LastWriteTime = fsInfo.LastWriteTimeUtc;
                             if (knownFile.OutputPath == knownFile.Name)
                                 knownFile.OutputPath = fullpath;
                             knownFile.Name = fullpath;
                             knownFile.RelativePath = GetRelativePath(fullpath);
-                            new LibraryFileService().UpdateMovedFile(knownFile).Wait();
+                            service.UpdateMovedFile(knownFile).Wait();
                             // new LibraryFileController().Update(knownFile).Wait();
                             // file has been updated, we return this is known and tell the scanner to just continue
                             return (true, null, null);
@@ -650,7 +652,7 @@ public class WatchedLibrary:IDisposable
     {
         if (ScanMutex.WaitOne(1) == false)
             return;
-        DateTime start = DateTime.Now;
+        DateTime start = DateTime.UtcNow;
         try
         {
             if (Library.ScanInterval < 10)
@@ -689,7 +691,7 @@ public class WatchedLibrary:IDisposable
             else
             {
                 var service = new Server.Services.LibraryFileService();
-                var knownFiles = service.GetKnownLibraryFilesWithCreationTimes();
+                var knownFiles = service.GetKnownLibraryFilesWithCreationTimes().Result;
 
                 var files = GetFiles(new DirectoryInfo(Library.Path));
                 var settings = new SettingsService().Get().Result;
@@ -723,8 +725,8 @@ public class WatchedLibrary:IDisposable
             Logger.Instance.ILog($"WatchedLibrary: Files queued for '{Library.Name}': {count} / {QueueCount()}");
             ScanComplete = true;
             
-            Library.LastScanned = DateTime.Now;
-            new LibraryService().UpdateLastScanned(Library.Uid);
+            Library.LastScanned = DateTime.UtcNow;
+            ServiceLoader.Load<LibraryService>().UpdateLastScanned(Library.Uid).Wait();
         }
         catch(Exception ex)
         {
@@ -735,7 +737,7 @@ public class WatchedLibrary:IDisposable
         }
         finally
         {
-            Logger.Instance.ILog($"WatchedLibrary: Scan finished on '{Library.Name}': {Library.Path} ({DateTime.Now.Subtract(start)})");
+            Logger.Instance.ILog($"WatchedLibrary: Scan finished on '{Library.Name}': {Library.Path} ({DateTime.UtcNow.Subtract(start)})");
             ScanMutex.ReleaseMutex();
         }
     }
@@ -769,11 +771,11 @@ public class WatchedLibrary:IDisposable
 
     private async Task<bool> CanAccess(FileInfo file, int fileSizeDetectionInterval)
     {
-        DateTime now = DateTime.Now;
+        DateTime now = DateTime.UtcNow;
         bool canRead = false, canWrite = false, checkedAccess = false;
         try
         {
-            if (file.LastWriteTime > DateTime.Now.AddSeconds(-10))
+            if (file.LastWriteTimeUtc > DateTime.UtcNow.AddSeconds(-10))
             {
                 // check if the file size changes
                 long fs = file.Length;
@@ -822,7 +824,7 @@ public class WatchedLibrary:IDisposable
         }
         finally
         {
-            LogQueueMessage($"Time taken \"{(DateTime.Now.Subtract(now))}\" to test can access file: \"{file}\"");
+            LogQueueMessage($"Time taken \"{(DateTime.UtcNow.Subtract(now))}\" to test can access file: \"{file}\"");
         }
     }
 

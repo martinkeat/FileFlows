@@ -82,10 +82,10 @@
                         {
                             <InputText @bind-Value=@Model.DbServer Label="Pages.Settings.Fields.Database.Server" Validators=@RequiredValidator/>
                             <InputText @bind-Value=@Model.DbName Label="Pages.Settings.Fields.Database.Name" Validators=@RequiredValidator/>
-                            <InputNumber @bind-Value=@Model.DbPort Label="Pages.Settings.Fields.Database.Port" Validators=@RequiredValidator Min="1" Max="65535" />
+                            <InputNumber @bind-Value=@Model.DbPort Label="Pages.Settings.Fields.Database.Port" Validators=@RequiredValidator Min="1" Max="65535" Help="@GetDatabasePortHelp()" />
                             <InputText @bind-Value=@Model.DbUser Label="Pages.Settings.Fields.Database.User" Validators=@RequiredValidator/>
                             <InputPassword @bind-Value=@Model.DbPassword Label="Pages.Settings.Fields.Database.Password" Validators=@RequiredValidator/>
-                            @if (Model.DbServer != OriginalServer || Model.DbName != OriginalDatabase)
+                            @if (Model.DbServer != OriginalServer || Model.DbName != OriginalDatabase || Model.DbType != OriginalDbType)
                             {
                                 <InputSwitch @bind-Value="@Model.RecreateDatabase" Label="Pages.Settings.Fields.Database.RecreateDatabase" />
                             }

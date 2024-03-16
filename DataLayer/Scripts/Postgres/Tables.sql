@@ -13,8 +13,8 @@ CREATE INDEX NameIndex ON "DbObject" ("Name");
 
 CREATE TABLE "DbLogMessage"
 (
-    "ClientUid"       uuid                NOT NULL,
-    "LogDate"         TIMESTAMP           DEFAULT CURRENT_TIMESTAMP,
+    "ClientUid"       VARCHAR(36)        NOT NULL,
+    "LogDate"         TIMESTAMP          DEFAULT CURRENT_TIMESTAMP,
     "Type"            INT                NOT NULL,
     "Message"         TEXT               NOT NULL
 );
@@ -23,18 +23,16 @@ CREATE INDEX ON "DbLogMessage" ("LogDate");
 
 CREATE TABLE "DbStatistic"
 (
-    "LogDate"         TIMESTAMP           DEFAULT CURRENT_TIMESTAMP,
-    "Name"            VARCHAR(100)       NOT NULL,
-    "Type"            INT                NOT NULL,
-    "StringValue"     TEXT               NOT NULL,
-    "NumberValue"     DOUBLE PRECISION   NOT NULL
+    "Name"            VARCHAR(255)       NOT NULL          PRIMARY KEY,
+    "Type"            int                NOT NULL,
+    "Data"            TEXT               NOT NULL
 );
 
 
 CREATE TABLE "RevisionedObject"
 (
     "Uid"             uuid               NOT NULL          PRIMARY KEY,
-    "RevisionUid"     VARCHAR(36)        NOT NULL,
+    "RevisionUid"     uuid               NOT NULL,
     "RevisionName"    VARCHAR(1024)      NOT NULL,
     "RevisionType"    VARCHAR(255)       NOT NULL,
     "RevisionDate"    TIMESTAMP           DEFAULT CURRENT_TIMESTAMP,

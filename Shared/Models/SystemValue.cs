@@ -15,7 +15,7 @@ public class SystemValue<T>
     /// </summary>
     [JsonPropertyName("x")]
     [JsonConverter(typeof(DateTimeStringConverter))]
-    public DateTime Time { get; set; } = DateTime.Now;
+    public DateTime Time { get; set; } = DateTime.UtcNow;
     
     /// <summary>
     /// Gets or sets the actual value

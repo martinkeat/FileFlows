@@ -140,7 +140,9 @@ export class ProcessingNodes extends FFChart
             tr.appendChild(tdStatus);
         }
         let chartDiv = document.getElementById(this.chartUid);
-        chartDiv.textContent = '';
-        chartDiv.appendChild(table);
+        if(chartDiv != null) {
+            chartDiv.textContent = '';
+            chartDiv.appendChild(table);
+        }
     }
 }

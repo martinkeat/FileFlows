@@ -37,7 +37,7 @@ public class TempFileCleaner:Worker
         Logger.Instance?.ILog("About to clean temporary directory: " + tempDir.FullName);
         foreach (var dir in tempDir.GetDirectories())
         {
-            if (dir.CreationTime < DateTime.Now.AddDays(-1))
+            if (dir.CreationTimeUtc < DateTime.UtcNow.AddDays(-1))
             {
                 try
                 {

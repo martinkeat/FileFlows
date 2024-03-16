@@ -28,9 +28,6 @@
       <EmbeddedResource Include="Scripts\MySql\Tables.sql" />
       <EmbeddedResource Include="Scripts\Postgres\Tables.sql" />
       <EmbeddedResource Include="Scripts\Sqlite\Tables.sql" />
-      <EmbeddedResource Include="Scripts\SqlServer\GetNextLibraryFile.sql" />
-      <EmbeddedResource Include="Scripts\SqlServer\GetRecentlyFinished.sql" />
-      <EmbeddedResource Include="Scripts\SqlServer\GetUpcoming.sql" />
       <None Remove="Scripts\SqlServer\Tables.sql" />
       <EmbeddedResource Include="Scripts\SqlServer\Tables.sql" />
     </ItemGroup>

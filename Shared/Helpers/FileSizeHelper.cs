@@ -9,10 +9,11 @@ public class FileSizeHelper
     /// Humanizes a file size into a human readable size
     /// </summary>
     /// <param name="bytes">the size in bytes</param>
+    /// <param name="decimalPlaces">number of decimal points</param>
     /// <returns>a human readable string, eg. 2.03GB</returns>
-    public static string Humanize(long bytes) 
+    public static string Humanize(long bytes, int decimalPlaces = 2) 
     {
-        var sizes = new string[] { "B", "KB", "MB", "GB", "TB" };
+        var sizes = new [] { "B", "KB", "MB", "GB", "TB" };
 
         var order = 0;
         decimal num = bytes;
@@ -20,6 +21,9 @@ public class FileSizeHelper
             order++;
             num /= 1000;
         }
-        return num.ToString("0.##") + ' ' + sizes[order];
+
+        if (decimalPlaces < 1)
+            return num.ToString("0") + ' ' + sizes[order];
+        return num.ToString("0." + new string('#', decimalPlaces)) + ' ' + sizes[order];
     }
 }

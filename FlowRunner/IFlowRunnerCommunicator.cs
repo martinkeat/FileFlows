@@ -131,6 +131,7 @@ public class FlowRunnerCommunicator : IFlowRunnerCommunicator
     /// </summary>
     /// <param name="runnerUid">the UID of the flow runner</param>
     /// <param name="info">The flow execution info</param>
+    /// <param name="args">the node parameters</param>
     public async Task<bool> Hello(Guid runnerUid, FlowExecutorInfo info, NodeParameters args)
     {
         try

@@ -1,6 +1,4 @@
-using System.Reflection.Metadata;
 using System.Text.RegularExpressions;
-using FileFlows.Shared.Models;
 
 namespace FileFlows.ServerShared.Helpers;
 
@@ -13,6 +11,7 @@ public class DirectoryHelper
     /// Gets if this is a Docker instance or not
     /// </summary>
     public static bool IsDocker { get; private set; }
+    
     /// <summary>
     /// Gets if this is a Node or Server
     /// </summary>
@@ -25,8 +24,8 @@ public class DirectoryHelper
     /// <param name="isNode">True if running on a node</param>
     public static void Init(bool isDocker, bool isNode)
     {
-        DirectoryHelper.IsDocker = isDocker;
-        DirectoryHelper.IsNode = isNode;
+        IsDocker = isDocker;
+        IsNode = isNode;
         
         InitLoggingDirectory();
         InitDataDirectory();

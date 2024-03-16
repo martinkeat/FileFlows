@@ -122,6 +122,8 @@ public partial class Dashboard : ComponentBase, IDisposable
                 Toast.ShowError(error);
                 return;
             }
+
+            this.Dashboards ??= new ();
             this.Dashboards.Add(new ()
             {
                 Label = newDashboardResult.Data.Name,

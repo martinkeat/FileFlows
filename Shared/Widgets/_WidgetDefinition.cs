@@ -64,6 +64,10 @@ public abstract class WidgetDefinition
             return new NvidiaSmi();
         if (uid == ProcessingNodes.WD_UID)
             return new ProcessingNodes();
+        if (uid == ProcessingNodes.WD_UID)
+            return new ProcessingNodes();
+        if (uid == CurrentRevision.WD_UID)
+            return new CurrentRevision();
         throw new Exception("Unknown widget: " + uid);
     }
     

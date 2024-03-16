@@ -2,7 +2,7 @@ using FileFlows.DataLayer;
 
 namespace FileFlowTests.Tests.DataLayerTests;
 
-public class TestDataHelper
+internal class TestDataHelper
 {
     private ILogger Logger;
     private DatabaseAccessManager Dam;
@@ -45,7 +45,7 @@ public class TestDataHelper
 
     public BulkInsertResult BulkInsert(int count = 10_000)
     {
-        var rand = new Random(DateTime.Now.Microsecond);
+        var rand = new Random(DateTime.UtcNow.Microsecond);
 
 
         var libDisabled = InsertLibrary(Dam, "Disabled", enabled: false);
@@ -94,7 +94,7 @@ public class TestDataHelper
                 result.Active.Add(file);
         }
 
-        Dam.LibraryFileManager.InsertBulk(files).Wait();
+        Dam.LibraryFileManager.InsertBulk(files.ToArray()).Wait();
         //
         // if (dbType == DatabaseType.Sqlite)
         //     continue;

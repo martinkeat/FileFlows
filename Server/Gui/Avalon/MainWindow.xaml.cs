@@ -1,3 +1,5 @@
+using FileFlows.Server.Services;
+
 namespace FileFlows.Server.Gui.Avalon;
 
 using System.ComponentModel;
@@ -163,13 +165,13 @@ public class MainWindowViewModel
     /// </summary>
     public bool StartMinimized
     {
-        get => AppSettings.Instance.StartMinimized;
+        get => AppSettingsService.Settings.StartMinimized;
         set
         {
-            if (AppSettings.Instance.StartMinimized != value)
+            if (AppSettingsService.Settings.StartMinimized != value)
             {
-                AppSettings.Instance.StartMinimized = value;
-                AppSettings.Instance.Save();
+                AppSettingsService.Settings.StartMinimized = value;
+                AppSettingsService.Save();
             }
         } 
     }
@@ -179,8 +181,11 @@ public class MainWindowViewModel
 
     public void Hide() => Window.Minimize();
 
+    private AppSettingsService AppSettingsService;
+
     public MainWindowViewModel(MainWindow window)
     {
+        AppSettingsService = ServiceLoader.Load<AppSettingsService>();
         this.Window = window;
         this.ServerUrl = $"http://{Environment.MachineName.ToLower()}:{WebServer.Port}/";
         this.Version = "FileFlows Version: " + Globals.Version;

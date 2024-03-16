@@ -110,7 +110,7 @@ public class ExecuteFlow : Node
                 return RunnerCodes.Failure;
             }
 
-            DateTime nodeStartTime = DateTime.Now;
+            DateTime nodeStartTime = DateTime.UtcNow;
             Node? currentFlowElement = null;
             TemporaryLogger loadFELogger = new(); // log this to a string so we can include it in the flow element start
             try
@@ -168,7 +168,7 @@ public class ExecuteFlow : Node
                     loadFELogger = null;
                 }
 
-                nodeStartTime = DateTime.Now;
+                nodeStartTime = DateTime.UtcNow;
 
                 // clear the failure reason, if this isn't a failure flow, if it is, we already have the reason for failure
                 if(Flow.Type != FlowType.Failure &&  part.FlowElementUid?.EndsWith("." + nameof(ExecuteFlow)) == false)
@@ -199,7 +199,10 @@ public class ExecuteFlow : Node
                 
                 if (outputNode == null)
                 {
-                    args.Logger?.ILog($"Flow '{Flow.Name}' completed");
+                    if(string.IsNullOrWhiteSpace(Flow.Name) == false)
+                        args.Logger?.ILog($"Flow '{Flow.Name}' completed");
+                    else
+                        args.Logger?.ILog($"Flow completed");
                     // flow has completed
                     return COMPLETED_OUTPUT;
                 }
@@ -296,7 +299,7 @@ public class ExecuteFlow : Node
         if(DontRecordFlowPart(part))
             return; // we dont record this output, the flow element that called the flow will record this for us
         
-        TimeSpan executionTime = DateTime.Now.Subtract(startTime);
+        TimeSpan executionTime = DateTime.UtcNow.Subtract(startTime);
         string feName = part.Label?.EmptyAsNull() ?? part.Name?.EmptyAsNull() ?? flowElement.Name;
         string feElementUid = part.FlowElementUid;
 

@@ -31,6 +31,11 @@ public class FileFlowsStatus
     public bool LicenseRevisions { get; set; }
     
     /// <summary>
+    /// Gets or sets if license allowed for external databases
+    /// </summary>
+    public bool LicenseExternalDatabase { get; set; }
+    
+    /// <summary>
     /// Gets or sets if license allowed for tasks
     /// </summary>
     public bool LicenseTasks { get; set; }

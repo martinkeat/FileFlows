@@ -84,7 +84,7 @@ public class ScriptController : Controller
     /// <param name="script">The script to save</param>
     /// <returns>the saved script instance</returns>
     [HttpPost]
-    public Script Save([FromBody] Script script)
+    public Task<Script> Save([FromBody] Script script)
         => new ScriptService().Save(script);
 
 
@@ -125,13 +125,13 @@ public class ScriptController : Controller
     /// <param name="name">The name</param>
     /// <param name="code">The code</param>
     [HttpPost("import")]
-    public Script Import([FromQuery(Name = "filename")] string name, [FromBody] string code)
+    public async Task<Script> Import([FromQuery(Name = "filename")] string name, [FromBody] string code)
     {
         var service = new ScriptService();
         // will throw if any errors
         name = name.Replace(".js", "").Replace(".JS", "");
         name = service.GetNewUniqueName(name);
-        return service.Save(new () { Name = name, Code = code, Repository = false});
+        return await service.Save(new () { Name = name, Code = code, Repository = false});
     }
 
     /// <summary>
@@ -154,7 +154,7 @@ public class ScriptController : Controller
         script.Repository = false;
         script.Uid = script.Name;
         script.Type = type;
-        return service.Save(script);
+        return await service.Save(script);
     }
     
     /// <summary>

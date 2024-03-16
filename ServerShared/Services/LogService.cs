@@ -1,5 +1,6 @@
 using FileFlows.Plugin;
 using FileFlows.Shared.Helpers;
+using FileFlows.Shared.Models;
 
 namespace FileFlows.ServerShared.Services;
 

@@ -32,7 +32,7 @@ public class ConfigCleaner: Worker
         {
             if (kv.Key == max || kv.Key == current)
                 continue;
-            if (current > 0 && kv.Value.CreationTime > DateTime.Now.AddHours(-12))
+            if (current > 0 && kv.Value.CreationTimeUtc > DateTime.UtcNow.AddHours(-12))
                 continue; // dont delete, something could still be using this
             try
             {

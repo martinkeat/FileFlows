@@ -276,7 +276,8 @@ public class FlowWorker : Worker
                 try
                 {
 #if (DEBUG)
-                    exitCode = FileFlows.FlowRunner.Program.Run(parameters);
+                    (exitCode, string output)  = FlowRunner.Program.RunWithLog(parameters);
+                    string error = string.Empty;
 #else   
                     using Process process = new Process();
                 
@@ -296,6 +297,12 @@ public class FlowWorker : Worker
                     process.StartInfo.CreateNoWindow = true;
                     process.Start();
                     string output = process.StandardOutput.ReadToEnd();
+                    string error = process.StandardError.ReadToEnd();
+                    process.WaitForExit();
+                    exitCode = process.ExitCode;
+
+                #endif
+                    
                     if (string.IsNullOrEmpty(output) == false)
                     {
                         completeLog.AppendLine(
@@ -307,8 +314,6 @@ public class FlowWorker : Worker
                             "===                       PROCESSING NODE OUTPUT END                       ===" + Environment.NewLine +
                             "==============================================================================");
                     }
-                    string error = process.StandardError.ReadToEnd();
-                    process.WaitForExit();
                     if (string.IsNullOrEmpty(error) == false)
                     {
                         completeLog.AppendLine(
@@ -320,23 +325,20 @@ public class FlowWorker : Worker
                             "===                    PROCESSING NODE ERROR OUTPUT END                    ===" + Environment.NewLine +
                             "==============================================================================");
                     }
-
-
-                    exitCode = process.ExitCode;
+                    
                     if (exitCode != 0)
                     {
-                        Logger.Instance?.ELog("Error executing runner: Invalid exit code: " + process.ExitCode);
-                        libFile.Status = FileStatus.ProcessingFailed;
-                        libFileService.Update(libFile);
+                        Logger.Instance?.ELog("Error executing runner: Invalid exit code: " + exitCode);
+                        libFile.Status = (FileStatus)exitCode;
+                        FinishWork(processUid, node2, libFile);
                     }
-                #endif
                 }
                 catch (Exception ex)
                 {
                     AppendToCompleteLog(completeLog, "Error executing runner: " + ex.Message + Environment.NewLine + ex.StackTrace, type: "ERR");
                     libFile.Status = FileStatus.ProcessingFailed;
-                    libFileService.Update(libFile);
-                    exitCode = -999;
+                    FinishWork(processUid, node2, libFile);
+                    exitCode = (int)FileStatus.ProcessingFailed;
                 }
             }
             finally
@@ -363,13 +365,26 @@ public class FlowWorker : Worker
                 {
                     AppendToCompleteLog(completeLog, "Failed to clean up runner directory: " + ex.Message, type: "ERR");
                 }
-                #if(!DEBUG) // not in debug since complete log is mostly empty
+                
                 SaveLog(libFile, completeLog.ToString());
-                #endif
 
                 Trigger();
             }
         });
+    }
+
+    private void FinishWork(Guid processUid, ProcessingNode node, LibraryFile libFile)
+    {
+        FlowExecutorInfo info = new()
+        {
+            Uid = processUid,
+            LibraryFile = libFile,
+            NodeUid = node.Uid,
+            NodeName = node.Name,
+            RelativeFile = libFile.RelativePath,
+            Library = libFile.Library
+        };
+        new FlowRunnerService().Finish(info).Wait();
     }
 
     /// <summary>

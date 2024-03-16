@@ -14,16 +14,35 @@ namespace FileFlows.Server.Controllers;
 public class DashboardController : Controller
 {
     /// <summary>
+    /// The settings for the application
+    /// </summary>
+    private AppSettings Settings;
+    /// <summary>
+    /// The settings for the application
+    /// </summary>
+    private AppSettingsService SettingsService;
+    
+    /// <summary>
+    /// Initializes a new instance of the controller
+    /// </summary>
+    /// <param name="appSettingsService">the application settings service</param>
+    public DashboardController(AppSettingsService appSettingsService)
+    {
+        SettingsService = appSettingsService;
+        Settings = appSettingsService.Settings;
+    }
+    
+    /// <summary>
     /// Get all dashboards in the system
     /// </summary>
     /// <returns>all dashboards in the system</returns>
     [HttpGet]
-    public IEnumerable<Dashboard> GetAll()
+    public async Task<List<Dashboard>> GetAll()
     {
         if (LicenseHelper.IsLicensed(LicenseFlags.Dashboards) == false)
              return new List<Dashboard>();
         
-        var dashboards = new DashboardService().GetAll()
+        var dashboards = (await new DashboardService().GetAll())
             .OrderBy(x => x.Name.ToLower()).ToList();
         if (dashboards.Any() == false)
         {
@@ -37,12 +56,12 @@ public class DashboardController : Controller
     /// </summary>
     /// <returns>all dashboards in the system</returns>
     [HttpGet("list")]
-    public IEnumerable<ListOption> ListAll()
+    public async Task<List<ListOption>> ListAll()
     {
 
         var dashboards = LicenseHelper.IsLicensed(LicenseFlags.Dashboards) == false
             ? new List<ListOption>()
-            : new DashboardService().GetAll()
+            : (await new DashboardService().GetAll())
                 .OrderBy(x => x.Name.ToLower()).Select(x => new ListOption
                 {
                     Label = x.Name,
@@ -65,15 +84,16 @@ public class DashboardController : Controller
     /// <param name="uid">The UID of the dashboard</param>
     /// <returns>The dashboard instance</returns>
     [HttpGet("{uid}/Widgets")]
-    public IEnumerable<WidgetUiModel> Get(Guid uid)
+    public async Task<List<WidgetUiModel>> Get(Guid uid)
     {
         if (LicenseHelper.IsLicensed(LicenseFlags.Dashboards) == false)
             uid = Dashboard.DefaultDashboardUid;
-        var db = new DashboardService().GetByUid(uid);;
+        var service = ServiceLoader.Load<DashboardService>();
+        var db = await new DashboardService().GetByUid(uid);;
         if ((db == null || db.Uid == Guid.Empty) && uid == Dashboard.DefaultDashboardUid)
         {
-            var nodes = new NodeService().GetAll().Count(x => x.Enabled);
-            db = Dashboard.GetDefaultDashboard(DbHelper.UseMemoryCache == false, nodes);
+            var nodes = (await ServiceLoader.Load<NodeService>().GetAllAsync()).Count(x => x.Enabled);
+            db = Dashboard.GetDefaultDashboard(Settings.DatabaseType == DatabaseType.Sqlite, nodes);
         }
         else if (db == null)
             throw new Exception("Dashboard not found");
@@ -119,16 +139,21 @@ public class DashboardController : Controller
     /// <returns>an awaited task</returns>
     [HttpDelete("{uid}")]
     public Task Delete([FromRoute] Guid uid)
-        => new DashboardService().Delete(uid);
-    
+        => ServiceLoader.Load<DashboardService>().Delete(uid);
+
     /// <summary>
     /// Saves a dashboard
     /// </summary>
     /// <param name="model">The dashboard being saved</param>
     /// <returns>The saved dashboard</returns>
     [HttpPut]
-    public Task<Dashboard> Save([FromBody] Dashboard model)
-        => new DashboardService().Update(model);
+    public async Task<IActionResult> Save([FromBody] Dashboard model)
+    {
+        var result = await ServiceLoader.Load<DashboardService>().Update(model);
+        if (result.Failed(out string error))
+            return BadRequest(error);
+        return Ok(result.Value);
+    }
 
     /// <summary>
     /// Saves a dashboard
@@ -137,15 +162,18 @@ public class DashboardController : Controller
     /// <param name="widgets">The Widgets to save</param>
     /// <returns>The saved dashboard</returns>
     [HttpPut("{uid}")]
-    public Task<Dashboard> Save([FromRoute] Guid uid, [FromBody] List<Widget> widgets)
+    public async Task<IActionResult> Save([FromRoute] Guid uid, [FromBody] List<Widget> widgets)
     {
         if (LicenseHelper.IsLicensed(LicenseFlags.Dashboards) == false)
             return null;
-        var service = new DashboardService();
-        var dashboard = service.GetByUid(uid);
+        var service = ServiceLoader.Load<DashboardService>();
+        var dashboard = await service.GetByUid(uid);
         if (dashboard == null)
             throw new Exception("Dashboard not found");
         dashboard.Widgets = widgets ?? new List<Widget>();
-        return service.Update(dashboard);
+        var result = await service.Update(dashboard);
+        if (result.Failed(out string error))
+            return BadRequest(error);
+        return Ok(result.Value);
     }
 }

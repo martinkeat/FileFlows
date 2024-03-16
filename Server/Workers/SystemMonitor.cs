@@ -1,7 +1,7 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
-using FileFlows.Server.Database.Managers;
 using FileFlows.Server.Helpers;
+using FileFlows.Server.Services;
 using FileFlows.ServerShared.Models;
 using FileFlows.Shared.Models;
 
@@ -24,10 +24,22 @@ public class SystemMonitor:FileFlows.ServerShared.Workers.Worker
     /// Gets the instance of the system monitor
     /// </summary>
     public static SystemMonitor Instance { get; private set; }
+
+    /// <summary>
+    /// The app settings service
+    /// </summary>
+    private AppSettingsService appSettingsService;
+
+    /// <summary>
+    /// Database service
+    /// </summary>
+    private DatabaseService dbService;
     
     public SystemMonitor() : base(ScheduleType.Second, 10)
     {
         Instance = this;
+        appSettingsService = ServiceLoader.Load<AppSettingsService>();
+        dbService = ServiceLoader.Load<DatabaseService>();
     }
 
     protected override void Execute()
@@ -56,7 +68,7 @@ public class SystemMonitor:FileFlows.ServerShared.Workers.Worker
         {
             Value = taskLogStorage.Result
         });
-        if (DbHelper.UseMemoryCache == false)
+        //if (appSettingsService.Settings.DatabaseType != DatabaseType.Sqlite)
         {
             OpenDatabaseConnections.Enqueue(new()
             {
@@ -96,23 +108,27 @@ public class SystemMonitor:FileFlows.ServerShared.Workers.Worker
         return records.Max();
     }
 
+    /// <summary>
+    /// Gets the open database connections
+    /// </summary>
+    /// <returns>the number of open database connections</returns>
     private async Task<int> GetOpenDatabaseConnections()
     {
-        if (DbHelper.UseMemoryCache)
-            return 0;
+        // if (appSettingsService.Settings.DatabaseType == DatabaseType.Sqlite)
+        //     return 0;
         
         await Task.Delay(1);
         List<int> records = new List<int>();
         int max = 70;
         for (int i = 0; i <= max; i++)
         {
-            int count = FlowDbConnection.GetOpenConnections;
-            records.Add(count);
+            int count = dbService.GetOpenConnections();
+                records.Add(count);
             if (i == max)
                 break;
             await Task.Delay(100);
         }
-
+        
         return records.Max();
     }
     private async Task<long> GetTempStorageSize()
@@ -159,7 +175,7 @@ public class SystemMonitor:FileFlows.ServerShared.Workers.Worker
             {
                 foreach (var nts in NodeStatistics.Values)
                 {
-                    if (nts.RecordedAt > DateTime.Now.AddMinutes(-5))
+                    if (nts.RecordedAt > DateTime.UtcNow.AddMinutes(-5))
                     {
                         var npath = logginDir ? nts.LogDirectorySize : nts.TemporaryDirectorySize;
                         size += npath.Size;
@@ -181,13 +197,10 @@ public class SystemMonitor:FileFlows.ServerShared.Workers.Worker
     /// <param name="args">the node system statistics</param>
     public void Record(NodeSystemStatistics args)
     {
-        args.RecordedAt = DateTime.Now;
+        args.RecordedAt = DateTime.UtcNow;
         lock (NodeStatistics)
         {
-            if (NodeStatistics.ContainsKey(args.Uid))
-                NodeStatistics[args.Uid] = args;
-            else
-                NodeStatistics.Add(args.Uid, args);
+            NodeStatistics[args.Uid] = args;
         }
     }
 }

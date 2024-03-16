@@ -24,6 +24,23 @@ public class TimeHelper
         return quarter;
     }
 
+    /// <summary>
+    /// Gets the integer index of the a specific date
+    /// A time quarter is a 15minute block, starting on Sunday at midnight.
+    /// </summary>
+    /// <param name="date">the date to get the quarter index for</param>
+    /// <returns>The integer index of the time quarter</returns>
+    public static int GetQuarter(DateTime date)
+    {
+        int quarter = (((int)date.DayOfWeek) * 96) + (date.Hour * 4);
+        if (date.Minute >= 45)
+            quarter += 3;
+        else if (date.Minute >= 30)
+            quarter += 2;
+        else if (date.Minute >= 15)
+            quarter += 1;
+        return quarter;
+    }
 
     /// <summary>
     /// Checks if the current time is in the supplied schedule

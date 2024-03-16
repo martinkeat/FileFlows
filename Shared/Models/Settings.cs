@@ -88,7 +88,7 @@ public class Settings : FileFlowObject
     /// <summary>
     /// Gets if the system is paused
     /// </summary>
-    public bool IsPaused => DateTime.Now < PausedUntil;
+    public bool IsPaused => DateTime.UtcNow < PausedUntil;
 
     /// <summary>
     /// Gets or sets the number of log files to keep
@@ -136,7 +136,8 @@ public class Settings : FileFlowObject
 /// <summary>
 /// Cache Settings
 /// </summary>
-public class CacheSettings {
+public class CacheSettings 
+{
     /// <summary>
     /// Gets or sets if the caching should be used
     /// </summary>
@@ -153,15 +154,15 @@ public enum DatabaseType
     /// </summary>
     Sqlite = 0,
     /// <summary>
-    /// Microsoft SQL Server
-    /// </summary>
-    SqlServer = 1,
-    /// <summary>
     /// MySql / MariaDB
     /// </summary>
-    MySql = 2,
+    MySql = 1,
     /// <summary>
     /// Postgres
     /// </summary>
-    Postgres = 3
+    Postgres = 2,
+    /// <summary>
+    /// Microsoft SQL Server
+    /// </summary>
+    SqlServer = 3
 }

@@ -350,5 +350,27 @@ window.ff = {
     
         // Update the URL
         window.history.replaceState({}, document.title, updatedUrl);
+    },
+
+    handleClickOutside: function(elementId, dotnetObjRef) {
+        let clickHandler = function(event) {
+            let element = document.getElementById(elementId);
+            if (element && !element.contains(event.target)) {
+                dotnetObjRef.invokeMethodAsync('OnOutsideClick');
+            }
+        };
+
+        window.addEventListener('click', clickHandler);
+
+        let elementClickHandlers = window.elementClickHandlers || {};
+        elementClickHandlers[elementId] = clickHandler;
+        window.elementClickHandlers = elementClickHandlers;
+    },
+    removeClickHandler: function(elementId) {
+        let clickHandler = window.elementClickHandlers[elementId];
+        if (clickHandler) {
+            window.removeEventListener('click', clickHandler);
+            delete window.elementClickHandlers[elementId];
+        }
     }
 };

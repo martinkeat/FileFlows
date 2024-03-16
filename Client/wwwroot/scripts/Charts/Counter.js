@@ -52,6 +52,8 @@ export class Counter extends FFChart
         this.value = await response.text();
         if(this.formatter) 
             this.span.innerText = this.formatter(this.value);
+        else if(/^[\d]+$/.test(this.value))
+            this.span.innerText = parseInt(this.value, 10).toLocaleString();
         else
             this.span.innerText = this.value;
 

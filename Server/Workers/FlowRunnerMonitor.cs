@@ -13,38 +13,36 @@ namespace FileFlows.Server.Workers;
 /// </summary>
 public class FlowRunnerMonitor:Worker
 {
-    private WorkerController Controller;
-
     private List<Guid> StartUpRunningFiles;
-    private DateTime StartedAt = DateTime.Now;
+    private DateTime StartedAt = DateTime.UtcNow;
 
     /// <summary>
     /// Constructs a Flow Runner Monitor worker
     /// </summary>
     public FlowRunnerMonitor() : base(ScheduleType.Second, 10)
     {
-        Controller = new(null);
-        StartUpRunningFiles = WorkerController.ExecutingLibraryFiles().ToList();
+        StartUpRunningFiles = FlowRunnerService.ExecutingLibraryFiles().Result;
     }
 
     protected override void Execute()
     {
-        Controller.AbortDisconnectedRunners();
+        var service = ServiceLoader.Load<FlowRunnerService>();
+        service.AbortDisconnectedRunners().Wait();
         if (StartUpRunningFiles?.Any() == true)
         {
             var array = StartUpRunningFiles.ToArray();
-            var service = new LibraryFileService();
+            var lfService = ServiceLoader.Load<LibraryFileService>();
             foreach (var lf in array)
             {
-                if (Controller.IsLibraryFileRunning(lf))
+                if (service.IsLibraryFileRunning(lf))
                     StartUpRunningFiles.Remove(lf);
-                else if(DateTime.Now > StartedAt.AddMinutes(2))
+                else if(DateTime.UtcNow > StartedAt.AddMinutes(2))
                 {
                     // no update in 2minutes, kill it
                     try
                     {
-                        var status = service.GetFileStatus(lf);
-                        if (status != FileStatus.Processing)
+                        var status = lfService.GetFileStatus(lf).Result;
+                        if (status != null && status != FileStatus.Processing)
                         {
                             StartUpRunningFiles.Remove(lf);
                             continue;
@@ -58,7 +56,7 @@ public class FlowRunnerMonitor:Worker
                     }
                     
                     // abort the file
-                    service.Abort(lf).Wait();
+                    ServiceLoader.Load<FlowRunnerService>().AbortByFile(lf).Wait();
                     StartUpRunningFiles.Remove(lf);
                 }
             }

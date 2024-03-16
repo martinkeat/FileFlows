@@ -1,3 +1,5 @@
+using FileFlows.Plugin;
+
 namespace FileFlows.Managers;
 
 /// <summary>
@@ -6,8 +8,9 @@ namespace FileFlows.Managers;
 public class Initializer
 {
     // may move this
-    public static void Init(string encryptionKey)
+    public static Result<bool> Init(ILogger logger,DatabaseType dbType, string connectionString, string encryptionKey)
     {
         DataLayer.Helpers.Decrypter.EncryptionKey = encryptionKey;
+        return DatabaseAccessManager.Initialize(logger, dbType, connectionString);
     }
 }

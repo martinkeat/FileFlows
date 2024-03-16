@@ -1,12 +1,10 @@
-using FileFlows.Plugin;
 using Microsoft.AspNetCore.Mvc;
-using System.Runtime.InteropServices;
 using FileFlows.Shared.Models;
 using FileFlows.Server.Workers;
 using FileFlows.Server.Helpers;
-using FileFlows.Server.Database.Managers;
 using FileFlows.Server.Services;
-
+using FileFlows.ServerShared.Models;
+using SettingsService = FileFlows.Server.Services.SettingsService;
 
 namespace FileFlows.Server.Controllers;
 /// <summary>
@@ -15,49 +13,32 @@ namespace FileFlows.Server.Controllers;
 [Route("/api/settings")]
 public class SettingsController : Controller
 {
-    private static Settings Instance;
-    private static SemaphoreSlim semaphore = new SemaphoreSlim(1);
+    /// <summary>
+    /// The settings for the application
+    /// </summary>
+    private AppSettings Settings;
+    /// <summary>
+    /// The settings for the application
+    /// </summary>
+    private AppSettingsService SettingsService;
+    
+    /// <summary>
+    /// Initializes a new instance of the controller
+    /// </summary>
+    /// <param name="appSettingsService">the application settings service</param>
+    public SettingsController(AppSettingsService appSettingsService)
+    {
+        SettingsService = appSettingsService;
+        Settings = appSettingsService.Settings;
+    }
 
     /// <summary>
     /// Gets the system status of FileFlows
     /// </summary>
     /// <returns>the system status of FileFlows</returns>
     [HttpGet("fileflows-status")]
-    public FileFlowsStatus GetFileFlowsStatus()
-    {
-        FileFlowsStatus status = new();
-        status.IsWindows = OperatingSystem.IsWindows();
-        status.IsLinux = OperatingSystem.IsLinux();
-        status.IsMacOS = OperatingSystem.IsMacOS();
-        status.IsDocker = Globals.IsDocker;
-        status.IsWebView = Program.UsingWebView;
-        
-        var license = LicenseHelper.GetLicense();
-        if (license?.Status == LicenseStatus.Valid)
-        {
-            status.Licensed = true;
-            string dbConnStr = AppSettings.Instance.DatabaseConnection;
-            status.ExternalDatabase = (string.IsNullOrWhiteSpace(dbConnStr) || dbConnStr.ToLower().Contains("sqlite")) == false;
-            status.LicenseDashboards = (license.Flags & LicenseFlags.Dashboards) == LicenseFlags.Dashboards;
-            status.LicenseRevisions = (license.Flags & LicenseFlags.Revisions) == LicenseFlags.Revisions;
-            status.LicenseTasks = (license.Flags & LicenseFlags.Tasks) == LicenseFlags.Tasks;
-            status.LicenseAutoUpdates = (license.Flags & LicenseFlags.AutoUpdates) == LicenseFlags.AutoUpdates;
-            status.LicenseWebhooks = (license.Flags & LicenseFlags.Webhooks) == LicenseFlags.Webhooks;
-            status.LicenseProcessingOrder = (license.Flags & LicenseFlags.ProcessingOrder) == LicenseFlags.ProcessingOrder;
-            status.LicenseFileServer = (license.Flags & LicenseFlags.FileServer) == LicenseFlags.FileServer;
-            status.LicenseEnterprise = (license.Flags & LicenseFlags.Enterprise) == LicenseFlags.Enterprise;
-        }
-
-        bool libs = new LibraryService().GetAll().Any();
-        bool flows = new FlowService().GetAll().Any();
-
-        if (flows)
-            status.ConfigurationStatus |= ConfigurationStatus.Flows;
-        if (libs)
-            status.ConfigurationStatus |= ConfigurationStatus.Libraries;
-        
-        return status;
-    }
+    public Task<FileFlowsStatus> GetFileFlowsStatus()
+        => ServiceLoader.Load<SettingsService>().GetFileFlowsStatus();
 
     /// <summary>
     /// Checks latest version from fileflows.com
@@ -66,7 +47,7 @@ public class SettingsController : Controller
     [HttpGet("check-update-available")]
     public async Task<string> CheckLatestVersion()
     {
-        var settings = await new SettingsController().Get();
+        var settings = await Get();
         if (settings.DisableTelemetry)
             return string.Empty; 
         try
@@ -92,7 +73,7 @@ public class SettingsController : Controller
     {
         var settings = await Get();
         var license = LicenseHelper.GetLicense();
-        if ((license == null || license.Status == LicenseStatus.Unlicensed) && string.IsNullOrWhiteSpace(AppSettings.Instance.LicenseKey) == false)
+        if ((license == null || license.Status == LicenseStatus.Unlicensed) && string.IsNullOrWhiteSpace(Settings.LicenseKey) == false)
             license.Status = LicenseStatus.Invalid;
         // clone it so we can remove some properties we dont want passed to the UI
         string json = JsonSerializer.Serialize(settings);
@@ -101,15 +82,11 @@ public class SettingsController : Controller
         uiModel.FileServerAllowedPathsString = uiModel.FileServerAllowedPaths?.Any() == true
             ? string.Join("\n", uiModel.FileServerAllowedPaths)
             : string.Empty;
-        
-        string dbConnStr = AppSettings.Instance.DatabaseMigrateConnection?.EmptyAsNull() ?? AppSettings.Instance.DatabaseConnection;
-        if (string.IsNullOrWhiteSpace(dbConnStr) || dbConnStr.ToLower().Contains("sqlite"))
-            uiModel.DbType = DatabaseType.Sqlite;
-        else if (dbConnStr.Contains(";Uid="))
-            new MySqlDbManager(string.Empty).PopulateSettings(uiModel, dbConnStr);
-        // else
-        //     new SqlServerDbManager(string.Empty).PopulateSettings(uiModel, dbConnStr);
-        uiModel.RecreateDatabase = AppSettings.Instance.RecreateDatabase;
+        uiModel.DbType = Settings.DatabaseMigrateType ?? Settings.DatabaseType;
+        if (uiModel.DbType != DatabaseType.Sqlite)
+            PopulateDbSettings(uiModel,
+                Settings.DatabaseMigrateConnection?.EmptyAsNull() ?? Settings.DatabaseConnection);
+        uiModel.RecreateDatabase = Settings.RecreateDatabase;
         
         return uiModel;
     }
@@ -119,35 +96,13 @@ public class SettingsController : Controller
     /// </summary>
     /// <returns>The system settings</returns>
     [HttpGet]
-    public async Task<Settings> Get()
-    {
-        await semaphore.WaitAsync();
-        try
-        {
-            if (Instance == null)
-            {
-                Instance = await DbHelper.Single<Settings>();
-            }
-            Instance.IsWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
-            Instance.IsDocker = Program.Docker;
-
-            if (LicenseHelper.IsLicensed() == false)
-            {
-                Instance.LogFileRetention = 2;
-            }
-            
-            return Instance;
-        }
-        finally
-        {
-            semaphore.Release();
-        }
-    }
+    public Task<Settings> Get()
+        => ServiceLoader.Load<SettingsService>().Get();
 
     private void SetLicenseFields(SettingsUiModel settings, License license)
     {
-        settings.LicenseKey = AppSettings.Instance.LicenseKey;
-        settings.LicenseEmail  = AppSettings.Instance.LicenseEmail;
+        settings.LicenseKey = Settings.LicenseKey;
+        settings.LicenseEmail  = Settings.LicenseEmail;
         settings.LicenseFiles = license == null ? string.Empty :
             license.Files >= 1_000_000_000 ? "Unlimited" : license.Files.ToString();
         settings.LicenseFlags = license == null ? 0 : license.Flags;
@@ -190,22 +145,23 @@ public class SettingsController : Controller
             FileServerAllowedPaths = model.FileServerAllowedPathsString?.Split(new [] { "\r\n", "\r", "\n"}, StringSplitOptions.RemoveEmptyEntries)
         });
         // validate license it
-        AppSettings.Instance.LicenseKey = model.LicenseKey?.Trim();
-        AppSettings.Instance.LicenseEmail = model.LicenseEmail?.Trim();
+        Settings.LicenseKey = model.LicenseKey?.Trim();
+        Settings.LicenseEmail = model.LicenseEmail?.Trim();
         await LicenseHelper.Update();
         
         TranslaterHelper.InitTranslater(model.Language?.EmptyAsNull() ?? "en");
         
         var newConnectionString = GetConnectionString(model, model.DbType);
-        if (IsConnectionSame(AppSettings.Instance.DatabaseConnection, newConnectionString) == false)
+        if (IsConnectionSame(Settings.DatabaseConnection, newConnectionString) == false)
         {
-            // need to migrate the database
-            AppSettings.Instance.DatabaseMigrateConnection = newConnectionString?.EmptyAsNull() ?? DbManager.GetDefaultConnectionString();
+             // need to migrate the database
+             Settings.DatabaseMigrateConnection = newConnectionString;
+             Settings.DatabaseMigrateType = model.DbType;
         }
 
-        AppSettings.Instance.RecreateDatabase = model.RecreateDatabase; 
+        Settings.RecreateDatabase = model.RecreateDatabase; 
         // save AppSettings with updated license and db migration if set
-        AppSettings.Instance.Save();
+        SettingsService.Save();
     }
     /// <summary>
     /// Save the system settings
@@ -216,16 +172,7 @@ public class SettingsController : Controller
     {
         if (model == null)
             return;
-        var settings = await Get() ?? model;
-        model.Name = settings.Name;
-        model.Uid = settings.Uid;
-        model.Version = Globals.Version.ToString();
-        model.DateCreated = settings.DateCreated;
-        model.IsWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
-        model.IsDocker = Program.Docker;
-        model.Revision = Math.Max(model.Revision, Instance.Revision + 1);
-        Instance = model;
-        await DbHelper.Update(model);
+        await ServiceLoader.Load<SettingsService>().Save(model);
     }
 
     private bool IsConnectionSame(string original, string newConnection)
@@ -244,13 +191,15 @@ public class SettingsController : Controller
 
     private string GetConnectionString(SettingsUiModel settings, DatabaseType dbType)
     {
-        // if (dbType == DatabaseType.SqlServer)
-        //     return new SqlServerDbManager(string.Empty).GetConnectionString(settings.DbServer, settings.DbName, settings.DbUser,
-        //         settings.DbPassword);
-        if (dbType == DatabaseType.MySql)
-            return new MySqlDbManager(string.Empty).GetConnectionString(settings.DbServer, settings.DbName, settings.DbPort, settings.DbUser,
-                settings.DbPassword);
-        return string.Empty;
+        return new DbConnectionInfo()
+        {
+            Type = dbType,
+            Server = settings.DbServer,
+            Name = settings.DbName,
+            Port = settings.DbPort,
+            User = settings.DbUser,
+            Password = settings.DbPassword
+        }.ToString();
     }
     
 
@@ -260,19 +209,19 @@ public class SettingsController : Controller
     /// <param name="model">The database connection info</param>
     /// <returns>OK if successful, otherwise a failure message</returns>
     [HttpPost("test-db-connection")]
-    public string TestDbConnection([FromBody] DbConnectionInfo model)
+    public async Task<IActionResult> TestDbConnection([FromBody] DbConnectionInfo model)
     {
         if (model == null)
             throw new ArgumentException(nameof(model));
 
-        // if (model.Type == DatabaseType.SqlServer)
-        //     return new SqlServerDbManager(string.Empty).Test(model.Server, model.Name, model.User, model.Password)
-        //         ?.EmptyAsNull() ?? "OK";
-        if (model.Type == DatabaseType.MySql)
-            return new MySqlDbManager(string.Empty).Test(model.Server, model.Name, model.Port, model.User, model.Password)
-                ?.EmptyAsNull() ?? "OK";
-        
-        return "Unsupported database type";
+        if (model.Type == DatabaseType.Sqlite)
+            return BadRequest("Unsupport database type");
+
+        var dbService = ServiceLoader.Load<DatabaseService>();
+        var result = dbService.TestConnection(model.Type, model.ToString());
+        if(result.Failed(out string error))
+            return BadRequest(error);
+        return Ok();
     }
 
     /// <summary>
@@ -300,98 +249,61 @@ public class SettingsController : Controller
     /// </summary>
     /// <returns>the current revision</returns>
     [HttpGet("current-config/revision")]
-    public int GetCurrentConfigRevision() => Instance.Revision;
+    public Task<int> GetCurrentConfigRevision()
+        => ServiceLoader.Load<SettingsService>().GetCurrentConfigurationRevision();
     
     /// <summary>
     /// Loads the current configuration
     /// </summary>
     /// <returns>the current configuration</returns>
     [HttpGet("current-config")]
-    public async Task<ConfigurationRevision> GetCurrentConfig()
+    public Task<ConfigurationRevision> GetCurrentConfig()
+        => ServiceLoader.Load<SettingsService>().GetCurrentConfiguration();
+    
+    
+    /// <summary>
+    /// Parses the connection string and populates the provided DbSettings object with server, user, password, database name, and port information.
+    /// </summary>
+    /// <param name="settings">The setting object to populate.</param>
+    /// <param name="connectionString">The connection string to parse.</param>
+    public void PopulateDbSettings(SettingsUiModel settings, string connectionString)
     {
-        var cfg = new ConfigurationRevision();
-        cfg.Revision = Instance.Revision;
-        var scriptController = new ScriptController();
-        cfg.FlowScripts = (await scriptController.GetAllByType(ScriptType.Flow)).ToList();
-        cfg.SystemScripts = (await scriptController.GetAllByType(ScriptType.System)).ToList();
-        cfg.SharedScripts = (await scriptController.GetAllByType(ScriptType.Shared)).ToList();
-        cfg.Variables = new VariableService().GetAll().ToDictionary(x => x.Name, x => x.Value);
-        cfg.Flows = new FlowService().GetAll();
-        cfg.Libraries = new LibraryService().GetAll();
-        cfg.Enterprise = LicenseHelper.IsLicensed(LicenseFlags.Enterprise);
-        cfg.AllowRemote = Instance.FileServerDisabled == false;
-        cfg.PluginSettings = new PluginService().GetAllPluginSettings().Result;
-        cfg.MaxNodes = LicenseHelper.IsLicensed() ? 250 : 30;
-        cfg.KeepFailedFlowTempFiles = Instance.KeepFailedFlowTempFiles;
-        cfg.Enterprise = LicenseHelper.IsLicensed(LicenseFlags.Enterprise);
-        var pluginInfos = (await new PluginController(null).GetAll())
-            .Where(x => x.Enabled)
-            .ToDictionary(x => x.PackageName + ".ffplugin", x => x);
-        var plugins = new Dictionary<string, byte[]>();
-        var pluginNames = new List<string>();
-        List<string> flowElementsInUse = cfg.Flows.SelectMany(x => x.Parts.Select(x => x.FlowElementUid)).ToList();
-        
-        Logger.Instance.DLog("Plugin, Flow Elements in Use: \n" + string.Join("\n", flowElementsInUse));
+        var parts = connectionString.Split(';');
 
-        foreach (var file in new DirectoryInfo(DirectoryHelper.PluginsDirectory).GetFiles("*.ffplugin"))
+        foreach (var part in parts)
         {
-            Logger.Instance.DLog($"Plugin found '{file.Name}'");
-            if (pluginInfos.ContainsKey(file.Name) == false)
-            {
-                Logger.Instance.DLog($"Plugin '{file.Name}' not enabled skipping for configuration.");
-                continue; // not enabled, skipped
-            }
+            var keyValue = part.Split('=');
+            if (keyValue.Length != 2)
+                continue;
 
-            var pluginInfo = pluginInfos[file.Name];
-            
-            var inUse = pluginInfo.Elements.Any(x => flowElementsInUse.Contains(x.Uid));
-            if (inUse == false)
-            {
-                Logger.Instance.DLog($"Plugin '{pluginInfo.Name}' not in use by any flow, skipping");
-                Logger.Instance.DLog("Plugin not using flow parts: " + string.Join(", ", pluginInfo.Elements.Select(x => x.Uid)));
-                continue; // plugin not used, skipping
-            }
+            var key = keyValue[0].Trim().ToLowerInvariant();
+            var value = keyValue[1].Trim();
 
-            Logger.Instance.DLog($"Plugin '{pluginInfo.Name}' is used in configuration.");
-            plugins.Add(file.Name, await System.IO.File.ReadAllBytesAsync(file.FullName));
-            pluginNames.Add(pluginInfo.Name);
+            switch (key)
+            {
+                case "server":
+                case "host":
+                    settings.DbServer = value;
+                    break;
+                case "user":
+                case "uid":
+                case "username":
+                case "user id":
+                    settings.DbUser = value;
+                    break;
+                case "password":
+                case "pwd":
+                    settings.DbPassword = value;
+                    break;
+                case "database":
+                case "initial catalog": // SQL Server specific
+                    settings.DbName = value;
+                    break;
+                case "port":
+                    if(int.TryParse(value, out int port))
+                        settings.DbPort = port;
+                    break;
+            }
         }
-
-        cfg.Plugins = plugins;
-        cfg.PluginNames = pluginNames;
-        Logger.Instance.DLog($"Plugin list that is used in configuration:", string.Join(", ", plugins.Select(x => x.Key)));
-        
-        return cfg;
     }
-}
-
-/// <summary>
-/// Database connection details
-/// </summary>
-public class DbConnectionInfo
-{
-    /// <summary>
-    /// Gets or sets the server address
-    /// </summary>
-    public string Server { get; set; }
-    /// <summary>
-    /// Gets or sets the database name
-    /// </summary>
-    public string Name { get; set; }
-    /// <summary>
-    /// Gets or sets the port
-    /// </summary>
-    public int Port { get; set; }
-    /// <summary>
-    /// Gets or sets the connecting user
-    /// </summary>
-    public string User { get; set; }
-    /// <summary>
-    /// Gets or sets the password used
-    /// </summary>
-    public string Password { get; set; }
-    /// <summary>
-    /// Gets or sets the database type
-    /// </summary>
-    public DatabaseType Type { get; set; }
 }

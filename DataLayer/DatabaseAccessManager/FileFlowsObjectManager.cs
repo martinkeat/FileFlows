@@ -14,7 +14,7 @@ namespace FileFlows.DataLayer;
 /// <summary>
 /// Manager for FileFlowsObject that are stored in the DbObject table
 /// </summary>
-public class FileFlowsObjectManager
+internal  class FileFlowsObjectManager
 {
     private readonly DbObjectManager dbom;
     internal FileFlowsObjectManager(DbObjectManager dbom)
@@ -27,7 +27,7 @@ public class FileFlowsObjectManager
     /// </summary>
     /// <typeparam name="T">the type of objects to select</typeparam>
     /// <returns>a list of objects</returns>
-    public virtual async Task<IEnumerable<T>> Select<T>() where T : FileFlowObject, new()
+    public virtual async Task<List<T>> Select<T>() where T : FileFlowObject, new()
     {
         var dbObjects = await dbom.GetAll(typeof(T).FullName);
         return ConvertFromDbObject<T>(dbObjects);
@@ -38,13 +38,16 @@ public class FileFlowsObjectManager
     /// </summary>
     /// <typeparam name="T">The type to select</typeparam>
     /// <returns>a single instance</returns>
-    public virtual async Task<Result<T>> Single<T>() where T : FileFlowObject, new()
+    public async Task<Result<T>> Single<T>() where T : FileFlowObject, new()
     {
         var fullName = typeof(T).FullName;
         if (fullName == null)
             return Result<T>.Fail("Type FullName was null");
         
         DbObject dbObject = await dbom.Single(fullName);
+        if (dbObject == null)
+            return default;
+        
         if (string.IsNullOrEmpty(dbObject?.Data))
             return Result<T>.Fail($"Object found with no data");
         return Convert<T>(dbObject);
@@ -56,21 +59,21 @@ public class FileFlowsObjectManager
     /// <param name="uid">the UID of the item to select</param>
     /// <typeparam name="T">the type of item to select</typeparam>
     /// <returns>a single instance</returns>
-    public virtual async Task<Result<T>> Single<T>(Guid uid) where T : FileFlowObject, new()
+    public virtual async Task<Result<T?>> Single<T>(Guid uid) where T : FileFlowObject, new()
     {
         var fullName = typeof(T).FullName;
         if (fullName == null)
-            return Result<T>.Fail("Type FullName was null");
+            return Result<T?>.Fail("Type FullName was null");
         
         DbObject dbObject = await dbom.Single(uid);
         if (dbObject == null)
-            return Result<T>.Fail("Not found");
+            return null;
         
         if (dbObject.Type != fullName)
-            return Result<T>.Fail($"Object found but was the wrong type '{dbObject.Type}' expected '{fullName}'");
+            return Result<T?>.Fail($"Object found but was the wrong type '{dbObject.Type}' expected '{fullName}'");
         
         if (string.IsNullOrEmpty(dbObject?.Data))
-            return Result<T>.Fail($"Object found with no data");
+            return Result<T?>.Fail($"Object found with no data");
         
         return Convert<T>(dbObject);
     }
@@ -82,7 +85,7 @@ public class FileFlowsObjectManager
     /// <param name="ignoreCase">if casing should be ignored</param>
     /// <typeparam name="T">The type to get</typeparam>
     /// <returns>the item</returns>
-    public async Task<Result<T>> GetByName<T>(string name, bool ignoreCase) where T : FileFlowObject, new()
+    public async Task<Result<T>> GetByName<T>(string name, bool ignoreCase = false) where T : FileFlowObject, new()
     {
         var fullName = typeof(T).FullName;
         if (fullName == null)
@@ -118,22 +121,15 @@ public class FileFlowsObjectManager
     /// <summary>
     /// Adds or updates an object in the database
     /// </summary>
-    /// <param name="db">The IDatabase used for this operation</param>
     /// <param name="obj">The object being added or updated</param>
+    /// <param name="saveRevision">if the revision should be saved</param>
     /// <typeparam name="T">The type of object being added or updated</typeparam>
     /// <returns>The updated object</returns>
-    public async Task<T> AddOrUpdateObject<T>(T obj) where T : FileFlowObject, new()
+    public async Task<(DbObject dbo, bool changed)> AddOrUpdateObject<T>(T obj, bool saveRevision = false) where T : FileFlowObject, new()
     {
-        var serializerOptions = new JsonSerializerOptions
-        {
-            Converters = { new DataConverter(), new DataConverter<FlowPart>(), new BoolConverter(), new ValidatorConverter() }
-        };
-        // need to case obj to (ViObject) here so the DataConverter is used
-        string json = JsonSerializer.Serialize((FileFlowObject)obj, serializerOptions);
-
-        var type = obj.GetType();
-        obj.Name = obj.Name?.EmptyAsNull() ?? type.Name;
+        var dbo = ConvertToDbObject(obj);
         var dbObject = obj.Uid == Guid.Empty ? null : await dbom.Single(obj.Uid);
+        bool changed = false;
         
         if (dbObject == null)
         {
@@ -148,24 +144,41 @@ public class FileFlowsObjectManager
                 Name = obj.Name,
                 DateCreated = obj.DateCreated,
                 DateModified = obj.DateModified,
-
-                Type = type.FullName!,
-                Data = json
+                Type = dbo.Type,
+                Data = dbo.Data
             };
             await dbom.Insert(dbObject);
+            changed = true;
         }
-        else
+        else if(dbo.Name != dbObject.Name || dbo.Data != dbObject.Data)
         {
             obj.DateModified = DateTime.UtcNow;
             dbObject.Name = obj.Name;
             dbObject.DateModified = obj.DateModified;
             if (obj.DateCreated != dbObject.DateCreated && obj.DateCreated > new DateTime(2020, 1, 1))
+            {
                 dbObject.DateCreated = obj.DateCreated; // OnHeld moving to process now can change this date
-            dbObject.Data = json;
+            }
+
+            changed = true;
+            dbObject.Data = dbo.Data;
             await dbom.Update(dbObject); 
         }
+        
+        if (changed && saveRevision)
+        {
+            await DatabaseAccessManager.Instance.RevisionManager.Insert(new()
+            {
+                RevisionDate = DateTime.UtcNow,
+                RevisionUid = dbo.Uid,
+                RevisionCreated = dbo.DateCreated,
+                RevisionName = dbo.Name,
+                RevisionType = dbo.Type,
+                RevisionData = dbo.Data
+            });
+        }
 
-        return obj;
+        return (dbObject, changed);
     }
     
     /// <summary>
@@ -174,7 +187,7 @@ public class FileFlowsObjectManager
     /// <param name="item">the item to update</param>
     public async Task Update(FileFlowObject item)
     {
-        item.DateModified = DateTime.Now;
+        item.DateModified = DateTime.UtcNow;
         if (item.Uid == Guid.Empty)
             item.Uid = Guid.NewGuid();
         var dbo = ConvertToDbObject(item);
@@ -229,7 +242,7 @@ public class FileFlowsObjectManager
     /// <param name="dbObjects">a collection of DbObjects</param>
     /// <typeparam name="T">The type to convert to</typeparam>
     /// <returns>A converted list of objects</returns>
-    internal IEnumerable<T> ConvertFromDbObject<T>(IEnumerable<DbObject> dbObjects) where T : FileFlowObject, new()
+    internal List<T> ConvertFromDbObject<T>(IEnumerable<DbObject> dbObjects) where T : FileFlowObject, new()
     {
         var list = dbObjects.ToList();
         T[] results = new T [list.Count];
@@ -239,7 +252,7 @@ public class FileFlowsObjectManager
             if (converted != null)
                 results[index] = converted;
         });
-        return results.Where(x => x != null);
+        return results.Where(x => x != null).ToList();
     }
     
     

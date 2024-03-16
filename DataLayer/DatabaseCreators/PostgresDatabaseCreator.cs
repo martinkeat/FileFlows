@@ -37,10 +37,10 @@ public class PostgresDatabaseCreator : IDatabaseCreator
         string connString = Regex.Replace(ConnectionString, "(^|;)Database=[^;]+", "");
         if (connString.StartsWith(";"))
             connString = connString[1..];
-        string dbName = GetDatabaseName();
+        string dbName = GetDatabaseName(ConnectionString);
         
         using var db = new Database(connString, null, Npgsql.NpgsqlFactory.Instance);
-        bool exists = db.ExecuteScalar<int>("SELECT CASE WHEN EXISTS (SELECT 1 FROM pg_database WHERE datname = @0) THEN 1 ELSE 0 END", dbName) == 1;
+        bool exists = DatabaseExists(ConnectionString);
         if (exists)
         {
             if(recreate == false)
@@ -61,16 +61,17 @@ public class PostgresDatabaseCreator : IDatabaseCreator
         catch (Exception ex)
         {
             Logger.ELog("Error creating SQL Server database: " + ex.Message);
-            return DbCreateResult.Failed;
+            return Result<DbCreateResult>.Fail(ex.Message);
         }
     }
     
     /// <summary>
     /// Gets the database name from the connection string
     /// </summary>
+    /// <param name="connectionString">the connection string</param>
     /// <returns>the database name</returns>
-    private string GetDatabaseName()
-        => Regex.Match(ConnectionString, @"(?<=(Database=))[a-zA-Z0-9_\-]+").Value;
+    private static string GetDatabaseName(string connectionString)
+        => Regex.Match(connectionString, @"(?<=(Database=))[a-zA-Z0-9_\-]+").Value;
     
     
     /// <inheritdoc />
@@ -83,5 +84,30 @@ public class PostgresDatabaseCreator : IDatabaseCreator
         db.Execute(sqlTables);
         
         return true;
+    }
+
+    /// <summary>
+    /// Checks if the MySql database exists
+    /// </summary>
+    /// <param name="connectionString">the connection string</param>
+    /// <returns>true if exists, otherwise false</returns>
+    public static Result<bool> DatabaseExists(string connectionString)
+    {
+        try
+        {
+            string connString = Regex.Replace(connectionString, "(^|;)Database=[^;]+", "");
+            if (connString.StartsWith(";"))
+                connString = connString[1..];
+            string dbName = GetDatabaseName(connectionString);
+
+            using var db = new Database(connString, null, Npgsql.NpgsqlFactory.Instance);
+            return db.ExecuteScalar<int>(
+                    "SELECT CASE WHEN EXISTS (SELECT 1 FROM pg_database WHERE datname = @0) THEN 1 ELSE 0 END",
+                    dbName) == 1;
+        }
+        catch (Exception ex)
+        {
+            return Result<bool>.Fail(ex.Message);
+        }
     }
 }

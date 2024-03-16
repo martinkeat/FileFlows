@@ -4,13 +4,13 @@ $offset:7;
 @mixin generate-base-colors($step: 7, $offset: 3) {
     $base-colors: ();
 
-    @for $i from 0 through 4 {
-        $name: nth(('base-darkest', 'base-darker', 'base', 'base-lighter', 'base-lightest'), $i + 1);
+    @for $i from 0 through 5 {
+        $name: nth(('base-darkest', 'base-darker', 'base', 'base-lighter', 'base-lightest', 'base-lightest-2'), $i + 1);
         $value: $offset + ($step * $i);
         $r: $value;
         $g: $value;
         $b: $value;
-
+        
         $base-colors: map-merge($base-colors, (
                 $name: rgb($r, $g, $b),
                 '#{$name}-rgb': (#{$r}, #{$g}, #{$b})

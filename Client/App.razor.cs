@@ -74,7 +74,7 @@ namespace FileFlows.Client
             }
 
             langFiles.Add(
-                await LoadLanguageFile("/api/plugin/language/en.json?ts=" + System.DateTime.Now.ToFileTime()));
+                await LoadLanguageFile("/api/plugin/language/en.json?ts=" + DateTime.UtcNow.ToFileTime()));
             if (nonEnglishLanguage)
             {
                 var other = await LoadLanguageFile("/api/plugin/language/" + language + ".json?version=" + Globals.Version);

@@ -56,9 +56,9 @@
 //         lock (ExecutedCommands)
 //         {
 //             if (ExecutedCommands.ContainsKey(hashCode))
-//                 ExecutedCommands[hashCode] = DateTime.Now;
+//                 ExecutedCommands[hashCode] = DateTime.UtcNow;
 //             else
-//                 ExecutedCommands.Add(hashCode, DateTime.Now);
+//                 ExecutedCommands.Add(hashCode, DateTime.UtcNow);
 //         }
 //         //
 //         // string sql = GetCommandText(cmd);
@@ -83,7 +83,7 @@
 //             ExecutedCommands.Remove(hashCode);
 //         }
 //
-//         var time = DateTime.Now.Subtract(started);
+//         var time = DateTime.UtcNow.Subtract(started);
 //         string sql = GetCommandText(cmd);
 //         if (sql.Contains("LogMessage"))
 //             return; // dont log these sql = "LOGMESSAGE";

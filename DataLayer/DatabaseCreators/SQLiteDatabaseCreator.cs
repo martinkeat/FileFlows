@@ -1,20 +1,37 @@
 using System.Data.Common;
 using System.Text.RegularExpressions;
-using FileFlows.DataLayer.DatabaseConnectors;
 using FileFlows.DataLayer.Helpers;
 using FileFlows.Plugin;
+using FileFlows.ServerShared.Helpers;
 
 namespace FileFlows.DataLayer.DatabaseCreators;
 
+/// <summary>
+/// SQLite Database Creator
+/// </summary>
 public class SQLiteDatabaseCreator : IDatabaseCreator
 {
+    /// <summary>
+    /// The connection string to the database
+    /// </summary>
     private string ConnectionString { get; init; }
+    /// <summary>
+    /// The logger to use
+    /// </summary>
     private ILogger Logger;
+    /// <summary>
+    /// The filename of the database file
+    /// </summary>
     private readonly string DbFilename;
     
     public SQLiteDatabaseCreator(ILogger logger, string connectionString)
     {
         Logger = logger;
+        
+        // if connection string is using relative file, update with full path
+        connectionString = connectionString.Replace($"Data Source=FileFlows.sqlite",
+            $"Data Source={Path.Combine(DirectoryHelper.DatabaseDirectory, "FileFlows.sqlite")}");
+        
         ConnectionString = connectionString;
         DbFilename = GetFilenameFromConnectionString(connectionString);
     }
@@ -38,6 +55,13 @@ public class SQLiteDatabaseCreator : IDatabaseCreator
         var info = new FileInfo(DbFilename);
         if(info.Exists && info.Length < 0)
             info.Delete();
+
+        if (info.Exists && recreate)
+        {
+            // move to a backup file
+            info.MoveTo(DbFilename + ".backup", true);
+            info = new FileInfo(DbFilename);
+        }
         
         if(info.Exists == false)
         {
@@ -46,8 +70,6 @@ public class SQLiteDatabaseCreator : IDatabaseCreator
             return DbCreateResult.Created;
         }
         
-        // create backup 
-        File.Copy(DbFilename, DbFilename + ".backup", true);
         return DbCreateResult.AlreadyExisted;
     }
     
@@ -55,7 +77,7 @@ public class SQLiteDatabaseCreator : IDatabaseCreator
     /// <inheritdoc />
     public Result<bool> CreateDatabaseStructure()
     {
-        string connString = SQLiteConnector.GetConnectionString(DbFilename);
+        string connString = SqliteHelper.GetConnectionString(DbFilename);
         using DbConnection con = PlatformHelper.IsArm ? new Microsoft.Data.Sqlite.SqliteConnection(connString) :
             new System.Data.SQLite.SQLiteConnection(connString);
         con.Open();
@@ -76,5 +98,21 @@ public class SQLiteDatabaseCreator : IDatabaseCreator
         {
             con.Close();
         }
+    }
+
+    /// <summary>
+    /// Checks if the MySql database exists
+    /// </summary>
+    /// <param name="connectionString">the connection string</param>
+    /// <returns>true if exists, otherwise false</returns>
+    public static Result<bool> DatabaseExists(string connectionString)
+    {
+        string dbFile = GetFilenameFromConnectionString(connectionString);
+        if (File.Exists(dbFile))
+            return new FileInfo(dbFile).Length> 0;
+        dbFile = Path.Combine(DirectoryHelper.DatabaseDirectory, dbFile);
+        if (File.Exists(dbFile))
+            return new FileInfo(dbFile).Length > 0;
+        return false;
     }
 }

@@ -30,6 +30,32 @@ public class MySqlDatabaseCreator : IDatabaseCreator
         Logger = logger;
         ConnectionString = connectionString;
     }
+
+    /// <summary>
+    /// Checks if the MySql database exists
+    /// </summary>
+    /// <param name="connectionString">the connection string</param>
+    /// <returns>true if exists, otherwise false</returns>
+    internal static Result<bool> DatabaseExists(string connectionString)
+    {
+        try
+        {
+            string connString = Regex.Replace(connectionString, "(^|;)Database=[^;]+", "");
+            if (connString.StartsWith(";"))
+                connString = connString[1..];
+            string dbName = GetDatabaseName(connectionString);
+
+            using var db = new Database(connString, null, MySqlConnectorFactory.Instance);
+            bool exists =
+                string.IsNullOrEmpty(db.ExecuteScalar<string>(
+                    "select schema_name from information_schema.schemata where schema_name = @0", dbName)) == false;
+            return exists;
+        }
+        catch (Exception ex)
+        {
+            return Result<bool>.Fail(ex.Message);
+        }
+    }
     
     /// <inheritdoc />
     public Result<DbCreateResult> CreateDatabase(bool recreate)
@@ -37,10 +63,10 @@ public class MySqlDatabaseCreator : IDatabaseCreator
         string connString = Regex.Replace(ConnectionString, "(^|;)Database=[^;]+", "");
         if (connString.StartsWith(";"))
             connString = connString[1..];
-        string dbName = GetDatabaseName();
+        string dbName = GetDatabaseName(ConnectionString);
         
         using var db = new Database(connString, null, MySqlConnectorFactory.Instance);
-        bool exists = string.IsNullOrEmpty(db.ExecuteScalar<string>("select schema_name from information_schema.schemata where schema_name = @0", dbName)) == false;
+        bool exists = DatabaseExists(ConnectionString);
         if (exists)
         {
             if(recreate == false)
@@ -50,16 +76,19 @@ public class MySqlDatabaseCreator : IDatabaseCreator
         }
 
         Logger.ILog("Creating Database");
-        return db.Execute("create database " + dbName + " character set utf8 collate 'utf8_unicode_ci';") > 0 ? 
-            DbCreateResult.Created : DbCreateResult.Failed;
+        bool created = db.Execute("create database " + dbName + " character set utf8 collate 'utf8_unicode_ci';") > 0;
+        if (created)
+            return DbCreateResult.Created;
+        return Result<DbCreateResult>.Fail("Failed to create database");
     }
     
     /// <summary>
     /// Gets the database name from the connection string
     /// </summary>
+    /// <param name="connectionString">the connection string</param>
     /// <returns>the database name</returns>
-    private string GetDatabaseName()
-        => Regex.Match(ConnectionString, @"(?<=(Database=))[a-zA-Z0-9_\-]+").Value;
+    private static string GetDatabaseName(string connectionString)
+        => Regex.Match(connectionString, @"(?<=(Database=))[a-zA-Z0-9_\-]+").Value;
     
     
     /// <inheritdoc />

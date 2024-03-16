@@ -3,6 +3,7 @@ import { Processing } from './Processing.js';
 import { LibraryFileTable } from "./LibraryFileTable.js";
 import { ProcessingNodes } from './ProcessingNodes.js';
 import { TotalsTable } from './TotalsTable.js';
+import { Counter } from './Counter.js';
 
 export function initDashboard(uid, Widgets, csharp, isReadOnly){
     if(!Widgets)
@@ -17,7 +18,8 @@ export function initDashboard(uid, Widgets, csharp, isReadOnly){
     }
     disposeAll();
     destroyDashboard();
-    
+    if(!document)
+        return;
     let dashboard = document.querySelector('.dashboard.grid-stack');
     if(!dashboard)
     {
@@ -227,6 +229,8 @@ function newChart(type, uid, args){
         window.FlowCharts[uid] = new BarChart(uid, args);
     else if(type == 'BellCurve' || type === 107)
         window.FlowCharts[uid] = new BellCurve(uid, args);
+    else if(type == 'Counter' || type === 108)
+        window.FlowCharts[uid] = new Counter(uid, args);
     else if(type == 'TotalsTable' || type === 110)
         window.FlowCharts[uid] = new TotalsTable(uid, args);
     else if(type == 'Nvidia' || type === 121)
@@ -392,7 +396,12 @@ export class BellCurve extends FFChart
     }
     
     fixData(data) {
-        data = data.map((x, index) => ({ x: index, y: x.Value}));
+        let fixed = [];
+        Object.keys(data).forEach(x => {
+            fixed.push({ x: x, y: data[x]});
+        })
+        data = fixed;
+        
         const mean = this.calcMean(data, true);
         const tmp = data.map(p => Math.pow(p.y - mean, 2));
         const variance = this.calcMean(data.map(p => Math.pow(p.y - mean, 2)));
@@ -506,38 +515,31 @@ export class PieChartChart extends FFChart
     }
 
     fixData(data) {
-        if (!data?.length || (data[0].Name && data[0].Value) === false)
-            return data;
+        if(!data || !Object.keys(data).length)
+            return [];
 
-        //statistic data, convert it
-        let newData = {};
-        for (let d of data) {
-            if (newData[d.Value])
-                newData[d.Value] = newData[d.Value] + 1;
-            else
-                newData[d.Value] = 1;
-        }
-        let temp = [];
-        Object.keys(newData).forEach(x => {
-            temp.push({
-                label: x,
-                value: newData[x]
+        let results = [];
+        Object.keys(data).forEach(x => {
+            results.push({
+                Name: x,
+                Value: data[x]
             })
         });
-        temp.sort((a, b) => {
-            return b.value - a.value
-        });
 
-        data = {
+        results.sort((a, b) => {
+            return b.Value - a.Value;
+        });
+        
+        let series = {
             labels: [],
             series: []
         };
-        for(let v of temp)
+        for(let v of results)
         {
-            data.labels.push(v.label);
-            data.series.push(v.value);
+            series.labels.push(v.Name);
+            series.series.push(v.Value);
         }
-        return data;
+        return series;
     }
 
 
@@ -585,24 +587,21 @@ export class TreeMapChart extends FFChart
     }
 
     fixData(data) {
-        if (!data?.length || (data[0].Name && data[0].Value) === false)
-            return data;
-
-        //statistic data, convert it
-        let newData = {};
-        for (let d of data) {
-            if (d.Value === 'mpeg2video')
-                d.Value = 'mpeg2'; // too long
-            if (newData[d.Value])
-                newData[d.Value] = newData[d.Value] + 1;
-            else
-                newData[d.Value] = 1;
-        }
-        data = [];
-        Object.keys(newData).forEach(x => {
-            data.push({x: x, y: newData[x]});
+        if(!data || !Object.keys(data).length)
+            return [];
+        
+        let results = [];
+        Object.keys(data).forEach(x => {
+            let name = x;
+            if (name=== 'mpeg2video')
+                name = 'mpeg2'; // too long
+            results.push({
+                x: name,
+                y: data[x]
+            })
         });
-        return data;
+        
+        return results;
     }
 
     getChartOptions(data)

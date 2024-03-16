@@ -96,7 +96,7 @@ public class LibraryWorker : Worker
     private void UpdateLibrariesInstance()
     {
         Logger.Instance.DLog("LibraryWorker: Updating Libraries");
-        var libraries = new Services.LibraryService().GetAll();
+        var libraries = new Services.LibraryService().GetAllAsync().Result;
         var libraryUids = libraries.Select(x => x.Uid + ":" + x.Path).ToList();            
 
         Watch(libraries.Where(x => WatchedLibraries.ContainsKey(x.Uid + ":" + x.Path) == false).ToArray());
@@ -110,17 +110,19 @@ public class LibraryWorker : Worker
             libwatcher.UpdateLibrary(library);
         }
      
-        LibrariesLastUpdated = DateTime.Now;
+        LibrariesLastUpdated = DateTime.UtcNow;
     }
 
     protected override void Execute()
     {
-        if(LibrariesLastUpdated < DateTime.Now.AddHours(-1))
+        if(LibrariesLastUpdated < DateTime.UtcNow.AddHours(-1))
             UpdateLibrariesInstance();
 
         foreach(var libwatcher in WatchedLibraries.Values)
         {
             var library = libwatcher.Library;
+            if (library.Enabled == false)
+                continue; // dont scan a disabled library
             if (library.FullScanIntervalMinutes == 0)
                 library.FullScanIntervalMinutes = 60;
             bool scan = library.Scan;
@@ -158,9 +160,8 @@ public class LibraryWorker : Worker
                                  $"(last scanned: {library.LastScannedAgo}) " +
                                  $"(Full Scan interval: {library.FullScanIntervalMinutes})");
 
-            Task.Run(async () =>
+            Task.Run(() =>
             {
-                await Task.Delay(1);
                 libwatcher.Scan();
             });
         }
@@ -173,15 +174,6 @@ public class LibraryWorker : Worker
     internal static void ResetProcessing(bool internalOnly = true)
     {
         var service = new Server.Services.LibraryFileService();
-        if (internalOnly)
-        {
-            service.ResetProcessingStatus(Globals.InternalNodeUid).Wait();
-        }
-        else
-        {
-            // special case can use dbhelper directly
-            // this is called at the start up of FileFlows
-            service.ResetProcessingStatus().Wait();
-        }
+        service.ResetProcessingStatus(internalOnly ? Globals.InternalNodeUid : null).Wait();
     }
 }

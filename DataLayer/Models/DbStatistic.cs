@@ -1,3 +1,5 @@
+using FileFlows.ServerShared;
+
 namespace FileFlows.DataLayer.Models;
 
 /// <summary>
@@ -6,27 +8,17 @@ namespace FileFlows.DataLayer.Models;
 public class DbStatistic
 {
     /// <summary>
-    /// Gets or sets when the statistic was recorded
-    /// </summary>
-    public DateTime LogDate { get; set; }
-
-    /// <summary>
     /// Gets or sets the name of the statistic
     /// </summary>
     public string Name { get; set; }
-
+    
     /// <summary>
-    /// Gets or sets the type
+    /// Gets or sets the type of statistic
     /// </summary>
     public StatisticType Type { get; set; }
     
     /// <summary>
-    /// Gets or sets the string value
-    /// </summary>
-    public string StringValue { get; set; }
-    
-    /// <summary>
     /// Gets or sets the number value
     /// </summary>
-    public double NumberValue { get; set; }
+    public string Data { get; set; }
 }

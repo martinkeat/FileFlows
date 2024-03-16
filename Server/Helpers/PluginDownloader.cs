@@ -28,7 +28,7 @@ public class PluginDownloader
         Version ffVersion = new Version(Globals.Version);
         try
         {
-            string url = Globals.PluginBaseUrl + "/download/" + packageName + $"?version={version}&rand=" + DateTime.Now.ToFileTime();
+            string url = Globals.PluginBaseUrl + "/download/" + packageName + $"?version={version}&rand=" + DateTime.UtcNow.ToFileTime();
             var dlResult = HttpHelper.Get<byte[]>(url).Result;
             if (dlResult.Success)
                 return (true, dlResult.Data);

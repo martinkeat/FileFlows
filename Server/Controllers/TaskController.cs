@@ -15,8 +15,8 @@ public class TaskController : Controller
     /// </summary>
     /// <returns>A list of all configured scheduled tasks</returns>
     [HttpGet]
-    public IEnumerable<FileFlowsTask> GetAll()
-        => new TaskService().GetAll().OrderBy(x => x.Name.ToLowerInvariant());
+    public async Task<IEnumerable<FileFlowsTask>> GetAll()
+        => (await ServiceLoader.Load<TaskService>().GetAllAsync()).OrderBy(x => x.Name.ToLowerInvariant());
 
     /// <summary>
     /// Get scheduled task
@@ -24,8 +24,8 @@ public class TaskController : Controller
     /// <param name="uid">The UID of the scheduled task to get</param>
     /// <returns>The scheduled task instance</returns>
     [HttpGet("{uid}")]
-    public FileFlowsTask Get(Guid uid) 
-        => new TaskService().GetByUid(uid);
+    public Task<FileFlowsTask?> Get(Guid uid) 
+        => ServiceLoader.Load<TaskService>().GetByUidAsync(uid);
 
     /// <summary>
     /// Get a scheduled task by its name, case insensitive
@@ -33,8 +33,8 @@ public class TaskController : Controller
     /// <param name="name">The name of the scheduled task</param>
     /// <returns>The scheduled task instance if found</returns>
     [HttpGet("name/{name}")]
-    public FileFlowsTask? GetByName(string name)
-        => new TaskService().GetByName(name);
+    public Task<FileFlowsTask?> GetByName(string name)
+        => ServiceLoader.Load<TaskService>().GetByNameAsync(name);
 
     /// <summary>
     /// Saves a scheduled task
@@ -42,8 +42,13 @@ public class TaskController : Controller
     /// <param name="fileFlowsTask">The scheduled task to save</param>
     /// <returns>The saved instance</returns>
     [HttpPost]
-    public Task<FileFlowsTask> Save([FromBody] FileFlowsTask fileFlowsTask)
-        => new TaskService().Update(fileFlowsTask);
+    public async Task<IActionResult> Save([FromBody] FileFlowsTask fileFlowsTask)
+    {
+        var result = await ServiceLoader.Load<TaskService>().Update(fileFlowsTask);
+        if (result.Failed(out string error))
+            return BadRequest(error);
+        return Ok(result.Value);
+    }
 
     /// <summary>
     /// Delete scheduled tasks from the system
@@ -52,7 +57,7 @@ public class TaskController : Controller
     /// <returns>an awaited task</returns>
     [HttpDelete]
     public Task Delete([FromBody] ReferenceModel<Guid> model)
-        => new TaskService().Delete(model.Uids);
+        => ServiceLoader.Load<TaskService>().Delete(model.Uids);
 
 
     /// <summary>

@@ -12,7 +12,7 @@
     <Body>
         
         <FlowTable @ref="Table" Data="@Data" TItem="Library" Selection="SelectionMode.Multiple"
-            DoubleClick="@OnDoubleClick" TableIdentifier="Libraries">
+            DoubleClick="@OnDoubleClick" TableIdentifier="Libraries"  DisableColumn="(item) => !item.Enabled">
             <ToolBar>            
                 <FlowTableButton Clicked=Add Icon="fas fa-plus" Label="Labels.Add" />
                 <FlowTableButton Clicked=Edit SelectedOne="true" Icon="fas fa-edit" Label="Labels.Edit" />
@@ -29,25 +29,21 @@
             </ToolBar>
 
             <Columns>
-                <FlowTableColumn TItem="Library" Width="14rem">
+                <FlowTableColumn TItem="Library" NoHeight="true">
                     <Header>
                         @Globals.lblName
                     </Header>
                     <Cell Context="item">
-                        <span>@item.Name</span>
-                    </Cell>
-                </FlowTableColumn>
-                <FlowTableColumn TItem="Library" MobileWidth="0">
-                    <Header>
-                        Path
-                    </Header>
-                    <Cell Context="item">
-                        <span>@item.Path</span>
+                        <div class="name-col">
+                            <i class="status-icon @GetPriorityIcon(item)"></i>
+                            <span class="name">@item.Name</span>
+                            <span class="page">@item.Path</span>
+                        </div>
                     </Cell>
                 </FlowTableColumn>
                 <FlowTableColumn TItem="Library" Width="14rem" MobileWidth="0">
                     <Header>
-                        Flow
+                        @lblFlow
                     </Header>
                     <Cell Context="item">
                         <span>@item.Flow?.Name</span>
@@ -55,19 +51,10 @@
                 </FlowTableColumn>
                 <FlowTableColumn TItem="Library" Width="12rem" MobileWidth="0">
                     <Header>
-                        Last Scanned
+                        @lblLastScanned
                     </Header>
                     <Cell Context="item">
                         <span>@TimeSpanToString(item)</span>
-                    </Cell>
-                </FlowTableColumn>
-                
-                <FlowTableColumn TItem="Library" Width="8rem" MobileWidth="0">
-                    <Header>
-                        Priority
-                    </Header>
-                    <Cell Context="item">
-                        <span>@item.Priority</span>
                     </Cell>
                 </FlowTableColumn>
                 <FlowTableColumn TItem="Library" Width="6rem" MobileWidth="4rem">
@@ -76,6 +63,17 @@
                     </Header>
                     <Cell Context="item">
                         <FlowSwitch Value="@item.Enabled" ValueChanged="@(args => { item.Enabled= args; _ = Enable(args, item); })"  />
+                    </Cell>
+                </FlowTableColumn>
+                <FlowTableColumn TItem="Library" Width="16rem" MobileWidth="0">
+                    <Header>
+                        @lblSavings
+                    </Header>
+                    <Cell Context="item">
+                        @if(GetStorageSaved(item.Name, out StorageSavedData saved) && saved.OriginalSize > 0)
+                        {
+                            <FlowSavings FinalSize="saved.FinalSize" OriginalSize="saved.OriginalSize" />
+                        }
                     </Cell>
                 </FlowTableColumn>
             </Columns>

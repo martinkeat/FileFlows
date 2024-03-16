@@ -38,7 +38,7 @@ public partial class RevisionExplorer
         try
         {
             var item = Table.GetSelected().FirstOrDefault();
-            var result = await HttpHelper.Put("/api/revision/" + ObjectUid + "/restore/" + item.Uid);
+            var result = await HttpHelper.Put("/api/revision/" + item.Uid + "/restore/" + ObjectUid);
             if (result.Success)
             {
                 Restored = true;

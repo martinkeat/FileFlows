@@ -20,7 +20,7 @@ public class ComicPages:WidgetDefinition
     /// <summary>
     /// Gets the URL
     /// </summary>
-    public override string Url => "/api/statistics/by-name/COMIC_PAGES";
+    public override string Url => "/api/statistics/average/COMIC_PAGES";
     
     /// <summary>
     /// Gets the Icon

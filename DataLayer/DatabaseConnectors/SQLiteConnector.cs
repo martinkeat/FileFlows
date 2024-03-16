@@ -1,9 +1,6 @@
-using System.ComponentModel;
-using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
-using FileFlows.DataLayer.Helpers;
 using FileFlows.Plugin;
-using NPoco;
+using FileFlows.ServerShared.Helpers;
 using DatabaseType = FileFlows.Shared.Models.DatabaseType;
 
 namespace FileFlows.DataLayer.DatabaseConnectors;
@@ -25,11 +22,24 @@ public class SQLiteConnector : IDatabaseConnector
     /// <inheritdoc />
     public string FormatDateQuoted(DateTime date)
         => "datetime('" + date.ToString("yyyy-MM-ddTHH:mm:ss.fffZ") + "', 'utc')";
-       // => "'" + date.ToString("yyyy-MM-ddTHH:mm:ss.fffZ") + "'";
+    
+    /// <inheritdoc />
+    public string TimestampDiffSeconds(string start, string end, string asColumn)
+       => $"(strftime('%s', {end}) - strftime('%s', {start})) AS {asColumn}";
+    
+    /// <inheritdoc />
+    public int GetOpenedConnections()
+        => writeSemaphore.CurrentInUse;
+    
     
     public SQLiteConnector(ILogger logger, string connectionString)
     {
         Logger = logger;
+
+        // if connection string is using relative file, update with full path
+        connectionString = connectionString.Replace($"Data Source=FileFlows.sqlite",
+            $"Data Source={Path.Combine(DirectoryHelper.DatabaseDirectory, "FileFlows.sqlite")}");
+        
         dbConnectionWrite = CreateConnection(connectionString);
         dbConnectionWrite.OnDispose += Dispose;
         // readPool = new(() => CreateConnection(connectionString), 5);
@@ -55,18 +65,6 @@ public class SQLiteConnector : IDatabaseConnector
         return new DatabaseConnection(db, false);
     }
 
-    
-    /// <summary>
-    /// Gets a sqlite connection string for a db file
-    /// </summary>
-    /// <param name="dbFile">the filename of the sqlite db file</param>
-    /// <returns>a sqlite connection string</returns>
-    public static string GetConnectionString(string dbFile)
-    {
-        if (PlatformHelper.IsArm)
-            return $"Data Source={dbFile}";
-        return $"Data Source={dbFile};Version=3;PRAGMA journal_mode=WAL;";
-    }
 
     /// <inheritdoc />
     public DatabaseType Type => DatabaseType.Sqlite;
@@ -80,17 +78,27 @@ public class SQLiteConnector : IDatabaseConnector
             return dbConnectionWrite;
         }
         
-        
-
         //return await readPool.AcquireConnectionAsync();
     }
 
     /// <inheritdoc />
     public string WrapFieldName(string name) => name;
     
+    /// <inheritdoc />
+    public async Task<bool> ColumnExists(string table, string column)
+    {
+        using var db = await GetDb(false);
+        bool exists = db.Db.ExecuteScalar<int>("SELECT COUNT(*) AS CNTREC FROM pragma_table_info(@0) WHERE name=@1", table, column) > 0;
+        return exists;
+    }
     
-    
-    
+    /// <inheritdoc />
+    public async Task CreateColumn(string table, string column, string type, string defaultValue)
+    {
+        string sql = $@"ALTER TABLE {table} ADD COLUMN {column} {type}" + (string.IsNullOrWhiteSpace(defaultValue) ? "" : $" DEFAULT {defaultValue}");
+        using var db = await GetDb(false);
+        await db.Db.ExecuteAsync(sql);
+    }
     
     /// <summary>
     /// Looks to see if the file in the specified connection string exists, and if so, moves it

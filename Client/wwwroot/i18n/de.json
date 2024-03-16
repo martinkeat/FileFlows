@@ -121,6 +121,13 @@
     "Pixels": "Pixels",
     "ReadOnly": "Nur lesen",
     "InUse": "Benutzung",
+    "Running": "Running",
+    "PossibilityDisconnected": "Possibly Disconnected",
+    "Disconnected": "Disconnected",
+    "LastScanned": "Last Scanned",
+    "Savings": "Savings",
+    "Flow": "Flow",
+    "ForceProcessing": "Force Processing",
     "ObsoleteConfirm": {
       "Title": "Veralteter Node",
       "Message": "Es wird empfohlen, zu einem anderen Node zu wechseln.",
@@ -275,7 +282,17 @@
     "ProcessingTimes": "Verarbeitungszeiten",
     "VideoContainers": "Video-Container",
     "AudioContainers": "Audio-Container",
-    "StorageSaved": "Gespeicherter Speicherplatz"
+    "StorageSaved": "Gespeicherter Speicherplatz",
+    "Decoders": "Decoders",
+    "Encoders": "Encoders",
+    "DecoderParameters": "Decoder Parameters",
+    "LogStorage": "Log Storage",
+    "LibraryProcessingTimes":"Library Processing Times",
+    "ImageFormats": "Image Formats",
+    "ComicFormats": "Comic Formats",
+    "ComicPages": "Comic Pages",
+    "NVIDIASMI": "NVIDIA SMI",
+    "CurrentRevision": "Current Revision"
   },
   "Flow": {
     "ErrorMessages":{

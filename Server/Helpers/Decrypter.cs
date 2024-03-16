@@ -1,6 +1,7 @@
 ﻿using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
+using FileFlows.Server.Services;
 
 namespace FileFlows.Server.Helpers;
 
@@ -9,10 +10,6 @@ namespace FileFlows.Server.Helpers;
 /// </summary>
 public class Decrypter
 {
-    /// <summary>
-    /// Gets the encryption key
-    /// </summary>
-    internal static string EncryptionKey => AppSettings.Instance.EncryptionKey;
 
     /// <summary>
     /// Decrypts a string
@@ -23,12 +20,13 @@ public class Decrypter
     {
         try
         {
+            var encryptionKey = ServiceLoader.Load<AppSettingsService>().Settings.EncryptionKey;
             byte[] IV = Convert.FromBase64String(text.Substring(0, 20));
             string work = text.Substring(20).Replace(" ", "+");
             byte[] cipherBytes = Convert.FromBase64String(work);
             using (Aes encryptor = Aes.Create())
             {
-                Rfc2898DeriveBytes pdb = new Rfc2898DeriveBytes(EncryptionKey, IV);
+                Rfc2898DeriveBytes pdb = new Rfc2898DeriveBytes(encryptionKey, IV);
                 encryptor.Key = pdb.GetBytes(32);
                 encryptor.IV = pdb.GetBytes(16);
                 using (MemoryStream ms = new MemoryStream())
@@ -59,13 +57,14 @@ public class Decrypter
     /// <returns>the encrypted text</returns>
     public static string Encrypt(string text)
     {
+        var encryptionKey = ServiceLoader.Load<AppSettingsService>().Settings.EncryptionKey;
         byte[] clearBytes = Encoding.Unicode.GetBytes(text);
-        Random rand= new Random(DateTime.Now.Millisecond);
+        Random rand= new Random(DateTime.UtcNow.Millisecond);
         using (Aes encryptor = Aes.Create())
         {
             byte[] IV = new byte[15];
             rand.NextBytes(IV);
-            Rfc2898DeriveBytes pdb = new Rfc2898DeriveBytes(EncryptionKey, IV);
+            Rfc2898DeriveBytes pdb = new Rfc2898DeriveBytes(encryptionKey, IV);
             encryptor.Key = pdb.GetBytes(32);
             encryptor.IV = pdb.GetBytes(16);
             using (MemoryStream ms = new MemoryStream())

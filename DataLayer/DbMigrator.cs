@@ -1,5 +1,6 @@
 using System.Text.Json;
 using FileFlows.DataLayer.DatabaseConnectors;
+using FileFlows.DataLayer.DatabaseCreators;
 using FileFlows.Plugin;
 using FileFlows.ServerShared.Models;
 using FileFlows.Shared.Models;
@@ -9,7 +10,7 @@ namespace FileFlows.DataLayer;
 /// <summary>
 /// Migrates one database to another database
 /// </summary>
-public class DbMigrator
+internal class DbMigrator
 {
     /// <summary>
     /// The logger to use
@@ -30,12 +31,13 @@ public class DbMigrator
     /// </summary>
     /// <param name="sourceInfo">the source database</param>
     /// <param name="destinationInfo">the destination database</param>
+    /// <param name="backingUp">true if performing a backup, otherwise false</param>
     /// <returns>if the migration was successful</returns>
-    public Result<bool> Migrate(DatabaseInfo sourceInfo, DatabaseInfo destinationInfo)
+    public Result<bool> Migrate(DatabaseInfo sourceInfo, DatabaseInfo destinationInfo, bool backingUp = false)
     {
         try
         {
-            Logger?.ILog("Database Migration started");
+            Logger?.ILog($"Database {(backingUp ? "Backup" : "Migration")} started");
 
             var source = DatabaseAccessManager.FromType(Logger!, sourceInfo.Type, sourceInfo.ConnectionString);
             var dest = DatabaseAccessManager.FromType(Logger!, destinationInfo.Type, destinationInfo.ConnectionString);
@@ -46,12 +48,10 @@ public class DbMigrator
                 SQLiteConnector.MoveFileFromConnectionString(destinationInfo.ConnectionString);
             }
 
-            var destCreator = DatabaseCreators.DatabaseCreator.Get(dest.Type, Logger!, destinationInfo.ConnectionString);
+            var destCreator = DatabaseCreator.Get(Logger!, dest.Type, destinationInfo.ConnectionString);
             var result = destCreator.CreateDatabase(recreate: true);
             if (result.Failed(out string error))
                 return Result<bool>.Fail("Failed creating destination database: " + error);
-            if(result.Value == DbCreateResult.Failed)
-                return Result<bool>.Fail("Failed creating destination database");
             
             var structureResult = destCreator.CreateDatabaseStructure();
             if(structureResult.Failed(out error))
@@ -59,19 +59,25 @@ public class DbMigrator
             if(structureResult.Value == false)
                 return Result<bool>.Fail("Failed creating destination database structure");
             
+            Logger?.ILog((backingUp ? "Backing up" : "Migrating") + " database objects");
             MigrateDbObjects(source, dest);
+            
+            Logger?.ILog((backingUp ? "Backing up" : "Migrating") + " library files");
             MigrateLibraryFiles(source, dest);
+            
+            Logger?.ILog((backingUp ? "Backing up" : "Migrating") + " statistics");
             MigrateDbStatistics(source, dest);
+            
+            Logger?.ILog((backingUp ? "Backing up" : "Migrating") + " revisions");
             MigrateRevisions(source, dest);
-            // log messages, we dont care if these are migrated
-            //MigrateDbLogs(source, dest);
 
-            Logger?.ILog("Database Migration complete");
+            Logger?.ILog($"Database {(backingUp ? "backup" : "migration")} complete");
             return true;
         }
         catch (Exception ex)
         {
-            return Result<bool>.Fail("Failed to migrate data: " + ex.Message);
+            Logger?.ELog($"Failed to {(backingUp ? "backup" : "migrate")} data: " + ex.Message + Environment.NewLine + ex.StackTrace);
+            return Result<bool>.Fail($"Failed to {(backingUp ? "backup" : "migrate")} data: " + ex.Message);
         }
     }
 
@@ -82,7 +88,7 @@ public class DbMigrator
     /// <param name="dest">the destination database</param>
     private void MigrateDbObjects(DatabaseAccessManager source, DatabaseAccessManager dest)
     {
-        var dbObjects = source.DbObjectManager.GetAll().Result.ToArray();
+        var dbObjects = source.ObjectManager.GetAll().Result.ToArray();
         if (dbObjects?.Any() != true)
             return;
 
@@ -92,7 +98,7 @@ public class DbMigrator
 
             try
             {
-                dest.DbObjectManager.Insert(obj).Wait();
+                dest.ObjectManager.Insert(obj).Wait();
             }
             catch (Exception ex)
             {
@@ -110,20 +116,17 @@ public class DbMigrator
     /// <param name="dest">the destination database</param>
     private void MigrateDbStatistics(DatabaseAccessManager source, DatabaseAccessManager dest)
     {
-        var dbStatistics = source.DbStatisticManager.GetAll().Result;
+        var dbStatistics = source.StatisticManager.GetAll().Result;
         if (dbStatistics?.Any() != true)
             return;
 
-        foreach (var obj in dbStatistics)
+        try
         {
-            try
-            {
-                dest.DbStatisticManager.Insert(obj).Wait();
-            }
-            catch (Exception ex)
-            {
-                Logger?.WLog("Failed migrating database statistic: " + ex.Message);
-            }
+            dest.StatisticManager.InsertBulk(dbStatistics.ToArray()).Wait();
+        }
+        catch (Exception ex)
+        {
+            Logger?.WLog("Failed migrating database statistic: " + ex.Message);
         }
     }
     
@@ -134,7 +137,7 @@ public class DbMigrator
     /// <param name="dest">the destination database</param>
     private void MigrateRevisions(DatabaseAccessManager source, DatabaseAccessManager dest)
     {
-        var dbRevisions = source.DbRevisionManager.GetAll().Result;
+        var dbRevisions = source.RevisionManager.GetAll().Result;
         if (dbRevisions?.Any() != true)
             return;
 
@@ -142,39 +145,11 @@ public class DbMigrator
         {
             try
             {
-                dest.DbRevisionManager.Insert(obj).Wait();
+                dest.RevisionManager.Insert(obj).Wait();
             }
             catch (Exception ex)
             {
                 Logger?.WLog("Failed migrating object revision: " + ex.Message);
-            }
-        }
-    }
-
-    
-    /// <summary>
-    /// Migrates database log messages from one database to another
-    /// </summary>
-    /// <param name="source">the source database</param>
-    /// <param name="dest">the destination database</param>
-    private void MigrateDbLogs(DatabaseAccessManager source, DatabaseAccessManager dest)
-    {
-        if (source.Type == DatabaseType.Sqlite || dest.Type == DatabaseType.Sqlite)
-            return;
-        
-        var dbLogMessages = source.DbLogMessageManager.GetAll().Result;
-        if (dbLogMessages?.Any() != true)
-            return;
-
-        foreach (var obj in dbLogMessages)
-        {
-            try
-            {
-                dest.DbLogMessageManager.Insert(obj).Wait();
-            }
-            catch (Exception)
-            {
-                // we really dont care if these arent migrated
             }
         }
     }
@@ -201,5 +176,28 @@ public class DbMigrator
                 Logger.ELog($"Failed migrating library file '{obj.Name}': " + ex.Message);
             }
         }
+    }
+
+    /// <summary>
+    /// Checks if a database exists
+    /// </summary>
+    /// <param name="type">the type of database to check</param>
+    /// <param name="connectionString">the connection string</param>
+    /// <returns>true if exists, otherwise false</returns>
+    public static Result<bool> DatabaseExists(DatabaseType type, string connectionString)
+    {
+        switch (type)
+        {
+            case DatabaseType.MySql:
+                return MySqlDatabaseCreator.DatabaseExists(connectionString);
+            case DatabaseType.SqlServer:
+                return SqlServerDatabaseCreator.DatabaseExists(connectionString);
+            case DatabaseType.Postgres:
+                return PostgresDatabaseCreator.DatabaseExists(connectionString);
+            case DatabaseType.Sqlite:
+                return SQLiteDatabaseCreator.DatabaseExists(connectionString);
+        }
+
+        return Result<bool>.Fail("Unsupported database type");
     }
 }

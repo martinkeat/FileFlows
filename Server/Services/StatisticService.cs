@@ -1,6 +1,8 @@
-﻿using FileFlows.Server.Controllers;
-using FileFlows.Server.Helpers;
+﻿using FileFlows.DataLayer;
+using FileFlows.Managers;
+using FileFlows.ServerShared.Models.StatisticModels;
 using FileFlows.ServerShared.Services;
+using FileFlows.Shared.Models;
 
 namespace FileFlows.Server.Services;
 
@@ -9,85 +11,239 @@ namespace FileFlows.Server.Services;
 /// </summary>
 public class StatisticService : IStatisticService
 {
-    /// <summary>
-    /// Records a statistic value
-    /// </summary>
-    /// <returns>a task to await</returns>
-    public Task Record(string name, object value) =>
-        Record(new Statistic { Name = name, Value = value });
+    private Dictionary<string, object> CachedData = new();
+
+    private FairSemaphore _semaphore = new(1);
 
     /// <summary>
-    /// Records a statistic
+    /// Initializes a new instance of the statistic service
     /// </summary>
-    /// <param name="statistic">the statistic to record</param>
-    public async Task Record(Statistic statistic)
+    public StatisticService()
     {
-        if (statistic == null)
-            return;
-        await DbHelper.RecordStatistic(statistic);
+        CachedData = new StatisticManager().GetAll().Result;
+    }
+
+    /// <summary>
+    /// Clears DbStatistics based on specified conditions.
+    /// </summary>
+    /// <param name="name">Optional. The name for which DbStatistics should be cleared.</param>
+    public async Task Clear(string? name = null)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            CachedData.Remove(name);
+        else
+            CachedData.Clear();
+        
+        await new StatisticManager().Clear(name);   
     }
 
     /// <summary>
     /// Gets statistics by name
     /// </summary>
     /// <returns>the matching statistics</returns>
-    public Task<IEnumerable<Statistic>> GetStatisticsByName(string name)
-        => DbHelper.GetStatisticsByName(name);
-
-    /// <summary>
-    /// Gets statistics totaled by their name
-    /// </summary>
-    /// <returns>the matching statistics</returns>
-    public async Task<Dictionary<string, int>> GetTotalsByName( string name)
+    public Dictionary<string, long> GetRunningTotals(string name)
     {
-        var stats = await DbHelper.GetStatisticsByName(name);
-        var groupedStats = stats.GroupBy(stat => stat.Value.ToString());
-
-        // Create a dictionary to store the counts
-        var resultDictionary = new Dictionary<string, int>();
-
-        // Iterate through the grouped stats and count the occurrences
-        foreach (var group in groupedStats)
-        {
-            // group.Key is the unique value, group.Count() is the count
-            resultDictionary.Add(group.Key, group.Count());
-        }
-
-        // Order the dictionary by count in descending order
-        resultDictionary = resultDictionary.OrderByDescending(kv => kv.Value)
-            .ToDictionary(kv => kv.Key, kv => kv.Value);
-
-        return resultDictionary;
+        if (CachedData.TryGetValue(name, out object o) == null)
+            return new();
+        if (o is not RunningTotals stat)
+            return new ();
+        return stat.Data;
     }
+
     /// <summary>
-    /// Clears DbStatistics based on specified conditions.
+    /// Gets average by name
     /// </summary>
-    /// <param name="name">Optional. The name for which DbStatistics should be cleared.</param>
-    /// <param name="before">Optional. The date before which DbStatistics should be cleared.</param>
-    /// <param name="after">Optional. The date after which DbStatistics should be cleared.</param>
-    public void Clear(string? name = null, DateTime? before = null, DateTime? after = null)
+    /// <returns>the matching average</returns>
+    public Dictionary<int, int> GetAverage(string name)
     {
-        if (string.IsNullOrWhiteSpace(name) && before == null && after == null)
+        if (CachedData.TryGetValue(name, out object o) == null)
+            return new();
+        if (o is not Average stat)
+            return new ();
+        return stat.Data;
+    }
+    
+    /// <summary>
+    /// Gets heatmap by name
+    /// </summary>
+    /// <returns>the heatmap</returns>
+    public List<HeatmapData> GetHeatMap(string name)
+    {
+        if (CachedData.TryGetValue(name, out object o) == null)
+            return new Heatmap().ConvertData();
+        
+        var data = o as Heatmap ?? new();
+        return data.ConvertData();
+    }
+
+    /// <summary>
+    /// Gets storage saved
+    /// </summary>
+    /// <returns>the storage saved</returns>
+    public List<StorageSavedData> GetStorageSaved()
+    {
+        if (CachedData.TryGetValue(Globals.STAT_STORAGE_SAVED, out object o) == null)
+            return new ();
+        return (o as StorageSaved)?.Data ?? new();
+    }
+
+    /// <summary>
+    /// Records a file has started processing 
+    /// </summary>
+    public async Task RecordFileStarted()
+    {
+        await _semaphore.WaitAsync();
+        try
         {
-            Logger.Instance.ILog("Deleting ALL DbStatistics");
-            DbHelper.Execute("DELETE FROM DbStatistic");
+            if (CachedData.ContainsKey(Globals.STAT_PROCESSING_TIMES_HEATMAP) == false || CachedData[Globals.STAT_PROCESSING_TIMES_HEATMAP] is Heatmap == false)
+            {
+                CachedData[Globals.STAT_PROCESSING_TIMES_HEATMAP] = new Heatmap();
+            }
+
+            int quarter = TimeHelper.GetCurrentQuarter();
+            var heatmap = (Heatmap)CachedData[Globals.STAT_PROCESSING_TIMES_HEATMAP];
+            if (heatmap == null)
+                return;
+
+            if (heatmap.Data.TryAdd(quarter, 1) == false)
+                heatmap.Data[quarter] += 1;
+            await new StatisticManager().Update(new()
+            {
+                Name = Globals.STAT_PROCESSING_TIMES_HEATMAP,
+                Type = StatisticType.Heatmap,
+                Value = heatmap
+            });
         }
-        else
+        catch (Exception ex)
         {
-            string whereClause = "";
+            Logger.Instance.ELog("Failed to file started: " + ex.Message + Environment.NewLine + ex.StackTrace);
+        }
+        finally
+        {
+            _semaphore.Release();
+        }
+    }
 
-            if (before != null)
-                whereClause += " LogDate < @0";
+    /// <inheritdoc />
+    public async Task RecordRunningTotal(string name, string value)
+    {
+        if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(value))
+            return; // bad stat
+        await _semaphore.WaitAsync();
+        try
+        {
+            if (CachedData.ContainsKey(name) == false || CachedData[name] is RunningTotals == false)
+            {
+                CachedData[name] = new RunningTotals();
+            }
 
-            if (after != null)
-                whereClause += (string.IsNullOrWhiteSpace(whereClause) ? "" : " AND") + " LogDate > @1";
+            var stat = (RunningTotals)CachedData[name];
+                
+            if (stat.Data.TryAdd(value, 1) == false)
+                stat.Data[value] += 1;
+            
+            await new StatisticManager().Update(new()
+            {
+                Name = name,
+                Type = StatisticType.RunningTotals,
+                Value = stat
+            });
+        }
+        catch (Exception ex)
+        {
+            Logger.Instance.ELog("Failed to record running total: " + ex.Message + Environment.NewLine + ex.StackTrace);
+        }
+        finally
+        {
+            _semaphore.Release();
+        }
+    }
+    
+    /// <summary>
+    /// Records a average 
+    /// </summary>
+    /// <param name="name">the name of the statistic</param>
+    /// <param name="value">the value of the statistic</param>
+    public async Task RecordAverage(string name, int value)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            return; // bad stat
+        await _semaphore.WaitAsync();
+        try
+        {
+            if (CachedData.ContainsKey(name) == false || CachedData[name] is Average == false)
+            {
+                CachedData[name] = new Average();
+            }
 
-            if (string.IsNullOrWhiteSpace(name) == false)
-                whereClause += (string.IsNullOrWhiteSpace(whereClause) ? "" : " AND") + " Name = @2";
+            var stat = (Average)CachedData[name];
+                
+            if (stat.Data.TryAdd(value, 1) == false)
+                stat.Data[value] += 1;
+            
+            await new StatisticManager().Update(new()
+            {
+                Name = name,
+                Type = StatisticType.Average,
+                Value = stat
+            });
+        }
+        catch (Exception ex)
+        {
+            Logger.Instance.ELog("Failed to record average: " + ex.Message + Environment.NewLine + ex.StackTrace);
+        }
+        finally
+        {
+            _semaphore.Release();
+        }
+    }
+    
+    /// <summary>
+    /// Records storage saved statistic
+    /// </summary>
+    /// <param name="library">the name of the library</param>
+    /// <param name="originalSize">the original size</param>
+    /// <param name="finalSize">the final size</param>
+    /// <returns>an awaited task</returns>
+    public async Task RecordStorageSaved(string library, long originalSize, long finalSize)
+    {
+        await _semaphore.WaitAsync();
+        try
+        {
+            if (CachedData.ContainsKey(Globals.STAT_STORAGE_SAVED) == false ||
+                CachedData[Globals.STAT_STORAGE_SAVED] is StorageSaved == false)
+            {
+                CachedData[Globals.STAT_STORAGE_SAVED] = new StorageSaved();
+            }
 
-            Logger.Instance.ILog(
-                $"Deleting DbStatistics{(!string.IsNullOrWhiteSpace(whereClause) ? $" with conditions: {whereClause}" : "")}");
-            DbHelper.Execute($"DELETE FROM DbStatistic WHERE{whereClause}", before, after, name);
+            var saved = (StorageSaved)CachedData[Globals.STAT_STORAGE_SAVED];
+
+            saved.Data ??= new();
+            var lib = saved.Data.FirstOrDefault(x => x.Library == library);
+            if (lib == null)
+            {
+                lib = new();
+                lib.Library = library;
+                saved.Data.Add(lib);
+            }
+
+            lib.OriginalSize += originalSize;
+            lib.FinalSize += finalSize;
+
+            await new StatisticManager().Update(new()
+            {
+                Name = Globals.STAT_STORAGE_SAVED,
+                Type = StatisticType.StorageSaved,
+                Value = saved
+            });
+        }
+        catch (Exception ex)
+        {
+            Logger.Instance.ELog("Failed to record storage saved: "+ ex.Message + Environment.NewLine + ex.StackTrace);
+        }
+        finally
+        {
+            _semaphore.Release();
         }
     }
 }

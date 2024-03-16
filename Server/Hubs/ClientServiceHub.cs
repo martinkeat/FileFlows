@@ -79,7 +79,7 @@ public class ClientServiceManager
                 minified[executor.Key] = new()
                 {
                     Uid = executor.Key,
-                    DisplayName = FileDisplayNameService.GetDisplayName(executor.Value.LibraryFile.Name, 
+                    DisplayName = FileDisplayNameService.GetDisplayName(executor.Value.LibraryFile.Name,
                         executor.Value.LibraryFile.RelativePath,
                         executor.Value.Library.Name),
                     LibraryName = executor.Value.Library.Name,
@@ -92,11 +92,12 @@ public class ClientServiceManager
                     CurrentPart = executor.Value.CurrentPart,
                     TotalParts = executor.Value.TotalParts,
                     CurrentPartPercent = executor.Value.CurrentPartPercent,
-                    Additional = executor.Value.AdditionalInfos.Where(x => x.Value.Expired == false)
-                        .Select(x => new object[]
+                    Additional = executor.Value.AdditionalInfos
+                        ?.Where(x => x.Value.Expired == false)
+                        ?.Select(x => new object[]
                         {
                             x.Key, x.Value.Value
-                        }).ToArray()
+                        })?.ToArray()
                 };
             }
 
@@ -112,10 +113,10 @@ public class ClientServiceManager
     /// <summary>
     /// Updates the file status
     /// </summary>
-    public void UpdateFileStatus()
+    public async Task UpdateFileStatus()
     {
-        var status = new LibraryFileService().GetStatus().ToList();
-        _hubContext.Clients.All.SendAsync("UpdateFileStatus", status);
+        var status = await ServiceLoader.Load<LibraryFileService>().GetStatus();
+        await _hubContext.Clients.All.SendAsync("UpdateFileStatus", status);
     }
     /// <summary>
     /// Called when a system is paused/unpaused

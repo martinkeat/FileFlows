@@ -30,7 +30,7 @@ public class FlowTemplateController : Controller
     public async Task<List<FlowTemplateModel>> GetAll([FromQuery] FlowType? type)
     {
         List<FlowTemplateModel> templates = new();
-        if (true || Templates == null || FetchedAt < DateTime.Now.AddMinutes(-10))
+        if (true || Templates == null || FetchedAt < DateTime.UtcNow.AddMinutes(-10))
             await RefreshTemplates();
         FlowType any = (FlowType)(-1);
         if (type == null)
@@ -51,7 +51,7 @@ public class FlowTemplateController : Controller
                         .ToList();
                 }
 
-                var results = (Templates ?? new()).Union(LocalFlows())
+                var results = (Templates ?? new()).Union(await LocalFlows())
                     .Where(x => x.Type == type || type == any)
                     .ToList();
                 templates.AddRange(results);
@@ -110,9 +110,9 @@ public class FlowTemplateController : Controller
         };
     }
     
-    private List<FlowTemplateModel> LocalFlows()
+    private async Task<List<FlowTemplateModel>> LocalFlows()
     {
-        var flows = new FlowService().GetAll()
+        var flows = (await ServiceLoader.Load<FlowService>().GetAllAsync())
             // .Where(x => x.Properties?.Fields?.Any() == true 
             //       && string.IsNullOrWhiteSpace(x.Properties?.Author) == false
             //       && string.IsNullOrWhiteSpace(x.Properties?.Description) == false)
@@ -227,7 +227,7 @@ public class FlowTemplateController : Controller
         else if (model.Path.StartsWith("local:"))
         {
             var uid = Guid.Parse(model.Path[6..]);
-            var tFlow = new FlowService().GetByUid(uid);
+            var tFlow = await ServiceLoader.Load<FlowService>().GetByUidAsync(uid);
             json = JsonSerializer.Serialize(tFlow); // we serialize this so any changes we make arent on the original flow object
         }
         else
@@ -291,7 +291,7 @@ public class FlowTemplateController : Controller
             if (Templates == null)
                 return;
             
-            FetchedAt = DateTime.Now;
+            FetchedAt = DateTime.UtcNow;
 
             // save to disk
             string json = JsonSerializer.Serialize(result.Data);
@@ -317,7 +317,7 @@ public class FlowTemplateController : Controller
         {
             string json = System.IO.File.ReadAllText(FlowTemplatesFile);
             Templates = JsonSerializer.Deserialize<List<FlowTemplateModel>>(json);
-            FetchedAt = DateTime.Now;
+            FetchedAt = DateTime.UtcNow;
         }
         catch (Exception ex)
         {

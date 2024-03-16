@@ -86,6 +86,19 @@ public partial class CustomDashboard
             });
         }
 
+        if (DoesntHaveWidget(FileFlows.Shared.Widgets.CurrentRevision.WD_UID))
+        {
+            fields.Add(new ElementField
+            {
+                InputType = FormInputType.Widget,
+                Name = nameof(FileFlows.Shared.Widgets.CurrentRevision),
+                Parameters = new Dictionary<string, object>
+                {
+                    { nameof(InputWidget.Type), WidgetType.Counter }
+                }
+            });
+        }
+
         if (DoesntHaveWidget(FileFlows.Shared.Widgets.Processing.WD_UID))
         {
             fields.Add(new ElementField
@@ -372,6 +385,9 @@ public partial class CustomDashboard
                                 break;
                             case nameof(OpenDatabaseConnections):
                                 newWidgets.Add(CreateNewWidgetModel(OpenDatabaseConnections.WD_UID, 3, 1));
+                                break;
+                            case nameof(CurrentRevision):
+                                newWidgets.Add(CreateNewWidgetModel(CurrentRevision.WD_UID, 3, 1));
                                 break;
                             case nameof(ProcessingNodes):
                                 newWidgets.Add(CreateNewWidgetModel(ProcessingNodes.WD_UID, 3, 1));

@@ -13,7 +13,7 @@ public interface ILibraryService
     /// </summary>
     /// <param name="uid">The UID of the library</param>
     /// <returns>An instance of the library if found</returns>
-    Task<Library> GetByUidAsync(Guid uid);
+    Task<Library?> GetByUidAsync(Guid uid);
 
     /// <summary>
     /// Gets all libraries in the system

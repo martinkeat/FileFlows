@@ -15,6 +15,11 @@ namespace FileFlows.DataLayer.DatabaseConnectors;
         private readonly object disposalLock = new object();
 
         /// <summary>
+        /// Gets the number of current open connections
+        /// </summary>
+        public int OpenedConnections => semaphore.CurrentInUse;
+
+        /// <summary>
         /// Initializes a new instance of the DatabaseConnectionPool class with the specified function to create database connections, pool size, and connection lifetime.
         /// </summary>
         /// <param name="createConnectionFunc">A function delegate that creates a new NPoco.Database connection.</param>
@@ -25,18 +30,8 @@ namespace FileFlows.DataLayer.DatabaseConnectors;
             this.createConnectionFunc = createConnectionFunc ?? throw new ArgumentNullException(nameof(createConnectionFunc));
             semaphore = new FairSemaphore(poolSize);
             this.connectionLifetime = connectionLifetime ?? TimeSpan.Zero; // Default to zero if not provided
-            // InitializePool(poolSize);
         }
-
-        private void InitializePool(int poolSize)
-        {
-            for (int i = 0; i < poolSize; i++)
-            {
-                var connection = createConnectionFunc();
-                pool.Enqueue(connection);
-            }
-        }
-
+        
         private void InitializeConnectionTimer(DatabaseConnection connection)
         {
             if (connectionLifetime > TimeSpan.Zero)

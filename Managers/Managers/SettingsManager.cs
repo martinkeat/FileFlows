@@ -1,4 +1,6 @@
-﻿namespace FileFlows.Managers;
+﻿using FileFlows.ServerShared;
+
+namespace FileFlows.Managers;
 
 /// <summary>
 /// An instance of the Settings Service which allows accessing of the system settings
@@ -12,6 +14,17 @@ public class SettingsManager
     static SettingsManager()
     {
         Instance = DatabaseAccessManager.Instance.FileFlowsObjectManager.Single<Settings>().Result;
+        if (Instance != null)
+            return;
+        Instance = new Settings
+        {
+            Name = "Settings",
+            AutoUpdatePlugins = true,
+            DateCreated = DateTime.Now,
+            DateModified = DateTime.Now,
+            Version = Globals.Version
+        };
+        DatabaseAccessManager.Instance.FileFlowsObjectManager.AddOrUpdateObject(Instance).Wait();
     }
 
     /// <summary>
@@ -48,4 +61,30 @@ public class SettingsManager
             _semaphore.Release();
         }
     }
+
+    /// <summary>
+    /// Updates the settings
+    /// </summary>
+    /// <param name="model">the setings</param>
+    public async Task Update(Settings model)
+    {
+        await _semaphore.WaitAsync();
+        try
+        {
+            model.Revision = Math.Max(model.Revision, Instance.Revision) +  1;
+            Instance = model;
+            await DatabaseAccessManager.Instance.FileFlowsObjectManager.Update(Instance);
+        }
+        finally
+        {
+            _semaphore.Release();
+        }
+    }
+    
+    /// <summary>
+    /// Gets the open number of database connections
+    /// </summary>
+    /// <returns>the number of connections</returns>
+    public int GetOpenConnections()
+        => DatabaseAccessManager.Instance.GetOpenConnections();
 }

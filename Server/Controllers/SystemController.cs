@@ -4,9 +4,15 @@ using FileFlows.Server.Hubs;
 using FileFlows.Server.Services;
 using FileFlows.Server.Workers;
 using FileFlows.ServerShared.Models;
+using FileFlows.ServerShared.Models.StatisticModels;
+using FileFlows.ServerShared.Services;
 using FileFlows.Shared.Models;
 using Microsoft.AspNetCore.Mvc;
 using FileHelper = FileFlows.ServerShared.Helpers.FileHelper;
+using LibraryFileService = FileFlows.Server.Services.LibraryFileService;
+using NodeService = FileFlows.Server.Services.NodeService;
+using SettingsService = FileFlows.Server.Services.SettingsService;
+using StatisticService = FileFlows.Server.Services.StatisticService;
 
 namespace FileFlows.Server.Controllers;
 
@@ -45,7 +51,7 @@ public class SystemController:Controller
             return;
         if (url.ToLowerInvariant()?.StartsWith("http") != true)
             return; // dont allow
-        if (Program.UsingWebView == false)
+        if (Application.UsingWebView == false)
             return; // only open if using WebView
         
         if (OperatingSystem.IsWindows())
@@ -103,8 +109,8 @@ public class SystemController:Controller
     [HttpPost("pause")]
     public async Task Pause([FromQuery] int duration)
     {
-        var controller = new SettingsController();
-        var settings = await controller.Get();
+        var service = ServiceLoader.Load<SettingsService>();
+        var settings = await service.Get();
         if (duration < 1)
         {
             settings.PausedUntil = DateTime.MinValue;
@@ -112,11 +118,11 @@ public class SystemController:Controller
         }
         else
         {
-            settings.PausedUntil = DateTime.Now.AddMinutes(duration);
+            settings.PausedUntil = DateTime.UtcNow.AddMinutes(duration);
             ClientServiceManager.Instance.SystemPaused(duration);
         }
 
-        await controller.Save(settings);
+        await service.Save(settings);
     }
 
 
@@ -133,7 +139,7 @@ public class SystemController:Controller
         //info.MemoryUsage = proc.PrivateMemorySize64;
         info.MemoryUsage = GC.GetTotalMemory(true);
         info.CpuUsage = await GetCpuPercentage();
-        var settings = await new SettingsController().Get();
+        var settings = await ServiceLoader.Load<SettingsService>().Get();
         info.IsPaused = settings.IsPaused;
         info.PausedUntil = settings.PausedUntil;
         return info;
@@ -147,6 +153,8 @@ public class SystemController:Controller
     [HttpGet("history-data/cpu")]
     public IEnumerable<SystemValue<float>> GetCpuData([FromQuery] DateTime? since = null)
     {
+        if (SystemMonitor.Instance == null)
+            return new SystemValue<float>[] { };
         if (since != null)
             return SystemMonitor.Instance.CpuUsage.Where(x => x.Time > since);
         var data = SystemMonitor.Instance.CpuUsage;
@@ -161,6 +169,8 @@ public class SystemController:Controller
     [HttpGet("history-data/memory")]
     public IEnumerable<SystemValue<float>> GetMemoryData([FromQuery] DateTime? since = null)
     {
+        if (SystemMonitor.Instance == null)
+            return new SystemValue<float>[] { };
         if (since != null)
             return SystemMonitor.Instance.MemoryUsage.Where(x => x.Time > since);
         var data = SystemMonitor.Instance.MemoryUsage;
@@ -175,6 +185,8 @@ public class SystemController:Controller
     [HttpGet("history-data/database-connections")]
     public IEnumerable<SystemValue<float>> GetOpenDatabaseConnectionsData([FromQuery] DateTime? since = null)
     {
+        if (SystemMonitor.Instance == null)
+            return new SystemValue<float>[] { };
         if (since != null)
             return SystemMonitor.Instance.OpenDatabaseConnections.Where(x => x.Time > since);
         var data = SystemMonitor.Instance.OpenDatabaseConnections;
@@ -189,6 +201,8 @@ public class SystemController:Controller
     [HttpGet("history-data/temp-storage")]
     public IEnumerable<SystemValue<long>> GetTempStorageData([FromQuery] DateTime? since = null)
     {
+        if (SystemMonitor.Instance == null)
+            return new SystemValue<long>[] { };
         if (since != null)
             return SystemMonitor.Instance.TempStorageUsage.Where(x => x.Time > since);
         var data = SystemMonitor.Instance.TempStorageUsage;
@@ -203,6 +217,8 @@ public class SystemController:Controller
     [HttpGet("history-data/log-storage")]
     public IEnumerable<SystemValue<long>> GetLoggingStorageData([FromQuery] DateTime? since = null)
     {
+        if (SystemMonitor.Instance == null)
+            return new SystemValue<long>[] { };
         if (since != null)
             return SystemMonitor.Instance.LogStorageUsage.Where(x => x.Time > since);
         var data = SystemMonitor.Instance.LogStorageUsage;
@@ -212,7 +228,7 @@ public class SystemController:Controller
     private IEnumerable<SystemValue<T>> EaseData<T>(IEnumerable<SystemValue<T>> data)
     {
         List<SystemValue<T>> eased = new();
-        var dtCutoff = DateTime.Now.AddMinutes(-5);
+        var dtCutoff = DateTime.UtcNow.AddMinutes(-5);
         var recent = data.Where(x => x.Time > dtCutoff);
         var older = data.Where(x => x.Time <= dtCutoff)
             .GroupBy(x => new DateTime(x.Time.Year, x.Time.Month, x.Time.Day, x.Time.Hour, x.Time.Minute, 0))
@@ -237,7 +253,7 @@ public class SystemController:Controller
     [HttpGet("history-data/library-processing-time")]
     public async Task<object> GetLibraryProcessingTime()
     {
-        var data = (await new LibraryFileService().GetLibraryProcessingTimes()).ToArray();
+        var data = (await ServiceLoader.Load<LibraryFileService>().GetLibraryProcessingTimes()).ToArray();
         var dict = data.Select(x => new
         {
             x.Library,
@@ -264,29 +280,8 @@ public class SystemController:Controller
     /// </summary>
     /// <returns></returns>
     [HttpGet("history-data/processing-heatmap")]
-    public async Task<object> GetProcessingHeatMap()
-    {
-        var data = await new LibraryFileService().GetHourProcessingTotals();
-        var results = data.Select((x, index) => new
-        {
-            name = ((DayOfWeek)index).ToString()[..3],
-            data = x.Select(y => new
-            {
-                x = y.Key == 0 ? "12am" : y.Key == 12 ? "12pm" : y.Key > 12 ? (y.Key - 12) + "pm" : y.Key + "am",
-                y = y.Value
-            })
-        }).OrderBy(x =>
-            // arrange the data so its shows monday -> sunday visually
-            x.name == "Mon" ? 7 :
-            x.name == "Tue" ? 6 :
-            x.name == "Wed" ? 5 :
-            x.name == "Thu" ? 4 :
-            x.name == "Fri" ? 3 :
-            x.name == "Sat" ? 2 :
-            1
-        );
-        return results;
-    }
+    public List<HeatmapData> GetProcessingHeatMap()
+        => ServiceLoader.Load<StatisticService>().GetHeatMap(Globals.STAT_PROCESSING_TIMES_HEATMAP);
 
     private async Task<float> GetCpuPercentage()
     {
@@ -315,7 +310,7 @@ public class SystemController:Controller
     [HttpPost("restart")]
     public void Restart()
     {
-        if (Program.Docker == false)
+        if (Application.Docker == false)
         {
             string script = Path.Combine(DirectoryHelper.BaseDirectory, "Server",
                 "restart." + (Globals.IsWindows ? "bat" : "sh"));
@@ -342,8 +337,9 @@ public class SystemController:Controller
     /// </summary>
     /// <param name="args">the node system statistics</param>
     [HttpPost("node-system-statistics")]
-    public void RecordNodeSystemStatistics([FromBody] NodeSystemStatistics args)
+    public async Task RecordNodeSystemStatistics([FromBody] NodeSystemStatistics args)
     {
-        SystemMonitor.Instance.Record(args);
+        await ServiceLoader.Load<NodeService>()?.UpdateLastSeen(args.Uid);
+        SystemMonitor.Instance?.Record(args);
     }
 }

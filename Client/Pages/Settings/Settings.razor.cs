@@ -42,6 +42,7 @@ public partial class Settings : InputRegister
         lblCheckNow, lblTestingDatabase, lblFileServer;
 
     private string OriginalDatabase, OriginalServer;
+    private DatabaseType OriginalDbType;
 
     private SettingsUiModel Model { get; set; } = new ();
     private string LicenseFlagsString = string.Empty;
@@ -58,8 +59,9 @@ public partial class Settings : InputRegister
     private readonly List<ListOption> DbTypes = new()
     {
         new() { Label = "SQLite", Value = DatabaseType.Sqlite },
-        //new() { Label = "SQL Server", Value = DatabaseType.SqlServer }, // not finished yet
-        new() { Label = "MySQL", Value = DatabaseType.MySql }
+        new() { Label = "MySQL", Value = DatabaseType.MySql },
+        new() { Label = "Postgres", Value = DatabaseType.Postgres }, 
+        new() { Label = "SQL Server", Value = DatabaseType.SqlServer }, 
     };
 
     /// <summary>
@@ -72,7 +74,7 @@ public partial class Settings : InputRegister
     };
 
     /// <summary>
-    /// Gets or sets the type of databsae to use
+    /// Gets or sets the type of database to use
     /// </summary>
     private object DbType
     {
@@ -143,7 +145,7 @@ public partial class Settings : InputRegister
     protected override void OnAfterRender(bool firstRender)
     {
         if (firstRender)
-            firstRenderedAt = DateTime.Now;
+            firstRenderedAt = DateTime.UtcNow;
         base.OnAfterRender(firstRender);
     }
 
@@ -160,6 +162,7 @@ public partial class Settings : InputRegister
             LicenseFlagsString = LicenseFlagsToString(Model.LicenseFlags);
             this.OriginalServer = this.Model?.DbServer;
             this.OriginalDatabase = this.Model?.DbName;
+            this.OriginalDbType = this.Model?.DbType ?? DatabaseType.Sqlite;
             if (this.Model != null && this.Model.DbPort < 1)
                 this.Model.DbPort = 3306;
         }
@@ -252,14 +255,12 @@ public partial class Settings : InputRegister
         Blocker.Show(lblTestingDatabase);
         try
         {
-            var result = await HttpHelper.Post<string>("/api/settings/test-db-connection", new
+            var result = await HttpHelper.Post("/api/settings/test-db-connection", new
             {
                 server, name, port, user, password, Type = DbType
             });
             if (result.Success == false)
                 throw new Exception(result.Body);
-            if(result.Data != "OK")
-                throw new Exception(result.Data);
             Toast.ShowSuccess(Translater.Instant("Pages.Settings.Messages.Database.TestSuccess"));
         }
         catch (Exception ex)
@@ -364,7 +365,7 @@ public partial class Settings : InputRegister
     
     private async Task OnTelemetryChange(bool disabled)
     {
-        if (firstRenderedAt < DateTime.Now.AddSeconds(-1) && disabled)
+        if (firstRenderedAt < DateTime.UtcNow.AddSeconds(-1) && disabled)
         {
             if (await Confirm.Show("Pages.Settings.Messages.DisableTelemetryConfirm.Title",
                     "Pages.Settings.Messages.DisableTelemetryConfirm.Message",
@@ -373,5 +374,19 @@ public partial class Settings : InputRegister
                 Model.DisableTelemetry = false;
             }
         }
+    }
+
+    private string GetDatabasePortHelp()
+    {
+        switch (Model.DbType)
+        {
+            case DatabaseType.Postgres:
+                return Translater.Instant("Pages.Settings.Fields.Database.Port-Help-Postgres");
+            case DatabaseType.MySql:
+                return Translater.Instant("Pages.Settings.Fields.Database.Port-Help-MySql");
+            case DatabaseType.SqlServer:
+                return Translater.Instant("Pages.Settings.Fields.Database.Port-Help-SQLServer");
+        }
+        return string.Empty;
     }
 }

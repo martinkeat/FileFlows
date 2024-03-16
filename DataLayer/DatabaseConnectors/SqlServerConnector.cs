@@ -35,6 +35,10 @@ public class SqlServerConnector : IDatabaseConnector
     public string FormatDateQuoted(DateTime date)
         => "'" + date.ToString("yyyy-MM-ddTHH:mm:ss.fffZ") + "'";
     
+    /// <inheritdoc />
+    public string TimestampDiffSeconds(string start, string end, string asColumn)
+        => $" DATEDIFF(second, {start}, {end}) AS {asColumn} ";
+    
     /// <summary>
     /// Initialises a SQL Server Connector
     /// </summary>
@@ -47,6 +51,10 @@ public class SqlServerConnector : IDatabaseConnector
         connectionPool = new(CreateConnection, 20, connectionLifetime: new TimeSpan(0, 10, 0));
     }
 
+    /// <inheritdoc />
+    public int GetOpenedConnections()
+        => connectionPool.OpenedConnections;
+    
     /// <summary>
     /// Create a new database connection
     /// </summary>
@@ -76,4 +84,24 @@ public class SqlServerConnector : IDatabaseConnector
     /// <inheritdoc />
     public string WrapFieldName(string name) => name;
 
+    /// <inheritdoc />
+    public async Task<bool> ColumnExists(string table, string column)
+    {
+        using var db = await GetDb(false);
+        var result = db.Db.ExecuteScalar<int>(@"
+        SELECT COUNT(*)
+        FROM information_schema.COLUMNS
+        WHERE
+            TABLE_NAME = @0
+        AND COLUMN_NAME = @1", table, column);
+        return result > 0;
+    }
+    
+    /// <inheritdoc />
+    public async Task CreateColumn(string table, string column, string type, string defaultValue)
+    {
+        string sql = $@"ALTER TABLE {table} ADD {column} {type}" + (string.IsNullOrWhiteSpace(defaultValue) ? "" : $" DEFAULT {defaultValue}");
+        using var db = await GetDb(false);
+        await db.Db.ExecuteAsync(sql);
+    }
 }

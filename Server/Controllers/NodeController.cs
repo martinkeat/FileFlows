@@ -3,7 +3,6 @@ using FileFlows.Shared.Models;
 using FileFlows.Server.Helpers;
 using FileFlows.Server.Services;
 using FileFlows.ServerShared.Models;
-using Humanizer;
 
 namespace FileFlows.Server.Controllers;
 
@@ -18,10 +17,10 @@ public class NodeController : Controller
     /// </summary>
     /// <returns>a list of processing node</returns>
     [HttpGet]
-    public IEnumerable<ProcessingNode> GetAll()
+    public async Task<IEnumerable<ProcessingNode>> GetAll()
     {
-        var service = new NodeService();
-        var nodes = service.GetAll()
+        var service = ServiceLoader.Load<NodeService>();
+        var nodes = (await service.GetAllAsync())
             .OrderBy(x => x.Address == Globals.InternalNodeName ? 0 : 1)
             .ThenBy(x => x.Name)
             .ToList();
@@ -41,9 +40,9 @@ public class NodeController : Controller
                 node.Status = ProcessingNodeStatus.OutOfSchedule;
             else if (node.Version != Globals.Version)
                 node.Status = ProcessingNodeStatus.VersionMismatch;
-            else if (node.LastSeen < DateTime.Now.AddMinutes(-5))
+            else if (node.LastSeen < DateTime.UtcNow.AddMinutes(-5))
                 node.Status = ProcessingNodeStatus.Offline;
-            else if (WorkerController.Executors.Any(x => x.Value.NodeUid == node.Uid))
+            else if (FlowRunnerService.Executors.Any(x => x.Value.NodeUid == node.Uid))
                 node.Status = ProcessingNodeStatus.Processing;
             else
                 node.Status = ProcessingNodeStatus.Idle;
@@ -52,14 +51,36 @@ public class NodeController : Controller
         return nodes.OrderBy(x => x.Name.ToLowerInvariant());
     }
 
+
+    /// <summary>
+    /// Gets a list of all processing nodes in the system
+    /// </summary>
+    /// <returns>a list of processing node</returns>
+    [HttpGet("list")]
+    public async Task<IEnumerable<ProcessingNode>> ListAll()
+    {
+        var service = ServiceLoader.Load<NodeService>();
+        var nodes = (await service.GetAllAsync()).Select(x => new ProcessingNode()
+        {
+            Uid = x.Uid,
+            Name = x.Name,
+            OperatingSystem = x.OperatingSystem,
+            Architecture = x.Architecture
+        }).ToList();
+        return nodes;
+    }
+
     /// <summary>
     /// Gets an overview of the nodes
     /// </summary>
     /// <returns>the response</returns>
     [HttpGet("overview")]
-    public IActionResult Overview()
+    public async Task<IActionResult> Overview()
     {
-        var data = GetAll().OrderBy(x => x.Enabled ? 1 : 2).ThenBy(x => x.Uid == Globals.InternalNodeUid ? 1 : 2)
+        var data = (await GetAll())
+            .OrderBy(x => x.Enabled ? 1 : 2)
+            .ThenByDescending(x => x.Priority)
+            .ThenBy(x => x.Uid == Globals.InternalNodeUid ? 1 : 2)
             .ThenBy(x => x.Name)
             .Select(x => new
             {
@@ -76,8 +97,8 @@ public class NodeController : Controller
     /// <param name="uid">The UID of the processing node</param>
     /// <returns>The processing node instance</returns>
     [HttpGet("{uid}")]
-    public ProcessingNode Get(Guid uid) => 
-        new NodeService().GetByUid(uid);
+    public Task<ProcessingNode?> Get(Guid uid) 
+        => ServiceLoader.Load<NodeService>().GetByUidAsync(uid);
 
     /// <summary>
     /// Saves a processing node
@@ -88,11 +109,11 @@ public class NodeController : Controller
     public async Task<IActionResult> Save([FromBody] ProcessingNode node)
     {
         // see if we are updating the internal node
-        var service = new NodeService();
+        var service = ServiceLoader.Load<NodeService>();
         if(node.Libraries?.Any() == true)
         {
             // remove any removed libraries and update any names
-            var libraries = new LibraryService().GetAll().ToDictionary(x => x.Uid, x => x.Name);
+            var libraries = (await ServiceLoader.Load<LibraryService>().GetAllAsync()).ToDictionary(x => x.Uid, x => x.Name);
             node.Libraries = node.Libraries.Where(x => libraries.ContainsKey(x.Uid)).Select(x => new Plugin.ObjectReference
             {
                 Uid = x.Uid,
@@ -105,7 +126,7 @@ public class NodeController : Controller
         if(node.Uid == Globals.InternalNodeUid)
         {
             Logger.Instance.ILog("Updating internal processing node");
-            var internalNode = GetAll().FirstOrDefault(x => x.Uid == Globals.InternalNodeUid);
+            var internalNode = (await GetAll()).FirstOrDefault(x => x.Uid == Globals.InternalNodeUid);
             if(internalNode != null)
             {
                 internalNode.Schedule = node.Schedule;
@@ -127,7 +148,7 @@ public class NodeController : Controller
                 
                 internalNode.Libraries = node.Libraries;
                 internalNode = await service.Update(internalNode);
-                CheckLicensedNodes(internalNode.Uid, internalNode.Enabled);
+                await CheckLicensedNodes(internalNode.Uid, internalNode.Enabled);
                 
                 await RevisionIncrement();
                 return Ok(internalNode);
@@ -141,20 +162,20 @@ public class NodeController : Controller
             node.Mappings = null; // no mappings for internal
             node.Variables ??= new();
             node = await service.Update(node);
-            CheckLicensedNodes(node.Uid, node.Enabled);
+            await CheckLicensedNodes(node.Uid, node.Enabled);
             await RevisionIncrement();
             return Ok(node);
         }
         else
         {
             Logger.Instance.ILog("Updating external processing node: " + node.Name);
-            var existing = service.GetByUid(node.Uid);
+            var existing = await service.GetByUidAsync(node.Uid);
             if (existing == null)
                 return BadRequest("Node not found");
             node.Variables ??= new();
             node = await service.Update(node);
             Logger.Instance.ILog("Updated external processing node: " + node.Name);
-            CheckLicensedNodes(node.Uid, node.Enabled);
+            await CheckLicensedNodes(node.Uid, node.Enabled);
             await RevisionIncrement();
             return Ok(node);
         }
@@ -175,11 +196,11 @@ public class NodeController : Controller
     [HttpDelete]
     public async Task Delete([FromBody] ReferenceModel<Guid> model)
     {
-        var internalNode =  this.GetAll()
+        var internalNode =  (await GetAll())
             .FirstOrDefault(x => x.Address == Globals.InternalNodeName)?.Uid ?? Guid.Empty;
         if (model.Uids.Contains(internalNode))
             throw new Exception("ErrorMessages.CannotDeleteInternalNode");
-        await new NodeService().Delete(model.Uids);
+        await ServiceLoader.Load<NodeService>().Delete(model.Uids);
     }
 
     /// <summary>
@@ -191,8 +212,8 @@ public class NodeController : Controller
     [HttpPut("state/{uid}")]
     public async Task<IActionResult> SetState([FromRoute] Guid uid, [FromQuery] bool? enable)
     {
-        var service = new NodeService();
-        var node = service.GetByUid(uid);
+        var service = ServiceLoader.Load<NodeService>();
+        var node = await service.GetByUidAsync(uid);
         if (node == null)
             return BadRequest("Node not found.");
         if (enable != null && node.Enabled != enable.Value)
@@ -200,7 +221,7 @@ public class NodeController : Controller
             node.Enabled = enable.Value;
             node = await service.Update(node);
         }
-        CheckLicensedNodes(uid, enable == true);
+        await CheckLicensedNodes(uid, enable == true);
         return Ok(node);
     }
 
@@ -216,7 +237,7 @@ public class NodeController : Controller
         if (string.IsNullOrWhiteSpace(address))
             throw new ArgumentNullException(nameof(address));
 
-        var service = new NodeService();
+        var service = ServiceLoader.Load<NodeService>();
         var node = await service.GetByAddressAsync(address);
         if (node == null)
             return node;
@@ -229,7 +250,7 @@ public class NodeController : Controller
         else
         {
             // this updates the "LastSeen"
-            await UpdateLastSeen(node.Uid);
+            await service.UpdateLastSeen(node.Uid);
         }
 
         node.SignalrUrl = "flow";
@@ -248,17 +269,17 @@ public class NodeController : Controller
             throw new ArgumentNullException(nameof(address));
 
         address = address.Trim();
-        var service = new NodeService();
-        var data = service.GetAll();
+        var service = ServiceLoader.Load<NodeService>();
+        var data = await service.GetAllAsync();
         var existing = data.FirstOrDefault(x => x.Address.ToLowerInvariant() == address.ToLowerInvariant());
         if (existing != null)
         {
             existing.SignalrUrl = "flow";
             return existing;
         }
-        var settings = await new SettingsController().Get();
+
         // doesnt exist, register a new node.
-        var variables = new VariableService().GetAll();
+        var variables = await ServiceLoader.Load<VariableService>().GetAllAsync();
         bool isSystem = address == Globals.InternalNodeName;
         var node = new ProcessingNode
         {
@@ -276,7 +297,7 @@ public class NodeController : Controller
         };
         node = await service.Update(node);
         node.SignalrUrl = "flow";
-        CheckLicensedNodes(Guid.Empty, false);
+        await CheckLicensedNodes(Guid.Empty, false);
         return node;
     }
 
@@ -285,11 +306,11 @@ public class NodeController : Controller
     /// </summary>
     /// <param name="nodeUid">optional UID of a node that should be checked first</param>
     /// <param name="enabled">optional status of the node state</param>
-    private void CheckLicensedNodes(Guid nodeUid, bool enabled)
+    private async Task CheckLicensedNodes(Guid nodeUid, bool enabled)
     {
         var licensedNodes = LicenseHelper.GetLicensedProcessingNodes();
-        var service = new NodeService();
-        var nodes = service.GetAll();
+        var service = ServiceLoader.Load<NodeService>();
+        var nodes = await service.GetAllAsync();
         int current = 0;
         foreach (var node in nodes.OrderBy(x => x.Uid == nodeUid ? 1 : 2).ThenBy(x => x.Name))
         {
@@ -297,7 +318,9 @@ public class NodeController : Controller
             {
                 Logger.Instance.ILog($"Changing processing node '{node.Name}' state from '{node.Enabled}' to '{enabled}'");
                 node.Enabled = enabled;
-                service.Update(node);
+                var result = await service.Update(node);
+                if (result.Failed(out string error))
+                    Logger.Instance.ELog($"Failed updating node '{node.Name}': {error}");
             }
 
             if (node.Enabled)
@@ -305,7 +328,7 @@ public class NodeController : Controller
                 if (current >= licensedNodes)
                 {
                     node.Enabled = false;
-                    service.Update(node);
+                    await service.Update(node);
                     Logger.Instance.ILog($"Disabled processing node '{node.Name}' due to license restriction");
                 }
                 else
@@ -331,8 +354,8 @@ public class NodeController : Controller
             throw new ArgumentNullException(nameof(model.TempPath));
 
         var address = model.Address.ToLowerInvariant().Trim();
-        var service = new NodeService();
-        var data = service.GetAll();
+        var service = ServiceLoader.Load<NodeService>();
+        var data = await service.GetAllAsync();
         var existing = data.FirstOrDefault(x => x.Address.ToLowerInvariant() == address);
         if (existing != null)
         {
@@ -351,7 +374,7 @@ public class NodeController : Controller
             return existing;
         }
         // doesnt exist, register a new node.
-        var variables = new VariableService().GetAll();
+        var variables = await ServiceLoader.Load<VariableService>().GetAllAsync();
 
         if(model.Mappings?.Any() == true)
         {
@@ -389,31 +412,6 @@ public class NodeController : Controller
         node = await service.Update(node);
         node.SignalrUrl = "flow";
         return node;
-    }
-
-    
-    /// <summary>
-    /// Changes the temp path of a node
-    /// </summary>
-    /// <param name="address">the nodes address</param>
-    /// <param name="path">the new temp path</param>
-    /// <returns>the result</returns>
-    [HttpPost("{address}/temp-path")]
-    public void ChangeTempPath([FromRoute] string address, [FromQuery] string path)
-         => new NodeService().ChangeTempPath(address, path);
-
-    /// <summary>
-    /// Updates the last seen to now for a node
-    /// </summary>
-    /// <param name="uid">The node to update</param>
-    internal async Task UpdateLastSeen(Guid uid)
-    {
-        var service = new NodeService();
-        var node = service.GetByUid(uid);
-        if (node == null)
-            return;
-        node.LastSeen = DateTime.Now;
-        await service.UpdateLastSeen(node);
     }
 }
 

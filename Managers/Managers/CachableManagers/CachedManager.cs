@@ -1,3 +1,4 @@
+using FileFlows.DataLayer.Models;
 using FileFlows.Plugin;
 using FileFlows.Shared.Helpers;
 
@@ -18,30 +19,35 @@ public abstract class CachedManager<T> where T : FileFlowObject, new()
     /// </summary>
     protected bool UseCache => SettingsManager.UseCache;
 
+    /// <summary>
+    /// Gets if the revisions should be saved
+    /// </summary>
+    protected virtual bool SaveRevisions => false;
+
     private FairSemaphore GetDataSemaphore = new(1);
     
     protected static List<T> _Data;
+    
     /// <summary>
-    /// Gets or sets the data
+    /// Gets the data
     /// </summary>
-    protected List<T> Data
+    protected async Task<List<T>> GetData()
     {
-        get
+        if (UseCache == false)
+            return await LoadDataFromDatabase();
+        GetDataSemaphore.WaitAsync().Wait();
+        try
         {
-            GetDataSemaphore.WaitAsync().Wait();
-            try
-            {
-                if (_Data == null)
-                    Refresh();
-                return _Data;
-            }
-            finally
-            {
-                GetDataSemaphore.Release();
-            }
+            if (_Data == null)
+                await Refresh();
+            return _Data;
         }
-        set => _Data = value;
+        finally
+        {
+            GetDataSemaphore.Release();
+        }
     }
+
 
     /// <summary>
     /// Sets the data
@@ -56,12 +62,8 @@ public abstract class CachedManager<T> where T : FileFlowObject, new()
     /// Gets the data
     /// </summary>
     /// <returns>the data</returns>
-    public virtual async Task<List<T>> GetAll()
-    {
-        if(UseCache)
-            return Data;
-        return await LoadDataFromDatabase();
-    }
+    public virtual Task<List<T>> GetAll()
+        => GetData();
 
     /// <summary>
     /// Gets an item by its UID
@@ -71,7 +73,7 @@ public abstract class CachedManager<T> where T : FileFlowObject, new()
     public virtual async Task<T?> GetByUid(Guid uid)
     {
         if(SettingsManager.UseCache)
-            return Data.FirstOrDefault(x => x.Uid == uid);
+            return (await GetData()).FirstOrDefault(x => x.Uid == uid);
         return await DatabaseAccessManager.Instance.FileFlowsObjectManager.Single<T>(uid);
     }
 
@@ -88,10 +90,10 @@ public abstract class CachedManager<T> where T : FileFlowObject, new()
             if (ignoreCase)
             {
                 name = name.ToLowerInvariant();
-                return Data.FirstOrDefault(x => x.Name.ToLowerInvariant() == name);
+                return (await GetData()).FirstOrDefault(x => x.Name.ToLowerInvariant() == name);
             }
 
-            return Data.FirstOrDefault(x => x.Name == name);
+            return (await GetData()).FirstOrDefault(x => x.Name == name);
         }
 
         return await DatabaseAccessManager.Instance.FileFlowsObjectManager.GetByName<T>(name, ignoreCase);
@@ -102,7 +104,8 @@ public abstract class CachedManager<T> where T : FileFlowObject, new()
     /// </summary>
     /// <param name="item">the item being updated</param>
     /// <param name="dontIncrementConfigRevision">if this is a revision object, if the revision should be updated</param>
-    public async virtual Task<Result<T>> Update(T item, bool dontIncrementConfigRevision = false)
+    /// <returns>the result of the update, if successful the updated item</returns>
+    public async Task<Result<T>> Update(T item, bool dontIncrementConfigRevision = false)
     {
         if (item == null)
             return Result<T>.Fail("No model");
@@ -115,36 +118,29 @@ public abstract class CachedManager<T> where T : FileFlowObject, new()
             return Result<T>.Fail("ErrorMessages.NameInUse");
         
         Logger.Instance.ILog($"Updating {item.GetType().Name}: '{item.Name}'");
-        await UpdateActual(item, dontIncrementConfigRevision);
+        var result = await DatabaseAccessManager.Instance.FileFlowsObjectManager
+            .AddOrUpdateObject(item, saveRevision: SaveRevisions);
         
-        if (dontIncrementConfigRevision == false)
-            IncrementConfigurationRevision();
+        if (result.changed && dontIncrementConfigRevision == false)
+            await IncrementConfigurationRevision();
         
         if(UseCache)
-            Refresh();
+            await Refresh();
 
         return (await GetByUid(item.Uid))!;
     }
-
-    /// <summary>
-    /// Actual update method
-    /// </summary>
-    /// <param name="item">the item being updated</param>
-    /// <param name="dontIncrementConfigRevision">if this is a revision object, if the revision should be updated</param>
-    protected virtual Task UpdateActual(T item, bool dontIncrementConfigRevision = false)
-        => DatabaseAccessManager.Instance.FileFlowsObjectManager.Update(item);
 
 
     /// <summary>
     /// Refreshes the data
     /// </summary>
-    public virtual void Refresh()
+    public async Task Refresh()
     {
         if (UseCache == false)
             return;
         
         Logger.Instance.ILog($"Refreshing Data for '{typeof(T).Name}'");
-        var newData = LoadDataFromDatabase().Result;
+        var newData = await LoadDataFromDatabase();
         if (_Data?.Any() != true)
         {
             _Data = newData;
@@ -190,13 +186,13 @@ public abstract class CachedManager<T> where T : FileFlowObject, new()
     /// Deletes items matching the UIDs
     /// </summary>
     /// <param name="uids">the UIDs of the items to delete</param>
-    public virtual async Task Delete(params Guid[] uids)
+    public async Task Delete(params Guid[] uids)
     {
         if (uids?.Any() != true)
             return;
         
         await DatabaseAccessManager.Instance.FileFlowsObjectManager.Delete(uids);
-        IncrementConfigurationRevision();
+        await IncrementConfigurationRevision();
         
         if(UseCache)
             Refresh();
@@ -206,12 +202,13 @@ public abstract class CachedManager<T> where T : FileFlowObject, new()
     /// <summary>
     /// Increments the revision of the configuration
     /// </summary>
-    protected void IncrementConfigurationRevision()
+    /// <param name="force">If we are forcing a configuration revision increment</param>
+    public async Task IncrementConfigurationRevision(bool force = false)
     {
-        if (IncrementsConfiguration == false)
+        if (force == false && IncrementsConfiguration == false)
             return;
         var service = new SettingsManager();
-        _ = service.RevisionIncrement();
+        await service.RevisionIncrement();
     }
     
     
@@ -225,7 +222,7 @@ public abstract class CachedManager<T> where T : FileFlowObject, new()
         List<string> names;
         if (UseCache)
         {
-             names = Data.Select(x => x.Name.ToLowerInvariant()).ToList();
+             names = (await GetData()).Select(x => x.Name.ToLowerInvariant()).ToList();
         }
         else
         {
@@ -247,7 +244,7 @@ public abstract class CachedManager<T> where T : FileFlowObject, new()
         if (UseCache)
         {
             name = name.ToLowerInvariant().Trim();
-            return Data.Any(x => uid != x.Uid && x.Name.ToLowerInvariant() == name);
+            return (await GetData()).Any(x => uid != x.Uid && x.Name.ToLowerInvariant() == name);
         }
         else
         {
@@ -256,4 +253,12 @@ public abstract class CachedManager<T> where T : FileFlowObject, new()
             return existing.IsFailed == false && existing.ValueOrDefault != null;
         }
     }
+
+    /// <summary>
+    /// Gets if a UID is in use
+    /// </summary>
+    /// <param name="uid">the UID to check</param>
+    /// <returns>true if in use</returns>
+    public virtual Task<bool> UidInUse(Guid uid)
+        => DatabaseAccessManager.Instance.ObjectManager.UidInUse(uid);
 }

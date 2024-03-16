@@ -4,11 +4,9 @@ using FileFlows.ServerShared.Services;
 using FileFlows.Shared.Helpers;
 using FileFlows.Shared.Models;
 using System.Net;
-using Esprima.Ast;
 using FileFlows.Plugin.Services;
 using FileFlows.ServerShared;
 using FileFlows.ServerShared.FileServices;
-using Node = FileFlows.Plugin.Node;
 
 namespace FileFlows.FlowRunner;
 
@@ -57,6 +55,19 @@ public class Program
         LogInfo("Exit Code: " + exitCode);
         Environment.ExitCode = exitCode;
     }
+
+    #if(DEBUG)
+    /// <summary>
+    /// Used for debugging to capture full log and test the full log update method
+    /// </summary>
+    /// <param name="args">the args</param>
+    /// <returns>the exit code and full log</returns>
+    public static (int ExitCode, string Log) RunWithLog(string[] args)
+    {
+        int exitCode = Run(args);
+        return (exitCode, Logger.ToString());
+    }
+    #endif
     
     
     /// <summary>
@@ -155,10 +166,10 @@ public class Program
                 WorkingDirectory = workingDir,
                 Hostname = hostname
             });
-            return result == null ? -2 :
-                result is FileStatus.ProcessingFailed or FileStatus.Processing ? -1 :
-                0; // otherwise it didnt fail, the status should have been updated (Processed, Mapping Failed, Reprocess, Missing Flow etc)
-                //result is  FileStatus.Processed or FileStatus.ReprocessByFlow or FileStatus.MappingIssue ? 0 : -1;
+            // we only want to return 0 here if the execute complete, the file may have finished in that, but its been
+            // successfully recorded/completed by that, so we dont need to tell the Node to update this file any more
+
+            return result ? 0 : (int)FileStatus.ProcessingFailed;
         }
         catch (Exception ex)
         {
@@ -168,10 +179,16 @@ public class Program
                 LogInfo("Error: " + ex.Message + Environment.NewLine + ex.StackTrace);
                 ex = ex.InnerException;
             }
-            return 1;
+            return (int)FileStatus.ProcessingFailed;;
         }
     }
 
+    /// <summary>
+    /// Gets an argument by its name
+    /// </summary>
+    /// <param name="args">the list of arguments</param>
+    /// <param name="name">the name of the argument to get</param>
+    /// <returns>the argument if found, otherwise an empty string</returns>
     static string GetArgument(string[] args, string name)
     {
         int index = args.Select(x => x.ToLower()).ToList().IndexOf(name.ToLower());
@@ -189,7 +206,7 @@ public class Program
     /// <param name="args">the args</param>
     /// <returns>the library file status, or null if library file was not loaded</returns>
     /// <exception cref="Exception">error was thrown</exception>
-    static FileStatus? Execute(ExecuteArgs args)
+    static bool Execute(ExecuteArgs args)
     {
         ProcessingNode node;
         var nodeService = NodeService.Load();
@@ -221,7 +238,7 @@ public class Program
         if (libFile == null)
         {
             LogInfo("Library file not found, must have been deleted from the library files.  Nothing to process");
-            return null; // nothing to process
+            return true; // nothing to process
         }
 
         // string workingFile = node.Map(libFile.Name);
@@ -233,12 +250,35 @@ public class Program
         {
             LogInfo("Library was not found, deleting library file");
             libfileService.Delete(libFile.Uid).Wait();
-            return null;
+            return true;
         }
 
         FileSystemInfo file = lib.Folders ? new DirectoryInfo(workingFile) : new FileInfo(workingFile);
         bool fileExists = file.Exists; // set to variable so we can set this to false in debugging easily
         bool remoteFile = false;
+        
+
+        var flow = args.Config.Flows.FirstOrDefault(x => x.Uid == (lib.Flow?.Uid ?? Guid.Empty));
+        if (flow == null || flow.Uid == Guid.Empty)
+        {
+            LogInfo("Flow not found, cannot process file: " + file.FullName);
+            libFile.Status = FileStatus.FlowNotFound;
+            FinishEarly(libFile);
+            return true;
+        }
+        // update the library file to reference the updated flow (if changed)
+        if (libFile.Flow?.Name != flow.Name || libFile.Flow?.Uid != flow.Uid)
+        {
+            libFile.Flow = new ObjectReference
+            {
+                Uid = flow.Uid,
+                Name = flow.Name,
+                Type = typeof(Flow)?.FullName ?? string.Empty
+            };
+            // libfileService.Update(libFile).Wait();
+        }
+        
+        
         IFileService _fileService;
         if (fileExists)
         {
@@ -249,7 +289,8 @@ public class Program
             // doesnt exist
             LogInfo("Library file does not exist, deleting from library files: " + file.FullName);
             libfileService.Delete(libFile.Uid).Wait();
-            return libFile.Status;
+            FinishEarly(libFile);
+            return true;
         }
         else
         {
@@ -270,8 +311,8 @@ public class Program
                     LogError(libFile.FailureReason);
                     libFile.Status = FileStatus.MappingIssue;
                     libFile.ExecutedNodes = new List<ExecutedNode>();
-                    libfileService.Update(libFile).Wait();
-                    return libFile.Status;
+                    FinishEarly(libFile);
+                    return true;
                 }
 
                 if (lib.Folders)
@@ -281,8 +322,8 @@ public class Program
                         "Library folder exists, but remote file server is not available for folders: " + file.FullName;
                     LogError(libFile.FailureReason);
                     libFile.ExecutedNodes = new List<ExecutedNode>();
-                    libfileService.Update(libFile).Wait();
-                    return libFile.Status;
+                    FinishEarly(libFile);
+                    return true;
                 }
             
                 remoteFile = true;
@@ -293,31 +334,11 @@ public class Program
 
         FileService.Instance = _fileService;
 
-        var flow = args.Config.Flows.FirstOrDefault(x => x.Uid == (lib.Flow?.Uid ?? Guid.Empty));
-        if (flow == null || flow.Uid == Guid.Empty)
-        {
-            LogInfo("Flow not found, cannot process file: " + file.FullName);
-            libFile.Status = FileStatus.FlowNotFound;
-            libfileService.Update(libFile).Wait();
-            return libFile.Status;
-        }
-
         libFile.Status = FileStatus.Processing;
         
-        // update the library file to reference the updated flow (if changed)
-        if (libFile.Flow?.Name != flow.Name || libFile.Flow?.Uid != flow.Uid)
-        {
-            libFile.Flow = new ObjectReference
-            {
-                Uid = flow.Uid,
-                Name = flow.Name,
-                Type = typeof(Flow)?.FullName ?? String.Empty
-            };
-            libfileService.Update(libFile).Wait();
-        }
 
-        libFile.ProcessingStarted = DateTime.Now;
-        libfileService.Update(libFile).Wait();
+        libFile.ProcessingStarted = DateTime.UtcNow;
+        // libfileService.Update(libFile).Wait();
         Config = args.Config;
         ConfigDirectory = args.ConfigDirectory;
 
@@ -335,7 +356,7 @@ public class Program
             CurrentPart = 0,
             CurrentPartPercent = 0,
             CurrentPartName = string.Empty,
-            StartedAt = DateTime.Now,
+            StartedAt = DateTime.UtcNow,
             WorkingFile = workingFile,
             IsDirectory = lib.Folders,
             LibraryPath = lib.Path, 
@@ -350,8 +371,22 @@ public class Program
         
 
         var runner = new Runner(info, flow, node, args.WorkingDirectory);
-        runner.Run(Logger);
-        return libFile.Status;
+        return runner.Run(Logger);
+    }
+
+    private static void FinishEarly(LibraryFile libFile)
+    {
+        FlowExecutorInfo info = new()
+        {
+            Uid = Program.Uid,
+            LibraryFile = libFile,
+            NodeUid = Program.ProcessingNode.Uid,
+            NodeName = Program.ProcessingNode.Name,
+            RelativeFile = libFile.RelativePath,
+            Library = libFile.Library
+        };
+        var log = Logger.ToString();
+        new FlowRunnerService().Finish(info).Wait();
     }
 
     private static long GetDirectorySize(string path)

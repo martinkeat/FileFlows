@@ -11,13 +11,22 @@ CREATE TABLE DbObject
 CREATE INDEX IF NOT EXISTS idx_DbObject_Type ON DbObject (Type);
 CREATE INDEX IF NOT EXISTS idx_DbObject_Name ON DbObject (Name);
 
+CREATE TABLE DbLogMessage
+(
+    ClientUid       VARCHAR(36)        NOT NULL,
+    LogDate         datetime,
+    Type            int                NOT NULL,
+    Message         TEXT               NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_DbLogMessage_ClientUid ON DbLogMessage (ClientUid);
+CREATE INDEX IF NOT EXISTS idx_DbLogMessage_LogDate ON DbLogMessage (LogDate);
+
 CREATE TABLE DbStatistic
 (
-    LogDate         datetime,
-    Name            varchar(100)       NOT NULL,
+    Name            varchar(255)       NOT NULL          PRIMARY KEY,
     Type            int                NOT NULL,
-    StringValue     TEXT               NOT NULL,
-    NumberValue     REAL               NOT NULL
+    Data            TEXT               NOT NULL
 );
 
 

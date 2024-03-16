@@ -1,0 +1,107 @@
+.flow-drop-down{
+  margin-left:0.5rem;
+  --dd-width: 14rem;
+}
+@media screen and (max-width: 1250px) {
+  .flow-drop-down {
+    --dd-width: 12rem;
+  }
+}
+@media screen and (max-width: 1150px) {
+  .flow-drop-down {
+    --dd-width: 11rem;
+  }
+}
+@media screen and (max-width: 900px) {
+  .flow-drop-down {
+    --dd-width: 9rem;
+  }
+}
+@media screen and (max-width: 800px) {
+  .flow-drop-down {
+    --dd-width: 7rem;
+  }
+}
+.dd-btn {
+  color: var(--color);
+  border: none;
+  cursor: pointer;
+  border-color: var(--input-background);
+  background: var(--input-background);
+  outline: none;
+  width: var(--dd-width);
+  text-align: left;
+  font-weight: var(--bold, 600);
+  overflow: hidden;
+  border-radius: 0.5rem;
+  height: 1.75rem;
+  display: flex;
+  align-items: center;
+  margin-top: 0.25rem;
+
+  .icon {
+    background: var(--base-lightest);
+    border-bottom-left-radius: 0.5rem;
+    border-top-left-radius: 0.5rem;
+    width: 2rem;
+    text-align: -webkit-center;
+    margin-right: 0.5rem;
+    img {
+      height:1rem;
+    }
+  }
+  .label {
+    flex-grow: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .clear {
+    min-width: 1.5rem;
+    width: 1.5rem;
+    text-align: center;
+    background: var(--base-lightest);
+    font-size: 0.7rem;
+    i {
+      position: relative;
+      top: 2px;
+    }
+  }
+}
+
+.dropdown-content {    
+  display: none;
+  position: absolute;
+  background-color: var(--base-lighter);
+  width: var(--dd-width);
+  min-width: var(--dd-width);
+  z-index: 1;
+  flex-direction: column;
+  border: solid 1px var(--base-lightest);
+  overflow-y:auto;
+  max-height: 20rem;
+  &.opened {
+    display:flex;
+  }
+}
+
+.option {
+  padding: 0.25rem;
+  overflow: hidden;
+  height: 2.5rem;
+  min-height: 2.5rem;
+  text-overflow: ellipsis;
+  &:hover {
+    background:var(--base-lightest-2);
+  }
+  .icon {
+    width:1.5rem;
+    min-width:1.5rem;
+    display: inline-block;
+    text-align: center;
+    img {
+      width: 1.5rem;
+      height: 1.5rem;
+      margin-right: 0.5rem;
+    }
+  }
+}

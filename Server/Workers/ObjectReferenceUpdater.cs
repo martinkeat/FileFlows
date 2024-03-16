@@ -1,6 +1,10 @@
 using FileFlows.Server.Controllers;
+using FileFlows.Server.Services;
 using FileFlows.ServerShared.Services;
 using FileFlows.ServerShared.Workers;
+using FlowService = FileFlows.Server.Services.FlowService;
+using LibraryFileService = FileFlows.Server.Services.LibraryFileService;
+using LibraryService = FileFlows.Server.Services.LibraryService;
 
 namespace FileFlows.Server.Workers;
 
@@ -41,54 +45,55 @@ public class ObjectReferenceUpdater:Worker
         IsRunning = true;
         try
         {
-            DateTime start = DateTime.Now;
-            var lfService = new Services.LibraryFileService();
-            var libService = new Services.LibraryService();
-            var libFiles = lfService.GetAll(null).Result;
-            var libraries = libService.GetAll();
-            var flows = new Services.FlowService().GetAll();
+            DateTime start = DateTime.UtcNow;
+            var lfService = ServiceLoader.Load<LibraryFileService>();
+            var libService = ServiceLoader.Load<LibraryService>();
+            //var libFiles = lfService.GetAll(null).Result;
+            var libraries = libService.GetAllAsync().Result;
+            var flows = ServiceLoader.Load<FlowService>().GetAllAsync().Result;
 
             var dictLibraries = libraries.ToDictionary(x => x.Uid, x => x.Name);
             var dictFlows = flows.ToDictionary(x => x.Uid, x => x.Name);
             
-            Logger.Instance.ILog("Time Taken to prepare for ObjectReference rename: "+ DateTime.Now.Subtract(start));
+            Logger.Instance.ILog("Time Taken to prepare for ObjectReference rename: "+ DateTime.UtcNow.Subtract(start));
+            
 
-            foreach (var lf in libFiles)
-            {
-                bool changed = false;
-                if (dictLibraries.ContainsKey(lf.Library.Uid) && lf.Library.Name != dictLibraries[lf.Library.Uid])
-                {
-                    string oldName = lf.Library.Name;
-                    string newName = dictLibraries[lf.Library.Uid];
-                    lf.LibraryName = newName;
-                    Logger.Instance.ILog($"Updating Library name reference '{oldName}' to '{lf.Library.Name}' in file: {lf.Name}");
-                    changed = true;
-                }
-
-                if (lf.Flow != null && lf.Flow.Uid != Guid.Empty && dictFlows.ContainsKey(lf.Flow.Uid) &&
-                    lf.Flow.Name != dictFlows[lf.Flow.Uid])
-                {
-                    string oldname = lf.Flow.Name;
-                    lf.Flow.Name = dictFlows[lf.Flow.Uid];
-                    Logger.Instance.ILog($"Updating Flow name reference '{oldname}' to '{lf.Flow.Name}' in file: {lf.Name}");
-                    changed = true;
-                }
-
-                if (changed)
-                    lfService.Update(lf).Wait();
-            }
+            // foreach (var lf in libFiles)
+            // {
+            //     bool changed = false;
+            //     if (dictLibraries.ContainsKey(lf.Library.Uid) && lf.Library.Name != dictLibraries[lf.Library.Uid])
+            //     {
+            //         string oldName = lf.Library.Name;
+            //         string newName = dictLibraries[lf.Library.Uid];
+            //         lf.LibraryName = newName;
+            //         Logger.Instance.ILog($"Updating Library name reference '{oldName}' to '{lf.Library.Name}' in file: {lf.Name}");
+            //         changed = true;
+            //     }
+            //
+            //     if (lf.Flow != null && lf.Flow.Uid != Guid.Empty && dictFlows.ContainsKey(lf.Flow.Uid) &&
+            //         lf.Flow.Name != dictFlows[lf.Flow.Uid])
+            //     {
+            //         string oldname = lf.Flow.Name;
+            //         lf.Flow.Name = dictFlows[lf.Flow.Uid];
+            //         Logger.Instance.ILog($"Updating Flow name reference '{oldname}' to '{lf.Flow.Name}' in file: {lf.Name}");
+            //         changed = true;
+            //     }
+            //
+            //     if (changed)
+            //         lfService.Update(lf).Wait();
+            // }
 
             foreach (var lib in libraries)
             {
-                if (dictFlows.ContainsKey(lib.Flow.Uid) && lib.Flow.Name != dictFlows[lib.Flow.Uid])
-                {
-                    string oldname = lib.Flow.Name;
-                    lib.Flow.Name = dictFlows[lib.Flow.Uid];
-                    Logger.Instance.ILog($"Updating Flow name reference '{oldname}' to '{lib.Flow.Name}' in library: {lib.Name}");
-                    libService.Update(lib);
-                }
+                lfService.UpdateLibraryName(lib.Uid, lib.Name).Wait();
             }
-            Logger.Instance.ILog("Time Taken to complete for ObjectReference rename: "+ DateTime.Now.Subtract(start));
+
+            foreach (var flow in flows)
+            {
+                libService.UpdateFlowName(flow.Uid, flow.Name).Wait();
+                lfService.UpdateFlowName(flow.Uid, flow.Name).Wait();
+            }
+            Logger.Instance.ILog("Time Taken to complete for ObjectReference rename: "+ DateTime.UtcNow.Subtract(start));
         }
         finally
         {

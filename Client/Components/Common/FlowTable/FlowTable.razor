@@ -95,34 +95,41 @@
 
     <div id="@Uid" class="flowtable-data">
 
-        <div class="flowtable-header">
-            <div class="flowtable-row flowtable-header-row">
-                @if(Selection != SelectionMode.None)
-                {
-                    <label class="flowtable-select" style="width:2rem;min-width:2rem;max-width:2rem">
-                        <input type="checkbox" @onchange="(e) => SelectAll(e)" checked="@(DisplayData.Any(i => SelectedItems != null && SelectedItems.Contains(i.Key)))"  />                        
-                    </label>
-                }
-                @foreach(var col in ColumnList)
-                {
-                    string hashcode = "col-" + col.GetHashCode();
-                    <span class="@col.ClassName @hashcode @(col.Hidden ? "hidden" : "")" data-width="@col.Width" style="@col.Style">
-                        @col.Header
-                    </span>
-                }
+        @if (HideHead == false)
+        {
+            <div class="flowtable-header">
+                <div class="flowtable-row flowtable-header-row">
+                    @if (Selection != SelectionMode.None)
+                    {
+                        <label class="flowtable-select" style="width:2rem;min-width:2rem;max-width:2rem">
+                            <input type="checkbox" @onchange="(e) => SelectAll(e)" checked="@(DisplayData.Any(i => SelectedItems != null && SelectedItems.Contains(i.Key)))"/>
+                        </label>
+                    }
+                    @foreach (var col in ColumnList)
+                    {
+                        string hashcode = "col-" + col.GetHashCode();
+                        <span class="@col.ClassName @hashcode @(col.Hidden ? "hidden" : "")" data-width="@col.Width" style="@col.Style">
+                            @col.Header
+                        </span>
+                    }
+                </div>
             </div>
-        </div>
+        }
         <FlowContextMenu CssClass="flowtable-body" @ref=TableContextMenu PreShow="ContextMenuPreShow">
             @if (DisplayData?.Any() == true)
             {
                 <Virtualize Items="@DisplayData" Context="item" ItemSize="25"  OverscanCount="4">
                     @{
                         bool selected = Selection != SelectionMode.None && SelectedItems?.Contains(item.Key) == true;
+                        bool disabled = DisableColumn?.Invoke(item.Key) ?? false;
                     }
-                    <div class="flowtable-row @(selected ? "selected" : "")" @ondblclick="() => OnDoubleClick(item.Key)" @onclick="(e) => OnClick(e, item.Key)" @onclick:preventDefault @onclick:stopPropagation>
+                    <div class="flowtable-row @(selected ? "selected" : "") @(disabled ? "disabled" : "")" 
+                         @ondblclick="() => OnDoubleClick(item.Key)" 
+                         @onclick="(e) => OnClick(e, item.Key)" 
+                         @onclick:preventDefault @onclick:stopPropagation>
                         @if(Selection!= SelectionMode.None)
                         {
-                            <label class="flowtable-select" style="width:2rem;min-width:2rem;max-width:2rem">
+                            <label class="flowtable-select" style="width:2rem;min-width:2rem;max-width:2rem;align-self: center;">
                                 <input type="checkbox" @onchange="(e) => CheckItem(e, item.Key)" checked="@(SelectedItems?.Contains(item.Key) == true)"
                                        onclick="ff.stopSelectPropagation(event)" />                        
                             </label>
@@ -130,7 +137,7 @@
                         @foreach (var col in ColumnList)
                         {
                             string hashcode = "col-" + col.GetHashCode();
-                            <span class="column @col.ClassName @hashcode @(col.Pre ? "pre-text" : "") @(col.Hidden ? "hidden": "")" style="@col.Style">
+                            <span class="column @col.ClassName @hashcode @(col.Pre ? "pre-text" : "") @(col.NoHeight ? "no-height" : "") @(col.Hidden ? "hidden": "")" style="@col.Style">
                                 @col.Cell(item.Key)
                             </span>
                         }

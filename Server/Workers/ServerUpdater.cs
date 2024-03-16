@@ -2,6 +2,7 @@
 using FileFlows.Server.Helpers;
 using FileFlows.Shared.Formatters;
 using FileFlows.Server.Controllers;
+using FileFlows.Server.Services;
 using FileFlows.ServerShared.Workers;
 using FileFlows.Shared.Helpers;
 
@@ -36,13 +37,13 @@ public class ServerUpdater : UpdaterWorker
     protected override void PreUpgradeArgumentsAdd(ProcessStartInfo startInfo)
     {
         Logger.Instance.ILog("Is MacOS: " + OperatingSystem.IsMacOS());
-        bool hasEntryPoint = string.IsNullOrWhiteSpace(Program.EntryPoint) == false;
+        bool hasEntryPoint = string.IsNullOrWhiteSpace(Application.EntryPoint) == false;
         Logger.Instance.ILog("Has Entry Point: " + hasEntryPoint);
         if (OperatingSystem.IsMacOS() && hasEntryPoint)
         {
             Logger.Instance.ILog("Upgrading Mac App");
             startInfo.ArgumentList.Add("mac");
-            startInfo.ArgumentList.Add(Program.EntryPoint);
+            startInfo.ArgumentList.Add(Application.EntryPoint);
             startInfo.ArgumentList.Add(Globals.Version.Split('.').Last());
         }
         base.PreUpgradeArgumentsAdd(startInfo);
@@ -87,7 +88,7 @@ public class ServerUpdater : UpdaterWorker
     /// <returns>if auto updates are enabled</returns>
     protected override bool GetAutoUpdatesEnabled()
     {
-        var settings = new SettingsController().Get().Result;
+        var settings = ServiceLoader.Load<SettingsService>().Get().Result;
         return settings?.AutoUpdate == true;
     }
 
@@ -166,7 +167,7 @@ public class ServerUpdater : UpdaterWorker
         Logger.Instance.ILog($"{UpdaterName}: Downloading update: " + onlineVersion);
         
         
-        string url = $"{UpdateUrl}/download/{onlineVersion}?ts={DateTime.Now.Ticks}";
+        string url = $"{UpdateUrl}/download/{onlineVersion}?ts={DateTime.UtcNow.Ticks}";
         HttpHelper.DownloadFile(url, file).Wait();
         if (File.Exists(file) == false)
         {

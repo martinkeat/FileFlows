@@ -1,5 +1,6 @@
 using FileFlows.Plugin;
 using FileFlows.Server.Controllers;
+using FileFlows.Server.Services;
 
 namespace FileFlows.Server.Middleware;
 
@@ -8,7 +9,24 @@ namespace FileFlows.Server.Middleware;
 /// </summary>
 public class LoggingMiddleware
 {
+    /// <summary>
+    /// Next request delegate
+    /// </summary>
     private readonly RequestDelegate _next;
+
+    /// <summary>
+    /// Settings service
+    /// </summary>
+    private SettingsService settingsService;
+    
+    /// <summary>
+    /// Initializes a new instance of the logging middleware
+    /// </summary>
+    /// <param name="settingsService">the settings service</param>
+    public LoggingMiddleware(SettingsService settingsService)
+    {
+        this.settingsService = settingsService;
+    }
     
     /// <summary>
     /// Gets the logger for the request logger
@@ -39,8 +57,7 @@ public class LoggingMiddleware
         {
             try
             {
-                var settings = new SettingsController().Get().Result;
-                if (settings.LogEveryRequest)
+                if (settingsService.Get().Result.LogEveryRequest)
                 {
                     _ = RequestLogger.Log((LogType) 999,
                         $"REQUEST [{context.Request?.Method}] [{context.Response?.StatusCode}]: {context.Request?.Path.Value}");

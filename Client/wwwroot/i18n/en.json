@@ -121,6 +121,13 @@
     "Pixels": "Pixels",
     "ReadOnly": "Read Only",
     "InUse": "In Use",
+    "Running": "Running",
+    "PossibilityDisconnected": "Possibly Disconnected",
+    "Disconnected": "Disconnected",
+    "LastScanned": "Last Scanned",
+    "Savings": "Savings",
+    "Flow": "Flow",
+    "ForceProcessing": "Force Processing",
     "ObsoleteConfirm": {
       "Title": "Obsolete Node",
       "Message": "It is recommended you switch to a different node.",
@@ -180,6 +187,14 @@
       "Fri": "Fri",
       "Sat": "Sat",
       "Sun": "Sun"
+    },
+    "FilesSortBy": {
+      "Size": "Size",
+      "SizeDesc": "Size Descending",
+      "Savings": "Savings",
+      "SavingsDesc": "Savings Descending",
+      "Time": "Time",
+      "TimeDesc": "Time Descending"
     },
     "FileStatus": {
       "OnHold":"On Hold",
@@ -275,7 +290,17 @@
     "ProcessingTimes": "Processing Times",
     "VideoContainers": "Video Containers",
     "AudioContainers": "Audio Containers",
-    "StorageSaved": "Storage Saved"
+    "StorageSaved": "Storage Saved",
+    "Decoders": "Decoders",
+    "Encoders": "Encoders",
+    "DecoderParameters": "Decoder Parameters",
+    "LogStorage": "Log Storage",
+    "LibraryProcessingTimes":"Library Processing Times",
+    "ImageFormats": "Image Formats",
+    "ComicFormats": "Comic Formats",
+    "ComicPages": "Comic Pages",
+    "NVIDIASMI": "NVIDIA SMI",
+    "CurrentRevision": "Current Revision"
   },
   "Flow": {
     "ErrorMessages":{
@@ -642,6 +667,9 @@
         "UpgradeRequired": "Upgrade Required",
         "UpgradeRequiredHint": "The Server and Nodes must be on the same version"
       },
+      "Messages": {
+        "DeleteNode": "Are you sure you want to delete ''{name}''?"
+      },
       "Fields": {
         "FlowRunners": "Flow Runners",
         "Address": "Address",
@@ -859,6 +887,9 @@
           "Server-Help":"The address of the Database server and the port or named instance if required",
           "Port":"Port",
           "Port-Help":"The default port for MySQL is 3306",
+          "Port-Help-Postgres": "The default port for Postgres is 5432",
+          "Port-Help-MySql":"The default port for MySQL is 3306",
+          "Port-Help-SQLServer": "The default port for SQL Server is 1433",
           "Name":"Name",
           "Name-Help":"The name of the database to created, if left blank ''FileFlows'' will be used",
           "User":"User",

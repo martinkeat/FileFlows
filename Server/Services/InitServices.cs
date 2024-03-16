@@ -12,16 +12,16 @@ internal class InitServices
     {
         //Node.FlowExecution.FlowRunnerCommunicator.SignalrUrl = Controllers.NodeController.SignalrUrl;
 
-        ServerShared.Services.SettingsService.Loader = () => new SettingsService();
-        ServerShared.Services.NodeService.Loader = () => new NodeService();
-        ServerShared.Services.PluginService.Loader = () => new PluginService();
-        ServerShared.Services.FlowService.Loader = () => new FlowService();
-        ServerShared.Services.FlowRunnerService.Loader = () => new FlowRunnerService();
-        ServerShared.Services.LibraryService.Loader = () => new LibraryService();
-        ServerShared.Services.LibraryFileService.Loader = () => new LibraryFileService();
-        ServerShared.Services.ScriptService.Loader = () => new ScriptService();
-        ServerShared.Services.StatisticService.Loader = () => new StatisticService();
-        ServerShared.Services.VariableService.Loader = () => new VariableService();
+        ServerShared.Services.SettingsService.Loader = () => ServiceLoader.Load<SettingsService>();
+        ServerShared.Services.NodeService.Loader = () => ServiceLoader.Load<NodeService>();
+        ServerShared.Services.PluginService.Loader = () => ServiceLoader.Load<PluginService>();
+        ServerShared.Services.FlowService.Loader = () => ServiceLoader.Load<FlowService>();
+        ServerShared.Services.FlowRunnerService.Loader = () => ServiceLoader.Load<FlowRunnerService>();
+        ServerShared.Services.LibraryService.Loader = () => ServiceLoader.Load<LibraryService>();
+        ServerShared.Services.LibraryFileService.Loader = () => ServiceLoader.Load<LibraryFileService>();
+        ServerShared.Services.ScriptService.Loader = () => ServiceLoader.Load<ScriptService>();
+        ServerShared.Services.StatisticService.Loader = () => ServiceLoader.Load<StatisticService>();
+        ServerShared.Services.VariableService.Loader = () => ServiceLoader.Load<VariableService>();
         
         FileDisplayNameService.Initialize();
     }

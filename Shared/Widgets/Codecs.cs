@@ -20,7 +20,7 @@ public class Codecs:WidgetDefinition
     /// <summary>
     /// Gets the URL
     /// </summary>
-    public override string Url => "/api/statistics/by-name/CODEC";
+    public override string Url => "/api/statistics/running-totals/CODEC";
     
     /// <summary>
     /// Gets the Icon

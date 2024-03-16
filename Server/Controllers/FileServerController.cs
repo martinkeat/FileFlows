@@ -29,10 +29,10 @@ public class FileServerController : Controller
     /// <summary>
     /// Constructs the controller
     /// </summary>
-    public FileServerController()
+    public FileServerController(SettingsService settingsService)
     {
-        var settings = new SettingsController().Get().Result;
-        var allowedPaths = new LibraryService().GetAll().Select(x => x.Path)
+        var settings = settingsService.Get().Result;
+        var allowedPaths = ServiceLoader.Load<LibraryService>().GetAllAsync().Result.Select(x => x.Path)
             .Union(settings.FileServerAllowedPaths ?? new string[] { })
             .Where(x => string.IsNullOrWhiteSpace(x) == false)
             .Distinct()
@@ -67,7 +67,7 @@ public class FileServerController : Controller
             return false;
         }
 
-        if (WorkerController.Executors.ContainsKey(executorUid) == false)
+        if (FlowRunnerService.Executors.ContainsKey(executorUid) == false)
         {
             message = "Unknown executor identifier given.";
             return false;
@@ -86,7 +86,7 @@ public class FileServerController : Controller
         if (LicenseHelper.IsLicensed(LicenseFlags.FileServer) == false)
             return false;
         
-        var settings = new SettingsController().Get().Result;
+        var settings = ServiceLoader.Load<SettingsService>().Get().Result;
         return settings.FileServerDisabled == false;
     }
 
@@ -573,7 +573,7 @@ public class FileServerController : Controller
     //     if(string.IsNullOrWhiteSpace(path))
     //         return StatusCode(503, "No path specified to delete.");
     //
-    //     var libraryPaths = (await new LibraryService().GetAllAsync()).Select(x => x.Path).ToArray();
+    //     var libraryPaths = (await ServiceLoader.Load<LibraryService>().GetAllAsync()).Select(x => x.Path).ToArray();
     //
     //     try
     //     {

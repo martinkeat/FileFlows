@@ -7,6 +7,9 @@ using FileFlows.Client.Components.Dialogs;
 
 namespace FileFlows.Client.Pages;
 
+/// <summary>
+/// Library Files Page
+/// </summary>
 public partial class LibraryFiles : ListPage<Guid, LibaryFileListModel>, IDisposable
 {
     private string filter = string.Empty;
@@ -28,10 +31,13 @@ public partial class LibraryFiles : ListPage<Guid, LibaryFileListModel>, IDispos
 
     private int PageIndex;
 
+    private Guid? SelectedNode, SelectedLibrary, SelectedFlow;
+    private FilesSortBy? SelectedSortBy;
+
     private string lblMoveToTop = "";
 
     private int Count;
-    private string lblSearch, lblDeleteSwitch;
+    private string lblSearch, lblDeleteSwitch, lblForcedProcessing;
 
     private string TableIdentifier => "LibraryFiles_" + this.SelectedStatus; 
 
@@ -46,6 +52,8 @@ public partial class LibraryFiles : ListPage<Guid, LibaryFileListModel>, IDispos
     private int TotalItems;
     private List<FlowExecutorInfo> WorkerStatus = new ();
     private Timer AutoRefreshTimer;
+    private Dictionary<string, ProcessingNode> Nodes = new();
+    private List<DropDownOption> optionsLibraries, optionsNodes, optionsFlows, optionsSortBy;
 
     protected override string DeleteMessage => "Labels.DeleteLibraryFiles";
     
@@ -59,16 +67,14 @@ public partial class LibraryFiles : ListPage<Guid, LibaryFileListModel>, IDispos
     }
 
     public override string FetchUrl => $"{ApiUrl}/list-all?status={SelectedStatus}&page={PageIndex}&pageSize={App.PageSize}" +
-                                       $"&filter={Uri.EscapeDataString(filterStatus == SelectedStatus ? filter ?? string.Empty : string.Empty)}";
-
-    private string NameMinWidth = "20ch";
+                                       $"&filter={Uri.EscapeDataString(filterStatus == SelectedStatus ? filter ?? string.Empty : string.Empty)}" +
+                                       (SelectedNode == null ? "" : $"&node={SelectedNode}") + 
+                                       (SelectedFlow == null ? "" : $"&flow={SelectedFlow}") + 
+                                       (SelectedSortBy == null ? "" : $"&sortBy={(int)SelectedSortBy}") + 
+                                       (SelectedLibrary == null ? "" : $"&library={SelectedLibrary}");
 
     public override async Task PostLoad()
     {
-        if(App.Instance.IsMobile)
-            this.NameMinWidth = this.Data?.Any() == true ? Math.Min(120, Math.Max(20, this.Data.Max(x => (x.Name?.Length / 2) ?? 0))) + "ch" : "20ch";
-        else
-            this.NameMinWidth = this.Data?.Any() == true ? Math.Min(120, Math.Max(20, this.Data.Max(x => (x.Name?.Length) ?? 0))) + "ch" : "20ch";
         await jsRuntime.InvokeVoidAsync("ff.scrollTableToTop");
     }
 
@@ -80,6 +86,7 @@ public partial class LibraryFiles : ListPage<Guid, LibaryFileListModel>, IDispos
     protected async override Task OnInitializedAsync()
     {
         this.SelectedStatus = FileFlows.Shared.Models.FileStatus.Unprocessed;
+        lblForcedProcessing = Translater.Instant("Labels.ForceProcessing");
         lblMoveToTop = Translater.Instant("Pages.LibraryFiles.Buttons.MoveToTop");
         lblLibraryFiles = Translater.Instant("Pages.LibraryFiles.Title");
         lblFileFlowsServer = Translater.Instant("Pages.Nodes.Labels.FileFlowsServer");
@@ -88,7 +95,57 @@ public partial class LibraryFiles : ListPage<Guid, LibaryFileListModel>, IDispos
         this.lblDeleteSwitch = Translater.Instant("Labels.DeleteLibraryFilesPhysicallySwitch");
         base.OnInitialized(true);
         
+        optionsSortBy = new ()
+        {
+            new () { Icon = "fas fa-sort-numeric-up", Label = Translater.Instant("Enums.FilesSortBy.Size"), Value = FilesSortBy.Size },
+            new () { Icon = "fas fa-sort-numeric-down-alt", Label = Translater.Instant("Enums.FilesSortBy.SizeDesc"), Value = FilesSortBy.SizeDesc },
+            new () { Icon = "fas fa-sort-amount-down-alt", Label = Translater.Instant("Enums.FilesSortBy.Savings"), Value = FilesSortBy.Savings },
+            new () { Icon = "fas fa-sort-amount-up", Label = Translater.Instant("Enums.FilesSortBy.SavingsDesc"), Value = FilesSortBy.SavingsDesc },
+            new () { Icon = "fas fa-hourglass-start", Label = Translater.Instant("Enums.FilesSortBy.Time"), Value = FilesSortBy.Time },
+            new () { Icon = "fas fa-hourglass-end", Label = Translater.Instant("Enums.FilesSortBy.TimeDesc"), Value = FilesSortBy.TimeDesc }
+        };
+
+        var nodesResult = await HttpHelper.Get<List<ProcessingNode>>("/api/node/list");
+        if (nodesResult.Success)
+        {
+            Nodes = nodesResult.Data.DistinctBy(x => x.Name.ToLowerInvariant())
+                .ToDictionary(x => x.Name.ToLowerInvariant(), x => x);
+            optionsNodes = nodesResult.Data.OrderBy(x => x.Name.ToLowerInvariant()).Select(x => new DropDownOption()
+            {
+                Icon = x.OperatingSystem switch
+                {
+                    OperatingSystemType.Docker => "/icons/docker.svg",
+                    OperatingSystemType.Linux => "/icons/linux.svg",
+                    OperatingSystemType.Mac => "/icons/apple.svg",
+                    OperatingSystemType.Windows => "/icons/windows.svg",
+                    _ => ""
+                },
+                Value = x.Uid,
+                Label = x.Name == "FileFlowsServer" ? "Internal Node" : x.Name
+            }).ToList();
+        }
         
+        var libraryResult = await HttpHelper.Get<List<Library>>("/api/library");
+        if (libraryResult.Success)
+        {
+            optionsLibraries = libraryResult.Data.OrderBy(x => x.Name.ToLowerInvariant()).Select(x => new DropDownOption()
+            {
+                Icon = "fas fa-folder",
+                Value = x.Uid,
+                Label = x.Name
+            }).ToList();
+        }
+        var flowResult = await HttpHelper.Get<List<FlowListModel>>("/api/flow/list-all");
+        if (flowResult.Success)
+        {
+            optionsFlows = flowResult.Data.OrderBy(x => x.Name.ToLowerInvariant()).Select(x => new DropDownOption()
+            {
+                Icon = "fas fa-sitemap",
+                Value = x.Uid,
+                Label = x.Name
+            }).ToList();
+        }
+
         AutoRefreshTimer = new Timer();
         AutoRefreshTimer.Elapsed += AutoRefreshTimerElapsed;
         AutoRefreshTimer.Interval = 10_000;
@@ -530,5 +587,102 @@ public partial class LibraryFiles : ListPage<Guid, LibaryFileListModel>, IDispos
             Blocker.Hide();
             this.StateHasChanged();
         }
+    }
+
+    private static string[] BasicExtensions = new[] { "doc", "iso", "pdf", "svg", "xml", "zip" };
+    private static string[] VideoExtensions = new[] { "avi", "mkv", "mov", "mp4", "mpeg", "mpg", "ts", "webm" };
+    private static string[] ImageExtensions = new[] { "bmp", "gif", "gif", "jpg", "png", "tiff", "webp" };
+    private static string[] TextExtensions = new[] { "srt", "sub", "sup", "txt" };
+    private static string[] ComicExtensions = new[] { "cb7", "cbr", "cbz" };
+    private static string[] ArchiveExtensions = new[] { "zip", "7z", "rar", "gz", "tar" };
+    private static string[] AudioExtensions = new[] { "aac", "flac", "m4a", "mp3", "ogg", "wav" };
+
+    /// <summary>
+    /// Gets the image for the file
+    /// </summary>
+    /// <param name="path">the path of the file</param>
+    /// <returns>the image to show</returns>
+    private string GetExtensionImage(string path)
+    {
+        int index = path.LastIndexOf(".", StringComparison.Ordinal);
+        if (index < 0)
+            return "folder.svg";
+        
+        string extension = path[(index + 1)..].ToLowerInvariant();
+        if (BasicExtensions.Contains(extension))
+            return $"filetypes/{extension}.svg";
+        if (ArchiveExtensions.Contains(extension))
+            return $"filetypes/archive/{extension}.svg";
+        if (AudioExtensions.Contains(extension))
+            return $"filetypes/audio/{extension}.svg";
+        if (ComicExtensions.Contains(extension))
+            return $"filetypes/comic/{extension}.svg";
+        if (ImageExtensions.Contains(extension))
+            return $"filetypes/image/{extension}.svg";
+        if (TextExtensions.Contains(extension))
+            return $"filetypes/text/{extension}.svg";
+        if (VideoExtensions.Contains(extension))
+            return $"filetypes/video/{extension}.svg";
+        
+        return "blank.svg";
+    }
+
+    /// <summary>
+    /// Gets the icon to show for the node
+    /// </summary>
+    /// <param name="node">the node</param>
+    /// <returns>the node icon</returns>
+    private string GetNodeIcon(string node)
+    {
+        if(Nodes.TryGetValue(node.ToLowerInvariant(), out ProcessingNode n) == false)
+            return "fas fa-desktop";
+        if (n.OperatingSystem == OperatingSystemType.Docker)
+            return "fab fa-docker";
+        if (n.OperatingSystem == OperatingSystemType.Windows)
+            return "fab fa-windows";
+        if (n.OperatingSystem == OperatingSystemType.Mac)
+            return "fab fa-apple";
+        if (n.OperatingSystem == OperatingSystemType.Linux)
+            return "fab fa-linux";
+        return "fas fa-desktop";
+    }
+
+    /// <summary>
+    /// Sets the selected node
+    /// </summary>
+    /// <param name="node">the node</param>
+    private void SelectNode(object node)
+    {
+        SelectedNode = node as Guid?;
+        _ = Refresh();
+    }
+
+    /// <summary>
+    /// Sets the sort by
+    /// </summary>
+    /// <param name="sortBy">the sort by</param>
+    private void SelectSortBy(object sortBy)
+    {
+        SelectedSortBy = sortBy as FilesSortBy?;
+        _ = Refresh();
+    }
+    /// <summary>
+    /// Sets the selected library
+    /// </summary>
+    /// <param name="library">the library</param>
+    private void SelectLibrary(object library)
+    {
+        SelectedLibrary = library as Guid?;
+        _ = Refresh();
+    }
+
+    /// <summary>
+    /// Sets the selected flow
+    /// </summary>
+    /// <param name="flow">the flow</param>
+    private void SelectFlow(object flow)
+    {
+        SelectedFlow = flow as Guid?;
+        _ = Refresh();
     }
 }

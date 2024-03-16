@@ -85,7 +85,7 @@ public abstract class ListPage<U, T> : ComponentBase where T : IUniqueObject<U>
     /// Sets the table data, virtual so a filter can be set if needed
     /// </summary>
     /// <param name="data">the data to set</param>
-    protected virtual void SetTableData(List<T> data) => Table.SetData(data, clearSelected: false);
+    protected virtual void SetTableData(List<T> data) => Table?.SetData(data, clearSelected: false);
 
     public virtual async Task Load(U selectedUid, bool showBlocker = true)
     {
@@ -141,7 +141,7 @@ public abstract class ListPage<U, T> : ComponentBase where T : IUniqueObject<U>
 
     public async Task Edit()
     {
-        var items = Table.GetSelected();
+        var items = Table?.GetSelected();
         if (items?.Any() != true)
             return;
         var selected = items.First();
@@ -207,7 +207,6 @@ public abstract class ListPage<U, T> : ComponentBase where T : IUniqueObject<U>
 
         try
         {
-#if (!DEMO)
             var deleteResult = await HttpHelper.Delete(DeleteUrl, new ReferenceModel<U> { Uids = uids });
             if (deleteResult.Success == false)
             {
@@ -217,7 +216,6 @@ public abstract class ListPage<U, T> : ComponentBase where T : IUniqueObject<U>
                     Toast.ShowError( Translater.Instant("ErrorMessages.DeleteFailed"));
                 return;
             }
-#endif
 
             this.Data = this.Data.Where(x => uids.Contains(x.Uid) == false).ToList();
 
@@ -260,16 +258,16 @@ public abstract class ListPage<U, T> : ComponentBase where T : IUniqueObject<U>
     /// <summary>
     /// Humanizes a date, eg 11 hours ago
     /// </summary>
-    /// <param name="date">the date</param>
+    /// <param name="dateUtc">the date</param>
     /// <returns>the humanized date</returns>
-    protected string DateString(DateTime? date)
+    protected string DateString(DateTime? dateUtc)
     {
-        if (date == null) return string.Empty;
-        if (date.Value.Year < 2020) return string.Empty; // fixes 0000-01-01 issue
-        var localDate = new DateTime(date.Value.Year, date.Value.Month, date.Value.Day, date.Value.Hour,
-            date.Value.Minute, date.Value.Second);
+        if (dateUtc == null) return string.Empty;
+        if (dateUtc.Value.Year < 2020) return string.Empty; // fixes 0000-01-01 issue
+        // var localDate = new DateTime(date.Value.Year, date.Value.Month, date.Value.Day, date.Value.Hour,
+        //     date.Value.Minute, date.Value.Second);
 
-        return FormatHelper.HumanizeDate(localDate);
+        return FormatHelper.HumanizeDate(dateUtc.Value);
     }
 
 }

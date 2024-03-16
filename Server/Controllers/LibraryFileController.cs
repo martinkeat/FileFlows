@@ -1,5 +1,3 @@
-using System.Globalization;
-using System.Reflection.Metadata.Ecma335;
 using Microsoft.AspNetCore.Mvc;
 using FileFlows.Server.Helpers;
 using FileFlows.Shared.Models;
@@ -9,6 +7,9 @@ using FileFlows.Server.Workers;
 using FileFlows.ServerShared.Models;
 using FileFlows.Shared.Helpers;
 using Humanizer;
+using LibraryFileService = FileFlows.Server.Services.LibraryFileService;
+using LibraryService = FileFlows.Server.Services.LibraryService;
+using NodeService = FileFlows.Server.Services.NodeService;
 
 namespace FileFlows.Server.Controllers;
 
@@ -28,9 +29,7 @@ public class LibraryFileController : Controller //ControllerStore<LibraryFile>
     [HttpPost("next-file")]
     public async Task<NextLibraryFileResult> GetNext([FromBody] NextLibraryFileArgs args)
     {
-        var service = new LibraryFileService();
-        // var node = new NodeService().GetByUid(args.NodeUid);
-        // var result = await service.GetNextLibraryFile(node, args.WorkerUid);
+        var service = ServiceLoader.Load<LibraryFileService>();
         var result = await service.GetNext(args.NodeName, args.NodeUid, args.NodeVersion, args.WorkerUid);
         if (result == null)
             return result;
@@ -50,22 +49,51 @@ public class LibraryFileController : Controller //ControllerStore<LibraryFile>
     /// <param name="page">The page to get</param>
     /// <param name="pageSize">The number of items to fetch</param>
     /// <param name="filter">[Optional] filter text</param>
+    /// <param name="node">[Optional] node to filter by</param>
+    /// <param name="library">[Optional] library to filter by</param>
+    /// <param name="flow">[Optional] flow to filter by</param>
+    /// <param name="sortBy">[Optional] sort by method</param>
     /// <returns>a slimmed down list of files with only needed information</returns>
     [HttpGet("list-all")]
-    public async Task<LibraryFileDatalistModel> ListAll([FromQuery] FileStatus status, [FromQuery] int page = 0, [FromQuery] int pageSize = 0, [FromQuery] string filter = null)
+    public async Task<LibraryFileDatalistModel> ListAll([FromQuery] FileStatus status, [FromQuery] int page = 0, 
+        [FromQuery] int pageSize = 0, [FromQuery] string filter = null, [FromQuery] Guid? node = null, 
+        [FromQuery] Guid? library = null, [FromQuery] Guid? flow = null, [FromQuery] FilesSortBy? sortBy = null)
     {
-        var service = new LibraryFileService();
-        var lfStatus = service.GetStatus();
-        var files = await service.GetAll(status, page * pageSize, pageSize, filter);
-        if (string.IsNullOrWhiteSpace(filter) == false)
+        var service = ServiceLoader.Load<LibraryFileService>();
+        var lfStatus = await service.GetStatus();
+        var libraries = await ServiceLoader.Load<LibraryService>().GetAllAsync();
+        
+        
+        var allLibraries = (await ServiceLoader.Load<LibraryService>().GetAllAsync());
+        
+        var sysInfo = new LibraryFilterSystemInfo()
         {
-            // need to get total number of items matching filter aswell
-            int total = await service.GetTotalMatchingItems(status, filter);
+            AllLibraries = allLibraries.ToDictionary(x => x.Uid, x => x),
+            Executors = FlowRunnerService.Executors.Values.ToList(),
+            LicensedForProcessingOrder = LicenseHelper.IsLicensed(LicenseFlags.ProcessingOrder)
+        };
+        var lfFilter = new LibraryFileFilter()
+        {
+            Status = status,
+            Skip = page * pageSize,
+            Rows = pageSize,
+            Filter = filter,
+            NodeUid = node,
+            LibraryUid = library,
+            FlowUid = flow,
+            SortBy = sortBy,
+            SysInfo = sysInfo,
+        };
+        
+        List<LibraryFile> files = await service.GetAll(lfFilter);
+        if (string.IsNullOrWhiteSpace(filter) == false || node != null || flow != null || library != null)
+        {
+            // need to get total number of items matching filter as well
+            int total = await service.GetTotalMatchingItems(lfFilter);
             HttpContext?.Response?.Headers?.TryAdd("x-total-items", total.ToString());
         }
 
-        var libraries = new LibraryService().GetAll();
-        var nodeNames = new NodeService().GetAll().ToDictionary(x => x.Uid, x => x.Name);
+        var nodeNames = (await ServiceLoader.Load<NodeService>().GetAllAsync()).ToDictionary(x => x.Uid, x => x.Name);
         return new()
         {
             Status = lfStatus,
@@ -81,8 +109,8 @@ public class LibraryFileController : Controller //ControllerStore<LibraryFile>
     /// <param name="top">The amount of items to grab, 0 to grab all</param>
     /// <returns>A list of library files</returns>
     [HttpGet]
-    public Task<IEnumerable<LibraryFile>> GetAll([FromQuery] FileStatus? status, [FromQuery] int skip = 0, [FromQuery] int top = 0)
-        => new LibraryFileService().GetAll(status, skip, top);
+    public Task<List<LibraryFile>> GetAll([FromQuery] FileStatus? status, [FromQuery] int skip = 0, [FromQuery] int top = 0)
+        => ServiceLoader.Load<LibraryFileService>().GetAll(status, skip: skip, rows: top);
 
     /// <summary>
     /// Get next 10 upcoming files to process
@@ -91,7 +119,7 @@ public class LibraryFileController : Controller //ControllerStore<LibraryFile>
     [HttpGet("upcoming")]
     public async Task<IActionResult> Upcoming()
     {
-        var data = await new LibraryFileService().GetAll(FileStatus.Unprocessed, rows: 10);
+        var data = await ServiceLoader.Load<LibraryFileService>().GetAll(FileStatus.Unprocessed, rows: 10);
         var results = data.Select(x => new
         {
             x.Uid,
@@ -108,10 +136,11 @@ public class LibraryFileController : Controller //ControllerStore<LibraryFile>
     [HttpGet("recently-finished")]
     public async Task<IActionResult> RecentlyFinished()
     {
-        var service = new LibraryFileService();
-        var processed = await service.GetAll(FileStatus.Processed, rows: 10);
-        var failed = await service.GetAll(FileStatus.ProcessingFailed, rows: 10);
-        var mapping = await service.GetAll(FileStatus.MappingIssue, rows: 10);
+        var service = ServiceLoader.Load<LibraryFileService>();
+        var libraries = await ServiceLoader.Load<LibraryService>().GetAllAsync();
+        var processed = await service.GetAll(FileStatus.Processed, rows: 10, allLibraries: libraries);
+        var failed = await service.GetAll(FileStatus.ProcessingFailed, rows: 10, allLibraries: libraries);
+        var mapping = await service.GetAll(FileStatus.MappingIssue, rows: 10, allLibraries: libraries);
         var minDate = new DateTime(2020, 1, 1);
         var all = processed.Union(failed).Union(mapping).OrderByDescending(x => x.ProcessingEnded < minDate ? x.ProcessingStarted : x.ProcessingEnded).ToArray();
         if (all.Any() == false)
@@ -120,7 +149,8 @@ public class LibraryFileController : Controller //ControllerStore<LibraryFile>
             all = all.Take(10).ToArray();
         var data = all.Select(x =>
         {
-            var when = x.ProcessingEnded.Humanize(false, DateTime.Now);
+            var date = x.ProcessingEnded.Year > 2000 ? x.ProcessingEnded : x.ProcessingStarted;
+            var when = date.ToLocalTime().Humanize(false, DateTime.UtcNow);
             return new
             {
                 x.Uid,
@@ -141,8 +171,8 @@ public class LibraryFileController : Controller //ControllerStore<LibraryFile>
     /// </summary>
     /// <returns>the library status overview</returns>
     [HttpGet("status")]
-    public IEnumerable<LibraryStatus> GetStatus()
-        => new LibraryFileService().GetStatus();
+    public Task<List<LibraryStatus>> GetStatus()
+        => ServiceLoader.Load<LibraryFileService>().GetStatus();
 
 
     /// <summary>
@@ -153,16 +183,17 @@ public class LibraryFileController : Controller //ControllerStore<LibraryFile>
     [HttpGet("{uid}")]
     public async Task<LibraryFile> Get(Guid uid)
     {
-        var result = await new LibraryFileService().Get(uid);
-        // if(DbHelper.UseMemoryCache == false && result != null)
-        //     CacheStore.Store(result.Uid, result);
-        if(result != null && (result.Status == FileStatus.ProcessingFailed || result.Status == FileStatus.Processed))
+        // first see if the file is currently processing, if it is, return that in memory 
+        var file = await ServiceLoader.Load<FlowRunnerService>().TryGetFile(uid) ?? 
+                   await ServiceLoader.Load<LibraryFileService>().Get(uid);
+        
+        if(file != null && (file.Status == FileStatus.ProcessingFailed || file.Status == FileStatus.Processed))
         {
             if (LibraryFileLogHelper.HtmlLogExists(uid))
-                return result;
+                return file;
             LibraryFileLogHelper.CreateHtmlOfLog(uid);
         }
-        return result;
+        return file;
     }
 
 
@@ -174,7 +205,8 @@ public class LibraryFileController : Controller //ControllerStore<LibraryFile>
     [HttpPut]
     public async Task<LibraryFile> Update([FromBody] LibraryFile file)
     {
-        var existing = await new LibraryFileService().Get(file.Uid);
+        throw new Exception("Obsolete method");
+        var existing = await ServiceLoader.Load<LibraryFileService>().Get(file.Uid);
 
         if (existing == null)
             throw new Exception("Not found");
@@ -222,7 +254,7 @@ public class LibraryFileController : Controller //ControllerStore<LibraryFile>
         if (file.FinalMetadata?.Any() == true)
             existing.FinalMetadata = file.FinalMetadata;
         
-        var updated = await new LibraryFileService().Update(existing);
+        var updated = await ServiceLoader.Load<LibraryFileService>().Update(existing);
         
         return updated;
     }
@@ -269,16 +301,8 @@ public class LibraryFileController : Controller //ControllerStore<LibraryFile>
     /// <param name="log">the log</param>
     /// <returns>true if successfully saved log</returns>
     [HttpPut("{uid}/full-log")]
-    public async Task<bool> SaveFullLog([FromRoute] Guid uid, [FromBody] string log)
-    {
-        try
-        {
-            await LibraryFileLogHelper.SaveLog(uid, log, saveHtml: true);
-            return true;
-        }
-        catch (Exception) { }
-        return false;
-    }
+    public Task<bool> SaveFullLog([FromRoute] Guid uid, [FromBody] string log)
+        => ServiceLoader.Load<LibraryFileService>().SaveFullLog(uid, log);
 
     /// <summary>
     /// A reference model of library files to move to the top of the processing queue
@@ -292,16 +316,8 @@ public class LibraryFileController : Controller //ControllerStore<LibraryFile>
             return; // nothing to delete
 
         var list = model.Uids.ToArray();
-        await new LibraryFileService().MoveToTop(list);
+        await ServiceLoader.Load<LibraryFileService>().MoveToTop(list);
     }
-
-    /// <summary>
-    /// Adds a library file into the system
-    /// </summary>
-    /// <param name="libraryFile">the file to add</param>
-    /// <returns>the newly added file</returns>
-    internal Task<LibraryFile> Add(LibraryFile libraryFile) =>
-        new LibraryFileService().Add(libraryFile);
 
 
     /// <summary>
@@ -310,39 +326,8 @@ public class LibraryFileController : Controller //ControllerStore<LibraryFile>
     /// <param name="uid">The Uid of the library file to check</param>
     /// <returns>true if exists, otherwise false</returns>
     [HttpGet("exists-on-server/{uid}")]
-    public async Task<bool> ExistsOnServer([FromRoute] Guid uid)
-    {
-        var libFile = await Get(uid);
-        if (libFile == null)
-            return false;
-        bool result = false;
-        
-        if (libFile.IsDirectory)
-        {
-            Logger.Instance.ILog("Checking Folder exists on server: " + libFile.Name);
-            try
-            {
-                result = System.IO.Directory.Exists(libFile.Name);
-            }
-            catch (Exception) {  }
-        }
-        else
-        {
-            try
-            {
-                result = System.IO.File.Exists(libFile.Name);
-            }
-            catch (Exception)
-            {
-            }
-        }
-
-        Logger.Instance.ILog((libFile.IsDirectory ? "Directory" : "File") +
-                             (result == false ? " does not exist" : "exists") +
-                             " on server: " + libFile.Name);
-        
-        return result;
-    }
+    public Task<bool> ExistsOnServer([FromRoute] Guid uid)
+        => ServiceLoader.Load<LibraryFileService>().ExistsOnServer(uid);
 
     /// <summary>
     /// Delete library files from the system
@@ -351,7 +336,7 @@ public class LibraryFileController : Controller //ControllerStore<LibraryFile>
     /// <returns>an awaited task</returns>
     [HttpDelete]
     public Task Delete([FromBody] ReferenceModel<Guid> model)
-        => new LibraryFileService().Delete(model?.Uids);
+        => ServiceLoader.Load<LibraryFileService>().Delete(model?.Uids);
 
     /// <summary>
     /// Delete library files from disk
@@ -378,7 +363,7 @@ public class LibraryFileController : Controller //ControllerStore<LibraryFile>
         }
 
         if (deleted.Any())
-            await new LibraryFileService().Delete(deleted.ToArray());
+            await ServiceLoader.Load<LibraryFileService>().Delete(deleted.ToArray());
 
         return failed ? Translater.Instant("ErrorMessages.NotAllFilesCouldBeDeleted") : string.Empty;
 
@@ -404,7 +389,7 @@ public class LibraryFileController : Controller //ControllerStore<LibraryFile>
     /// <returns>an awaited task</returns>
     [HttpPost("reprocess")]
     public Task Reprocess([FromBody] ReferenceModel<Guid> model)
-        => new LibraryFileService().Reprocess(model.Uids);
+        => ServiceLoader.Load<LibraryFileService>().Reprocess(model.Uids);
 
     /// <summary>
     /// Unhold library files
@@ -413,7 +398,7 @@ public class LibraryFileController : Controller //ControllerStore<LibraryFile>
     /// <returns>an awaited task</returns>
     [HttpPost("unhold")]
     public Task Unhold([FromBody] ReferenceModel<Guid> model)
-        => new LibraryFileService().Unhold(model?.Uids ?? new Guid[]{});
+        => ServiceLoader.Load<LibraryFileService>().Unhold(model?.Uids ?? new Guid[]{});
 
     /// <summary>
     /// Toggles force processing 
@@ -422,7 +407,7 @@ public class LibraryFileController : Controller //ControllerStore<LibraryFile>
     /// <returns>an awaited task</returns>
     [HttpPost("toggle-force")]
     public Task ToggleForce([FromBody] ReferenceModel<Guid> model)
-        => new LibraryFileService().ToggleForce(model?.Uids ?? new Guid[]{});
+        => ServiceLoader.Load<LibraryFileService>().ToggleForce(model?.Uids ?? new Guid[]{});
     
 
     /// <summary>
@@ -433,7 +418,7 @@ public class LibraryFileController : Controller //ControllerStore<LibraryFile>
     /// <returns>an awaited task</returns>
     [HttpPost("force-processing")]
     public Task ForceProcessing([FromBody] ReferenceModel<Guid> model)
-        => new LibraryFileService().ForceProcessing(model?.Uids ?? new Guid[]{});
+        => ServiceLoader.Load<LibraryFileService>().ForceProcessing(model?.Uids ?? new Guid[]{});
 
 
     /// <summary>
@@ -444,93 +429,8 @@ public class LibraryFileController : Controller //ControllerStore<LibraryFile>
     /// <returns>an awaited task</returns>
     [HttpPost("set-status/{status}")]
     public Task SetStatus([FromRoute] FileStatus status, [FromBody] ReferenceModel<Guid> model)
-        => new LibraryFileService().SetStatus(status, model?.Uids ?? new Guid[]{});
+        => ServiceLoader.Load<LibraryFileService>().SetStatus(status, model?.Uids ?? new Guid[]{});
 
-
-
-    /// <summary>
-    /// Gets the shrinkage data for a bar chart
-    /// </summary>
-    /// <returns>the bar chart data</returns>
-    [HttpGet("shrinkage-bar-chart")]
-    public object ShrinkageBarChart()
-    {
-        var groups = ShrinkageGroups();
-        // #if(DEBUG)
-        // groups = new Dictionary<string, ShrinkageData>()
-        // {
-        //     { "Movies", new() { FinalSize = 10_000_000_000, OriginalSize = 25_000_000_000 } },
-        //     { "TV", new() { FinalSize = 45_000_000_000, OriginalSize = 75_000_000_000 } },
-        //     { "Other", new() { FinalSize = 45_000_000_000, OriginalSize = 40_000_000_000 } },
-        //     { "Other2", new() { FinalSize = 15_000_000_000, OriginalSize = 20_000_000_000 } },
-        //     { "Other3", new() { FinalSize = 27_000_000_000, OriginalSize = 30_000_000_000 } },
-        // };
-        // #endif
-        return new
-        {
-            series = new object[]
-            {
-                //new { name = "Final Size", data = groups.Select(x => (x.Value.OriginalSize - x.Value.FinalSize)).ToArray() },
-                new { name = "Final Size", data = groups.Select(x => x.Value.FinalSize).ToArray() },
-                //new { name = "Original Size", data = groups.Select(x => x.Value.OriginalSize).ToArray() }
-                new { name = "Savings", data = groups.Select(x =>
-                {
-                    var change = x.Value.OriginalSize - x.Value.FinalSize;
-                    if (change > 0)
-                        return change;
-                    return 0;
-                }).ToArray() },
-                new { name = "Increase", data = groups.Select(x =>
-                {
-                    var change = x.Value.OriginalSize - x.Value.FinalSize;
-                    if (change > 0)
-                        return 0;
-                    return change * -1;
-                }).ToArray() }
-            },
-            labels = groups.Select(x => x.Key.Replace("###TOTAL###", "Total")).ToArray(),
-            items = groups.Select(x => x.Value.Items).ToArray()
-        };
-    }
-
-    /// <summary>
-    /// Get library file shrinkage grouped by library
-    /// </summary>
-    /// <returns>the library file shrinkage data</returns>
-    [HttpGet("shrinkage-groups")]
-    public Dictionary<string, ShrinkageData> ShrinkageGroups()
-    {
-        var data = new LibraryFileService().GetShrinkageGroups();
-        var libraries = data.ToDictionary(x => x.Library, x => x);
-        ShrinkageData total = new ShrinkageData();
-        foreach (var lib in libraries)
-        {
-            total.FinalSize += lib.Value.FinalSize;
-            total.OriginalSize += lib.Value.OriginalSize;
-            total.Items += lib.Value.Items;
-        }
-        
-        if (libraries.Count > 5)
-        {
-            ShrinkageData other = new ShrinkageData();
-            while (libraries.Count > 4)
-            {
-                List<string> toRemove = new();
-                var sd = libraries.MinBy(x => x.Value.Items);
-                other.Items += sd.Value.Items;
-                other.FinalSize += sd.Value.FinalSize;
-                other.OriginalSize += sd.Value.OriginalSize;
-                libraries.Remove(sd.Key);
-            }
-
-            libraries.Add("Other", other);
-        }
-        
-        if (libraries.ContainsKey("###TOTAL###") ==
-            false) // so unlikely, only if they named a library this, but just incase they did
-            libraries.Add("###TOTAL###", total);
-        return libraries;
-    }
 
     /// <summary>
     /// Performance a search for library files
@@ -538,8 +438,8 @@ public class LibraryFileController : Controller //ControllerStore<LibraryFile>
     /// <param name="filter">the search filter</param>
     /// <returns>a list of matching library files</returns>
     [HttpPost("search")]
-    public Task<IEnumerable<LibraryFile>> Search([FromBody] LibraryFileSearchModel filter)
-        => new LibraryFileService().Search(filter);
+    public Task<List<LibraryFile>> Search([FromBody] LibraryFileSearchModel filter)
+        => ServiceLoader.Load<LibraryFileService>().Search(filter);
 
 
     /// <summary>
@@ -548,7 +448,7 @@ public class LibraryFileController : Controller //ControllerStore<LibraryFile>
     /// <param name="uid">The UID of the library file</param>
     /// <returns>the library file instance</returns>
     internal Task<LibraryFile?> GetCached(Guid uid)
-        => new LibraryFileService().Get(uid);
+        => ServiceLoader.Load<LibraryFileService>().Get(uid);
 
     /// <summary>
     /// Downloads a library file
@@ -557,9 +457,9 @@ public class LibraryFileController : Controller //ControllerStore<LibraryFile>
     /// <param name="test">[Optional] if the file should be tested to see if it still exists and can be downloaded</param>
     /// <returns>the download</returns>
     [HttpGet("download/{uid}")]
-    public IActionResult Download([FromRoute] Guid uid, [FromQuery] bool test = false)
+    public async Task<IActionResult> Download([FromRoute] Guid uid, [FromQuery] bool test = false)
     {
-        var file = new LibraryFileService().GetByUid(uid);
+        var file = await ServiceLoader.Load<LibraryFileService>().Get(uid);
         if (file == null)
             return NotFound("File not found.");
         string filePath = file.Name;
@@ -591,8 +491,8 @@ public class LibraryFileController : Controller //ControllerStore<LibraryFile>
             if (string.IsNullOrWhiteSpace(filename))
                 return BadRequest("Filename not set");
 
-            var service = new LibraryFileService();
-            var file = service.GetFileIfKnown(filename);
+            var service = ServiceLoader.Load<LibraryFileService>();
+            var file = await service.GetFileIfKnown(filename);
             if (file != null)
             {
                 if ((int)file.Status < 2)
@@ -602,7 +502,7 @@ public class LibraryFileController : Controller //ControllerStore<LibraryFile>
             }
 
             // file not known, add to the queue
-            var library = new LibraryService().GetAll().Where(x => x.Enabled)
+            var library = (await ServiceLoader.Load<LibraryService>().GetAllAsync()).Where(x => x.Enabled)
                 .FirstOrDefault(x => filename.StartsWith(x.Path));
             if (library == null)
                 return BadRequest("No library found for file: " + filename);

@@ -107,7 +107,7 @@ input[type=checkbox]:disabled {
   cursor: not-allowed;
 }
 
-button:not(.flowtable-button):not(.navbar-toggler), a.btn, .btn-select {
+button:not(.flowtable-button):not(.navbar-toggler):not(.dd-btn), a.btn, .btn-select {
   font-size: 0.8rem !important;
   text-transform: uppercase;
   border-radius: unset !important;
@@ -124,15 +124,15 @@ button:not(.flowtable-button):not(.navbar-toggler), a.btn, .btn-select {
   color: var(--color);
   overflow: hidden;
 }
-button:not(.flowtable-button):not(.navbar-toggler):hover:not(:disabled), button:not(.flowtable-button):not(.navbar-toggler):active:not(:disabled), a.btn:hover:not(:disabled), a.btn:active:not(:disabled), .btn-select:hover:not(:disabled), .btn-select:active:not(:disabled) {
+button:not(.flowtable-button):not(.navbar-toggler):not(.dd-btn):hover:not(:disabled), button:not(.flowtable-button):not(.navbar-toggler):not(.dd-btn):active:not(:disabled), a.btn:hover:not(:disabled), a.btn:active:not(:disabled), .btn-select:hover:not(:disabled), .btn-select:active:not(:disabled) {
   background-image: linear-gradient(rgba(var(--accent-rgb), 0.3), rgba(var(--accent-rgb), 0.3)) !important;
   box-shadow: inset 0 -3px 0 0 var(--accent) !important;
 }
-button:not(.flowtable-button):not(.navbar-toggler):disabled, a.btn:disabled, .btn-select:disabled {
+button:not(.flowtable-button):not(.navbar-toggler):not(.dd-btn):disabled, a.btn:disabled, .btn-select:disabled {
   border-color: var(--input-background);
   color: var(--input-background);
 }
-button:not(.flowtable-button):not(.navbar-toggler):focus, a.btn:focus, .btn-select:focus {
+button:not(.flowtable-button):not(.navbar-toggler):not(.dd-btn):focus, a.btn:focus, .btn-select:focus {
   background: rgba(var(--accent-rgb), 0.2) !important;
 }
 
@@ -2678,7 +2678,7 @@ a, .btn-link {
   border-top: solid 1px rgba(var(--accent-rgb), 0.5);
   bottom: 0;
   box-shadow: 0 -1px 2px rgba(0, 0, 0, 0.2);
-  display: none;
+  display: none !important;
   left: 0;
   padding: 0.6rem 1.25rem 0.7rem 1.25rem;
   position: fixed;
@@ -2686,7 +2686,7 @@ a, .btn-link {
   z-index: 1000;
 }
 #blazor-error-ui .blazor-error-ui-wrapper {
-  display: flex;
+  display: none !important;
   flex-direction: row;
 }
 #blazor-error-ui .errormessage {
@@ -3210,7 +3210,7 @@ hr {
 .widget .runner .buttons {
   position: absolute;
   bottom: 0;
-  background: var(--base);
+  background: var(--base-darker);
   left: 11rem;
   right: 0;
   display: none;
@@ -3274,6 +3274,7 @@ hr {
     bottom: unset;
     top: unset;
     margin-bottom: 1rem;
+    height: 100%;
   }
 }
 @media screen and (min-width: 850px) {
@@ -3296,6 +3297,7 @@ hr {
     color: var(--color);
     animation: bounce 1.75s infinite;
     box-shadow: 0 3px 10px rgba(var(--accent-rgb), 0.2);
+    font-weight: var(--bold, 600);
   }
   .not-configured-pointer:before {
     content: "";
@@ -3320,7 +3322,7 @@ hr {
 }
 @media screen and (max-height: 856px) {
   .not-configured-pointer {
-    top: 3px;
+    top: 1px;
   }
 }
 /** step pointer end */
@@ -3640,12 +3642,7 @@ hr {
     height: 25rem !important;
   }
   .grid-stack-item:not(.chart-type-105) .content {
-    height: fit-content;
     flex-grow: 1;
-  }
-  .grid-stack-item:not(.chart-type-105) .content > div {
-    height: unset !important;
-    max-height: unset !important;
   }
   .grid-stack-item:not(.chart-type-105) .content .no-data {
     height: unset !important;
@@ -3656,6 +3653,132 @@ hr {
   }
   .grid-stack-item:not(.chart-type-105) table {
     height: unset !important;
+  }
+}
+.library-file {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  line-height: 2;
+  padding: 0 0 0.25rem;
+}
+.library-file .icon {
+  width: 3.25rem;
+  min-width: 3.25rem;
+  margin-right: 0.75rem;
+}
+.library-file .icon img {
+  width: 100%;
+  height: 100%;
+}
+.library-file .center {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.library-file .center .info {
+  display: flex;
+  flex-direction: row;
+}
+.library-file .center .name {
+  flex-grow: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: flex;
+  flex-direction: column;
+}
+.library-file .center .name span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.library-file .center .name span:first-child:has(+ span) {
+  font-weight: var(--bold, 600);
+}
+.library-file .right {
+  width: 14rem;
+  min-width: 14rem;
+  padding: 0.5rem;
+  align-self: center;
+}
+.library-file .right .right-inner {
+  height: 4rem;
+  padding: 1.75rem 0 0 0.5rem;
+}
+.library-file .right .finished, .library-file .right .time {
+  font-weight: var(--bold, 600);
+  position: absolute;
+  top: 0;
+  padding: 0 0.75rem;
+  border-bottom-left-radius: 0.5rem;
+  width: fit-content;
+  text-align: center;
+}
+.library-file .right .finished {
+  background: #303030;
+  right: 0;
+}
+.library-file .right .time {
+  display: none;
+  right: 5rem;
+  background: #464545;
+  padding-right: 2.5rem;
+  width: 8rem;
+}
+.library-file .icon-value {
+  cursor: pointer;
+  border: solid 1px var(--iv-color);
+  border-radius: 0.5rem;
+  overflow: hidden;
+  display: flex;
+  font-size: 0.7rem;
+  margin: 0.25rem 0.5rem 0.25rem 0;
+}
+.library-file .icon-value.flow {
+  --iv-color: #345772;
+}
+.library-file .icon-value.node {
+  --iv-color: #780746;
+}
+.library-file .icon-value.library {
+  --iv-color: #0d5d38;
+}
+.library-file .icon-value.flag {
+  --iv-color: #aa2975;
+}
+.library-file .icon-value.time {
+  --iv-color: #ac6300;
+}
+.library-file .icon-value i {
+  padding: 0 0.5rem;
+  background: var(--iv-color);
+  display: flex;
+  align-items: center;
+}
+.library-file .icon-value .value {
+  font-weight: var(--bold, 600);
+  padding: 0 0.5rem;
+}
+
+@media screen and (max-width: 850px) {
+  .library-file .icon {
+    display: none;
+  }
+  .library-file .right {
+    min-width: 8rem;
+    width: 8rem;
+  }
+  .library-file .time, .library-file .node {
+    display: none;
+  }
+}
+@media screen and (max-width: 450px) {
+  .library-file .name {
+    white-space: pre-wrap;
+    --bold:300;
+  }
+  .library-file .info, .library-file .output-path {
+    display: none !important;
   }
 }
 

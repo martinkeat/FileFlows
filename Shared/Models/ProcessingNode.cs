@@ -107,7 +107,7 @@ public class ProcessingNode: FileFlowObject
     /// <summary>
     /// The directory separator used by this node
     /// </summary>
-    public char DirectorySeperatorChar = System.IO.Path.DirectorySeparatorChar;
+    public char DirectorySeparatorChar = System.IO.Path.DirectorySeparatorChar;
 
     /// <summary>
     /// Maps a path locally for this node
@@ -131,8 +131,8 @@ public class ProcessingNode: FileFlowObject
                 path = Regex.Replace(path, "^" + pattern, replacement, RegexOptions.IgnoreCase);
             }
             // now convert / to path character
-            if (DirectorySeperatorChar != '/')
-                path = path.Replace('/', DirectorySeperatorChar);
+            if (DirectorySeparatorChar != '/')
+                path = path.Replace('/', DirectorySeparatorChar);
             if(path.StartsWith("//")) // special case for SMB paths
                 path = path.Replace('/', '\\');
         }

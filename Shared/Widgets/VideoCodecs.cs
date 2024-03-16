@@ -20,7 +20,7 @@ public class VideoCodecs:WidgetDefinition
     /// <summary>
     /// Gets the URL
     /// </summary>
-    public override string Url => "/api/statistics/by-name/VIDEO_CODEC";
+    public override string Url => "/api/statistics/running-totals/VIDEO_CODEC";
     
     /// <summary>
     /// Gets the Icon

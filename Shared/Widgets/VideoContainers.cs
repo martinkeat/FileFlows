@@ -20,7 +20,7 @@ public class VideoContainers:WidgetDefinition
     /// <summary>
     /// Gets the URL
     /// </summary>
-    public override string Url => "/api/statistics/by-name/VIDEO_CONTAINER";
+    public override string Url => "/api/statistics/running-totals/VIDEO_CONTAINER";
     
     /// <summary>
     /// Gets the Icon

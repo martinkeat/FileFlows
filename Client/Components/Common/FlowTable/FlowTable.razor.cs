@@ -76,6 +76,11 @@ public partial class FlowTable<TItem>: FlowTableBase,IDisposable, INotifyPropert
     /// Gets or sets the callback for the filter
     /// </summary>
     [Parameter] public EventCallback<FilterEventArgs> OnFilter { get; set; }
+    
+    /// <summary>
+    /// Gets or sets a disable column function 
+    /// </summary>
+    [Parameter] public Func<TItem, bool> DisableColumn { get; set; } 
 
     private int _TotalItems;
 
@@ -180,6 +185,10 @@ public partial class FlowTable<TItem>: FlowTableBase,IDisposable, INotifyPropert
     /// </summary>
     [Parameter] public EventCallback<TItem> DoubleClick { get; set; }
 
+    /// <summary>
+    /// Gets or sets if the head row should be hidden
+    /// </summary>
+    [Parameter] public bool HideHead { get; set; }
 
     private Dictionary<TItem, string> DisplayData { get; set; } = new ();
 

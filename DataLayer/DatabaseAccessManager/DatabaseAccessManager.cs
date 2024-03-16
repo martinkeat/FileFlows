@@ -1,19 +1,21 @@
 ﻿using FileFlows.DataLayer.Converters;
 using FileFlows.DataLayer.DatabaseConnectors;
+using FileFlows.DataLayer.DatabaseCreators;
 using FileFlows.Plugin;
 using FileFlows.Shared.Models;
+using Org.BouncyCastle.Ocsp;
 
 namespace FileFlows.DataLayer;
 
 /// <summary>
 /// Manages data access operations by serving as a proxy for database commands.
 /// </summary>
-public class DatabaseAccessManager
+internal  class DatabaseAccessManager
 {
     /// <summary>
     /// The connector being used
     /// </summary>
-    private IDatabaseConnector DbConnector;
+    public IDatabaseConnector DbConnector { get; private set; }
     
     /// <summary>
     /// Gets or sets the singleton instance of the Database Access Manager
@@ -48,15 +50,15 @@ public class DatabaseAccessManager
     {
         Logger = logger;
         Type = type;
-        DbConnector = LoadConnector(logger, type, connectionString);
+        DbConnector = DatabaseConnectorLoader.LoadConnector(logger, type, connectionString);
         // if (type == DatabaseType.Sqlite)
         //     return;
-        this.DbObjectManager = new (type, DbConnector);
-        this.DbStatisticManager = new (type, DbConnector);
-        this.DbRevisionManager = new (type, DbConnector);
-        this.DbLogMessageManager = new (type, DbConnector);
+        this.ObjectManager = new (logger, type, DbConnector);
+        this.StatisticManager = new (logger, type, DbConnector);
+        this.RevisionManager = new (logger, type, DbConnector);
+        this.LogMessageManager = new (logger, type, DbConnector);
         this.LibraryFileManager = new (logger, type, DbConnector);
-        this.FileFlowsObjectManager = new(this.DbObjectManager);
+        this.FileFlowsObjectManager = new(this.ObjectManager);
     }
 
     /// <summary>
@@ -83,7 +85,7 @@ public class DatabaseAccessManager
     /// <param name="type">the type of database</param>
     /// <param name="connectionString">the connection string</param>
     /// <returns>the database access manager instance</returns>
-    public static DatabaseAccessManager FromType(ILogger logger, DatabaseType type, string connectionString)
+    internal static DatabaseAccessManager FromType(ILogger logger, DatabaseType type, string connectionString)
     {
         switch (type)
         {
@@ -98,46 +100,74 @@ public class DatabaseAccessManager
     }
 
     /// <summary>
-    /// Loads a database connector 
+    /// Initializes the database access manager instance
     /// </summary>
-    /// <param name="logger">The logger to used for logging</param>
-    /// <param name="type">The type of connector to load</param>
-    /// <param name="connectionString">The connection string of the database</param>
-    /// <returns>The initialized connector</returns>
-    private IDatabaseConnector LoadConnector(ILogger logger, DatabaseType type, string connectionString)
+    /// <param name="logger">the logger to use</param>
+    /// <param name="type">the type of database</param>
+    /// <param name="connectionString">the connection string</param>
+    /// <returns>true if initialized and can connect</returns>
+    internal static Result<bool> Initialize(ILogger logger, DatabaseType type, string connectionString)
     {
-        switch (type)
+        try
         {
-            case DatabaseType.MySql:
-                return new FileFlows.DataLayer.DatabaseConnectors.MySqlConnector(logger, connectionString);
-            case DatabaseType.SqlServer:
-                return new SqlServerConnector(logger, connectionString);
-            case DatabaseType.Postgres:
-                return new PostgresConnector(logger, connectionString);
-            default:
-                return new SQLiteConnector(logger, connectionString);
+            Instance= FromType(logger, type, connectionString);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            return Result<bool>.Fail("Failed connecting to database: " + ex.Message);
         }
     }
 
     /// <summary>
+    /// Tests it eh database can be reached
+    /// </summary>
+    /// <param name="type">the database type</param>
+    /// <param name="connectionString">the connection string</param>
+    /// <returns>true if can be reached, otherwise false</returns>
+    internal static Result<bool> CanConnect(DatabaseType type, string connectionString)
+    {
+        try
+        {
+            switch (type)
+            {
+                case DatabaseType.SqlServer:
+                    return SqlServerDatabaseCreator.DatabaseExists(connectionString);
+                case DatabaseType.MySql:
+                    return MySqlDatabaseCreator.DatabaseExists(connectionString);
+                case DatabaseType.Postgres:
+                    return PostgresDatabaseCreator.DatabaseExists(connectionString);
+                case DatabaseType.Sqlite:
+                    return SQLiteDatabaseCreator.DatabaseExists(connectionString);
+            }
+            return Result<bool>.Fail("Unsupported database type");
+        }
+        catch (Exception ex)
+        {
+            return Result<bool>.Fail("Failed connecting to database: " + ex.Message);
+        }
+    }
+
+
+    /// <summary>
     /// Gets the DbObject manager to manage the database operations for the DbObject table
     /// </summary>
-    public DbObjectManager DbObjectManager { get; init; }
+    public DbObjectManager ObjectManager { get; init; }
     
     /// <summary>
     /// Gets the DbStatistic manager to manage the database operations for the DbStatistic table
     /// </summary>
-    public DbStatisticManager DbStatisticManager { get; init; }
+    public DbStatisticManager StatisticManager { get; init; }
     
     /// <summary>
     /// Gets the DbRevision manager to manage the database operations for the RevisionedObject table
     /// </summary>
-    public DbRevisionManager DbRevisionManager { get; init; }
+    public DbRevisionManager RevisionManager { get; init; }
     
     /// <summary>
     /// Gets the DbLogMessage manager to manage the database operations for the DbLogMessage table
     /// </summary>
-    public DbLogMessageManager DbLogMessageManager { get; init; }
+    public DbLogMessageManager LogMessageManager { get; init; }
 
     /// <summary>
     /// Gets the FileFlowsObject manager to manage the database operations for the FileFlowsObjects that are saved in the DbObject table
@@ -147,5 +177,12 @@ public class DatabaseAccessManager
     /// <summary>
     /// Gets the Library File manager to manage the database operations for the Library Files
     /// </summary>
-    public LibraryFileManager LibraryFileManager { get; init; }
+    public DbLibraryFileManager LibraryFileManager { get; init; }
+
+    /// <summary>
+    /// Gets the open number of database connections
+    /// </summary>
+    /// <returns>the number of connections</returns>
+    public int GetOpenConnections()
+        => DbConnector.GetOpenedConnections();
 }

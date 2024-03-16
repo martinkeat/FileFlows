@@ -20,7 +20,7 @@ public class ImageFormats:WidgetDefinition
     /// <summary>
     /// Gets the URL
     /// </summary>
-    public override string Url => "/api/statistics/by-name/IMAGE_FORMAT";
+    public override string Url => "/api/statistics/running-totals/IMAGE_FORMAT";
     
     /// <summary>
     /// Gets the Icon

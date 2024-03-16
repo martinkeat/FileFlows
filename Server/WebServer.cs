@@ -3,9 +3,10 @@ using FileFlows.Server.Workers;
 using System.Text.RegularExpressions;
 using Microsoft.OpenApi.Models;
 using System.Runtime.InteropServices;
-using Esprima.Ast;
+using FileFlows.Plugin;
 using FileFlows.Server.Hubs;
 using FileFlows.Server.Middleware;
+using FileFlows.Server.Services;
 using FileFlows.ServerShared.Workers;
 using Microsoft.AspNetCore.SignalR;
 
@@ -84,7 +85,8 @@ public class WebServer
     {
         bool isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
         string protocol = "http";
-        Port = AppSettings.Instance.ServerPort ?? 19200;
+        var appSettings = ServiceLoader.Load<AppSettingsService>().Settings;
+        Port = appSettings.ServerPort ?? 19200;
 #if (DEBUG)
         Port = 6868;
 #endif
@@ -115,6 +117,15 @@ public class WebServer
     /// <param name="args">command line arguments</param>
     public static void Start(string[] args)
     {
+        if (RunStartupCode().Failed(out string error))
+        {
+            Logger.Instance.ELog("Startup failed: " + error);
+            if (Application.UsingWebView)
+                Thread.Sleep(10_000);
+
+            return;
+        }
+        
         var builder = WebApplication.CreateBuilder(args);
 
         builder.WebHost.ConfigureKestrel((context, options) =>
@@ -130,6 +141,22 @@ public class WebServer
         Task.Run(() => OnStatusUpdate?.Invoke(WebServerState.Starting, "Starting web server", serverUrl));
 
         // Add services to the container.
+        
+        // Dynamically register services from the console application's service provider
+        builder.Services.AddSingleton<AppSettingsService>(x => ServiceLoader.Load<AppSettingsService>());
+        builder.Services.AddSingleton<SettingsService>(x => ServiceLoader.Load<SettingsService>());
+        builder.Services.AddSingleton<StatisticService>(x => ServiceLoader.Load<StatisticService>());
+        builder.Services.AddSingleton<DashboardService>(x => ServiceLoader.Load<DashboardService>());
+        builder.Services.AddSingleton<FlowService>(x => ServiceLoader.Load<FlowService>());
+        builder.Services.AddSingleton<LibraryService>(x => ServiceLoader.Load<LibraryService>());
+        builder.Services.AddSingleton<LibraryFileService>(x => ServiceLoader.Load<LibraryFileService>());
+        builder.Services.AddSingleton<NodeService>(x => ServiceLoader.Load<NodeService>());
+        builder.Services.AddSingleton<PluginService>(x => ServiceLoader.Load<PluginService>());
+        builder.Services.AddSingleton<TaskService>(x => ServiceLoader.Load<TaskService>());
+        builder.Services.AddSingleton<VariableService>(x => ServiceLoader.Load<VariableService>());
+        builder.Services.AddSingleton<RevisionService>(x => ServiceLoader.Load<RevisionService>());
+        builder.Services.AddSingleton<FlowRunnerService>(x => ServiceLoader.Load<FlowRunnerService>());
+        
         builder.Services.AddControllersWithViews();
         builder.Services.AddSignalR();
         builder.Services.AddResponseCompression();
@@ -242,8 +269,7 @@ public class WebServer
 #endif
 
         // do this so the settings object is loaded
-        var settings = new Controllers.SettingsController().Get().Result;
-
+        var settings = ServiceLoader.Load<SettingsService>().Get().Result;
 
 
         ServerShared.Services.Service.ServiceBaseUrl = $"{protocol}://localhost:{Port}";
@@ -291,8 +317,8 @@ public class WebServer
             new FlowRunnerMonitor(),
             new ObjectReferenceUpdater(),
             new FileFlowsTasksWorker(),
-            new RepositoryUpdaterWorker(),
-            new LibraryFileServiceUpdater()
+            new RepositoryUpdaterWorker()
+            //new LibraryFileServiceUpdater()
         );
 
         Started = CheckServerListening(serverUrl.Replace("0.0.0.0", "localhost").TrimEnd('/') + "/api/status").Result;
@@ -311,6 +337,19 @@ public class WebServer
         WorkerManager.StopWorkers();
     }
 
+    /// <summary>
+    /// Runs the startup code
+    /// </summary>
+    /// <returns>the result</returns>
+    private static Result<bool> RunStartupCode()
+    {
+        var service = ServiceLoader.Load<StartupService>();
+        service.OnStatusUpdate = (string message) =>
+        {
+            Task.Run(() => OnStatusUpdate?.Invoke(WebServerState.Starting, message, string.Empty));
+        };
+        return service.Run();
+    }
 
 
     private static async Task<bool> CheckServerListening(string url)

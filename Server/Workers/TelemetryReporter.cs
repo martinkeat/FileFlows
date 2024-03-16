@@ -2,9 +2,16 @@
 using FileFlows.Server.Controllers;
 using FileFlows.Server.Helpers;
 using FileFlows.Server.Services;
+using FileFlows.ServerShared.Services;
 using FileFlows.ServerShared.Workers;
 using FileFlows.Shared.Helpers;
 using FileFlows.Shared.Models;
+using FlowService = FileFlows.Server.Services.FlowService;
+using LibraryFileService = FileFlows.Server.Services.LibraryFileService;
+using LibraryService = FileFlows.Server.Services.LibraryService;
+using NodeService = FileFlows.Server.Services.NodeService;
+using SettingsService = FileFlows.Server.Services.SettingsService;
+using StatisticService = FileFlows.Server.Services.StatisticService;
 #if(!DEBUG)
 using System.Runtime.InteropServices;
 using FileFlows.Server.Controllers;
@@ -28,17 +35,17 @@ public class TelemetryReporter : Worker
 #if (DEBUG && false)
             return;
 #else
-            var settings = new SettingsController().Get().Result;
+            var settings = ServiceLoader.Load<SettingsService>().Get().Result;
             if (settings?.DisableTelemetry == true)
                 return; // they have turned it off, dont report anything
 
-            bool isDocker = Program.Docker;
+            bool isDocker = Application.Docker;
 
             TelemetryData data = new TelemetryData();
             data.ClientUid = settings.Uid;
-            data.Version = Globals.Version.ToString();
-            data.DatabaseProvider = DbHelper.IsSqlLite ? "SQLite" : "MySQL";
-            var pNodes = new NodeService().GetAll().Where(x => x.Enabled);
+            data.Version = Globals.Version;
+            data.DatabaseProvider = ServiceLoader.Load<AppSettingsService>().Settings.DatabaseType.ToString();
+            var pNodes = ServiceLoader.Load<NodeService>().GetAllAsync().Result.Where(x => x.Enabled).ToList();
             data.ProcessingNodes = pNodes.Count();
             data.ProcessingNodeData = pNodes.Select(x => new ProcessingNodeData()
             {
@@ -49,24 +56,34 @@ public class TelemetryReporter : Worker
             }).ToList();
             data.Architecture = RuntimeInformation.ProcessArchitecture.ToString();
             data.OS = isDocker ? "Docker" :
-                Globals.IsLinux ? "MacOS" :
-                Globals.IsLinux ? "Linux" :
-                Globals.IsFreeBsd ? "FreeBSD" :
-                Globals.IsWindows ? "Windows" :
+                OperatingSystem.IsMacOS() ? "MacOS" :
+                OperatingSystem.IsLinux() ? "Linux" :
+                OperatingSystem.IsFreeBSD() ? "FreeBSD" :
+                OperatingSystem.IsWindows() ? "Windows" :
                 RuntimeInformation.OSDescription;
-            var libFiles = new LibraryFileController().GetAll(null).Result;
-            data.FilesFailed = libFiles.Count(x => x.Status == FileStatus.ProcessingFailed);
-            data.FilesProcessed = libFiles.Count(x => x.Status == FileStatus.Processed);
-            var flows = new FlowService().GetAll();
+
+            var lfService = ServiceLoader.Load<LibraryFileService>();
+            var libFileStatus = lfService.GetStatus().Result;
+
+            int filesFailed = libFileStatus
+                .Where(x => x.Status == FileStatus.ProcessingFailed)
+                .Select(x =>x.Count)
+                .FirstOrDefault();
+            int filesProcessed = libFileStatus
+                .Where(x => x.Status == FileStatus.Processed)
+                .Select(x =>x.Count)
+                .FirstOrDefault();
+            
+            data.FilesFailed = filesFailed;
+            data.FilesProcessed = filesProcessed;
+            var flows = ServiceLoader.Load<FlowService>().GetAllAsync().Result;
             var dictNodes = new Dictionary<string, int>();
             foreach (var fp in flows?.SelectMany(x => x.Parts)?.ToArray() ?? new FlowPart[] { })
             {
                 if (fp == null)
                     continue;
-                if (dictNodes.ContainsKey(fp.FlowElementUid))
-                    dictNodes[fp.FlowElementUid] = dictNodes[fp.FlowElementUid] + 1;
-                else
-                    dictNodes.Add(fp.FlowElementUid, 1);
+                if (!dictNodes.TryAdd(fp.FlowElementUid, 1))
+                    dictNodes[fp.FlowElementUid] += 1;
             }
 
             data.Nodes = dictNodes.Select(x => new TelemetryDataSet
@@ -75,17 +92,15 @@ public class TelemetryReporter : Worker
                 Count = x.Value
             }).ToList();
 
-            var libraries = new LibraryService().GetAll();
+            var libraries = ServiceLoader.Load<LibraryService>().GetAllAsync().Result;
             dictNodes.Clear();
             foreach (var lib in libraries?.Where(x => string.IsNullOrEmpty(x.Template) == false) ?? new List<Library>())
             {
-                if (dictNodes.ContainsKey(lib.Template))
-                    dictNodes[lib.Template] = dictNodes[lib.Template] + 1;
-                else
-                    dictNodes.Add(lib.Template, 1);
+                if (!dictNodes.TryAdd(lib.Template, 1))
+                    dictNodes[lib.Template] += 1;
             }
 
-            data.StorageSaved = new LibraryFileService().GetTotalStorageSaved();
+            data.StorageSaved = lfService.GetTotalStorageSaved().Result;
 
             data.LibraryTemplates = dictNodes.Select(x => new TelemetryDataSet
             {
@@ -97,10 +112,8 @@ public class TelemetryReporter : Worker
             dictNodes.Clear();
             foreach (var lib in flows?.Where(x => string.IsNullOrEmpty(x.Template) == false) ?? new List<Flow>())
             {
-                if (dictNodes.ContainsKey(lib.Template))
-                    dictNodes[lib.Template] = dictNodes[lib.Template] + 1;
-                else
-                    dictNodes.Add(lib.Template, 1);
+                if (!dictNodes.TryAdd(lib.Template, 1))
+                    dictNodes[lib.Template] += 1;
             }
 
             data.FlowTemplates = dictNodes.Select(x => new TelemetryDataSet

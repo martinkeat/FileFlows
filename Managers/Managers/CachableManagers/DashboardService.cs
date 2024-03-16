@@ -10,4 +10,7 @@ public class DashboardManager : CachedManager<Dashboard>
     /// as they do not effect configuration on a Flow Runner
     /// </summary>
     public override bool IncrementsConfiguration => false;
+
+    /// <inheritdoc />
+    protected override bool SaveRevisions => true;
 }

@@ -76,7 +76,7 @@ public class FlowWorkerStatus
     /// <summary>
     /// Gets the current total processing time of the flow
     /// </summary>
-    public TimeSpan ProcessingTime => StartedAt > new DateTime(2000, 1, 1) ? DateTime.Now.Subtract(StartedAt) : new TimeSpan();
+    public TimeSpan ProcessingTime => StartedAt > new DateTime(2000, 1, 1) ? DateTime.UtcNow.Subtract(StartedAt) : new TimeSpan();
 }
 
 /// <summary>

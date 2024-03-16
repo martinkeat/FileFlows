@@ -41,7 +41,7 @@ public class FileFlowsTaskRun
     /// <summary>
     /// Gets or sets when the run was executed
     /// </summary>
-    public DateTime RunAt { get; set; } = DateTime.Now;
+    public DateTime RunAt { get; set; } = DateTime.UtcNow;
     
     /// <summary>
     /// Gets the execution log

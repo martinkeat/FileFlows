@@ -38,6 +38,10 @@ public class PostgresConnector : IDatabaseConnector
     public string FormatDateQuoted(DateTime date)
         => "'" + date.ToString("yyyy-MM-ddTHH:mm:ss.fffZ") + "'::timestamp";
 
+    /// <inheritdoc />
+    public string TimestampDiffSeconds(string start, string end, string asColumn)
+        => $" EXTRACT(epoch FROM {end} - {start}) AS {asColumn} ";
+
     /// <summary>
     /// Initialises a Postgres Connector
     /// </summary>
@@ -50,6 +54,10 @@ public class PostgresConnector : IDatabaseConnector
         CustomDbMapperInstance = new ();
         connectionPool = new(CreateConnection, 20, connectionLifetime: new TimeSpan(0, 10, 0));
     }
+    
+    /// <inheritdoc />
+    public int GetOpenedConnections()
+        => connectionPool.OpenedConnections;
 
     /// <summary>
     /// Create a new database connection
@@ -79,4 +87,25 @@ public class PostgresConnector : IDatabaseConnector
 
     /// <inheritdoc />
     public string WrapFieldName(string name) => "\"" + name + "\"";
+
+    /// <inheritdoc />
+    public async Task<bool> ColumnExists(string table, string column)
+    {
+        using var db = await GetDb(false);
+        var result = db.Db.ExecuteScalar<int>(@"
+        SELECT COUNT(*)
+        FROM information_schema.columns
+        WHERE
+            table_name = @0
+        AND column_name = @1", table, column);
+        return result > 0;
+    }
+
+    /// <inheritdoc />
+    public async Task CreateColumn(string table, string column, string type, string defaultValue)
+    {
+        string sql = $@"ALTER TABLE {WrapFieldName(table)} ADD COLUMN {WrapFieldName(column)} {type}" + (string.IsNullOrWhiteSpace(defaultValue) ? "" : $" DEFAULT {defaultValue}");
+        using var db = await GetDb(false);
+        await db.Db.ExecuteAsync(sql);
+    }
 }

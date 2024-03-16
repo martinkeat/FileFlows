@@ -10,20 +10,21 @@ public static class FormatHelper
     /// <summary>
     /// Formats a date so its easily readable to a user
     /// </summary>
-    /// <param name="date">the date</param>
+    /// <param name="dateUtc">the UTC date</param>
     /// <returns>the human readable date</returns>
-    public static string HumanizeDate(DateTime date)
+    public static string HumanizeDate(DateTime dateUtc)
     {
+        var local = dateUtc.ToLocalTime();
         try
         {
-            return date.Humanize(false, DateTime.Now);
+            return local.Humanize(false, DateTime.Now);
         }
         catch (Exception)
         {
             // see FF-1130 - can throw an exception
-            if (date < DateTime.Today)
-                return date.ToShortDateString();
-            return date.ToShortTimeString();
+            if (dateUtc < DateTime.Now)
+                return local.ToShortDateString();
+            return local.ToShortTimeString();
         }
     }
     /// <summary>

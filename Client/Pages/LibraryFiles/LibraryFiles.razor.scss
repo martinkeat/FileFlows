@@ -4,6 +4,12 @@
     top: 10px;
     width:calc(100% - 10px);
 }
+.header {
+    display:flex;
+    span {
+        flex-grow:1;
+    }
+}
 
 @media (max-width: 849.99px)
 {
@@ -21,7 +27,21 @@
         width: unset;
     }
 }
+.column-header {
+    visibility:hidden;
+}
+.filters {
+    display:flex;
+}
 
+@media (max-width:540px){
+    .filters {
+        display:none;
+    }
+    .column-header {
+        visibility: unset;
+    }
+}
 .worker-progress.has-current {
     .current-progress {
         bottom: 0.3rem !important;
