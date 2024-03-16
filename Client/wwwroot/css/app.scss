@@ -1289,3 +1289,14 @@ input[type=file]{
         }
     }
 }
+@media screen and (max-width:450px){
+    .library-file {
+        .name {
+            white-space: pre-wrap;
+            --bold:300;
+        }
+        .info, .output-path {
+            display:none !important;
+        }
+    }
+}

@@ -50,6 +50,26 @@ public partial class FlowDropDown : ComponentBase, IDisposable
     
     [Parameter] public EventCallback<object?> OnSelected { get; set; }
 
+    private object _SelectedValue;
+
+    [Parameter]
+    public object SelectedValue
+    {
+        get => _SelectedValue;
+        set
+        {
+            if (_SelectedValue == value)
+                return;
+            if (_SelectedValue?.ToString() == value?.ToString())
+                return;
+            
+            _SelectedValue = value;
+            if (value != null)
+                Selected = Options.FirstOrDefault(x => x.Value?.ToString() == value?.ToString());
+            StateHasChanged();
+        }
+    }
+
     /// <inheritdoc />
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {

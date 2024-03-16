@@ -27,7 +27,21 @@
         width: unset;
     }
 }
+.column-header {
+    visibility:hidden;
+}
+.filters {
+    display:flex;
+}
 
+@media (max-width:540px){
+    .filters {
+        display:none;
+    }
+    .column-header {
+        visibility: unset;
+    }
+}
 .worker-progress.has-current {
     .current-progress {
         bottom: 0.3rem !important;

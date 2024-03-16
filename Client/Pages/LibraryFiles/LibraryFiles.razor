@@ -61,27 +61,29 @@
         <FlowTableColumn TItem="LibaryFileListModel" NoHeight="true">
             <Header>
                 <div class="header">
-                    <span class="">File</span>
-                @if (SelectedStatus is not FileStatus.Unprocessed and not FileStatus.Processing)
-                {
-                    <FlowDropDown Options="optionsSortBy" OnSelected="SelectSortBy"
-                                  Placeholder="Sort By" PlaceholderIcon="fas fa-sort"/>
-                }
-                @if (optionsNodes?.Any() == true && SelectedStatus is FileStatus.Processed or FileStatus.ProcessingFailed)
-                {
-                    <FlowDropDown Options="optionsNodes" OnSelected="SelectNode"
-                                  Placeholder="Node" PlaceholderIcon="fas fa-desktop"/>
-                }
-                @if (optionsFlows?.Any() == true && SelectedStatus is not FileStatus.Unprocessed and not FileStatus.Disabled and not FileStatus.OnHold)
-                {
-                    <FlowDropDown Options="optionsFlows" OnSelected="SelectFlow"
-                                  Placeholder="Flow" PlaceholderIcon="fas fa-sitemap"/>
-                }
-                @if (optionsLibraries?.Any() == true)
-                {
-                    <FlowDropDown Options="optionsLibraries" OnSelected="SelectLibrary"
-                                  Placeholder="Library" PlaceholderIcon="fas fa-folder"/>
-                }
+                    <span class="column-header">File</span>
+                    <div class="filters">
+                    @if (SelectedStatus is not FileStatus.Unprocessed and not FileStatus.Processing)
+                    {
+                        <FlowDropDown Options="optionsSortBy" OnSelected="SelectSortBy" SelectedValue="@SelectedSortBy"
+                                      Placeholder="Sort By" PlaceholderIcon="fas fa-sort"/>
+                    }
+                    @if (optionsNodes?.Any() == true && SelectedStatus is FileStatus.Processed or FileStatus.ProcessingFailed)
+                    {
+                        <FlowDropDown Options="optionsNodes" OnSelected="SelectNode" SelectedValue="@SelectedNode"
+                                      Placeholder="Node" PlaceholderIcon="fas fa-desktop"/>
+                    }
+                    @if (optionsFlows?.Any() == true && SelectedStatus is not FileStatus.Unprocessed and not FileStatus.Disabled and not FileStatus.OnHold)
+                    {
+                        <FlowDropDown Options="optionsFlows" OnSelected="SelectFlow" SelectedValue="@SelectedFlow"
+                                      Placeholder="Flow" PlaceholderIcon="fas fa-sitemap"/>
+                    }
+                    @if (optionsLibraries?.Any() == true)
+                    {
+                        <FlowDropDown Options="optionsLibraries" OnSelected="SelectLibrary" SelectedValue="@SelectedLibrary"
+                                      Placeholder="Library" PlaceholderIcon="fas fa-folder"/>
+                    }
+                    </div>
                 </div>
             </Header>
             <Cell Context="item">

@@ -18,7 +18,8 @@ export function initDashboard(uid, Widgets, csharp, isReadOnly){
     }
     disposeAll();
     destroyDashboard();
-    
+    if(!document)
+        return;
     let dashboard = document.querySelector('.dashboard.grid-stack');
     if(!dashboard)
     {

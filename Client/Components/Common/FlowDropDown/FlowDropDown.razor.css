@@ -13,6 +13,16 @@
     --dd-width: 11rem;
   }
 }
+@media screen and (max-width: 900px) {
+  .flow-drop-down {
+    --dd-width: 9rem;
+  }
+}
+@media screen and (max-width: 800px) {
+  .flow-drop-down {
+    --dd-width: 7rem;
+  }
+}
 .dd-btn {
   color: var(--color);
   border: none;
