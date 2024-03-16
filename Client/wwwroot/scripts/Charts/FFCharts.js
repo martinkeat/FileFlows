@@ -878,7 +878,12 @@ export class TimeSeriesChart extends FFChart
             tooltip: {
                 x: {
                     show:true,
-                    formatter: (value, opts) => new Date(value).toLocaleTimeString()
+                    formatter: (value, opts) =>
+                    {
+                        const utcDate = new Date(value);
+                        const localDate = new Date(utcDate.getTime() - utcDate.getTimezoneOffset() * 60000);
+                        return localDate.toLocaleTimeString();
+                    }
                 },
                 y: {
                     title: {
