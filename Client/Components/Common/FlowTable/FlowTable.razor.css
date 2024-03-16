@@ -100,6 +100,9 @@
   width: 100%;
   padding-left: 0.25rem;
 }
+.flowtable-row:nth-child(odd) {
+  background: rgba(255, 255, 255, 0.03);
+}
 .flowtable-row:not(.flowtable-header-row) {
   border-top-color: transparent;
   border-right-color: transparent;

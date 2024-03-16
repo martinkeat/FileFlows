@@ -57,3 +57,140 @@
 .flags {
     margin-right:0.5rem;
 }
+
+
+
+.library-file {
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    line-height: 2;
+    padding: 0 0 0.25rem;
+    .icon {
+        width: 3.25rem;
+        min-width: 3.25rem;
+        margin-right: 0.75rem;
+        img {
+            width:100%;
+            height:100%;
+        }
+    }
+    .center {
+        flex-grow:1;
+        display:flex;
+        flex-direction: column;
+        overflow: hidden;
+        .info {
+            display:flex;
+            flex-direction: row;
+        }
+        .name {
+            flex-grow: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display:flex;
+            flex-direction: column;
+            span {
+                overflow: hidden;
+                text-overflow: ellipsis;
+                &:first-child:has(+ span) {
+                    font-weight: var(--bold, 600);
+                }
+            }
+        }
+    }
+    .right{
+        width:14rem;
+        min-width: 14rem;
+        padding:0.5rem;
+        align-self: center;
+        .right-inner {
+            height: 4rem;
+            padding: 1.75rem 0 0 0.5rem;
+        }
+        .finished, .time
+        {
+            font-weight: var(--bold, 600);
+            position: absolute;
+            top: 0;
+            padding: 0 0.75rem;
+            border-bottom-left-radius: 0.5rem;
+            width: fit-content;
+            text-align: center;
+        }
+        .finished {
+            background: #303030;
+            right: 0;
+            //z-index:2;
+        }
+        .time {
+            display:none;
+            right: 5rem;
+            background: #464545;
+            //z-index: 1;
+            padding-right: 2.5rem;
+            width: 8rem;
+        }
+    }
+
+    .icon-value{
+        &.flow {
+            --iv-color: #345772;
+        }
+        &.node {
+            --iv-color: #780746;
+        }
+        &.library {
+            --iv-color: #0d5d38;
+        }
+        &.flag {
+            --iv-color: #aa2975;
+        }
+        &.time {
+            --iv-color: #ac6300;
+        }
+        cursor: pointer;
+        border: solid 1px var(--iv-color);
+        border-radius: 0.5rem;
+        overflow: hidden;
+        display: flex;
+        font-size:0.7rem;
+        margin:0.25rem 0.5rem 0.25rem 0;
+        i {
+            padding: 0 0.5rem;
+            background:var(--iv-color);
+            display: flex;
+            align-items: center;
+        }
+        .value {
+            font-weight: var(--bold, 600);
+            padding: 0 0.5rem;
+        }
+    }
+}
+
+@media screen and (max-width: 850px){
+    .library-file {
+        .icon {
+            display:none;
+        }
+        .right {
+            min-width:8rem;
+            width:8rem;
+        }
+        .time, .node {
+            display:none;
+        }
+    }
+}
+@media screen and (max-width:450px){
+    .library-file {
+        .name {
+            white-space: pre-wrap;
+            --bold:300;
+        }
+        .info, .output-path {
+            display:none !important;
+        }
+    }
+}
