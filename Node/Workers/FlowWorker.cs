@@ -651,11 +651,17 @@ public class FlowWorker : Worker
         bool windows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
         bool macOs = RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
         bool is64bit = IntPtr.Size == 8;
-        foreach (var plugin in config.Plugins ?? new Dictionary<string, byte[]>())
+        foreach (var plugin in config.Plugins)
         {
-            var zip = Path.Combine(dir, plugin.Key + ".zip");
-            await File.WriteAllBytesAsync(zip, plugin.Value);
-            string destDir = Path.Combine(dir, "Plugins", plugin.Key);
+            var result = await service.DownloadPlugin(plugin, dir);
+            if (result.Failed(out string error))
+            {
+                Logger.Instance?.ELog(error);
+                return false;
+            }
+
+            var zip = result.Value;
+            string destDir = Path.Combine(dir, "Plugins", plugin);
             Directory.CreateDirectory(destDir);
             System.IO.Compression.ZipFile.ExtractToDirectory(zip, destDir);
             File.Delete(zip);

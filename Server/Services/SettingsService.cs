@@ -102,10 +102,10 @@ public class SettingsService : ISettingsService
         var settings = await new SettingsManager().Get();
         var cfg = new ConfigurationRevision();
         cfg.Revision = settings.Revision;
-        var scriptController = new ScriptController();
-        cfg.FlowScripts = (await scriptController.GetAllByType(ScriptType.Flow)).ToList();
-        cfg.SystemScripts = (await scriptController.GetAllByType(ScriptType.System)).ToList();
-        cfg.SharedScripts = (await scriptController.GetAllByType(ScriptType.Shared)).ToList();
+        var scriptService = new ScriptService();
+        cfg.FlowScripts = (await scriptService.GetAllByType(ScriptType.Flow)).ToList();
+        cfg.SystemScripts = (await scriptService.GetAllByType(ScriptType.System)).ToList();
+        cfg.SharedScripts = (await scriptService.GetAllByType(ScriptType.Shared)).ToList();
         cfg.Variables = (await ServiceLoader.Load<VariableService>().GetAllAsync()).ToDictionary(x => x.Name, x => x.Value);
         cfg.Flows = await ServiceLoader.Load<FlowService>().GetAllAsync();
         cfg.Libraries = await ServiceLoader.Load<LibraryService>().GetAllAsync();
@@ -115,14 +115,14 @@ public class SettingsService : ISettingsService
         cfg.MaxNodes = LicenseHelper.IsLicensed() ? 250 : 30;
         cfg.KeepFailedFlowTempFiles = settings.KeepFailedFlowTempFiles;
         cfg.Enterprise = LicenseHelper.IsLicensed(LicenseFlags.Enterprise);
-        var pluginInfos = (await new PluginController(null).GetAll())
+        var pluginInfos = (await ServiceLoader.Load<PluginService>().GetPluginInfoModels(true))
             .Where(x => x.Enabled)
             .ToDictionary(x => x.PackageName + ".ffplugin", x => x);
-        var plugins = new Dictionary<string, byte[]>();
+        var plugins = new List<string>();
         var pluginNames = new List<string>();
         List<string> flowElementsInUse = cfg.Flows.SelectMany(x => x.Parts.Select(x => x.FlowElementUid)).ToList();
         
-        Logger.Instance.DLog("Plugin, Flow Elements in Use: \n" + string.Join("\n", flowElementsInUse));
+        // Logger.Instance.DLog("Plugin, Flow Elements in Use: \n" + string.Join("\n", flowElementsInUse));
 
         foreach (var file in new DirectoryInfo(DirectoryHelper.PluginsDirectory).GetFiles("*.ffplugin"))
         {
@@ -144,13 +144,13 @@ public class SettingsService : ISettingsService
             }
 
             Logger.Instance.DLog($"Plugin '{pluginInfo.Name}' is used in configuration.");
-            plugins.Add(file.Name, await System.IO.File.ReadAllBytesAsync(file.FullName));
+            plugins.Add(file.Name[(DirectoryHelper.PluginsDirectory.Length + 1)..]);//, await System.IO.File.ReadAllBytesAsync(file.FullName));
             pluginNames.Add(pluginInfo.Name);
         }
 
         cfg.Plugins = plugins;
         cfg.PluginNames = pluginNames;
-        Logger.Instance.DLog($"Plugin list that is used in configuration:", string.Join(", ", plugins.Select(x => x.Key)));
+        Logger.Instance.DLog($"Plugin list that is used in configuration:", string.Join(", ", plugins));
         
         return cfg;
     }

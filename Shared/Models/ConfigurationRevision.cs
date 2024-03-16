@@ -66,9 +66,9 @@ public class ConfigurationRevision
     public Dictionary<string, string> PluginSettings { get; set; }
 
     /// <summary>
-    /// Gets or sets a dictionary of plugin packages (including the .ffplugin) and their binary data in the system
+    /// Gets or sets a dictionary of plugins in use
     /// </summary>
-    public Dictionary<string, byte[]> Plugins { get; set; }
+    public List<string> Plugins { get; set; }
     
     /// <summary>
     /// Gets or sets a list of plugin names in use

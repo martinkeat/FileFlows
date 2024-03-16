@@ -1,4 +1,6 @@
-﻿using FileFlows.ServerShared.Models;
+﻿using System.Web;
+using FileFlows.Plugin;
+using FileFlows.ServerShared.Models;
 
 namespace FileFlows.ServerShared.Services;
 
@@ -133,6 +135,27 @@ public class SettingsService : Service, ISettingsService
         {
             Logger.Instance?.WLog("Failed to get FileFlows current configuration: " + ex.Message);
             return null;
+        }
+    }
+
+    /// <summary>
+    /// Downloads a plugin to the destination
+    /// </summary>
+    /// <returns>A task to await</returns>
+    public async Task<Result<string>> DownloadPlugin(string name, string destinationPath)
+    {
+        try
+        {
+            var result = await HttpHelper.Get<byte[]>($"{ServiceBaseUrl}/api/settings/download-plugin/{HttpUtility.UrlEncode(name)}");
+            if (result.Success == false)
+                return Result<string>.Fail($"Failed to download plugin '{name}': " + result.Body);
+            string output = Path.Combine(destinationPath, name);
+            await File.WriteAllBytesAsync(output, result.Data);
+            return output;
+        }
+        catch (Exception ex)
+        {
+            return Result<string>.Fail($"Failed to download plugin '{name}': " + ex.Message);
         }
     }
 }

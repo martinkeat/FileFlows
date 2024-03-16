@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Mvc;
 using FileFlows.Shared.Models;
 using FileFlows.Server.Workers;
@@ -259,6 +260,28 @@ public class SettingsController : Controller
     [HttpGet("current-config")]
     public Task<ConfigurationRevision> GetCurrentConfig()
         => ServiceLoader.Load<SettingsService>().GetCurrentConfiguration();
+
+    /// <summary>
+    /// Downloads a plugin
+    /// </summary>
+    /// <param name="name">the name of the plugin</param>
+    /// <returns>the plugin file</returns>
+    [HttpGet("download-plugin/{name}")]
+    public IActionResult DownloadPlugin(string name)
+    {
+        Logger.Instance?.ILog("DownloadPlugin: " + name);
+        if (Regex.IsMatch(name, @"^[a-zA-Z0-9\-\._+]\.ffplugin$", RegexOptions.CultureInvariant) == false)
+        {
+            Logger.Instance?.WLog("DownloadPlugin.Invalid Plugin: " + name);
+            return BadRequest("Invalid plugin: " + name);
+        }
+
+        var file = Path.Combine(DirectoryHelper.PluginsDirectory, name);
+        if (System.IO.File.Exists(file) == false)
+            return NotFound(); // Plugin file not found
+
+        return PhysicalFile(file, "application/octet-stream"); 
+    }
     
     
     /// <summary>
