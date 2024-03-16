@@ -590,8 +590,8 @@ public partial class LibraryFiles : ListPage<Guid, LibaryFileListModel>, IDispos
     }
 
     private static string[] BasicExtensions = new[] { "doc", "iso", "pdf", "svg", "xml", "zip" };
-    private static string[] VideoExtensions = new[] { "avi", "mkv", "mov", "mp4", "mpeg", "mpg", "ts", "webm" };
-    private static string[] ImageExtensions = new[] { "bmp", "gif", "gif", "jpg", "png", "tiff", "webp" };
+    private static string[] VideoExtensions = new[] { "avi", "mkv", "mov", "mp4", "mpeg", "mpg", "ts", "webm", "wmv" };
+    private static string[] ImageExtensions = new[] { "bmp", "gif", "gif", "heic", "jpg", "png", "tiff", "webp" };
     private static string[] TextExtensions = new[] { "srt", "sub", "sup", "txt" };
     private static string[] ComicExtensions = new[] { "cb7", "cbr", "cbz" };
     private static string[] ArchiveExtensions = new[] { "zip", "7z", "rar", "gz", "tar" };
@@ -624,7 +624,7 @@ public partial class LibraryFiles : ListPage<Guid, LibaryFileListModel>, IDispos
         if (VideoExtensions.Contains(extension))
             return $"filetypes/video/{extension}.svg";
         
-        return "blank.svg";
+        return "filetypes/blank.svg";
     }
 
     /// <summary>
