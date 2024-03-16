@@ -594,6 +594,8 @@ public partial class LibraryFiles : ListPage<Guid, LibaryFileListModel>, IDispos
     private static string[] ImageExtensions = new[] { "bmp", "gif", "gif", "jpg", "png", "tiff", "webp" };
     private static string[] TextExtensions = new[] { "srt", "sub", "sup", "txt" };
     private static string[] ComicExtensions = new[] { "cb7", "cbr", "cbz" };
+    private static string[] ArchiveExtensions = new[] { "zip", "7z", "rar", "gz", "tar" };
+    private static string[] AudioExtensions = new[] { "aac", "flac", "m4a", "mp3", "ogg", "wav" };
 
     /// <summary>
     /// Gets the image for the file
@@ -606,10 +608,13 @@ public partial class LibraryFiles : ListPage<Guid, LibaryFileListModel>, IDispos
         if (index < 0)
             return "";
         
-        
         string extension = path[(index + 1)..].ToLowerInvariant();
         if (BasicExtensions.Contains(extension))
             return $"filetypes/{extension}.svg";
+        if (ArchiveExtensions.Contains(extension))
+            return $"filetypes/archive/{extension}.svg";
+        if (AudioExtensions.Contains(extension))
+            return $"filetypes/audio/{extension}.svg";
         if (ComicExtensions.Contains(extension))
             return $"filetypes/comic/{extension}.svg";
         if (ImageExtensions.Contains(extension))
