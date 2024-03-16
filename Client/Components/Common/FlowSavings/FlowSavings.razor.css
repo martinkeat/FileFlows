@@ -5,7 +5,9 @@
   width: 100%;
   border-radius: 0.5rem;
   overflow: hidden;
-  background: rgba(2, 100, 126, 0.85);
+  background: #13191b;
+  border: solid 2px #33b2df;
+  font-size: 0.8rem;
 }
 .flow-savings-bar div {
   font-weight: var(--bold, 600);
@@ -19,11 +21,15 @@
   line-height: 1.2;
 }
 
+.final-size {
+  border-top-right-radius: 0.5rem;
+  border-bottom-right-radius: 0.5rem;
+  background: rgba(51, 178, 223, 0.3803921569);
+  background: linear-gradient(to right, rgba(51, 178, 223, 0.25), rgba(51, 178, 223, 0.5));
+}
+
 .original-size {
   flex-grow: 1;
-  background: #353535;
-  border-top-left-radius: 0.5rem;
-  border-bottom-left-radius: 0.5rem;
 }
 
 /*# sourceMappingURL=FlowSavings.razor.css.map */

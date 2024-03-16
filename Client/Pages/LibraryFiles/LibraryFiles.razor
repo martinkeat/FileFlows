@@ -63,7 +63,7 @@
                 <div class="header">
                     <span class="column-header">File</span>
                     <div class="filters">
-                    @if (SelectedStatus is not FileStatus.Unprocessed and not FileStatus.Processing)
+                    @if (SelectedStatus is FileStatus.Processed)
                     {
                         <FlowDropDown Options="optionsSortBy" OnSelected="SelectSortBy" SelectedValue="@SelectedSortBy"
                                       Placeholder="Sort By" PlaceholderIcon="fas fa-sort"/>
