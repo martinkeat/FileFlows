@@ -606,7 +606,7 @@ public partial class LibraryFiles : ListPage<Guid, LibaryFileListModel>, IDispos
     {
         int index = path.LastIndexOf(".", StringComparison.Ordinal);
         if (index < 0)
-            return "folder.svg";
+            return "filetypes/folder.svg";
         
         string extension = path[(index + 1)..].ToLowerInvariant();
         if (BasicExtensions.Contains(extension))
