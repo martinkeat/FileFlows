@@ -144,7 +144,7 @@ public class SettingsService : ISettingsService
             }
 
             Logger.Instance.DLog($"Plugin '{pluginInfo.Name}' is used in configuration.");
-            plugins.Add(file.Name[(DirectoryHelper.PluginsDirectory.Length + 1)..]);//, await System.IO.File.ReadAllBytesAsync(file.FullName));
+            plugins.Add(file.Name);//, await System.IO.File.ReadAllBytesAsync(file.FullName));
             pluginNames.Add(pluginInfo.Name);
         }
 
