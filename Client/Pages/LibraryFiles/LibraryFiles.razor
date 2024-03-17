@@ -87,7 +87,7 @@
                 </div>
             </Header>
             <Cell Context="item">
-                <div class="library-file">
+                <div class="library-file table-item">
                     <span class="icon">
                         <img src="@GetExtensionImage(item.Name.ToLowerInvariant())"/>
                     </span>
@@ -107,35 +107,35 @@
                     <div class="info">
                         @if (string.IsNullOrWhiteSpace(item.Library) == false)
                         {
-                            <div class="icon-value library clickable" @onclick="() => SelectLibrary(item.Library)">
+                            <div class="icon-value green clickable" @onclick="() => SelectLibrary(item.Library)">
                                 <i class="fas fa-folder"></i>
                                 <span class="value">@item.Library</span>
                             </div>
                         }
                         @if (string.IsNullOrWhiteSpace(item.Flow) == false)
                         {
-                            <div class="icon-value flow clickable" @onclick="() => SelectFlow(item.Flow)">
+                            <div class="icon-value blue clickable" @onclick="() => SelectFlow(item.Flow)">
                                 <i class="fas fa-sitemap"></i>
                                 <span class="value">@item.Flow</span>
                             </div>
                         }
                         @if (string.IsNullOrWhiteSpace(item.Node) == false)
                         {
-                            <div class="icon-value node clickable" @onclick="() => SelectNode(item.Node)">
+                            <div class="icon-value purple clickable" @onclick="() => SelectNode(item.Node)">
                                 <i class="@GetNodeIcon(item.Node)"></i>
                                 <span class="value">@(item.Node == "FileFlowsServer" ? lblFileFlowsServer : item.Node)</span>
                             </div>
                         }
                         @if (item.Forced && SelectedStatus == FileStatus.Unprocessed)
                         {
-                            <div class="icon-value flag">
+                            <div class="icon-value pink">
                                 <i class="fas fa-hammer"></i>
                                 <span class="value">@lblForcedProcessing</span>
                             </div>
                         }
                         @if (item.ProcessingTime != null && SelectedStatus is FileStatus.Processed or FileStatus.ProcessingFailed or FileStatus.OnHold)
                         {
-                            <div class="icon-value time">
+                            <div class="icon-value orange">
                                 <i class="fas fa-clock"></i>
                                 @if (SelectedStatus == FileStatus.OnHold)
                                 {
@@ -152,20 +152,12 @@
                     @if (SelectedStatus != FileStatus.Processing && SelectedStatus != FileStatus.ReprocessByFlow)
                     {
                         <div class="right savings">
-                            <span class="finished">@DateString(item.Date)</span>
+                            <span class="top-right">@DateString(item.Date)</span>
                             @if (item.OriginalSize != null && item.FinalSize != null)
                             {
                                 <div class="right-inner">
                                     <FlowSavings FinalSize="@item.FinalSize.Value" OriginalSize="@item.OriginalSize.Value"/>
                                 </div>
-                            }
-                            @if (SelectedStatus == FileStatus.OnHold)
-                            {
-                                <span class="time">@FormatHelper.HumanizeTime(item.ProcessingTime.Value)</span>
-                            }
-                            else
-                            {
-                                <span class="time">@($@"{item.ProcessingTime:hh\:mm\:ss}")</span>
                             }
                         </div>
                     }

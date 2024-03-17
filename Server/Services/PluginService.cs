@@ -203,6 +203,7 @@ public class PluginService : IPluginService
                 Deleted = plugin.Deleted,
                 Settings = plugin.Settings,
                 Authors = plugin.Authors,
+                Icon = plugin.Icon,
                 Url = plugin.Url,
                 PackageName = plugin.PackageName,
                 Description = plugin.Description,   

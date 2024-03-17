@@ -1,5 +1,4 @@
 ﻿using System.IO.Compression;
-using FileFlows.Server.Controllers;
 using FileFlows.Server.Services;
 using FileFlows.Shared.Models;
 
@@ -154,6 +153,11 @@ public class PluginScanner
                 if (isNew || plugin.Description != pi.Description)
                 {
                     plugin.Description = pi.Description;
+                    isDifferent = true;
+                }
+                if (isNew || plugin.Icon != pi.Icon)
+                {
+                    plugin.Icon = pi.Icon;
                     isDifferent = true;
                 }
                 if (isNew || 

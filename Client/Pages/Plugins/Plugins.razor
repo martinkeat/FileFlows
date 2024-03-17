@@ -12,7 +12,7 @@
     <Body>
         
         <FlowTable @ref="Table" Data="@Data" TItem="PluginInfoModel" Selection="SelectionMode.Multiple"
-            DoubleClick="@DoubleClick" TableIdentifier="Plugins">
+            DoubleClick="@DoubleClick" TableIdentifier="Plugins"  DisableColumn="(item) => !item.Enabled">
             <ToolBar>            
                 <FlowTableButton Clicked=Add Icon="fas fa-plus" Label="Labels.Add" />
                 <FlowTableButton Clicked=Edit SelectedOne="true" Icon="fas fa-edit" Label="Labels.Edit" />
@@ -26,58 +26,67 @@
             </ToolBar>
 
             <Columns>
-                <FlowTableColumn TItem="PluginInfoModel">
+                <FlowTableColumn TItem="PluginInfoModel" NoHeight="true">
                     <Header>
                         @Globals.lblName
                     </Header>
                     <Cell Context="item">
-                        <span>@item.Name</span>
-                    </Cell>
-                </FlowTableColumn>
-                <FlowTableColumn TItem="PluginInfoModel" Width="9rem" LargeWidth="18rem" Align="FlowTableAlignment.Center" MobileWidth="0">
-                    <Header>
-                        Settings
-                    </Header>
-                    <Cell Context="item">
-                        @if(@item.Settings?.Any() == true)
-                        {
-                            <i class="fas fa-check"></i>
-                        }
-                    </Cell>
-                </FlowTableColumn>
-                <FlowTableColumn TItem="PluginInfoModel" Width="9rem" LargeWidth="18rem" Align="FlowTableAlignment.Center" MobileWidth="0">
-                    <Header>
-                        Version
-                    </Header>
-                    <Cell Context="item">
-                        <span>@item.Version</span>
-                    </Cell>
-                </FlowTableColumn>
-                <FlowTableColumn TItem="PluginInfoModel" Width="9rem" LargeWidth="18rem" Align="FlowTableAlignment.Center" MobileWidth="0">
-                    <Header>
-                        Latest Version
-                    </Header>
-                    <Cell Context="item">
-                        <span>@item.LatestVersion</span>
-                    </Cell>
-                </FlowTableColumn>
-                <FlowTableColumn TItem="PluginInfoModel" Width="9rem" LargeWidth="18rem" Align="FlowTableAlignment.Center">
-                    <Header>
-                        In Use
-                    </Header>
-                    <Cell Context="item">
-                        @if (item.UsedBy?.Any() == true)
-                        {
-                            <i class="fas fa-check"></i>
-                        }
-                    </Cell>
-                </FlowTableColumn>
-                <FlowTableColumn TItem="PluginInfoModel" Width="9rem" LargeWidth="18rem" Align="FlowTableAlignment.Center">
-                    <Header>
-                        @Globals.lblEnabled
-                    </Header>
-                    <Cell Context="item">
-                        <FlowSwitch Value="@item.Enabled" ValueChanged="@(args => { item.Enabled= args; _ = Enable(args, item); })"  />
+                        <div class="table-item">
+                            <span class="icon">
+                                @if (item.Icon.StartsWith("svg:"))
+                                {
+                                    <img src="/icons/@(item.Icon[4..]).svg" />
+                                }
+                                else
+                                {
+                                    var parts = item.Icon.Split(':');
+                                    if (parts.Length == 2)
+                                    {
+                                        <i class="icon @parts[0]" style="color:@parts[1]"></i>
+                                    }
+                                    else
+                                    {
+                                        <i class="icon @item.Icon"></i>
+                                    }
+                                }
+                            </span>
+                            <div class="center">
+                                <span class="name"><span>@item.Name</span></span>
+                                <div class="info">
+                                    <div class="icon-value blue clickable" @onclick="() => About(item)">
+                                        <i class="fas fa-sitemap"></i>
+                                        <span class="value">@item.Elements.Count @(item.Elements.Count == 1 ? lblFlowElement : lblFlowElements)</span>
+                                    </div>
+                                    @if (item.HasSettings)
+                                    {
+                                        <div class="icon-value orange clickable" @onclick="() => Edit(item)">
+                                            <i class="fas fa-folder"></i>
+                                            <span class="value">@lblSettings</span>
+                                        </div>
+                                    }
+                                    @if (item.UsedBy?.Any() == true)
+                                    {
+                                        <div class="icon-value green clickable" @onclick="() => OpenUsedBy(item)">
+                                            <i class="fas fa-folder"></i>
+                                            <span class="value">@lblInUse</span>
+                                        </div>
+                                    }
+                                    @if (item.UpdateAvailable)
+                                    {
+                                        <div class="icon-value pink clickable" @onclick="() => Update(item.Uid)">
+                                            <i class="fas fa-cloud-download-alt"></i>
+                                            <span class="value">@item.LatestVersion</span>
+                                        </div>
+                                        
+                                    }
+                                </div>
+                            </div>
+                            <div class="right">
+                                <span class="top-right @(item.UpdateAvailable ? "warning" :"")">@item.Version</span>
+                                <FlowSwitch Value="@item.Enabled" ValueChanged="@(args => { item.Enabled= args; _ = Enable(args, item); })"  />
+                            </div>
+                        </div>
+                            
                     </Cell>
                 </FlowTableColumn>
             </Columns>

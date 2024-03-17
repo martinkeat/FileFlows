@@ -13,8 +13,14 @@ public partial class Plugins : ListPage<Guid, PluginInfoModel>
 
     private PluginBrowser PluginBrowser { get; set; }
 
+    private string lblSettings, lblInUse, lblFlowElement, lblFlowElements;
+
     protected override void OnInitialized()
     {
+        lblSettings = Translater.Instant("Labels.Settings");
+        lblInUse = Translater.Instant("Labels.InUse");
+        lblFlowElement = Translater.Instant("Labels.FlowElement");
+        lblFlowElements = Translater.Instant("Labels.FlowElements");
         _ = Load(default);
     }
 
@@ -32,6 +38,11 @@ public partial class Plugins : ListPage<Guid, PluginInfoModel>
         var plugins = Table.GetSelected()?.Select(x => x.Uid)?.ToArray() ?? new System.Guid[] { };
         if (plugins?.Any() != true)
             return;
+        await Update(plugins);
+    }
+    
+    async Task Update(params Guid[] plugins)
+    {
         Blocker.Show("Pages.Plugins.Messages.UpdatingPlugins");
         this.StateHasChanged();
         Data.Clear();
@@ -221,6 +232,9 @@ public partial class Plugins : ListPage<Guid, PluginInfoModel>
         var item = Table.GetSelected()?.FirstOrDefault();
         if (item?.UsedBy?.Any() != true)
             return;
-        await UsedByDialog.Show(item.UsedBy);
+        await OpenUsedBy(item);
     }
+    
+    private Task OpenUsedBy(PluginInfoModel item)
+        => UsedByDialog.Show(item.UsedBy); 
 }

@@ -128,6 +128,9 @@
     "Savings": "Savings",
     "Flow": "Flow",
     "ForceProcessing": "Force Processing",
+    "Settings": "Settings",
+    "FlowElement": "Flow Element",
+    "FlowElements": "Flow Elements",
     "ObsoleteConfirm": {
       "Title": "Obsolete Node",
       "Message": "It is recommended you switch to a different node.",

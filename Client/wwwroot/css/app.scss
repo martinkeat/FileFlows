@@ -1164,3 +1164,133 @@ input[type=file]{
         }
     }    
 }
+
+
+
+.table-item {
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    line-height: 2;
+    padding: 0 0 0.25rem;
+
+    .icon {
+        width: 3.25rem;
+        min-width: 3.25rem;
+        margin-right: 0.75rem;
+        align-self: center;
+        text-align: center;
+
+        img {
+            width: 90%;
+        }
+
+        i {
+            font-size: 2.5rem;
+        }
+    }
+
+    .center {
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+
+        .info {
+            display: flex;
+            flex-direction: row;
+            flex-grow: 1;
+        }
+
+        .name {
+            flex-grow: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+
+            span {
+                overflow: hidden;
+                text-overflow: ellipsis;
+
+                &:first-child:has(+ span) {
+                    font-weight: var(--bold, 600);
+                }
+            }
+        }
+    }
+
+    .right {
+        width: 14rem;
+        min-width: 14rem;
+        padding: 0.5rem;
+        align-self: center;
+        
+        .flow-switch {
+            position: relative;
+            top:0;
+        }
+
+        .top-right {
+            font-weight: var(--bold, 600);
+            position: absolute;
+            top: 0;
+            padding: 0 0.75rem;
+            border-bottom-left-radius: 0.5rem;
+            width: fit-content;
+            text-align: center;
+            background: #303030;
+            right: 0;
+            &.warning {
+                background:var(--warning);
+            }
+        }
+    }
+
+    .icon-value {
+        &.blue {
+            --iv-color: #345772;
+        }
+
+        &.purple {
+            --iv-color: #780746;
+        }
+
+        &.green {
+            --iv-color: #0d5d38;
+        }
+
+        &.pink {
+            --iv-color: #aa2975;
+        }
+
+        &.orange {
+            --iv-color: #ac6300;
+        }
+
+        border: solid 1px var(--iv-color);
+        border-radius: 0.5rem;
+        overflow: hidden;
+        display: flex;
+        font-size: 0.7rem;
+        margin: 0.25rem 0.5rem 0.25rem 0;
+        height: 1.5rem;
+
+        &.clickable {
+            cursor: pointer;
+        }
+
+        i {
+            padding: 0 0.5rem;
+            background: var(--iv-color);
+            display: flex;
+            align-items: center;
+        }
+
+        .value {
+            font-weight: var(--bold, 600);
+            padding: 0 0.5rem;
+        }
+    }
+}

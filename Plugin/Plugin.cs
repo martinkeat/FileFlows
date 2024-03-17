@@ -14,6 +14,11 @@ public interface IPlugin
     /// Gets the name of the plugin
     /// </summary>
     string Name { get; }
+
+    /// <summary>
+    /// Gets the icon of the plugin
+    /// </summary>
+    virtual string? Icon => null;
     
     /// <summary>
     /// Gets the minimum support FileFlows version of this plugin

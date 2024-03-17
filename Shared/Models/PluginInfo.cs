@@ -65,6 +65,11 @@ public class PluginInfo : FileFlowObject
     /// Gets or sets a list of elements/flowparts/nodes this plugin has
     /// </summary>
     public List<FlowElement> Elements { get; set; }
+    
+    /// <summary>
+    /// Gets or sets the icon for the plugins
+    /// </summary>
+    public string Icon { get; set; }
 }
 
 /// <summary>

@@ -3655,5 +3655,112 @@ hr {
     height: unset !important;
   }
 }
+.table-item {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  line-height: 2;
+  padding: 0 0 0.25rem;
+}
+.table-item .icon {
+  width: 3.25rem;
+  min-width: 3.25rem;
+  margin-right: 0.75rem;
+  align-self: center;
+  text-align: center;
+}
+.table-item .icon img {
+  width: 90%;
+}
+.table-item .icon i {
+  font-size: 2.5rem;
+}
+.table-item .center {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.table-item .center .info {
+  display: flex;
+  flex-direction: row;
+  flex-grow: 1;
+}
+.table-item .center .name {
+  flex-grow: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.table-item .center .name span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.table-item .center .name span:first-child:has(+ span) {
+  font-weight: var(--bold, 600);
+}
+.table-item .right {
+  width: 14rem;
+  min-width: 14rem;
+  padding: 0.5rem;
+  align-self: center;
+}
+.table-item .right .flow-switch {
+  position: relative;
+  top: 0;
+}
+.table-item .right .top-right {
+  font-weight: var(--bold, 600);
+  position: absolute;
+  top: 0;
+  padding: 0 0.75rem;
+  border-bottom-left-radius: 0.5rem;
+  width: fit-content;
+  text-align: center;
+  background: #303030;
+  right: 0;
+}
+.table-item .right .top-right.warning {
+  background: var(--warning);
+}
+.table-item .icon-value {
+  border: solid 1px var(--iv-color);
+  border-radius: 0.5rem;
+  overflow: hidden;
+  display: flex;
+  font-size: 0.7rem;
+  margin: 0.25rem 0.5rem 0.25rem 0;
+  height: 1.5rem;
+}
+.table-item .icon-value.blue {
+  --iv-color: #345772;
+}
+.table-item .icon-value.purple {
+  --iv-color: #780746;
+}
+.table-item .icon-value.green {
+  --iv-color: #0d5d38;
+}
+.table-item .icon-value.pink {
+  --iv-color: #aa2975;
+}
+.table-item .icon-value.orange {
+  --iv-color: #ac6300;
+}
+.table-item .icon-value.clickable {
+  cursor: pointer;
+}
+.table-item .icon-value i {
+  padding: 0 0.5rem;
+  background: var(--iv-color);
+  display: flex;
+  align-items: center;
+}
+.table-item .icon-value .value {
+  font-weight: var(--bold, 600);
+  padding: 0 0.5rem;
+}
 
 /*# sourceMappingURL=app.css.map */
