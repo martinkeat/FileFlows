@@ -792,7 +792,6 @@ public class WatchedLibrary : IDisposable
 
             checkedAccess = true;
 
-            //Since we don't actually write, we don't need to lock the file
             using (var fs = FileOpenHelper.OpenForCheckingReadWriteAccess(file.FullName))
             {
                 if (fs.CanRead == false)
@@ -910,7 +909,7 @@ public class WatchedLibrary : IDisposable
             if (QueuedFiles.Contains(fullPath) == false)
                 QueuedFiles.Enqueue(fullPath);
         }
-        
+
         ProcessQueue();
     }
 

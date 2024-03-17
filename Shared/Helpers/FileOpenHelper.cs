@@ -29,6 +29,6 @@ public static class FileOpenHelper
     /// Opens a file for writing without a write lock
     /// This allows other applications to read the file while it is being written to
     /// </summary>
-    public static FileStream OpenRead_NoWriteLock(string file)
-        => File.Open(file, FileMode.Create, FileAccess.Write, FileShare.Read);
+    public static FileStream OpenWrite_NoReadLock(string file, FileMode fileMode)
+        => File.Open(file, fileMode, FileAccess.Write, FileShare.Read);
 }
