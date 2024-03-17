@@ -10,6 +10,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using FileFlows.Plugin.Helpers;
 using FileFlows.Shared.Models;
 
 /// <summary>
@@ -143,7 +144,7 @@ public class HttpHelper
 
             using HttpResponseMessage response = await Client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
             await using var streamToReadFrom = await response.Content.ReadAsStreamAsync();
-            await using var streamToWriteTo = File.Open(destination, FileMode.Create);
+            await using var streamToWriteTo = FileOpenHelper.OpenRead_NoWriteLock(destination);
             await streamToReadFrom.CopyToAsync(streamToWriteTo);
         }
         catch (Exception ex)

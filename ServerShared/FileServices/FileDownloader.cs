@@ -113,7 +113,7 @@ public class FileDownloader
                 logger?.ILog("Content-Length header is not present in the response.");
             }
 
-            using FileStream fileStream = File.OpenWrite(destinationPath);
+            using FileStream fileStream = FileOpenHelper.OpenRead_NoWriteLock(destinationPath);
             
             int bufferSize;
             

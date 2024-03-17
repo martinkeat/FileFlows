@@ -22,7 +22,7 @@ public class Gzipper
             if (File.Exists(outputFile))
                 File.Delete(outputFile);
 
-            using (FileStream originalFileStream = File.Open(inputFile, FileMode.Open))
+            using (FileStream originalFileStream = FileOpenHelper.OpenRead_NoLocks(inputFile))
             {
                 using FileStream compressedFileStream = File.Create(outputFile);
                 using var compressor = new GZipStream(compressedFileStream, CompressionMode.Compress);
@@ -55,7 +55,7 @@ public class Gzipper
             if (File.Exists(outputFile))
                 File.Delete(outputFile);
             
-            using FileStream compressedFileStream = File.Open(inputFile, FileMode.Open);
+            using FileStream compressedFileStream = FileOpenHelper.OpenRead_NoLocks(inputFile);
             using FileStream outputFileStream = File.Create(outputFile);
             using var decompressor = new GZipStream(compressedFileStream, CompressionMode.Decompress);
             decompressor.CopyTo(outputFileStream);
@@ -96,7 +96,7 @@ public class Gzipper
     /// <returns>the decompresses file contents</returns>
     public static string DecompressFileToString(string inputFile, int lines = 0, int bytes = 0)
     {
-        using FileStream compressedFileStream = File.Open(inputFile, FileMode.Open);
+        using FileStream compressedFileStream = FileOpenHelper.OpenRead_NoLocks(inputFile);
         using MemoryStream outputStream = new MemoryStream();
         using var decompressor = new GZipStream(compressedFileStream, CompressionMode.Decompress);
         

@@ -20,7 +20,7 @@ public class DownloadController:Controller
         if (System.IO.File.Exists(file) == false)
             return NotFound();
 
-        return new FileStreamResult(System.IO.File.OpenRead(file), "application/octet-stream")
+        return new FileStreamResult(FileOpenHelper.OpenRead_NoLocks(file), "application/octet-stream")
         {
             FileDownloadName = zipName
         };
