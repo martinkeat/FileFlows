@@ -3685,6 +3685,7 @@ hr {
   display: flex;
   flex-direction: row;
   flex-grow: 1;
+  flex-wrap: wrap;
 }
 .table-item .center .name {
   flex-grow: 1;

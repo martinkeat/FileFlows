@@ -660,7 +660,10 @@
         "Version": "Version",
         "DownloadNode":"Node herunterladen",
         "UpgradeRequired": "Upgrade erforderlich",
-        "UpgradeRequiredHint": "Der Server und die Nodes müssen dieselbe Version haben"
+        "UpgradeRequiredHint": "Der Server und die Nodes müssen dieselbe Version haben",
+        "FilesProcessed": "Files Processed",
+        "PossiblyDisconnected": "Possibly Disconnected",
+        "Disconnected": "Disconnected"
       },
       "Fields": {
         "FlowRunners": "Flow Runners",

@@ -17,7 +17,7 @@ public partial class Nodes : ListPage<Guid, ProcessingNode>
     private ProcessingNode SelectedItem = null;
 
     private string lblInternal, lblAddress, lblRunners, lblVersion, lblDownloadNode, lblUpgradeRequired, 
-        lblUpgradeRequiredHint, lblRunning, lblDisconnected, lblPossiblyDisconnected, lblHelp;
+        lblUpgradeRequiredHint, lblRunning, lblDisconnected, lblPossiblyDisconnected, lblPriority;
      
 #if(DEBUG)
     string DownloadUrl = "http://localhost:6868/download";
@@ -34,22 +34,29 @@ public partial class Nodes : ListPage<Guid, ProcessingNode>
         lblDownloadNode = Translater.Instant("Pages.Nodes.Labels.DownloadNode");
         lblUpgradeRequired = Translater.Instant("Pages.Nodes.Labels.UpgradeRequired");
         lblUpgradeRequiredHint = Translater.Instant("Pages.Nodes.Labels.UpgradeRequiredHint");
-        lblHelp = Translater.Instant("Labels.Help");
+        lblPriority = Translater.Instant("Pages.ProcessingNode.Fields.Priority");
 
         lblRunning = Translater.Instant("Labels.Running");
-        lblPossiblyDisconnected = Translater.Instant("Labels.PossiblyDisconnected");
-        lblDisconnected = Translater.Instant("Labels.Disconnected");
+        lblPossiblyDisconnected = Translater.Instant("Pages.Nodes.Labels.PossiblyDisconnected");
+        lblDisconnected = Translater.Instant("Pages.Nodes.Labels.Disconnected");
     }
 
     /// <summary>
     /// we only want to do the sort the first time, otherwise the list will jump around for the user
     /// </summary>
     private List<Guid> initialSortOrder;
+
+    /// <summary>
+    /// The highest and lowest priorities in the data
+    /// </summary>
+    private int HighestPriority, LowestPriority;
     
     /// <inheritdoc />
     public override Task PostLoad()
     {
         var serverNode = this.Data?.Where(x => x.Address == FileFlowsServer).FirstOrDefault();
+        HighestPriority = Data?.Max(x => x.Priority) ?? 0;
+        LowestPriority = Data?.Min(x => x.Priority) ?? 0;
         if(serverNode != null)
         {
             serverNode.Name = Translater.Instant("Pages.Nodes.Labels.FileFlowsServer");                
@@ -178,4 +185,5 @@ public partial class Nodes : ListPage<Guid, ProcessingNode>
             return false;
         return va == vb;
     }
+
 }
