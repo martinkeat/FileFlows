@@ -53,31 +53,18 @@
                             <div class="center">
                                 <span class="name"><span>@item.Name</span></span>
                                 <div class="info">
-                                    <div class="icon-value blue clickable" @onclick="() => About(item)">
-                                        <i class="fas fa-sitemap"></i>
-                                        <span class="value">@item.Elements.Count @(item.Elements.Count == 1 ? lblFlowElement : lblFlowElements)</span>
-                                    </div>
+                                    <IconValue Color="IconValueColor.Blue" OnClick="() => About(item)" Icon="fas fa-sitemap" Value="@(item.Elements.Count + " " + (item.Elements.Count == 1 ? lblFlowElement : lblFlowElements))" />
                                     @if (item.HasSettings)
                                     {
-                                        <div class="icon-value orange clickable" @onclick="() => Edit(item)">
-                                            <i class="fas fa-folder"></i>
-                                            <span class="value">@lblSettings</span>
-                                        </div>
+                                        <IconValue Color="IconValueColor.Orange" OnClick="() => Edit(item)" Icon="fas fa-cog" Value="@lblSettings" />
                                     }
                                     @if (item.UsedBy?.Any() == true)
                                     {
-                                        <div class="icon-value green clickable" @onclick="() => OpenUsedBy(item)">
-                                            <i class="fas fa-folder"></i>
-                                            <span class="value">@lblInUse</span>
-                                        </div>
+                                        <IconValue Color="IconValueColor.Green" OnClick="() => OpenUsedBy(item)" Icon="fas fa-folder" Value="@lblInUse" />
                                     }
                                     @if (item.UpdateAvailable)
                                     {
-                                        <div class="icon-value pink clickable" @onclick="() => Update(item.Uid)">
-                                            <i class="fas fa-cloud-download-alt"></i>
-                                            <span class="value">@item.LatestVersion</span>
-                                        </div>
-                                        
+                                        <IconValue Color="IconValueColor.Pink" OnClick="() => Update(item.Uid)" Icon="fas fa-cloud-download-alt" Value="@item.LatestVersion" />
                                     }
                                 </div>
                             </div>

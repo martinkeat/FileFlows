@@ -60,18 +60,7 @@
 
 .indicators {
   margin-top: 0.5rem;
-  font-size: 0.9rem;
-  > span {
-    border: solid 1px var(--flow-process);
-    padding: 0.15rem 0.25rem;
-    margin-right: 0.5rem;
-    &.offline {
-      border-color: var(--danger);
-    }
-    &.possibly-disconnected {
-      border-color: var(--warning);
-    }
-  }
+  display:flex;
 }
 
 .btn-download-node {

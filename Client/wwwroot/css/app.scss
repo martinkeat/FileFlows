@@ -1226,71 +1226,77 @@ input[type=file]{
         min-width: 14rem;
         padding: 0.5rem;
         align-self: center;
-        
+
         .flow-switch {
             position: relative;
-            top:0;
+            top: 0;
         }
 
-        .top-right {
-            font-weight: var(--bold, 600);
-            position: absolute;
-            top: 0;
-            padding: 0 0.75rem;
-            border-bottom-left-radius: 0.5rem;
-            width: fit-content;
-            text-align: center;
-            background: #303030;
-            right: 0;
-            &.warning {
-                background:var(--warning);
-            }
-        }
+    }
+}
+
+.icon-value {
+    &.blue {
+        --iv-color: #345772;
     }
 
-    .icon-value {
-        &.blue {
-            --iv-color: #345772;
-        }
+    &.purple {
+        --iv-color: #780746;
+    }
 
-        &.purple {
-            --iv-color: #780746;
-        }
+    &.green {
+        --iv-color: #0d5d38;
+    }
 
-        &.green {
-            --iv-color: #0d5d38;
-        }
+    &.pink {
+        --iv-color: #aa2975;
+    }
 
-        &.pink {
-            --iv-color: #aa2975;
-        }
+    &.orange {
+        --iv-color: #ac6300;
+    }
+    &.red {
+        --iv-color: #9c0715;
+    }
 
-        &.orange {
-            --iv-color: #ac6300;
-        }
+    border: solid 1px var(--iv-color);
+    border-radius: 0.5rem;
+    overflow: hidden;
+    display: flex;
+    font-size: 0.7rem;
+    margin: 0.25rem 0.5rem 0.25rem 0;
+    height: 1.5rem;
 
-        border: solid 1px var(--iv-color);
-        border-radius: 0.5rem;
-        overflow: hidden;
+    &.clickable {
+        cursor: pointer;
+    }
+
+    i {
+        padding: 0 0.5rem;
+        background: var(--iv-color);
         display: flex;
-        font-size: 0.7rem;
-        margin: 0.25rem 0.5rem 0.25rem 0;
-        height: 1.5rem;
+        align-items: center;
+    }
 
-        &.clickable {
-            cursor: pointer;
-        }
+    .value {
+        font-weight: var(--bold, 600);
+        padding: 0 0.5rem;
+        align-self: center;
+    }
+}
 
-        i {
-            padding: 0 0.5rem;
-            background: var(--iv-color);
-            display: flex;
-            align-items: center;
-        }
+.top-right {
+    font-weight: var(--bold, 600);
+    position: absolute;
+    top: 0;
+    padding: 0 0.75rem;
+    border-bottom-left-radius: 0.5rem;
+    width: fit-content;
+    text-align: center;
+    background: #303030;
+    right: 0;
 
-        .value {
-            font-weight: var(--bold, 600);
-            padding: 0 0.5rem;
-        }
+    &.warning {
+        background: var(--warning);
     }
 }

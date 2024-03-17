@@ -1,0 +1,6 @@
+@namespace FileFlows.Client.Components.Common
+
+<div class="icon-value @(Color.ToString().ToLowerInvariant()) @(OnClick != null ? "clickable" : "")" @onclick="ClickPerformed">
+    <i class="@Icon"></i>
+    <span class="value">@Value</span>
+</div>

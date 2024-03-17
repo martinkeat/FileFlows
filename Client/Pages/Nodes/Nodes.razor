@@ -114,20 +114,16 @@
                         <div class="indicators">
                             @if (offline)
                             {
-                                <span class="offline">
-                                    @statusTitle
-                                </span>
+                                <IconValue Color="IconValueColor.Red" Icon="fas fa-ethernet" Value="@statusTitle" />
                             }
                             else if (possiblyDisconnected)
                             {
-                                <span class="possibly-disconnected">
-                                    @statusTitle
-                                </span>
+                                <IconValue Color="IconValueColor.Orange" Icon="fas fa-ethernet" Value="@statusTitle" />
                             }
 
                             @if (internalNode == false && item.Status == ProcessingNodeStatus.VersionMismatch)
                             {
-                                <span class="version-mismatch" title="@lblUpgradeRequiredHint">@lblUpgradeRequired</span>
+                                <IconValue Color="IconValueColor.Purple" Icon="fas fa-code-branch" Value="@lblUpgradeRequired" />
                             }
                         </div>
                     </div>

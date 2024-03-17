@@ -536,6 +536,9 @@
           "Message": "Are you sure you want to proceed with reprocessing the selected libraries?\n\nThis action will mark all files as unprocessed and initiate their reprocessing. Please note that this action cannot be undone."
         }
       },
+      "Labels": {
+        "Files": "{TotalString} {TotalFiles, plural, one {File} other {Files}}"
+      },
       "ErrorMessages": {
         "NoFlows": "There are no flows configured.\nCreate a flow before adding or updating a library."
       }
