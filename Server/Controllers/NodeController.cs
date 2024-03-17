@@ -31,9 +31,13 @@ public class NodeController : Controller
         if (internalNode != null)
             internalNode.OperatingSystem = OperatingSystemType.Linux;
 #endif
+        var totalFiles = await service.GetTotalFiles();
 
         foreach (var node in nodes)
         {
+            if (totalFiles.TryGetValue(node.Uid, out int pValue))
+                node.ProcessedFiles = pValue;
+            
             if (node.Enabled == false)
                 node.Status = ProcessingNodeStatus.Disabled;
             else if (TimeHelper.InSchedule(node.Schedule) == false)
@@ -50,8 +54,6 @@ public class NodeController : Controller
         
         return nodes.OrderBy(x => x.Name.ToLowerInvariant());
     }
-
-
     /// <summary>
     /// Gets a list of all processing nodes in the system
     /// </summary>

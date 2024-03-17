@@ -1266,6 +1266,8 @@ input[type=file]{
     font-size: 0.7rem;
     margin: 0.25rem 0.5rem 0.25rem 0;
     height: 1.5rem;
+    user-select: none;
+    cursor: default;
 
     &.clickable {
         cursor: pointer;

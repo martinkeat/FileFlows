@@ -111,4 +111,11 @@ public class NodeManager : CachedManager<ProcessingNode>
 
         return true;
     }
+
+    /// <summary>
+    /// Gets the total files each node has processed
+    /// </summary>
+    /// <returns>A dictionary of the total files indexed by the node UID</returns>
+    public Task<Dictionary<Guid, int>> GetTotalFiles()
+        => DatabaseAccessManager.Instance.LibraryFileManager.GetNodeTotalFiles();
 }

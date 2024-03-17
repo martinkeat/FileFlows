@@ -174,4 +174,11 @@ public class NodeService : INodeService
     /// <returns>a task to await</returns>
     public Task Delete(Guid[] uids)
         => new NodeManager().Delete(uids);
+
+    /// <summary>
+    /// Gets the total files each node has processed
+    /// </summary>
+    /// <returns>A dictionary of the total files indexed by the node UID</returns>
+    public Task<Dictionary<Guid, int>> GetTotalFiles()
+        => new NodeManager().GetTotalFiles();
 }

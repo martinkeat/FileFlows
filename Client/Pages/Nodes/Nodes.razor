@@ -106,24 +106,25 @@
                                 <span class="label">@lblAddress</span>
                                 <span class="value">@(item.Address != FileFlowsServer ? item.Address : lblInternal)</span>
                             </div>
-                            <div>
-                                <span class="label">@lblRunners</span>
-                                <span class="value">@item.FlowRunners</span>
-                            </div>
                         </div>
                         <div class="indicators">
+                            <IconValue Color="IconValueColor.Green" Icon="fas fa-running" Value="@item.FlowRunners.ToString()" Tooltip="Pages.Nodes.Fields.FlowRunners"  />
+                            @if (item.ProcessedFiles > 0)
+                            {
+                                <IconValue Color="IconValueColor.Blue" Icon="fas fa-check" Value="@item.ProcessedFiles.ToString("#,##0")" Tooltip="Pages.Nodes.Labels.FilesProcessed" />
+                            }
                             @if (offline)
                             {
-                                <IconValue Color="IconValueColor.Red" Icon="fas fa-ethernet" Value="@statusTitle" />
+                                <IconValue Color="IconValueColor.Red" Icon="fas fa-ethernet" Value="@statusTitle"/>
                             }
                             else if (possiblyDisconnected)
                             {
-                                <IconValue Color="IconValueColor.Orange" Icon="fas fa-ethernet" Value="@statusTitle" />
+                                <IconValue Color="IconValueColor.Orange" Icon="fas fa-ethernet" Value="@statusTitle"/>
                             }
 
                             @if (internalNode == false && item.Status == ProcessingNodeStatus.VersionMismatch)
                             {
-                                <IconValue Color="IconValueColor.Purple" Icon="fas fa-code-branch" Value="@lblUpgradeRequired" />
+                                <IconValue Color="IconValueColor.Purple" Icon="fas fa-code-branch" Value="@lblUpgradeRequired"/>
                             }
                         </div>
                     </div>

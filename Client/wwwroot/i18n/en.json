@@ -671,7 +671,8 @@
         "Version": "Version",
         "DownloadNode":"Download Node",
         "UpgradeRequired": "Upgrade Required",
-        "UpgradeRequiredHint": "The Server and Nodes must be on the same version"
+        "UpgradeRequiredHint": "The Server and Nodes must be on the same version",
+        "FilesProcessed": "Files Processed"
       },
       "Messages": {
         "DeleteNode": "Are you sure you want to delete ''{name}''?"

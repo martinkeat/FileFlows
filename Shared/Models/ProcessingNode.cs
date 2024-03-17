@@ -105,6 +105,12 @@ public class ProcessingNode: FileFlowObject
     public int MaxFileSizeMb { get; set; }
 
     /// <summary>
+    /// Gets or sets how many files have been processed
+    /// </summary>
+    [DbIgnore]
+    public int ProcessedFiles { get; set; }
+    
+    /// <summary>
     /// The directory separator used by this node
     /// </summary>
     public char DirectorySeparatorChar = System.IO.Path.DirectorySeparatorChar;

@@ -1,9 +1,8 @@
 using BlazorContextMenu;
 using FileFlows.Client.Components.Dialogs;
+using FileFlows.Client.Components;
 
 namespace FileFlows.Client.Pages;
-
-using FileFlows.Client.Components;
 
 /// <summary>
 /// Page for processing nodes

@@ -1420,4 +1420,19 @@ FROM {Wrap(nameof(LibraryFile))}";
         using var db = await DbConnector.GetDb();
         return await db.Db.FetchAsync<LibraryFile>(sql);
     }
+
+
+    /// <summary>
+    /// Gets the total files each node has processed
+    /// </summary>
+    /// <returns>A dictionary of the total files indexed by the node UID</returns>
+    public async Task<Dictionary<Guid, int>> GetNodeTotalFiles()
+    {
+        string sql = $@"SELECT {Wrap(nameof(LibraryFile.NodeUid))}, COUNT(*) AS {Wrap("FileCount")}
+FROM {Wrap(nameof(LibraryFile))} GROUP BY {Wrap(nameof(LibraryFile.NodeUid))};";
+            
+        using var db = await DbConnector.GetDb();
+        var result =  await db.Db.FetchAsync<(Guid NodeUid, int FileCount)>(sql);
+        return result.ToDictionary(x => x.NodeUid, x => x.FileCount);
+    }
 }

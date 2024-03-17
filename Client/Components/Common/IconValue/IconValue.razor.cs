@@ -16,6 +16,17 @@ public partial class IconValue : ComponentBase
     /// </summary>
     [Parameter] public string Value { get; set; }
 
+    private string _Tooltip;
+    /// <summary>
+    /// Gets or sets the tootlip
+    /// </summary>
+    [Parameter]
+    public string Tooltip
+    {
+        get => _Tooltip;
+        set => _Tooltip = Translater.TranslateIfNeeded(value);
+    }
+
     /// <summary>
     /// Gets or sets the the color 
     /// </summary>
