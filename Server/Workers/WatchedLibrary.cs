@@ -910,7 +910,7 @@ public class WatchedLibrary : IDisposable
             if (QueuedFiles.Contains(fullPath) == false)
                 QueuedFiles.Enqueue(fullPath);
         }
-
+        
         ProcessQueue();
     }
 
