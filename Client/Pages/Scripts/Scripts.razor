@@ -39,58 +39,67 @@
         </ToolBar>
 
         <Columns>
-            <FlowTableColumn TItem="Script">
-                <Header>
-                    @Globals.lblName
-                </Header>
-                <Cell Context="item">
-                    <span>@item.Name</span>
-                </Cell>
-            </FlowTableColumn>
-            <FlowTableColumn TItem="Script" Width="10rem" LargeWidth="18rem" Align="FlowTableAlignment.Center">
-                <Header>
-                    Revision
-                </Header>
-                <Cell Context="item">
-                    @if (item.Revision > 0)
-                    {
-                        <span>@item.Revision</span>
-                    }
-                </Cell>
-            </FlowTableColumn>
-            <FlowTableColumn TItem="Script" Width="10rem" LargeWidth="18rem" Align="FlowTableAlignment.Center">
-                <Header>
-                    Latest Revision
-                </Header>
-                <Cell Context="item">
-                    @if (item.LatestRevision > 0)
-                    {
-                        <span>@item.LatestRevision</span>
-                    }
-                </Cell>
-            </FlowTableColumn>
-            <FlowTableColumn TItem="Script" Width="10rem" LargeWidth="18rem" Align="FlowTableAlignment.Center" Hidden=@(SelectedType == ScriptType.Shared)>
-                <Header>
-                    Read Only
-                </Header>
-                <Cell Context="item">
-                    @if (item.Repository)
-                    {
-                        <i class="fas fa-check"></i>
-                    }
-                </Cell>
-            </FlowTableColumn>
-            <FlowTableColumn TItem="Script" Width="10rem" LargeWidth="18rem" Align="FlowTableAlignment.Center" Hidden=@(SelectedType == ScriptType.Shared)>
-                <Header>
-                    In Use
-                </Header>
-                <Cell Context="item">
-                    @if (item.UsedBy?.Any() == true)
-                    {
-                        <i class="fas fa-check"></i>
-                    }
-                </Cell>
-            </FlowTableColumn>
+            <FlowTableColumn TItem="Script"NoHeight="true">
+               <Header>
+                   @Globals.lblName
+               </Header>
+               <Cell Context="item">
+               @{
+                   
+                   var match = Regex.Match(item.CommentBlock, @"@description\s+(.*?)\s*[@\*/]", RegexOptions.Singleline);
+                   string description = match.Success ? match.Groups[1].Value : null;
+                   match = Regex.Match(item.CommentBlock, @"@author\s+(.*?)\s*[@\*/]", RegexOptions.Singleline);
+                   string author = match.Success ? match.Groups[1].Value : null;
+               }
+                   <div class="table-item">
+                       <span class="icon">
+                           @{
+                               string icon = GetIcon(item);
+                           }
+                           @if(icon.EndsWith(".svg"))
+                           {
+                               <img src="@icon"/>
+                           }
+                           else
+                           {
+                               <i class="icon @icon"></i>
+                           }
+                       </span>
+                       <div class="center">
+                           <span class="name">
+                               <span>@item.Name</span>
+                               @if(description != null){
+                                   <span>@description</span>
+                               }
+                           </span>
+                           <div class="info">
+                               <IconValue Color="IconValueColor.Blue" Icon="fas fa-code-branch" Value="@item.Revision.ToString()" />
+                               @if (item.LatestRevision > item.Revision)
+                               {
+                                   <IconValue Color="IconValueColor.Orange" Icon="fas fa-code-branch" Value="@item.LatestRevision.ToString()" Tooltip="@lblUpdateAvailable"/>
+                               }
+                                @if (item.UsedBy?.Any() == true)
+                                {
+                                    <IconValue Color="IconValueColor.Green" OnClick="() => OpenUsedBy(item)" Icon="fas fa-folder" Value="@lblInUse" />
+                                }
+                           </div>
+                       </div>
+                        <div class="right">
+                            @if (author != null)
+                            {
+                                <span class="top-right @(item.Repository ? "error" : "") title=@(item.Repository ? lblReadOnly : "")">
+                                    @if (item.Repository)
+                                    {
+                                        <i class="fas fa-ban"></i>
+                                    }
+                                    @author
+                                </span>
+                            }
+                        </div>
+                   </div>
+                       
+               </Cell>
+           </FlowTableColumn>
             <FlowTableColumn TItem="Script" Width="36rem" MobileWidth="0" Hidden=@(SelectedType != ScriptType.Shared)>
                 <Header>
                     Import

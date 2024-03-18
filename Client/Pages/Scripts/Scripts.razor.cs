@@ -31,7 +31,7 @@ public partial class Scripts : ListPage<string, Script>
     private List<Script> DataShared = new();
     private ScriptType SelectedType = ScriptType.Flow;
 
-    private string lblUpdateScripts, lblUpdatingScripts;
+    private string lblUpdateScripts, lblUpdatingScripts, lblInUse, lblReadOnly, lblUpdateAvailable;
 
     /// <summary>
     /// Gets or sets the instance of the ScriptBrowser
@@ -43,6 +43,9 @@ public partial class Scripts : ListPage<string, Script>
         base.OnInitialized();
         this.lblUpdateScripts = Translater.Instant("Pages.Scripts.Buttons.UpdateAllScripts");
         this.lblUpdatingScripts = Translater.Instant("Pages.Scripts.Labels.UpdatingScripts");
+        lblInUse = Translater.Instant("Labels.InUse");
+        lblReadOnly = Translater.Instant("Labels.ReadOnly");
+        lblUpdateAvailable = Translater.Instant("Pages.Scripts.Labels.UpdateAvailable");
     }
 
 
@@ -183,6 +186,14 @@ public partial class Scripts : ListPage<string, Script>
             return;
         await UsedByDialog.Show(item.UsedBy);
     }
+    /// <summary>
+    /// Opens the used by dialog
+    /// </summary>
+    /// <param name="item">the item to open used by for</param>
+    /// <returns>a task to await</returns>
+    private Task OpenUsedBy(Script item)
+        => UsedByDialog.Show(item.UsedBy);
+
     
     
     public override Task PostLoad()
@@ -280,5 +291,43 @@ public partial class Scripts : ListPage<string, Script>
         {
             this.Blocker.Hide();
         }
+    }
+
+    private string GetIcon(Script item)
+    {
+        string url = "";
+#if (DEBUG)
+        url = "http://localhost:6868" + url;
+#endif
+        string nameLower = item.Name.ToLowerInvariant();
+        if (nameLower.StartsWith("video"))
+            return "/icons/video.svg";
+        if (item.Name == "FILE_DISPLAY_NAME")
+            return "fas fa-signature";
+        if (nameLower.StartsWith("fileflows"))
+            return "/favicon.svg";
+        if (nameLower.StartsWith("image"))
+            return "/icons/image.svg";
+        if (nameLower.StartsWith("folder"))
+            return "/icons/filetypes/folder.svg";
+        if (nameLower.StartsWith("file"))
+            return url + "/icon/filetype/file.svg";
+        if (nameLower.StartsWith("7zip"))
+            return url + "/icon/filetype/7z.svg";
+        if (nameLower.StartsWith("language"))
+            return "fas fa-comments";
+        var icons = new[]
+        {
+            "apple", "apprise", "audio", "basic", "comic", "database", "docker", "emby", "folder", "gotify", "gz",
+            "image", "intel", "linux", "nvidia", "plex", "pushbullet", "pushover", "radarr", "sabnzbd", "sonarr", "video", "windows"
+        };
+        foreach (var icon in icons)
+        {
+            if (nameLower.StartsWith(icon))
+                return $"/icons/{icon}.svg";
+        }
+
+        return "fas fa-scroll";
+
     }
 }

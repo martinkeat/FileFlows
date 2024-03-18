@@ -1298,8 +1298,14 @@ input[type=file]{
     text-align: center;
     background: #303030;
     right: 0;
+    i {
+        margin-right:0.5rem;
+    }
 
     &.warning {
         background: var(--warning);
+    }
+    &.error {
+        background: var(--danger);
     }
 }

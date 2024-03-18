@@ -235,6 +235,36 @@ public partial class Plugins : ListPage<Guid, PluginInfoModel>
         await OpenUsedBy(item);
     }
     
+    /// <summary>
+    /// Opens the used by dialog
+    /// </summary>
+    /// <param name="item">the plugin info model to open used by for</param>
+    /// <returns>a task to await</returns>
     private Task OpenUsedBy(PluginInfoModel item)
-        => UsedByDialog.Show(item.UsedBy); 
+        => UsedByDialog.Show(item.UsedBy);
+    
+    
+
+    /// <summary>
+    /// we only want to do the sort the first time, otherwise the list will jump around for the user
+    /// </summary>
+    private List<Guid> initialSortOrder;
+    
+    /// <inheritdoc />
+    public override Task PostLoad()
+    {
+        if (initialSortOrder == null)
+        {
+            Data = Data?.OrderByDescending(x => x.Enabled)?.ThenBy(x => x.Name)
+                ?.ToList();
+            initialSortOrder = Data?.Select(x => x.Uid)?.ToList();
+        }
+        else
+        {
+            Data = Data?.OrderBy(x => initialSortOrder.Contains(x.Uid) ? initialSortOrder.IndexOf(x.Uid) : 1000000)
+                .ThenBy(x => x.Name)
+                ?.ToList();
+        }
+        return base.PostLoad();
+    }
 }

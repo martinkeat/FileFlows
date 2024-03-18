@@ -3768,8 +3768,14 @@ hr {
   background: #303030;
   right: 0;
 }
+.top-right i {
+  margin-right: 0.5rem;
+}
 .top-right.warning {
   background: var(--warning);
+}
+.top-right.error {
+  background: var(--danger);
 }
 
 /*# sourceMappingURL=app.css.map */

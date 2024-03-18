@@ -787,7 +787,8 @@
       },
       "Labels": {
         "ScriptBrowser":"Script Repository",
-        "UpdatingScripts": "Updating Scripts"
+        "UpdatingScripts": "Updating Scripts",
+        "UpdateAvailable": "Update Available"
       },
       "Buttons": {
         "ScriptBrowser": "Repository",

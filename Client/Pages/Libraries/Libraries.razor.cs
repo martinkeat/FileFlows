@@ -259,5 +259,29 @@ public partial class Libraries : ListPage<Guid, Library>
     /// <returns>if the storage savings were in the dictionary</returns>
     private bool GetStorageSaved(string libraryName, out StorageSavedData storageSavedData)
         => StorageSaved.TryGetValue(libraryName, out storageSavedData);
+    
+    
+    /// <summary>
+    /// we only want to do the sort the first time, otherwise the list will jump around for the user
+    /// </summary>
+    private List<Guid> initialSortOrder;
+    
+    /// <inheritdoc />
+    public override Task PostLoad()
+    {
+        if (initialSortOrder == null)
+        {
+            Data = Data?.OrderByDescending(x => x.Enabled)?.ThenBy(x => x.Name)
+                ?.ToList();
+            initialSortOrder = Data?.Select(x => x.Uid)?.ToList();
+        }
+        else
+        {
+            Data = Data?.OrderBy(x => initialSortOrder.Contains(x.Uid) ? initialSortOrder.IndexOf(x.Uid) : 1000000)
+                .ThenBy(x => x.Name)
+                ?.ToList();
+        }
+        return base.PostLoad();
+    }
 }
 
