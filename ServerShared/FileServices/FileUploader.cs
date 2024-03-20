@@ -87,7 +87,7 @@ public class FileUploader
             url += "?path=" + HttpUtility.UrlEncode(serverPath);
             logger.ILog("Uploading file to URL: " + url);
 
-            await using var fileStream = File.OpenRead(filePath);
+            await using var fileStream = FileOpenHelper.OpenRead_NoLocks(filePath);
             var content = new StreamContent(fileStream);
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, url);
             request.Headers.Add("x-executor", executorUid.ToString());
@@ -116,7 +116,7 @@ public class FileUploader
     /// <returns>The computed SHA256 hash of the file as a byte array.</returns>
     private static async Task<byte[]> CalculateFileHash(string filePath)
     {
-        await using var stream = File.OpenRead(filePath);
+        await using var stream = FileOpenHelper.OpenRead_NoLocks(filePath);
         return await SHA256.Create().ComputeHashAsync(stream);
     }
 

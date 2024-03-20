@@ -7,7 +7,6 @@ namespace FileFlows.ServerShared.Helpers;
 /// </summary>
 public class FileHelper
 {
-
     /// <summary>
     /// Removes illegal file/path characters from a string
     /// </summary>
@@ -46,7 +45,7 @@ public class FileHelper
             }
             else
             {
-                using var stream = File.OpenRead(file);
+                using var stream = FileOpenHelper.OpenRead_NoLocks(file);
                 hash = hasher.ComputeHash(stream);
             }
 

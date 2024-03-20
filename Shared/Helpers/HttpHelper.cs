@@ -143,7 +143,7 @@ public class HttpHelper
 
             using HttpResponseMessage response = await Client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
             await using var streamToReadFrom = await response.Content.ReadAsStreamAsync();
-            await using var streamToWriteTo = File.Open(destination, FileMode.Create);
+            await using var streamToWriteTo = FileOpenHelper.OpenWrite_NoReadLock(destination, FileMode.Create);
             await streamToReadFrom.CopyToAsync(streamToWriteTo);
         }
         catch (Exception ex)

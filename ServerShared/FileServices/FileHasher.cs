@@ -19,21 +19,21 @@ public static class FileHasher
             var fileInfo = new FileInfo(filePath);
             if (!fileInfo.Exists)
                 return string.Empty;
-            
-            using(var stream = new BufferedStream(File.OpenRead(filePath), 1200000))
+
+            using (var stream = new BufferedStream(FileOpenHelper.OpenRead_NoLocks(filePath), 1200000))
             {
                 // The rest remains the same
                 var sha = SHA256.Create();
                 byte[] checksum = await sha.ComputeHashAsync(stream);
                 return BitConverter.ToString(checksum).Replace("-", string.Empty);
             }
-            
+
             using var hasher = SHA256.Create();
             byte[]? hash;
 
             if (fileInfo.Length > 100_000_000)
             {
-                using var stream = File.OpenRead(filePath);
+                using var stream = FileOpenHelper.OpenRead_NoLocks(filePath);
                 const int chunkSize = 100_000_000; // 100MB chunks
                 var buffer = new byte[chunkSize];
 
@@ -51,7 +51,7 @@ public static class FileHasher
             }
             else
             {
-                await using var stream = File.OpenRead(filePath);
+                await using var stream = FileOpenHelper.OpenRead_NoLocks(filePath);
                 hash = await hasher.ComputeHashAsync(stream);
             }
 

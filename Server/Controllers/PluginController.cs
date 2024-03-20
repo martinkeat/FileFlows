@@ -218,7 +218,7 @@ public class PluginController : Controller
 
         try
         {
-            return File(System.IO.File.OpenRead(file), "application/octet-stream");
+            return File(FileOpenHelper.OpenRead_NoLocks(file), "application/octet-stream");
         }
         catch(Exception ex)
         {

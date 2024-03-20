@@ -791,7 +791,7 @@ public class WatchedLibrary:IDisposable
 
             checkedAccess = true;
 
-            using (var fs = File.Open(file.FullName, FileMode.Open))
+            using (var fs = FileOpenHelper.OpenForCheckingReadWriteAccess(file.FullName))
             {
                 if(fs.CanRead == false)
                 {
