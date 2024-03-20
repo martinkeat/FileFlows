@@ -140,7 +140,7 @@ public class DatabaseService
     /// </summary>
     private void RestoreDefaults()
     {
-        new NodeManager().EnsureInternalNodeExists();
+        new NodeManager().EnsureInternalNodeExists().Wait();
         new VariableManager().RestoreDefault();
     }
 

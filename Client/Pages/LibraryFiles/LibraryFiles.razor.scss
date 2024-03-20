@@ -107,3 +107,12 @@
         }
     }
 }
+
+.file-size {
+    display: flex;
+    align-items: center;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    font-weight: var(--bold, 600);
+}

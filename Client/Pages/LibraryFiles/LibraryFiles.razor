@@ -149,19 +149,25 @@
                         }
                     </div>
                     </div>
-                    @if (SelectedStatus != FileStatus.Processing && SelectedStatus != FileStatus.ReprocessByFlow)
+                    @if (SelectedStatus != FileStatus.Processing)
                     {
                         <div class="right savings">
                             <span class="top-right">@DateString(item.Date)</span>
-                            @if (item.OriginalSize != null && item.FinalSize != null)
+                            @if (SelectedStatus is not FileStatus.ReprocessByFlow and not FileStatus.Unprocessed && item.OriginalSize != null && item.FinalSize != null)
                             {
                                 <div class="right-inner">
                                     <FlowSavings FinalSize="@item.FinalSize.Value" OriginalSize="@item.OriginalSize.Value"/>
                                 </div>
                             }
+                            else if(item.OriginalSize != null)
+                            {
+                                <div class="right-inner">
+                                    <span class="file-size">@FileSizeHelper.Humanize(item.OriginalSize.Value)</span>
+                                </div>
+                            }
                         </div>
                     }
-                    else if (SelectedStatus == FileStatus.Processing)
+                    else
                     {
                         <div class="right processing">
                         @{

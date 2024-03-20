@@ -9,7 +9,6 @@ using FileFlows.ServerShared.Models;
 using FileFlows.Shared;
 using FileFlows.Shared.Json;
 using FileFlows.Shared.Models;
-using SQLitePCL;
 
 namespace FileFlows.DataLayer;
 
@@ -967,19 +966,19 @@ internal class DbLibraryFileManager : BaseManager
 
 
 
-            var possibleComplexSortingLibraries = args.AllowedLibraries?.Where(x =>
+            var possibleComplexSortingLibraries = args.SysInfo.AllLibraries.Values.Where(library =>
             {
-                if (args.SysInfo.AllLibraries.TryGetValue(x, out Library library) == false)
-                    return false;
                 if (library.Enabled == false)
                     return false;
                 if (library.ProcessingOrder == ProcessingOrder.AsFound)
+                    return false;
+                if (args.AllowedLibraries?.Any() == true && args.AllowedLibraries.Contains(library.Uid) == false)
                     return false;
                 if (TimeHelper.InSchedule(library.Schedule) == false)
                     return false;
                 // check this library has any unprocessed files
                 return true;
-            })?.ToArray() ?? new Guid[] { };
+            }).Select(x => x.Uid)?.ToArray() ?? new Guid[] { };
             
 
             sql = $"select {Wrap(nameof(LibraryFile))}.* from {Wrap(nameof(LibraryFile))} " +
@@ -1015,51 +1014,35 @@ internal class DbLibraryFileManager : BaseManager
 
             switch (DbType)
             {
-                case DatabaseType.SqlServer:
-                    orderBys.Add($@" 
-case 
-    when json_value({Wrap(nameof(DbObject))}.{Wrap(nameof(DbObject.Data))}, '$.{nameof(Library.ProcessingOrder)}') = '{(int)ProcessingOrder.Random}' then rand()
-    when json_value({Wrap(nameof(DbObject))}.{Wrap(nameof(DbObject.Data))}, '$.{nameof(Library.ProcessingOrder)}') = '{(int)ProcessingOrder.SmallestFirst}' then {Wrap(nameof(LibraryFile))}.{Wrap(nameof(LibraryFile.OriginalSize))}
-    when json_value({Wrap(nameof(DbObject))}.{Wrap(nameof(DbObject.Data))}, '$.{nameof(Library.ProcessingOrder)}') = '{(int)ProcessingOrder.LargestFirst}' then {Wrap(nameof(LibraryFile))}.{Wrap(nameof(LibraryFile.OriginalSize))} * -1
-    when json_value({Wrap(nameof(DbObject))}.{Wrap(nameof(DbObject.Data))}, '$.{nameof(Library.ProcessingOrder)}') = '{(int)ProcessingOrder.NewestFirst}' then DATEDIFF(second, '1970-01-01', {Wrap(nameof(LibraryFile))}.{Wrap(nameof(LibraryFile.CreationTime))}) * -1
-    when json_value({Wrap(nameof(DbObject))}.{Wrap(nameof(DbObject.Data))}, '$.{nameof(Library.ProcessingOrder)}') = '{(int)ProcessingOrder.OldestFirst}' then DATEDIFF(second, '1970-01-01', {Wrap(nameof(LibraryFile))}.{Wrap(nameof(LibraryFile.CreationTime))})
-    else null
-end ");
-                    orderBys.Add($@"
-case
-    when json_value({Wrap(nameof(DbObject))}.{Wrap(nameof(DbObject.Data))}, '$.{nameof(Library.ProcessingOrder)}') = '{(int)ProcessingOrder.Alphabetical}' then {Wrap(nameof(LibraryFile))}.{Wrap(nameof(LibraryFile.RelativePath))}
-    else null
-end ");
-                    break;
                 case DatabaseType.MySql:
                     orderBys.Add($@" 
 case 
-    when json_extract({Wrap(nameof(DbObject))}.{Wrap(nameof(DbObject.Data))}, '$.{nameof(Library.ProcessingOrder)}') = '{(int)ProcessingOrder.Random}' then rand()
-    when json_extract({Wrap(nameof(DbObject))}.{Wrap(nameof(DbObject.Data))}, '$.{nameof(Library.ProcessingOrder)}') = '{(int)ProcessingOrder.SmallestFirst}' then {Wrap(nameof(LibraryFile))}.{Wrap(nameof(LibraryFile.OriginalSize))}
-    when json_extract({Wrap(nameof(DbObject))}.{Wrap(nameof(DbObject.Data))}, '$.{nameof(Library.ProcessingOrder)}') = '{(int)ProcessingOrder.LargestFirst}' then {Wrap(nameof(LibraryFile))}.{Wrap(nameof(LibraryFile.OriginalSize))} * -1 
-    when json_extract({Wrap(nameof(DbObject))}.{Wrap(nameof(DbObject.Data))}, '$.{nameof(Library.ProcessingOrder)}') = '{(int)ProcessingOrder.NewestFirst}' then {Wrap(nameof(LibraryFile))}.{Wrap(nameof(LibraryFile.CreationTime))} * -1
-    when json_extract({Wrap(nameof(DbObject))}.{Wrap(nameof(DbObject.Data))}, '$.{nameof(Library.ProcessingOrder)}') = '{(int)ProcessingOrder.OldestFirst}' then {Wrap(nameof(LibraryFile))}.{Wrap(nameof(LibraryFile.CreationTime))} 
+    when json_extract({Wrap(nameof(DbObject))}.{Wrap(nameof(DbObject.Data))}, '$.{nameof(Library.ProcessingOrder)}') = {(int)ProcessingOrder.Random} then cast(rand() as decimal)
+    when json_extract({Wrap(nameof(DbObject))}.{Wrap(nameof(DbObject.Data))}, '$.{nameof(Library.ProcessingOrder)}') = {(int)ProcessingOrder.SmallestFirst} then cast({Wrap(nameof(LibraryFile))}.{Wrap(nameof(LibraryFile.OriginalSize))} as decimal)
+    when json_extract({Wrap(nameof(DbObject))}.{Wrap(nameof(DbObject.Data))}, '$.{nameof(Library.ProcessingOrder)}') = {(int)ProcessingOrder.LargestFirst} then cast({Wrap(nameof(LibraryFile))}.{Wrap(nameof(LibraryFile.OriginalSize))} as decimal) * -1
+    when json_extract({Wrap(nameof(DbObject))}.{Wrap(nameof(DbObject.Data))}, '$.{nameof(Library.ProcessingOrder)}') = {(int)ProcessingOrder.NewestFirst} then cast(TIMESTAMPDIFF(SECOND, '1970-01-01', {Wrap(nameof(LibraryFile))}.{Wrap(nameof(LibraryFile.CreationTime))}) as decimal) * -1
+    when json_extract({Wrap(nameof(DbObject))}.{Wrap(nameof(DbObject.Data))}, '$.{nameof(Library.ProcessingOrder)}') = {(int)ProcessingOrder.OldestFirst} then cast(TIMESTAMPDIFF(SECOND, '1970-01-01', {Wrap(nameof(LibraryFile))}.{Wrap(nameof(LibraryFile.CreationTime))}) as decimal)
     else null 
 end ");
                     orderBys.Add($@"
 case 
-    when json_extract({Wrap(nameof(DbObject))}.{Wrap(nameof(DbObject.Data))}, '$.{nameof(Library.ProcessingOrder)}') = '{(int)ProcessingOrder.Alphabetical}' then {Wrap(nameof(LibraryFile))}.{Wrap(nameof(LibraryFile.RelativePath))}
+    when json_extract({Wrap(nameof(DbObject))}.{Wrap(nameof(DbObject.Data))}, '$.{nameof(Library.ProcessingOrder)}') = {(int)ProcessingOrder.Alphabetical} then {Wrap(nameof(LibraryFile))}.{Wrap(nameof(LibraryFile.RelativePath))}
     else null
 end");
                     break;
                 case DatabaseType.Sqlite:
                     orderBys.Add($@" 
 case 
-    when json_extract({Wrap(nameof(DbObject))}.{Wrap(nameof(DbObject.Data))}, '$.{nameof(Library.ProcessingOrder)}') = '{(int)ProcessingOrder.Random}' then random()
-    when json_extract({Wrap(nameof(DbObject))}.{Wrap(nameof(DbObject.Data))}, '$.{nameof(Library.ProcessingOrder)}') = '{(int)ProcessingOrder.SmallestFirst}' then {Wrap(nameof(LibraryFile))}.{Wrap(nameof(LibraryFile.OriginalSize))}
-    when json_extract({Wrap(nameof(DbObject))}.{Wrap(nameof(DbObject.Data))}, '$.{nameof(Library.ProcessingOrder)}') = '{(int)ProcessingOrder.LargestFirst}' then {Wrap(nameof(LibraryFile))}.{Wrap(nameof(LibraryFile.OriginalSize))} * -1 
-    when json_extract({Wrap(nameof(DbObject))}.{Wrap(nameof(DbObject.Data))}, '$.{nameof(Library.ProcessingOrder)}') = '{(int)ProcessingOrder.NewestFirst}' then {Wrap(nameof(LibraryFile))}.{Wrap(nameof(LibraryFile.CreationTime))} * -1
-    when json_extract({Wrap(nameof(DbObject))}.{Wrap(nameof(DbObject.Data))}, '$.{nameof(Library.ProcessingOrder)}') = '{(int)ProcessingOrder.OldestFirst}' then {Wrap(nameof(LibraryFile))}.{Wrap(nameof(LibraryFile.CreationTime))} 
+    when json_extract({Wrap(nameof(DbObject))}.{Wrap(nameof(DbObject.Data))}, '$.{nameof(Library.ProcessingOrder)}') = {(int)ProcessingOrder.Random} then random()
+    when json_extract({Wrap(nameof(DbObject))}.{Wrap(nameof(DbObject.Data))}, '$.{nameof(Library.ProcessingOrder)}') = {(int)ProcessingOrder.SmallestFirst} then {Wrap(nameof(LibraryFile))}.{Wrap(nameof(LibraryFile.OriginalSize))}
+    when json_extract({Wrap(nameof(DbObject))}.{Wrap(nameof(DbObject.Data))}, '$.{nameof(Library.ProcessingOrder)}') = {(int)ProcessingOrder.LargestFirst} then {Wrap(nameof(LibraryFile))}.{Wrap(nameof(LibraryFile.OriginalSize))} * -1 
+    when json_extract({Wrap(nameof(DbObject))}.{Wrap(nameof(DbObject.Data))}, '$.{nameof(Library.ProcessingOrder)}') = {(int)ProcessingOrder.NewestFirst} then strftime('%s', {Wrap(nameof(LibraryFile))}.{Wrap(nameof(LibraryFile.CreationTime))}) * -1
+    when json_extract({Wrap(nameof(DbObject))}.{Wrap(nameof(DbObject.Data))}, '$.{nameof(Library.ProcessingOrder)}') = {(int)ProcessingOrder.OldestFirst} then {Wrap(nameof(LibraryFile))}.{Wrap(nameof(LibraryFile.CreationTime))} 
     else null 
 end ");
                     orderBys.Add($@"
 case 
-    when json_extract({Wrap(nameof(DbObject))}.{Wrap(nameof(DbObject.Data))}, '$.{nameof(Library.ProcessingOrder)}') = '{(int)ProcessingOrder.Alphabetical}' then {Wrap(nameof(LibraryFile))}.{Wrap(nameof(LibraryFile.RelativePath))}
+    when json_extract({Wrap(nameof(DbObject))}.{Wrap(nameof(DbObject.Data))}, '$.{nameof(Library.ProcessingOrder)}') = {(int)ProcessingOrder.Alphabetical} then {Wrap(nameof(LibraryFile))}.{Wrap(nameof(LibraryFile.RelativePath))}
     else null
 end");
                     break;
@@ -1080,6 +1063,22 @@ case
 end");
                     break;
 
+                case DatabaseType.SqlServer:
+                    orderBys.Add($@" 
+case 
+    when json_value({Wrap(nameof(DbObject))}.{Wrap(nameof(DbObject.Data))}, '$.{nameof(Library.ProcessingOrder)}') = {(int)ProcessingOrder.Random} then CAST(CHECKSUM(NEWID()) AS FLOAT)
+    when json_value({Wrap(nameof(DbObject))}.{Wrap(nameof(DbObject.Data))}, '$.{nameof(Library.ProcessingOrder)}') = {(int)ProcessingOrder.SmallestFirst} then {Wrap(nameof(LibraryFile))}.{Wrap(nameof(LibraryFile.OriginalSize))}
+    when json_value({Wrap(nameof(DbObject))}.{Wrap(nameof(DbObject.Data))}, '$.{nameof(Library.ProcessingOrder)}') = {(int)ProcessingOrder.LargestFirst} then {Wrap(nameof(LibraryFile))}.{Wrap(nameof(LibraryFile.OriginalSize))} * -1
+    when json_value({Wrap(nameof(DbObject))}.{Wrap(nameof(DbObject.Data))}, '$.{nameof(Library.ProcessingOrder)}') = {(int)ProcessingOrder.NewestFirst} then DATEDIFF(second, '1970-01-01', {Wrap(nameof(LibraryFile))}.{Wrap(nameof(LibraryFile.CreationTime))}) * -1
+    when json_value({Wrap(nameof(DbObject))}.{Wrap(nameof(DbObject.Data))}, '$.{nameof(Library.ProcessingOrder)}') = {(int)ProcessingOrder.OldestFirst} then DATEDIFF(second, '1970-01-01', {Wrap(nameof(LibraryFile))}.{Wrap(nameof(LibraryFile.CreationTime))})
+    else null
+end ");
+                    orderBys.Add($@"
+case
+    when json_value({Wrap(nameof(DbObject))}.{Wrap(nameof(DbObject.Data))}, '$.{nameof(Library.ProcessingOrder)}') = {(int)ProcessingOrder.Alphabetical} then {Wrap(nameof(LibraryFile))}.{Wrap(nameof(LibraryFile.RelativePath))}
+    else null
+end ");
+                    break;
             }
 
             orderBys.Add($"{Wrap(nameof(LibraryFile.DateCreated))}");
