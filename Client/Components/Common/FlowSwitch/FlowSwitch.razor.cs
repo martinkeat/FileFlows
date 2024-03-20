@@ -11,15 +11,7 @@
         public bool Value
         {
             get => _Value;
-            set
-            {
-                if(_Value != value)
-                {
-                    _Value = value;
-                    if(ValueChanged.HasDelegate)
-                        ValueChanged.InvokeAsync(value);
-                }
-            }
+            set => _Value = value;
         }
 
         [Parameter]
@@ -41,7 +33,12 @@
 
         private void ToggleValue(EventArgs args)
         {
+            if (ReadOnly)
+                return;
+            
             this.Value = !this.Value;
+            if(ValueChanged.HasDelegate)
+                ValueChanged.InvokeAsync(this.Value);
         }
     }
 }

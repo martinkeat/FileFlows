@@ -171,9 +171,6 @@ public abstract class ListPage<U, T> : ComponentBase where T : IUniqueObject<U>
 
     public async Task Enable(bool enabled, T item)
     {
-#if (DEMO)
-        return;
-#else
         Blocker.Show();
         this.StateHasChanged();
         Data.Clear();
@@ -186,7 +183,6 @@ public abstract class ListPage<U, T> : ComponentBase where T : IUniqueObject<U>
             Blocker.Hide();
             this.StateHasChanged();
         }
-#endif
     }
 
     protected virtual string DeleteMessage => "Labels.DeleteItems";
