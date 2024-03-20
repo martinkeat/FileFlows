@@ -764,6 +764,7 @@ internal class DbLibraryFileManager : BaseManager
 #endif
                 if (sql.StartsWith("select") == false)
                     sql = $"select {Wrap(nameof(LibraryFile))}.* from {Wrap(nameof(LibraryFile))} " + sql;
+                orderBys = orderBys.Where(x => string.IsNullOrWhiteSpace(x) == false).ToList();
                 return sql + (orderBys.Any() == false ? "" : "order by \n" + string.Join(", \n", orderBys));
             }
 
@@ -979,6 +980,18 @@ internal class DbLibraryFileManager : BaseManager
                 // check this library has any unprocessed files
                 return true;
             })?.ToArray() ?? new Guid[] { };
+            
+
+            sql = $"select {Wrap(nameof(LibraryFile))}.* from {Wrap(nameof(LibraryFile))} " +
+                  $" inner join {Wrap(nameof(DbObject))} on " +
+                  $" {Wrap(nameof(DbObject))}.{Wrap(nameof(DbObject.Type))} = '{typeof(Library).FullName}' and " +
+                  $" {Wrap(nameof(DbObject))}.{Wrap(nameof(DbObject.Uid))} = " +
+                  (DbType != DatabaseType.Postgres
+                      ? $" {Wrap(nameof(LibraryFile))}.{Wrap(nameof(LibraryFile.LibraryUid))} "
+                      : $" cast({Wrap(nameof(LibraryFile))}.{Wrap(nameof(LibraryFile.LibraryUid))} as uuid) "
+                  ) + sql;
+            
+            orderBys.Add(OrderByLibraryPriority());
 
             if (possibleComplexSortingLibraries.Any() == false || args.SysInfo.LicensedForProcessingOrder == false)
             {
@@ -999,15 +1012,6 @@ internal class DbLibraryFileManager : BaseManager
                 orderBys.Add($"{Wrap(nameof(LibraryFile.DateCreated))}");
                 return ReturnWithOrderBy();
             }
-
-            sql = $"select {Wrap(nameof(LibraryFile))}.* from {Wrap(nameof(LibraryFile))} " +
-                  $" inner join {Wrap(nameof(DbObject))} on " +
-                  $" {Wrap(nameof(DbObject))}.{Wrap(nameof(DbObject.Type))} = '{typeof(Library).FullName}' and " +
-                  $" {Wrap(nameof(DbObject))}.{Wrap(nameof(DbObject.Uid))} = " +
-                  (DbType != DatabaseType.Postgres
-                      ? $" {Wrap(nameof(LibraryFile))}.{Wrap(nameof(LibraryFile.LibraryUid))} "
-                      : $" cast({Wrap(nameof(LibraryFile))}.{Wrap(nameof(LibraryFile.LibraryUid))} as uuid) "
-                  ) + sql;
 
             switch (DbType)
             {
@@ -1088,6 +1092,28 @@ end");
             return string.Empty;
         }
     }
+
+    /// <summary>
+    /// Gets the order by SQL for library priority
+    /// </summary>
+    /// <returns>the order by SQL</returns>
+    private string OrderByLibraryPriority()
+    {
+        switch (DbType)
+        {
+            case DatabaseType.SqlServer:
+                return $@"cast(json_value({Wrap(nameof(DbObject))}.{Wrap(nameof(DbObject.Data))}, '$.{nameof(Library.Priority)}') as int) desc";
+            case DatabaseType.MySql:
+                return $@"json_extract({Wrap(nameof(DbObject))}.{Wrap(nameof(DbObject.Data))}, '$.{nameof(Library.Priority)}') desc";
+            case DatabaseType.Sqlite:
+                return $@"json_extract({Wrap(nameof(DbObject))}.{Wrap(nameof(DbObject.Data))}, '$.{nameof(Library.Priority)}') desc";
+            case DatabaseType.Postgres:
+                return $@"cast({Wrap(nameof(DbObject))}.{Wrap(nameof(DbObject.Data))}::json->>'{nameof(Library.Priority)}' as int) desc";
+        }
+
+        return string.Empty;
+    }
+
     #endregion
     
     #region get overview

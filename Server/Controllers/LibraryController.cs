@@ -88,7 +88,7 @@ public class LibraryController : Controller
             RefreshCaches();
 
             if (newLib)
-                Rescan(new() { Uids = new[] { library.Uid } });
+                _ = Rescan(new() { Uids = new[] { library.Uid } });
         });
         
         return Ok(library);

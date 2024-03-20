@@ -102,7 +102,7 @@ public abstract class ListPage<U, T> : ComponentBase where T : IUniqueObject<U>
                 if (Table != null)
                 {
                     SetTableData(this.Data);
-                    var item = this.Data.Where(x => x.Uid.Equals(selectedUid)).FirstOrDefault();
+                    var item = this.Data.FirstOrDefault(x => x.Uid.Equals(selectedUid));
                     if (item != null)
                     {
                         _ = Task.Run(async () =>
