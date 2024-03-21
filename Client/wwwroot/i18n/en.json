@@ -529,7 +529,7 @@
     "Libraries": {
       "Title": "Libraries",      
       "Messages":{
-        "DeleteConfirm": "Are you sure you want to delete the selected {count, plural, one {library} other {libraries}}?\n\nIf you wish to keep the records for the files in {count, plural, one {this library} other {these libraries}}, then check the option below.",
+        "DeleteConfirm": "Are you sure you want to delete the selected {count, plural, one {library} other {libraries}}?",
         "KeepLibraryFiles":"Retain files in database for statistics",
         "Reprocess" : {
           "Title":"Reprocess Selected Libraries",

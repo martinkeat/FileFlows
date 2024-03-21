@@ -144,10 +144,9 @@ public class LibraryFileManager
     /// <summary>
     /// Deletes files from the database
     /// </summary>
-    /// <param name="nonProcessedOnly">if only non processed files should be delete</param>
     /// <param name="uids">the UIDs of the libraries to remove</param>
-    public Task DeleteByLibrary(Guid[] uids, bool nonProcessedOnly = false)
-        => DatabaseAccessManager.Instance.LibraryFileManager.DeleteByLibrary(nonProcessedOnly, uids);
+    public Task DeleteByLibrary(Guid[] uids)
+        => DatabaseAccessManager.Instance.LibraryFileManager.DeleteByLibrary(uids);
 
     /// <summary>
     /// Reprocess all files based on library UIDs

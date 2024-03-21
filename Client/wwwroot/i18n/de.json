@@ -521,8 +521,7 @@
     "Libraries": {
       "Title": "Bibliotheken",      
       "Messages":{
-        "DeleteConfirm": "Sind Sie sicher, dass Sie die ausgewählten {count, plural, one {library} other {libraries}} löschen möchten?\n\nWenn Sie die Datensätze für die Dateien in {count, plural, one {this library} other {these libraries}} beibehalten möchten, dann aktivieren Sie die unten stehende Option.",
-        "KeepLibraryFiles":"Dateien in der Datenbank für Statistiken aufbewahren",
+        "DeleteConfirm": "Sind Sie sicher, dass Sie die ausgewählten {count, plural, one {library} other {libraries}} löschen möchten?",
         "Reprocess" : {
           "Title":"Ausgewählte Bibliotheken nachbearbeiten",
           "Message": "Sind Sie sicher, dass Sie mit der erneuten Verarbeitung der ausgewählten Bibliotheken fortfahren möchten? Mit dieser Aktion werden alle Dateien als unverarbeitet markiert und ihre erneute Verarbeitung wird eingeleitet. Bitte beachten Sie, dass diese Aktion nicht rückgängig gemacht werden kann."

@@ -360,17 +360,14 @@ internal class DbLibraryFileManager : BaseManager
     /// <summary>
     /// Deletes files from the database
     /// </summary>
-    /// <param name="nonProcessedOnly">if only non processed files should be delete</param>
     /// <param name="libraryUids">the UIDs of the libraries to remove</param>
-    public async Task DeleteByLibrary(bool nonProcessedOnly, params Guid[] libraryUids)
+    public async Task DeleteByLibrary(params Guid[] libraryUids)
     {
         if (libraryUids?.Any() == false)
             return;   
         string inStr = string.Join(",", libraryUids.Select(x => $"'{x}'"));
         string sql = $"delete from  {Wrap(nameof(LibraryFile))} " +
                      $" where {Wrap(nameof(LibraryFile.LibraryUid))} in ({inStr})";
-        if(nonProcessedOnly)
-            sql += $" and {Wrap(nameof(LibraryFile.Status))} != {(int)FileStatus.Processed}";
         
         using var db = await DbConnector.GetDb();
         await db.Db.ExecuteAsync(sql);

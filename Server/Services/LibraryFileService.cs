@@ -427,13 +427,12 @@ public class LibraryFileService : ILibraryFileService
     /// Deletes the files from the given libraries
     /// </summary>
     /// <param name="uids">the UIDs of the libraries</param>
-    /// <param name="nonProcessedOnly">if only non processed files should be delete</param>
     /// <returns>a task to await</returns>
-    public async Task DeleteByLibrary(Guid[] uids, bool nonProcessedOnly = false)
+    public async Task DeleteByLibrary(Guid[] uids)
     {
         if (uids?.Any() != true)
             return;
-        await new LibraryFileManager().DeleteByLibrary(uids, nonProcessedOnly);
+        await new LibraryFileManager().DeleteByLibrary(uids);
         await ClientServiceManager.Instance.UpdateFileStatus();
     }
 

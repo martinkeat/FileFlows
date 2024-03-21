@@ -128,17 +128,18 @@ public class LibraryController : Controller
     /// Delete libraries from the system
     /// </summary>
     /// <param name="model">A reference model containing UIDs to delete</param>
-    /// <param name="deleteLibraryFiles">[Optional] if libraries files should also be deleted for this library</param>
     /// <returns>an awaited task,</returns>
     [HttpDelete]
-    public async Task Delete([FromBody] ReferenceModel<Guid> model, [FromQuery] bool deleteLibraryFiles = false)
+    public async Task Delete([FromBody] ReferenceModel<Guid> model)
     {
         if (model?.Uids?.Any() != true)
             return;
+        // delete the files first
+        await ServiceLoader.Load<LibraryFileService>().DeleteByLibrary(model.Uids);
+        // then delete the libraries
         await ServiceLoader.Load<LibraryService>().Delete(model.Uids);
-        await ServiceLoader.Load<LibraryFileService>().DeleteByLibrary(model.Uids, nonProcessedOnly: !deleteLibraryFiles);
 
-        UpdateHasLibraries();
+        await UpdateHasLibraries();
         RefreshCaches();
     }
 

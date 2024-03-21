@@ -44,7 +44,7 @@ CREATE TABLE LibraryFile
 (
     -- common fields from DbObject
     Uid                 VARCHAR(36)        COLLATE utf8_unicode_ci      NOT NULL          PRIMARY KEY,
-    Name                VARCHAR(1024)      COLLATE utf8_unicode_ci      NOT NULL          UNIQUE,
+    Name                VARCHAR(1024)      COLLATE utf8_unicode_ci      NOT NULL,
     DateCreated         datetime           default           now()      NOT NULL,
     DateModified        datetime           default           now()      NOT NULL,
     

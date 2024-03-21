@@ -44,7 +44,7 @@ CREATE TABLE "LibraryFile"
 (
     -- common fields from DbObject
     "Uid"                 uuid               NOT NULL          PRIMARY KEY,
-    "Name"                VARCHAR(1024)      NOT NULL          UNIQUE,
+    "Name"                VARCHAR(1024)      NOT NULL,
     "DateCreated"         TIMESTAMP           DEFAULT CURRENT_TIMESTAMP      NOT NULL,
     "DateModified"        TIMESTAMP           DEFAULT CURRENT_TIMESTAMP      NOT NULL,
 
