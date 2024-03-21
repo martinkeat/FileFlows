@@ -132,7 +132,7 @@ public class LanguageHelper
             new () {English = "Lower Sorbian",French = "bas-sorabe",German = "Niedersorbisch",Iso2 = "dsb"},
             new () {English = "Duala",French = "douala",German = "Duala-Sprachen",Iso2 = "dua"},
             new () {English = "Dutch, Middle (ca.1050-1350)",French = "n\u00E9erlandais moyen (ca. 1050-1350)",German = "Mittelniederl\u00E4ndisch",Iso2 = "dum"},
-            new () {English = "Dutch",French = "n\u00E9erlandais",German = "Niederl\u00E4ndisch",Iso2 = "nld",Iso1 = "nl"},
+            new () {English = "Dutch",French = "n\u00E9erlandais",German = "Niederl\u00E4ndisch",Iso2 = "nld",Iso1 = "nl", Aliases = new [] { "dut"}},
             new () {English = "Dyula",French = "dioula",German = "Dyula-Sprache",Iso2 = "dyu"},
             new () {English = "Dzongkha",French = "dzongkha",German = "Dzongkha",Iso2 = "dzo",Iso1 = "dz"},
             new () {English = "Efik",French = "efik",German = "Efik",Iso2 = "efi"},
