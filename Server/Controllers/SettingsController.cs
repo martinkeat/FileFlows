@@ -276,11 +276,12 @@ public class SettingsController : Controller
             return BadRequest("Invalid plugin: " + name);
         }
 
-        var file = Path.Combine(DirectoryHelper.PluginsDirectory, name);
-        if (System.IO.File.Exists(file) == false)
+        var file = new FileInfo(Path.Combine(DirectoryHelper.PluginsDirectory, name));
+        if (file.Exists == false)
             return NotFound(); // Plugin file not found
 
-        return PhysicalFile(file, "application/octet-stream"); 
+        var stream = new FileStream(file.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+        return File(stream, "application/octet-stream");
     }
     
     

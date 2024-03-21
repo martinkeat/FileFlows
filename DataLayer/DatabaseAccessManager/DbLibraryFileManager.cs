@@ -321,9 +321,19 @@ internal class DbLibraryFileManager : BaseManager
     /// <returns>the library file if it is known</returns>
     public async Task<LibraryFile?> GetFileByFingerprint(string fingerprint)
     {
-        using var db = await DbConnector.GetDb();
-        return await db.Db.FirstOrDefaultAsync<LibraryFile>($"where {Wrap(nameof(LibraryFile.Fingerprint))} = @0 or " +
-                                                            $" {Wrap(nameof(LibraryFile.FinalFingerprint))} = @0", fingerprint);
+        string sql =
+            $"select * from {Wrap(nameof(LibraryFile))} where {Wrap(nameof(LibraryFile.Fingerprint))} = @0 or " +
+            $" {Wrap(nameof(LibraryFile.FinalFingerprint))} = @0";
+        try
+        {
+            using var db = await DbConnector.GetDb();
+            return await db.Db.FirstOrDefaultAsync<LibraryFile>(sql, fingerprint);
+        }
+        catch (Exception ex)
+        {
+            Logger.ELog("Failed getting file by fingerprint: " + ex.Message + Environment.NewLine + sql);
+            return null;
+        }
     }
 
     #endregion

@@ -78,17 +78,26 @@ public class Upgrade_24_03_2
 
             // LibraryFiles
             var libFiles = db.Db.Fetch<LibraryFileUpgrade>(
-                "select Uid, DateCreated, DateModified, ProcessingStarted, ProcessingEnded, HoldUntil, CreationTime, LastWriteTime from LibraryFile");
+                "select Uid, Name, DateCreated, DateModified, ProcessingStarted, ProcessingEnded, HoldUntil, CreationTime, LastWriteTime from LibraryFile");
             sql.Clear();
             foreach (var lf in libFiles)
             {
+                var fileInfo = new FileInfo(lf.Name);
                 lf.DateCreated = DateTimeHelper.LocalToUtc(lf.DateCreated);
                 lf.DateModified = DateTimeHelper.LocalToUtc(lf.DateModified);
                 lf.ProcessingStarted = DateTimeHelper.LocalToUtc(lf.ProcessingStarted);
                 lf.ProcessingEnded = DateTimeHelper.LocalToUtc(lf.ProcessingEnded);
                 lf.HoldUntil = DateTimeHelper.LocalToUtc(lf.HoldUntil);
-                lf.CreationTime = DateTimeHelper.LocalToUtc(lf.CreationTime);
-                lf.LastWriteTime = DateTimeHelper.LocalToUtc(lf.LastWriteTime);
+                if (fileInfo.Exists)
+                {
+                    lf.CreationTime = fileInfo.CreationTimeUtc;
+                    lf.LastWriteTime = fileInfo.LastWriteTimeUtc;
+                }
+                else
+                {
+                    lf.CreationTime = DateTimeHelper.LocalToUtc(lf.CreationTime);
+                    lf.LastWriteTime = DateTimeHelper.LocalToUtc(lf.LastWriteTime);
+                }
                 sql.AppendLine("update LibraryFile set DateCreated = " +
                                connector.FormatDateQuoted(lf.DateCreated) +
                                ", DateModified = " + connector.FormatDateQuoted(lf.DateModified) +
@@ -98,9 +107,15 @@ public class Upgrade_24_03_2
                                ", CreationTime = " + connector.FormatDateQuoted(lf.CreationTime) +
                                ", LastWriteTime = " + connector.FormatDateQuoted(lf.LastWriteTime) +
                                $" where Uid = '{lf.Uid}';");
+                if (sql.Length > 1000)
+                {
+                    db.Db.Execute(sql.ToString());
+                    sql.Clear();
+                }
             }
 
-            db.Db.Execute(sql.ToString());
+            if(sql.Length > 0)
+                db.Db.Execute(sql.ToString());
 
             db.Db.Execute(
                 "update DbObject set Name = REPLACE(Name, 'PluginsSettings_', '') , Type = 'FileFlows.ServerShared.Models.PluginSettingsModel' where Type = 'FileFlows.Server.Models.PluginSettingsModel'");
@@ -147,21 +162,63 @@ public class Upgrade_24_03_2
         RevisionCreated = datetime(RevisionCreated, 'utc')
         ");
         
-            db.Db.Execute(@"
-        UPDATE LibraryFile SET 
-        DateCreated = datetime(DateCreated, 'utc'),
-        DateModified = datetime(DateModified, 'utc'),
-        CreationTime = datetime(CreationTime, 'utc'),
-        LastWriteTime = datetime(LastWriteTime, 'utc'),
-        HoldUntil = datetime(HoldUntil, 'utc'),
-        ProcessingStarted = datetime(ProcessingStarted, 'utc'),
-        ProcessingEnded = datetime(ProcessingEnded, 'utc')
-        ");
+        //     db.Db.Execute(@"
+        // UPDATE LibraryFile SET 
+        // DateCreated = datetime(DateCreated, 'utc'),
+        // DateModified = datetime(DateModified, 'utc'),
+        // CreationTime = datetime(CreationTime, 'utc'),
+        // LastWriteTime = datetime(LastWriteTime, 'utc'),
+        // HoldUntil = datetime(HoldUntil, 'utc'),
+        // ProcessingStarted = datetime(ProcessingStarted, 'utc'),
+        // ProcessingEnded = datetime(ProcessingEnded, 'utc')
+        // ");
+        //
+        //     string minDate = connector.FormatDateQuoted(new DateTime(1970, 1, 1));
+        //     db.Db.Execute($"UPDATE LibraryFile SET HoldUntil = {minDate} where HoldUntil < '1970-01-01'");
+        //     db.Db.Execute($"UPDATE LibraryFile SET ProcessingStarted = {minDate} where ProcessingStarted < '1970-01-01'");
+        //     db.Db.Execute($"UPDATE LibraryFile SET ProcessingEnded =  {minDate} where ProcessingEnded < '1970-01-01'");
+        
+        
+            // LibraryFiles
+            var libFiles = db.Db.Fetch<LibraryFileUpgrade>(
+                "select Uid, Name, DateCreated, DateModified, ProcessingStarted, ProcessingEnded, HoldUntil, CreationTime, LastWriteTime from LibraryFile");
+            StringBuilder sql = new ();
+            foreach (var lf in libFiles)
+            {
+                var fileInfo = new FileInfo(lf.Name);
+                lf.DateCreated = DateTimeHelper.LocalToUtc(lf.DateCreated);
+                lf.DateModified = DateTimeHelper.LocalToUtc(lf.DateModified);
+                lf.ProcessingStarted = DateTimeHelper.LocalToUtc(lf.ProcessingStarted);
+                lf.ProcessingEnded = DateTimeHelper.LocalToUtc(lf.ProcessingEnded);
+                lf.HoldUntil = DateTimeHelper.LocalToUtc(lf.HoldUntil);
+                if (fileInfo.Exists)
+                {
+                    lf.CreationTime = fileInfo.CreationTimeUtc;
+                    lf.LastWriteTime = fileInfo.LastWriteTimeUtc;
+                }
+                else
+                {
+                    lf.CreationTime = DateTimeHelper.LocalToUtc(lf.CreationTime);
+                    lf.LastWriteTime = DateTimeHelper.LocalToUtc(lf.LastWriteTime);
+                }
+                sql.AppendLine("update LibraryFile set DateCreated = " +
+                               connector.FormatDateQuoted(lf.DateCreated) +
+                               ", DateModified = " + connector.FormatDateQuoted(lf.DateModified) +
+                               ", ProcessingStarted = " + connector.FormatDateQuoted(lf.ProcessingStarted) +
+                               ", ProcessingEnded = " + connector.FormatDateQuoted(lf.ProcessingEnded) +
+                               ", HoldUntil = " + connector.FormatDateQuoted(lf.HoldUntil) +
+                               ", CreationTime = " + connector.FormatDateQuoted(lf.CreationTime) +
+                               ", LastWriteTime = " + connector.FormatDateQuoted(lf.LastWriteTime) +
+                               $" where Uid = '{lf.Uid}';");
+                if (sql.Length > 1000)
+                {
+                    db.Db.Execute(sql.ToString());
+                    sql.Clear();
+                }
+            }
 
-            string minDate = connector.FormatDateQuoted(new DateTime(1970, 1, 1));
-            db.Db.Execute($"UPDATE LibraryFile SET HoldUntil = {minDate} where HoldUntil < '1970-01-01'");
-            db.Db.Execute($"UPDATE LibraryFile SET ProcessingStarted = {minDate} where ProcessingStarted < '1970-01-01'");
-            db.Db.Execute($"UPDATE LibraryFile SET ProcessingEnded =  {minDate} where ProcessingEnded < '1970-01-01'");
+            if(sql.Length > 0)
+                db.Db.Execute(sql.ToString());
             
             db.Db.Execute(
                 "update DbObject set Name = REPLACE(Name, 'PluginsSettings_', ''), Type = 'FileFlows.ServerShared.Models.PluginSettingsModel' where Type = 'FileFlows.Server.Models.PluginSettingsModel'");
@@ -327,6 +384,11 @@ CREATE TABLE DbLogMessage
         /// Gets or sets the unique identifier of the file.
         /// </summary>
         public Guid Uid { get; set; }
+        
+        /// <summary>
+        /// Gets or sets the name of the file
+        /// </summary>
+        public string Name { get; set; }
 
         /// <summary>
         /// Gets or sets the date and time when the file was created.

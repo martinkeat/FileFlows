@@ -146,7 +146,8 @@ public class SettingsService : Service, ISettingsService
     {
         try
         {
-            var result = await HttpHelper.Get<byte[]>($"{ServiceBaseUrl}/api/settings/download-plugin/{HttpUtility.UrlEncode(name)}");
+            string url = $"{ServiceBaseUrl}/api/settings/download-plugin/{HttpUtility.UrlEncode(name)}";
+            var result = await HttpHelper.Get<byte[]>(url);
             if (result.Success == false)
                 return Result<string>.Fail($"Failed to download plugin '{name}': " + result.Body);
             string output = Path.Combine(destinationPath, name);
