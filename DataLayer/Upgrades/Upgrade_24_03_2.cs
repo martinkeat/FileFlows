@@ -88,10 +88,18 @@ public class Upgrade_24_03_2
             
             // LibraryFiles
             var libFiles = db.Db.Fetch<LibraryFileUpgrade>(
-                "select Uid, Name, DateCreated, DateModified, ProcessingStarted, ProcessingEnded, HoldUntil, CreationTime, LastWriteTime from LibraryFile");
+                "select Uid, Name, LibraryName, OriginalSize, FinalSize, DateCreated, DateModified, ProcessingStarted, ProcessingEnded, HoldUntil, CreationTime, LastWriteTime from LibraryFile");
             sql.Clear();
+
+            Dictionary<string, StorageSavedData> storageSavedData = new(); 
             foreach (var lf in libFiles)
             {
+                if (storageSavedData.ContainsKey(lf.LibraryName) == false)
+                    storageSavedData[lf.LibraryName] = new() { Library = lf.LibraryName };
+                storageSavedData[lf.LibraryName].TotalFiles += 1;
+                storageSavedData[lf.LibraryName].FinalSize += lf.FinalSize;
+                storageSavedData[lf.LibraryName].OriginalSize += lf.OriginalSize;
+                    
                 var fileInfo = new FileInfo(lf.Name);
                 lf.DateCreated = DateTimeHelper.LocalToUtc(lf.DateCreated);
                 lf.DateModified = DateTimeHelper.LocalToUtc(lf.DateModified);
@@ -132,7 +140,7 @@ public class Upgrade_24_03_2
 
             var upgradeStats = GetUpgradedStatistics(logger, db);
 
-            UpgradeStatistics(logger, db, true, upgradeStats, knownLibraries);
+            UpgradeStatistics(logger, db, true, upgradeStats, knownLibraries, storageSavedData);
 
             db.Db.CompleteTransaction();
 
@@ -169,6 +177,7 @@ public class Upgrade_24_03_2
             List<UpgradedStatistic> upgradeStatistics;
             List<Guid> knownLibraries = new();
             List<string> sql = new();
+            Dictionary<string, StorageSavedData> storageSavedData = new(); 
             using (var db = connector.GetDb(true).Result)
             {
                 dbObjects = db.Db.Fetch<DbObject>("select * from DbObject");
@@ -196,6 +205,13 @@ public class Upgrade_24_03_2
                 for (int i=libFiles.Count - 1;i >= 0;i--)
                 {
                     var lf = libFiles[i];
+                    
+                    if (storageSavedData.ContainsKey(lf.LibraryName) == false)
+                        storageSavedData[lf.LibraryName] = new() { Library = lf.LibraryName };
+                    storageSavedData[lf.LibraryName].TotalFiles += 1;
+                    storageSavedData[lf.LibraryName].FinalSize += lf.FinalSize;
+                    storageSavedData[lf.LibraryName].OriginalSize += lf.OriginalSize;
+                    
                     var fileInfo = new FileInfo(lf.Name);
                     lf.DateCreated = DateTimeHelper.LocalToUtc(lf.DateCreated);
                     lf.DateModified = DateTimeHelper.LocalToUtc(lf.DateModified);
@@ -256,7 +272,7 @@ public class Upgrade_24_03_2
                     count++;
                 }
                 
-                UpgradeStatistics(logger, db, false, upgradeStatistics, knownLibraries);
+                UpgradeStatistics(logger, db, false, upgradeStatistics, knownLibraries, storageSavedData);
             }
             string old = Path.Combine(DirectoryHelper.DatabaseDirectory, "FileFlows-24-03-02-UpgradeBackup.sqlite");
             File.Move(dbFile, old, true);
@@ -338,7 +354,9 @@ public class Upgrade_24_03_2
     /// <param name="mySql">true if using mysql, otherwise false</param>
     /// <param name="upgradedStatistics">the upgrade statistics</param>
     /// <param name="knownLibraries">the known library UIDs</param>
-    private void UpgradeStatistics(ILogger logger, DatabaseConnection connector, bool mySql, List<UpgradedStatistic> upgradedStatistics, List<Guid> knownLibraries)
+    /// <param name="storageSavedData">the storage saved data</param>
+    private void UpgradeStatistics(ILogger logger, DatabaseConnection connector, bool mySql, 
+        List<UpgradedStatistic> upgradedStatistics, List<Guid> knownLibraries, Dictionary<string, StorageSavedData> storageSavedData)
     {
         // processing heatmap, after upgrade, so now UTC dates
         logger.ILog("Creating processing heatmap data");
@@ -377,13 +395,7 @@ public class Upgrade_24_03_2
 
         // storage saved
         logger.ILog("Creating storage saved data");
-        string sql = $@"SELECT LibraryName as Library,
-            SUM(CAST(OriginalSize AS {(mySql ? "SIGNED" : "INTEGER")})) AS OriginalSize,
-            SUM(CAST(FinalSize AS {(mySql ? "SIGNED" : "INTEGER")})) AS FinalSize,
-            COUNT(*) AS TotalFiles
-        FROM LibraryFile
-        GROUP BY LibraryName";
-        var storageSaved = new StorageSaved() { Data = connector.Db.Fetch<StorageSavedData>(sql) };
+        var storageSaved = new StorageSaved() { Data = storageSavedData.Values.ToList() };
 
         connector.Db.Execute("insert into DbStatistic (Name, Type, Data) values " +
                              $" (@0, {((int)StatisticType.StorageSaved)}, @1)",
