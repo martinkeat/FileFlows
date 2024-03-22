@@ -52,6 +52,10 @@ public class StatisticManager
                 Type = statistic.Type
             });
         }
+        catch (Exception ex)
+        {
+            Logger.Instance.WLog($"Failed to update statistic '{statistic.Name}': " + ex.Message);
+        }
         finally
         {
             _semaphore.Release();

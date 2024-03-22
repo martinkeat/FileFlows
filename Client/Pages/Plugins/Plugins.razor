@@ -33,9 +33,13 @@
                     <Cell Context="item">
                         <div class="table-item">
                             <span class="icon">
-                                @if (item.Icon.StartsWith("svg:"))
+                                @if(string.IsNullOrWhiteSpace(item.Icon))
                                 {
-                                    <img src="/icons/@(item.Icon[4..]).svg" />
+                                    <i class="icon fas fa-puzzle-piece"></i>
+                                }
+                                else if (item.Icon.StartsWith("svg:"))
+                                {
+                                    <img src="/icons/@(item.Icon[4..]).svg"/>
                                 }
                                 else
                                 {
