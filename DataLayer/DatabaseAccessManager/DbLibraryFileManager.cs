@@ -1465,6 +1465,7 @@ FROM {Wrap(nameof(LibraryFile))} GROUP BY {Wrap(nameof(LibraryFile.NodeUid))};";
             
         using var db = await DbConnector.GetDb();
         var result =  await db.Db.FetchAsync<(Guid NodeUid, int FileCount)>(sql);
-        return result.ToDictionary(x => x.NodeUid, x => x.FileCount);
+        return result.Where(x => x.NodeUid != Guid.Empty).DistinctBy(x => x.NodeUid)
+            .ToDictionary(x => x.NodeUid, x => x.FileCount);
     }
 }

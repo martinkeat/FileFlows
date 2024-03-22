@@ -1,8 +1,5 @@
 ﻿using System.Runtime.InteropServices;
-using FileFlows.Server.Controllers;
-using FileFlows.Server.Helpers;
 using FileFlows.Server.Services;
-using FileFlows.ServerShared.Services;
 using FileFlows.ServerShared.Workers;
 using FileFlows.Shared.Helpers;
 using FileFlows.Shared.Models;
@@ -11,13 +8,6 @@ using LibraryFileService = FileFlows.Server.Services.LibraryFileService;
 using LibraryService = FileFlows.Server.Services.LibraryService;
 using NodeService = FileFlows.Server.Services.NodeService;
 using SettingsService = FileFlows.Server.Services.SettingsService;
-using StatisticService = FileFlows.Server.Services.StatisticService;
-#if(!DEBUG)
-using System.Runtime.InteropServices;
-using FileFlows.Server.Controllers;
-using FileFlows.Shared.Helpers;
-using FileFlows.Shared.Models;
-#endif
 
 namespace FileFlows.Server.Workers;
 
@@ -32,9 +22,9 @@ public class TelemetryReporter : Worker
     {
         try
         {
-#if (DEBUG && false)
-            return;
-#else
+// #if (DEBUG && false)
+//             return;
+// #else
             var settings = ServiceLoader.Load<SettingsService>().Get().Result;
             if (settings?.DisableTelemetry == true)
                 return; // they have turned it off, dont report anything
@@ -123,10 +113,9 @@ public class TelemetryReporter : Worker
             }).ToList();
 
             string url = Globals.FileFlowsDotComUrl + "/api/telemetry";
-            var task = HttpHelper.Post(url, data);
-            task.Wait();
+            _ = HttpHelper.Post(url, data).Result;
 
-#endif
+//#endif
         }
         catch (Exception)
         {
