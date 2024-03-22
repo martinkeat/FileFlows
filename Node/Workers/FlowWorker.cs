@@ -249,6 +249,7 @@ public class FlowWorker : Worker
         {
             int exitCode = 0; 
             StringBuilder completeLog = new StringBuilder();
+            bool keepFiles = false;
             try
             {
 #pragma warning disable CS8601 // Possible null reference assignment.
@@ -302,6 +303,11 @@ public class FlowWorker : Worker
                     exitCode = process.ExitCode;
 
                 #endif
+                    if (exitCode == 100)
+                    {
+                        exitCode = 0; // special case
+                        keepFiles = true;
+                    }
                     
                     if (string.IsNullOrEmpty(output) == false)
                     {
@@ -348,7 +354,7 @@ public class FlowWorker : Worker
                 try
                 {
                     string dir = Path.Combine(tempPath, "Runner-" + processUid);
-                    if (exitCode == 0 || CurrentConfigurationKeepFailedFlowFiles == false)
+                    if (keepFiles || CurrentConfigurationKeepFailedFlowFiles == false)
                     {
                         if (Directory.Exists(dir))
                         {

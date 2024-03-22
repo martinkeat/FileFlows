@@ -101,7 +101,7 @@ public class Runner
     /// <summary>
     /// Starts the flow runner processing
     /// </summary>
-    public bool Run(FlowLogger logger)
+    public (bool Success, bool KeepFiles) Run(FlowLogger logger)
     {
         var systemHelper = new SystemHelper();
         try
@@ -110,7 +110,7 @@ public class Runner
             var service = FlowRunnerService.Load();
             var updated = service.Start(Info).Result;
             if (updated == null)
-                return false; // failed to update
+                return (false, false); // failed to update
             var communicator = FlowRunnerCommunicator.Load(Info.LibraryFile.Uid);
             communicator.OnCancel += Communicator_OnCancel;
             logger.SetCommunicator(communicator);
@@ -184,7 +184,7 @@ public class Runner
         }
 
         systemHelper.Stop();
-        return success;
+        return (success, Info.LibraryFile.Status == FileStatus.ProcessingFailed);
     }
 
     /// <summary>

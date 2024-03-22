@@ -169,7 +169,7 @@ public class Program
             // we only want to return 0 here if the execute complete, the file may have finished in that, but its been
             // successfully recorded/completed by that, so we dont need to tell the Node to update this file any more
 
-            return result ? 0 : (int)FileStatus.ProcessingFailed;
+            return result.Success ? (result.KeepFiles ? 100 : 0) : (int)FileStatus.ProcessingFailed;
         }
         catch (Exception ex)
         {
@@ -206,7 +206,7 @@ public class Program
     /// <param name="args">the args</param>
     /// <returns>the library file status, or null if library file was not loaded</returns>
     /// <exception cref="Exception">error was thrown</exception>
-    static bool Execute(ExecuteArgs args)
+    static (bool Success, bool KeepFiles) Execute(ExecuteArgs args)
     {
         ProcessingNode node;
         var nodeService = NodeService.Load();
@@ -238,7 +238,7 @@ public class Program
         if (libFile == null)
         {
             LogInfo("Library file not found, must have been deleted from the library files.  Nothing to process");
-            return true; // nothing to process
+            return (true, false); // nothing to process
         }
 
         // string workingFile = node.Map(libFile.Name);
@@ -250,7 +250,7 @@ public class Program
         {
             LogInfo("Library was not found, deleting library file");
             libfileService.Delete(libFile.Uid).Wait();
-            return true;
+            return (true, false);
         }
 
         FileSystemInfo file = lib.Folders ? new DirectoryInfo(workingFile) : new FileInfo(workingFile);
@@ -264,7 +264,7 @@ public class Program
             LogInfo("Flow not found, cannot process file: " + file.FullName);
             libFile.Status = FileStatus.FlowNotFound;
             FinishEarly(libFile);
-            return true;
+            return (true, false);
         }
         // update the library file to reference the updated flow (if changed)
         if (libFile.Flow?.Name != flow.Name || libFile.Flow?.Uid != flow.Uid)
@@ -290,7 +290,7 @@ public class Program
             LogInfo("Library file does not exist, deleting from library files: " + file.FullName);
             libfileService.Delete(libFile.Uid).Wait();
             FinishEarly(libFile);
-            return true;
+            return (true, false);
         }
         else
         {
@@ -312,7 +312,7 @@ public class Program
                     libFile.Status = FileStatus.MappingIssue;
                     libFile.ExecutedNodes = new List<ExecutedNode>();
                     FinishEarly(libFile);
-                    return true;
+                    return (true, false);
                 }
 
                 if (lib.Folders)
@@ -323,7 +323,7 @@ public class Program
                     LogError(libFile.FailureReason);
                     libFile.ExecutedNodes = new List<ExecutedNode>();
                     FinishEarly(libFile);
-                    return true;
+                    return (true, false);
                 }
             
                 remoteFile = true;
