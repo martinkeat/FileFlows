@@ -1,0 +1,32 @@
+
+using FileFlows.Managers.InitializationManagers;
+using FileFlows.Server.Services;
+using FileFlows.Shared.Models;
+
+namespace FileFlows.Server.Upgrade;
+
+        
+/// <summary>
+/// Run upgrade from 24.03.5
+/// </summary>
+public class Upgrade_24_03_5 : UpgradeBase
+{
+    /// <summary>
+    /// Initializes the upgrade for 24.03.5
+    /// </summary>
+    /// <param name="logger">the logger</param>
+    /// <param name="settingsService">the settings service</param>
+    /// <param name="upgradeManager">the upgrade manager</param>
+    public Upgrade_24_03_5(FileFlows.Plugin.ILogger logger, AppSettingsService settingsService, UpgradeManager upgradeManager)
+        : base(logger, settingsService, upgradeManager)
+    {
+    }
+    
+    /// <summary>
+    /// Runs the upgrade
+    /// </summary>
+    public void Run()
+    {
+        UpgradeManager.Run_Upgrade_24_03_5(Logger, DbType, ConnectionString);
+    }
+}

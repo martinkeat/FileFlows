@@ -106,4 +106,10 @@ public class UpgradeManager
     /// </summary>
     public void Run_Upgrade_24_03_2(ILogger logger, DatabaseType dbType, string connectionString)
         => new Upgrade_24_03_2().Run(logger, dbType, connectionString);
+    
+    /// <summary>
+    /// Run upgrade from 24.03.5
+    /// </summary>
+    public void Run_Upgrade_24_03_5(ILogger logger, DatabaseType dbType, string connectionString)
+        => new Upgrade_24_03_5().Run(logger, dbType, connectionString);
 }

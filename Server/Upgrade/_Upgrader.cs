@@ -11,7 +11,7 @@ namespace FileFlows.Server.Upgrade;
 public class Upgrader
 {
     // update this with the latest db version
-    private readonly Version LATEST_DB_VERSION = new Version(24, 03, 2);
+    private readonly Version LATEST_DB_VERSION = new Version(24, 03, 5);
 
     /// <summary>
     /// Gets an instance of the upgrade manager
@@ -109,6 +109,9 @@ public class Upgrader
         
         if(currentVersion < new Version(24, 3, 2))
             new Upgrade_24_03_2(Logger.Instance, appSettingsService, manager).Run();
+        
+        if(currentVersion < new Version(24, 3, 5))
+            new Upgrade_24_03_5(Logger.Instance, appSettingsService, manager).Run();
 
         // save the settings
         Logger.Instance.ILog("Saving version to database");
