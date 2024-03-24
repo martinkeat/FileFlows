@@ -215,8 +215,7 @@ public class PluginService : IPluginService
 
             foreach (var ele in plugin.Elements)
             {
-                if (pluginDict.ContainsKey(ele.Uid) == false)
-                    pluginDict.Add(ele.Uid, pim);
+                pluginDict.TryAdd(ele.Uid, pim);
             }
         }
 

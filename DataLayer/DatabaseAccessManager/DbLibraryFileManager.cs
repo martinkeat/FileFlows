@@ -972,7 +972,6 @@ internal class DbLibraryFileManager : BaseManager
                          $" end");
 
 
-
             var possibleComplexSortingLibraries = args.SysInfo.AllLibraries.Values.Where(library =>
             {
                 if (library.Enabled == false)

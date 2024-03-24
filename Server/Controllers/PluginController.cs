@@ -294,6 +294,7 @@ public class PluginController : Controller
         if (newJson == oldSettings)
             return;
         await service.SetSettingsJson(packageName, newJson);
+        await new SettingsService().RevisionIncrement();
     }
 
     
