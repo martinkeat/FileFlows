@@ -967,7 +967,7 @@ internal class DbLibraryFileManager : BaseManager
             }
 
             orderBys.Add($"case " +
-                         $" when {Wrap("Processing" + nameof(LibraryFile.Order))} > 0 THEN {Wrap(nameof(LibraryFile.OriginalSize))} " +
+                         $" when {Wrap("Processing" + nameof(LibraryFile.Order))} > 0 THEN {Wrap("Processing" + nameof(LibraryFile.Order))} " +
                          $" else {1_000_000_000} " +
                          $" end");
 
