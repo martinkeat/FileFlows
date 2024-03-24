@@ -411,10 +411,10 @@ public class SqliteTests : DbLayerTest
         var rand = new Random(DateTime.UtcNow.Microsecond);
         foreach (var dbType in new[]
                  {
-                     //DatabaseType.Sqlite, 
+                     DatabaseType.Sqlite, 
                      // DatabaseType.Postgres,
                      // DatabaseType.SqlServer,
-                     DatabaseType.MySql,
+                     // DatabaseType.MySql,
                  })
         {
             Logger.ILog("Database Type: " + dbType);

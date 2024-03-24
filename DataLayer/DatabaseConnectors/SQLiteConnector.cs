@@ -36,10 +36,14 @@ public class SQLiteConnector : IDatabaseConnector
     {
         Logger = logger;
 
-        // if connection string is using relative file, update with full path
-        connectionString = connectionString.Replace($"Data Source=FileFlows.sqlite",
-            $"Data Source={Path.Combine(DirectoryHelper.DatabaseDirectory, "FileFlows.sqlite")}");
-        
+        if (string.IsNullOrWhiteSpace(DirectoryHelper.DatabaseDirectory) == false)
+        {
+            // database directory can be null during unit testing
+            // if connection string is using relative file, update with full path
+            connectionString = connectionString.Replace($"Data Source=FileFlows.sqlite",
+                $"Data Source={Path.Combine(DirectoryHelper.DatabaseDirectory, "FileFlows.sqlite")}");
+        }
+
         dbConnectionWrite = CreateConnection(connectionString);
         dbConnectionWrite.OnDispose += Dispose;
         // readPool = new(() => CreateConnection(connectionString), 5);

@@ -29,9 +29,13 @@ public class SQLiteDatabaseCreator : IDatabaseCreator
         Logger = logger;
         
         // if connection string is using relative file, update with full path
-        connectionString = connectionString.Replace($"Data Source=FileFlows.sqlite",
-            $"Data Source={Path.Combine(DirectoryHelper.DatabaseDirectory, "FileFlows.sqlite")}");
-        
+        if (string.IsNullOrWhiteSpace(DirectoryHelper.DatabaseDirectory) == false)
+        {
+            // database directory can be null during unit testing
+            connectionString = connectionString.Replace($"Data Source=FileFlows.sqlite",
+                $"Data Source={Path.Combine(DirectoryHelper.DatabaseDirectory, "FileFlows.sqlite")}");
+        }
+
         ConnectionString = connectionString;
         DbFilename = GetFilenameFromConnectionString(connectionString);
     }
