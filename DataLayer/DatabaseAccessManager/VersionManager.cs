@@ -33,7 +33,6 @@ internal class VersionManager: BaseManager
     /// <returns>a version number</returns>
     public async Task<Version?> Get()
     {
-        return new Version("24.03.4.2000"); // temporary, we gotta fix deployed db
         try
         {
             using var db = await DbConnector.GetDb();
