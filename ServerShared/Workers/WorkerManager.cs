@@ -40,4 +40,15 @@ public class WorkerManager
         }
         Workers.Clear();
     }
+
+    /// <summary>
+    /// Gets a worker
+    /// </summary>
+    /// <typeparam name="T">the type of worker to get</typeparam>
+    /// <returns>the worker or null if not found</returns>
+    public static T? GetWorker<T>() where T : Worker
+    {
+        var foundWorker = Workers.FirstOrDefault(x => x != null && x.GetType() == typeof(T));
+        return foundWorker as T;
+    }
 }

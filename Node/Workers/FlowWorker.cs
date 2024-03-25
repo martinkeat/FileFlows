@@ -1,13 +1,11 @@
 ﻿using System.Text;
 using FileFlows.Plugin;
-using FileFlows.Server;
 using FileFlows.ServerShared;
 using FileFlows.ServerShared.Models;
 using FileFlows.ServerShared.Helpers;
 using FileFlows.ServerShared.Services;
 using FileFlows.ServerShared.Workers;
 using FileFlows.Shared.Models;
-using Jint.Native.Json;
 
 namespace FileFlows.Node.Workers;
 
@@ -743,4 +741,10 @@ public class FlowWorker : Worker
 
     }
 
+    /// <summary>
+    /// Gets the executors UIDs
+    /// </summary>
+    /// <returns>the executors UIDs</returns>
+    public Guid[] GetExecutors()
+        => ExecutingRunners?.ToArray() ?? new Guid[] { };
 }

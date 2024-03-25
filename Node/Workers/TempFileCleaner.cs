@@ -1,11 +1,13 @@
+using FileFlows.Server.Workers;
 using FileFlows.ServerShared.Services;
+using FileFlows.ServerShared.Workers;
 
-namespace FileFlows.ServerShared.Workers;
+namespace FileFlows.Node.Workers;
 
 /// <summary>
 /// Worker to clean up temporary files
 /// </summary>
-public class TempFileCleaner:Worker
+public class TempFileCleaner : Worker
 {
     private string nodeAddress;
     
@@ -33,20 +35,29 @@ public class TempFileCleaner:Worker
         var tempDir = new DirectoryInfo(node.TempPath);
         if (tempDir.Exists == false)
             return;
+
+        var executors = (WorkerManager.GetWorker<FlowWorker>()?.GetExecutors() ?? new Guid[] { })
+            .Select(x => "Runner-" + x).ToList();
         
         Logger.Instance?.ILog("About to clean temporary directory: " + tempDir.FullName);
         foreach (var dir in tempDir.GetDirectories())
         {
+            if (executors.Contains(dir.Name))
+            {
+                Logger.Instance?.ILog($"Skipping directory '{dir.Name}' as it still executing");
+                continue; // still executing
+            }
+
             if (dir.CreationTimeUtc < DateTime.UtcNow.AddDays(-1))
             {
                 try
                 {
                     dir.Delete(recursive: true);
-                    Logger.Instance.ILog($"Deleted directory '{dir.Name}' from temp directory");
+                    Logger.Instance?.ILog($"Deleted directory '{dir.Name}' from temp directory");
                 }
                 catch (Exception ex)
                 {
-                    Logger.Instance.WLog($"Failed to delete directory '{dir.Name}' from temp directory: " + ex.Message);
+                    Logger.Instance?.WLog($"Failed to delete directory '{dir.Name}' from temp directory: " + ex.Message);
                 }
             }
         }
