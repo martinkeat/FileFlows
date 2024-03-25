@@ -352,7 +352,7 @@ public class FlowWorker : Worker
                 try
                 {
                     string dir = Path.Combine(tempPath, "Runner-" + processUid);
-                    if (keepFiles || CurrentConfigurationKeepFailedFlowFiles == false)
+                    if (keepFiles == false || CurrentConfigurationKeepFailedFlowFiles == false)
                     {
                         if (Directory.Exists(dir))
                         {
