@@ -74,11 +74,6 @@ public class Settings : FileFlowObject
     /// Gets or sets if this is running inside Docker
     /// </summary>
     public bool IsDocker { get; set; }
-    
-    /// <summary>
-    /// Gets or sets the FileFlows version number
-    /// </summary>
-    public string Version { get; set; }
 
     /// <summary>
     /// Gets or sets if when the system is paused until

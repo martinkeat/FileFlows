@@ -1,3 +1,4 @@
+using System.Text.Json;
 using FileFlows.DataLayer.Upgrades;
 using FileFlows.Plugin;
 using FileFlows.ServerShared;
@@ -60,10 +61,19 @@ public class UpgradeManager
             var dam = DatabaseAccessManager.FromType(Logger, DbType, ConnectionString);
             if (DatabaseAccessManager.CanConnect(DbType, ConnectionString).Failed(out error))
                 return Result<Version?>.Fail(error);
-            var settings = await dam.FileFlowsObjectManager.Single<Settings>();
-            if (settings.Failed(out error) || settings.Value == null)
+
+            var version = dam.VersionManager.Get().Result;
+            if (version != null)
+                return version;
+            
+            var dboSettings = await dam.ObjectManager.Single("FileFlows.Shared.Models.Settings");
+            if (dboSettings == null)
                 return null;
-            return Version.Parse(settings.Value.Version);
+
+            var settings = JsonSerializer.Deserialize<LegacySettings>(dboSettings.Data);
+            if (settings != null && Version.TryParse(settings.Version, out Version? v))
+                return v;
+            return null;
         }
         catch (Exception ex)
         {
@@ -80,13 +90,7 @@ public class UpgradeManager
         try
         {
             var dam = DatabaseAccessManager.FromType(Logger, DbType, ConnectionString);
-            var settings = await dam.FileFlowsObjectManager.Single<Settings>();
-            if (settings.Failed(out string error))
-                return Result<bool>.Fail(error);
-
-            settings.Value.Version = Globals.Version;
-            settings.Value.Revision += 1;
-            await dam.FileFlowsObjectManager.Update(settings);
+            await dam.VersionManager.Set(Globals.Version);
             return true;
         }
         catch (Exception ex)
@@ -112,4 +116,15 @@ public class UpgradeManager
     /// </summary>
     public void Run_Upgrade_24_03_5(ILogger logger, DatabaseType dbType, string connectionString)
         => new Upgrade_24_03_5().Run(logger, dbType, connectionString);
+
+    /// <summary>
+    /// Legacy settings which has the version in the settings model
+    /// </summary>
+    class LegacySettings
+    {
+        /// <summary>
+        /// Gets or sets the version number
+        /// </summary>
+        public string Version { get; set; }
+    }
 }

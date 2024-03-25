@@ -66,6 +66,20 @@ public class Upgrade_24_03_5
             }
         }
 
+        try
+        {
+            db.Db.Execute($@"DROP TABLe {Wrap("FileFlows")}");
+        }
+        catch (Exception)
+        {
+        }
+
+        db.Db.Execute($@"
+CREATE TABLE {Wrap("FileFlows")}
+(
+    {Wrap("Version")}       VARCHAR(36)        NOT NULL
+)");
+
         return true;
     }
 }

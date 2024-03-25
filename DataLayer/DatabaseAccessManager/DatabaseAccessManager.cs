@@ -58,6 +58,7 @@ internal  class DatabaseAccessManager
         this.RevisionManager = new (logger, type, DbConnector);
         this.LogMessageManager = new (logger, type, DbConnector);
         this.LibraryFileManager = new (logger, type, DbConnector);
+        this.VersionManager = new (logger, type, DbConnector);
         this.FileFlowsObjectManager = new(this.ObjectManager);
     }
 
@@ -173,6 +174,11 @@ internal  class DatabaseAccessManager
     /// Gets the FileFlowsObject manager to manage the database operations for the FileFlowsObjects that are saved in the DbObject table
     /// </summary>
     public FileFlowsObjectManager FileFlowsObjectManager { get; init; }
+
+    /// <summary>
+    /// Gets the Version manager
+    /// </summary>
+    public VersionManager VersionManager { get; init; }
 
     /// <summary>
     /// Gets the Library File manager to manage the database operations for the Library Files

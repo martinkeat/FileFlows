@@ -127,6 +127,8 @@ public class DatabaseService
         }
         
         Logger.Instance.ILog("Database initialized");
+        
+        
 
         RestoreDefaults();
 

@@ -166,7 +166,6 @@ public class SettingsService : ISettingsService
         var settings = await Get() ?? model;
         model.Name = settings.Name;
         model.Uid = settings.Uid;
-        model.Version = Globals.Version.ToString();
         model.DateCreated = settings.DateCreated;
         model.IsWindows = OperatingSystem.IsWindows();
         model.IsDocker = Application.Docker;

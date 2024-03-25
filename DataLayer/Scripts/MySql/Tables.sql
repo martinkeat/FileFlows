@@ -1,3 +1,8 @@
+CREATE TABLE FileFlows
+(
+    Version       VARCHAR(36)        NOT NULL
+);
+
 CREATE TABLE DbObject
 (
     Uid             VARCHAR(36)        COLLATE utf8_unicode_ci      NOT NULL          PRIMARY KEY,
