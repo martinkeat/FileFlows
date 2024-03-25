@@ -141,7 +141,7 @@ public class PluginService : IPluginService
                     string text = string.Empty;
                     if (dict[key] is JsonElement je)
                     {
-                        text = je.GetString() ?? String.Empty;
+                        text = je.GetString() ?? string.Empty;
                     }
                     else if (dict[key] is string str)
                     {

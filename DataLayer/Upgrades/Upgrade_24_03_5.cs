@@ -39,6 +39,33 @@ public class Upgrade_24_03_5
         db.Db.Execute(
             $"delete from {Wrap(nameof(LibraryFile))} where {Wrap(nameof(LibraryFile.LibraryUid))} not in ({inStr})");
 
+        var objects = db.Db.Fetch<DbObject>($"select * from {Wrap(nameof(DbObject))} " +
+                              $" where {Wrap(nameof(DbObject.Type))} = 'FileFlows.ServerShared.Models.PluginSettingsModel'")
+            .ToDictionary(x => x.Name);
+
+        foreach (var key in objects.Keys)
+        {
+            if (key.StartsWith("PluginSettings_") == false)
+                continue;
+            string name = key["PluginSettings_".Length..];
+            if (objects.ContainsKey(name))
+            {
+                // delete it
+                logger.ILog("Deleting duplicate plugin settings: " + name);
+                db.Db.Execute(
+                    $"delete from {Wrap(nameof(DbObject))} where {Wrap(nameof(DbObject.Uid))} = '{objects[key].Uid}'");
+            }
+            else
+            {
+                // update it
+                logger.ILog("Updating plugin settings name");
+                db.Db.Execute(
+                    $"update {Wrap(nameof(DbObject))} set {Wrap(nameof(DbObject.Name))} = '{name}'" +
+                    $" where {Wrap(nameof(DbObject.Uid))} = '{objects[key].Uid}'");
+                
+            }
+        }
+
         return true;
     }
 }

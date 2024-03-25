@@ -262,7 +262,7 @@ internal  class FileFlowsObjectManager
     /// <param name="dbObject">the DbObject instance to convert</param>
     /// <typeparam name="T">the type to convert to</typeparam>
     /// <returns>the converetd object</returns>
-    internal T Convert<T>(DbObject dbObject) where T : FileFlowObject, new()
+    private T? Convert<T>(DbObject dbObject) where T : FileFlowObject, new()
     {
         if (dbObject == null)
             return default;
@@ -272,9 +272,10 @@ internal  class FileFlowsObjectManager
             Converters =
             {
                 new BoolConverter(), 
-                new FileFlows.Shared.Json.ValidatorConverter(), 
+                new ValidatorConverter(), 
                 new DataConverter()
-            }
+            },
+            PropertyNameCaseInsensitive = true
         };
         
         // need to case obj to (ViObject) here so the DataConverter is used
