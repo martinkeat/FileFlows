@@ -103,14 +103,23 @@ public class Upgrader
             return true; // way to old, or new install
         
         var manager = GetUpgradeManager(appSettingsService.Settings);
-        if(currentVersion < new Version(24, 2))
+        if (currentVersion < new Version(24, 2))
+        {
+            Logger.Instance.ILog("Running 24.2 upgrade");
             new Upgrade_24_02(Logger.Instance, appSettingsService, manager).Run();
-        
-        if(currentVersion < new Version(24, 3, 2))
+        }
+
+        if (currentVersion < new Version(24, 3, 2))
+        {
+            Logger.Instance.ILog("Running 24.3.2 upgrade");
             new Upgrade_24_03_2(Logger.Instance, appSettingsService, manager).Run();
-        
-        if(currentVersion < new Version(24, 3, 5))
+        }
+
+        if (currentVersion < new Version(24, 3, 5))
+        {
+            Logger.Instance.ILog("Running 24.3.5 upgrade");
             new Upgrade_24_03_5(Logger.Instance, appSettingsService, manager).Run();
+        }
 
         // save the settings
         Logger.Instance.ILog("Saving version to database");

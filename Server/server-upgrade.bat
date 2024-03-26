@@ -2,4 +2,4 @@
 
 move server-upgrade-actual.bat ..\server-upgrade.bat
 cd ..
-start server-upgrade.bat "UPDATE" %1 > ffupgrade.log & exit
+start server-upgrade.bat "UPDATE" %1 & exit

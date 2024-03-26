@@ -36,6 +36,8 @@ public class Upgrade_24_03_5
 
         string inStr = string.Join(",", knownLibraries.Select(x => $"'{x}'"));
 
+
+        logger.ILog("Deleting rogue Library Files");
         db.Db.Execute(
             $"delete from {Wrap(nameof(LibraryFile))} where {Wrap(nameof(LibraryFile.LibraryUid))} not in ({inStr})");
 
@@ -43,6 +45,8 @@ public class Upgrade_24_03_5
                               $" where {Wrap(nameof(DbObject.Type))} = 'FileFlows.ServerShared.Models.PluginSettingsModel'")
             .ToDictionary(x => x.Name);
 
+
+        logger.ILog("Fixing plugin settings");
         foreach (var key in objects.Keys)
         {
             if (key.StartsWith("PluginSettings_") == false)
@@ -68,12 +72,13 @@ public class Upgrade_24_03_5
 
         try
         {
-            db.Db.Execute($@"DROP TABLe {Wrap("FileFlows")}");
+            db.Db.Execute($@"DROP TABLE {Wrap("FileFlows")}");
         }
         catch (Exception)
         {
         }
 
+        logger.ILog("Created FileFlows database table");
         db.Db.Execute($@"
 CREATE TABLE {Wrap("FileFlows")}
 (
