@@ -31,6 +31,13 @@ public class Upgrade_24_03_5
         return true;
     }
 
+
+    /// <summary>
+    /// Create the file flows table
+    /// </summary>
+    /// <param name="logger">the logger</param>
+    /// <param name="db">the db connection</param>
+    /// <param name="Wrap">the Wrap method</param>
     private void CreateFileFlowsTable(ILogger logger, DatabaseConnection db, Func<string, string> Wrap)
     {
         try
@@ -49,11 +56,16 @@ CREATE TABLE {Wrap("FileFlows")}
 )");
     }
 
+    /// <summary>
+    /// Fixes the plugin settings
+    /// </summary>
+    /// <param name="logger">the logger</param>
+    /// <param name="db">the db connection</param>
+    /// <param name="Wrap">the Wrap method</param>
     private void FixPluginSettings(ILogger logger, DatabaseConnection db, Func<string, string> Wrap)
     {
         logger.ILog("Fixing plugin settings");
         
-
         var objects = db.Db.Fetch<DbObject>($"select * from {Wrap(nameof(DbObject))} " +
                                             $" where {Wrap(nameof(DbObject.Type))} = 'FileFlows.ServerShared.Models.PluginSettingsModel'")
             .ToDictionary(x => x.Name);
@@ -82,6 +94,13 @@ CREATE TABLE {Wrap("FileFlows")}
         }
     }
 
+
+    /// <summary>
+    /// Removes the library files with missing libraries
+    /// </summary>
+    /// <param name="logger">the logger</param>
+    /// <param name="db">the db connection</param>
+    /// <param name="Wrap">the Wrap method</param>
     private void RemoveLibraryFiles(ILogger logger, DatabaseConnection db, Func<string, string> Wrap)
     {
         string sql =
