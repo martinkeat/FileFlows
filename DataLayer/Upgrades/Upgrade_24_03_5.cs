@@ -23,30 +23,41 @@ public class Upgrade_24_03_5
     {
         var connector = DatabaseConnectorLoader.LoadConnector(logger, dbType, connectionString);
         using var db = connector.GetDb(true).Result;
-        var Wrap = connector.WrapFieldName;
 
-        string sql =
-            $"select {Wrap(nameof(DbObject.Uid))} from {Wrap(nameof(DbObject))} " +
-            $" where {Wrap(nameof(DbObject.Type))} = '{typeof(Library).FullName}'";
+        RemoveLibraryFiles(logger, db, connector.WrapFieldName);
+        FixPluginSettings(logger, db, connector.WrapFieldName);
+        CreateFileFlowsTable(logger, db, connector.WrapFieldName);
 
-        var knownLibraries = db.Db.Fetch<Guid>(sql);
+        return true;
+    }
 
-        if (knownLibraries.Any() == false)
-            return true;
+    private void CreateFileFlowsTable(ILogger logger, DatabaseConnection db, Func<string, string> Wrap)
+    {
+        try
+        {
+            db.Db.Execute($@"DROP TABLE {Wrap("FileFlows")}");
+        }
+        catch (Exception)
+        {
+        }
 
-        string inStr = string.Join(",", knownLibraries.Select(x => $"'{x}'"));
+        logger.ILog("Created FileFlows database table");
+        db.Db.Execute($@"
+CREATE TABLE {Wrap("FileFlows")}
+(
+    {Wrap("Version")}       VARCHAR(36)        NOT NULL
+)");
+    }
 
-
-        logger.ILog("Deleting rogue Library Files");
-        db.Db.Execute(
-            $"delete from {Wrap(nameof(LibraryFile))} where {Wrap(nameof(LibraryFile.LibraryUid))} not in ({inStr})");
+    private void FixPluginSettings(ILogger logger, DatabaseConnection db, Func<string, string> Wrap)
+    {
+        logger.ILog("Fixing plugin settings");
+        
 
         var objects = db.Db.Fetch<DbObject>($"select * from {Wrap(nameof(DbObject))} " +
-                              $" where {Wrap(nameof(DbObject.Type))} = 'FileFlows.ServerShared.Models.PluginSettingsModel'")
+                                            $" where {Wrap(nameof(DbObject.Type))} = 'FileFlows.ServerShared.Models.PluginSettingsModel'")
             .ToDictionary(x => x.Name);
-
-
-        logger.ILog("Fixing plugin settings");
+        
         foreach (var key in objects.Keys)
         {
             if (key.StartsWith("PluginSettings_") == false)
@@ -69,22 +80,25 @@ public class Upgrade_24_03_5
                 
             }
         }
+    }
 
-        try
-        {
-            db.Db.Execute($@"DROP TABLE {Wrap("FileFlows")}");
-        }
-        catch (Exception)
-        {
-        }
+    private void RemoveLibraryFiles(ILogger logger, DatabaseConnection db, Func<string, string> Wrap)
+    {
+        string sql =
+            $"select {Wrap(nameof(DbObject.Uid))} from {Wrap(nameof(DbObject))} " +
+            $" where {Wrap(nameof(DbObject.Type))} = '{typeof(Library).FullName}'";
 
-        logger.ILog("Created FileFlows database table");
-        db.Db.Execute($@"
-CREATE TABLE {Wrap("FileFlows")}
-(
-    {Wrap("Version")}       VARCHAR(36)        NOT NULL
-)");
+        var knownLibraries = db.Db.Fetch<Guid>(sql);
 
-        return true;
+        if (knownLibraries.Any())
+            return;
+
+        string inStr = string.Join(",", knownLibraries.Select(x => $"'{x}'"));
+
+
+        logger.ILog("Deleting rogue Library Files");
+        db.Db.Execute(
+            $"delete from {Wrap(nameof(LibraryFile))} where {Wrap(nameof(LibraryFile.LibraryUid))} not in ({inStr})");
+
     }
 }
