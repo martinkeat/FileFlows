@@ -229,7 +229,23 @@ public class SettingsController : Controller
     /// Triggers a check for an update
     /// </summary>
     [HttpPost("check-for-update-now")]
-    public async Task CheckForUpdateNow()
+    public bool CheckForUpdateNow()
+    {
+        if (LicenseHelper.IsLicensed(LicenseFlags.AutoUpdates) == false)
+            return false;
+
+        if (ServerUpdater.Instance == null)
+            return false;
+
+        var available = ServerUpdater.GetLatestOnlineVersion();
+        return available.updateAvailable;
+    }
+
+    /// <summary>
+    /// Triggers a upgrade now
+    /// </summary>
+    [HttpPost("upgrade-now")]
+    public async Task UpgradeNow()
     {
         if (LicenseHelper.IsLicensed(LicenseFlags.AutoUpdates) == false)
             return;
@@ -240,11 +256,11 @@ public class SettingsController : Controller
         _ = Task.Run(async () =>
         {
             await Task.Delay(1);
-            return ServerUpdater.Instance.RunCheck();
+            return ServerUpdater.Instance.RunCheck(skipEnabledCheck: true);
         });
         await Task.CompletedTask;
     }
-
+    
     /// <summary>
     /// Gets the current configuration revision
     /// </summary>

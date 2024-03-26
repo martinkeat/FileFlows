@@ -303,8 +303,24 @@ public partial class Settings : InputRegister
     {
         try
         {
-            await HttpHelper.Post("/api/settings/check-for-update-now");
-            Toast.ShowSuccess("Pages.Settings.Messages.CheckUpdateSuccess");
+            var available = await HttpHelper.Post<bool>("/api/settings/check-for-update-now");
+            if (available.Success == false)
+            {
+                Toast.ShowError("Pages.Settings.Messages.Update.Failed");
+                return;
+            }
+
+            if (available.Data == false)
+            {
+                Toast.ShowInfo("Pages.Settings.Messages.Update.NotAvailable");
+                return;
+            }
+
+            if (await Confirm.Show("Pages.Settings.Messages.Update.Title",
+                    "Pages.Settings.Messages.Update.Message") == false)
+                return;
+            await HttpHelper.Post("/api/settings/upgrade-now");
+            Toast.ShowInfo("Pages.Settings.Messages.Update.Downloading");
         }
         catch (Exception)
         {

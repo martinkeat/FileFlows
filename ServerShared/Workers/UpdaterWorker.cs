@@ -66,8 +66,9 @@ public abstract class UpdaterWorker : Worker
     /// <summary>
     /// Runs a check for update and if found will download it 
     /// </summary>
+    /// <param name="skipEnabledCheck">if the enabled checks should be skipped</param>
     /// <returns>A update has been downloaded</returns>
-    public bool RunCheck()
+    public bool RunCheck(bool skipEnabledCheck = false)
     {
         if (PreCheck() == false)
             return false;
@@ -78,7 +79,7 @@ public abstract class UpdaterWorker : Worker
 #if(DEBUG)
             return false; // disable during debugging
 #else
-            string updateScript = DownloadUpdate();
+            string updateScript = DownloadUpdate(skipEnabledCheck);
             if (string.IsNullOrEmpty(updateScript))
                 return false;
 
@@ -217,14 +218,19 @@ public abstract class UpdaterWorker : Worker
     /// <returns>if an update is available</returns>
     protected abstract bool GetUpdateAvailable();
 
-    private string DownloadUpdate()
+    /// <summary>
+    /// Downloads the update
+    /// </summary>
+    /// <param name="skipEnabledCheck">if the enabled checks should be skipped</param>
+    /// <returns>the download URL</returns>
+    private string DownloadUpdate(bool skipEnabledCheck)
     {
         try
         {
             if (GetUpdateAvailable() == false)
                 return string.Empty;
             
-            if (GetAutoUpdatesEnabled() == false)
+            if ((skipEnabledCheck || GetAutoUpdatesEnabled()) == false)
                 return string.Empty;
 
             Logger.Instance?.DLog($"{UpdaterName}: Checking for new update binary");
