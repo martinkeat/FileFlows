@@ -111,7 +111,7 @@ internal  class DatabaseAccessManager
     {
         try
         {
-            Instance= FromType(logger, type, connectionString);
+            Instance = FromType(logger, type, connectionString);
             return true;
         }
         catch (Exception ex)

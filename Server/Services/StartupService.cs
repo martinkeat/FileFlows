@@ -65,6 +65,12 @@ public class StartupService
                 return Result<bool>.Fail(error);
             }
 
+            if (SetVersion().Failed(out error))
+            {
+                UpdateStatus(error);
+                return Result<bool>.Fail(error);
+            }
+
             return true;
         }
         catch (Exception ex)
@@ -78,7 +84,6 @@ public class StartupService
             return Result<bool>.Fail(ex.Message);
         }
     }
-
     /// <summary>
     /// Tests a connection to a database
     /// </summary>
@@ -203,6 +208,25 @@ public class StartupService
             return Result<bool>.Fail(error);
 
         return true;
+    }
+
+
+    /// <summary>
+    /// Sets the version in the database
+    /// </summary>
+    /// <returns>true if successful</returns>
+    private Result<bool> SetVersion()
+    {
+        try
+        {
+            var service = ServiceLoader.Load<DatabaseService>();
+            service.SetVersion().Wait();
+            return true;
+        }
+        catch (Exception ex)
+        {
+            return Result<bool>.Fail(ex.Message);
+        }
     }
 
 }

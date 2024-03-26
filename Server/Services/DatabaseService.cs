@@ -127,8 +127,6 @@ public class DatabaseService
         }
         
         Logger.Instance.ILog("Database initialized");
-        
-        
 
         RestoreDefaults();
 
@@ -170,4 +168,12 @@ public class DatabaseService
     /// <returns>the number of connections</returns>
     public int GetOpenConnections()
         => new SettingsManager().GetOpenConnections();
+
+
+    /// <summary>
+    /// Sets the version in the database
+    /// </summary>
+    /// <returns>true if successful</returns>
+    public Task SetVersion()
+        => new FileFlowsManager().SetVersion(Globals.Version);
 }

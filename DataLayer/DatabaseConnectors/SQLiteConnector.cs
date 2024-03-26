@@ -12,7 +12,6 @@ public class SQLiteConnector : IDatabaseConnector
 {
     private DatabaseConnection dbConnectionWrite;
     private FairSemaphore writeSemaphore = new(1);
-    // private DatabaseConnectionPool readPool;
     
     /// <summary>
     /// Logger used for logging
@@ -76,13 +75,8 @@ public class SQLiteConnector : IDatabaseConnector
     /// <inheritdoc />
     public async Task<DatabaseConnection> GetDb(bool write)
     {
-        //if (write)
-        {
-            await writeSemaphore.WaitAsync();
-            return dbConnectionWrite;
-        }
-        
-        //return await readPool.AcquireConnectionAsync();
+        await writeSemaphore.WaitAsync();
+        return dbConnectionWrite;
     }
 
     /// <inheritdoc />
