@@ -158,19 +158,19 @@ public abstract class UpdaterWorker : Worker
         }
     }
     
-    
-
     /// <summary>
     /// Makes the specified file executable by changing its permissions.
     /// </summary>
     /// <param name="filename">The filename of the file to make executable.</param>
     /// <returns>True if the file was made executable successfully, otherwise false.</returns>
-    public static bool MakeExecutable(string filename) {
+    public static bool MakeExecutable(string filename) 
+    {
         // Check if the operating system supports chmod command
         if (OperatingSystem.IsLinux() == false && OperatingSystem.IsMacOS() == false && OperatingSystem.IsFreeBSD() == false) 
             return false;
 
-        try {
+        try 
+        {
             Logger.Instance.ILog("Making upgrade script executable: " + filename);
             // Execute the chmod command to make the file executable
             ProcessStartInfo psi = new ProcessStartInfo {
