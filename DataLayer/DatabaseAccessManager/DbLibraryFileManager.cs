@@ -413,21 +413,30 @@ internal class DbLibraryFileManager : BaseManager
     /// <returns>true if a row was updated, otherwise false</returns>
     public async Task<bool> ResetFileInfoForProcessing(Guid uid, Guid? flowUid, string? flowName)
     {
-        string sql = $"update {Wrap(nameof(LibraryFile))} set " +
-                     $" {Wrap(nameof(LibraryFile.ExecutedNodes))} = '', " +
-                     $" {Wrap(nameof(LibraryFile.OriginalMetadata))} = '', " +
-                     $" {Wrap(nameof(LibraryFile.FinalMetadata))} = '', " +
-                     $" {Wrap(nameof(LibraryFile.FinalSize))} = 0, " +
-                     $" {Wrap(nameof(LibraryFile.OutputPath))} = '', " +
-                     $" {Wrap(nameof(LibraryFile.FailureReason))} = '', " +
-                     $" {Wrap(nameof(LibraryFile.ProcessOnNodeUid))} = '', " +
-                     $" {Wrap(nameof(LibraryFile.FlowUid))} = '{flowUid?.ToString() ?? ""}', " +
-                     $" {Wrap(nameof(LibraryFile.FlowName))} = '{flowName ?? string.Empty}', " +
-                     $" {Wrap(nameof(LibraryFile.ProcessingEnded))} = " + DbConnector.FormatDateQuoted(new DateTime(1970, 1, 1)) +
-                     $" where {Wrap(nameof(LibraryFile.Uid))} = '{uid}'";
-        
-        using var db = await DbConnector.GetDb();
-        return await db.Db.ExecuteAsync(sql) > 0;
+        try
+        {
+            string sql = $"update {Wrap(nameof(LibraryFile))} set " +
+                         $" {Wrap(nameof(LibraryFile.ExecutedNodes))} = '', " +
+                         $" {Wrap(nameof(LibraryFile.OriginalMetadata))} = '', " +
+                         $" {Wrap(nameof(LibraryFile.FinalMetadata))} = '', " +
+                         $" {Wrap(nameof(LibraryFile.FinalSize))} = 0, " +
+                         $" {Wrap(nameof(LibraryFile.OutputPath))} = '', " +
+                         $" {Wrap(nameof(LibraryFile.FailureReason))} = '', " +
+                         $" {Wrap(nameof(LibraryFile.ProcessOnNodeUid))} = '', " +
+                         $" {Wrap(nameof(LibraryFile.FlowUid))} = '{flowUid?.ToString() ?? ""}', " +
+                         $" {Wrap(nameof(LibraryFile.FlowName))} = @0, " +
+                         $" {Wrap(nameof(LibraryFile.ProcessingEnded))} = " +
+                         DbConnector.FormatDateQuoted(new DateTime(1970, 1, 1)) +
+                         $" where {Wrap(nameof(LibraryFile.Uid))} = '{uid}'";
+
+            using var db = await DbConnector.GetDb();
+            return await db.Db.ExecuteAsync(sql, flowName ?? string.Empty) > 0;
+        }
+        catch (Exception ex)
+        {
+            Logger.WLog("Failed to rest file info: " + ex.Message);
+            return false;
+        }
     }
     
     
