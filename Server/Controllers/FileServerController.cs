@@ -521,17 +521,21 @@ public class FileServerController : Controller
     /// <returns>the temp path</returns>
     private async Task<string> SaveToTempLocation(string path, StringBuilder log, Stream stream)
     {
+        log.AppendLine("Path: " + path);
+        var directory = FileHelper.GetDirectory(path);
+        string parent = FileHelper.GetDirectory(directory);
         var fileInfo = new FileInfo(path);
         DirectoryInfo tempDirLocation;
-        if (fileInfo.Directory?.Parent != null)
+        if (string.IsNullOrWhiteSpace(parent) == false)
         {
-            tempDirLocation = new DirectoryInfo(Path.Combine(fileInfo.Directory.Parent.FullName,
+            tempDirLocation = new DirectoryInfo(Path.Combine(parent,
                 "_TEMP_" + fileInfo.DirectoryName + "_" + Guid.NewGuid()));
         }
         else
         {
-            tempDirLocation = new DirectoryInfo(fileInfo.Directory.FullName + "_" + Guid.NewGuid());
+            tempDirLocation = new DirectoryInfo(directory + "_" + Guid.NewGuid());
         }
+        log.AppendLine("tempDirLocation: " + tempDirLocation);
 
         string dirPath = tempDirLocation.Name;
         tempDirLocation.Create();
