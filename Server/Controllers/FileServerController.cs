@@ -476,60 +476,30 @@ public class FileServerController : Controller
                 return StatusCode(503, "No File specified for upload.");
             }
 
-            bool tempDir = false;
-            var fileInfo = new FileInfo(path);
-            string dirPath = fileInfo.DirectoryName!;
-            if (fileInfo.Directory.Exists == false)
-            {
-                tempDir = true;
-                dirPath += " [TEMP]";
-                log.AppendLine("Creating temp directory: " + dirPath);
-                new DirectoryInfo(dirPath).Create();
-                _localFileService.SetPermissions(dirPath, logMethod: (string m) => log.AppendLine(m));
-            }
-
-            string outFile = Path.Combine(dirPath, "_TEMP_" + fileInfo.Name + ".FFTEMP");
-            log.AppendLine("Writing file to temporary filename: " + outFile);
-
-            await using (var fileStream = new FileStream(outFile, FileMode.Create))
-            {
-                await stream.CopyToAsync(fileStream);
-            }
+            string tempFile = await SaveToTempLocation(path, log, stream);
 
             // move from temp after its uploaded
-            log.AppendLine("Renaming temporary filename: " + outFile);
-            var outFileInfo = new FileInfo(outFile);
-            log.AppendLine("Temporary file exists: " + outFileInfo.Exists);
+            log.AppendLine("Renaming temporary filename: " + tempFile);
+            var tempFileInfo = new FileInfo(tempFile);
+            log.AppendLine("Temporary file exists: " + tempFileInfo.Exists);
+            if(tempFileInfo.Exists == false)
+                return StatusCode(503, log.ToString());
             
-            // remove the _TEMP and .FFTEMP
-            string dir = FileHelper.GetDirectory(outFile);
-            string file = FileHelper.GetShortFileName(outFile);
-            string rename = FileHelper.Combine(dir, file[6..^7]);
-            
-            log.AppendLine("Renaming to: " + rename);
-            outFileInfo.MoveTo(rename, true);
-            log.AppendLine("File renamed: " + rename);
-
-            fileInfo = new FileInfo(path);
-            if (tempDir && fileInfo.Directory.Exists == false)
+            var fileInfo = new FileInfo(path);
+            if (fileInfo.Directory.Exists == false)
             {
-                log.AppendLine("Moving temp directory to final location: " + fileInfo.DirectoryName);
-                Directory.Move(dirPath, fileInfo.DirectoryName);
-                _localFileService.SetPermissions(dirPath, logMethod: (string m) => log.AppendLine(m));
+                log.AppendLine("Creating directory: " + fileInfo.Directory.FullName);
+                fileInfo.Directory.Create();
+                _localFileService.SetPermissions(fileInfo.Directory.FullName, 
+                    logMethod: m => log.AppendLine(m));
             }
 
-
-            if (tempDir && dirPath.EndsWith(" [TEMP]"))
-            {
-                var tempDirInfo = new DirectoryInfo(dirPath);
-                if (tempDirInfo.Exists)
-                {
-                    log.AppendLine("Deleting temporary folder: " + dirPath);
-                    tempDirInfo.Delete(true);
-                }
-            }
-
-            _localFileService.SetPermissions(path, logMethod: (string m) => log.AppendLine(m));
+            log.AppendLine("Moving temp directory to final location: " + fileInfo.DirectoryName);
+            tempFileInfo.MoveTo(path, true);
+            _localFileService.SetPermissions(path, logMethod: m => log.AppendLine(m));
+            
+            log.AppendLine("Deleting temporary folder: " + tempFileInfo.Directory.FullName);
+            tempFileInfo.Directory.Delete(true);
 
             log.AppendLine("FileServer: Uploaded successfully: " + path);
             return Ok(log.ToString());
@@ -540,6 +510,42 @@ public class FileServerController : Controller
             log.AppendLine($"FileServer: An error occurred: {ex.Message}" + Environment.NewLine + ex.StackTrace);
             return StatusCode(500, log.ToString());
         }
+    }
+
+    /// <summary>
+    /// Saves the file to a temporary file/folder
+    /// </summary>
+    /// <param name="path">the actual destination path</param>
+    /// <param name="log">the logger</param>
+    /// <param name="stream">the file stream</param>
+    /// <returns>the temp path</returns>
+    private async Task<string> SaveToTempLocation(string path, StringBuilder log, Stream stream)
+    {
+        var fileInfo = new FileInfo(path);
+        DirectoryInfo tempDirLocation;
+        if (fileInfo.Directory?.Parent != null)
+        {
+            tempDirLocation = new DirectoryInfo(Path.Combine(fileInfo.Directory.Parent.FullName,
+                "_TEMP_" + fileInfo.DirectoryName + "_" + Guid.NewGuid()));
+        }
+        else
+        {
+            tempDirLocation = new DirectoryInfo(fileInfo.Directory.FullName + "_" + Guid.NewGuid());
+        }
+
+        string dirPath = tempDirLocation.Name;
+        tempDirLocation.Create();
+        _localFileService.SetPermissions(dirPath, logMethod: (m) => log.AppendLine(m));
+
+        string outFile = Path.Combine(dirPath, fileInfo.Name + ".FFTEMP");
+        log.AppendLine("Writing file to temporary filename: " + outFile);
+
+        await using (var fileStream = new FileStream(outFile, FileMode.Create))
+        {
+            await stream.CopyToAsync(fileStream);
+        }
+
+        return outFile;
     }
 
     /// <summary>
