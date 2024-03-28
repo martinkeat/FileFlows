@@ -77,7 +77,7 @@ internal class DbLibraryFileManager : BaseManager
     }
 
     /// <summary>
-    /// Updates a LibraryFile
+    /// Updates a Library File
     /// </summary>
     /// <param name="file">the LibraryFile to update</param>
     public async Task Update(LibraryFile file)
@@ -111,7 +111,7 @@ internal class DbLibraryFileManager : BaseManager
             $" {Wrap(nameof(LibraryFile.ExecutedNodes))}=@19, " +
             $" {Wrap(nameof(LibraryFile.FailureReason))}=@20, " +
             $" {Wrap("ProcessingOrder")}={file.Order}, " + // special case, since Order is reserved in sql
-            $" {Wrap(nameof(LibraryFile.Status))}={(int)file.Status}, " +
+            $" {Wrap(nameof(LibraryFile.Status))} = {(int)file.Status}, " +
             $" {Wrap(nameof(LibraryFile.Flags))} = {(int)file.Flags}, " +
             $" {Wrap(nameof(LibraryFile.OriginalSize))} = {file.OriginalSize}," +
             $" {Wrap(nameof(LibraryFile.FinalSize))} = {file.FinalSize}," +
@@ -1139,10 +1139,11 @@ end ");
         
         using var db = await DbConnector.GetDb();
 
-        var results = db.Db.Fetch<LibraryStatus>($@"select {Wrap(nameof(LibraryFile.Status))}, count(*) AS {Wrap("StatusCount")}
+        string sql = $@"select {Wrap(nameof(LibraryFile.Status))}, count(*) AS {Wrap("StatusCount")}
 from {Wrap(nameof(LibraryFile))}
 where {Wrap(nameof(LibraryFile.Status))} > 0
-group by {Wrap(nameof(LibraryFile.Status))}");
+group by {Wrap(nameof(LibraryFile.Status))}";
+        var results = db.Db.Fetch<LibraryStatus>(sql);
         
         // now for the complicated bit
         

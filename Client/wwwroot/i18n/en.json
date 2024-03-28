@@ -132,9 +132,9 @@
     "FlowElement": "Flow Element",
     "FlowElements": "Flow Elements",
     "ObsoleteConfirm": {
-      "Title": "Obsolete Node",
-      "Message": "It is recommended you switch to a different node.",
-      "Question": "This node is now obsolete and will soon be removed.  Are you sure you want to use this node?"
+      "Title": "Obsolete Flow Element",
+      "Message": "It is recommended you switch to a different flow element.",
+      "Question": "This flow element is now obsolete and will soon be removed.  Are you sure you want to use this?"
     },
     "DateRanges":{
       "Live": "Live",
