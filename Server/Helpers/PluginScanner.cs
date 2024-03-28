@@ -128,7 +128,7 @@ public class PluginScanner
                     plugin.Version = pi.Version;
                     isDifferent = true;
                 }
-                if (isNew || plugin.Deleted == false)
+                if (isNew || plugin.Deleted)
                 {
                     plugin.Deleted = false;
                     isDifferent = true;
