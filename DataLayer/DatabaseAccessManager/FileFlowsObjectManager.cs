@@ -125,60 +125,80 @@ internal  class FileFlowsObjectManager
     /// <param name="saveRevision">if the revision should be saved</param>
     /// <typeparam name="T">The type of object being added or updated</typeparam>
     /// <returns>The updated object</returns>
-    public async Task<(DbObject dbo, bool changed)> AddOrUpdateObject<T>(T obj, bool saveRevision = false) where T : FileFlowObject, new()
+    public async Task<Result<(DbObject dbo, bool changed)>> AddOrUpdateObject<T>(T obj, bool saveRevision = false) where T : FileFlowObject, new()
     {
-        var dbo = ConvertToDbObject(obj);
-        var dbObject = obj.Uid == Guid.Empty ? null : await dbom.Single(obj.Uid);
-        bool changed = false;
-        
-        if (dbObject == null)
+        try
         {
-            if (obj.Uid == Guid.Empty)
-                obj.Uid = Guid.NewGuid();
-            obj.DateCreated = DateTime.UtcNow;
-            obj.DateModified = obj.DateCreated;
-            // create new 
-            dbObject = new DbObject
+            var dbo = ConvertToDbObject(obj);
+            DbObject? dbObject = null;
+            if (obj.Uid != Guid.Empty)
             {
-                Uid = obj.Uid,
-                Name = obj.Name,
-                DateCreated = obj.DateCreated,
-                DateModified = obj.DateModified,
-                Type = dbo.Type,
-                Data = dbo.Data
-            };
-            await dbom.Insert(dbObject);
-            changed = true;
-        }
-        else if(dbo.Name != dbObject.Name || dbo.Data != dbObject.Data)
-        {
-            obj.DateModified = DateTime.UtcNow;
-            dbObject.Name = obj.Name;
-            dbObject.DateModified = obj.DateModified;
-            if (obj.DateCreated != dbObject.DateCreated && obj.DateCreated > new DateTime(2020, 1, 1))
-            {
-                dbObject.DateCreated = obj.DateCreated; // OnHeld moving to process now can change this date
+                try
+                {
+                    dbObject = await dbom.Single(obj.Uid);
+                }
+                catch (Exception)
+                {
+                }
             }
 
-            changed = true;
-            dbObject.Data = dbo.Data;
-            await dbom.Update(dbObject); 
-        }
-        
-        if (changed && saveRevision)
-        {
-            await DatabaseAccessManager.Instance.RevisionManager.Insert(new()
-            {
-                RevisionDate = DateTime.UtcNow,
-                RevisionUid = dbo.Uid,
-                RevisionCreated = dbo.DateCreated,
-                RevisionName = dbo.Name,
-                RevisionType = dbo.Type,
-                RevisionData = dbo.Data
-            });
-        }
+            bool changed = false;
 
-        return (dbObject, changed);
+            if (dbObject == null)
+            {
+                if (obj.Uid == Guid.Empty)
+                    obj.Uid = Guid.NewGuid();
+                if (obj.DateCreated < new DateTime(2020, 1, 1))
+                    obj.DateCreated = DateTime.UtcNow;
+                obj.DateModified = DateTime.UtcNow;
+                // create new 
+                dbObject = new DbObject
+                {
+                    Uid = obj.Uid,
+                    Name = obj.Name,
+                    DateCreated = obj.DateCreated,
+                    DateModified = obj.DateModified,
+                    Type = dbo.Type,
+                    Data = dbo.Data
+                };
+                await dbom.Insert(dbObject);
+                changed = true;
+            }
+            else if (dbo.Name != dbObject.Name || dbo.Data != dbObject.Data)
+            {
+                obj.DateModified = DateTime.UtcNow;
+                dbObject.Name = obj.Name;
+                dbObject.DateModified = obj.DateModified;
+                if (obj.DateCreated != dbObject.DateCreated && obj.DateCreated > new DateTime(2020, 1, 1))
+                {
+                    dbObject.DateCreated = obj.DateCreated; // OnHeld moving to process now can change this date
+                }
+
+                changed = true;
+                dbObject.Data = dbo.Data;
+                await dbom.Update(dbObject);
+            }
+
+            if (changed && saveRevision)
+            {
+                await DatabaseAccessManager.Instance.RevisionManager.Insert(new()
+                {
+                    RevisionDate = DateTime.UtcNow,
+                    RevisionUid = dbo.Uid,
+                    RevisionCreated = dbo.DateCreated,
+                    RevisionName = dbo.Name,
+                    RevisionType = dbo.Type,
+                    RevisionData = dbo.Data
+                });
+            }
+
+            return (dbObject, changed);
+        }
+        catch (Exception ex)
+        {
+            Logger.Instance.ELog("Failed FFObjectManager.AddOrUpdateObject: " + ex.Message + Environment.NewLine + ex.StackTrace);
+            return Result<(DbObject dbo, bool changed)>.Fail("Error: " + ex.Message);
+        }
     }
     
     /// <summary>

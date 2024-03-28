@@ -69,7 +69,6 @@ public class NodeManager : CachedManager<ProcessingNode>
             return Result<bool>.Fail(error);
         if (node.Value == null)
         {
-
             string tempPath;
             if (DirectoryHelper.IsDocker)
                 tempPath = "/temp";

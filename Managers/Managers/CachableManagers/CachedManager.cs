@@ -121,7 +121,7 @@ public abstract class CachedManager<T> where T : FileFlowObject, new()
         var result = await DatabaseAccessManager.Instance.FileFlowsObjectManager
             .AddOrUpdateObject(item, saveRevision: SaveRevisions);
         
-        if (result.changed && dontIncrementConfigRevision == false)
+        if (result is { IsFailed: false, Value.changed: true } && dontIncrementConfigRevision == false)
             await IncrementConfigurationRevision();
         
         if(UseCache)
