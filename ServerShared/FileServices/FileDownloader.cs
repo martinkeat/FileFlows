@@ -69,7 +69,7 @@ public class FileDownloader
     /// Downloads a file from the specified URL and saves it to the destination path.
     /// Validates the downloaded file using a SHA256 hash provided by the server.
     /// </summary>
-    /// <param name="uid">The UID of the file to download</param>
+    /// <param name="path">The path of the file to download</param>
     /// <param name="destinationPath">The path where the downloaded file will be saved.</param>
     /// <returns>A tuple indicating success (True) or failure (False) and an error message if applicable.</returns>
     public async Task<Result<bool>> DownloadFile(string path, string destinationPath)
