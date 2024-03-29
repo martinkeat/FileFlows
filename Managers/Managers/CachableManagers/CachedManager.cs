@@ -72,9 +72,17 @@ public abstract class CachedManager<T> where T : FileFlowObject, new()
     /// <returns>the item</returns>
     public virtual async Task<T?> GetByUid(Guid uid)
     {
-        if(SettingsManager.UseCache)
-            return (await GetData()).FirstOrDefault(x => x.Uid == uid);
-        return await DatabaseAccessManager.Instance.FileFlowsObjectManager.Single<T>(uid);
+        try
+        {
+            if (SettingsManager.UseCache)
+                return (await GetData()).FirstOrDefault(x => x.Uid == uid);
+            return await DatabaseAccessManager.Instance.FileFlowsObjectManager.Single<T>(uid);
+        }
+        catch (Exception ex)
+        {
+            Logger.Instance.ELog($"Failed getting '{typeof(T).Name}': " + ex.Message);
+            return null;
+        }
     }
 
     /// <summary>

@@ -20,13 +20,13 @@ public class SQLiteConnector : IDatabaseConnector
 
     /// <inheritdoc />
     public string FormatDateQuoted(DateTime date)
-    {
-        // this caused one user to insert null into the database
-        //=> "datetime('" + date.ToString("yyyy-MM-ddTHH:mm:ss.fffZ") + "', 'utc')";
-        // if Z is added to the end here, it causes the timezone bias to be applied twice
-        string dateString = date.ToString("yyyy-MM-ddTHH:mm:ss.fff");
-        return "'" + dateString + "'";
-    }
+        => "datetime('" + date.ToString("yyyy-MM-ddTHH:mm:ss.fffZ") + "', 'utc')"; 
+    // ^^ this worked for all but one, that one user had many other issues, reverting to this 
+    
+    //     // if Z is added to the end here, it causes the timezone bias to be applied twice
+    //     string dateString = date.ToString("yyyy-MM-ddTHH:mm:ss.fff");
+    //     return "'" + dateString + "'";
+    // }
 
     /// <inheritdoc />
     public string TimestampDiffSeconds(string start, string end, string asColumn)

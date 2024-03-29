@@ -55,6 +55,10 @@ public class SettingsManager
             Instance.Revision += 1;
             await DatabaseAccessManager.Instance.FileFlowsObjectManager.Update(Instance);
         }
+        catch (Exception ex)
+        {
+            Logger.Instance.WLog("Failed to increment revision: " + ex.Message);
+        }
         finally
         {
             _semaphore.Release();
