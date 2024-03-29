@@ -497,9 +497,13 @@ public class FileServerController : Controller
             log.AppendLine("Moving temp directory to final location: " + fileInfo.DirectoryName);
             tempFileInfo.MoveTo(path, true);
             _localFileService.SetPermissions(path, logMethod: m => log.AppendLine(m));
-            
-            log.AppendLine("Deleting temporary folder: " + tempFileInfo.Directory.FullName);
-            tempFileInfo.Directory.Delete(true);
+
+            var tempDir = FileHelper.GetDirectory(tempFile);
+            if (Directory.Exists(tempDir))
+            {
+                log.AppendLine("Deleting temporary folder: " + tempDir);
+                Directory.Delete(tempDir,true);
+            }
 
             log.AppendLine("FileServer: Uploaded successfully: " + path);
             return Ok(log.ToString());
@@ -540,7 +544,6 @@ public class FileServerController : Controller
 
         string dirPath = tempDirLocation.FullName;
         tempDirLocation.Create();
-        _localFileService.SetPermissions(dirPath, logMethod: (m) => log.AppendLine(m));
 
         string outFile = Path.Combine(dirPath, fileInfo.Name + ".FFTEMP");
         log.AppendLine("Writing file to temporary filename: " + outFile);
