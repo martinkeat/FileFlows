@@ -26,7 +26,6 @@
 		<StackPanel Grid.Row="1" Margin="10">
 			<Image Source="avares://FileFlows.Node/Ui/icon.ico" Width="100" />
 
-
 			<TextBlock Margin="6" Text="{Binding Version}" TextAlignment="Center" />
 			
 			<Grid ColumnDefinitions="140,4*" RowDefinitions="Auto,Auto,Auto,40,40,Auto"  Margin="4">
@@ -43,33 +42,11 @@
 					/>
 				</DockPanel>
 				
-				
-				<ToggleSwitch Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" IsChecked="{Binding StartMinimized}" 
+				<ToggleSwitch Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" 
+				              IsVisible="{Binding ShowStartMinimized}" 
+				              IsChecked="{Binding StartMinimized}" 
 				              Margin="5 5 5 5" HorizontalAlignment="Center" 
 				              OffContent="Start Minimised" OnContent="Start Minimised"  />
-				
-				<!--
-				<TextBlock Text="Temp Path:" Grid.Row="1" Grid.Column="0"  Margin="5 13 5 5" TextAlignment="Right"/>
-				<DockPanel Grid.Row="1" Grid.Column="1"  Margin="5" HorizontalAlignment="Stretch">
-					<TextBox Text="{Binding TempPath}" Watermark="Temp Path" Foreground="white" 
-					         Margin="0"  Height="38" Padding="7" Width="350"  />
-					
-					<Button Margin="0" Content="..." Command="{Binding Browse}" Width="70"
-					        Grid.Row="4" Grid.Column="1"
-					        Foreground="#ff0090" Background="#111214"
-					        BorderBrush="#ff0090"
-					/>
-				</DockPanel>
-
-
-				<TextBlock Text="Flow Runners:" Grid.Row="2" Grid.Column="0"  Margin="5 13 5 5" TextAlignment="Right" />
-				<NumericUpDown Text="{Binding FlowRunners}" Grid.Row="2" Grid.Column="1" Minimum="0" Maximum="100" Foreground="white" Margin="5" />
-
-				<TextBlock Text="Enabled:" Grid.Row="3" Grid.Column="0"  Margin="5 10 5 5" TextAlignment="Right" />
-				<ToggleSwitch IsChecked="{Binding Enabled}" 
-				              Grid.Row="3" Grid.Column="1" Margin="5 5 5 5" 
-				              OffContent="" OnContent=""  />
-				-->
 				
 				<StackPanel Grid.Row="4" Grid.Column="1" Orientation="Horizontal">
 					<Button Margin="6" Content="SAVE / REGISTER" Command="{Binding SaveRegister}"

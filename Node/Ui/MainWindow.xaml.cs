@@ -251,6 +251,19 @@ public class MainWindowViewModel:INotifyPropertyChanged
             }
         }
     }
+
+    /// <summary>
+    /// Gets if start minimized should be shown 
+    /// </summary>
+    public bool ShowStartMinimized
+    {
+        get
+        {
+            if (OperatingSystem.IsMacOS())
+                return false;
+            return true;
+        }
+    }
     
     /// <summary>
     /// Gets or sets if the app should start minimized
