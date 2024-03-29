@@ -538,7 +538,7 @@ public class FileServerController : Controller
         }
         log.AppendLine("tempDirLocation: " + tempDirLocation);
 
-        string dirPath = tempDirLocation.Name;
+        string dirPath = tempDirLocation.FullName;
         tempDirLocation.Create();
         _localFileService.SetPermissions(dirPath, logMethod: (m) => log.AppendLine(m));
 
