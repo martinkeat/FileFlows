@@ -331,7 +331,7 @@ internal  class DbObjectManager : BaseManager
     /// <returns>true if any objects were updated, otherwise false</returns>
     public async Task<bool> UpdateAllObjectReferences(string property, Guid uid, string name)
     {
-        string sql = $"update {Wrap(nameof(DbObject))} ";
+        string sql = $"update {Wrap(nameof(DbObject))} set ";
 
         string dataColumnName = Wrap(nameof(DbObject.Data));
         
