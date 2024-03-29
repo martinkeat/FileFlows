@@ -523,13 +523,14 @@ public class FileServerController : Controller
     {
         log.AppendLine("Path: " + path);
         var directory = FileHelper.GetDirectory(path);
+        var directoryName = FileHelper.GetDirectoryName(path);
         string parent = FileHelper.GetDirectory(directory);
         var fileInfo = new FileInfo(path);
         DirectoryInfo tempDirLocation;
         if (string.IsNullOrWhiteSpace(parent) == false)
         {
             tempDirLocation = new DirectoryInfo(Path.Combine(parent,
-                "_TEMP_" + fileInfo.DirectoryName + "_" + Guid.NewGuid()));
+                "_TEMP_" + directoryName + "_" + Guid.NewGuid()));
         }
         else
         {
