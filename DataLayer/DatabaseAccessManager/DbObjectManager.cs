@@ -45,22 +45,30 @@ internal  class DbObjectManager : BaseManager
     /// <param name="dbObject">the new DbObject</param>
     internal async Task Insert(DbObject dbObject)
     {
-        using var db = await DbConnector.GetDb(write: true);
-        await db.Db.ExecuteAsync("insert into " + Wrap(nameof(DbObject)) + "(" +
-                           Wrap(nameof(DbObject.Uid)) + ", " +
-                           Wrap(nameof(DbObject.Name)) + ", " +
-                           Wrap(nameof(DbObject.Type)) + ", " +
-                           Wrap(nameof(DbObject.Data)) + ", " +
-                           Wrap(nameof(DbObject.DateCreated)) + ", " +
-                           Wrap(nameof(DbObject.DateModified)) + " " +
-                           " ) values (@0, @1, @2, @3, " +
-                           DbConnector.FormatDateQuoted(dbObject.DateCreated.Clamp()) + ", "+ 
-                           DbConnector.FormatDateQuoted(dbObject.DateModified.Clamp()) + ")",
-            dbObject.Uid,
-            dbObject.Name,
-            dbObject.Type,
-            dbObject.Data ?? string.Empty
-        );
+        string sql = "insert into " + Wrap(nameof(DbObject)) + "(" +
+                     Wrap(nameof(DbObject.Uid)) + ", " +
+                     Wrap(nameof(DbObject.Name)) + ", " +
+                     Wrap(nameof(DbObject.Type)) + ", " +
+                     Wrap(nameof(DbObject.Data)) + ", " +
+                     Wrap(nameof(DbObject.DateCreated)) + ", " +
+                     Wrap(nameof(DbObject.DateModified)) + " " +
+                     " ) values (@0, @1, @2, @3, " +
+                     DbConnector.FormatDateQuoted(dbObject.DateCreated.Clamp()) + ", " +
+                     DbConnector.FormatDateQuoted(dbObject.DateModified.Clamp()) + ")";
+        try
+        {
+            using var db = await DbConnector.GetDb(write: true);
+            await db.Db.ExecuteAsync(sql,
+                dbObject.Uid,
+                dbObject.Name ?? string.Empty,
+                dbObject.Type ?? string.Empty,
+                dbObject.Data ?? string.Empty
+            );
+        }
+        catch (Exception ex)
+        {
+            Logger.ELog("Failed to insert DB Object: " + ex.Message + Environment.NewLine + sql);
+        }
     }
 
     /// <summary>
