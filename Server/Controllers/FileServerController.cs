@@ -15,6 +15,7 @@ namespace FileFlows.Server.Controllers;
 /// </summary>
 [Route("/api/file-server")]
 [FileFlowsAuthorize]
+[ApiExplorerSettings(IgnoreApi = true)]
 public class FileServerController : Controller
 {
 

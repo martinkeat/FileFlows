@@ -235,7 +235,7 @@ public class MainWindowViewModel:INotifyPropertyChanged
     /// </summary>
     public string Version { get; set; }
 
-    private string _ServerUrl = String.Empty;
+    private string _ServerUrl = string.Empty;
     /// <summary>
     /// Gets or sets the URL of the FileFlows Server
     /// </summary>
@@ -246,12 +246,29 @@ public class MainWindowViewModel:INotifyPropertyChanged
         {
             if (_ServerUrl?.EmptyAsNull() != value?.EmptyAsNull())
             {
-                _ServerUrl = value ?? String.Empty;
+                _ServerUrl = value ?? string.Empty;
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ServerUrl)));
             }
         }
     }
 
+
+    private string _ApiToken = string.Empty;
+    /// <summary>
+    /// Gets or sets the API Token
+    /// </summary>
+    public string ApiToken
+    {
+        get => _ApiToken;
+        set
+        {
+            if (_ApiToken?.EmptyAsNull() != value?.EmptyAsNull())
+            {
+                _ApiToken = value ?? string.Empty;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ApiToken)));
+            }
+        }
+    }
     /// <summary>
     /// Gets if start minimized should be shown 
     /// </summary>
@@ -298,7 +315,7 @@ public class MainWindowViewModel:INotifyPropertyChanged
             ServerUrl = "http://" + ServerUrl;
         if (ServerUrl.EndsWith("/") == false)
             ServerUrl += "/";
-        
+
         AppSettings.Instance.ServerUrl = ServerUrl;
 
         Window.Launch();
@@ -333,6 +350,7 @@ public class MainWindowViewModel:INotifyPropertyChanged
         if (ServerUrl.EndsWith("/") == false)
             ServerUrl += "/";
         
+        AppSettings.Instance.ApiToken = ApiToken;
         AppSettings.Instance.ServerUrl = ServerUrl;
         
         _ = Window.SaveRegister();

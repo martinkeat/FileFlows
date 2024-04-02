@@ -12,7 +12,7 @@ public class SettingsService : RemoteService, ISettingsService
     {
         try
         {
-            var result = await HttpHelper.Get<string>($"{ServiceBaseUrl}/api/processing-node/version");
+            var result = await HttpHelper.Get<string>($"{ServiceBaseUrl}/remote/system/version");
             if (result.Success == false)
                 throw new Exception(result.Body);
             return new Version(result.Data);

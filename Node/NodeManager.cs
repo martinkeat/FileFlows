@@ -149,18 +149,13 @@ public class NodeManager
             mappings.AddRange(AppSettings.EnvironmentalMappings);
         }
 
-        // if (AppSettings.EnvironmentalRunnerCount != null)
-        //     AppSettings.Instance.Runners = AppSettings.EnvironmentalRunnerCount.Value;
-        //
-        // if (AppSettings.EnvironmentalEnabled != null)
-        //     AppSettings.Instance.Enabled = AppSettings.EnvironmentalEnabled.Value;
-
         string tempPath =  AppSettings.ForcedTempPath?.EmptyAsNull() ?? (Globals.IsDocker ? "/temp" : Path.Combine(DirectoryHelper.BaseDirectory, "Temp"));
 
         var settings = AppSettings.Instance;
         if (string.IsNullOrEmpty(settings.ServerUrl))
             return (false, "Server URL not set");
         
+        RemoteService.ApiToken = settings.ApiToken;
         var nodeService = ServiceLoader.Load<INodeService>();
         Shared.Models.ProcessingNode result;
         try

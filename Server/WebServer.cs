@@ -5,12 +5,14 @@ using Microsoft.OpenApi.Models;
 using System.Runtime.InteropServices;
 using FileFlows.Plugin;
 using FileFlows.RemoteServices;
+using FileFlows.Server.Helpers;
 using FileFlows.Server.Hubs;
 using FileFlows.Server.Middleware;
 using FileFlows.Server.Services;
 using FileFlows.ServerShared.Workers;
 using Microsoft.AspNetCore.SignalR;
 using FlowRunnerService = FileFlows.Server.Services.FlowRunnerService;
+using HttpMethod = System.Net.Http.HttpMethod;
 using LibraryFileService = FileFlows.Server.Services.LibraryFileService;
 using NodeService = FileFlows.Server.Services.NodeService;
 using ServiceLoader = FileFlows.Server.Services.ServiceLoader;
@@ -176,9 +178,39 @@ public class WebServer
                 System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
         });
         builder.Services.AddMvc();
+        
+        // do this so the settings object is loaded
+        var settings = ServiceLoader.Load<SettingsService>().Get().Result;
+        var appSettings = ServiceLoader.Load<AppSettingsService>().Settings;
+        
         builder.Services.AddSwaggerGen(c =>
         {
             c.SwaggerDoc("v1", new OpenApiInfo { Title = "FileFlows", Version = "v1" });
+
+            if (LicenseHelper.IsLicensed(LicenseFlags.UserSecurity) && appSettings.Security != SecurityMode.Off)
+            {
+                c.AddSecurityDefinition("Bearer", new()
+                {
+                    Type = SecuritySchemeType.ApiKey,
+                    Name = "Authorization",
+                    In = ParameterLocation.Header,
+                    Description = "Authorization bearer token"
+                });
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type=ReferenceType.SecurityScheme,
+                                Id="Bearer"
+                            }
+                        },
+                        new string[]{}
+                    }
+                });
+            }
 
             var filePath = Path.Combine(System.AppContext.BaseDirectory, "FileFlows.Server.xml");
             if (File.Exists(filePath))
@@ -270,14 +302,11 @@ public class WebServer
         );
 
 
-        Services.InitServices.Init();
+        InitServices.Init();
 
 #if(DEBUG)
         //Helpers.DbHelper.CleanDatabase().Wait();
 #endif
-
-        // do this so the settings object is loaded
-        var settings = ServiceLoader.Load<SettingsService>().Get().Result;
 
 
         Application.ServerUrl = $"{protocol}://localhost:{Port}";
@@ -331,7 +360,7 @@ public class WebServer
             //new LibraryFileServiceUpdater()
         );
 
-        Started = CheckServerListening(serverUrl.Replace("0.0.0.0", "localhost").TrimEnd('/') + "/api/status").Result;
+        Started = CheckServerListening(serverUrl.Replace("0.0.0.0", "localhost").TrimEnd('/') + "/remote/system/version").Result;
         if (Started == false)
         {
             StartError = "Failed to start on: " + serverUrl;
@@ -371,12 +400,24 @@ public class WebServer
         using var client = new HttpClient(handler);
 
         client.Timeout = TimeSpan.FromSeconds(30); // Set the timeout to 30 seconds
+        var settings = ServiceLoader.Load<AppSettingsService>().Settings;
+        var apiToken = (await ServiceLoader.Load<SettingsService>().Get()).ApiToken;
 
         for (int i = 0; i < 15; i++) // Retry 15 times (15 * 2 seconds = 30 seconds)
         {
             try
             {
-                var response = await client.GetAsync(url);
+                var request = new HttpRequestMessage
+                {
+                    Method = HttpMethod.Get ,
+                    RequestUri = new Uri(url, UriKind.RelativeOrAbsolute)
+                };
+                if (settings.Security != SecurityMode.Off && LicenseHelper.IsLicensed(LicenseFlags.UserSecurity) && string.IsNullOrWhiteSpace(apiToken) == false)
+                {
+                    request.Headers.Add("x-token", apiToken);
+                }
+
+                var response = await client.SendAsync(request);
 
                 if (response.IsSuccessStatusCode)
                 {

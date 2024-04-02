@@ -678,6 +678,11 @@
         "AutoRefresh":"Auto Refresh"
       }
     },
+    "Login": {
+      "Messages": {
+        "InvalidUsernameOrPassword": "Invalid username or password"
+      }
+    },
     "Nodes": {
       "Title": "Nodes",
       "Labels": {

@@ -342,7 +342,7 @@ public class SettingsController : Controller
     /// </summary>
     /// <param name="settings">The setting object to populate.</param>
     /// <param name="connectionString">The connection string to parse.</param>
-    public void PopulateDbSettings(SettingsUiModel settings, string connectionString)
+    void PopulateDbSettings(SettingsUiModel settings, string connectionString)
     {
         var parts = connectionString.Split(';');
 

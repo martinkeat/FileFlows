@@ -6,6 +6,7 @@ namespace FileFlows.Server.Controllers;
 /// Icon file type controller
 /// </summary>
 [Route("/icon/filetype")]
+[ApiExplorerSettings(IgnoreApi = true)]
 public class FileTypeIconController : Controller
 {
 	private const string HEAD = @"<?xml version=""1.0"" encoding=""iso-8859-1""?>

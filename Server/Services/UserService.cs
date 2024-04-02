@@ -66,7 +66,7 @@ public class UserService
     {
         var user = await GetByName(username);
         if (user == null)
-            return Result<User>.Fail("Pages.Login.InvalidUsernameOrPassword");
+            return Result<User>.Fail("Pages.Login.Messages.InvalidUsernameOrPassword");
 
         LoginAttempts.TryGetValue(user.Uid, out LoginAttempt? loginAttempt);
         if (loginAttempt != null && loginAttempt.LockedOutUntil > DateTime.UtcNow)
@@ -80,7 +80,7 @@ public class UserService
                 loginAttempt.LockedOutUntil = DateTime.UtcNow.AddMinutes(20);
             LoginAttempts[user.Uid] = loginAttempt;
             
-            return Result<User>.Fail("Pages.Login.InvalidUsernameOrPassword");
+            return Result<User>.Fail("Pages.Login.Messages.InvalidUsernameOrPassword");
         }
 
         if(loginAttempt != null)
