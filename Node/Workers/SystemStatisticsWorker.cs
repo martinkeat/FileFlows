@@ -1,3 +1,4 @@
+using FileFlows.RemoteServices;
 using FileFlows.ServerShared.Helpers;
 using FileFlows.ServerShared.Models;
 using FileFlows.ServerShared.Services;
@@ -26,7 +27,7 @@ public class SystemStatisticsWorker:Worker
     {
         if(processingNode == null)
         {
-            var nodeService = NodeService.Load();
+            var nodeService = ServiceLoader.Load<INodeService>();
             processingNode =
                 nodeService.GetByAddressAsync(AppSettings.ForcedHostName?.EmptyAsNull() ?? Environment.MachineName).Result;
             if (processingNode == null)
@@ -35,7 +36,7 @@ public class SystemStatisticsWorker:Worker
         
         var tempStorage = GetTempStorageSize();
         var logStorage = GetLogStorageSize();
-        new SystemService().RecordNodeSystemStatistics(new()
+        ServiceLoader.Load<INodeService>().RecordNodeSystemStatistics(new()
         {
             Uid = processingNode.Uid,
             TemporaryDirectorySize = tempStorage,

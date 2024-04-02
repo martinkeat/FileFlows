@@ -3247,11 +3247,10 @@ hr {
 
 .page:not(.collapsed) .navbar-brand {
   margin: 0.75rem 0 0 0.75rem;
-  background: url("/logo.svg");
+}
+.page:not(.collapsed) .navbar-brand img {
   width: 11rem;
   height: 2.5rem;
-  background-size: contain;
-  background-repeat: no-repeat;
 }
 
 .draghandle {

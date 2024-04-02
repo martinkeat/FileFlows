@@ -54,7 +54,7 @@ public class FileFlowsTasksWorker: Worker
             dict.Add(var.Name, var.Value);
         }
         
-        dict.TryAdd("FileFlows.Url", ServerShared.Services.Service.ServiceBaseUrl);
+        dict.TryAdd("FileFlows.Url", Application.ServerUrl);
         return dict;
     }
 

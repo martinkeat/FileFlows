@@ -31,15 +31,15 @@ public partial class Settings : InputRegister
     /// <summary>
     /// Gets or sets the navigation manager used
     /// </summary>
-    [Inject] private NavigationManager  NavigationManager { get; set; }
+    [Inject] private NavigationManager NavigationManager { get; set; }
 
     private bool ShowExternalDatabase => LicensedFor(LicenseFlags.ExternalDatabase);
 
     private bool IsSaving { get; set; }
 
-    private string lblSave, lblSaving, lblHelp, lblGeneral, lblAdvanced, lblNode, lblDatabase, lblLogging, 
-        lblInternalProcessingNodeDescription, lblDbDescription, lblFileServerDescription, lblTest, lblRestart, lblLicense, lblUpdates, 
-        lblCheckNow, lblTestingDatabase, lblFileServer;
+    private string lblSave, lblSaving, lblHelp, lblEmail, lblAdvanced, lblDatabase, lblLogging, 
+        lblDbDescription, lblFileServerDescription, lblTest, lblRestart, 
+        lblLicense, lblUpdates, lblCheckNow, lblTestingDatabase, lblFileServer;
 
     private string OriginalDatabase, OriginalServer;
     private DatabaseType OriginalDbType;
@@ -48,20 +48,32 @@ public partial class Settings : InputRegister
     private string LicenseFlagsString = string.Empty;
     // indicates if the page has rendered or not
     private DateTime firstRenderedAt = DateTime.MaxValue;
-    
-    private ProcessingNode InternalProcessingNode { get; set; }
 
     private readonly List<Validator> RequiredValidator = new()
     {
         new Required()
     };
 
+    /// <summary>
+    /// The database types
+    /// </summary>
     private readonly List<ListOption> DbTypes = new()
     {
         new() { Label = "SQLite", Value = DatabaseType.Sqlite },
         new() { Label = "MySQL", Value = DatabaseType.MySql },
         new() { Label = "Postgres", Value = DatabaseType.Postgres }, 
         new() { Label = "SQL Server", Value = DatabaseType.SqlServer }, 
+    };
+
+    /// <summary>
+    /// the SMTP security types
+    /// </summary>
+    private readonly List<ListOption> SmtpSecurityTypes = new()
+    {
+        new() { Label = "None", Value = EmailSecurity.None },
+        new() { Label = "Auto", Value = EmailSecurity.Auto },
+        new() { Label = "TLS", Value = EmailSecurity.TLS },
+        new() { Label = "SSL", Value = EmailSecurity.SSL },
     };
 
     /// <summary>
@@ -73,6 +85,15 @@ public partial class Settings : InputRegister
         new() { Label = "Deutsch", Value = "de" },
     };
 
+    /// <summary>
+    /// The security options
+    /// </summary>
+    private readonly List<ListOption> SecurityOptions = new()
+    {
+        new() { Label = $"Enums.{nameof(SecurityMode)}.{nameof(SecurityMode.Off)}", Value = SecurityMode.Off },
+        new() { Label = $"Enums.{nameof(SecurityMode)}.{nameof(SecurityMode.Local)}", Value = SecurityMode.Local },
+    };
+    
     /// <summary>
     /// Gets or sets the type of database to use
     /// </summary>
@@ -87,6 +108,19 @@ public partial class Settings : InputRegister
                 if (dbType != DatabaseType.Sqlite && string.IsNullOrWhiteSpace(Model.DbName))
                     Model.DbName = "FileFlows";
             }
+        }
+    }
+    
+    /// <summary>
+    /// Gets or sets the type of email security to use
+    /// </summary>
+    private object SmtpSecurity
+    {
+        get => Model.SmtpSecurity;
+        set
+        {
+            if (value is EmailSecurity security)
+                Model.SmtpSecurity = security;
         }
     }
 
@@ -104,6 +138,22 @@ public partial class Settings : InputRegister
             }
         }
     }
+    
+    
+    /// <summary>
+    /// Gets or sets the security
+    /// </summary>
+    private object Security
+    {
+        get => Model.Security;
+        set
+        {
+            if (value is SecurityMode mode)
+            {
+                Model.Security = mode;
+            }
+        }
+    }
 
     private string initialLannguage;
 
@@ -115,11 +165,9 @@ public partial class Settings : InputRegister
         lblHelp = Translater.Instant("Labels.Help");
         lblAdvanced = Translater.Instant("Labels.Advanced");
         lblLicense = Translater.Instant("Labels.License");
-        lblGeneral = Translater.Instant("Pages.Settings.Labels.General");
-        lblNode = Translater.Instant("Pages.Settings.Labels.InternalProcessingNode");
+        lblEmail = Translater.Instant("Pages.Settings.Labels.Email");
         lblUpdates = Translater.Instant("Pages.Settings.Labels.Updates");
         lblDatabase = Translater.Instant("Pages.Settings.Labels.Database");
-        lblInternalProcessingNodeDescription = Translater.Instant("Pages.Settings.Fields.InternalProcessingNode.Description");
         lblDbDescription = Translater.Instant("Pages.Settings.Fields.Database.Description");
         lblTest = Translater.Instant("Labels.Test");
         lblRestart= Translater.Instant("Pages.Settings.Labels.Restart");
@@ -154,7 +202,7 @@ public partial class Settings : InputRegister
     {
         if(blocker)
             Blocker.Show();
-#if (!DEMO)
+        
         var response = await HttpHelper.Get<SettingsUiModel>("/api/settings/ui-settings");
         if (response.Success)
         {
@@ -163,26 +211,24 @@ public partial class Settings : InputRegister
             this.OriginalServer = this.Model?.DbServer;
             this.OriginalDatabase = this.Model?.DbName;
             this.OriginalDbType = this.Model?.DbType ?? DatabaseType.Sqlite;
-            if (this.Model != null && this.Model.DbPort < 1)
+            if (this.Model is { DbPort: < 1 })
                 this.Model.DbPort = 3306;
+
+            if (Model is { SmtpPort: < 1})
+                Model.SmtpPort = 25;
+
+            if (Model != null && string.IsNullOrWhiteSpace(Model.ApiToken))
+                Model.ApiToken = Guid.NewGuid().ToString("N");
         }
 
-        var nodesResponse = await HttpHelper.Get<ProcessingNode[]>("/api/node");
-        if (nodesResponse.Success)
-        {
-            this.InternalProcessingNode = nodesResponse.Data.FirstOrDefault(x => x.Address == "FileFlowsServer") ?? new ();
-        }
         this.StateHasChanged();
-#endif
+        
         if(blocker)
             Blocker.Hide();
     }
 
     private async Task Save()
     {
-#if (DEMO)
-        return;
-#else
         this.Blocker.Show(lblSaving);
         this.IsSaving = true;
         try
@@ -193,11 +239,6 @@ public partial class Settings : InputRegister
                 return;
             
             await HttpHelper.Put<string>("/api/settings/ui-settings", this.Model);
-
-            if (this.InternalProcessingNode != null)
-            {
-                await HttpHelper.Post("/api/node", this.InternalProcessingNode);
-            }
 
             await App.Instance.LoadAppInfo();
 
@@ -216,7 +257,6 @@ public partial class Settings : InputRegister
             this.IsSaving = false;
             this.Blocker.Hide();
         }
-#endif
     }
 
     private void OpenHelp()

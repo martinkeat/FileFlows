@@ -1,0 +1,203 @@
+using FileFlows.Server.Authentication;
+using FileFlows.Server.Helpers;
+using FileFlows.Server.Services;
+using FileFlows.Server.Workers;
+using FileFlows.ServerShared.Models;
+using FileFlows.Shared.Models;
+using Microsoft.AspNetCore.Mvc;
+
+namespace FileFlows.Server.Controllers.RemoteControllers;
+
+/// <summary>
+/// Controller used by a processing node to communicate with the server
+/// </summary>
+[Route("/remote/node")]
+[FileFlowsApiAuthorize]
+[ApiExplorerSettings(IgnoreApi = true)]
+public class NodeController : Controller
+{
+    /// <summary>
+    /// Get processing node by address
+    /// </summary>
+    /// <param name="address">The address</param>
+    /// <param name="version">The version of the node</param>
+    /// <returns>If found, the processing node</returns>
+    [HttpGet("by-address/{address}")]
+    public async Task<ProcessingNode> GetByAddress([FromRoute] string address, [FromQuery] string version)
+    {
+        if (string.IsNullOrWhiteSpace(address))
+            throw new ArgumentNullException(nameof(address));
+
+        var service = ServiceLoader.Load<NodeService>();
+        var node = await service.GetByAddressAsync(address);
+        if (node == null)
+            return node;
+
+        if (string.IsNullOrEmpty(version) == false && node.Version != version)
+        {
+            node.Version = version;
+            node = await service.Update(node);
+        }
+        else
+        {
+            // this updates the "LastSeen"
+            await service.UpdateLastSeen(node.Uid);
+        }
+
+        node.SignalrUrl = "flow";
+        return node;
+    }
+    
+    /// <summary>
+    /// Gets the version an node update available
+    /// </summary>
+    /// <returns>the version an node update available</returns>
+    [HttpGet("update-version")]
+    public string GetNodeUpdateVersion()
+    {
+        if (LicenseHelper.IsLicensed(LicenseFlags.AutoUpdates) == false)
+            return string.Empty;
+        return Globals.Version.ToString();
+    }
+    
+    /// <summary>
+    /// Gets the node updater
+    /// </summary>
+    /// <param name="windows">if the update is for a windows system</param>
+    /// <returns>the node updater</returns>
+    [HttpGet("updater")]
+    public IActionResult GetNodeUpdater([FromQuery] bool windows)
+    {
+        if (LicenseHelper.IsLicensed(LicenseFlags.AutoUpdates) == false)
+            return new ContentResult();
+        
+        string updateFile = Path.Combine(DirectoryHelper.BaseDirectory, "Server", "Nodes",
+            $"FileFlows-Node-{Globals.Version}.zip");
+        if (System.IO.File.Exists(updateFile) == false)
+            return new ContentResult();
+
+        return File(System.IO.File.ReadAllBytes(updateFile), "application/zip");
+    }
+
+    /// <summary>
+    /// Gets an node update available
+    /// </summary>
+    /// <param name="version">the current version of the node</param>
+    /// <param name="windows">if the update is for a windows system</param>
+    /// <returns>if there is a node update available, returns the update</returns>
+    [HttpGet("updater-available")]
+    public IActionResult GetNodeUpdater([FromQuery]string version, [FromQuery] bool windows)
+    {
+        if (LicenseHelper.IsLicensed(LicenseFlags.AutoUpdates) == false)
+            return new ContentResult();
+        if (string.IsNullOrWhiteSpace(version))
+            return new ContentResult();
+        var current = new Version(Globals.Version);
+        var node =  new Version(version);
+        if (node >= current)
+            return new ContentResult();
+
+        return GetNodeUpdater(windows);
+    }
+
+    /// <summary>
+    /// Records the node system statistics to the server
+    /// </summary>
+    /// <param name="args">the node system statistics</param>
+    [HttpPost("system-statistics")]
+    public async Task RecordNodeSystemStatistics([FromBody] NodeSystemStatistics args)
+    {
+        await ServiceLoader.Load<NodeService>()?.UpdateLastSeen(args.Uid);
+        SystemMonitor.Instance?.Record(args);
+    }
+    
+    /// <summary>
+    /// Gets if nodes should auto update
+    /// </summary>
+    /// <returns>if nodes should auto update</returns>
+    [HttpGet("auto-update-nodes")]
+    public async Task<bool> GetAutoUpdateNodes()
+    {
+        if (LicenseHelper.IsLicensed(LicenseFlags.AutoUpdates) == false)
+            return false;
+        var settings = await ServiceLoader.Load<SettingsService>().Get();
+        return settings.AutoUpdateNodes;
+
+    }
+    
+
+
+    /// <summary>
+    /// Register a processing node.  If already registered will return existing instance
+    /// </summary>
+    /// <param name="model">The register model containing information about the processing node being registered</param>
+    /// <returns>The processing node instance</returns>
+    [HttpPost("register")]
+    public async Task<ProcessingNode> RegisterPost([FromBody] RegisterModel model)
+    {
+        if (string.IsNullOrWhiteSpace(model?.Address))
+            throw new ArgumentNullException(nameof(model.Address));
+        if (string.IsNullOrWhiteSpace(model?.TempPath))
+            throw new ArgumentNullException(nameof(model.TempPath));
+
+        var address = model.Address.ToLowerInvariant().Trim();
+        var service = ServiceLoader.Load<NodeService>();
+        var data = await service.GetAllAsync();
+        var existing = data.FirstOrDefault(x => x.Address.ToLowerInvariant() == address);
+        if (existing != null)
+        {
+            if(existing.Version != model.Version) // existing.TempPath != model.TempPath)
+            {
+                //existing.FlowRunners = model.FlowRunners;
+                //existing.Enabled = model.Enabled;
+                //existing.TempPath = model.TempPath;
+                //existing.OperatingSystem = model.OperatingSystem;
+                existing.Architecture = model.Architecture;
+                existing.OperatingSystem = model.OperatingSystem;
+                existing.Version = model.Version;
+                existing = await service.Update(existing);
+            }
+            existing.SignalrUrl = "flow";
+            return existing;
+        }
+        // doesnt exist, register a new node.
+        var variables = await ServiceLoader.Load<VariableService>().GetAllAsync();
+
+        if(model.Mappings?.Any() == true)
+        {
+            var ffmpegTool = variables.FirstOrDefault(x => x.Name.ToLower() == "ffmpeg");
+            if (ffmpegTool != null)
+            {
+                // update ffmpeg with actual location
+                var mapping = model.Mappings.FirstOrDefault(x => x.Server.ToLower() == "ffmpeg");
+                if(mapping != null)
+                {
+                    mapping.Server = ffmpegTool.Value;
+                }
+            }
+        }
+
+        var node = new ProcessingNode
+        {
+            Name = address,
+            Address = address,
+            //Enabled = model.Enabled,
+            //FlowRunners = model.FlowRunners,
+            Enabled = false,
+            FlowRunners = 1,
+            TempPath = model.TempPath,
+            OperatingSystem = model.OperatingSystem,
+            Architecture = model.Architecture,
+            Version = model.Version,
+            Schedule = new string('1', 672),
+            AllLibraries = ProcessingLibraries.All,
+            Mappings = model.Mappings?.Select(x => new KeyValuePair<string, string>(x.Server, x.Local))?.ToList() ??
+                       variables?.Select(x => new
+                           KeyValuePair<string, string>(x.Value, "")
+                       )?.ToList() ?? new()
+        };
+        node = await service.Update(node);
+        node.SignalrUrl = "flow";
+        return node;
+    }
+}

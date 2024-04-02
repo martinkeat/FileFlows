@@ -1,6 +1,4 @@
-﻿using FileFlows.ServerShared;
-
-namespace FileFlows.Managers;
+﻿namespace FileFlows.Managers;
 
 /// <summary>
 /// An instance of the Settings Service which allows accessing of the system settings
@@ -29,7 +27,7 @@ public class SettingsManager
     /// <summary>
     /// Gets or sets if caching should be used
     /// </summary>
-    internal static bool UseCache => Instance.Cache?.UseCache != false;
+    internal static bool UseCache => true; // Instance.Cache?.UseCache != false;
     
     /// <summary>
     /// Gets the system settings
@@ -68,7 +66,7 @@ public class SettingsManager
     /// <summary>
     /// Updates the settings
     /// </summary>
-    /// <param name="model">the setings</param>
+    /// <param name="model">the settings</param>
     public async Task Update(Settings model)
     {
         await _semaphore.WaitAsync();

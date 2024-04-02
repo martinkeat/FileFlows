@@ -1,6 +1,7 @@
 using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Text;
+using FileFlows.Server.Authentication;
 using FileFlows.Server.Helpers;
 using FileFlows.Server.Services;
 using FileFlows.ServerShared.FileServices;
@@ -13,6 +14,7 @@ namespace FileFlows.Server.Controllers;
 /// Controller responsible for managing file-related operations.
 /// </summary>
 [Route("/api/file-server")]
+[FileFlowsAuthorize]
 public class FileServerController : Controller
 {
 

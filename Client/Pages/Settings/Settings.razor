@@ -26,19 +26,6 @@
         <CascadingValue IsFixed="true" Value="this">
             <div class="settings">
                 <FlowTabs>
-                    <FlowTab Title="@lblNode">
-                        @if (InternalProcessingNode != null)
-                        {
-                            <p>@lblInternalProcessingNodeDescription</p>
-                            <hr/>
-                            <InputSwitch @bind-Value="@InternalProcessingNode.Enabled" Label="Pages.Settings.Fields.InternalProcessingNode.Enabled" />
-                            <InputNumber @bind-Value="@InternalProcessingNode.FlowRunners" Label="Pages.Settings.Fields.InternalProcessingNode.FlowRunners" Min=0 Max=100/>
-                            <InputFile @bind-Value="@InternalProcessingNode.TempPath" Directory="true" Validators=@RequiredValidator
-                                       Label="Pages.Settings.Fields.InternalProcessingNode.TempPath" />
-                            <hr/>
-                            <InputSchedule @bind-Value="@InternalProcessingNode.Schedule" Label="Pages.Settings.Fields.InternalProcessingNode.Schedule" />
-                        }
-                    </FlowTab>
                     <FlowTab Title=@lblLogging>
                         <InputSwitch @bind-Value="@Model.LogQueueMessages" Label="Pages.Settings.Fields.LogQueueMessages" />
                         @if (IsLicensed)
@@ -100,6 +87,14 @@
                     </FlowTab>
                     <FlowTab Title="@lblAdvanced">
                         <InputSelect @bind-Value="@Language" Options=@LanguageOptions Label="Pages.Settings.Fields.Language" AllowClear="false" />
+                        @if (LicensedFor(LicenseFlags.UserSecurity))
+                        {
+                            <InputSelect @bind-Value="@Security" Options=@SecurityOptions Label="Pages.Settings.Fields.Security" AllowClear="false" />
+                            @if (Model.Security != SecurityMode.Off)
+                            {
+                                <InputApiToken @bind-Value="Model.ApiToken" Label="Pages.Settings.Fields.ApiToken" />
+                            }
+                        }
                         @{
                             if (Model.ProcessFileCheckInterval < 5)
                                 Model.ProcessFileCheckInterval = 5;
@@ -108,6 +103,15 @@
                         
                         <InputSwitch @bind-Value="@Model.KeepFailedFlowTempFiles" Label="Pages.Settings.Fields.KeepFailedFlowTempFiles" />
                         <InputSwitch @bind-Value="@Model.DisableTelemetry" Inverse="@true" Label="Pages.Settings.Fields.Telemetry" OnChangedValue="OnTelemetryChange"/>
+                    </FlowTab>
+                    <FlowTab Title="@lblEmail" Visible="@(Model.Security == SecurityMode.Local)">
+                        <InputText @bind-Value="@Model.SmtpServer" Label="Pages.Settings.Fields.Smtp.Server" />
+                        <InputNumber @bind-Value="@Model.SmtpPort" Label="Pages.Settings.Fields.Smtp.Port" Min="1" Max="65535" />
+                        <InputSelect @bind-Value="@SmtpSecurity" Options=@SmtpSecurityTypes Label="Pages.Settings.Fields.Smtp.Security" AllowClear="false" />
+                        <InputText @bind-Value="@Model.SmtpUser" Label="Pages.Settings.Fields.Smtp.User" />
+                        <InputPassword @bind-Value="@Model.SmtpPassword" Label="Pages.Settings.Fields.Smtp.Password" />
+                        <InputText @bind-Value="@Model.SmtpFrom" Label="Pages.Settings.Fields.Smtp.From" />
+                        <InputText @bind-Value="@Model.SmtpFromAddress" Label="Pages.Settings.Fields.Smtp.FromAddress" />
                     </FlowTab>
                     <FlowTab Title="@lblLicense">
                         <p class="box info">Here you can enter your license key to enable additional features

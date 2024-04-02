@@ -1,3 +1,4 @@
+using FileFlows.RemoteServices;
 using FileFlows.Server.Workers;
 using FileFlows.ServerShared.Services;
 using FileFlows.ServerShared.Workers;
@@ -26,7 +27,7 @@ public class TempFileCleaner : Worker
     /// </summary>
     protected sealed override void Execute()
     {
-        var service = NodeService.Load();
+        var service = ServiceLoader.Load<INodeService>();
         var node = string.IsNullOrWhiteSpace(nodeAddress)
             ? service.GetServerNodeAsync().Result
             : service.GetByAddressAsync(nodeAddress).Result;

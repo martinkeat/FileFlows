@@ -131,6 +131,8 @@
     "Settings": "Einstellungen",
     "FlowElement": "Flow Element",
     "FlowElements": "Flow Elements",
+    "ChangePassword": "Passwort ändern",
+    "Logout": "Abmelden",
     "ObsoleteConfirm": {
       "Title": "Veralteter Node",
       "Message": "Es wird empfohlen, zu einem anderen Node zu wechseln.",
@@ -146,6 +148,13 @@
     }
   },
   "Dialogs":{
+    "ChangePassword": {
+      "Title": "Passwort ändern",
+      "PasswordMismatch": "Passwörter stimmen nicht überein.",
+      "OldPassword": "Altes Passwort",
+      "NewPassword": "Neues Passwort",
+      "NewPasswordConfirm": "Bestätigen"
+    },
     "FileBrowser": {
       "FileTitle": "Eine Datei auswählen",
       "DirectoryTitle": "Ein Verzeichnis wählen"
@@ -240,6 +249,10 @@
       "Disabled": "Deaktiviert",
       "OutOfSchedule": "Außerhalb des Zeitplans",
       "VersionMismatch": "Versionskonflikt"
+    },
+    "SecurityMode": {
+      "Off": "None",
+      "Local": "Local Users"
     }
   },
   "ErrorMessages": {
@@ -267,7 +280,8 @@
     "Configuration": "Konfiguration",
     "Extensions": "Erweiterungen",
     "System": "System",
-    "Information": "Informationen"
+    "Information": "Informationen",
+    "User": "User"
   },
   "Widgets": {
     "CPUUsage": "CPU-Auslastung",
@@ -866,6 +880,8 @@
         "ProcessFileCheckInterval": "Intervall für die Dateiprüfung",
         "ProcessFileCheckInterval-Help": "Wie oft wird geprüft, ob eine neue Datei zur Verarbeitung in den Verarbeitungsknoten vorliegt.",
         "ProcessFileCheckInterval-Suffix": "Sekunden",
+        "Security": "Security",
+        "Security-Help": "Enable user authentication to access FileFlows.",
         "InternalProcessingNode": {
           "Description": "Hier können Sie den internen Verarbeitungsknoten von FileFlows konfigurieren. Ein Processing Node ist das, was einen Flow ausführt und Dateien verarbeitet.",
           "Enabled": "Aktiviert",
@@ -929,6 +945,16 @@
       },
       "Buttons": {
         "EditScript": "Skript bearbeiten"
+      }
+    },
+    "Users": {
+      "Title": "Benutzer",
+      "Single": "Benutzer",
+      "Messages": {
+        "CannotDeleteYourself": "Du kannst dich nicht selbst löschen."
+      },
+      "Fields": {
+        "IsAdmin": "Administrator"
       }
     },
     "FileFlowsTask":{

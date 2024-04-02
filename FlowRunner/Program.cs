@@ -5,6 +5,7 @@ using FileFlows.Shared.Helpers;
 using FileFlows.Shared.Models;
 using System.Net;
 using FileFlows.Plugin.Services;
+using FileFlows.RemoteServices;
 using FileFlows.ServerShared;
 using FileFlows.ServerShared.FileServices;
 
@@ -126,7 +127,9 @@ public class Program
             if (string.IsNullOrEmpty(baseUrl))
                 throw new Exception("baseUrl not set");
             LogInfo("Base URL: " + baseUrl);
-            Service.ServiceBaseUrl = baseUrl;
+            RemoteService.ServiceBaseUrl = baseUrl;
+
+            RemoteService.ApiToken = GetArgument(args, "--apiToken");
 
             string hostname = GetArgument(args, "--hostname");
             if(string.IsNullOrWhiteSpace(hostname))
@@ -155,7 +158,7 @@ public class Program
             LogInfo("Created Directory: " + workingDir);
 
             var libfileUid = Guid.Parse(GetArgument(args, "--libfile"));
-            HttpHelper.Client = HttpHelper.GetDefaultHttpHelper(Service.ServiceBaseUrl);
+            HttpHelper.Client = HttpHelper.GetDefaultHttpClient(RemoteService.ServiceBaseUrl);
             var result = Execute(new()
             {
                 IsServer = server,
@@ -209,7 +212,7 @@ public class Program
     static (bool Success, bool KeepFiles) Execute(ExecuteArgs args)
     {
         ProcessingNode node;
-        var nodeService = NodeService.Load();
+        var nodeService = ServiceLoader.Load<INodeService>();
         try
         {
             string address = args.IsServer ? "INTERNAL_NODE" : args.Hostname;
@@ -226,14 +229,14 @@ public class Program
             throw;
         }
 
-        if ((node.Address == "FileFlowsServer" || node.SignalrUrl == "flow") && string.IsNullOrEmpty(Service.ServiceBaseUrl) == false)
-            FlowRunnerCommunicator.SignalrUrl = Service.ServiceBaseUrl.EndsWith("/")
-                ? Service.ServiceBaseUrl + "flow"
-                : Service.ServiceBaseUrl + "/flow";
+        if ((node.Address == "FileFlowsServer" || node.SignalrUrl == "flow") && string.IsNullOrEmpty(RemoteService.ServiceBaseUrl) == false)
+            FlowRunnerCommunicator.SignalrUrl = RemoteService.ServiceBaseUrl.EndsWith("/")
+                ? RemoteService.ServiceBaseUrl + "flow"
+                : RemoteService.ServiceBaseUrl + "/flow";
         else
             FlowRunnerCommunicator.SignalrUrl = node.SignalrUrl;
 
-        var libFileService = LibraryFileService.Load();
+        var libFileService = ServiceLoader.Load<ILibraryFileService>();
         var libFile = libFileService.Get(args.LibraryFileUid).Result;
         if (libFile == null)
         {
@@ -244,7 +247,7 @@ public class Program
         // string workingFile = node.Map(libFile.Name);
         string workingFile = libFile.Name;
 
-        var libfileService = LibraryFileService.Load();
+        var libfileService = ServiceLoader.Load<ILibraryFileService>();
         var lib = args.Config.Libraries.FirstOrDefault(x => x.Uid == libFile.Library.Uid);
         if (lib == null)
         {
@@ -327,7 +330,7 @@ public class Program
                 }
             
                 remoteFile = true;
-                _fileService = new RemoteFileService(Uid, Service.ServiceBaseUrl, args.WorkingDirectory, Logger,
+                _fileService = new RemoteFileService(Uid, RemoteService.ServiceBaseUrl, args.WorkingDirectory, Logger,
                     libFile.Name.Contains('/') ? '/' : '\\');
             }
         }

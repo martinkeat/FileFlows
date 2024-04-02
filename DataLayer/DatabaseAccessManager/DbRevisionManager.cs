@@ -7,7 +7,7 @@ namespace FileFlows.DataLayer;
 /// <summary>
 /// Manages data access operations for the RevisionedObject table
 /// </summary>
-internal  class DbRevisionManager : BaseManager
+internal class DbRevisionManager : BaseManager
 {
     /// <summary>
     /// Initializes a new instance of the DbRevision manager
@@ -71,7 +71,6 @@ internal  class DbRevisionManager : BaseManager
         using var db = await DbConnector.GetDb();
         return (await db.Db.FetchAsync<RevisionedObject>()).ToList();
     }
-
 
     /// <summary>
     /// Gets all revisions for a given object

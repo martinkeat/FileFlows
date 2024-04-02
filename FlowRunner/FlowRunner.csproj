@@ -23,6 +23,7 @@
   </PropertyGroup>
 
 	<ItemGroup>
+		<ProjectReference Include="..\RemoteServices\RemoteServices.csproj" />
 		<ProjectReference Include="..\ServerShared\ServerShared.csproj" />
 		<ProjectReference Include="..\Shared\Shared.csproj" />
 	</ItemGroup>

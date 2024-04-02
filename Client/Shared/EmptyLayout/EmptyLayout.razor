@@ -1,0 +1,10 @@
+@inherits LayoutComponentBase
+
+@namespace FileFlows.Client.Shared
+
+<CascadingValue Value="Blocker" IsFixed="true">
+    @Body
+</CascadingValue>
+
+<FileFlows.Client.Components.Toast />
+<Blocker @ref="Blocker"></Blocker>

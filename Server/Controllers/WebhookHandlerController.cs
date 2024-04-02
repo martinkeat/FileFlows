@@ -78,7 +78,7 @@ public class WebhookHandlerController:Controller
             {
                 { "Request", Request },
                 { "Body", body },
-                { "FileFlows.Url", ServerShared.Services.Service.ServiceBaseUrl }
+                { "FileFlows.Url", Application.ServerUrl }
             }, sharedDirectory: DirectoryHelper.ScriptsDirectoryShared, dontLogCode: true);
             if (result.Success)
                 return Ok(result.Log);

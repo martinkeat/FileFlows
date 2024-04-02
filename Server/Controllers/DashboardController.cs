@@ -1,4 +1,5 @@
 using FileFlows.Plugin;
+using FileFlows.Server.Authentication;
 using FileFlows.Server.Helpers;
 using FileFlows.Server.Services;
 using FileFlows.Shared.Models;
@@ -11,6 +12,7 @@ namespace FileFlows.Server.Controllers;
 /// Controller for the dashboard
 /// </summary>
 [Route("/api/dashboard")]
+[FileFlowsAuthorize]
 public class DashboardController : Controller
 {
     /// <summary>

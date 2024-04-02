@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using FileFlows.Plugin;
+using FileFlows.RemoteServices;
 using FileFlows.ServerShared;
 using FileFlows.ServerShared.Models;
 using FileFlows.ServerShared.Helpers;
@@ -40,12 +41,7 @@ public class FlowWorker : Worker
         
         return _configKeyDefault;;
     }
-    // #if(DEBUG)
-    // private static readonly bool ConfigNoEncrypt = true;
-    // #else
-    // private static readonly bool ConfigNoEncrypt = Environment.GetEnvironmentVariable("FF_NO_ENCRYPT") == "1";
-    // #endif
-
+    
     /// <summary>
     /// Gets if the config should not be encrypted
     /// </summary>
@@ -134,9 +130,8 @@ public class FlowWorker : Worker
         int newInterval = node.ProcessFileCheckInterval;
         if (newInterval < 1)
         {
-            var settingsService = SettingsService.Load();
-            var settings = settingsService.Get().Result;
-            newInterval = settings.ProcessFileCheckInterval;
+            var settingsService = ServiceLoader.Load<IFlowRunnerService>();
+            newInterval = settingsService.GetFileCheckInterval().Result;
         }
         
         if (newInterval == Interval || newInterval < 5)
@@ -156,10 +151,15 @@ public class FlowWorker : Worker
 
         if (IsEnabledCheck?.Invoke() == false)
             return;
-        var nodeService = NodeService.Load();
+        var nodeService = ServiceLoader.Load<INodeService>();
         try
         {
             node = isServer ? nodeService.GetServerNodeAsync().Result : nodeService.GetByAddressAsync(this.Hostname).Result;
+            if(node == null)
+            {
+                Logger.Instance?.ELog("Failed to register node");
+                return;
+            }
         }
         catch(Exception ex)
         {
@@ -172,7 +172,7 @@ public class FlowWorker : Worker
         {
             FirstExecute = false;
             // tell the server to kill any flow executors from this node, in case this node was restarted
-            nodeService.ClearWorkersAsync(node.Uid);
+            nodeService.ClearWorkersAsync(node.Uid).Wait();
         }
 
         if (node == null)
@@ -184,8 +184,8 @@ public class FlowWorker : Worker
         if (UpdateConfiguration(node).Result == false)
             return;
 
-        var settingsService = SettingsService.Load();
-        var ffStatus = settingsService.GetFileFlowsStatus().Result;
+        var frService = ServiceLoader.Load<IFlowRunnerService>();
+        var isLicensed = frService.IsLicensed().Result;
 
         string nodeName = node?.Name == "FileFlowsServer" ? "Internal Processing Node" : (node?.Name ?? "Unknown");
 
@@ -222,13 +222,13 @@ public class FlowWorker : Worker
             }
         }
 
-        if (ffStatus?.Licensed == true && string.IsNullOrWhiteSpace(node.PreExecuteScript) == false)
+        if (isLicensed && string.IsNullOrWhiteSpace(node.PreExecuteScript) == false)
         {
             if (PreExecuteScriptTest(node) == false)
                 return;
         }
         
-        var libFileService = LibraryFileService.Load();
+        var libFileService = ServiceLoader.Load<ILibraryFileService>();
         var libFileResult = libFileService.GetNext(node?.Name ?? string.Empty, node?.Uid ?? Guid.Empty,node?.Version ?? string.Empty, Uid).Result;
         if (libFileResult?.Status != NextLibraryFileStatus.Success)
         {
@@ -264,7 +264,9 @@ public class FlowWorker : Worker
                     "--cfgKey",
                     GetConfigNoEncrypt(node2) ? "NO_ENCRYPT" : GetConfigKey(node2),
                     "--baseUrl",
-                    Service.ServiceBaseUrl,
+                    RemoteService.ServiceBaseUrl,
+                    string.IsNullOrEmpty(RemoteService.ApiToken) ? null : "--apiToken",
+                    string.IsNullOrEmpty(RemoteService.ApiToken) ? null : RemoteService.ApiToken,
                     Globals.IsDocker ? "--docker" : null,
                     isServer ? null : "--hostname",
                     isServer ? null : Hostname,
@@ -388,7 +390,7 @@ public class FlowWorker : Worker
             RelativeFile = libFile.RelativePath,
             Library = libFile.Library
         };
-        new FlowRunnerService().Finish(info).Wait();
+        ServiceLoader.Load<IFlowRunnerService>().Finish(info).Wait();
     }
 
     /// <summary>
@@ -401,7 +403,6 @@ public class FlowWorker : Worker
 
     private bool PreExecuteScriptTest(ProcessingNode node)
     {
-        var scriptService  = ScriptService.Load();
         string scriptDir = Path.Combine(GetConfigurationDirectory(), "Scripts");
         string sharedDir = Path.Combine(scriptDir, "Shared");
         string jsFile = Path.Combine(scriptDir, "System", node.PreExecuteScript + ".js");
@@ -427,19 +428,16 @@ public class FlowWorker : Worker
             return false;
         }
 
-        var variableService = new VariableService();
+        var variableService = ServiceLoader.Load<IVariableService>();
         var variables = variableService.GetAllAsync().Result?.ToDictionary(x => x.Name, x => (object)x.Value) ?? new ();
-        if (variables.ContainsKey("FileFlows.Url"))
-            variables["FileFlows.Url"] = Service.ServiceBaseUrl;
-        else
-            variables.Add("FileFlows.Url", Service.ServiceBaseUrl);
+        variables["FileFlows.Url"] = RemoteService.ServiceBaseUrl;
         var result = ScriptExecutor.Execute(code, variables, sharedDirectory: sharedDir);
         if (result.Success == false)
         {
             Logger.Instance.ELog("Pre-execute script failed: " + result.ReturnValue + "\n" + result.Log);
             return false;
         }
-        Logger.Instance.ILog("Pre-Execute script returned: " + result.ReturnValue == null ? "" : System.Text.Json.JsonSerializer.Serialize(result.ReturnValue));
+        Logger.Instance.ILog("Pre-Execute script returned: " + (result.ReturnValue == null ? "" : System.Text.Json.JsonSerializer.Serialize(result.ReturnValue)));
         
 
         if (result.ReturnValue?.ToString()?.ToLowerInvariant() == "exit")
@@ -475,24 +473,6 @@ public class FlowWorker : Worker
         }
         Logger.Instance.ILog("Pre-execute script passed: \n"+ result.Log.Replace("\\n", "\n"));
         return true;
-    }
-
-    private void StringBuilderLog(StringBuilder builder, LogType type, params object[] args)
-    {
-        string typeString = type switch
-        {
-            LogType.Debug => "[DBUG] ",
-            LogType.Info => "[INFO] ",
-            LogType.Warning => "[WARN] ",
-            LogType.Error => "[ERRR] ",
-            _ => "",
-        };
-        string message = typeString + string.Join(", ", args.Select(x =>
-            x == null ? "null" :
-            x.GetType().IsPrimitive ? x.ToString() :
-            x is string ? x.ToString() :
-            System.Text.Json.JsonSerializer.Serialize(x)));
-        builder.AppendLine(message);
     }
 
     /// <summary>
@@ -550,7 +530,7 @@ public class FlowWorker : Worker
     {
         if (string.IsNullOrWhiteSpace(log))
             return;
-        var service = new LibraryFileService();
+        var service = ServiceLoader.Load<ILibraryFileService>();
         bool saved = service.SaveFullLog(libFile.Uid, log).Result;
         if (!saved)
         {
@@ -559,7 +539,6 @@ public class FlowWorker : Worker
             Logger.Instance?.DLog(Environment.NewLine + log);
         }
     }
-
 
     /// <summary>
     /// The location of dotnet
@@ -605,7 +584,7 @@ public class FlowWorker : Worker
     /// <returns>an awaited task</returns>
     private async Task<bool> UpdateConfiguration(ProcessingNode node)
     {
-        var service = new SettingsService();
+        var service = ServiceLoader.Load<ISettingsService>();
         int revision = await service.GetCurrentConfigurationRevision();
         if (revision == -1)
         {
@@ -623,8 +602,6 @@ public class FlowWorker : Worker
             Logger.Instance.ELog("Failed downloading latest configuration from server");
             return false;
         }
-        var settingsService = SettingsService.Load();
-        var ffStatus = settingsService.GetFileFlowsStatus().Result;
 
         string dir = GetConfigurationDirectory(revision);
         try
@@ -711,7 +688,7 @@ public class FlowWorker : Worker
             config.Revision,
             config.MaxNodes,
             config.Enterprise,
-            AllowRemote = config.AllowRemote && ffStatus.LicenseFileServer,
+            config.AllowRemote,
             Variables = variables,
             config.Libraries,
             config.PluginNames,

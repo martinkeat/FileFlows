@@ -1,3 +1,4 @@
+using FileFlows.Server.Authentication;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FileFlows.Server.Controllers;
@@ -6,6 +7,7 @@ namespace FileFlows.Server.Controllers;
 /// Controller for NVIDIA
 /// </summary>
 [Route("api/nvidia")]
+[FileFlowsAuthorize]
 public class NvidiaController : Controller
 {
     /// <summary>

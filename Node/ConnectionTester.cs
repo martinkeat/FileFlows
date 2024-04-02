@@ -1,4 +1,5 @@
-﻿using FileFlows.ServerShared.Models;
+﻿using FileFlows.RemoteServices;
+using FileFlows.ServerShared.Models;
 using FileFlows.ServerShared.Services;
 
 namespace FileFlows.Node;
@@ -33,7 +34,7 @@ public class ConnectionTester
             {
                 try
                 {
-                    var nodeService = new NodeService();
+                    var nodeService = ServiceLoader.Load<INodeService>();
                     string actualUrl = protocol + "://" + address + ":" + port + "/";
                     var result = nodeService.Register(actualUrl, Environment.MachineName, tempPath, mappings).Result;
                     if (result == null)

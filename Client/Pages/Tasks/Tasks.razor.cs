@@ -66,6 +66,9 @@ public partial class Tasks: ListPage<Guid, FileFlowsTask>
         return "Custom Schedule";
     }
     
+    /// <summary>
+    /// Adds a new task
+    /// </summary>
     private async Task Add()
     {
         await Edit(new FileFlowsTask()

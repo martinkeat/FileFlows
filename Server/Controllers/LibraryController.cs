@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using FileFlows.Server.Helpers;
 using FileFlows.Shared.Models;
 using System.Text.RegularExpressions;
+using FileFlows.Server.Authentication;
 using FileFlows.Server.Services;
 
 namespace FileFlows.Server.Controllers;
@@ -11,6 +12,7 @@ namespace FileFlows.Server.Controllers;
 /// Library controller
 /// </summary>
 [Route("/api/library")]
+[FileFlowsAuthorize]
 public class LibraryController : Controller
 {
     private static bool? _HasLibraries;

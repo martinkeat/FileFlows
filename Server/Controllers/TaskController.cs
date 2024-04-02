@@ -1,3 +1,4 @@
+using FileFlows.Server.Authentication;
 using FileFlows.Server.Services;
 using FileFlows.Shared.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -8,6 +9,7 @@ namespace FileFlows.Server.Controllers;
 /// Controller for scheduled tasks
 /// </summary>
 [Route("/api/task")]
+[FileFlowsAuthorize]
 public class TaskController : Controller
 {
     /// <summary>

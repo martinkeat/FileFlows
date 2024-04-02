@@ -1,4 +1,5 @@
 using FileFlows.Plugin;
+using FileFlows.RemoteServices;
 using FileFlows.ServerShared.Services;
 
 namespace FileFlows.Node.Utils;
@@ -23,7 +24,7 @@ public class ServerLogger:ILogWriter
     /// <param name="args">the arguments for the log message</param>
     public Task Log(LogType type, params object[] args)
     {
-        var service = LogService.Load();
+        var service = ServiceLoader.Load<ILogService>();
         return service.LogMessage(new()
         {
             NodeAddress = AppSettings.Instance.HostName,

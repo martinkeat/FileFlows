@@ -7,6 +7,7 @@ using FileFlows.Plugin;
 using System.Runtime.InteropServices;
 using System.Text.Json.Serialization;
 using FileFlows.ScriptExecution;
+using FileFlows.Server.Authentication;
 using FileFlows.Server.Helpers;
 using FileFlows.Server.Services;
 using Humanizer;
@@ -19,6 +20,7 @@ namespace FileFlows.Server.Controllers;
 /// Controller for Flows
 /// </summary>
 [Route("/api/flow")]
+[FileFlowsAuthorize]
 public class FlowController : Controller
 {
     const int DEFAULT_XPOS = 450;

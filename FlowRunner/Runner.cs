@@ -8,6 +8,7 @@ using FileFlows.FlowRunner.Helpers;
 using FileFlows.FlowRunner.RunnerFlowElements;
 using FileFlows.FlowRunner.TemplateRenders;
 using FileFlows.Plugin.Services;
+using FileFlows.RemoteServices;
 using FileFlows.ServerShared.FileServices;
 
 namespace FileFlows.FlowRunner;
@@ -107,7 +108,7 @@ public class Runner
         try
         {
             systemHelper.Start();
-            var service = FlowRunnerService.Load();
+            var service = ServiceLoader.Load<IFlowRunnerService>();
             var updated = service.Start(Info).Result;
             if (updated == null)
                 return (false, false); // failed to update
@@ -276,7 +277,7 @@ public class Runner
             try
             {
 
-                var service = FlowRunnerService.Load();
+                var service = ServiceLoader.Load<IFlowRunnerService>();;
                 await service.Finish(Info);
                 return;
             }
@@ -371,7 +372,7 @@ public class Runner
             if(waitMilliseconds != 1000) // 1000 is the delay for finishing / step changes
                 await Task.Delay(500);
             LastUpdate = DateTime.UtcNow;
-            var service = FlowRunnerService.Load();
+            var service = ServiceLoader.Load<IFlowRunnerService>();;
             if(nodeParameters?.OriginalMetadata != null)
                 Info.LibraryFile.OriginalMetadata = nodeParameters.OriginalMetadata;
             await service.Update(info);
@@ -449,13 +450,13 @@ public class Runner
         };
         nodeParameters.UploadFile = (string source, string destination) =>
         {
-            var task = new FileUploader(logger, Service.ServiceBaseUrl, Program.Uid).UploadFile(source, destination);
+            var task = new FileUploader(logger, RemoteService.ServiceBaseUrl, Program.Uid).UploadFile(source, destination);
             task.Wait();
             return task.Result;
         };
         nodeParameters.DeleteRemote = (path, ifEmpty, includePatterns) =>
         {
-            var task = new FileUploader(logger, Service.ServiceBaseUrl, Program.Uid).DeleteRemote(path, ifEmpty, includePatterns);
+            var task = new FileUploader(logger, RemoteService.ServiceBaseUrl, Program.Uid).DeleteRemote(path, ifEmpty, includePatterns);
             task.Wait();
             return task.Result.Success;
         };
@@ -473,7 +474,7 @@ public class Runner
         nodeParameters.ScriptExecutor = new ScriptExecutor()
         {
             SharedDirectory = Path.Combine(Program.ConfigDirectory, "Scripts", "Shared"),
-            FileFlowsUrl = Service.ServiceBaseUrl,
+            FileFlowsUrl = RemoteService.ServiceBaseUrl,
             PluginMethodInvoker = (plugin, method, methodArgs) 
                 => Helpers.PluginHelper.PluginMethodInvoker(nodeParameters, plugin, method, methodArgs)
         };
@@ -533,11 +534,11 @@ public class Runner
             Program.Config.PluginSettings?.TryGetValue(pluginSettingsType, out json);
             return json;
         };
-        var statService = StatisticService.Load();
+        var statService = ServiceLoader.Load<IStatisticService>();;
         nodeParameters.StatisticRecorderRunningTotals = (name, value) =>
-            statService.RecordRunningTotal(name, value);
+            _ = statService.RecordRunningTotal(name, value);
         nodeParameters.StatisticRecorderAverage = (name, value) =>
-            statService.RecordAverage(name, value);
+            _ = statService.RecordAverage(name, value);
         nodeParameters.AdditionalInfoRecorder = RecordAdditionalInfo;
 
         var flow = FlowHelper.GetStartupFlow(Info.IsRemote, Flow);

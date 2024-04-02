@@ -1,5 +1,5 @@
+using FileFlows.Server.Authentication;
 using Microsoft.AspNetCore.Mvc;
-using FileFlows.Server.Helpers;
 using FileFlows.Server.Services;
 using FileFlows.Shared.Models;
 
@@ -9,6 +9,7 @@ namespace FileFlows.Server.Controllers;
 /// Variable Controller
 /// </summary>
 [Route("/api/variable")]
+[FileFlowsAuthorize]
 public class VariableController : Controller
 {   
     /// <summary>

@@ -6,11 +6,18 @@ namespace FileFlows.Client.Shared;
 public partial class MainLayout : LayoutComponentBase
 {
     public NavMenu Menu { get; set; }
+    /// <summary>
+    /// Gets or sets the blocker
+    /// </summary>
     public Blocker Blocker { get; set; }
     public Blocker DisconnectedBlocker { get; set; }
     public Editor Editor { get; set; }
     [Inject] private ClientService ClientService { get; set; }
     [Inject] private FFLocalStorageService LocalStorage { get; set; }
+    /// <summary>
+    /// Gets or sets the navigation manager
+    /// </summary>
+    [Inject] private NavigationManager NavigationManager { get; set; }
 
     public static MainLayout Instance { get; private set; }
 
@@ -23,10 +30,16 @@ public partial class MainLayout : LayoutComponentBase
 
     protected override async Task OnInitializedAsync()
     {
+        HttpHelper.On401 = On401;
         App.Instance.NavMenuCollapsed = await LocalStorage.GetItemAsync<bool>("NavMenuCollapsed");
             
         this.ClientService.Connected += ClientServiceOnConnected;
         this.ClientService.Disconnected += ClientServiceOnDisconnected;
+    }
+
+    private void On401()
+    {
+        NavigationManager.NavigateTo("/login", true);
     }
 
     private void ClientServiceOnDisconnected()

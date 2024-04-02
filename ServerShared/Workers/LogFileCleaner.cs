@@ -21,29 +21,29 @@ public class LogFileCleaner:Worker
     /// </summary>
     protected sealed override void Execute()
     {
-        var settings = new SettingsService().Get().Result;
-        if (settings == null || settings.LogFileRetention < 1)
-            return; // not yet ready
-        var dir = DirectoryHelper.LoggingDirectory;
-        int count = 0;
-        foreach (var file in new DirectoryInfo(dir).GetFiles("FileFlows*")
-                     .OrderByDescending(x => x.LastWriteTime))
-        {
-            if (string.IsNullOrEmpty(file.Extension) == false && file.Extension != ".log")
-                continue;
-            
-            if (++count > settings.LogFileRetention)
-            {
-                try
-                {
-                    file.Delete();
-                    Logger.Instance.ILog("Deleted log file: " + file.Name);
-                }
-                catch (Exception)
-                {
-                    // ignored
-                }
-            }
-        }
+        // var settings = new SettingsService().Get().Result;
+        // if (settings == null || settings.LogFileRetention < 1)
+        //     return; // not yet ready
+        // var dir = DirectoryHelper.LoggingDirectory;
+        // int count = 0;
+        // foreach (var file in new DirectoryInfo(dir).GetFiles("FileFlows*")
+        //              .OrderByDescending(x => x.LastWriteTime))
+        // {
+        //     if (string.IsNullOrEmpty(file.Extension) == false && file.Extension != ".log")
+        //         continue;
+        //     
+        //     if (++count > settings.LogFileRetention)
+        //     {
+        //         try
+        //         {
+        //             file.Delete();
+        //             Logger.Instance.ILog("Deleted log file: " + file.Name);
+        //         }
+        //         catch (Exception)
+        //         {
+        //             // ignored
+        //         }
+        //     }
+        // }
     }
 }

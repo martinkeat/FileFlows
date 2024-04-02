@@ -122,21 +122,47 @@ public class Settings : FileFlowObject
     public string[] FileServerAllowedPaths { get; set; }
     
     /// <summary>
-    /// Gets or sets the caching settings
+    /// Gets or sets the API token processing nodes will use to connect
     /// </summary>
-    public CacheSettings Cache { get; set; }
-}
-
-
-/// <summary>
-/// Cache Settings
-/// </summary>
-public class CacheSettings 
-{
+    [Encrypted]
+    public string ApiToken { get; set; }
+    
     /// <summary>
-    /// Gets or sets if the caching should be used
+    /// Gets or sets the email server address
     /// </summary>
-    public bool UseCache { get; set; }
+    [Encrypted]
+    public string SmtpServer { get; set; } = string.Empty;
+    /// <summary>
+    /// Gets or sets the email server port
+    /// </summary>
+    public int SmtpPort { get; set; }
+    /// <summary>
+    /// Gets or sets the email server security
+    /// </summary>
+    public EmailSecurity SmtpSecurity { get; set; }
+
+    /// <summary>
+    /// Gets or sets the name this is sent from
+    /// </summary>
+    [Encrypted]
+    public string SmtpFrom { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the email address this is sent from
+    /// </summary>
+    [Encrypted]
+    public string SmtpFromAddress { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the email server user
+    /// </summary>
+    [Encrypted]
+    public string SmtpUser { get; set; } = string.Empty;
+    /// <summary>
+    /// Gets or sets the email server password
+    /// </summary>
+    [Encrypted]
+    public string SmtpPassword { get; set; } = string.Empty;
 }
 
 /// <summary>
@@ -160,4 +186,27 @@ public enum DatabaseType
     /// Microsoft SQL Server
     /// </summary>
     SqlServer = 3
+}
+
+/// <summary>
+/// The types of email security
+/// </summary>
+public enum EmailSecurity
+{
+    /// <summary>
+    /// no security
+    /// </summary>
+    None = 0,
+    /// <summary>
+    /// Auto security
+    /// </summary>
+    Auto = 1,
+    /// <summary>
+    /// SSL security
+    /// </summary>
+    SSL = 2,
+    /// <summary>
+    /// TlS security
+    /// </summary>
+    TLS = 3,
 }

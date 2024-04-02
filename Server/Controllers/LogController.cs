@@ -1,9 +1,8 @@
 ﻿using FileFlows.Plugin;
+using FileFlows.Server.Authentication;
 using FileFlows.Server.Helpers;
 using FileFlows.Server.Middleware;
 using FileFlows.Server.Services;
-using FileFlows.Server.Utils;
-using FileFlows.ServerShared.Services;
 using FileFlows.Shared.Models;
 using FileFlows.Shared.Helpers;
 using Microsoft.AspNetCore.Mvc;
@@ -16,6 +15,7 @@ namespace FileFlows.Server.Controllers;
 /// System log controller
 /// </summary>
 [Route("/api/fileflows-log")] // FF-1060 renamed route to fileflows-log to avoid uBlock origin blacking /api/log
+[FileFlowsAuthorize]
 public class LogController : Controller
 {
     /// <summary>
@@ -89,7 +89,7 @@ public class LogController : Controller
                 _ => ""
             };
         
-            return x.LogDate.ToString("yyyy-MM-dd HH:mm:ss.fff") + " [" + prefix + "] -> " + x.Message;
+            return x.LogDate.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss.fff") + " [" + prefix + "] -> " + x.Message;
         }));
         string html = LogToHtml.Convert(log);
         return FixLog(html);
@@ -121,47 +121,5 @@ public class LogController : Controller
         string log = Logger.Instance.GetTail(10_000);
         byte[] data = System.Text.Encoding.UTF8.GetBytes(log);
         return File(data, "application/octet-stream", "FileFlows.log");
-    }
-
-    private readonly Dictionary<string, Guid> ClientUids = new (); 
-        
-
-    /// <summary>
-    /// Logs a message to the server
-    /// </summary>
-    /// <param name="message">The log message to log</param>
-    [HttpPost("message")]
-    public async Task Log([FromBody] LogServiceMessage message)
-    {
-        if (message == null)
-            return;
-        if (string.IsNullOrEmpty(message.NodeAddress))
-            return;
-
-        if(ClientUids.TryGetValue(message.NodeAddress.ToLower(), out Guid clientUid) == false)
-        {
-            var nodes = await new Services.NodeService().GetAllAsync();
-            foreach (var node in nodes)
-            {
-                if (node.Address.ToLower() == message.NodeAddress.ToLower())
-                    clientUid = node.Uid;
-                if (string.IsNullOrEmpty(node.Address) == false &&
-                    ClientUids.ContainsKey(node.Address.ToLower()) == false)
-                {
-                    ClientUids.Add(node.Address.ToLower(), node.Uid);
-                }
-            }
-        }
-
-        if (clientUid == Guid.Empty)
-        {
-            Logger.Instance.ILog($"Failed to find client '{message.NodeAddress}', could not log message");
-            return;
-        }
-
-        if (Logger.Instance.TryGetLogger(out DatabaseLogger logger))
-        {
-             await logger.Log(clientUid, message.Type, message.Arguments);
-        }
     }
 }

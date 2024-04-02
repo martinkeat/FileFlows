@@ -1,0 +1,45 @@
+@namespace FileFlows.Client.Pages
+@using FileFlows.Shared.Models
+
+@inherits ListPage<Guid, User>
+
+@page "/users"
+
+<PageView>
+
+    <Head>
+    </Head>
+
+    <Body>
+        
+    <FlowTable @ref="Table" Data="@Data" TItem="User" Selection="SelectionMode.Multiple" DoubleClick="@OnDoubleClick" TableIdentifier="Users">
+        <ToolBar>      
+            <FlowTableButton Clicked=Add Icon="fas fa-plus" Label="Labels.Add" />
+            <FlowTableButton Clicked=Edit SelectedOne="true" Icon="fas fa-edit" Label="Labels.Edit" />
+            <FlowTableButton Clicked=Delete SelectedOneOrMore="true" Icon="fas fa-trash" Label="Labels.Delete" />      
+            <FlowTableButtonSeparator />                    
+            <FlowTableHelpButton HelpUrl="users" />
+        </ToolBar>
+            
+        <Columns>
+            <FlowTableColumn TItem="User">
+                <Header>
+                    @Globals.lblName
+                </Header>
+                <Cell Context="item">
+                    <span>@item.Name</span>
+                </Cell>
+            </FlowTableColumn>
+            <FlowTableColumn TItem="User" Width="10rem" MobileWidth="0">
+                <Header>
+                    Last Logged In
+                </Header>
+                <Cell Context="item">
+                    @DateString(item.DateModified)
+                </Cell>
+            </FlowTableColumn>
+        </Columns>
+    </FlowTable>
+    </Body>
+
+</PageView>

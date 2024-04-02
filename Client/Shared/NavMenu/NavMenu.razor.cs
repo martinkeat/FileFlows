@@ -2,13 +2,13 @@ using System.Threading;
 using System.Threading.Tasks.Dataflow;
 using Microsoft.Extensions.Logging;
 using Microsoft.JSInterop;
-
-namespace FileFlows.Client.Shared;
-
 using System.Collections.Generic;
 using System.Linq;
+using FileFlows.Client.Components.Dialogs;
 using FileFlows.Shared;
 using Microsoft.AspNetCore.Components;
+
+namespace FileFlows.Client.Shared;
 
 public partial class NavMenu : IDisposable
 {
@@ -21,20 +21,30 @@ public partial class NavMenu : IDisposable
     [Inject] public IJSRuntime jSRuntime { get; set; }
     private List<NavMenuGroup> MenuItems = new List<NavMenuGroup>();
     private bool collapseNavMenu = true;
+    
+    /// <summary>
+    /// Gets or sets the change password dialog
+    /// </summary>
+    private ChangePassword ChangePassword { get; set; }
 
     public NavMenuItem Active { get; private set; }
 
-    private string lblVersion, lblHelp, lblForum, lblDiscord;
+    private string lblVersion, lblHelp, lblForum, lblDiscord, lblChangePassword, lblLogout;
 
     private string NavMenuCssClass => collapseNavMenu ? "collapse" : null;
     private NavMenuItem nmiFlows, nmiLibraries, nmiPause;
+    /// <summary>
+    /// If the user menu is opened or closed
+    /// </summary>
+    private bool UserMenuOpened = false;
 
     private int Unprocessed = -1, Processing = -1, Failed = -1;
     /// <summary>
     /// Gets or sets the paused service
     /// </summary>
     [Inject] private IPausedService PausedService { get; set; }
-    
+
+    private List<NavMenuItem> UserMenu = new();
 
     // private BackgroundTask bubblesTask;
 
@@ -45,6 +55,8 @@ public partial class NavMenu : IDisposable
         lblHelp = Translater.Instant("Labels.Help");
         lblForum = Translater.Instant("Labels.Forum");
         lblDiscord = Translater.Instant("Labels.Discord");
+        lblChangePassword = Translater.Instant("Labels.ChangePassword");
+        lblLogout = Translater.Instant("Labels.Logout");
         
         App.Instance.OnFileFlowsSystemUpdated += FileFlowsSystemUpdated;
 
@@ -133,28 +145,60 @@ public partial class NavMenu : IDisposable
                 new("Pages.Variables.Title", "fas fa-at", "variables"),
             }
         });
-        MenuItems.Add(new NavMenuGroup
+        if(App.Instance.FileFlowsSystem.IsAdmin)
         {
-            Name = Translater.Instant("MenuGroups.System"),
-            Icon = "fas fa-desktop",
-            Items = new List<NavMenuItem>
+            MenuItems.Add(new NavMenuGroup
             {
-                App.Instance.FileFlowsSystem.LicenseRevisions ? new ("Pages.Revisions.Title", "fas fa-history", "revisions") : null,
-                App.Instance.FileFlowsSystem.LicenseTasks ? new ("Pages.Tasks.Title", "fas fa-clock", "tasks") : null,
-                App.Instance.FileFlowsSystem.LicenseWebhooks ? new ("Pages.Webhooks.Title", "fas fa-handshake", "webhooks") : null,
-                new ("Pages.Settings.Title", "fas fa-cogs", "settings"),
-            }
-        });
+                Name = Translater.Instant("MenuGroups.System"),
+                Icon = "fas fa-desktop",
+                Items = new List<NavMenuItem>
+                {
+                    new ("Pages.Log.Title", "fas fa-file-alt", "log"),
+                    App.Instance.FileFlowsSystem.LicenseRevisions ? new ("Pages.Revisions.Title", "fas fa-history", "revisions") : null,
+                    new ("Pages.Settings.Title", "fas fa-cogs", "settings"),
+                    App.Instance.FileFlowsSystem.LicenseTasks ? new ("Pages.Tasks.Title", "fas fa-clock", "tasks") : null,
+                    App.Instance.FileFlowsSystem.LicenseUserSecurity ? new ("Pages.Users.Title", "fas fa-users", "users") : null,
+                    App.Instance.FileFlowsSystem.LicenseWebhooks ? new ("Pages.Webhooks.Title", "fas fa-handshake", "webhooks") : null,
+                }
+            });
+        }
 
-        MenuItems.Add(new NavMenuGroup
+        if (App.Instance.IsMobile)
         {
-            Name = Translater.Instant("MenuGroups.Information"),
-            Icon = "fas fa-question-circle",
-            Items = new List<NavMenuItem>
+            MenuItems.Add(new NavMenuGroup
             {
-                new ("Pages.Log.Title", "fas fa-file-alt", "log")
-            }
-        });
+                Name = Translater.Instant("MenuGroups.Information"),
+                Icon = "fas fa-question-circle",
+                Items = new List<NavMenuItem>
+                {
+                    new (lblHelp, "fas fa-question-circle", "https://fileflows.com/docs"), 
+                    new (lblForum, "fas fa-comments", "https://fileflows.com/forum"),
+                    new (lblDiscord, "fab fa-discord", "https://fileflows.com/discord")
+                }
+            });
+        }
+
+        if (App.Instance.IsMobile && App.Instance.FileFlowsSystem.ShowLogout)
+        {
+            MenuItems.Add(new NavMenuGroup
+            {
+                Name = Translater.Instant("MenuGroups.User"),
+                Icon = "fas fa-user",
+                Items = new List<NavMenuItem>
+                {
+                    App.Instance.FileFlowsSystem.ShowChangePassword ? new (lblChangePassword, "fas fa-key", "#change-password") : null,
+                    new (lblLogout, "fas fa-unlock", "#logout"),
+                }
+            });
+        }
+
+        UserMenu.Clear();
+        UserMenu.Add(new("fileflows.com", "fas fa-globe", "https://fileflows.com"));
+        UserMenu.Add(new(lblHelp, "fas fa-question-circle", "https://fileflows.com/docs"));
+        if(App.Instance.FileFlowsSystem.ShowChangePassword)
+            UserMenu.Add(new (lblChangePassword, "fas fa-key", "#change-password"));
+        if(App.Instance.FileFlowsSystem.ShowLogout)
+            UserMenu.Add(new (lblLogout, "fas fa-unlock", "#logout"));
 
         try
         {
@@ -209,11 +253,31 @@ public partial class NavMenu : IDisposable
 
     async Task Click(NavMenuItem item)
     {
+        UserMenuOpened = false;
         if (item == nmiPause)
         {
             await PausedService.Toggle();
             return;
         }
+
+        if (item.Url.StartsWith("http"))
+        {
+            await jSRuntime.InvokeVoidAsync("open", item.Url);
+            return;
+        }
+
+        if (item.Url == "#change-password")
+        {
+            await ChangePassword.Show();
+            return;
+        }
+
+        if (item.Url == "#logout")
+        {
+            NavigationManager.NavigateTo("/login", forceLoad: true);
+            return;
+        }
+
         bool ok = await NavigationService.NavigateTo(item.Url);
         if (ok)
         {
@@ -236,6 +300,14 @@ public partial class NavMenu : IDisposable
         // _ = bubblesTask?.StopAsync();
         // bubblesTask = null;
     }
+
+    /// <summary>
+    /// Toggles the visibility of the user menu
+    /// </summary>
+    private void ToggleUserMenu()
+    {
+        UserMenuOpened = !UserMenuOpened;
+    }
 }
 
 public class NavMenuGroup
@@ -253,7 +325,7 @@ public class NavMenuItem
 
     public NavMenuItem(string title = "", string icon = "", string url = "")
     {
-        this.Title = Translater.TranslateIfNeeded(title);
+        this.Title = title == "fileflows.com" ? title : Translater.TranslateIfNeeded(title);
         this.Icon = icon;
         this.Url = url;
     }

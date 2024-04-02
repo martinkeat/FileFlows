@@ -71,5 +71,10 @@ internal class AppSettings
     /// setting will be reset
     /// </summary>
     public DatabaseType? DatabaseMigrateType { get; set; }
+    
+    /// <summary>
+    /// Gets or sets the security mode
+    /// </summary>
+    public SecurityMode Security { get; set; }
 
 }

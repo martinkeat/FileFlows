@@ -48,7 +48,7 @@ export class Counter extends FFChart
 
         if(!this.span)
             this.createDiv();
-        let response = await fetch(this.url);
+        let response = await ff.doFetch(this.url);
         this.value = await response.text();
         if(this.formatter) 
             this.span.innerText = this.formatter(this.value);

@@ -1,15 +1,12 @@
-using System.Text.RegularExpressions;
-using FileFlows.Plugin;
+using FileFlows.Server.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using FileFlows.Shared.Models;
 using FileFlows.Server.Helpers;
 using FileFlows.Server.Hubs;
 using FileFlows.Server.Services;
-using FileFlows.Shared.Helpers;
 
 namespace FileFlows.Server.Controllers;
-
 
 /// <summary>
 /// This controller will be responsible for knowing about the workers and the nodes
@@ -17,6 +14,7 @@ namespace FileFlows.Server.Controllers;
 /// This needs to be able to kill a worker running on any node
 /// </summary>
 [Route("/api/worker")]
+[FileFlowsAuthorize]
 public class WorkerController : Controller
 {
     /// <summary>
@@ -33,40 +31,40 @@ public class WorkerController : Controller
         this.Context = context;
     }
 
-    /// <summary>
-    /// Start work, tells the server work has started on a flow runner
-    /// </summary>
-    /// <param name="info">The info about the work starting</param>
-    /// <returns>the updated info</returns>
-    [HttpPost("work/start")]
-    public Task<FlowExecutorInfo> StartWork([FromBody] FlowExecutorInfo info)
-        => ServiceLoader.Load<FlowRunnerService>().Start(info);
-
-    /// <summary>
-    /// Finish work, tells the server work has finished on a flow runner
-    /// </summary>
-    /// <param name="info">the flow executor info</param>
-    [HttpPost("work/finish")]
-    public Task FinishWork([FromBody] FlowExecutorInfo info)
-        => ServiceLoader.Load<FlowRunnerService>().Finish(info);
+    // /// <summary>
+    // /// Start work, tells the server work has started on a flow runner
+    // /// </summary>
+    // /// <param name="info">The info about the work starting</param>
+    // /// <returns>the updated info</returns>
+    // [HttpPost("work/start")]
+    // public Task<FlowExecutorInfo> StartWork([FromBody] FlowExecutorInfo info)
+    //     => ServiceLoader.Load<FlowRunnerService>().Start(info);
+    //
+    // /// <summary>
+    // /// Finish work, tells the server work has finished on a flow runner
+    // /// </summary>
+    // /// <param name="info">the flow executor info</param>
+    // [HttpPost("work/finish")]
+    // public Task FinishWork([FromBody] FlowExecutorInfo info)
+    //     => ServiceLoader.Load<FlowRunnerService>().Finish(info);
     
-    /// <summary>
-    /// Update work, tells the server about updated work on a flow runner
-    /// </summary>
-    /// <param name="info">The updated work information</param>
-    [HttpPost("work/update")]
-    public Task UpdateWork([FromBody] FlowExecutorInfo info)
-        => ServiceLoader.Load<FlowRunnerService>().Update(info);
-
-    /// <summary>
-    /// Clear all workers from a node.  Intended for clean up in case a node restarts.  
-    /// This is called when a node first starts.
-    /// </summary>
-    /// <param name="nodeUid">The UID of the processing node</param>
-    /// <returns>an awaited task</returns>
-    [HttpPost("clear/{nodeUid}")]
-    public Task Clear([FromRoute] Guid nodeUid)
-        => ServiceLoader.Load<FlowRunnerService>().Clear(nodeUid);
+    // /// <summary>
+    // /// Update work, tells the server about updated work on a flow runner
+    // /// </summary>
+    // /// <param name="info">The updated work information</param>
+    // [HttpPost("work/update")]
+    // public Task UpdateWork([FromBody] FlowExecutorInfo info)
+    //     => ServiceLoader.Load<FlowRunnerService>().Update(info);
+    
+    // /// <summary>
+    // /// Clear all workers from a node.  Intended for clean up in case a node restarts.  
+    // /// This is called when a node first starts.
+    // /// </summary>
+    // /// <param name="nodeUid">The UID of the processing node</param>
+    // /// <returns>an awaited task</returns>
+    // [HttpPost("clear/{nodeUid}")]
+    // public Task Clear([FromRoute] Guid nodeUid)
+    //     => ServiceLoader.Load<FlowRunnerService>().Clear(nodeUid);
 
     /// <summary>
     /// Get all running flow executors

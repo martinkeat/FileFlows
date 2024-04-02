@@ -2,7 +2,7 @@
 using FileFlows.Managers;
 using FileFlows.Plugin;
 using FileFlows.Server.Controllers;
-using FileFlows.ServerShared.Services;
+using FileFlows.ServerShared.Models;
 using FileFlows.Shared.Models;
 
 namespace FileFlows.Server.Services;
@@ -10,7 +10,7 @@ namespace FileFlows.Server.Services;
 /// <summary>
 /// An Service for communicating with the server for all Processing Node related actions
 /// </summary>
-public class NodeService : INodeService
+public class NodeService //: INodeService
 {
     /// <summary>
     /// Initializes the node service
@@ -51,29 +51,20 @@ public class NodeService : INodeService
         }
     }
 
+    //
+    // /// <summary>
+    // /// Clears all workers on the node.
+    // /// This is called when a node first starts up, if a node crashed when workers were running this will reset them
+    // /// </summary>
+    // /// <param name="nodeUid">The UID of the node</param>
+    // /// <returns>a completed task</returns>
+    // public Task ClearWorkersAsync(Guid nodeUid) => new WorkerController(null).Clear(nodeUid);
 
-    /// <summary>
-    /// A loader to load an instance of the Node service
-    /// </summary>
-    public static Func<INodeService> Loader { get; set; }
-
-    /// <summary>
-    /// Loads an instance of the node service
-    /// </summary>
-    /// <returns>an instance of the node service</returns>
-    public static INodeService Load()
+    /// <inheritdoc />
+    public Task<ProcessingNode> Register(string serverUrl, string address, string tempPath, List<RegisterModelMapping> mappings)
     {
-        if (Loader == null)
-            return ServiceLoader.Load<NodeService>();
-        return Loader.Invoke();
+        throw new NotImplementedException();
     }
-    /// <summary>
-    /// Clears all workers on the node.
-    /// This is called when a node first starts up, if a node crashed when workers were running this will reset them
-    /// </summary>
-    /// <param name="nodeUid">The UID of the node</param>
-    /// <returns>a completed task</returns>
-    public Task ClearWorkersAsync(Guid nodeUid) => new WorkerController(null).Clear(nodeUid);
 
     /// <summary>
     /// Gets an instance of the internal processing node

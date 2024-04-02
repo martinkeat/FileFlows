@@ -1,8 +1,6 @@
 ﻿using FileFlows.Managers;
 using FileFlows.Plugin;
 using FileFlows.Server.Helpers;
-using FileFlows.Server.Controllers;
-using FileFlows.ServerShared.Services;
 using FileFlows.Shared.Models;
 
 namespace FileFlows.Server.Services;
@@ -10,24 +8,8 @@ namespace FileFlows.Server.Services;
 /// <summary>
 /// An instance of the Settings Service which allows accessing of the system settings
 /// </summary>
-public class SettingsService : ISettingsService
+public class SettingsService // : ISettingsService
 {
-    /// <summary>
-    /// A loader to load an instance of the Settings
-    /// </summary>
-    public static Func<ISettingsService> Loader { get; set; }
-
-    /// <summary>
-    /// Loads an instance of the settings service
-    /// </summary>
-    /// <returns>an instance of the settings service</returns>
-    public static ISettingsService Load()
-    {
-        if (Loader == null)
-            return new SettingsService();
-        return Loader.Invoke();
-    }
-
     /// <summary>
     /// Gets the system settings
     /// </summary>
@@ -69,6 +51,8 @@ public class SettingsService : ISettingsService
             status.LicenseTasks = (license.Flags & LicenseFlags.Tasks) == LicenseFlags.Tasks;
             status.LicenseAutoUpdates = (license.Flags & LicenseFlags.AutoUpdates) == LicenseFlags.AutoUpdates;
             status.LicenseWebhooks = (license.Flags & LicenseFlags.Webhooks) == LicenseFlags.Webhooks;
+            status.LicenseUserSecurity = (license.Flags & LicenseFlags.UserSecurity) == LicenseFlags.UserSecurity;
+            status.Security = settings.Security;
             status.LicenseProcessingOrder = (license.Flags & LicenseFlags.ProcessingOrder) == LicenseFlags.ProcessingOrder;
             status.LicenseFileServer = (license.Flags & LicenseFlags.FileServer) == LicenseFlags.FileServer;
             status.LicenseEnterprise = (license.Flags & LicenseFlags.Enterprise) == LicenseFlags.Enterprise;
@@ -110,7 +94,7 @@ public class SettingsService : ISettingsService
         cfg.Flows = await ServiceLoader.Load<FlowService>().GetAllAsync();
         cfg.Libraries = await ServiceLoader.Load<LibraryService>().GetAllAsync();
         cfg.Enterprise = LicenseHelper.IsLicensed(LicenseFlags.Enterprise);
-        cfg.AllowRemote = settings.FileServerDisabled == false;
+        cfg.AllowRemote = settings.FileServerDisabled == false && LicenseHelper.IsLicensed(LicenseFlags.FileServer);
         cfg.PluginSettings = await new PluginService().GetAllPluginSettings();
         cfg.MaxNodes = LicenseHelper.IsLicensed() ? 250 : 30;
         cfg.KeepFailedFlowTempFiles = settings.KeepFailedFlowTempFiles;
@@ -154,7 +138,13 @@ public class SettingsService : ISettingsService
         
         return cfg;
     }
-    
+
+    /// <inheritdoc />
+    public Task<Result<string>> DownloadPlugin(string name, string destinationPath)
+    {
+        throw new NotImplementedException();
+    }
+
     /// <summary>
     /// Increments the revision
     /// </summary>

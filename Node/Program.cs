@@ -5,6 +5,7 @@ using Avalonia;
 using FileFlows.Node.Helpers;
 using FileFlows.Node.Ui;
 using FileFlows.Node.Utils;
+using FileFlows.RemoteServices;
 using FileFlows.ServerShared;
 using FileFlows.ServerShared.Helpers;
 using FileFlows.ServerShared.Models;
@@ -39,7 +40,7 @@ public class Program
             CommandLineOptions.PrintHelp();
             return;
         }
-        HttpHelper.Client = HttpHelper.GetDefaultHttpHelper(Service.ServiceBaseUrl);
+        HttpHelper.Client = HttpHelper.GetDefaultHttpClient(RemoteService.ServiceBaseUrl);
         ServicePointManager.DefaultConnectionLimit = 50;
 
         var options = CommandLineOptions.Parse(args);
@@ -84,13 +85,16 @@ public class Program
         try
         {
             LoadEnvironmentalVaraibles();
-            
-            Service.ServiceBaseUrl = AppSettings.Load().ServerUrl;
+
+            var appSettings = AppSettings.Load();
+            RemoteService.ServiceBaseUrl = appSettings.ServerUrl;
             #if(DEBUG)
-            if (string.IsNullOrEmpty(Service.ServiceBaseUrl))
-                Service.ServiceBaseUrl = "http://localhost:6868/";
+            if (string.IsNullOrEmpty(RemoteService.ServiceBaseUrl))
+                RemoteService.ServiceBaseUrl = "http://localhost:6868/";
             #endif
 
+            RemoteService.ApiToken = appSettings.ApiToken;
+            
             if (string.IsNullOrEmpty(options.Server) == false)
                 AppSettings.ForcedServerUrl = options.Server;
             if (string.IsNullOrEmpty(options.Temp) == false)
@@ -189,6 +193,7 @@ public class Program
         AppSettings.ForcedServerUrl = Environment.GetEnvironmentVariable("ServerUrl");
         AppSettings.ForcedTempPath = Environment.GetEnvironmentVariable("TempPath");
         AppSettings.ForcedHostName = Environment.GetEnvironmentVariable("NodeName");
+        AppSettings.ForcedApiToken = Environment.GetEnvironmentVariable("ApiToken");
 
         string mappings = Environment.GetEnvironmentVariable("NodeMappings");
         if (string.IsNullOrWhiteSpace(mappings) == false)

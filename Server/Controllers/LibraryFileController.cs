@@ -1,3 +1,4 @@
+using FileFlows.Server.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using FileFlows.Server.Helpers;
 using FileFlows.Shared.Models;
@@ -17,30 +18,10 @@ namespace FileFlows.Server.Controllers;
 /// Library files controller
 /// </summary>
 [Route("/api/library-file")]
+[FileFlowsAuthorize]
 public class LibraryFileController : Controller //ControllerStore<LibraryFile>
 {
     private static CacheStore CacheStore = new();
-
-    /// <summary>
-    /// Gets the next library file for processing, and puts it into progress
-    /// </summary>
-    /// <param name="args">The arguments for the call</param>
-    /// <returns>the next library file to process</returns>
-    [HttpPost("next-file")]
-    public async Task<NextLibraryFileResult> GetNext([FromBody] NextLibraryFileArgs args)
-    {
-        var service = ServiceLoader.Load<LibraryFileService>();
-        var result = await service.GetNext(args.NodeName, args.NodeUid, args.NodeVersion, args.WorkerUid);
-        if (result == null)
-            return result;
-        
-        // don't add any logic here to clear the file etc.  
-        // the internal processing node bypasses this call and call the service directly (as does debug testing)
-        // only remote processing nodes make this call
-
-        Logger.Instance.ILog($"GetNextFile for ['{args.NodeName}']({args.NodeUid}): {result.Status}");
-        return result;
-    }
 
     /// <summary>
     /// Lists all of the library files, only intended for the UI
@@ -196,70 +177,6 @@ public class LibraryFileController : Controller //ControllerStore<LibraryFile>
         return file;
     }
 
-
-    /// <summary>
-    /// Update a library file
-    /// </summary>
-    /// <param name="file">The library file to update</param>
-    /// <returns>The updated library file</returns>
-    [HttpPut]
-    public async Task<LibraryFile> Update([FromBody] LibraryFile file)
-    {
-        throw new Exception("Obsolete method");
-        var existing = await ServiceLoader.Load<LibraryFileService>().Get(file.Uid);
-
-        if (existing == null)
-            throw new Exception("Not found");
-
-        if (existing.Status == FileStatus.Processed && file.Status == FileStatus.Processing)
-        {
-            // already finished and reported finished in the Worker controller.  So ignore this out of date update
-            return existing;
-        }
-
-        if (existing.Status != file.Status)
-        {
-            Logger.Instance?.ILog($"Setting library file status to: {file.Status} - {file.Name}");
-            existing.Status = file.Status;
-        }
-
-        existing.Node = file.Node;
-        if(existing.FinalSize == 0 || file.FinalSize > 0)
-            existing.FinalSize = file.FinalSize;
-        if(file.OriginalSize > 0)
-            existing.OriginalSize = file.OriginalSize;
-        if(string.IsNullOrEmpty(file.OutputPath))
-            existing.OutputPath = file.OutputPath;
-        if(file.Flow != null && file.Flow.Uid != Guid.Empty && string.IsNullOrEmpty(file.Flow.Name) == false)
-            existing.Flow = file.Flow;
-        if(file.Library != null && file.Library.Uid == existing.Library.Uid)
-            existing.Library = file.Library; // name may have changed and is being updated
-        
-        existing.DateCreated = file.DateCreated; // this can be changed if library file is unheld
-        if(file.ProcessingEnded > new DateTime(2020, 1,1))
-            existing.ProcessingEnded = file.ProcessingEnded;
-        existing.ProcessingStarted = file.ProcessingStarted;
-        existing.WorkerUid = file.WorkerUid;
-        existing.CreationTime = file.CreationTime;
-        existing.LastWriteTime = file.LastWriteTime;
-        existing.HoldUntil = file.HoldUntil;
-        existing.Order = file.Order;
-        existing.Fingerprint = file.Fingerprint;
-        existing.FinalFingerprint = file.FinalFingerprint;
-        existing.OriginalSize = file.OriginalSize;
-        if(file.ExecutedNodes?.Any() == true)
-            existing.ExecutedNodes = file.ExecutedNodes ?? new List<ExecutedNode>();
-        if (file.OriginalMetadata?.Any() == true)
-            existing.OriginalMetadata = file.OriginalMetadata;
-        if (file.FinalMetadata?.Any() == true)
-            existing.FinalMetadata = file.FinalMetadata;
-        
-        var updated = await ServiceLoader.Load<LibraryFileService>().Update(existing);
-        
-        return updated;
-    }
-
-
     /// <summary>
     /// Downloads a  log of a library file
     /// </summary>
@@ -294,17 +211,6 @@ public class LibraryFileController : Controller //ControllerStore<LibraryFile>
     }
 
     /// <summary>
-    /// Saves the full log for a library file
-    /// Call this after processing has completed for a library file
-    /// </summary>
-    /// <param name="uid">The uid of the library file</param>
-    /// <param name="log">the log</param>
-    /// <returns>true if successfully saved log</returns>
-    [HttpPut("{uid}/full-log")]
-    public Task<bool> SaveFullLog([FromRoute] Guid uid, [FromBody] string log)
-        => ServiceLoader.Load<LibraryFileService>().SaveFullLog(uid, log);
-
-    /// <summary>
     /// A reference model of library files to move to the top of the processing queue
     /// </summary>
     /// <param name="model">The reference model of items in order to move</param>
@@ -320,14 +226,6 @@ public class LibraryFileController : Controller //ControllerStore<LibraryFile>
     }
 
 
-    /// <summary>
-    /// Checks if a library file exists on the server
-    /// </summary>
-    /// <param name="uid">The Uid of the library file to check</param>
-    /// <returns>true if exists, otherwise false</returns>
-    [HttpGet("exists-on-server/{uid}")]
-    public Task<bool> ExistsOnServer([FromRoute] Guid uid)
-        => ServiceLoader.Load<LibraryFileService>().ExistsOnServer(uid);
 
     /// <summary>
     /// Delete library files from the system

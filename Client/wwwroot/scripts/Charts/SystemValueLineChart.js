@@ -53,10 +53,10 @@ export class SystemValueLineChart{
             let fullDate = time.getFullYear() + '-' + ((time.getMonth() + 1).toString()).padStart(2, '0') + '-' + (time.getDate().toString()).padStart(2, '0')
             let fullTime = time.getHours().toString().padStart(2, '0') + ':' + time.getMinutes().toString().padStart(2, '0') + ':' + time.getSeconds().toString().padStart(2, '0')
                             + '.' + time.getMilliseconds().toString().padEnd(3, '0');
-            let response = await fetch(`${this.url}?since=${fullDate}T${fullTime}Z`);
+            let response = await ff.doFetch(`${this.url}?since=${fullDate}T${fullTime}Z`);
             data = await response.json();
         }else {
-            let response = await fetch(this.url);
+            let response = await ff.doFetch(this.url);
             data = await response.json();
         }   
         

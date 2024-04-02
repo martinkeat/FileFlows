@@ -1,16 +1,13 @@
-using System.Collections;
 using System.IO;
-using NPoco.Expressions;
-
-namespace FileFlows.Shared.Helpers;
-
-using System;
-using System.Net.Http;
+using System.Net;
 using System.Text;
+using System.Net.Http;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using FileFlows.Shared.Models;
+
+namespace FileFlows.Shared.Helpers;
 
 /// <summary>
 /// A helper for HTTP processing of requests
@@ -18,6 +15,11 @@ using FileFlows.Shared.Models;
 public class HttpHelper
 {
     private static HttpClient _Client;
+    
+    /// <summary>
+    /// Gets or sets the 401 action handler
+    /// </summary>
+    public static Action On401 { get; set; }
 
     /// <summary>
     /// Gets or sets the HTTP Client used
@@ -25,10 +27,7 @@ public class HttpHelper
     public static HttpClient Client
     {
         get => _Client;
-        set
-        {
-            _Client = value;
-        }
+        set => _Client = value;
     }
 
     /// <summary>
@@ -49,7 +48,7 @@ public class HttpHelper
     /// <returns>the request result</returns>
     public static async Task<RequestResult<T>> Get<T>(string url)
     {
-        return await MakeRequest<T>(HttpMethod.Get, url);
+        return await MakeRequest<T>(System.Net.Http.HttpMethod.Get, url);
     }
     
     /// <summary>
@@ -62,9 +61,8 @@ public class HttpHelper
     /// <returns>the request result</returns>
     public static async Task<RequestResult<T>> Get<T>(string url, int timeoutSeconds = 0, bool noLog = false)
     {
-        return await MakeRequest<T>(HttpMethod.Get, url, timeoutSeconds: timeoutSeconds, noLog: noLog);
+        return await MakeRequest<T>(System.Net.Http.HttpMethod.Get, url, timeoutSeconds: timeoutSeconds, noLog: noLog);
     }
-#if (!DEMO)
     
     /// <summary>
     /// Performs a POST request
@@ -75,7 +73,7 @@ public class HttpHelper
     /// <returns>the request result</returns>
     public static async Task<RequestResult<string>> Post(string url, object data = null, bool noLog = false)
     {
-        return await MakeRequest<string>(HttpMethod.Post, url, data, noLog: noLog);
+        return await MakeRequest<string>(System.Net.Http.HttpMethod.Post, url, data, noLog: noLog);
     }
     
     /// <summary>
@@ -88,7 +86,7 @@ public class HttpHelper
     /// <returns>the request result</returns>
     public static async Task<RequestResult<T>> Post<T>(string url, object data = null, int timeoutSeconds = 0)
     {
-        return await MakeRequest<T>(HttpMethod.Post, url, data, timeoutSeconds: timeoutSeconds);
+        return await MakeRequest<T>(System.Net.Http.HttpMethod.Post, url, data, timeoutSeconds: timeoutSeconds);
     }
     
     /// <summary>
@@ -99,7 +97,7 @@ public class HttpHelper
     /// <returns>the request result</returns>
     public static async Task<RequestResult<string>> Put(string url, object data = null)
     {
-        return await MakeRequest<string>(HttpMethod.Put, url, data);
+        return await MakeRequest<string>(System.Net.Http.HttpMethod.Put, url, data);
     }
     
     /// <summary>
@@ -111,7 +109,7 @@ public class HttpHelper
     /// <returns>the request result</returns>
     public static async Task<RequestResult<T>> Put<T>(string url, object data = null)
     {
-        return await MakeRequest<T>(HttpMethod.Put, url, data);
+        return await MakeRequest<T>(System.Net.Http.HttpMethod.Put, url, data);
     }
 
     /// <summary>
@@ -122,7 +120,7 @@ public class HttpHelper
     /// <returns>the request result</returns>
     public static async Task<RequestResult<string>> Delete(string url, object data = null)
     {
-        return await MakeRequest<string>(HttpMethod.Delete, url, data);
+        return await MakeRequest<string>(System.Net.Http.HttpMethod.Delete, url, data);
     }
     
     
@@ -151,7 +149,6 @@ public class HttpHelper
             throw new Exception("Error downloading file: " + ex.Message);
         }
     }
-#endif
 
     /// <summary>
     /// Logs a message to the log
@@ -182,7 +179,7 @@ public class HttpHelper
     /// <param name="noLog">if the request show record nothing to the log</param>
     /// <typeparam name="T">The request object returned</typeparam>
     /// <returns>a processing result of the request</returns>
-    private static async Task<RequestResult<T>> MakeRequest<T>(HttpMethod method, string url, object data = null,
+    private static async Task<RequestResult<T>> MakeRequest<T>(System.Net.Http.HttpMethod method, string url, object data = null,
         int timeoutSeconds = 0, bool noLog = false)
     {
 #if (DEBUG)
@@ -198,7 +195,7 @@ public class HttpHelper
 
         OnHttpRequestCreated?.Invoke(request);
 
-        if (method == HttpMethod.Post && data == null)
+        if (method == System.Net.Http.HttpMethod.Post && data == null)
         {
             // if this is null, asp.net will return a 415 content not support, as the content-type will not be set
             request.Content = new StringContent("", Encoding.UTF8, "application/json");
@@ -245,6 +242,11 @@ public class HttpHelper
             {
                 body = "Unable to connect, server possibly down";
                 noLog = true;
+            }
+
+            if (response.StatusCode == HttpStatusCode.Unauthorized && On401 != null)
+            {
+                On401();
             }
 
             if (noLog == false && string.IsNullOrWhiteSpace(body) == false)
@@ -312,7 +314,7 @@ public class HttpHelper
     /// </summary>
     /// <param name="serviceBaseUrl">the base URL for services</param>
     /// <returns>a HttpClient</returns>
-    public static HttpClient GetDefaultHttpHelper(string serviceBaseUrl)
+    public static HttpClient GetDefaultHttpClient(string serviceBaseUrl)
     {
         // #if(!DEBUG)
         // if (Environment.GetEnvironmentVariable("HTTPS") != "1")

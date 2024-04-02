@@ -21,6 +21,10 @@ public class AppSettings
     /// Gets or sets a forced hostname to identify this node as
     /// </summary>
     public static string? ForcedHostName { get; set; }
+    /// <summary>
+    /// Gets or sets a forced API Token 
+    /// </summary>
+    public static string? ForcedApiToken { get; set; }
 
     /// <summary>
     /// Gets or sets mappings passed in via enviromental values
@@ -38,7 +42,7 @@ public class AppSettings
     public static bool? EnvironmentalEnabled { get; set; }
 
     private string _ServerUrl = string.Empty;
-    //private string _TempPath = string.Empty;
+    
     /// <summary>
     /// Gets or sets the URL to the server
     /// </summary>
@@ -50,33 +54,29 @@ public class AppSettings
                 return ForcedServerUrl;
             return _ServerUrl;
         }
-        set
+        set => _ServerUrl = value ?? String.Empty;
+    }
+
+    private string _ApiToken = string.Empty;
+    
+    /// <summary>
+    /// Gets or sets the API Token
+    /// </summary>
+    public string ApiToken
+    {
+        get
         {
-            _ServerUrl = value ?? String.Empty;
+            if (string.IsNullOrEmpty(ForcedApiToken) == false)
+                return ForcedApiToken;
+            return _ApiToken;
         }
+        set => _ApiToken = value ?? String.Empty;
     }
 
     /// <summary>
     /// Gets or sets if the app should start minimized
     /// </summary>
     public bool StartMinimized { get; set; }
-
-    // /// <summary>
-    // /// Gets or sets the temporary path
-    // /// </summary>
-    // public string TempPath
-    // {
-    //     get
-    //     {
-    //         if (string.IsNullOrEmpty(ForcedTempPath) == false)
-    //             return ForcedTempPath;
-    //         return _TempPath;
-    //     }
-    //     set
-    //     {
-    //         _TempPath = value ?? String.Empty;
-    //     }
-    // }
 
     /// <summary>
     /// Gets the hostname of this node
@@ -90,16 +90,6 @@ public class AppSettings
             return Environment.MachineName;
         }
     }
-    //
-    // /// <summary>
-    // /// Gets or sets the number of runners this node can execute
-    // /// </summary>
-    // public int Runners { get; set; }
-    //
-    // /// <summary>
-    // /// Gets or sets if this node is enabled
-    // /// </summary>
-    // public bool Enabled { get; set; }
 
     /// <summary>
     /// Saves the configuration
@@ -148,8 +138,6 @@ public class AppSettings
         if (File.Exists(file) == false)
         {
             AppSettings settings = new();
-            //settings.Runners = 1;
-            //settings.TempPath = Globals.IsDocker ? "/temp" :  Path.Combine(DirectoryHelper.BaseDirectory, "Temp");
             settings.Save();
             return settings;
         }

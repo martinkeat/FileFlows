@@ -46,6 +46,16 @@ public class FileFlowsStatus
     public bool LicenseWebhooks { get; set; }
     
     /// <summary>
+    /// Gets or sets if license allowed for user security
+    /// </summary>
+    public bool LicenseUserSecurity { get; set; }
+    
+    /// <summary>
+    /// Gets or sets the security
+    /// </summary>
+    public SecurityMode Security { get; set; }
+    
+    /// <summary>
     /// Gets or sets if license allowed for auto updates
     /// </summary>
     public bool LicenseAutoUpdates { get; set; }
@@ -85,6 +95,21 @@ public class FileFlowsStatus
     /// Gets or sets if this is a web view 
     /// </summary>
     public bool IsWebView { get; set; }
+    
+    /// <summary>
+    /// Gets or sets if the user is an admin
+    /// </summary>
+    public bool IsAdmin { get; set; }
+    
+    /// <summary>
+    /// Gets or sets if the change password should be shown
+    /// </summary>
+    public bool ShowChangePassword { get; set; }
+    
+    /// <summary>
+    /// Gets or sets if the logout link should be shown
+    /// </summary>
+    public bool ShowLogout { get; set; }
 }
 
 /// <summary>

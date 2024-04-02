@@ -1,4 +1,5 @@
-﻿using FileFlows.Server.Services;
+﻿using FileFlows.Server.Authentication;
+using FileFlows.Server.Services;
 using SettingsService = FileFlows.Server.Services.SettingsService;
 using Microsoft.AspNetCore.Mvc;
 using FileFlows.Shared.Models;
@@ -9,6 +10,7 @@ namespace FileFlows.Server.Controllers;
 /// Status controller
 /// </summary>
 [Route("/api/status")]
+[FileFlowsAuthorize]
 public class StatusController : Controller
 {
     /// <summary>

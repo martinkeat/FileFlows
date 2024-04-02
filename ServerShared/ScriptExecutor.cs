@@ -1,20 +1,21 @@
 using System.Text;
-using System.Text.Json;
-using System.Text.RegularExpressions;
 using FileFlows.Plugin;
 using FileFlows.Plugin.Models;
 using FileFlows.ScriptExecution;
-using FileFlows.Shared.Helpers;
 using FileFlows.Shared.Models;
 
 namespace FileFlows.ServerShared;
 
 /// <summary>
-/// A Javascript code executor
+/// A JavaScript code executor
 /// </summary>
-/// 
 public class ScriptExecutor:IScriptExecutor
 {
+    /// <summary>
+    /// The HTTP Client used in scripts for requests
+    /// </summary>
+    private static HttpClient httpClient = new ();
+    
     /// <summary>
     /// Delegate used by the executor so log messages can be passed from the javascript code into the flow runner
     /// </summary>
@@ -55,7 +56,7 @@ public class ScriptExecutor:IScriptExecutor
         executor.Logger.WLogAction = (largs) => args.Logger.WLog(largs);
         executor.Logger.ILogAction = (largs) => args.Logger.ILog(largs);
         executor.Logger.DLogAction = (largs) => args.Logger.DLog(largs);
-        executor.HttpClient = HttpHelper.Client;
+        executor.HttpClient = httpClient;
         if (string.IsNullOrWhiteSpace(FileFlowsUrl) == false)
             args.Variables["FileFlows.Url"] = FileFlowsUrl;
 
@@ -73,15 +74,9 @@ public class ScriptExecutor:IScriptExecutor
         executor.ProcessExecutor = new ScriptProcessExecutor(args);
         foreach (var arg in execArgs.AdditionalArguments ?? new ())
             executor.AdditionalArguments.Add(arg.Key, arg.Value);
-        if(executor.AdditionalArguments.ContainsKey("Flow"))
-            executor.AdditionalArguments["Flow"] = args;
-        else
-            executor.AdditionalArguments.Add("Flow", args);
+        executor.AdditionalArguments["Flow"] = args;
 
-        if (executor.AdditionalArguments.ContainsKey("PluginMethod"))
-            executor.AdditionalArguments["PluginMethod"] = PluginMethodInvoker;
-        else
-            executor.AdditionalArguments.Add("PluginMethod", PluginMethodInvoker);
+        executor.AdditionalArguments["PluginMethod"] = PluginMethodInvoker;
         
         executor.SharedDirectory = SharedDirectory;
         try
@@ -112,7 +107,7 @@ public class ScriptExecutor:IScriptExecutor
         Executor executor = new Executor();
         executor.Code = code;
         executor.SharedDirectory = sharedDirectory?.EmptyAsNull() ?? DirectoryHelper.ScriptsDirectoryShared;
-        executor.HttpClient = HttpHelper.Client;
+        executor.HttpClient = httpClient;
         executor.Logger = new ScriptExecution.Logger();
         executor.DontLogCode = dontLogCode;
         StringBuilder sbLog = new();

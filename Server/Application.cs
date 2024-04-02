@@ -24,6 +24,10 @@ public class Application
     public static bool Docker => ServerShared.Globals.IsDocker;
 
 
+    /// <summary>
+    /// Gets or sets the server url
+    /// </summary>
+    public static string ServerUrl { get; set; }
 
     /// <summary>
     /// Gets or sets if using a web view
@@ -102,7 +106,7 @@ public class Application
 
             WriteLogHeader(args);
 
-            HttpHelper.Client = HttpHelper.GetDefaultHttpHelper(string.Empty);
+            HttpHelper.Client = HttpHelper.GetDefaultHttpClient(string.Empty);
 
             if (Docker || noGui)
             {

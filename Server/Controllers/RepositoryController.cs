@@ -1,4 +1,5 @@
 using FileFlows.Plugin;
+using FileFlows.Server.Authentication;
 using FileFlows.Server.Helpers;
 using FileFlows.Server.Services;
 using FileFlows.Shared.Models;
@@ -10,6 +11,7 @@ namespace FileFlows.Server.Controllers;
 /// Controller for the Repository
 /// </summary>
 [Route("/api/repository")]
+[FileFlowsAuthorize]
 public class RepositoryController : Controller
 {
     /// <summary>

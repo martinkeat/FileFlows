@@ -2,6 +2,7 @@ using System.Net;
 using System.Dynamic;
 using System.Text.RegularExpressions;
 using FileFlows.Plugin;
+using FileFlows.Server.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using FileFlows.Server.Helpers;
 using FileFlows.Server.Services;
@@ -14,6 +15,7 @@ namespace FileFlows.Server.Controllers;
 /// Plugin Controller
 /// </summary>
 [Route("/api/plugin")]
+[FileFlowsAuthorize]
 public class PluginController : Controller
 {
     /// <summary>

@@ -1,13 +1,24 @@
-﻿namespace FileFlows.ServerShared.Services;
+﻿using FileFlows.Shared.Models;
 
-using FileFlows.Shared.Helpers;
-using FileFlows.Shared.Models;
+namespace FileFlows.ServerShared.Services;
 
 /// <summary>
 /// Interface for a Flow Runner, which is responsible for executing a flow and processing files
 /// </summary>
 public interface IFlowRunnerService
 {
+    /// <summary>
+    /// Gets the file check interval in seconds
+    /// </summary>
+    /// <returns>the file check interval in seconds</returns>
+    Task<int> GetFileCheckInterval();
+
+    /// <summary>
+    /// Gets if the server is licensed
+    /// </summary>
+    /// <returns>if hte server is licensed</returns>
+    Task<bool> IsLicensed();
+    
     /// <summary>
     /// Called when a flow execution starts
     /// </summary>
@@ -26,87 +37,4 @@ public interface IFlowRunnerService
     /// <param name="info">The information about the flow execution</param>
     /// <returns>a completed task</returns>
     Task Update(FlowExecutorInfo info);
-}
-
-/// <summary>
-/// A flow runner which is responsible for executing a flow and processing files
-/// </summary>
-public class FlowRunnerService : Service, IFlowRunnerService
-{
-
-    /// <summary>
-    /// Gets or sets the function that will load the flow runner when Load is called
-    /// This is used in unit testing to mock this runner
-    /// </summary>
-    public static Func<IFlowRunnerService> Loader { get; set; }
-
-    /// <summary>
-    /// Loads a Flow Runner instance and returns it
-    /// </summary>
-    /// <returns>a flow runner instance</returns>
-    public static IFlowRunnerService Load()
-    {
-        if (Loader == null)
-            return new FlowRunnerService();
-        return Loader.Invoke();
-    }
-
-    /// <summary>
-    /// Called when a flow execution starts
-    /// </summary>
-    /// <param name="info">The information about the flow execution</param>
-    /// <returns>The updated information</returns>
-    public async Task Finish(FlowExecutorInfo info)
-    {
-        try
-        {
-            var result = await HttpHelper.Post($"{ServiceBaseUrl}/api/worker/work/finish", info);
-            if (result.Success == false)
-                throw new Exception("Failed to finish work: " + result.Body);
-        }
-        catch (Exception ex)
-        {
-            Logger.Instance?.WLog("Failed to finish work: " + ex.Message);
-        }
-    }
-
-    /// <summary>
-    /// Called when the flow execution has completed
-    /// </summary>
-    /// <param name="info">The information about the flow execution</param>
-    /// <returns>a completed task</returns>
-    public async Task<FlowExecutorInfo> Start(FlowExecutorInfo info)
-    {
-        try
-        {
-            var result = await HttpHelper.Post<FlowExecutorInfo>($"{ServiceBaseUrl}/api/worker/work/start", info);
-            if (result.Success == false)
-                throw new Exception("Failed to start work: " + result.Body);
-            return result.Data;
-        }
-        catch (Exception ex)
-        {
-            Logger.Instance?.WLog("Failed to start work: " + ex.Message);
-            return null;
-        }
-    }
-
-    /// <summary>
-    /// Called to update the status of the flow execution on the server
-    /// </summary>
-    /// <param name="info">The information about the flow execution</param>
-    /// <returns>a completed task</returns>
-    public async Task Update(FlowExecutorInfo info)
-    {
-        try
-        {
-            var result = await HttpHelper.Post($"{ServiceBaseUrl}/api/worker/work/update", info, noLog: true);
-            if (result.Success == false)
-                throw new Exception("Failed to update work: " + result.Body);
-        }
-        catch (Exception ex)
-        {
-            Logger.Instance?.WLog("Failed to update work: " + ex.Message);
-        }
-    }
 }

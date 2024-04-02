@@ -1,3 +1,4 @@
+#if(DEBUG)
 using System.IO;
 using FileFlows.FlowRunner.TemplateRenders;
 using FileFlows.ServerShared.FileServices;
@@ -96,3 +97,4 @@ File shrunk in size by: {{ difference | file_size }} / {{ percent }}%
 //         var log = logger.ToString();
 //     }
 }
+#endif

@@ -302,7 +302,11 @@ public enum LicenseFlags
     /// <summary>
     /// Can use the file server
     /// </summary>
-    FileServer = 256
+    FileServer = 256,
+    /// <summary>
+    /// User security
+    /// </summary>
+    UserSecurity = 512
 }
 
 
@@ -341,12 +345,53 @@ public enum FlowFieldType
     Slider = 6,
 }
 
+/// <summary>
+/// Sort files by 
+/// </summary>
 public enum FilesSortBy
 {
+    /// <summary>
+    /// Sort by size
+    /// </summary>
     Size = 1,
+    /// <summary>
+    /// Sort by size descending
+    /// </summary>
     SizeDesc = 2,
+    /// <summary>
+    /// Sort by savings
+    /// </summary>
     Savings = 3,
+    /// <summary>
+    /// Sort by savings descending
+    /// </summary>
     SavingsDesc = 4,
+    /// <summary>
+    /// Sort by time
+    /// </summary>
     Time = 5,
+    /// <summary>
+    /// Sort by time descending
+    /// </summary>
     TimeDesc = 6
+}
+
+
+/// <summary>
+/// Security mode
+/// </summary>
+public enum SecurityMode
+{
+    /// <summary>
+    /// No security
+    /// </summary>
+    Off = 0,
+    /// <summary>
+    /// Local security
+    /// </summary>
+    Local = 1,
+    /// <summary>
+    /// Open ID Connect security
+    /// </summary>
+    OpenIdConnect = 2
 }

@@ -1,5 +1,6 @@
 using System.Text.RegularExpressions;
 using FileFlows.Plugin;
+using FileFlows.Server.Authentication;
 using FileFlows.Server.Services;
 using FileFlows.Shared.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -10,6 +11,7 @@ namespace FileFlows.Server.Controllers;
 /// Script controller
 /// </summary>
 [Route("/api/script")]
+[FileFlowsAuthorize]
 public class ScriptController : Controller
 {
 

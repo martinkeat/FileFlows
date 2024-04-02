@@ -168,7 +168,7 @@
             {
                 var value = GetValue<bool>(field.Name);
                 bool inverse = GetParameter<bool>(field, nameof(InputSwitch.Inverse));
-                <InputSwitch Field=@field Label="@label" Value="@value" Inverse=@inverse ReadOnly=@readOnly ValueChanged="@(x => UpdateValue(field, x))"
+                <InputSwitch Field=@field Label="@label" Value="@value" Inverse=@inverse ReadOnly=@readOnly Disabled="@readOnly" ValueChanged="@(x => UpdateValue(field, x))"
                              Validators=@field.Validators Placeholder="@field.Placeholder" HideLabel=@hideLabel OnSubmit=@OnSubmit OnClose=@OnClose Help=@field.HelpText />
             }
             break;

@@ -5,6 +5,35 @@ window.ff = {
     setCSharp(csharp) {
         window.ff.ffcsharp = csharp;
     },
+    getAccessToken:  function(){
+        try{
+            let value = localStorage.getItem('ACCESS_TOKEN');
+            if(value)
+                return JSON.parse(value);
+        }catch(err){
+            return ACCESS_TOKEN;
+        }
+    },
+    setAccessToken: function(token) {
+        try{
+            if(token) localStorage.setItem('ACCESS_TOKEN', JSON.stringify(token));
+            else localStorage.setItem('ACCESS_TOKEN', token);
+        }catch(err){
+            return ACCESS_TOKEN = token;
+        }
+    },
+    doFetch: function(url) {
+        let token = ff.getAccessToken();
+        if(!token)
+            return fetch(url);
+
+        return fetch(url, {
+            method: 'GET',
+            headers: {
+                'Authorization': 'Bearer ' + token
+            }
+        });
+    },
     open: function(url, inBrowser){
         if(inBrowser) {
             open(url, '_blank', 'noopener,noreferrer');

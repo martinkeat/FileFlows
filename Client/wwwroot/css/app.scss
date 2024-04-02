@@ -694,11 +694,10 @@ input[type=file]{
 .page:not(.collapsed) .navbar-brand 
 {
     margin: .75rem 0 0 .75rem;
-    background:url('/logo.svg');
-    width: 11rem;
-    height: 2.5rem;
-    background-size: contain;
-    background-repeat: no-repeat;
+    img {
+        width: 11rem;
+        height: 2.5rem;
+    }
 }
 
 

@@ -1,5 +1,6 @@
 using System.Text.RegularExpressions;
 using FileFlows.Plugin;
+using FileFlows.Server.Authentication;
 using FileFlows.Server.Helpers;
 using FileFlows.Server.Services;
 using FileFlows.Shared.Models;
@@ -12,6 +13,7 @@ namespace FileFlows.Server.Controllers;
 /// Controller for webhooks
 /// </summary>
 [Route("/api/webhook")]
+[FileFlowsAuthorize(UserRole.Admin)]
 public class WebhookController : Controller
 {
     /// <summary>

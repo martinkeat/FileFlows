@@ -1,3 +1,4 @@
+using FileFlows.RemoteServices;
 using FileFlows.ServerShared;
 using FileFlows.ServerShared.Helpers;
 using FileFlows.ServerShared.Services;
@@ -70,15 +71,16 @@ public class NodeUpdater:UpdaterWorker
     protected override string DownloadUpdateBinary()
     {   
         Logger.Instance.DLog("Checking for auto update");
-        var systemService = SystemService.Load();
-        var serverVersion = systemService.GetNodeUpdateVersion().Result;
+        var service = ServiceLoader.Load<ISettingsService>();
+        var serverVersion = service.GetServerVersion().Result;
         Logger.Instance.DLog("Checking for auto update: " + serverVersion);
         if (serverVersion <= CurrentVersion)
             return string.Empty;
 
         Logger.Instance.ILog($"New Node version {serverVersion} detected, starting download");
 
-        var data = systemService.GetNodeUpdater().Result;
+        var nodeService = ServiceLoader.Load<INodeService>();
+        var data = nodeService.GetNodeUpdater().Result;
         if (data?.Any() != true)
         {
             Logger.Instance.WLog("Failed to download Node updater.");
@@ -101,15 +103,14 @@ public class NodeUpdater:UpdaterWorker
     /// <returns>true if automatic updates are enabled</returns>
     protected override bool GetAutoUpdatesEnabled()
     {
-        var settingsService = SettingsService.Load();
-        var settings = settingsService.Get().Result;
-        return settings?.AutoUpdateNodes == true;
+        var settingsService = ServiceLoader.Load<INodeService>();
+        return settingsService.AutoUpdateNodes().Result;
     }
 
     protected override bool GetUpdateAvailable()
     {
-        var systemService = SystemService.Load();
-        var serverVersion = systemService.GetNodeUpdateVersion().Result;
+        var service = ServiceLoader.Load<INodeService>();
+        var serverVersion = service.GetNodeUpdateVersion().Result;
         Logger.Instance.DLog("Checking for auto update: " + serverVersion);
         return serverVersion > CurrentVersion;
     }

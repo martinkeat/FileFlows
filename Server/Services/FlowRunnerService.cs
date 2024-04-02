@@ -28,7 +28,18 @@ public class FlowRunnerService : IFlowRunnerService
     /// The semaphore that locks the executors list
     /// </summary>
     private static FairSemaphore executorsSempahore = new(1);
-    
+
+    /// <inheritdoc />
+    public async Task<int> GetFileCheckInterval()
+    {
+        var settings = await ServiceLoader.Load<SettingsService>().Get();
+        return settings.ProcessFileCheckInterval;
+    }
+
+    /// <inheritdoc />
+    public Task<bool> IsLicensed()
+        => Task.FromResult(LicenseHelper.IsLicensed());
+
     /// <summary>
     /// Called when the flow execution has completed
     /// </summary>

@@ -10,6 +10,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using FileFlows.Node.Ui;
+using FileFlows.RemoteServices;
 using FileFlows.ServerShared;
 using FileFlows.ServerShared.Helpers;
 using FileFlows.ServerShared.Workers;
@@ -72,7 +73,7 @@ public class NodeManager
                     return false;
                 }
 
-                var nodeService = new NodeService();
+                var nodeService = ServiceLoader.Load<INodeService>();
                 try
                 {
                     var settings = nodeService.GetByAddressAsync(AppSettings.Instance.HostName).Result;
@@ -87,7 +88,7 @@ public class NodeManager
                     // AppSettings.Instance.TempPath = settings.TempPath;
                     AppSettings.Instance.Save();
 
-                    var serverVersion = new SystemService().GetVersion().Result;
+                    var serverVersion = ServiceLoader.Load<ISettingsService>().GetServerVersion().Result;
                     if (serverVersion != nodeVersionVersion)
                     {
                         Logger.Instance?.ILog($"Node version '{nodeVersion}' does not match server version '{serverVersion}'");
@@ -160,7 +161,7 @@ public class NodeManager
         if (string.IsNullOrEmpty(settings.ServerUrl))
             return (false, "Server URL not set");
         
-        var nodeService = new NodeService();
+        var nodeService = ServiceLoader.Load<INodeService>();
         Shared.Models.ProcessingNode result;
         try
         {
@@ -178,9 +179,9 @@ public class NodeManager
             return (false, ex.Message);
         }
 
-        Service.ServiceBaseUrl = settings.ServerUrl;
-        if (Service.ServiceBaseUrl.EndsWith("/"))
-            Service.ServiceBaseUrl = Service.ServiceBaseUrl.Substring(0, Service.ServiceBaseUrl.Length - 1);
+        RemoteService.ServiceBaseUrl = settings.ServerUrl;
+        if (RemoteService.ServiceBaseUrl.EndsWith("/"))
+            RemoteService.ServiceBaseUrl = RemoteService.ServiceBaseUrl[..^1];
 
         Logger.Instance?.ILog("Successfully registered node");
         //settings.Enabled = result.Enabled;

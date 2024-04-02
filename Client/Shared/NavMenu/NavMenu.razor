@@ -5,8 +5,17 @@
     <PageTitle>FileFlows - @Active.Title</PageTitle>
 }
 
-<div class="top-row navbar navbar-dark">
-    <a class="navbar-brand" onclick="ff.openLink(event);return false;" href="https://fileflows.com/"></a>
+<div class="top-row navbar navbar-dark @(UserMenuOpened ? "user-menu-opened" : "user-menu-closed")">
+    <span class="navbar-brand" @onclick="() => ToggleUserMenu()">
+        <i class="fas fa-caret-right" />
+        <img src="/logo.svg" />
+    </span>
+    <div class="user-menu">
+        @foreach (var nmi in UserMenu)
+        {
+            <span @onclick="() => Click(nmi)">@nmi.Title</span>
+        }
+    </div>
     <span class="page-title">
         @if (Active != null)
         {
@@ -42,7 +51,7 @@
                 }
                 <li class="nav-item @(item.Url == ""  ? "dashboard" : item.Url.Replace("/", ""))">
                     <a class="nav-link @(Active == item  ? "active": "")" href="@item.Url" @onclick:preventDefault @onclick:stopPropagation
-                                                                                           @onclick="() => Click(item)">
+                       @onclick="() => Click(item)">
                         <span class="icon @item.Icon" aria-hidden="true"></span>
                         <span class="text-label">@item.Title</span>
                         @if (item.Url == "library-files" && (Processing > 0 || Failed > 0 || Unprocessed > 0))
@@ -70,21 +79,6 @@
                 </li>
             }
         }
-        <li class="nav-item help">
-            <a class="nav-link" onclick="ff.openLink(event);return false;"  href="https://fileflows.com/docs">
-                <span class="icon far fa-question-circle" aria-hidden="true"></span> <span class="text-label">@lblHelp</span>
-            </a>
-        </li>
-        <li class="nav-item forum">
-            <a class="nav-link" onclick="ff.openLink(event);return false;" href="https://fileflows.com/forum" >
-                <span class="icon fas fa-comments" aria-hidden="true"></span> <span class="text-label">@lblForum</span>
-            </a>
-        </li>
-        <li class="nav-item discord">
-            <a class="nav-link" onclick="ff.openLink(event);return false;" href="https://fileflows.com/discord">
-                <span class="icon fab fa-discord" aria-hidden="true"></span> <span class="text-label">@lblDiscord</span>
-            </a>
-        </li>
     </ul>
     
     @if (App.Instance.IsMobile == false)
@@ -105,3 +99,5 @@
         @lblVersion: <a href="https://fileflows.com/docs/versions" rel="noreferrer" target="_blank">@Globals.Version</a>
     </div>
 </div>
+
+<FileFlows.Client.Components.Dialogs.ChangePassword @ref="ChangePassword"/>

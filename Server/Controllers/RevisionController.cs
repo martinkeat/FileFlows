@@ -1,3 +1,4 @@
+using FileFlows.Server.Authentication;
 using FileFlows.Server.Helpers;
 using FileFlows.Server.Services;
 using FileFlows.Shared.Models;
@@ -10,6 +11,7 @@ namespace FileFlows.Server.Controllers;
 /// Revisioned Object controller
 /// </summary>
 [Route("/api/revision")]
+[FileFlowsAuthorize]
 public class RevisionController:Controller
 {
     /// <summary>

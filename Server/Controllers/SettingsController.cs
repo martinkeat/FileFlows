@@ -1,10 +1,13 @@
 using System.Text.RegularExpressions;
+using FileFlows.RemoteServices;
+using FileFlows.Server.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using FileFlows.Shared.Models;
 using FileFlows.Server.Workers;
 using FileFlows.Server.Helpers;
 using FileFlows.Server.Services;
 using FileFlows.ServerShared.Models;
+using ServiceLoader = FileFlows.Server.Services.ServiceLoader;
 using SettingsService = FileFlows.Server.Services.SettingsService;
 
 namespace FileFlows.Server.Controllers;
@@ -12,8 +15,14 @@ namespace FileFlows.Server.Controllers;
 /// Settings Controller
 /// </summary>
 [Route("/api/settings")]
+[FileFlowsAuthorize]
 public class SettingsController : Controller
 {
+    /// <summary>
+    /// Dummy password to use in place of passwords
+    /// </summary>
+    private const string DUMMY_PASSWORD = "************";
+    
     /// <summary>
     /// The settings for the application
     /// </summary>
@@ -38,8 +47,24 @@ public class SettingsController : Controller
     /// </summary>
     /// <returns>the system status of FileFlows</returns>
     [HttpGet("fileflows-status")]
-    public Task<FileFlowsStatus> GetFileFlowsStatus()
-        => ServiceLoader.Load<SettingsService>().GetFileFlowsStatus();
+    public async Task<FileFlowsStatus> GetFileFlowsStatus()
+    {
+        var status = await ServiceLoader.Load<SettingsService>().GetFileFlowsStatus();
+        var security = ServiceLoader.Load<AppSettingsService>().Settings.Security;
+        if (security != SecurityMode.Off)
+        {
+            var user = HttpContext.GetLoggedInUser().Result;
+            status.IsAdmin = (user.Role & UserRole.Admin) == UserRole.Admin;
+            status.ShowChangePassword = security == SecurityMode.Local;
+            status.ShowLogout = true;
+        }
+        else
+        {
+            status.IsAdmin = true;
+        }
+
+        return status;
+    }
 
     /// <summary>
     /// Checks latest version from fileflows.com
@@ -79,6 +104,9 @@ public class SettingsController : Controller
         // clone it so we can remove some properties we dont want passed to the UI
         string json = JsonSerializer.Serialize(settings);
         var uiModel = JsonSerializer.Deserialize<SettingsUiModel>(json);
+        if (string.IsNullOrWhiteSpace(settings.SmtpPassword) == false)
+            uiModel.SmtpPassword = DUMMY_PASSWORD;
+        
         SetLicenseFields(uiModel, license);
         uiModel.FileServerAllowedPathsString = uiModel.FileServerAllowedPaths?.Any() == true
             ? string.Join("\n", uiModel.FileServerAllowedPaths)
@@ -88,6 +116,8 @@ public class SettingsController : Controller
             PopulateDbSettings(uiModel,
                 Settings.DatabaseMigrateConnection?.EmptyAsNull() ?? Settings.DatabaseConnection);
         uiModel.RecreateDatabase = Settings.RecreateDatabase;
+
+        uiModel.Security = ServiceLoader.Load<AppSettingsService>().Settings.Security;
         
         return uiModel;
     }
@@ -97,8 +127,17 @@ public class SettingsController : Controller
     /// </summary>
     /// <returns>The system settings</returns>
     [HttpGet]
-    public Task<Settings> Get()
-        => ServiceLoader.Load<SettingsService>().Get();
+    public async Task<Settings> Get()
+    {
+        var settings = await ServiceLoader.Load<SettingsService>().Get();
+        if (string.IsNullOrWhiteSpace(settings.SmtpPassword) == false)
+        {
+            string json = JsonSerializer.Serialize(settings);
+            settings = JsonSerializer.Deserialize<Settings>(json);
+            settings.SmtpPassword = DUMMY_PASSWORD;
+        }
+        return settings;
+    }
 
     private void SetLicenseFields(SettingsUiModel settings, License license)
     {
@@ -123,6 +162,13 @@ public class SettingsController : Controller
         if (model == null)
             return;
 
+        if (model.SmtpPassword == DUMMY_PASSWORD)
+        {
+            // need to get the existing password
+            var existing = await ServiceLoader.Load<SettingsService>().Get();
+            model.SmtpPassword = existing.SmtpPassword;
+        }
+
         await Save(new ()
         {
             PausedUntil = model.PausedUntil,
@@ -143,12 +189,24 @@ public class SettingsController : Controller
             FileServerDisabled = model.FileServerDisabled,
             FileServerOwnerGroup = model.FileServerOwnerGroup,
             FileServerFilePermissions = model.FileServerFilePermissions,
-            FileServerAllowedPaths = model.FileServerAllowedPathsString?.Split(new [] { "\r\n", "\r", "\n"}, StringSplitOptions.RemoveEmptyEntries)
+            FileServerAllowedPaths = model.FileServerAllowedPathsString?.Split(new [] { "\r\n", "\r", "\n"}, StringSplitOptions.RemoveEmptyEntries),
+            ApiToken = model.ApiToken ?? string.Empty,
+            
+            SmtpFrom = model.SmtpFrom ?? string.Empty,
+            SmtpPassword = model.SmtpPassword ?? string.Empty,
+            SmtpServer = model.SmtpServer ?? string.Empty,
+            SmtpPort = model.SmtpPort,
+            SmtpSecurity = model.SmtpSecurity,
+            SmtpUser = model.SmtpUser ?? string.Empty,
+            SmtpFromAddress = model.SmtpFromAddress ?? string.Empty
         });
+        RemoteService.ApiToken = model.ApiToken;
         // validate license it
         Settings.LicenseKey = model.LicenseKey?.Trim();
         Settings.LicenseEmail = model.LicenseEmail?.Trim();
         await LicenseHelper.Update();
+        
+        Settings.Security = model.Security;
         
         TranslaterHelper.InitTranslater(model.Language?.EmptyAsNull() ?? "en");
         
@@ -164,6 +222,7 @@ public class SettingsController : Controller
         // save AppSettings with updated license and db migration if set
         SettingsService.Save();
     }
+    
     /// <summary>
     /// Save the system settings
     /// </summary>
@@ -277,29 +336,6 @@ public class SettingsController : Controller
     public Task<ConfigurationRevision> GetCurrentConfig()
         => ServiceLoader.Load<SettingsService>().GetCurrentConfiguration();
 
-    /// <summary>
-    /// Downloads a plugin
-    /// </summary>
-    /// <param name="name">the name of the plugin</param>
-    /// <returns>the plugin file</returns>
-    [HttpGet("download-plugin/{name}")]
-    public IActionResult DownloadPlugin(string name)
-    {
-        Logger.Instance?.ILog("DownloadPlugin: " + name);
-        if (Regex.IsMatch(name, @"^[a-zA-Z][a-zA-Z0-9\-\._+]+\.ffplugin$", RegexOptions.CultureInvariant) == false)
-        {
-            Logger.Instance?.WLog("DownloadPlugin.Invalid Plugin: " + name);
-            return BadRequest("Invalid plugin: " + name);
-        }
-
-        var file = new FileInfo(Path.Combine(DirectoryHelper.PluginsDirectory, name));
-        if (file.Exists == false)
-            return NotFound(); // Plugin file not found
-
-        var stream = new FileStream(file.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-        return File(stream, "application/octet-stream");
-    }
-    
     
     /// <summary>
     /// Parses the connection string and populates the provided DbSettings object with server, user, password, database name, and port information.

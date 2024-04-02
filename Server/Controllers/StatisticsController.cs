@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using FileFlows.Server.Authentication;
+using Microsoft.AspNetCore.Mvc;
 using FileFlows.Server.Services;
 using FileFlows.ServerShared.Models.StatisticModels;
 using FileFlows.Shared.Models;
@@ -9,6 +10,7 @@ namespace FileFlows.Server.Controllers;
 /// Status controller
 /// </summary>
 [Route("/api/statistics")]
+[FileFlowsAuthorize]
 public class StatisticsController : Controller
 {
     /// <summary>

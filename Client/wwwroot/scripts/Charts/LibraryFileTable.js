@@ -85,7 +85,7 @@ export class LibraryFileTable extends FFChart
         if(this.url.endsWith('recently-finished') !== true)
             return await super.fetchData();
         else {
-            return await (await fetch(this.url)).json();
+            return await (await ff.doFetch(this.url)).json();
         }
     }
 

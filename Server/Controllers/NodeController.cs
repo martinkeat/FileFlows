@@ -1,3 +1,4 @@
+using FileFlows.Server.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using FileFlows.Shared.Models;
 using FileFlows.Server.Helpers;
@@ -10,6 +11,7 @@ namespace FileFlows.Server.Controllers;
 /// Processing node controller
 /// </summary>
 [Route("/api/node")]
+[FileFlowsAuthorize]
 public class NodeController : Controller
 {
     /// <summary>
@@ -339,81 +341,6 @@ public class NodeController : Controller
                 }
             }
         }
-    }
-
-
-    /// <summary>
-    /// Register a processing node.  If already registered will return existing instance
-    /// </summary>
-    /// <param name="model">The register model containing information about the processing node being registered</param>
-    /// <returns>The processing node instance</returns>
-    [HttpPost("register")]
-    public async Task<ProcessingNode> RegisterPost([FromBody] RegisterModel model)
-    {
-        if (string.IsNullOrWhiteSpace(model?.Address))
-            throw new ArgumentNullException(nameof(model.Address));
-        if (string.IsNullOrWhiteSpace(model?.TempPath))
-            throw new ArgumentNullException(nameof(model.TempPath));
-
-        var address = model.Address.ToLowerInvariant().Trim();
-        var service = ServiceLoader.Load<NodeService>();
-        var data = await service.GetAllAsync();
-        var existing = data.FirstOrDefault(x => x.Address.ToLowerInvariant() == address);
-        if (existing != null)
-        {
-            if(existing.Version != model.Version) // existing.TempPath != model.TempPath)
-            {
-                //existing.FlowRunners = model.FlowRunners;
-                //existing.Enabled = model.Enabled;
-                //existing.TempPath = model.TempPath;
-                //existing.OperatingSystem = model.OperatingSystem;
-                existing.Architecture = model.Architecture;
-                existing.OperatingSystem = model.OperatingSystem;
-                existing.Version = model.Version;
-                existing = await service.Update(existing);
-            }
-            existing.SignalrUrl = "flow";
-            return existing;
-        }
-        // doesnt exist, register a new node.
-        var variables = await ServiceLoader.Load<VariableService>().GetAllAsync();
-
-        if(model.Mappings?.Any() == true)
-        {
-            var ffmpegTool = variables.FirstOrDefault(x => x.Name.ToLower() == "ffmpeg");
-            if (ffmpegTool != null)
-            {
-                // update ffmpeg with actual location
-                var mapping = model.Mappings.FirstOrDefault(x => x.Server.ToLower() == "ffmpeg");
-                if(mapping != null)
-                {
-                    mapping.Server = ffmpegTool.Value;
-                }
-            }
-        }
-
-        var node = new ProcessingNode
-        {
-            Name = address,
-            Address = address,
-            //Enabled = model.Enabled,
-            //FlowRunners = model.FlowRunners,
-            Enabled = false,
-            FlowRunners = 1,
-            TempPath = model.TempPath,
-            OperatingSystem = model.OperatingSystem,
-            Architecture = model.Architecture,
-            Version = model.Version,
-            Schedule = new string('1', 672),
-            AllLibraries = ProcessingLibraries.All,
-            Mappings = model.Mappings?.Select(x => new KeyValuePair<string, string>(x.Server, x.Local))?.ToList() ??
-                       variables?.Select(x => new
-                           KeyValuePair<string, string>(x.Value, "")
-                       )?.ToList() ?? new()
-        };
-        node = await service.Update(node);
-        node.SignalrUrl = "flow";
-        return node;
     }
 }
 

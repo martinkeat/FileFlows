@@ -1,11 +1,11 @@
 using System.Diagnostics;
+using FileFlows.Server.Authentication;
 using FileFlows.Server.Helpers;
 using FileFlows.Server.Hubs;
 using FileFlows.Server.Services;
 using FileFlows.Server.Workers;
 using FileFlows.ServerShared.Models;
 using FileFlows.ServerShared.Models.StatisticModels;
-using FileFlows.ServerShared.Services;
 using FileFlows.Shared.Models;
 using Microsoft.AspNetCore.Mvc;
 using FileHelper = FileFlows.ServerShared.Helpers.FileHelper;
@@ -20,6 +20,7 @@ namespace FileFlows.Server.Controllers;
 /// System Controller
 /// </summary>
 [Route("/api/system")]
+[FileFlowsAuthorize]
 public class SystemController:Controller
 {
     /// <summary>
@@ -27,18 +28,6 @@ public class SystemController:Controller
     /// </summary>
     [HttpGet("version")]
     public string GetVersion() => Globals.Version.ToString();
-
-    /// <summary>
-    /// Gets the version an node update available
-    /// </summary>
-    /// <returns>the version an node update available</returns>
-    [HttpGet("node-update-version")]
-    public string GetNodeUpdateVersion()
-    {
-        if (LicenseHelper.IsLicensed(LicenseFlags.AutoUpdates) == false)
-            return string.Empty;
-        return Globals.Version.ToString();
-    }
 
     /// <summary>
     /// Opens a URL in the host OS
@@ -62,46 +51,6 @@ public class SystemController:Controller
             Process.Start(new ProcessStartInfo("xdg-open", url));
     }
     
-    /// <summary>
-    /// Gets an node update available
-    /// </summary>
-    /// <param name="version">the current version of the node</param>
-    /// <param name="windows">if the update is for a windows system</param>
-    /// <returns>if there is a node update available, returns the update</returns>
-    [HttpGet("node-updater-available")]
-    public IActionResult GetNodeUpdater([FromQuery]string version, [FromQuery] bool windows)
-    {
-        if (LicenseHelper.IsLicensed(LicenseFlags.AutoUpdates) == false)
-            return new ContentResult();
-        if (string.IsNullOrWhiteSpace(version))
-            return new ContentResult();
-        var current = new Version(Globals.Version);
-        var node =  new Version(version);
-        if (node >= current)
-            return new ContentResult();
-
-        return GetNodeUpdater(windows);
-    }
-
-    /// <summary>
-    /// Gets the node updater
-    /// </summary>
-    /// <param name="windows">if the update is for a windows system</param>
-    /// <returns>the node updater</returns>
-    [HttpGet("node-updater")]
-    public IActionResult GetNodeUpdater([FromQuery] bool windows)
-    {
-        if (LicenseHelper.IsLicensed(LicenseFlags.AutoUpdates) == false)
-            return new ContentResult();
-        
-        string updateFile = Path.Combine(DirectoryHelper.BaseDirectory, "Server", "Nodes",
-            $"FileFlows-Node-{Globals.Version}.zip");
-        if (System.IO.File.Exists(updateFile) == false)
-            return new ContentResult();
-
-        return File(System.IO.File.ReadAllBytes(updateFile), "application/zip");
-    }
-
     /// <summary>
     /// Pauses the system
     /// </summary>
@@ -330,16 +279,5 @@ public class SystemController:Controller
         // docker is easy, just stop it and it should auto restart
         WorkerManager.StopWorkers();
         Environment.Exit(99);
-    }
-
-    /// <summary>
-    /// Records the node system statistics to the server
-    /// </summary>
-    /// <param name="args">the node system statistics</param>
-    [HttpPost("node-system-statistics")]
-    public async Task RecordNodeSystemStatistics([FromBody] NodeSystemStatistics args)
-    {
-        await ServiceLoader.Load<NodeService>()?.UpdateLastSeen(args.Uid);
-        SystemMonitor.Instance?.Record(args);
     }
 }

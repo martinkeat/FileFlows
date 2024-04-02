@@ -335,4 +335,38 @@
   }
 }
 
+.navbar-brand i {
+  color: var(--color) !important;
+  font-weight: unset !important;
+  font-size: 1rem;
+  position: relative;
+  left: -0.5rem;
+}
+
+.user-menu {
+  display: none;
+  position: absolute;
+  flex-direction: column;
+  background: var(--base-lightest);
+  overflow: hidden;
+  width: 16rem;
+  border-radius: 0.5rem;
+  top: 4rem;
+  z-index: 1;
+}
+.user-menu span {
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+}
+.user-menu span:hover {
+  background: var(--base);
+}
+
+.user-menu-opened .navbar-brand i {
+  transform: rotate(90deg);
+}
+.user-menu-opened .user-menu {
+  display: flex;
+}
+
 /*# sourceMappingURL=NavMenu.razor.css.map */

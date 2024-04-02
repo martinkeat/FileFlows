@@ -1,3 +1,4 @@
+using FileFlows.Server.Authentication;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FileFlows.Server.Controllers;
@@ -6,6 +7,7 @@ namespace FileFlows.Server.Controllers;
 /// Controller to download a node
 /// </summary>
 [Route("/download")]
+[FileFlowsAuthorize]
 public class DownloadController:Controller
 {
     /// <summary>

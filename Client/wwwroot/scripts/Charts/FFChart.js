@@ -79,10 +79,9 @@
     }
 
     async fetchData(){
-        let response = await fetch(this.url);
+        let response = await ff.doFetch(this.url);
         return await response.json();
     }
-
     hasData(data) {
         return data?.length;
     }

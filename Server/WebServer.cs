@@ -4,11 +4,19 @@ using System.Text.RegularExpressions;
 using Microsoft.OpenApi.Models;
 using System.Runtime.InteropServices;
 using FileFlows.Plugin;
+using FileFlows.RemoteServices;
 using FileFlows.Server.Hubs;
 using FileFlows.Server.Middleware;
 using FileFlows.Server.Services;
 using FileFlows.ServerShared.Workers;
 using Microsoft.AspNetCore.SignalR;
+using FlowRunnerService = FileFlows.Server.Services.FlowRunnerService;
+using LibraryFileService = FileFlows.Server.Services.LibraryFileService;
+using NodeService = FileFlows.Server.Services.NodeService;
+using ServiceLoader = FileFlows.Server.Services.ServiceLoader;
+using SettingsService = FileFlows.Server.Services.SettingsService;
+using StatisticService = FileFlows.Server.Services.StatisticService;
+using VariableService = FileFlows.Server.Services.VariableService;
 
 namespace FileFlows.Server;
 
@@ -272,11 +280,13 @@ public class WebServer
         var settings = ServiceLoader.Load<SettingsService>().Get().Result;
 
 
-        ServerShared.Services.Service.ServiceBaseUrl = $"{protocol}://localhost:{Port}";
+        Application.ServerUrl = $"{protocol}://localhost:{Port}";
         // update the client with the proper ServiceBaseUrl
         Shared.Helpers.HttpHelper.Client =
-            Shared.Helpers.HttpHelper.GetDefaultHttpHelper(ServerShared.Services.Service.ServiceBaseUrl);
+            Shared.Helpers.HttpHelper.GetDefaultHttpClient(Application.ServerUrl);
 
+        RemoteService.ServiceBaseUrl = Application.ServerUrl;
+        RemoteService.ApiToken = settings.ApiToken;
 
         app.MapHub<Hubs.FlowHub>("/flow");
 

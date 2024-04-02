@@ -1,0 +1,54 @@
+@namespace FileFlows.Client.Pages
+
+@page "/Login"
+@layout EmptyLayout
+
+<form class="login-page" @onsubmit="() => Submit()">
+  <div class="login-inner">
+    <div class="logo">
+      <img src="logo-color-full.svg" />
+    </div>
+    @if (mode == 0)
+    {
+      <div class="content">
+        <div class="email input-field">
+          <label for="username">Username</label>
+          <div class="input">
+            <i class="fas fa-user"></i>
+            <input type="text" name="username" placeholder="username" @bind-value="username" autofocus disabled="@loading"/>
+          </div>
+        </div>
+        <div class="password input-field">
+          <label for="password">Password</label>
+          <div class="input">
+            <i class="fas fa-lock"></i>
+            <input type="password" name="password" placeholder="············" @bind-value="password" disabled="@loading"/>
+          </div>
+        </div>
+        <a href="#" @onclick="() => SwitchMode(1)" @onclick:preventDefault @onclick:stopPropagation>Forgot Password?</a>
+      </div>
+      
+      <div class="footer">
+        <button type="submit" class="login" disabled="@loading">Login</button>
+      </div>
+    }
+    else
+    {
+      <div class="content">
+      <div class="password input-field">
+        <label for="usernameOrEmail">Username or Email</label>
+        <div class="input">
+          <i class="fas fa-lock"></i>
+          <input type="text" name="usernameOrEmail" placeholder="username" @bind-value="usernameOrEmail" disabled="@loading"/>
+        </div>
+      </div>
+      
+      </div>
+        
+      <div class="footer reset">
+        <button type="submit" class="login" disabled="@loading">Reset</button>
+        <button class="login" disabled="@loading" @onclick="() => SwitchMode(0)" @onclick:preventDefault @onclick:stopPropagation>Cancel</button>
+      </div>
+    }
+  </div>
+</form>

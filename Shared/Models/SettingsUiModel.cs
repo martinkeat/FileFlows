@@ -5,7 +5,6 @@ namespace FileFlows.Shared.Models;
 /// </summary>
 public class SettingsUiModel:Settings
 {
-
     /// <summary>
     /// Gets or sets the license email
     /// </summary>
@@ -77,5 +76,10 @@ public class SettingsUiModel:Settings
     /// Gets or sets the file server all list
     /// </summary>
     public string FileServerAllowedPathsString { get; set; }
+    
+    /// <summary>
+    /// Gets or sets the security mode
+    /// </summary>
+    public SecurityMode Security { get; set; }
 
 }

@@ -1,5 +1,6 @@
 ﻿using System.Text.RegularExpressions;
 using FileFlows.Plugin;
+using FileFlows.Server.Authentication;
 using FileFlows.Server.Helpers;
 using FileFlows.Server.Services;
 using FileFlows.Shared.Helpers;
@@ -13,6 +14,7 @@ namespace FileFlows.Server.Controllers;
 /// Controller for Flow Templates
 /// </summary>
 [Route("/api/flow-template")]
+[FileFlowsAuthorize]
 public class FlowTemplateController : Controller
 {
     const int DEFAULT_XPOS = 450;

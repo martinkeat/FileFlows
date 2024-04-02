@@ -9,6 +9,7 @@ public class FFLocalStorageService
 {
     private readonly IJSRuntime _jsRuntime;
     private bool? _localStorageEnabled;
+    private string _accessToken;
 
     /// <summary>
     /// Gets a value indicating whether local storage is enabled.
@@ -89,5 +90,33 @@ public class FFLocalStorageService
         catch (Exception ex)
         {
         }
+    }
+
+    /// <summary>
+    /// Gets the access token
+    /// </summary>
+    /// <returns>the access token</returns>
+    public async Task<string?> GetAccessToken()
+    {
+        if (_localStorageEnabled == null)
+            await CheckLocalStorageEnabled();
+        if (_localStorageEnabled == true)
+            return await GetItemAsync<string>("ACCESS_TOKEN");
+        return _accessToken;
+    }
+    
+    /// <summary>
+    /// Sets the access token
+    /// </summary>
+    /// <param name="token">the token</param>
+    public async Task SetAccessToken(string token)
+    {
+        _accessToken = token;
+        
+        if (_localStorageEnabled == null)
+            await CheckLocalStorageEnabled();
+        if (_localStorageEnabled == true)
+            await SetItemAsync("ACCESS_TOKEN", token);
+        await _jsRuntime.InvokeVoidAsync("ff.setAccessToken", token);
     }
 }
