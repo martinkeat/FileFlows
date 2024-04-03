@@ -87,7 +87,7 @@ public class FileDownloader
             string url = serverUrl;
             if (url.EndsWith("/") == false)
                 url += "/";
-            url += "api/file-server";
+            url += "remote/file-server";
             
             DateTime start = DateTime.UtcNow;
             

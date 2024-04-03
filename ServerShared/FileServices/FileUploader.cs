@@ -89,7 +89,7 @@ public class FileUploader
             string url = serverUrl;
             if (url.EndsWith("/") == false)
                 url += "/";
-            url += "api/file-server";
+            url += "remote/file-server";
             url += "?path=" + HttpUtility.UrlEncode(serverPath);
             logger.ILog("Uploading file to URL: " + url);
 
@@ -151,7 +151,7 @@ public class FileUploader
             string url = serverUrl;
             if (url.EndsWith("/") == false)
                 url += "/";
-            url += "api/file-server/delete";
+            url += "remote/file-server/delete";
             
             string json = JsonSerializer.Serialize(new
             {
