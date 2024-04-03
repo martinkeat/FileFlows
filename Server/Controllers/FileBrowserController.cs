@@ -8,7 +8,7 @@ namespace FileFlows.Server.Controllers;
 
 [Route("/api/file-browser")]
 [ApiExplorerSettings(IgnoreApi = true)]
-[FileFlowsAuthorize]
+[FileFlowsAuthorize(UserRole.Libraries | UserRole.Flows)]
 public class FileBrowserController : Controller
 {
     [HttpGet]

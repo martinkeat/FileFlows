@@ -9,7 +9,7 @@ namespace FileFlows.Server.Controllers;
 /// Controller for scheduled tasks
 /// </summary>
 [Route("/api/task")]
-[FileFlowsAuthorize]
+[FileFlowsAuthorize(UserRole.Tasks)]
 public class TaskController : Controller
 {
     /// <summary>

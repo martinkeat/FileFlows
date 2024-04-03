@@ -72,8 +72,7 @@ public partial class CustomDashboard
             });
         }
 
-        if (App.Instance.FileFlowsSystem.ExternalDatabase &&
-            DoesntHaveWidget(FileFlows.Shared.Widgets.OpenDatabaseConnections.WD_UID))
+        if (Profile.LicensedFor(LicenseFlags.ExternalDatabase) && DoesntHaveWidget(FileFlows.Shared.Widgets.OpenDatabaseConnections.WD_UID))
         {
             fields.Add(new ElementField
             {

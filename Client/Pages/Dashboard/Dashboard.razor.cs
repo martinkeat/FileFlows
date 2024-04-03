@@ -32,7 +32,13 @@ public partial class Dashboard : ComponentBase, IDisposable
     /// <summary>
     /// Gets or sets the client service
     /// </summary>
-    [Inject]public ClientService ClientService { get; set; }
+    [Inject] public ClientService ClientService { get; set; }
+    /// <summary>
+    /// Gets or sets the profile service
+    /// </summary>
+    [Inject] public ProfileService ProfileService { get; set; }
+
+    private Profile Profile;
 
     /// <summary>
     /// Gets the UID of the active dashboard
@@ -49,7 +55,8 @@ public partial class Dashboard : ComponentBase, IDisposable
 
     protected override async Task OnInitializedAsync()
     {
-        ConfiguredStatus = App.Instance.FileFlowsSystem.ConfigurationStatus;
+        Profile = await ProfileService.Get();
+        ConfiguredStatus = Profile.ConfigurationStatus;
         lblAddWidget = Translater.Instant("Pages.Dashboard.Labels.AddWidget");
         ClientService.SystemPausedUpdated += ClientServiceOnSystemPausedUpdated;
         PausedService.OnPausedLabelChanged += PausedServiceOnOnPausedLabelChanged;

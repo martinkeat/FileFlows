@@ -29,6 +29,14 @@ public partial class Log : ComponentBase
     private LogType LogLevel { get; set; } = LogType.Info;
 
     private List<ListOption> LoggingSources = new ();
+    /// <summary>
+    /// Gets or sets the profile service
+    /// </summary>
+    [Inject] public ProfileService ProfileService { get; set; }
+    /// <summary>
+    /// The users profile
+    /// </summary>
+    private Profile Profile;
 
     private readonly LogSearchModel SearchModel = new()
     {
@@ -38,11 +46,13 @@ public partial class Log : ComponentBase
         TypeIncludeHigherSeverity = true
     };
 
-#if (!DEMO)
     protected override async Task OnInitializedAsync()
     {
+        Profile = await ProfileService.Get();
+        
         SearchModel.FromDate = DateRangeHelper.LiveStart;
         SearchModel.ToDate = DateRangeHelper.LiveEnd;
+
 
         LoggingSources = (await HttpHelper.Get<List<ListOption>>("/api/fileflows-log/log-sources")).Data;
 
@@ -106,7 +116,7 @@ public partial class Log : ComponentBase
         if (Searching)
             return;
         
-        if (App.Instance.FileFlowsSystem.ExternalDatabase)
+        if (Profile.LicensedFor(LicenseFlags.ExternalDatabase))
         {
             if (SearchModel.ToDate != DateRangeHelper.LiveEnd || SearchModel.FromDate != DateRangeHelper.LiveStart)
                 return;
@@ -133,7 +143,7 @@ public partial class Log : ComponentBase
     async Task Refresh()
     {
         bool nearBottom = string.IsNullOrWhiteSpace(LogText) == false && await jsRuntime.InvokeAsync<bool>("ff.nearBottom", new object[]{ ".page .content"});
-        if (App.Instance.FileFlowsSystem.LicenseExternalDatabase)
+        if (Profile.LicensedFor(LicenseFlags.ExternalDatabase))
         {
             var response = await HttpHelper.Post<string>("/api/fileflows-log/search", SearchModel);
             if (response.Success)
@@ -154,13 +164,9 @@ public partial class Log : ComponentBase
             }
         }
     }
-#endif
 
     async Task ChangeLogType(ChangeEventArgs args)
     {
-#if (DEMO)
-        return;
-#endif
         this.LogLevel = (LogType)int.Parse(args.Value.ToString());
         await Refresh();
     }

@@ -56,6 +56,7 @@ public class SystemController:Controller
     /// </summary>
     /// <param name="duration">duration in minutes to pause for, any number less than 1 will resume</param>
     [HttpPost("pause")]
+    [FileFlowsAuthorize(UserRole.PauseProcessing)]
     public async Task Pause([FromQuery] int duration)
     {
         var service = ServiceLoader.Load<SettingsService>();
@@ -257,6 +258,7 @@ public class SystemController:Controller
     /// Restarts FileFlows server
     /// </summary>
     [HttpPost("restart")]
+    [FileFlowsAuthorize(UserRole.Admin)]
     public void Restart()
     {
         if (Application.Docker == false)

@@ -13,7 +13,7 @@ namespace FileFlows.Server.Controllers;
 /// Controller for webhooks
 /// </summary>
 [Route("/api/webhook")]
-[FileFlowsAuthorize(UserRole.Admin)]
+[FileFlowsAuthorize(UserRole.Webhooks)]
 public class WebhookController : Controller
 {
     /// <summary>

@@ -52,9 +52,9 @@ public partial class LibraryFiles : ListPage<Guid, LibaryFileListModel>, IDispos
     private int TotalItems;
     private List<FlowExecutorInfo> WorkerStatus = new ();
     private Timer AutoRefreshTimer;
-    private Dictionary<string, ProcessingNode> Nodes = new();
-    private List<Library> Libraries = new();
-    private List<FlowListModel> Flows = new();
+    private Dictionary<string, NodeInfo> Nodes = new();
+    private Dictionary<Guid, string> Libraries = new();
+    private Dictionary<Guid, string>  Flows = new();
     private List<DropDownOption> optionsLibraries, optionsNodes, optionsFlows, optionsSortBy;
 
     protected override string DeleteMessage => "Labels.DeleteLibraryFiles";
@@ -107,7 +107,7 @@ public partial class LibraryFiles : ListPage<Guid, LibaryFileListModel>, IDispos
             new () { Icon = "fas fa-hourglass-end", Label = Translater.Instant("Enums.FilesSortBy.TimeDesc"), Value = FilesSortBy.TimeDesc }
         };
 
-        var nodesResult = await HttpHelper.Get<List<ProcessingNode>>("/api/node/list");
+        var nodesResult = await HttpHelper.Get<List<NodeInfo>>("/api/library-file/node-list");
         if (nodesResult.Success)
         {
             Nodes = nodesResult.Data.DistinctBy(x => x.Name.ToLowerInvariant())
@@ -127,26 +127,26 @@ public partial class LibraryFiles : ListPage<Guid, LibaryFileListModel>, IDispos
             }).ToList();
         }
         
-        var libraryResult = await HttpHelper.Get<List<Library>>("/api/library");
+        var libraryResult = await HttpHelper.Get<Dictionary<Guid, string>>("/api/library/basic-list");
         if (libraryResult.Success)
         {
             Libraries = libraryResult.Data;
-            optionsLibraries = libraryResult.Data.OrderBy(x => x.Name.ToLowerInvariant()).Select(x => new DropDownOption()
+            optionsLibraries = libraryResult.Data.OrderBy(x => x.Value.ToLowerInvariant()).Select(x => new DropDownOption()
             {
                 Icon = "fas fa-folder",
-                Value = x.Uid,
-                Label = x.Name
+                Value = x.Key,
+                Label = x.Value
             }).ToList();
         }
-        var flowResult = await HttpHelper.Get<List<FlowListModel>>("/api/flow/list-all");
+        var flowResult = await HttpHelper.Get<Dictionary<Guid, string>>("/api/flow/basic-list");
         if (flowResult.Success)
         {
             Flows = flowResult.Data;
-            optionsFlows = flowResult.Data.OrderBy(x => x.Name.ToLowerInvariant()).Select(x => new DropDownOption()
+            optionsFlows = flowResult.Data.OrderBy(x => x.Value.ToLowerInvariant()).Select(x => new DropDownOption()
             {
                 Icon = "fas fa-sitemap",
-                Value = x.Uid,
-                Label = x.Name
+                Value = x.Key,
+                Label = x.Value
             }).ToList();
         }
 
@@ -619,7 +619,7 @@ public partial class LibraryFiles : ListPage<Guid, LibaryFileListModel>, IDispos
     /// <returns>the node icon</returns>
     private string GetNodeIcon(string node)
     {
-        if(Nodes.TryGetValue(node.ToLowerInvariant(), out ProcessingNode n) == false)
+        if(Nodes.TryGetValue(node.ToLowerInvariant(), out NodeInfo n) == false)
             return "fas fa-desktop";
         if (n.OperatingSystem == OperatingSystemType.Docker)
             return "fab fa-docker";
@@ -667,10 +667,10 @@ public partial class LibraryFiles : ListPage<Guid, LibaryFileListModel>, IDispos
     {
         if (library is string str)
         {
-            var l = Libraries?.FirstOrDefault(x => x.Name?.ToLowerInvariant() == str.ToLowerInvariant());
+            var l = Libraries?.FirstOrDefault(x => x.Value?.ToLowerInvariant() == str.ToLowerInvariant());
             if (l == null)
                 return;
-            SelectedLibrary = l.Uid;
+            SelectedLibrary = l.Value.Key;
         }
         else
             SelectedLibrary = library as Guid?;
@@ -685,10 +685,10 @@ public partial class LibraryFiles : ListPage<Guid, LibaryFileListModel>, IDispos
     {
         if (flow is string str)
         {
-            var f = Flows?.FirstOrDefault(x => x.Name?.ToLowerInvariant() == str.ToLowerInvariant());
+            var f = Flows?.FirstOrDefault(x => x.Value?.ToLowerInvariant() == str.ToLowerInvariant());
             if (f == null)
                 return;
-            SelectedFlow = f.Uid;
+            SelectedFlow = f.Value.Key;
         }
         else
             SelectedFlow = flow as Guid?;

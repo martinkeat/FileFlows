@@ -32,6 +32,17 @@ public partial class Settings : InputRegister
     /// Gets or sets the navigation manager used
     /// </summary>
     [Inject] private NavigationManager NavigationManager { get; set; }
+    
+
+    /// <summary>
+    /// Gets or sets the profile service
+    /// </summary>
+    [Inject] protected ProfileService ProfileService { get; set; }
+    
+    /// <summary>
+    /// Gets the profile
+    /// </summary>
+    protected Profile Profile { get; private set; }
 
     private bool ShowExternalDatabase => LicensedFor(LicenseFlags.ExternalDatabase);
 
@@ -160,6 +171,7 @@ public partial class Settings : InputRegister
     /// <inheritdoc />
     protected override async Task OnInitializedAsync()
     {
+        Profile = await ProfileService.Get();
         lblSave = Translater.Instant("Labels.Save");
         lblSaving = Translater.Instant("Labels.Saving");
         lblHelp = Translater.Instant("Labels.Help");
@@ -240,7 +252,7 @@ public partial class Settings : InputRegister
             
             await HttpHelper.Put<string>("/api/settings/ui-settings", this.Model);
 
-            await App.Instance.LoadAppInfo();
+            await ProfileService.Refresh();
 
             if (initialLannguage != Model.Language)
             {

@@ -11,7 +11,7 @@ namespace FileFlows.Server.Controllers;
 /// Processing node controller
 /// </summary>
 [Route("/api/node")]
-[FileFlowsAuthorize]
+[FileFlowsAuthorize(UserRole.Nodes)]
 public class NodeController : Controller
 {
     /// <summary>

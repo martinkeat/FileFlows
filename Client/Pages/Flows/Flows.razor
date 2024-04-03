@@ -35,12 +35,12 @@
                     <FlowTableButtonSeparator />
                 }
                 <FlowTableButton Clicked=UsedBy SelectedOne="true" Icon="fas fa-info-circle" Label="Labels.UsedBy" />   
-                @if (App.Instance.FileFlowsSystem.LicenseRevisions)
+                @if (Profile != null && Profile.LicensedFor(LicenseFlags.Revisions) && Profile.HasRole(UserRole.Revisions))
                 {
                     <FlowTableButton Clicked=Revisions SelectedOne="true" Icon="fas fa-history" Label="Labels.Revisions" />
                 }
                 <FlowTableButtonSeparator />
-                <FlowTableHelpButton  HelpUrl="flows" />
+                <FlowTableHelpButton HelpUrl="flows" />
             </ToolBar>
 
             <Columns>

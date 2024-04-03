@@ -1,7 +1,6 @@
 using FileFlows.Client.Components;
 using FileFlows.Client.Components.Inputs;
 using FileFlows.Plugin;
-using Humanizer;
 
 namespace FileFlows.Client.Pages;
 
@@ -19,7 +18,7 @@ public partial class Users: ListPage<Guid, User>
     /// </summary>
     /// <returns>if they are licensed for this page</returns>
     protected override bool Licensed()
-        => App.Instance.FileFlowsSystem.LicenseUserSecurity; 
+        => Profile.LicensedFor(LicenseFlags.UserSecurity); 
 
     /// <summary>
     /// Adds a new user
@@ -44,7 +43,8 @@ public partial class Users: ListPage<Guid, User>
             IsAdmin = item.Role == UserRole.Admin,
             Password = item.Password,
             Uid = item.Uid,
-            Email = item.Email
+            Email = item.Email,
+            Roles = new ()
         };
 
         fields.Add(new ElementField
@@ -64,7 +64,7 @@ public partial class Users: ListPage<Guid, User>
             }
         });
 
-        if (App.Instance.FileFlowsSystem.Security != SecurityMode.OpenIdConnect && isUser == false)
+        if (Profile.Security != SecurityMode.OpenIdConnect && isUser == false)
         {
             fields.Add(new ElementField
             {
@@ -75,13 +75,45 @@ public partial class Users: ListPage<Guid, User>
                 }
             });
         }
-        fields.Add(new ElementField
+
+        var eleIsAdmin = new ElementField
         {
             InputType = FormInputType.Switch,
             Name = nameof(model.IsAdmin),
-            Parameters = new ()
+            Parameters = new()
             {
                 { nameof(InputSwitch.ReadOnly), isUser }
+            }
+        };
+        fields.Add(eleIsAdmin);
+
+        var roleOptions = new List<ListOption>();
+        foreach (var role in Enum.GetValues<UserRole>())
+        {
+            if (role == UserRole.Admin)
+                continue;
+            roleOptions.Add(new ListOption()
+            {
+                Label = Translater.Instant($"Enums.{nameof(UserRole)}.{role}"),
+                Value = role
+            });
+            if(model.IsAdmin)
+                model.Roles.Add(role);
+            else if((item.Role & role) == role)
+                model.Roles.Add(role);
+        }
+        
+        fields.Add(new ElementField()
+        {
+            InputType = FormInputType.Checklist,
+            Name = nameof(model.Roles),
+            Parameters = new()
+            {
+                { nameof(InputChecklist.Options), roleOptions }
+            },
+            Conditions = new List<Condition>
+            {
+                new (eleIsAdmin, model.IsAdmin, value: false)
             }
         });
         
@@ -110,7 +142,24 @@ public partial class Users: ListPage<Guid, User>
             user.Email = dict[nameof(UserEditModel.Email)].ToString() ?? string.Empty;
             if (dict.TryGetValue(nameof(UserEditModel.Password), out object oPassword) && oPassword is string password)
                 user.Password = password;
-            user.Role = dict[nameof(UserEditModel.IsAdmin)] as bool? == true ? UserRole.Admin : UserRole.Basic;
+            var isAdmin = dict[nameof(UserEditModel.IsAdmin)] as bool? == true;
+            if (isAdmin)
+            {
+                user.Role = UserRole.Admin;
+            }
+            else
+            {
+                user.Role = (UserRole)0;
+                var roles = dict[nameof(UserEditModel.Roles)] as List<object>;
+                if (roles?.Any() == true)
+                {
+                    foreach (var role in roles)
+                    {
+                        if (role is UserRole r)
+                            user.Role |= r;
+                    }
+                }
+            }
             
             var saveResult = await HttpHelper.Post<User>($"{ApiUrl}", user);
             if (saveResult.Success == false)
@@ -144,5 +193,10 @@ public partial class Users: ListPage<Guid, User>
         /// Gets or sets if the user is an admin
         /// </summary>
         public bool IsAdmin { get; set; }
+        
+        /// <summary>
+        /// Gets or sets the user roles this user has
+        /// </summary>
+        public List<object> Roles { get; set; }
     }
 }

@@ -43,13 +43,19 @@ public partial class NavMenu : IDisposable
     /// Gets or sets the paused service
     /// </summary>
     [Inject] private IPausedService PausedService { get; set; }
+    
+    /// <summary>
+    /// Gets or sets the profile service
+    /// </summary>
+    [Inject] private ProfileService ProfileService { get; set; }
 
     private List<NavMenuItem> UserMenu = new();
+    private Profile Profile;
 
     // private BackgroundTask bubblesTask;
 
     /// <inheritdoc />
-    protected override void OnInitialized()
+    protected async override Task OnInitializedAsync()
     {
         lblVersion = Translater.Instant("Labels.Version");
         lblHelp = Translater.Instant("Labels.Help");
@@ -58,7 +64,8 @@ public partial class NavMenu : IDisposable
         lblChangePassword = Translater.Instant("Labels.ChangePassword");
         lblLogout = Translater.Instant("Labels.Logout");
         
-        App.Instance.OnFileFlowsSystemUpdated += FileFlowsSystemUpdated;
+        // App.Instance.OnFileFlowsSystemUpdated += FileFlowsSystemUpdated;
+        
 
         // bubblesTask = new BackgroundTask(TimeSpan.FromMilliseconds(10_000), () => _ = RefreshBubbles());
         _ = RefreshBubbles();
@@ -66,7 +73,8 @@ public partial class NavMenu : IDisposable
         
         this.ClientService.FileStatusUpdated += ClientServiceOnFileStatusUpdated;
         PausedService.OnPausedLabelChanged += PausedServiceOnOnPausedLabelChanged;
-        
+
+        Profile = await ProfileService.Get();
         this.LoadMenu();
     }
     
@@ -101,11 +109,11 @@ public partial class NavMenu : IDisposable
         Failed = sResult.Data.Where(x => x.Status == FileStatus.ProcessingFailed).Select(x => x.Count).FirstOrDefault();
         this.StateHasChanged();
     }
-
+    
     void LoadMenu()
     {
         this.MenuItems.Clear();
-        nmiPause = new(PausedService.PausedLabel, "far fa-pause-circle", "#pause");
+        nmiPause = Profile.HasRole(UserRole.PauseProcessing) ? new(PausedService.PausedLabel, "far fa-pause-circle", "#pause") : null;
 
         MenuItems.Add(new NavMenuGroup
         {
@@ -114,13 +122,13 @@ public partial class NavMenu : IDisposable
             Items = new List<NavMenuItem>
             {
                 new ("Pages.Dashboard.Title", "fas fa-chart-pie", ""),
-                new ("Pages.LibraryFiles.Title", "fas fa-copy", "library-files"),
+                Profile.HasRole(UserRole.Files) ? new ("Pages.LibraryFiles.Title", "fas fa-copy", "library-files") : null,
                 nmiPause
             }
         });
 
-        nmiFlows = new("Pages.Flows.Title", "fas fa-sitemap", "flows");
-        nmiLibraries = new("Pages.Libraries.Title", "fas fa-folder", "libraries");
+        nmiFlows = Profile.HasRole(UserRole.Flows) ? new("Pages.Flows.Title", "fas fa-sitemap", "flows") : null;
+        nmiLibraries = Profile.HasRole(UserRole.Libraries) ? new("Pages.Libraries.Title", "fas fa-folder", "libraries") : null;
 
         MenuItems.Add(new NavMenuGroup
         {
@@ -130,7 +138,7 @@ public partial class NavMenu : IDisposable
             {
                 nmiFlows,
                 nmiLibraries,
-                new ("Pages.Nodes.Title", "fas fa-desktop", "nodes")
+                Profile.HasRole(UserRole.Nodes) ? new ("Pages.Nodes.Title", "fas fa-desktop", "nodes") : null
             }
         });
 
@@ -140,25 +148,33 @@ public partial class NavMenu : IDisposable
             Icon = "fas fa-laptop-house",
             Items = new List<NavMenuItem>
             {
-                new("Pages.Plugins.Title", "fas fa-puzzle-piece", "plugins"),
-                new("Pages.Scripts.Title", "fas fa-scroll", "scripts"),
-                new("Pages.Variables.Title", "fas fa-at", "variables"),
+                Profile.HasRole(UserRole.Plugins) ? new("Pages.Plugins.Title", "fas fa-puzzle-piece", "plugins") : null,
+                Profile.HasRole(UserRole.Scripts) ? new("Pages.Scripts.Title", "fas fa-scroll", "scripts") : null,
+                Profile.HasRole(UserRole.Variables) ? new("Pages.Variables.Title", "fas fa-at", "variables") : null,
             }
         });
-        if(App.Instance.FileFlowsSystem.IsAdmin)
+        MenuItems.Add(new NavMenuGroup
+        {
+            Name = Translater.Instant("MenuGroups.System"),
+            Icon = "fas fa-desktop",
+            Items = new List<NavMenuItem>
+            {
+                Profile.HasRole(UserRole.Log) ? new ("Pages.Log.Title", "fas fa-file-alt", "log") : null,
+                Profile.HasRole(UserRole.Revisions) && Profile.LicensedFor(LicenseFlags.Revisions) ? new ("Pages.Revisions.Title", "fas fa-history", "revisions") : null,
+                Profile.HasRole(UserRole.Tasks) && Profile.LicensedFor(LicenseFlags.Tasks) ? new ("Pages.Tasks.Title", "fas fa-clock", "tasks") : null,
+                Profile.HasRole(UserRole.Webhooks) && Profile.LicensedFor(LicenseFlags.Webhooks) ? new ("Pages.Webhooks.Title", "fas fa-handshake", "webhooks") : null,
+            }
+        });
+        if(Profile.IsAdmin)
         {
             MenuItems.Add(new NavMenuGroup
             {
-                Name = Translater.Instant("MenuGroups.System"),
-                Icon = "fas fa-desktop",
+                Name = Translater.Instant("MenuGroups.Admin"),
+                Icon = "fas fa-user-shield",
                 Items = new List<NavMenuItem>
                 {
-                    new ("Pages.Log.Title", "fas fa-file-alt", "log"),
-                    App.Instance.FileFlowsSystem.LicenseRevisions ? new ("Pages.Revisions.Title", "fas fa-history", "revisions") : null,
                     new ("Pages.Settings.Title", "fas fa-cogs", "settings"),
-                    App.Instance.FileFlowsSystem.LicenseTasks ? new ("Pages.Tasks.Title", "fas fa-clock", "tasks") : null,
-                    App.Instance.FileFlowsSystem.LicenseUserSecurity ? new ("Pages.Users.Title", "fas fa-users", "users") : null,
-                    App.Instance.FileFlowsSystem.LicenseWebhooks ? new ("Pages.Webhooks.Title", "fas fa-handshake", "webhooks") : null,
+                    Profile.LicensedFor(LicenseFlags.UserSecurity) ? new ("Pages.Users.Title", "fas fa-users", "users") : null
                 }
             });
         }
@@ -178,7 +194,7 @@ public partial class NavMenu : IDisposable
             });
         }
 
-        if (App.Instance.IsMobile && App.Instance.FileFlowsSystem.ShowLogout)
+        if (App.Instance.IsMobile && Profile.Security != SecurityMode.Off)
         {
             MenuItems.Add(new NavMenuGroup
             {
@@ -186,7 +202,7 @@ public partial class NavMenu : IDisposable
                 Icon = "fas fa-user",
                 Items = new List<NavMenuItem>
                 {
-                    App.Instance.FileFlowsSystem.ShowChangePassword ? new (lblChangePassword, "fas fa-key", "#change-password") : null,
+                    Profile.Security == SecurityMode.Local ? new (lblChangePassword, "fas fa-key", "#change-password") : null,
                     new (lblLogout, "fas fa-unlock", "#logout"),
                 }
             });
@@ -195,9 +211,9 @@ public partial class NavMenu : IDisposable
         UserMenu.Clear();
         UserMenu.Add(new("fileflows.com", "fas fa-globe", "https://fileflows.com"));
         UserMenu.Add(new(lblHelp, "fas fa-question-circle", "https://fileflows.com/docs"));
-        if(App.Instance.FileFlowsSystem.ShowChangePassword)
+        if(Profile.Security == SecurityMode.Local)
             UserMenu.Add(new (lblChangePassword, "fas fa-key", "#change-password"));
-        if(App.Instance.FileFlowsSystem.ShowLogout)
+        if(Profile.Security != SecurityMode.Off)
             UserMenu.Add(new (lblLogout, "fas fa-unlock", "#logout"));
 
         try
@@ -230,13 +246,13 @@ public partial class NavMenu : IDisposable
     {
         if (nmi == Active)
             return null;
-        if ((App.Instance.FileFlowsSystem.ConfigurationStatus & ConfigurationStatus.Flows) !=
+        if ((Profile.ConfigurationStatus & ConfigurationStatus.Flows) !=
             ConfigurationStatus.Flows)
         {
             return nmi == nmiFlows ? "Step 1" : null;
         }
 
-        if ((App.Instance.FileFlowsSystem.ConfigurationStatus & ConfigurationStatus.Libraries) !=
+        if ((Profile.ConfigurationStatus & ConfigurationStatus.Libraries) !=
             ConfigurationStatus.Libraries)
         {
             return nmi == nmiLibraries ? "Step 2" : null; 

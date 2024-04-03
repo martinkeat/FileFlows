@@ -221,7 +221,7 @@ public partial class Scripts : ListPage<string, Script>
                 Count = this.DataFlow.Count,
                 Value = ScriptType.Flow
             },
-            App.Instance.FileFlowsSystem.Licensed ? new ()
+            Profile.LicensedFor(LicenseFlags.Tasks) ? new ()
             {
                 Name = "System Scripts",
                 Icon = "fas fa-laptop-code",

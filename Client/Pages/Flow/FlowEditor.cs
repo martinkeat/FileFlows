@@ -22,6 +22,15 @@ public class FlowEditor : IDisposable
     private IBlazorContextMenuService ContextMenuService => FlowPage.ContextMenuService;
     
     /// <summary>
+    /// Gets or sets the profile service
+    /// </summary>
+    private ProfileService ProfileService { get; set; }
+    /// <summary>
+    /// The users profile
+    /// </summary>
+    private Profile Profile;
+    
+    /// <summary>
     /// Gets or sets if this flow is dirty and has any changes
     /// </summary>
     public bool IsDirty { get; set; }
@@ -36,10 +45,11 @@ public class FlowEditor : IDisposable
     const string API_URL = "/api/flow";
     private DateTime LoadedAt;
 
-    public FlowEditor(Flow flowPage, ff flow)
+    public FlowEditor(Flow flowPage, ff flow, ProfileService profileService)
     {
         this.FlowPage = flowPage;
         this.Flow = flow;
+        this.ProfileService = profileService;
     }
 
     /// <summary>
@@ -50,6 +60,7 @@ public class FlowEditor : IDisposable
         LoadedAt = DateTime.UtcNow;
         if (Flow.Uid == Guid.Empty)
             Flow.Uid = Guid.NewGuid();
+        Profile = await ProfileService.Get();
         ffFlow = await ffFlowWrapper.Create(jsRuntime, Flow.Uid, Flow.ReadOnly);
         ffFlow.OnAddElement = AddElement;
         ffFlow.OnOpenContextMenu = OpenContextMenu;
@@ -155,7 +166,7 @@ public class FlowEditor : IDisposable
                 return null;
         }
 
-        if (element.Enterprise && App.Instance.FileFlowsSystem.LicenseEnterprise != true)
+        if (element.Enterprise && Profile.LicensedFor(LicenseFlags.Enterprise) == false)
         {
             await MessageBox.Show("Unlicensed", "You must have an Enterprise license to use this flow element.");
             return null;
@@ -198,11 +209,10 @@ public class FlowEditor : IDisposable
             var result = await HttpHelper.Put<ff>(API_URL, Flow);
             if (result.Success)
             {
-                if ((App.Instance.FileFlowsSystem.ConfigurationStatus & ConfigurationStatus.Flows) !=
-                    ConfigurationStatus.Flows)
+                if ((Profile.ConfigurationStatus & ConfigurationStatus.Flows) != ConfigurationStatus.Flows)
                 {
                     // refresh the app configuration status
-                    await App.Instance.LoadAppInfo();
+                    await ProfileService.Refresh();
                 }
 
                 Flow = result.Data;

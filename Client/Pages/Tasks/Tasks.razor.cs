@@ -40,7 +40,7 @@ public partial class Tasks: ListPage<Guid, FileFlowsTask>
     /// </summary>
     /// <returns>if they are licensed for this page</returns>
     protected override bool Licensed()
-        => App.Instance.FileFlowsSystem.LicenseTasks; 
+        => Profile.LicensedFor(LicenseFlags.Tasks); 
     
     protected override void OnInitialized()
     {

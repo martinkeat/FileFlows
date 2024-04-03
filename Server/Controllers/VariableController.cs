@@ -9,7 +9,7 @@ namespace FileFlows.Server.Controllers;
 /// Variable Controller
 /// </summary>
 [Route("/api/variable")]
-[FileFlowsAuthorize]
+[FileFlowsAuthorize(UserRole.Variables)]
 public class VariableController : Controller
 {   
     /// <summary>

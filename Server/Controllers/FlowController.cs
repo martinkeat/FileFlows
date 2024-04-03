@@ -20,7 +20,7 @@ namespace FileFlows.Server.Controllers;
 /// Controller for Flows
 /// </summary>
 [Route("/api/flow")]
-[FileFlowsAuthorize]
+[FileFlowsAuthorize(UserRole.Flows)]
 public class FlowController : Controller
 {
     const int DEFAULT_XPOS = 450;
@@ -48,6 +48,20 @@ public class FlowController : Controller
     [HttpGet]
     public async Task<IEnumerable<Flow>> GetAll() => 
         (await ServiceLoader.Load<FlowService>().GetAllAsync()).OrderBy(x => x.Name.ToLowerInvariant());
+
+    /// <summary>
+    /// Basic flow list
+    /// </summary>
+    /// <returns>flow list</returns>
+    [HttpGet("basic-list")]
+    [FileFlowsAuthorize(UserRole.Flows | UserRole.Libraries)]
+    public async Task<Dictionary<Guid, string>> GetFlowList([FromQuery] FlowType? type = null)
+    {
+        IEnumerable<Flow> items = await new FlowService().GetAllAsync();
+        if (type != null)
+            items = items.Where(x => x.Type == type.Value);
+        return items.ToDictionary(x => x.Uid, x => x.Name);
+    }
 
     [HttpGet("list-all")]
     public async Task<IEnumerable<FlowListModel>> ListAll()

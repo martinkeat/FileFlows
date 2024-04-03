@@ -18,7 +18,7 @@ namespace FileFlows.Server.Controllers;
 /// Library files controller
 /// </summary>
 [Route("/api/library-file")]
-[FileFlowsAuthorize]
+[FileFlowsAuthorize(UserRole.Files)]
 public class LibraryFileController : Controller //ControllerStore<LibraryFile>
 {
     private static CacheStore CacheStore = new();
@@ -83,6 +83,23 @@ public class LibraryFileController : Controller //ControllerStore<LibraryFile>
     }
 
     /// <summary>
+    /// Basic node list
+    /// In this controller in case the users only has access to files page
+    /// </summary>
+    /// <returns>node list</returns>
+    [HttpGet("node-list")]
+    public async Task<List<NodeInfo>> GetNodeList()
+    {
+        var nodes = await new NodeService().GetAllAsync();
+        return nodes.Select(x => new NodeInfo()
+        {
+            Uid = x.Uid,
+            Name = x.Name,
+            OperatingSystem = x.OperatingSystem
+        }).ToList();
+    }
+
+    /// <summary>
     /// Gets all library files in the system
     /// </summary>
     /// <param name="status">The status to get, if missing will return all library files</param>
@@ -98,6 +115,7 @@ public class LibraryFileController : Controller //ControllerStore<LibraryFile>
     /// </summary>
     /// <returns>a list of upcoming files to process</returns>
     [HttpGet("upcoming")]
+    [FileFlowsAuthorize]
     public async Task<IActionResult> Upcoming()
     {
         var data = await ServiceLoader.Load<LibraryFileService>().GetAll(FileStatus.Unprocessed, rows: 10);
@@ -115,6 +133,7 @@ public class LibraryFileController : Controller //ControllerStore<LibraryFile>
     /// </summary>
     /// <returns>the last successfully processed files</returns>
     [HttpGet("recently-finished")]
+    [FileFlowsAuthorize]
     public async Task<IActionResult> RecentlyFinished()
     {
         var service = ServiceLoader.Load<LibraryFileService>();
@@ -152,6 +171,7 @@ public class LibraryFileController : Controller //ControllerStore<LibraryFile>
     /// </summary>
     /// <returns>the library status overview</returns>
     [HttpGet("status")]
+    [FileFlowsAuthorize]
     public Task<List<LibraryStatus>> GetStatus()
         => ServiceLoader.Load<LibraryFileService>().GetStatus();
 

@@ -11,7 +11,7 @@ namespace FileFlows.Server.Controllers;
 /// Revisioned Object controller
 /// </summary>
 [Route("/api/revision")]
-[FileFlowsAuthorize]
+[FileFlowsAuthorize(UserRole.Revisions)]
 public class RevisionController:Controller
 {
     /// <summary>

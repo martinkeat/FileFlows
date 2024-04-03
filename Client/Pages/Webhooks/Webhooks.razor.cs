@@ -36,7 +36,7 @@ public partial class Webhooks : ListPage<string, Webhook>
     /// </summary>
     /// <returns>if they are licensed for this page</returns>
     protected override bool Licensed()
-        => App.Instance.FileFlowsSystem.LicenseWebhooks; 
+        => Profile.LicensedFor(LicenseFlags.Webhooks); 
 
     /// <summary>
     /// Initializes the webhooks page

@@ -18,7 +18,8 @@ public partial class Libraries : ListPage<Guid, Library>
             ShowEditHttpError(flowResult, "Pages.Libraries.ErrorMessages.NoFlows");
             return false;
         }
-        var flowOptions = flowResult.Data.Where(x => x.Type is FlowType.Standard).Select(x => new ListOption { Value = new ObjectReference { Name = x.Name, Uid = x.Uid, Type = x.GetType().FullName }, Label = x.Name });
+        var flowOptions = flowResult.Data
+            .Select(x => new ListOption { Value = new ObjectReference { Name = x.Value, Uid = x.Key, Type = typeof(Flow).FullName! }, Label = x.Value });
         efTemplate = null;
 
         var tabs = new Dictionary<string, List<ElementField>>();
@@ -158,7 +159,7 @@ public partial class Libraries : ListPage<Guid, Library>
             }
         });
         
-        if(App.Instance.FileFlowsSystem.LicenseProcessingOrder)
+        if(Profile.LicensedFor(LicenseFlags.ProcessingOrder))
         {
             fields.Add(new ElementField
             {

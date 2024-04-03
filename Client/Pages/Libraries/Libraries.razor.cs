@@ -1,5 +1,6 @@
 using FileFlows.Client.Components;
 using FileFlows.Client.Components.Dialogs;
+using Microsoft.AspNetCore.Components;
 
 namespace FileFlows.Client.Pages;
 
@@ -32,8 +33,8 @@ public partial class Libraries : ListPage<Guid, Library>
         });
     }
 
-    private Task<RequestResult<FileFlows.Shared.Models.Flow[]>> GetFlows()
-        => HttpHelper.Get<FileFlows.Shared.Models.Flow[]>("/api/flow");
+    private Task<RequestResult<Dictionary<Guid, string>>> GetFlows()
+        => HttpHelper.Get<Dictionary<Guid, string>>("/api/flow/basic-list?type=Standard");
 
     private Dictionary<string, StorageSavedData> StorageSaved = new ();
 
@@ -99,11 +100,11 @@ public partial class Libraries : ListPage<Guid, Library>
                 Toast.ShowError( Translater.TranslateIfNeeded(saveResult.Body?.EmptyAsNull() ?? "ErrorMessages.SaveFailed"));
                 return false;
             }
-            if ((App.Instance.FileFlowsSystem.ConfigurationStatus & ConfigurationStatus.Libraries) !=
+            if ((Profile.ConfigurationStatus & ConfigurationStatus.Libraries) !=
                 ConfigurationStatus.Libraries)
             {
                 // refresh the app configuration status
-                await App.Instance.LoadAppInfo();
+                await ProfileService.Refresh();
             }
 
             int index = this.Data.FindIndex(x => x.Uid == saveResult.Data.Uid);

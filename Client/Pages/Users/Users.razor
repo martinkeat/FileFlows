@@ -30,7 +30,18 @@
                     <span>@item.Name</span>
                 </Cell>
             </FlowTableColumn>
-            <FlowTableColumn TItem="User" Width="10rem" MobileWidth="0">
+            <FlowTableColumn TItem="User" Width="12rem" Align="FlowTableAlignment.Center">
+                <Header>
+                    Administrator
+                </Header>
+                <Cell Context="item">
+                    @if ((item.Role & UserRole.Admin) == UserRole.Admin)
+                    {
+                        <i class="fas fa-check"></i>
+                    }
+                </Cell>
+            </FlowTableColumn>
+            <FlowTableColumn TItem="User" Width="14rem" MobileWidth="0">
                 <Header>
                     Last Logged In
                 </Header>

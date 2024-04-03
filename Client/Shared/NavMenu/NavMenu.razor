@@ -30,8 +30,13 @@
 
 <div class="nav-menu-container @NavMenuCssClass" @onclick="ToggleNavMenu">
     <ul class="nav flex-column">
-        @foreach (var group  in MenuItems)
+        @foreach (var group in MenuItems)
         {
+            if (group.Items.Any(x => x != null) == false)
+            {
+                continue;
+            }
+
             <li class="nav-menu-group">
                 @if(string.IsNullOrEmpty(group.Icon) == false)
                 {

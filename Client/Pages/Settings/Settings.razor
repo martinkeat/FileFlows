@@ -55,7 +55,7 @@
                         <p style="white-space: pre-wrap">@lblFileServerDescription</p>
                         <hr />
                         <InputSwitch @bind-Value="@Model.FileServerDisabled" Inverse="true" Label="Pages.Settings.Fields.FileServer.Enabled" />
-                        @if (App.Instance.FileFlowsSystem.IsLinux)
+                        @if (Profile.ServerOS == OperatingSystemType.Linux)
                         {
                             <InputNumber @bind-Value="@Model.FileServerFilePermissions" Label="Pages.Settings.Fields.FileServer.FilePermissions" Disabled="Model.FileServerDisabled" Max="777" ZeroAsEmpty="true" />
                             <InputText @bind-Value="@Model.FileServerOwnerGroup" Label="Pages.Settings.Fields.FileServer.OwnerGroup" Disabled="Model.FileServerDisabled" />

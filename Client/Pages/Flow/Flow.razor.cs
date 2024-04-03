@@ -111,8 +111,19 @@ public partial class Flow : ComponentBase, IDisposable
     /// </summary>
     private bool FieldsTabOpened { get; set; }
 
-    protected override void OnInitialized()
+    /// <summary>
+    /// Gets or sets the profile service
+    /// </summary>
+    [Inject] protected ProfileService ProfileService { get; set; }
+    
+    /// <summary>
+    /// Gets the profile
+    /// </summary>
+    protected Profile Profile { get; private set; }
+
+    protected override async Task OnInitializedAsync()
     {
+        Profile = await ProfileService.Get();
         lblSave = Translater.Instant("Labels.Save");
         lblClose = Translater.Instant("Labels.Close");
         lblSaving = Translater.Instant("Labels.Saving");
@@ -251,7 +262,7 @@ public partial class Flow : ComponentBase, IDisposable
 
             ff flow = (modelResult.Success ? modelResult.Data : null) ?? new ff { Parts = new List<ffPart>() };
 
-            var fEditor = new FlowEditor(this, flow);
+            var fEditor = new FlowEditor(this, flow, ProfileService);
             await fEditor.Initialize();
             OpenedFlows.Add(fEditor);
             ActivateFlow(fEditor);
@@ -918,11 +929,10 @@ public partial class Flow : ComponentBase, IDisposable
                     // update url to save flow
                     await jsRuntime.InvokeVoidAsync("ff.updateUrlWithNewUid", result.Data.Uid.ToString());
                 }
-                if ((App.Instance.FileFlowsSystem.ConfigurationStatus & ConfigurationStatus.Flows) !=
-                    ConfigurationStatus.Flows)
+                if ((Profile.ConfigurationStatus & ConfigurationStatus.Flows) != ConfigurationStatus.Flows)
                 {
                     // refresh the app configuration status
-                    await App.Instance.LoadAppInfo();
+                    await ProfileService.Refresh();
                 }
 
                 editor.UpdateModel(result.Data, clean: true);
@@ -954,7 +964,7 @@ public partial class Flow : ComponentBase, IDisposable
         if (flow.Uid == Guid.Empty)
             flow.Uid = Guid.NewGuid();
         
-        FlowEditor editor = new FlowEditor(this, flow);
+        FlowEditor editor = new FlowEditor(this, flow, ProfileService);
         editor.IsDirty = isDirty;
         await editor.Initialize();
         bool first = OpenedFlows.Any() == false;
@@ -998,10 +1008,10 @@ public partial class Flow : ComponentBase, IDisposable
         
         if (newFlow.Uid != Guid.Empty)
         {
-            if ((App.Instance.FileFlowsSystem.ConfigurationStatus & ConfigurationStatus.Flows) != ConfigurationStatus.Flows)
+            if ((Profile.ConfigurationStatus & ConfigurationStatus.Flows) != ConfigurationStatus.Flows)
             {
                 // refresh the app configuration status
-                await App.Instance.LoadAppInfo();
+                await ProfileService.Refresh();
             }
             await AddNewFlow(newFlow, isDirty: false);
         }

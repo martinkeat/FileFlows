@@ -24,12 +24,57 @@ public class User : FileFlowObject
 /// <summary>
 /// User Role
 /// </summary>
+[Flags]
 public enum UserRole
 {
     /// <summary>
-    /// Basic role
+    /// Files role
     /// </summary>
-    Basic = 1,
+    Files = 1,
+    /// <summary>
+    /// Flows role
+    /// </summary>
+    Flows = 2,
+    /// <summary>
+    /// Libraries role
+    /// </summary>
+    Libraries = 4,
+    /// <summary>
+    /// Nodes role
+    /// </summary>
+    Nodes = 8,
+    /// <summary>
+    /// Log role
+    /// </summary>
+    Log = 16,
+    /// <summary>
+    /// Plugins role
+    /// </summary>
+    Plugins = 32,
+    /// <summary>
+    /// Scripts role
+    /// </summary>
+    Scripts = 64,
+    /// <summary>
+    /// Variables role
+    /// </summary>
+    Variables = 128,
+    /// <summary>
+    /// Revisions role
+    /// </summary>
+    Revisions = 256,
+    /// <summary>
+    /// Tasks role
+    /// </summary>
+    Tasks = 512,
+    /// <summary>
+    /// Webhooks role
+    /// </summary>
+    Webhooks = 1024,
+    /// <summary>
+    /// Pause Processing role
+    /// </summary>
+    PauseProcessing = 2048,
     /// <summary>
     /// Administrator
     /// </summary>

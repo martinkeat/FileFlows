@@ -25,6 +25,16 @@ public abstract class ListPage<U, T> : ComponentBase where T : IUniqueObject<U>
     protected bool Loaded { get; set; }
     protected bool HasData { get; set; }
 
+    /// <summary>
+    /// Gets or sets the profile service
+    /// </summary>
+    [Inject] protected ProfileService ProfileService { get; set; }
+    
+    /// <summary>
+    /// Gets the profile
+    /// </summary>
+    protected Profile Profile { get; private set; }
+
     public List<T> _Data = new List<T>();
     public List<T> Data
     {
@@ -35,8 +45,9 @@ public abstract class ListPage<U, T> : ComponentBase where T : IUniqueObject<U>
         }
     }
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
+        Profile = await ProfileService.Get();
         if (Licensed() == false)
         {
             NavigationManager.NavigateTo("/");

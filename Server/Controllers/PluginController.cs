@@ -8,6 +8,7 @@ using FileFlows.Server.Helpers;
 using FileFlows.Server.Services;
 using FileFlows.Shared.Models;
 using FileFlows.Shared.Helpers;
+using Microsoft.AspNetCore.Authorization;
 
 namespace FileFlows.Server.Controllers;
 
@@ -15,9 +16,26 @@ namespace FileFlows.Server.Controllers;
 /// Plugin Controller
 /// </summary>
 [Route("/api/plugin")]
-[FileFlowsAuthorize]
+[FileFlowsAuthorize(UserRole.Plugins)]
 public class PluginController : Controller
 {
+    /// <summary>
+    /// Get the plugins translation file
+    /// </summary>
+    /// <param name="langCode">The language code to get the translations for</param>
+    /// <returns>The json plugin translation file</returns>
+    [HttpGet("language/{langCode}.json")]
+    [AllowAnonymous]
+    public IActionResult LanguageFile([FromRoute] string langCode = "en")
+    {
+        if(Regex.IsMatch(langCode, "^[a-zA-Z]{2,3}$") == false)
+            return new JsonResult(new {});
+        string file = $"i18n/plugins.{langCode}.json";
+        if(System.IO.File.Exists(Path.Combine(_hostingEnvironment.WebRootPath, file)))
+            return File(file, "text/json");
+        return new JsonResult(new {});
+    }
+    
     /// <summary>
     /// Represents the hosting environment of the application.
     /// </summary>
@@ -58,22 +76,6 @@ public class PluginController : Controller
     [HttpGet("by-package-name/{name}")]
     public Task<PluginInfo?> GetByPackageName([FromRoute] string name)
         => new Services.PluginService().GetByPackageName(name);
-
-    /// <summary>
-    /// Get the plugins translation file
-    /// </summary>
-    /// <param name="langCode">The language code to get the translations for</param>
-    /// <returns>The json plugin translation file</returns>
-    [HttpGet("language/{langCode}.json")]
-    public IActionResult LanguageFile([FromRoute] string langCode = "en")
-    {
-        if(Regex.IsMatch(langCode, "^[a-zA-Z]{2,3}$") == false)
-            return new JsonResult(new {});
-        string file = $"i18n/plugins.{langCode}.json";
-        if(System.IO.File.Exists(Path.Combine(_hostingEnvironment.WebRootPath, file)))
-            return File(file, "text/json");
-        return new JsonResult(new {});
-    }
 
     /// <summary>
     /// Get the available plugin packages 

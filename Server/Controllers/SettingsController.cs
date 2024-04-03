@@ -7,6 +7,7 @@ using FileFlows.Server.Workers;
 using FileFlows.Server.Helpers;
 using FileFlows.Server.Services;
 using FileFlows.ServerShared.Models;
+using Microsoft.AspNetCore.Authorization;
 using ServiceLoader = FileFlows.Server.Services.ServiceLoader;
 using SettingsService = FileFlows.Server.Services.SettingsService;
 
@@ -15,7 +16,7 @@ namespace FileFlows.Server.Controllers;
 /// Settings Controller
 /// </summary>
 [Route("/api/settings")]
-[FileFlowsAuthorize]
+[FileFlowsAuthorize(UserRole.Admin)]
 public class SettingsController : Controller
 {
     /// <summary>
@@ -71,6 +72,7 @@ public class SettingsController : Controller
     /// </summary>
     /// <returns>The latest version number if greater than current</returns>
     [HttpGet("check-update-available")]
+    [AllowAnonymous]
     public async Task<string> CheckLatestVersion()
     {
         var settings = await Get();
@@ -86,7 +88,7 @@ public class SettingsController : Controller
         catch (Exception ex)
         {
             Logger.Instance.ELog("Failed checking latest version: " + ex.Message + Environment.NewLine + ex.StackTrace);
-            return String.Empty;
+            return string.Empty;
         }
     }
 

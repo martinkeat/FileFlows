@@ -19,7 +19,7 @@
                 <FlowTableButton Clicked=Delete SelectedOneOrMore="true" Icon="fas fa-trash" Label="Labels.Delete" />
                 <FlowTableButtonSeparator />            
                 <FlowTableButton Clicked=Rescan SelectedOneOrMore=true Icon="fas fa-search-plus" Label="Labels.Rescan" />
-                @if (App.Instance.FileFlowsSystem.LicenseRevisions)
+                @if (Profile != null && Profile.LicensedFor(LicenseFlags.Revisions) && Profile.HasRole(UserRole.Revisions))
                 {
                     <FlowTableButton Clicked=Revisions SelectedOne="true" Icon="fas fa-history" Label="Labels.Revisions" />
                 }

@@ -22,6 +22,14 @@ public partial class CustomDashboard : IDisposable
     /// Gets or sets the client service
     /// </summary>
     [Inject]public ClientService ClientService { get; set; }
+    /// <summary>
+    /// Gets or sets the profile service
+    /// </summary>
+    [Inject] public ProfileService ProfileService { get; set; }
+    /// <summary>
+    /// The users profile
+    /// </summary>
+    private Profile Profile;
 
     /// <summary>
     /// Register callbacks in javascript for events
@@ -69,6 +77,8 @@ public partial class CustomDashboard : IDisposable
     {
         jsCharts = await jSRuntime.InvokeAsync<IJSObjectReference>("import", $"./scripts/Charts/FFCharts.js");
         Dashboard.AddWidgetEvent = (sender, args) => _ = AddWidgetDialog();
+
+        Profile = await ProfileService.Get();
 
         if (needsLoading)
         {

@@ -19,9 +19,18 @@
                                      AddSelectedElement="AddSelectedElement" Close="@CloseElements" />
                 </FlowTab>
                 <FlowTab Icon="fas fa-scroll" Title="@lblScripts" Visible="@(AvailableScripts != null)">
-                    <FlowElementList @ref="eleListScripts"  Items="@AvailableScripts" OnDragStart="@HandleDragStart"
-                                     AddSelectedElement="AddSelectedElement" Close="@CloseElements"
-                                     OpenBrowser="@(() => _ = OpenScriptBrowser())" OpenBrowserIcon="fas fa-scroll" OpenBrowserLabel="Pages.Flow.Labels.OpenScriptBrowser" />
+                    @if (Profile.HasRole(UserRole.Scripts))
+                    {
+                        <FlowElementList @ref="eleListScripts" Items="@AvailableScripts" OnDragStart="@HandleDragStart"
+                                         AddSelectedElement="AddSelectedElement" Close="@CloseElements"
+                                         OpenBrowser="@(() => _ = OpenScriptBrowser())" OpenBrowserIcon="fas fa-scroll" OpenBrowserLabel="Pages.Flow.Labels.OpenScriptBrowser"/>
+                    }
+                    else
+                    {
+                        // not allowed to add scripts
+                        <FlowElementList @ref="eleListScripts" Items="@AvailableScripts" OnDragStart="@HandleDragStart"
+                                         AddSelectedElement="AddSelectedElement" Close="@CloseElements" />
+                    }
                 </FlowTab>
                 <FlowTab Icon="fas fa-subway" Title="@lblSubFlows" Visible="@(AvailableSubFlows != null)">
                     <FlowElementList @ref="eleListSubFlows"  Items="@AvailableSubFlows" DefaultGroup="Sub Flows" OnDragStart="@HandleDragStart"

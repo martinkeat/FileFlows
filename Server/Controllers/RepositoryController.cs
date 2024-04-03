@@ -11,7 +11,7 @@ namespace FileFlows.Server.Controllers;
 /// Controller for the Repository
 /// </summary>
 [Route("/api/repository")]
-[FileFlowsAuthorize]
+[FileFlowsAuthorize(UserRole.Flows | UserRole.Plugins | UserRole.Scripts)]
 public class RepositoryController : Controller
 {
     /// <summary>

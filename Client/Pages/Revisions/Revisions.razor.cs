@@ -16,7 +16,7 @@ public partial class Revisions: ListPage<Guid, RevisionedObject>
     /// </summary>
     /// <returns>if they are licensed for this page</returns>
     protected override bool Licensed()
-        => App.Instance.FileFlowsSystem.LicenseRevisions; 
+        => Profile.LicensedFor(LicenseFlags.Revisions); 
 
     public override async Task<bool> Edit(RevisionedObject item)
     {

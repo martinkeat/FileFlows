@@ -14,7 +14,7 @@ namespace FileFlows.Server.Controllers;
 /// Controller for Flow Templates
 /// </summary>
 [Route("/api/flow-template")]
-[FileFlowsAuthorize]
+[FileFlowsAuthorize(UserRole.Flows)]
 public class FlowTemplateController : Controller
 {
     const int DEFAULT_XPOS = 450;

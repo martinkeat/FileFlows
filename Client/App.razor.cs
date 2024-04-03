@@ -20,6 +20,11 @@ public partial class App : ComponentBase
     [Inject] public IJSRuntime jsRuntime { get; set; }
     [Inject] public NavigationManager NavigationManager { get; set; }
     [Inject] private FFLocalStorageService LocalStorage { get; set; }
+    
+    /// <summary>
+    /// Gets or sets the profile service
+    /// </summary>
+    [Inject] private ProfileService ProfileService { get; set; }
     public bool LanguageLoaded { get; set; } = false;
 
     public int DisplayWidth { get; private set; }
@@ -43,16 +48,16 @@ public partial class App : ComponentBase
     /// </summary>
     public event EscapePushed OnEscapePushed;
 
-    public FileFlowsStatus FileFlowsSystem { get; private set; }
+    // public FileFlowsStatus FileFlowsSystem { get; private set; }
     
     /// <summary>
     /// Gets or sets if the nav menu is collapsed
     /// </summary>
     public bool NavMenuCollapsed { get; set; }
 
-    public delegate void FileFlowsSystemUpdated(FileFlowsStatus system);
+    //public delegate void FileFlowsSystemUpdated(FileFlowsStatus system);
 
-    public event FileFlowsSystemUpdated OnFileFlowsSystemUpdated;
+    //public event FileFlowsSystemUpdated OnFileFlowsSystemUpdated;
     
 
     public async Task LoadLanguage(string language, bool loadPlugin = true)
@@ -87,29 +92,6 @@ public partial class App : ComponentBase
     }
 
     /// <summary>
-    /// Load the application info
-    /// </summary>
-    /// <param name="forced">if the load should be forced</param>
-    /// <returns>true if successfully loaded, otherwise false</returns>
-    public async Task<bool> LoadAppInfo(bool forced = false)
-    {
-        if (forced == false && NavigationManager.Uri.Contains("/login"))
-            return false;
-        
-        var result = await HttpHelper.Get<FileFlowsStatus>("/api/settings/fileflows-status");
-        if (result.StatusCode == HttpStatusCode.Unauthorized)
-        {
-            NavigationManager.NavigateTo("/login", true);
-            return false;
-        }
-
-        FileFlowsSystem = result.Data;
-        StateHasChanged();
-        OnFileFlowsSystemUpdated?.Invoke(FileFlowsSystem);
-        return true;
-    }
-
-    /// <summary>
     /// Reinitialize the app after a login
     /// </summary>
     public async Task Reinitialize(bool forced = false)
@@ -120,17 +102,17 @@ public partial class App : ComponentBase
             HttpHelper.Client.DefaultRequestHeaders.Authorization
                 = new AuthenticationHeaderValue("Bearer", token);
         }
-        if (await LoadAppInfo(forced))
+
+        if (forced || NavigationManager.Uri.Contains("/login") == false)
         {
-            Settings = (await HttpHelper.Get<Settings>("/api/settings")).Data ?? new Settings();
-            await LoadLanguage(Settings.Language);
-            LanguageLoaded = true;
+            var profile = await ProfileService.Get();
+            await LoadLanguage(profile.Language);
         }
         else
         {
             await LoadLanguage(null, loadPlugin: false);
-            LanguageLoaded = true;
         }
+        LanguageLoaded = true;
         StateHasChanged();
     }
 
@@ -199,20 +181,20 @@ public partial class App : ComponentBase
     [JSInvokable]
     public async Task<bool> OpenUrl(string url)
     {
-        if (App.Instance.FileFlowsSystem.IsWebView == false)
+        var profile = await ProfileService.Get();
+        if (profile.IsWebView == false)
             return false;
         await HttpHelper.Post("/api/system/open-url?url=" + HttpUtility.UrlEncode(url));
         return true;
     }
 
-    public void OpenHelp(string url)
+    public async Task OpenHelp(string url)
     {
-        if (Instance.FileFlowsSystem.IsWebView) 
-            _ = OpenUrl(url);
-        else
-        {
-            _ = jsRuntime.InvokeVoidAsync("ff.open", url, true);
-        }
+        var profile = await ProfileService.Get();
+        if (profile.IsWebView == false)
+            await jsRuntime.InvokeVoidAsync("ff.open", url, true);
+        else  
+            await OpenUrl(url);
     }
     
 }

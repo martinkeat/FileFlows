@@ -123,7 +123,7 @@ public partial class Nodes : ListPage<Guid, ProcessingNode>
             }
         });
 
-        if (App.Instance.FileFlowsSystem.Licensed)
+        if (Profile.LicensedFor(LicenseFlags.Tasks))
         {
             var scriptOptions = scripts.Select(x => new ListOption
             {

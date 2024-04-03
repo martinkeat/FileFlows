@@ -264,6 +264,20 @@
     "SecurityMode": {
       "Off": "None",
       "Local": "Local Users"
+    },
+    "UserRole": {
+      "Files": "Files",
+      "Flows": "Flows",
+      "Libraries": "Libraries",
+      "Nodes": "Nodes",
+      "Plugins": "Plugins",
+      "Scripts": "Scripts",
+      "Variables": "Variables",
+      "Revisions": "Revisions",
+      "Tasks": "Tasks",
+      "Webhooks": "Webhooks",
+      "Log": "Log",
+      "PauseProcessing": "Pause Processing"
     }
   },
   "ErrorMessages": {
@@ -292,7 +306,8 @@
     "Extensions": "Extensions",
     "System": "System",
     "Information": "Information",
-    "User": "User"
+    "User": "User",
+    "Admin": "Admin"
   },
   "Widgets": {
     "CPUUsage": "CPU Usage",
@@ -987,7 +1002,8 @@
       "Fields": {
         "IsAdmin": "Administrator",
         "Email": "Email",
-        "Password": "Password"
+        "Password": "Password",
+        "Roles": "Roles"
       }
     },
     "FileFlowsTask":{

@@ -11,7 +11,7 @@ namespace FileFlows.Server.Controllers;
 /// Script controller
 /// </summary>
 [Route("/api/script")]
-[FileFlowsAuthorize]
+[FileFlowsAuthorize(UserRole.Scripts)]
 public class ScriptController : Controller
 {
 
