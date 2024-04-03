@@ -1392,12 +1392,20 @@ where {Wrap(nameof(LibraryFile.Status))} = 1 and {Wrap(nameof(LibraryFile.Proces
         string sql = @$"select {Wrap(nameof(LibraryFile.LibraryName))} as {Wrap(nameof(ShrinkageData.Library))},
         count(*) as {Wrap(nameof(ShrinkageData.Items))},
         sum({Wrap(nameof(LibraryFile.FinalSize))} as {Wrap(nameof(ShrinkageData.FinalSize))},
-        sum({Wrap(nameof(LibraryFile.OriginalSize))} as {Wrap(nameof(ShrinkageData.OriginalSize))},
+        sum({Wrap(nameof(LibraryFile.OriginalSize))} as {Wrap(nameof(ShrinkageData.OriginalSize))}
         from {Wrap(nameof(LibraryFile))}
         group by {Wrap(nameof(LibraryFile.LibraryName))}";
-        
-        using var db = await DbConnector.GetDb();
-        return await db.Db.FetchAsync<ShrinkageData>(sql);
+
+        try
+        {
+            using var db = await DbConnector.GetDb();
+            return await db.Db.FetchAsync<ShrinkageData>(sql);
+        }
+        catch (Exception ex)
+        {
+            Logger.WLog("Error fetching shrinkage groups: " + ex.Message + Environment.NewLine + sql);
+            return new();
+        }
     }
 
     /// <summary>
