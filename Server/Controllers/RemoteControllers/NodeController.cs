@@ -8,6 +8,22 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace FileFlows.Server.Controllers.RemoteControllers;
 
+public class NodeControllerTemp : Controller
+{
+    
+    /// <summary>
+    /// Gets the version an node update available
+    /// </summary>
+    /// <returns>the version an node update available</returns>
+    [HttpGet("/remote/update-version")]
+    public string GetNodeUpdateVersion()
+    {
+        if (LicenseHelper.IsLicensed(LicenseFlags.AutoUpdates) == false)
+            return string.Empty;
+        return Globals.Version.ToString();
+    }
+}
+
 /// <summary>
 /// Controller used by a processing node to communicate with the server
 /// </summary>

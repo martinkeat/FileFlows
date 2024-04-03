@@ -121,9 +121,9 @@ public class NodeService : RemoteService, INodeService
     {
         try
         {
-            var result = await HttpHelper.Get<string>($"{ServiceBaseUrl}/remote/update-version?version={Globals.Version}&system={GetSystem()}");
+            var result = await HttpHelper.Get<string>($"{ServiceBaseUrl}/remote/node/update-version?version={Globals.Version}&system={GetSystem()}");
             if (result.Success == false)
-                throw new Exception("Failed to get node update version: " + result.Body);
+                throw new Exception(result.Body);
             if (string.IsNullOrWhiteSpace(result.Data))
                 return new Version();
             return Version.Parse(result.Data);
