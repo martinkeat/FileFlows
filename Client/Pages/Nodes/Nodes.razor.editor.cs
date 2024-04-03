@@ -17,12 +17,12 @@ public partial class Nodes : ListPage<Guid, ProcessingNode>
         node.Mappings ??= new();
         this.EditingItem = node;
 
-        List<Script> scripts;
+        Dictionary<string, string> scripts;
         var tabs = new Dictionary<string, List<ElementField>>();
         Blocker.Show();
         try
         {
-            scripts = (await HttpHelper.Get<List<Script>>("/api/script")).Data ?? new List<Script>();
+            scripts = (await HttpHelper.Get<Dictionary<string, string>>("/api/script/basic-list")).Data ?? new ();
             tabs.Add("General", TabGeneral(node, isServerProcessingNode, scripts));
             tabs.Add("Schedule", TabSchedule(node, isServerProcessingNode));
             if (isServerProcessingNode == false)
@@ -51,7 +51,7 @@ public partial class Nodes : ListPage<Guid, ProcessingNode>
         return false;
     }
 
-    private List<ElementField> TabGeneral(ProcessingNode node, bool isServerProcessingNode, List<Script> scripts)
+    private List<ElementField> TabGeneral(ProcessingNode node, bool isServerProcessingNode, Dictionary<string, string> scripts)
     {
         List<ElementField> fields = new List<ElementField>();
 
@@ -127,7 +127,7 @@ public partial class Nodes : ListPage<Guid, ProcessingNode>
         {
             var scriptOptions = scripts.Select(x => new ListOption
             {
-                Value = x.Name, Label = x.Name
+                Value = x.Value, Label = x.Value
             }).ToList();
             scriptOptions.Insert(0, new ListOption() { Label = "Labels.None", Value = string.Empty});
             fields.Add(new ElementField
@@ -229,14 +229,14 @@ public partial class Nodes : ListPage<Guid, ProcessingNode>
     
     private async Task<List<ElementField>> TabProcessing(ProcessingNode node)
     {
-        var librariesResult = await HttpHelper.Get<Library[]>("/api/library");
+        var librariesResult = await HttpHelper.Get<Dictionary<Guid, string>>("/api/library/basic-list");
         var libraries = librariesResult?.Data?.Select(x => new ListOption
         {
-            Label = x.Name,
+            Label = x.Value,
             Value = new ObjectReference
             {
-                Uid = x.Uid,
-                Name = x.Name,
+                Uid = x.Key,
+                Name = x.Value,
                 Type = typeof(Library)?.FullName ?? string.Empty
             }
         })?.OrderBy(x => x.Label)?.ToList() ?? new List<ListOption>();

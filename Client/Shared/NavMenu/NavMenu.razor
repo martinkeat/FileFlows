@@ -86,7 +86,7 @@
         }
     </ul>
     
-    @if (App.Instance.IsMobile == false)
+    @if (App.Instance.IsMobile == false && Profile?.HasRole(UserRole.PauseProcessing) == true)
     {
         <div class="paused-indicator">
             <span class="@(PausedService.IsPaused ? "paused" : "not-paused")" @onclick="() => PausedService.Toggle()" title="@PausedService.PausedLabel">

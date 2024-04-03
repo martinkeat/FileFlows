@@ -53,7 +53,7 @@
                     }
                 }
 
-                if (App.Instance.IsMobile == false)
+                if (App.Instance.IsMobile == false && Profile?.HasRole(UserRole.PauseProcessing) == true)
                 {
                     <PauseResume/>
                 }

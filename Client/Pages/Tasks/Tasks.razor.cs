@@ -81,23 +81,26 @@ public partial class Tasks: ListPage<Guid, FileFlowsTask>
     {
         List<ElementField> fields = new List<ElementField>();
 
-        var scriptResponse = await HttpHelper.Get<List<Script>>("/api/script/list/system");
+        var scriptResponse = await HttpHelper.Get<Dictionary<string, string>>("/api/script/basic-list?type=system");
         if (scriptResponse.Success == false)
         {
             Toast.ShowError(scriptResponse.Body);
             return false;
         }
 
-        if (scriptResponse.Data?.Any() != true)
+        var data = scriptResponse.Data.Where(x => x.Key != "FILE_DISPLAY_NAME")
+            .ToDictionary(x => x.Key, x => x.Value);
+
+        if (data.Any() != true)
         {
             Toast.ShowError("Pages.Tasks.Messages.NoScripts");
             return false;
         }
 
-        var scriptOptions = scriptResponse.Data.Select(x => new ListOption()
+        var scriptOptions = data.Select(x => new ListOption()
         {
-            Label = x.Name,
-            Value = x.Uid
+            Label = x.Value,
+            Value = x.Key
         }).ToList();
 
         fields.Add(new ElementField

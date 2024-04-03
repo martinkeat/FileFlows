@@ -46,8 +46,9 @@ public partial class InputCode : Input<string>, IDisposable
     {
         _ = Task.Run(async () =>
         {
-            var shared = await HttpHelper.Get<Script[]>("/api/script/all-by-type/shared");
-            await jsRuntime.InvokeVoidAsync("ffCode.initModel", Variables, shared.Success ? shared.Data : null);
+            // var shared = await HttpHelper.Get<Dictionary<string, string>>("/api/script/basic-list?type=Shared");
+            
+            await jsRuntime.InvokeVoidAsync("ffCode.initModel", Variables, null);//, shared.Success ? shared.Data : null);
         });
         InitialValue = this.Value;
     }

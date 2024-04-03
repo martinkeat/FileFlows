@@ -24,10 +24,26 @@ public class ScriptController : Controller
         => new ScriptService().GetAll();
 
     /// <summary>
+    /// Basic script list
+    /// </summary>
+    /// <param name="type">optional script type</param>
+    /// <returns>script list</returns>
+    [HttpGet("basic-list")]
+    [FileFlowsAuthorize(UserRole.Nodes | UserRole.Tasks)]
+    public async Task<Dictionary<string, string>> GetBasicList([FromQuery] ScriptType? type = null)
+    {
+        IEnumerable<Script> items = await new ScriptService().GetAll();
+        if (type != null)
+            items = items.Where(x => x.Type == type.Value);
+        return items.ToDictionary(x => x.Uid, x => x.Name);
+    }
+
+    /// <summary>
     /// Get script templates for the function editor
     /// </summary>
     /// <returns>a list of script templates</returns>
     [HttpGet("templates")]
+    [FileFlowsAuthorize(UserRole.Scripts | UserRole.Flows)]
     public Task<IEnumerable<Script>> GetTemplates() 
         => new ScriptService().GetAllByType(ScriptType.Template);
     
