@@ -1,5 +1,4 @@
 using FileFlows.Plugin;
-using FileFlows.Plugin.Helpers;
 using FileFlows.Plugin.Models;
 using FileFlows.Plugin.Services;
 using FileFlows.Shared.Helpers;
@@ -19,13 +18,15 @@ public class RemoteFileService : IFileService
     private readonly ILogger logger;
     private static HttpClient _Client;
     private readonly LocalFileService _localFileService;
+    private readonly string ApiToken;
 
-    public RemoteFileService(Guid executorUid, string serverUrl, string tempPath, ILogger logger, char pathSeparator)
+    public RemoteFileService(Guid executorUid, string serverUrl, string tempPath, ILogger logger, char pathSeparator, string apiToken)
     {
         this.executorUid = executorUid;
         this.serverUrl = serverUrl;
         this.tempPath = tempPath;
         this.logger = logger;
+        this.ApiToken = apiToken;
         this.PathSeparator = pathSeparator;
         this._localFileService = new();
         HttpHelper.OnHttpRequestCreated = OnHttpRequestCreated;
@@ -34,11 +35,13 @@ public class RemoteFileService : IFileService
     private void OnHttpRequestCreated(HttpRequestMessage request)
     {
         request.Headers.Add("x-executor", executorUid.ToString());
+        if(string.IsNullOrWhiteSpace(ApiToken) == false)
+            request.Headers.Add("x-token", ApiToken);
     }
 
     private string GetUrl(string route)
     {
-        return serverUrl + "/api/file-server/" + route;
+        return serverUrl + "/remote/file-server/" + route;
     }
 
     private string PreparePath(ref string path)

@@ -13,12 +13,11 @@ namespace FileFlows.Server.Controllers;
 /// <summary>
 /// Controller responsible for managing file-related operations.
 /// </summary>
-[Route("/api/file-server")]
+[Route("/remote/file-server")]
 [FileFlowsAuthorize]
 [ApiExplorerSettings(IgnoreApi = true)]
 public class FileServerController : Controller
 {
-
     /// <summary>
     /// Buffer size used for reading files during file operations.
     /// </summary>

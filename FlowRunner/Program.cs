@@ -331,7 +331,7 @@ public class Program
             
                 remoteFile = true;
                 _fileService = new RemoteFileService(Uid, RemoteService.ServiceBaseUrl, args.WorkingDirectory, Logger,
-                    libFile.Name.Contains('/') ? '/' : '\\');
+                    libFile.Name.Contains('/') ? '/' : '\\', RemoteService.ApiToken);
             }
         }
 
