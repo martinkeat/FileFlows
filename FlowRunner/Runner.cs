@@ -450,13 +450,15 @@ public class Runner
         };
         nodeParameters.UploadFile = (string source, string destination) =>
         {
-            var task = new FileUploader(logger, RemoteService.ServiceBaseUrl, Program.Uid).UploadFile(source, destination);
+            var task = new FileUploader(logger, RemoteService.ServiceBaseUrl, Program.Uid, RemoteService.ApiToken)
+                .UploadFile(source, destination);
             task.Wait();
             return task.Result;
         };
         nodeParameters.DeleteRemote = (path, ifEmpty, includePatterns) =>
         {
-            var task = new FileUploader(logger, RemoteService.ServiceBaseUrl, Program.Uid).DeleteRemote(path, ifEmpty, includePatterns);
+            var task = new FileUploader(logger, RemoteService.ServiceBaseUrl, Program.Uid, RemoteService.ApiToken)
+                .DeleteRemote(path, ifEmpty, includePatterns);
             task.Wait();
             return task.Result.Success;
         };

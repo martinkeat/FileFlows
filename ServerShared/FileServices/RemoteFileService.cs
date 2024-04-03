@@ -6,10 +6,22 @@ using FileHelper = FileFlows.Plugin.Helpers.FileHelper;
 
 namespace FileFlows.ServerShared.FileServices;
 
+/// <summary>
+/// Remote File Service that connects to the FileFlows server remotely
+/// </summary>
 public class RemoteFileService : IFileService
 {
+    /// <summary>
+    /// Gets the path separator
+    /// </summary>
     public char PathSeparator { get; init; }
+    /// <summary>
+    /// Gets or sets the replace variables delegate
+    /// </summary>
     public ReplaceVariablesDelegate ReplaceVariables { get; set; }
+    /// <summary>
+    /// Gets or sets the logger
+    /// </summary>
     public ILogger? Logger { get; set; }
 
     private readonly Guid executorUid;
@@ -18,8 +30,20 @@ public class RemoteFileService : IFileService
     private readonly ILogger logger;
     private static HttpClient _Client;
     private readonly LocalFileService _localFileService;
+    /// <summary>
+    /// The api token
+    /// </summary>
     private readonly string ApiToken;
 
+    /// <summary>
+    /// Constructs a new remote file service instance
+    /// </summary>
+    /// <param name="executorUid">the UID of the executor</param>
+    /// <param name="serverUrl">the URL to the FileFlows server</param>
+    /// <param name="tempPath">the path to the temporary runner directory</param>
+    /// <param name="logger">the logger</param>
+    /// <param name="pathSeparator">the path separator</param>
+    /// <param name="apiToken">the API token to use</param>
     public RemoteFileService(Guid executorUid, string serverUrl, string tempPath, ILogger logger, char pathSeparator, string apiToken)
     {
         this.executorUid = executorUid;
@@ -32,6 +56,10 @@ public class RemoteFileService : IFileService
         HttpHelper.OnHttpRequestCreated = OnHttpRequestCreated;
     }
 
+    /// <summary>
+    /// Called when a http request is created so headers can be added
+    /// </summary>
+    /// <param name="request">the request</param>
     private void OnHttpRequestCreated(HttpRequestMessage request)
     {
         request.Headers.Add("x-executor", executorUid.ToString());
@@ -39,11 +67,21 @@ public class RemoteFileService : IFileService
             request.Headers.Add("x-token", ApiToken);
     }
 
+    /// <summary>
+    /// Gets the URL on the server
+    /// </summary>
+    /// <param name="route">the route</param>
+    /// <returns>the full url to the server</returns>
     private string GetUrl(string route)
     {
         return serverUrl + "/remote/file-server/" + route;
     }
 
+    /// <summary>
+    /// Prepares a path replacing any variables
+    /// </summary>
+    /// <param name="path">the path</param>
+    /// <returns>the corrected path</returns>
     private string PreparePath(ref string path)
     {
         if (ReplaceVariables != null)
@@ -51,6 +89,7 @@ public class RemoteFileService : IFileService
         return path;
     }
 
+    /// <inheritdoc />
     public Result<string[]> GetFiles(string path, string searchPattern = "", bool recursive = false)
     {
         if (FileIsLocal(PreparePath(ref path)))
@@ -71,6 +110,7 @@ public class RemoteFileService : IFileService
         }
     }
 
+    /// <inheritdoc />
     public Result<string[]> GetDirectories(string path)
     {
         if (FileIsLocal(PreparePath(ref path)))
@@ -86,6 +126,7 @@ public class RemoteFileService : IFileService
         }
     }
 
+    /// <inheritdoc />
     public Result<bool> DirectoryExists(string path)
     {
         if (FileIsLocal(PreparePath(ref path)))
@@ -100,6 +141,8 @@ public class RemoteFileService : IFileService
             return false;
         }
     }
+    
+    /// <inheritdoc />
     public Result<bool> DirectoryDelete(string path, bool recursive = false)
     {
         if (FileIsLocal(PreparePath(ref path)))
@@ -119,6 +162,7 @@ public class RemoteFileService : IFileService
         }
     }
 
+    /// <inheritdoc />
     public Result<bool> DirectoryMove(string path, string destination)
     {
         if (FileIsLocal(PreparePath(ref path)))
@@ -146,6 +190,7 @@ public class RemoteFileService : IFileService
         }
     }
 
+    /// <inheritdoc />
     public Result<bool> DirectoryCreate(string path)
     {
         if (FileIsLocal(PreparePath(ref path)))
@@ -161,6 +206,7 @@ public class RemoteFileService : IFileService
         }
     }
 
+    /// <inheritdoc />
     public Result<bool> FileExists(string path)
     {
         if (FileIsLocal(PreparePath(ref path)))
@@ -176,6 +222,7 @@ public class RemoteFileService : IFileService
         }
     }
 
+    /// <inheritdoc />
     public bool FileIsLocal(string path)
     {
         if (path.StartsWith(tempPath))
@@ -183,6 +230,7 @@ public class RemoteFileService : IFileService
         return false;
     }
 
+    /// <inheritdoc />
     public Result<string> GetLocalPath(string path)
     {
         if (FileIsLocal(PreparePath(ref path)))
@@ -195,12 +243,14 @@ public class RemoteFileService : IFileService
         if (DirectoryExists(path).Is(true))
             return Result<string>.Fail("Cannot map a remote folder");
 
-        var result = new FileDownloader(logger, serverUrl, executorUid).DownloadFile(path, filename).Result;
+        var result = new FileDownloader(logger, serverUrl, executorUid, ApiToken)
+            .DownloadFile(path, filename).Result;
         if (result.IsFailed)
             return Result<string>.Fail(result.Error);
         return filename;
     }
 
+    /// <inheritdoc />
     public Result<bool> Touch(string path)
     {
         if (FileIsLocal(PreparePath(ref path)))
@@ -216,6 +266,7 @@ public class RemoteFileService : IFileService
         }
     }
 
+    /// <inheritdoc />
     public Result<FileInformation> FileInfo(string path)
     {
         if (FileIsLocal(PreparePath(ref path)))
@@ -231,6 +282,7 @@ public class RemoteFileService : IFileService
         }
     }
 
+    /// <inheritdoc />
     public Result<bool> FileDelete(string path)
     {
         if (FileIsLocal(PreparePath(ref path)))
@@ -246,6 +298,7 @@ public class RemoteFileService : IFileService
         }
     }
 
+    /// <inheritdoc />
     public Result<long> FileSize(string path)
     {
         if (FileIsLocal(PreparePath(ref path)))
@@ -261,6 +314,7 @@ public class RemoteFileService : IFileService
         }
     }
 
+    /// <inheritdoc />
     public Result<DateTime> FileCreationTimeUtc(string path)
     {
         if (FileIsLocal(PreparePath(ref path)))
@@ -276,6 +330,7 @@ public class RemoteFileService : IFileService
         }
     }
 
+    /// <inheritdoc />
     public Result<DateTime> FileLastWriteTimeUtc(string path)
     {
         if (FileIsLocal(PreparePath(ref path)))
@@ -291,13 +346,15 @@ public class RemoteFileService : IFileService
         }
     }
 
+    /// <inheritdoc />
     public Result<bool> FileMove(string path, string destination, bool overwrite = true)
     {
         if (FileIsLocal(PreparePath(ref path)))
         {
             if(FileIsLocal(PreparePath(ref destination)))
                 return _localFileService.FileMove(path, destination, overwrite);
-            var result = new FileUploader(logger, serverUrl, executorUid).UploadFile(path, destination).Result;
+            var result = new FileUploader(logger, serverUrl, executorUid, ApiToken)
+                .UploadFile(path, destination).Result;
             if (result.Success == false)
                 return Result<bool>.Fail(result.Error);
             FileDelete(path);
@@ -321,13 +378,15 @@ public class RemoteFileService : IFileService
         }
     }
 
+    /// <inheritdoc />
     public Result<bool> FileCopy(string path, string destination, bool overwrite = true)
     {
         if (FileIsLocal(PreparePath(ref path)))
         {
             if(FileIsLocal(PreparePath(ref destination)))
                 return _localFileService.FileCopy(path, destination, overwrite);
-            var result = new FileUploader(logger, serverUrl, executorUid).UploadFile(path, destination).Result;
+            var result = new FileUploader(logger, serverUrl, executorUid, ApiToken)
+                .UploadFile(path, destination).Result;
             if (result.Success == false)
                 return Result<bool>.Fail(result.Error);
             return true;
@@ -336,7 +395,8 @@ public class RemoteFileService : IFileService
         if (FileIsLocal(PreparePath(ref destination)))
         {
             // download the file
-            var result = new FileDownloader(logger, serverUrl, executorUid).DownloadFile(path, destination).Result;
+            var result = new FileDownloader(logger, serverUrl, executorUid, ApiToken)
+                .DownloadFile(path, destination).Result;
             if (result.IsFailed)
                 return Result<bool>.Fail(result.Error);
             return true;
@@ -359,6 +419,7 @@ public class RemoteFileService : IFileService
         }
     }
 
+    /// <inheritdoc />
     public Result<bool> FileAppendAllText(string path, string text)
     {
         if (FileIsLocal(PreparePath(ref path)))
@@ -378,6 +439,7 @@ public class RemoteFileService : IFileService
         }
     }
 
+    /// <inheritdoc />
     public Result<bool> SetCreationTimeUtc(string path, DateTime date)
     {
         if (FileIsLocal(PreparePath(ref path)))
@@ -397,6 +459,7 @@ public class RemoteFileService : IFileService
         }
     }
 
+    /// <inheritdoc />
     public Result<bool> SetLastWriteTimeUtc(string path, DateTime date)
     {
         if (FileIsLocal(PreparePath(ref path)))

@@ -27,6 +27,10 @@ public class FileUploader
     /// The UID of the executor for the authentication
     /// </summary>
     private readonly Guid executorUid;
+    /// <summary>
+    /// The api token
+    /// </summary>
+    private readonly string ApiToken;
     
     /// <summary>
     /// Constructs an instance of the file uploader
@@ -34,11 +38,13 @@ public class FileUploader
     /// <param name="logger">the logger to use in the file uploader</param>
     /// <param name="serverUrl">The URL where the file will be uploaded.</param>
     /// <param name="executorUid">The UID of the executor for the authentication</param>
-    public FileUploader(ILogger logger, string serverUrl, Guid executorUid)
+    /// <param name="apiToken">the API token to use</param>
+    public FileUploader(ILogger logger, string serverUrl, Guid executorUid, string apiToken)
     {
         this.logger = logger;
         this.serverUrl = serverUrl;
         this.executorUid = executorUid;
+        this.ApiToken = apiToken;
     }
     
     /// <summary>
@@ -91,6 +97,8 @@ public class FileUploader
             var content = new StreamContent(fileStream);
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, url);
             request.Headers.Add("x-executor", executorUid.ToString());
+            if(string.IsNullOrWhiteSpace(ApiToken) == false)
+                request.Headers.Add("x-token", ApiToken);
             request.Content = content;
             var response = await _client.SendAsync(request);
             
@@ -154,6 +162,8 @@ public class FileUploader
             
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, url);
             request.Headers.Add("x-executor", executorUid.ToString());
+            if(string.IsNullOrWhiteSpace(ApiToken) == false)
+                request.Headers.Add("x-token", ApiToken);
             request.Content = new StringContent(json, Encoding.UTF8, "application/json");;
             var response = await _client.SendAsync(request);
 

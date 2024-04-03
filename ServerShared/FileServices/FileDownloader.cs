@@ -39,6 +39,10 @@ public class FileDownloader
     /// Event that is triggered to notify subscribers about the progress, using the <see cref="OnProgressDelegate"/> delegate.
     /// </summary>
     public event OnProgressDelegate OnProgress;
+    /// <summary>
+    /// The api token
+    /// </summary>
+    private readonly string ApiToken;
     
     /// <summary>
     /// Constructs an instance of the file downloader
@@ -46,11 +50,13 @@ public class FileDownloader
     /// <param name="logger">the logger to use in the file downloader</param>
     /// <param name="serverUrl">The URL where the file will be uploaded.</param>
     /// <param name="executorUid">The UID of the executor for the authentication</param>
-    public FileDownloader(ILogger logger, string serverUrl,Guid executorUid)
+    /// <param name="apiToken">the API token to use</param>
+    public FileDownloader(ILogger logger, string serverUrl, Guid executorUid, string apiToken)
     {
         this.logger = logger;
         this.serverUrl = serverUrl;
         this.executorUid = executorUid;
+        this.ApiToken = apiToken;
     }
 
     /// <summary>
@@ -87,6 +93,8 @@ public class FileDownloader
             
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, url + "/download");
             request.Headers.Add("x-executor", executorUid.ToString());
+            if(string.IsNullOrWhiteSpace(ApiToken) == false)
+                request.Headers.Add("x-token", ApiToken);
             string json = JsonSerializer.Serialize(new { path });
             request.Content  = new StringContent(json, Encoding.UTF8, "application/json");
 
@@ -256,6 +264,8 @@ public class FileDownloader
             // Create the GET request with required headers
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url + "/size");
             request.Headers.Add("x-executor", executorUid.ToString());
+            if(string.IsNullOrWhiteSpace(ApiToken) == false)
+                request.Headers.Add("x-token", ApiToken);
             string json = JsonSerializer.Serialize(new { path });
             request.Content  = new StringContent(json, Encoding.UTF8, "application/json");
 

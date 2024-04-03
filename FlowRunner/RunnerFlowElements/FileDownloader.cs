@@ -18,7 +18,7 @@ public class FileDownloader : Node
     public override int Execute(NodeParameters args)
     {
         string dest = Path.Combine(args.TempPath, new FileInfo(args.LibraryFileName).Name);
-        var downloader = new ServerShared.FileServices.FileDownloader(args.Logger, RemoteService.ServiceBaseUrl, Program.Uid);
+        var downloader = new ServerShared.FileServices.FileDownloader(args.Logger, RemoteService.ServiceBaseUrl, Program.Uid, RemoteService.ApiToken);
         downloader.OnProgress += (percent, eta, speed) =>
         {
             args.PartPercentageUpdate(percent);
