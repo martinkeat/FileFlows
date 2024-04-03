@@ -24,12 +24,6 @@ namespace FileFlows.Server.Controllers;
 public class SystemController:Controller
 {
     /// <summary>
-    /// Gets the version of FileFlows
-    /// </summary>
-    [HttpGet("version")]
-    public string GetVersion() => Globals.Version.ToString();
-
-    /// <summary>
     /// Opens a URL in the host OS
     /// </summary>
     /// <param name="url">the URL to open</param>

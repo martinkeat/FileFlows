@@ -62,17 +62,6 @@ class HttpHelper
     /// <summary>
     /// Performs a PUT request
     /// </summary>
-    /// <param name="url">the URL to call</param>
-    /// <param name="data">any data to send with the request</param>
-    /// <returns>the request result</returns>
-    public static async Task<RequestResult<string>> Put(string url, object data = null)
-    {
-        return await MakeRequest<string>(System.Net.Http.HttpMethod.Put, url, data);
-    }
-    
-    /// <summary>
-    /// Performs a PUT request
-    /// </summary>
     /// <typeparam name="T">the type of object returned by the request</typeparam>
     /// <param name="url">the URL to call</param>
     /// <param name="data">any data to send with the request</param>
