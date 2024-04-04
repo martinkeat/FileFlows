@@ -602,13 +602,6 @@ public class LibraryFileService : ILibraryFileService
     }
 
     /// <summary>
-    /// Gets the shrinkage groups for the files
-    /// </summary>
-    /// <returns>the shrinkage groups</returns>
-    public Task<List<ShrinkageData>> GetShrinkageGroups()
-        => new LibraryFileManager().GetShrinkageGroups();
-
-    /// <summary>
     /// Updates all files with the new library name if they used this library
     /// </summary>
     /// <param name="uid">the UID of the library</param>

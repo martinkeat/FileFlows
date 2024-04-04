@@ -19,9 +19,9 @@ public class InfoController : Controller
     /// </summary>
     /// <returns>the shrinkage groups</returns>
     [HttpGet("shrinkage-groups")]
-    public async Task<List<ShrinkageData>> GetShrinkageGroups()
+    public List<StorageSavedData> GetShrinkageGroups()
     {
-        var groups = await new LibraryFileManager().GetShrinkageGroups();
+        var groups = new StatisticService().GetStorageSaved();
         return groups;
     }
     

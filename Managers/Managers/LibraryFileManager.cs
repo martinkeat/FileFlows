@@ -254,12 +254,6 @@ public class LibraryFileManager
     public Task<List<KnownFileInfo>> GetKnownLibraryFilesWithCreationTimes(bool includeOutput = false)
         => DatabaseAccessManager.Instance.LibraryFileManager.GetKnownLibraryFilesWithCreationTimes(includeOutput);
 
-    /// <summary>
-    /// Gets the shrinkage groups for the files
-    /// </summary>
-    /// <returns>the shrinkage groups</returns>
-    public Task<List<ShrinkageData>> GetShrinkageGroups()
-        => DatabaseAccessManager.Instance.LibraryFileManager.GetShrinkageGroups();
 
     /// <summary>
     /// Gets the total storage saved
