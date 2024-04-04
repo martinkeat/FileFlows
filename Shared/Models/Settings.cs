@@ -163,6 +163,23 @@ public class Settings : FileFlowObject
     /// </summary>
     [Encrypted]
     public string SmtpPassword { get; set; } = string.Empty;
+    
+    
+    /// <summary>
+    /// Gets or sets the open ID connect authority
+    /// </summary>
+    [Encrypted]
+    public string OidcAuthority { get; set; }
+    /// <summary>
+    /// Gets or sets the open ID connect client ID
+    /// </summary>
+    [Encrypted]
+    public string OidcClientId { get; set; }
+    /// <summary>
+    /// Gets or sets the open ID connect client secret
+    /// </summary>
+    [Encrypted]
+    public string OidcClientSecret { get; set; }
 }
 
 /// <summary>

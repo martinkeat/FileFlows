@@ -49,7 +49,7 @@ public partial class Settings : InputRegister
     private bool IsSaving { get; set; }
 
     private string lblSave, lblSaving, lblHelp, lblEmail, lblAdvanced, lblDatabase, lblLogging, 
-        lblDbDescription, lblFileServerDescription, lblTest, lblRestart, 
+        lblDbDescription, lblFileServerDescription, lblTest, lblRestart, lblOpenIdConnect, 
         lblLicense, lblUpdates, lblCheckNow, lblTestingDatabase, lblFileServer;
 
     private string OriginalDatabase, OriginalServer;
@@ -103,6 +103,7 @@ public partial class Settings : InputRegister
     {
         new() { Label = $"Enums.{nameof(SecurityMode)}.{nameof(SecurityMode.Off)}", Value = SecurityMode.Off },
         new() { Label = $"Enums.{nameof(SecurityMode)}.{nameof(SecurityMode.Local)}", Value = SecurityMode.Local },
+        new() { Label = $"Enums.{nameof(SecurityMode)}.{nameof(SecurityMode.OpenIdConnect)}", Value = SecurityMode.OpenIdConnect },
     };
     
     /// <summary>
@@ -179,6 +180,7 @@ public partial class Settings : InputRegister
         lblLicense = Translater.Instant("Labels.License");
         lblEmail = Translater.Instant("Pages.Settings.Labels.Email");
         lblUpdates = Translater.Instant("Pages.Settings.Labels.Updates");
+        lblOpenIdConnect = Translater.Instant("Pages.Settings.Labels.OpenIdConnect");
         lblDatabase = Translater.Instant("Pages.Settings.Labels.Database");
         lblDbDescription = Translater.Instant("Pages.Settings.Fields.Database.Description");
         lblTest = Translater.Instant("Labels.Test");

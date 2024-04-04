@@ -200,7 +200,11 @@ public class SettingsController : Controller
             SmtpPort = model.SmtpPort,
             SmtpSecurity = model.SmtpSecurity,
             SmtpUser = model.SmtpUser ?? string.Empty,
-            SmtpFromAddress = model.SmtpFromAddress ?? string.Empty
+            SmtpFromAddress = model.SmtpFromAddress ?? string.Empty,
+                
+            OidcAuthority = model.OidcAuthority ?? string.Empty,
+            OidcClientId = model.OidcClientId ?? string.Empty,
+            OidcClientSecret = model.OidcClientSecret ?? string.Empty,
         });
         RemoteService.ApiToken = model.ApiToken;
         // validate license it

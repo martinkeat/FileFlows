@@ -113,6 +113,11 @@
                         <InputText @bind-Value="@Model.SmtpFrom" Label="Pages.Settings.Fields.Smtp.From" />
                         <InputText @bind-Value="@Model.SmtpFromAddress" Label="Pages.Settings.Fields.Smtp.FromAddress" />
                     </FlowTab>
+                    <FlowTab Title="@lblOpenIdConnect" Visible="@(Model.Security == SecurityMode.OpenIdConnect)">
+                        <InputText @bind-Value="@Model.OidcAuthority" Label="Pages.Settings.Fields.OpenIdConnect.Authority" />
+                        <InputText @bind-Value="@Model.OidcClientId" Label="Pages.Settings.Fields.OpenIdConnect.ClientId" />
+                        <InputText @bind-Value="@Model.OidcClientSecret" Label="Pages.Settings.Fields.OpenIdConnect.ClientSecret" />
+                    </FlowTab>
                     <FlowTab Title="@lblLicense">
                         <p class="box info">Here you can enter your license key to enable additional features
                             See <a href="https://fileflows.com/pricing" target="_blank" rel="noreferrer">FileFlows.com</a> for more information.</p>

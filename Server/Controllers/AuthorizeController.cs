@@ -45,7 +45,7 @@ public class AuthorizeController : Controller
             return BadRequest(error);
         }
 
-        var jwt = CreateJwtToken(result.Value);
+        var jwt = SecurityHelper.CreateJwtToken(result.Value, Request.GetActualIP());
         return Ok(jwt);
     }
 
@@ -174,39 +174,6 @@ Best regards,
 The FileFlows Team");
 
         return Redirect("/login?pr=1");
-    }
-    
-    /// <summary>
-    /// Creates a JWT Token for an email address
-    /// </summary>
-    /// <param name="user">the user</param>
-    /// <returns>the JWT token</returns>
-    private string CreateJwtToken(User user)
-    {
-        string ip = Request.GetActualIP().Replace(":", "_");
-        string code = Decrypter.Encrypt(user.Uid + ":" + ip + ":" + user.Name);
-        var claims = new List<Claim>
-        {
-            new (ClaimTypes.Name, user.Name),
-            new (ClaimTypes.Email, user.Email),
-            new Claim("code", code)
-        };
-    
-        var claimsIdentity = new ClaimsIdentity(claims);
-
-        var key = ServiceLoader.Load<AppSettingsService>().Settings.EncryptionKey;
-    
-        var tokenHandler = new JwtSecurityTokenHandler();
-        var tokenDescriptor = new SecurityTokenDescriptor
-        {
-            Subject = claimsIdentity,
-            Expires = DateTime.UtcNow.AddDays(7),
-            Issuer = "https://fileflows.com",
-            Audience = "https://fileflows.com",
-            SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(Encoding.ASCII.GetBytes(key)), SecurityAlgorithms.HmacSha256Signature)
-        };
-        var token = tokenHandler.CreateToken(tokenDescriptor);
-        return tokenHandler.WriteToken(token);
     }
 
 
