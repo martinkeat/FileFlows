@@ -89,8 +89,15 @@ WHERE {Wrap(nameof(DbLogMessage.LogDate))} < (
     WHERE RowNumber <= {max}
 );
 ";
-        using var db = await DbConnector.GetDb();
-        await db.Db.ExecuteAsync(sql);
+        try
+        {
+            using var db = await DbConnector.GetDb();
+            await db.Db.ExecuteAsync(sql);
+        }
+        catch (Exception ex)
+        {
+            Logger.WLog("Error pruning old logs: " + ex.Message + Environment.NewLine + sql);
+        }
     }
 
     /// <summary>

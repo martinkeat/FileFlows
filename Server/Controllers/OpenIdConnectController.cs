@@ -70,13 +70,13 @@ public class OpenIDController : Controller
             // Perform token validation
             var redirectUri = Url.Action("Callback", "OpenID", null, Request.Scheme); // Callback URL
 
-            var tokenRequestContent = new FormUrlEncodedContent(new[]
+            var tokenRequestContent = new FormUrlEncodedContent(new KeyValuePair<string, string>[]
             {
-                new KeyValuePair<string, string>("grant_type", "authorization_code"),
-                new KeyValuePair<string, string>("code", code),
-                new KeyValuePair<string, string>("redirect_uri", redirectUri),
-                new KeyValuePair<string, string>("client_id", _settings.OidcClientId),
-                new KeyValuePair<string, string>("client_secret", _settings.OidcClientSecret)
+                new ("grant_type", "authorization_code"),
+                new ("code", code),
+                new ("redirect_uri", redirectUri),
+                new ("client_id", _settings.OidcClientId),
+                new ("client_secret", _settings.OidcClientSecret)
             });
 
             var tokenEndpoint = oidcConfig.TokenEndpoint;
@@ -113,16 +113,42 @@ public class OpenIDController : Controller
 
             var jwt = SecurityHelper.CreateJwtToken(user, Request.GetActualIP());
 
-            string url = "/auth-redirect.html?jwt=" + jwt;
-            #if(DEBUG)
-            url = "http://localhost:5276" + url;
-            #endif
-            return Redirect(url);
+            return AuthRedirectPage(jwt);
         }
         catch (Exception)
         {
             return ErrorPage();
         }
+    }
+
+    /// <summary>
+    /// Creates the response to the auth-redirect page
+    /// </summary>
+    /// <param name="jwt">the JWT token</param>
+    /// <returns>the IActionResult</returns>
+    private IActionResult AuthRedirectPage(string jwt)
+    {
+#if(DEBUG)
+        return Redirect($"http://localhost:5276/auth-redirect.html?jwt={jwt}");
+#endif
+        var htmlContent = $@"
+    <!DOCTYPE html>
+    <html lang='en'>
+    <head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>FileFlows</title>
+    <style>
+        body {{ background: black; }}
+    </style>
+    <script>
+        localStorage.setItem('ACCESS_TOKEN', '{JsonSerializer.Serialize(jwt)}');
+        window.location.href = '/';
+    </script>
+    </head>
+    <body></body>
+    </html>";
+        return Content(htmlContent, "text/html");
     }
 
     /// <summary>
