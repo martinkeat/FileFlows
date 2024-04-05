@@ -10,6 +10,20 @@ namespace FileFlows.Server.Authentication;
 /// </summary>
 public class FileFlowsApiAuthorizeAttribute : Attribute, IAsyncAuthorizationFilter
 {
+    /// <summary>
+    /// If this needs a valid Node UID to be called
+    /// </summary>
+    private readonly bool Node;
+
+    /// <summary>
+    /// Initialises a new instance of the attribute
+    /// </summary>
+    /// <param name="node">if this needs a valid Node UID to be caleld</param>
+    public FileFlowsApiAuthorizeAttribute(bool node = true)
+    {
+        Node = node;
+    }
+    
     
     /// <summary>
     /// Handles the on on authorization

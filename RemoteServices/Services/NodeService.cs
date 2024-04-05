@@ -8,12 +8,7 @@ namespace FileFlows.RemoteServices;
 /// </summary>
 public class NodeService : RemoteService, INodeService
 {   
-    /// <summary>
-    /// Clears all workers on the node.
-    /// This is called when a node first starts up, if a node crashed when workers were running this will reset them
-    /// </summary>
-    /// <param name="nodeUid">The UID of the node</param>
-    /// <returns>a completed task</returns>
+    /// <inheritdoc />
     public async Task ClearWorkersAsync(Guid nodeUid)
     {
         try
@@ -26,10 +21,7 @@ public class NodeService : RemoteService, INodeService
         }
     }
 
-    /// <summary>
-    /// Gets an instance of the internal processing node
-    /// </summary>
-    /// <returns>an instance of the internal processing node</returns>
+    /// <inheritdoc />
     public async Task<ProcessingNode> GetServerNodeAsync()
     {
         try
@@ -44,11 +36,7 @@ public class NodeService : RemoteService, INodeService
         }
     }
     
-    /// <summary>
-    /// Gets a processing node by its physical address
-    /// </summary>
-    /// <param name="address">The address (hostname or IP address) of the node</param>
-    /// <returns>An instance of the processing node</returns>
+    /// <inheritdoc />
     public async Task<ProcessingNode> GetByAddressAsync(string address)
     {
         try
@@ -61,6 +49,29 @@ public class NodeService : RemoteService, INodeService
                 // node does not exist
                 Logger.Instance.ILog("Node does not exist: " + address);
                 return null;
+            }
+            result.Data.SignalrUrl = ServiceBaseUrl + "/" + result.Data.SignalrUrl;
+            return result.Data;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Failed to get node by address: " + ex.Message + Environment.NewLine + ex.StackTrace);
+            throw;
+        }
+    }
+    
+    /// <inheritdoc />
+    public async Task<ProcessingNode> GetByUidAsync(Guid uid)
+    {
+        try
+        {
+            var result = await HttpHelper.Get<ProcessingNode>(ServiceBaseUrl + "/remote/node/" + uid + "?version=" + Globals.Version);
+            if (result.Success == false)
+                throw new Exception("Failed to get node: " + result.Body);                
+            if(result.Data == null)
+            {
+                // node does not exist
+                throw new Exception("Node does not exist: " + uid);
             }
             result.Data.SignalrUrl = ServiceBaseUrl + "/" + result.Data.SignalrUrl;
             return result.Data;

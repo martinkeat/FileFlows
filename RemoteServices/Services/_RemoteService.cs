@@ -31,4 +31,9 @@ public abstract class RemoteService
     /// </summary>
     public static string ApiToken { get; set; }
 
+    /// <summary>
+    /// Gets or sets the Node UID whose making these requests
+    /// </summary>
+    public static Guid NodeUid { get; set; }
+
 }

@@ -174,6 +174,8 @@ public class NodeManager
             return (false, ex.Message);
         }
 
+        if(result.Uid != Globals.InternalNodeUid) // internal node uid is already set elsewhere to a unique UID for security
+            RemoteService.NodeUid = result.Uid;
         RemoteService.ServiceBaseUrl = settings.ServerUrl;
         if (RemoteService.ServiceBaseUrl.EndsWith("/"))
             RemoteService.ServiceBaseUrl = RemoteService.ServiceBaseUrl[..^1];

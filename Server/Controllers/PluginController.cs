@@ -278,7 +278,7 @@ public class PluginController : Controller
                             if (string.IsNullOrEmpty(text))
                                 continue;
 
-                            dict[key] = Decrypter.Encrypt(text);
+                            dict[key] = DataLayer.Helpers.Decrypter.Encrypt(text);
                             updated = true;
                         }
                     }

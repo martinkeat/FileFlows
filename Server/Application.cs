@@ -30,6 +30,12 @@ public class Application
     public static string ServerUrl { get; set; }
 
     /// <summary>
+    /// Gets the running UID which will be used to verify remote requests come from this running instance
+    /// We cant use the InternalNodeUid as thats fixed across all installs
+    /// </summary>
+    internal static readonly Guid RunningUid = Guid.NewGuid();
+
+    /// <summary>
     /// Gets or sets if using a web view
     /// </summary>
     public static bool UsingWebView { get; private set; }

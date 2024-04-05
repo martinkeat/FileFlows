@@ -7,6 +7,8 @@ using FileFlows.ServerShared.Helpers;
 using FileFlows.ServerShared.Services;
 using FileFlows.ServerShared.Workers;
 using FileFlows.Shared.Models;
+using Jint.Native.Json;
+using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace FileFlows.Node.Workers;
 
@@ -250,28 +252,24 @@ public class FlowWorker : Worker
             bool keepFiles = false;
             try
             {
-#pragma warning disable CS8601 // Possible null reference assignment.
-                var parameters = new string[]
-                {
-                    "--uid",
-                    processUid.ToString(),
-                    "--libfile",
-                    libFile.Uid.ToString(),
-                    "--tempPath",
-                    tempPath,
-                    "--cfgPath",
-                    GetConfigurationDirectory(),
-                    "--cfgKey",
-                    GetConfigNoEncrypt(node2) ? "NO_ENCRYPT" : GetConfigKey(node2),
-                    "--baseUrl",
-                    RemoteService.ServiceBaseUrl,
-                    string.IsNullOrEmpty(RemoteService.ApiToken) ? null : "--apiToken",
-                    string.IsNullOrEmpty(RemoteService.ApiToken) ? null : RemoteService.ApiToken,
-                    Globals.IsDocker ? "--docker" : null,
-                    isServer ? null : "--hostname",
-                    isServer ? null : Hostname,
-                    isServer ? "--server" : "--notserver"
-                }.Where(x => x != null).ToArray();
+                var runnerParameters = new RunnerParameters();
+                runnerParameters.Uid = processUid;
+                runnerParameters.NodeUid = node2.Uid;
+                runnerParameters.LibraryFile = libFile.Uid;
+                runnerParameters.TempPath = tempPath;
+                runnerParameters.ConfigPath = GetConfigurationDirectory();
+                runnerParameters.ConfigKey = GetConfigNoEncrypt(node2) ? "NO_ENCRYPT" : GetConfigKey(node2);
+                runnerParameters.BaseUrl = RemoteService.ServiceBaseUrl;
+                runnerParameters.ApiToken = RemoteService.ApiToken;
+                runnerParameters.RemoteNodeUid = RemoteService.NodeUid;
+                runnerParameters.IsDocker = Globals.IsDocker;
+                runnerParameters.IsInternalServerNode = isServer;
+                runnerParameters.Hostname = isServer ? null : Hostname;
+                string json = JsonSerializer.Serialize(runnerParameters);
+                string randomString = new string(Enumerable.Repeat("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789", 20)
+                    .Select(s => s[new Random().Next(s.Length)]).ToArray());
+                string encrypted = Decrypter.Encrypt(json, "hVYjHrWvtEq8huShjTkA" + randomString + "oZf4GW3jJtjuNHlMNpl9");
+                var parameters = new[] { encrypted, randomString };
 #pragma warning restore CS8601 // Possible null reference assignment.
 
                 try

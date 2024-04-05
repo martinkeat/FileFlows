@@ -35,7 +35,7 @@ public static class HttpContextExtensions
             var codeClaim = claims.FirstOrDefault(c => c.Type == "code")?.Value;
             if (string.IsNullOrWhiteSpace(codeClaim))
                 return null;
-            var code = Decrypter.Decrypt(codeClaim);
+            var code = DataLayer.Helpers.Decrypter.Decrypt(codeClaim);
             if (string.IsNullOrWhiteSpace(code) || code.IndexOf(":", StringComparison.Ordinal) < 1)
                 return null;
 

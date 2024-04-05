@@ -118,6 +118,7 @@ class HttpHelper
         
         if(string.IsNullOrWhiteSpace(RemoteService.ApiToken) == false)
             request.Headers.Add("x-token", RemoteService.ApiToken);
+        request.Headers.Add("x-node", RemoteService.NodeUid.ToString());
 
         if (method == System.Net.Http.HttpMethod.Post && data == null)
         {

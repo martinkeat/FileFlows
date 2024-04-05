@@ -8,6 +8,9 @@ using FileFlows.Plugin.Services;
 using FileFlows.RemoteServices;
 using FileFlows.ServerShared;
 using FileFlows.ServerShared.FileServices;
+using FileFlows.ServerShared.Helpers;
+using FileFlows.ServerShared.Models;
+using FileFlows.Shared;
 
 namespace FileFlows.FlowRunner;
 
@@ -20,7 +23,14 @@ public class Program
     /// Gets the runner instance UID
     /// </summary>
     public static Guid Uid { get; private set; }
+    /// <summary>
+    /// Gets the Node UID
+    /// </summary>
+    public static Guid NodeUid { get; private set; }
 
+    /// <summary>
+    /// The flow logger
+    /// </summary>
     public static FlowLogger Logger;
     
     /// <summary>
@@ -80,23 +90,27 @@ public class Program
     {
         Logger = new (null);
         LogInfo("Flow Runner Version: " + Globals.Version);
+
+        string encrypted = args[0];
+        string decrypted = Decrypter.Decrypt(encrypted, "hVYjHrWvtEq8huShjTkA" + args[1] + "oZf4GW3jJtjuNHlMNpl9");
+        RunnerParameters parameters = JsonSerializer.Deserialize<RunnerParameters>(decrypted)!;
+        
         ServicePointManager.DefaultConnectionLimit = 50;
         try
         {
-            args ??= new string[] { };
-            bool server = args.Any(x => x.ToLower() == "--server");
+            Uid = parameters.Uid;
+            NodeUid = parameters.NodeUid;
+            LogInfo("Base URL: " + parameters.BaseUrl);
+            RemoteService.ServiceBaseUrl = parameters.BaseUrl;
+            RemoteService.ApiToken = parameters.ApiToken;
+            RemoteService.NodeUid = parameters.RemoteNodeUid;
 
-            string uid = GetArgument(args, "--uid");
-            if (string.IsNullOrEmpty(uid))
-                throw new Exception("uid not set.");
-            Uid = Guid.Parse(uid);
-
-            string tempPath = GetArgument(args, "--tempPath");
+            string tempPath = parameters.TempPath;
             if (string.IsNullOrEmpty(tempPath) || Directory.Exists(tempPath) == false)
                 throw new Exception("Temp path doesnt exist: " + tempPath);
             LogInfo("Temp Path: " + tempPath);
             
-            string cfgPath = GetArgument(args, "--cfgPath");
+            string cfgPath = parameters.ConfigPath;
             if (string.IsNullOrEmpty(cfgPath) || Directory.Exists(cfgPath) == false)
                 throw new Exception("Configuration Path doesnt exist: " + cfgPath);
 
@@ -105,7 +119,7 @@ public class Program
                 throw new Exception("Configuration file doesnt exist: " + cfgFile);
 
 
-            string cfgKey = GetArgument(args, "--cfgKey");
+            string cfgKey = parameters.ConfigKey;
             if (string.IsNullOrEmpty(cfgKey))
                 throw new Exception("Configuration Key not set");
             bool noEncrypt = cfgKey == "NO_ENCRYPT";
@@ -123,22 +137,13 @@ public class Program
 
             var config = JsonSerializer.Deserialize<ConfigurationRevision>(cfgJson);
 
-            string baseUrl = GetArgument(args, "--baseUrl");
-            if (string.IsNullOrEmpty(baseUrl))
-                throw new Exception("baseUrl not set");
-            LogInfo("Base URL: " + baseUrl);
-            RemoteService.ServiceBaseUrl = baseUrl;
 
-            RemoteService.ApiToken = GetArgument(args, "--apiToken");
+            string hostname = parameters.Hostname?.EmptyAsNull() ?? Environment.MachineName;
 
-            string hostname = GetArgument(args, "--hostname");
-            if(string.IsNullOrWhiteSpace(hostname))
-                hostname = Environment.MachineName;
-
-            Globals.IsDocker = args.Contains("--docker");
+            Globals.IsDocker = parameters.IsDocker;
             LogInfo("Docker: " + Globals.IsDocker);
 
-            string workingDir = Path.Combine(tempPath, "Runner-" + uid);
+            string workingDir = Path.Combine(tempPath, "Runner-" + Uid);
             Program.WorkingDirectory = workingDir;
             LogInfo("Working Directory: " + workingDir);
             try
@@ -157,11 +162,11 @@ public class Program
 
             LogInfo("Created Directory: " + workingDir);
 
-            var libfileUid = Guid.Parse(GetArgument(args, "--libfile"));
+            var libfileUid = parameters.LibraryFile;
             HttpHelper.Client = HttpHelper.GetDefaultHttpClient(RemoteService.ServiceBaseUrl);
             var result = Execute(new()
             {
-                IsServer = server,
+                IsServer = parameters.IsInternalServerNode,
                 Config = config,
                 ConfigDirectory = cfgPath,
                 TempDirectory = tempPath,
@@ -187,23 +192,6 @@ public class Program
     }
 
     /// <summary>
-    /// Gets an argument by its name
-    /// </summary>
-    /// <param name="args">the list of arguments</param>
-    /// <param name="name">the name of the argument to get</param>
-    /// <returns>the argument if found, otherwise an empty string</returns>
-    static string GetArgument(string[] args, string name)
-    {
-        int index = args.Select(x => x.ToLower()).ToList().IndexOf(name.ToLower());
-        if (index < 0)
-            return string.Empty;
-        if (index >= args.Length - 1)
-            return string.Empty;
-        return args[index + 1];
-    }
-
-
-    /// <summary>
     /// Executes the runner
     /// </summary>
     /// <param name="args">the args</param>
@@ -216,10 +204,8 @@ public class Program
         try
         {
             string address = args.IsServer ? "INTERNAL_NODE" : args.Hostname;
-            LogInfo("Address: "+ address);
-            node = nodeService.GetByAddressAsync(address).Result;
-            if (node == null)
-                throw new Exception("Failed to load node!!!!");
+            LogInfo("Address: " + address);
+            node = nodeService.GetByUidAsync(NodeUid).Result;  // throws if not found
             LogInfo("Node SignalrUrl: " + node.SignalrUrl);
             Program.ProcessingNode = node;
         }

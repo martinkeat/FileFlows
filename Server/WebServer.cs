@@ -316,6 +316,7 @@ public class WebServer
 
         RemoteService.ServiceBaseUrl = Application.ServerUrl;
         RemoteService.ApiToken = settings.ApiToken;
+        RemoteService.NodeUid = Application.RunningUid;
 
         app.MapHub<Hubs.FlowHub>("/flow");
 

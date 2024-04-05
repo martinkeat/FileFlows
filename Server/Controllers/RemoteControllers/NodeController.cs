@@ -47,7 +47,36 @@ public class NodeController : Controller
         node.SignalrUrl = "flow";
         return node;
     }
-    
+
+    /// <summary>
+    /// Get processing node
+    /// </summary>
+    /// <param name="uid">The UID of the processing node</param>
+    /// <param name="version">The version of the node</param>
+    /// <returns>The processing node instance</returns>
+    [HttpGet("{uid}")]
+    public async Task<ProcessingNode?> Get(Guid uid, [FromQuery] string version)
+    {
+        var service = ServiceLoader.Load<NodeService>();
+        var node = await service.GetByUidAsync(uid);
+        if (node == null)
+            return node;
+
+        if (string.IsNullOrEmpty(version) == false && node.Version != version)
+        {
+            node.Version = version;
+            node = await service.Update(node);
+        }
+        else
+        {
+            // this updates the "LastSeen"
+            await service.UpdateLastSeen(node.Uid);
+        }
+
+        node.SignalrUrl = "flow";
+        return node;
+    }
+
     /// <summary>
     /// Gets the version an node update available
     /// </summary>
@@ -133,6 +162,7 @@ public class NodeController : Controller
     /// <param name="model">The register model containing information about the processing node being registered</param>
     /// <returns>The processing node instance</returns>
     [HttpPost("register")]
+    [FileFlowsApiAuthorize(node: false)]
     public async Task<ProcessingNode> RegisterPost([FromBody] RegisterModel model)
     {
         if (string.IsNullOrWhiteSpace(model?.Address))

@@ -14,6 +14,13 @@ public interface INodeService
     /// <param name="address">The address (hostname or IP address) of the node</param>
     /// <returns>An instance of the processing node</returns>
     Task<ProcessingNode> GetByAddressAsync(string address);
+    
+    /// <summary>
+    /// Gets a processing node by UID
+    /// </summary>
+    /// <param name="uid">The UID of the node</param>
+    /// <returns>An instance of the processing node</returns>
+    Task<ProcessingNode> GetByUidAsync(Guid uid);
 
     /// <summary>
     /// Gets an instance of the internal processing node
