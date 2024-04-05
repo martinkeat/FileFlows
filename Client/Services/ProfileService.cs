@@ -18,10 +18,20 @@ public class ProfileService
     private Profile _profile;
 
     private NavigationManager NavigationManager;
+    private FFLocalStorageService LocalStorageService;
+    /// <summary>
+    /// Represents the method that handles the Refresh event.
+    /// </summary>
+    public delegate void OnRefreshDelegate();
+    /// <summary>
+    /// Occurs when the paused label changes.
+    /// </summary>
+    public event OnRefreshDelegate OnRefresh;
 
-    public ProfileService(NavigationManager navigationManager)
+    public ProfileService(NavigationManager navigationManager, FFLocalStorageService localStorageService)
     {
         NavigationManager = navigationManager;
+        LocalStorageService = localStorageService;
     }
 
     /// <summary>
@@ -38,7 +48,11 @@ public class ProfileService
             var result = await HttpHelper.Get<Profile>("/api/profile");
             if (result.Success == false)
             {
+#if(DEBUG)
+                NavigationManager.NavigateTo("http://localhost:6868/login", true);
+#else
                 NavigationManager.NavigateTo("/login", true);
+#endif
                 return null;
             }
 
@@ -62,7 +76,11 @@ public class ProfileService
             var result = await HttpHelper.Get<Profile>("/api/profile");
             if (result.Success == false)
             {
-                NavigationManager.NavigateTo("/login");
+#if(DEBUG)
+                NavigationManager.NavigateTo("http://localhost:6868/login", true);
+#else
+                NavigationManager.NavigateTo("/login", true);
+#endif
                 return;
             }
             var newProfile = result.Data;
@@ -83,7 +101,31 @@ public class ProfileService
         }
         finally
         {
-            
+            _semaphore.Release();
         }
+        OnRefresh?.Invoke();
+    }
+
+    /// <summary>
+    /// Performs a logout
+    /// </summary>
+    public async Task Logout()
+    {
+        await LocalStorageService.SetAccessToken(null);
+        HttpHelper.Client.DefaultRequestHeaders.Authorization = null;
+#if(DEBUG)
+        NavigationManager.NavigateTo("http://localhost:6868/login", true);
+#else
+        NavigationManager.NavigateTo("/login", true);
+#endif
+    }
+
+    /// <summary>
+    /// Clears the access token
+    /// </summary>
+    public async Task ClearAccessToken()
+    {
+        await LocalStorageService.SetAccessToken(null);
+        HttpHelper.Client.DefaultRequestHeaders.Authorization = null;
     }
 }

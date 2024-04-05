@@ -87,20 +87,11 @@
                     </FlowTab>
                     <FlowTab Title="@lblAdvanced">
                         <InputSelect @bind-Value="@Language" Options=@LanguageOptions Label="Pages.Settings.Fields.Language" AllowClear="false" />
-                        @if (LicensedFor(LicenseFlags.UserSecurity))
-                        {
-                            <InputSelect @bind-Value="@Security" Options=@SecurityOptions Label="Pages.Settings.Fields.Security" AllowClear="false" />
-                            @if (Model.Security != SecurityMode.Off)
-                            {
-                                <InputApiToken @bind-Value="Model.ApiToken" Label="Pages.Settings.Fields.ApiToken" />
-                            }
-                        }
                         @{
                             if (Model.ProcessFileCheckInterval < 5)
                                 Model.ProcessFileCheckInterval = 5;
                         }
                         <InputNumber @bind-Value="@Model.ProcessFileCheckInterval" Label="Pages.Settings.Fields.ProcessFileCheckInterval" Min=5 Max=86400 />
-                        
                         <InputSwitch @bind-Value="@Model.KeepFailedFlowTempFiles" Label="Pages.Settings.Fields.KeepFailedFlowTempFiles" />
                         <InputSwitch @bind-Value="@Model.DisableTelemetry" Inverse="@true" Label="Pages.Settings.Fields.Telemetry" OnChangedValue="OnTelemetryChange"/>
                     </FlowTab>
@@ -113,10 +104,25 @@
                         <InputText @bind-Value="@Model.SmtpFrom" Label="Pages.Settings.Fields.Smtp.From" />
                         <InputText @bind-Value="@Model.SmtpFromAddress" Label="Pages.Settings.Fields.Smtp.FromAddress" />
                     </FlowTab>
-                    <FlowTab Title="@lblOpenIdConnect" Visible="@(Model.Security == SecurityMode.OpenIdConnect)">
-                        <InputText @bind-Value="@Model.OidcAuthority" Label="Pages.Settings.Fields.OpenIdConnect.Authority" />
-                        <InputText @bind-Value="@Model.OidcClientId" Label="Pages.Settings.Fields.OpenIdConnect.ClientId" />
-                        <InputText @bind-Value="@Model.OidcClientSecret" Label="Pages.Settings.Fields.OpenIdConnect.ClientSecret" />
+                    <FlowTab Title="@lblSecurity" Visible="@(LicensedFor(LicenseFlags.UserSecurity))">
+                        <p style="white-space: pre-wrap">@((MarkupString)mdSecurityDescription)</p>
+                        <hr />
+                        <InputSelect @bind-Value="@Security" AllowClear="false"
+                                     Disabled="@((Profile.ConfigurationStatus & ConfigurationStatus.Users) != ConfigurationStatus.Users)"
+                                     Options=@SecurityOptions Label="Pages.Settings.Fields.Security.Mode" />
+                        @if (Model.Security != SecurityMode.Off)
+                        {
+                            <InputApiToken @bind-Value="Model.ApiToken" Label="Pages.Settings.Fields.Security.ApiToken" />
+                        }
+                        
+                        @if (Model.Security == SecurityMode.OpenIdConnect)
+                        {
+                            <hr />
+                            
+                            <InputText @bind-Value="@Model.OidcAuthority" Label="Pages.Settings.Fields.Security.Authority"/>
+                            <InputText @bind-Value="@Model.OidcClientId" Label="Pages.Settings.Fields.Security.ClientId"/>
+                            <InputText @bind-Value="@Model.OidcClientSecret" Label="Pages.Settings.Fields.Security.ClientSecret"/>
+                        }
                     </FlowTab>
                     <FlowTab Title="@lblLicense">
                         <p class="box info">Here you can enter your license key to enable additional features

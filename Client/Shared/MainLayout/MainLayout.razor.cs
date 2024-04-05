@@ -39,7 +39,11 @@ public partial class MainLayout : LayoutComponentBase
 
     private void On401()
     {
+        #if(DEBUG)
+        NavigationManager.NavigateTo("http://localhost:6868/login", true);
+        #else
         NavigationManager.NavigateTo("/login", true);
+        #endif
     }
 
     private void ClientServiceOnDisconnected()

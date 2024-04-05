@@ -1,7 +1,8 @@
 .toast-container {
   position: fixed;
-  bottom: 1.5rem;
-  right: 1.5rem;
+  top: 1.5rem;
+  right: 50%;
+  transform: translateX(50%);
   z-index: 9999;
 }
 
@@ -16,7 +17,7 @@
   box-shadow: 0 0.1rem 0.25rem rgba(0, 0, 0, 0.1);
   overflow: hidden;
   transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
-  transform: translateY(100%);
+  transform: translateY(-100%);
   opacity: 0;
 }
 .ff-toast.show {
@@ -72,11 +73,11 @@
   color: inherit;
 }
 .ff-toast svg {
-  width: 1rem;
-  position: relative;
-  top: 0.1rem;
-  left: 0.15rem;
-}
+   width: 1rem;
+   position: relative;
+   top: 0.1rem;
+   left: 0.15rem;
+ }
 .ff-toast .toast-close {
   right: 0.75rem;
   color: var(--color) !important;
@@ -87,4 +88,3 @@
   opacity: 1;
 }
 
-/*# sourceMappingURL=toast.css.map */

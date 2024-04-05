@@ -33,7 +33,8 @@ public partial class Users: ListPage<Guid, User>
     public override async Task<bool> Edit(User item)
     {
         Blocker.Show();
-        var isUser = item.Uid != Guid.Empty && (await HttpHelper.Post<bool>("/authorize/is-user/" + item.Uid)).Data;
+
+        var isUser = item.Uid == Profile.Uid;
         
         List<ElementField> fields = new List<ElementField>();
 
@@ -168,6 +169,9 @@ public partial class Users: ListPage<Guid, User>
                 return false;
             }
 
+            if ((Profile.ConfigurationStatus & ConfigurationStatus.Users) != ConfigurationStatus.Users)
+                Profile.ConfigurationStatus |= ConfigurationStatus.Users;
+
             int index = this.Data.FindIndex(x => x.Uid == saveResult.Data.Uid);
             if (index < 0)
                 this.Data.Add(saveResult.Data);
@@ -182,6 +186,19 @@ public partial class Users: ListPage<Guid, User>
             Blocker.Hide();
             this.StateHasChanged();
         }
+    }
+
+    /// <summary>
+    /// Called after deleting items
+    /// </summary>
+    /// <returns>a task to await</returns>
+    protected override Task PostDelete()
+    {
+        // check if users need to be removed
+        if (this.Data?.Any() != true &&
+            (Profile.ConfigurationStatus & ConfigurationStatus.Users) == ConfigurationStatus.Users)
+            Profile.ConfigurationStatus -= ConfigurationStatus.Users;
+        return Task.CompletedTask;
     }
 
     /// <summary>

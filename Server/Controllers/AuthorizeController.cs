@@ -1,20 +1,14 @@
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
 using System.Web;
 using FileFlows.Server.Authentication;
 using FileFlows.Server.Helpers;
 using FileFlows.Server.Services;
-using FileFlows.Shared.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
 
 namespace FileFlows.Server.Controllers;
 
 /// <summary>
 /// Authorization controller
 /// </summary>
-[Route("authorize")]
 [ApiExplorerSettings(IgnoreApi = true)]
 public class AuthorizeController : Controller
 {
@@ -22,14 +16,39 @@ public class AuthorizeController : Controller
     /// The claim used in the verification code
     /// </summary>
     private const string Claim = "emailAddress";
-    
+
+    /// <summary>
+    /// Login page/route
+    /// </summary>
+    /// <returns>the login page/route</returns>
+    [HttpGet("login")]
+    public async Task<IActionResult> LoginPage()
+    {
+        var mode = AuthenticationHelper.GetSecurityMode();
+        if (mode == SecurityMode.Off)
+            return Redirect("/");
+        var service = ServiceLoader.Load<SettingsService>();
+        if (mode == SecurityMode.OpenIdConnect)
+            return RedirectToAction(nameof(OpenIDController.Login), nameof(OpenIDController)[..^10]);
+        #if(DEBUG)
+        ViewBag.UrlPrefix = "http://localhost:5276/";
+        #endif
+
+        if (Translater.InitDone == false)
+        {
+            var settings = await ServiceLoader.Load<SettingsService>().Get();
+            TranslaterHelper.InitTranslater(settings.Language?.EmptyAsNull() ?? "en");
+        }
+        return View("Login");
+    }
+
     /// <summary>
     /// Performs a login
     /// </summary>
     /// <param name="model">the login model</param>
     /// <returns>the action result</returns>
-    [HttpPost]
-    public async Task<IActionResult> Login([FromBody] AuthorizationModel model)
+    [HttpPost("authorize")]
+    public async Task<IActionResult> PerformLogin([FromBody] AuthorizationModel model)
     {
         if (string.IsNullOrWhiteSpace(model?.Username))
             return BadRequest("Username is required");
@@ -45,7 +64,7 @@ public class AuthorizeController : Controller
             return BadRequest(error);
         }
 
-        var jwt = SecurityHelper.CreateJwtToken(result.Value, Request.GetActualIP());
+        var jwt = AuthenticationHelper.CreateJwtToken(result.Value, Request.GetActualIP());
         return Ok(jwt);
     }
 
@@ -54,7 +73,7 @@ public class AuthorizeController : Controller
     /// </summary>
     /// <param name="model">the model</param>
     /// <returns>the response</returns>
-    [HttpPost("change-password")]
+    [HttpPost("authorize/change-password")]
     public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordModel model)
     {
         var security = ServiceLoader.Load<AppSettingsService>().Settings.Security;
@@ -76,22 +95,10 @@ public class AuthorizeController : Controller
     }
 
     /// <summary>
-    /// Gets if the logged in user is this user
-    /// </summary>
-    /// <param name="uid">the user UID</param>
-    /// <returns>the result</returns>
-    [HttpPost("is-user/{uid}")]
-    public async Task<bool> IsUser([FromRoute] Guid uid)
-    {
-        var user = await HttpContext.GetLoggedInUser();
-        return user?.Uid == uid;
-    }
-
-    /// <summary>
     /// Resets the users password
     /// </summary>
     /// <param name="model">the reset model</param>
-    [HttpPost("reset-password")]
+    [HttpPost("authorize/reset-password")]
     public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordModel model)
     {
         if (string.IsNullOrWhiteSpace(model?.UsernameOrEmail))
@@ -137,7 +144,7 @@ public class AuthorizeController : Controller
     /// </summary>
     /// <param name="code">the reset code</param>
     /// <returns>the IActionResult</returns>
-    [HttpGet("reset-password/{code}")]
+    [HttpGet("authorize/reset-password/{code}")]
     public async Task<IActionResult> ResetPassword([FromRoute] string code)
     {
         if (string.IsNullOrWhiteSpace(code))

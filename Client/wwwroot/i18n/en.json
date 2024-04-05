@@ -263,7 +263,8 @@
     },
     "SecurityMode": {
       "Off": "None",
-      "Local": "Local Users"
+      "Local": "Local Users",
+      "OpenIdConnect": "Open ID Connect"
     },
     "UserRole": {
       "Files": "Files",
@@ -695,7 +696,18 @@
     },
     "Login": {
       "Messages": {
-        "InvalidUsernameOrPassword": "Invalid username or password"
+        "InvalidUsernameOrPassword": "Invalid username or password",
+        "PasswordReset": "Password Reset",
+        "LockedOut": "Too many incorrect login attempts, you are currently locked out."
+      },
+      "Fields": {
+        "Username": "Username",
+        "Password": "Password",
+        "UsernameOrEmail": "Username or Email",
+        "ForgotPassword": "Forgot Password?",
+        "Login": "Login",
+        "Reset": "Reset",
+        "Cancel": "Cancel"
       }
     },
     "Nodes": {
@@ -916,10 +928,6 @@
         "ProcessFileCheckInterval-Suffix": "seconds",
         "Language": "Language",
         "Language-Help": "The language that will be used in the system.",
-        "Security": "User Security",
-        "Security-Help": "Enable user authentication to access FileFlows.\nWhen enabled users will have to login in and processing nodes will require the API Token to access the server.",
-        "ApiToken": "API Token",
-        "ApiToken-Help": "API Token used by processing nodes to connect to the server",
         "Database":{
           "Description":"Here you can configure what Database FileFlows will use.\nNote: Any changes here will require you to restart FileFlows so it can migrate your data and if necessary create the new database.",
           "Type":"Type",
@@ -977,6 +985,20 @@
           "From-Help": "The name of the user who emails will be sent from",
           "FromAddress": "From Address",
           "FromAddress-Help": "The email address of the user who emails will be sent from"
+        },
+        "Security": {
+          "Title": "Security",
+          "Mode": "Mode",
+          "Mode-Help": "Enable user authentication to access FileFlows.\nWhen enabled users will have to login in and processing nodes will require the API Token to access the server.",
+          "ApiToken": "API Token",
+          "ApiToken-Help": "API Token used by processing nodes to connect to the server",
+          "Description": "Here you can configure a single sign on provider using Open ID Connect.\n\nUsers must be added to the [Users](/users) page before they can sign in or before you can use this feature.",
+          "Authority": "Authority",
+          "Authority-Help": "Enter the URL of the OpenID Connect provider (e.g., https://accounts.google.com/).",
+          "ClientId": "Client ID",
+          "ClientId-Help": "The client ID registered with the OpenID Connect provider.",
+          "ClientSecret": "Client Secret",
+          "ClientSecret-Help": "The client secret registered with the OpenID Connect provider."
         }
       }
     },

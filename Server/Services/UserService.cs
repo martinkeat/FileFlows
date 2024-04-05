@@ -31,6 +31,13 @@ public class UserService
     /// <returns>The user</returns>
     public Task<User?> GetByName(string name)
         => new UserManager().GetByName(name);
+    
+    /// <summary>
+    /// Gets if there are any users in the system
+    /// </summary>
+    /// <returns>true if there are any users</returns>
+    public Task<bool> HasAny()
+        => new UserManager().HasAny();
 
     /// <summary>
     /// Finds a user by their username or email address
@@ -66,11 +73,11 @@ public class UserService
     {
         var user = await GetByName(username);
         if (user == null)
-            return Result<User>.Fail("Pages.Login.Messages.InvalidUsernameOrPassword");
+            return Result<User>.Fail(Translater.Instant("Pages.Login.Messages.InvalidUsernameOrPassword"));
 
         LoginAttempts.TryGetValue(user.Uid, out LoginAttempt? loginAttempt);
         if (loginAttempt != null && loginAttempt.LockedOutUntil > DateTime.UtcNow)
-            return Result<User>.Fail("Pages.Login.LockedOut");
+            return Result<User>.Fail(Translater.Instant("Pages.Login.Messages.LockedOut"));
 
         if (BCrypt.Net.BCrypt.Verify(password, user.Password) == false)
         {
@@ -80,7 +87,7 @@ public class UserService
                 loginAttempt.LockedOutUntil = DateTime.UtcNow.AddMinutes(20);
             LoginAttempts[user.Uid] = loginAttempt;
             
-            return Result<User>.Fail("Pages.Login.Messages.InvalidUsernameOrPassword");
+            return Result<User>.Fail(Translater.Instant("Pages.Login.Messages.InvalidUsernameOrPassword"));
         }
 
         if(loginAttempt != null)

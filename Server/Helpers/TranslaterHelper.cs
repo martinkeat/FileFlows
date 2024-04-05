@@ -21,6 +21,9 @@ public class TranslaterHelper
         
         string appdir = DirectoryHelper.BaseDirectory + "/Server";
         string wwwroot = Path.Combine(appdir, $"wwwroot");
+        #if(DEBUG)
+        wwwroot = wwwroot[..wwwroot.IndexOf("/bin")] + "/wwwroot";
+        #endif
         
         wwwroot = Path.Combine(wwwroot, "i18n", $"{langCode}.json");
 

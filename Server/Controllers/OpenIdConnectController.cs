@@ -45,7 +45,7 @@ public class OpenIDController : Controller
         string clientId = _settings.OidcClientId; // Replace with your client ID
         string redirectUri = Url.Action("Callback", "OpenID", null, Request.Scheme); // Callback URL
 
-        string redirectUrl = $"{idpAuthUrl}?client_id={clientId}&redirect_uri={redirectUri}&response_type=code";
+        string redirectUrl = $"{idpAuthUrl}?client_id={clientId}&redirect_uri={redirectUri}&response_type=code&prompt=login";
 
         redirectUrl += "&scope=openid+profile+email";
         // Redirect the user to the IdP for authentication
@@ -111,7 +111,7 @@ public class OpenIDController : Controller
             if (user == null)
                 return ErrorPage();
 
-            var jwt = SecurityHelper.CreateJwtToken(user, Request.GetActualIP());
+            var jwt = AuthenticationHelper.CreateJwtToken(user, Request.GetActualIP());
 
             return AuthRedirectPage(jwt);
         }

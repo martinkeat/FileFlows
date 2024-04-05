@@ -49,7 +49,7 @@ public partial class Settings : InputRegister
     private bool IsSaving { get; set; }
 
     private string lblSave, lblSaving, lblHelp, lblEmail, lblAdvanced, lblDatabase, lblLogging, 
-        lblDbDescription, lblFileServerDescription, lblTest, lblRestart, lblOpenIdConnect, 
+        lblDbDescription, lblFileServerDescription, lblTest, lblRestart, lblSecurity, mdSecurityDescription, 
         lblLicense, lblUpdates, lblCheckNow, lblTestingDatabase, lblFileServer;
 
     private string OriginalDatabase, OriginalServer;
@@ -99,12 +99,7 @@ public partial class Settings : InputRegister
     /// <summary>
     /// The security options
     /// </summary>
-    private readonly List<ListOption> SecurityOptions = new()
-    {
-        new() { Label = $"Enums.{nameof(SecurityMode)}.{nameof(SecurityMode.Off)}", Value = SecurityMode.Off },
-        new() { Label = $"Enums.{nameof(SecurityMode)}.{nameof(SecurityMode.Local)}", Value = SecurityMode.Local },
-        new() { Label = $"Enums.{nameof(SecurityMode)}.{nameof(SecurityMode.OpenIdConnect)}", Value = SecurityMode.OpenIdConnect },
-    };
+    private List<ListOption> SecurityOptions;
     
     /// <summary>
     /// Gets or sets the type of database to use
@@ -180,7 +175,7 @@ public partial class Settings : InputRegister
         lblLicense = Translater.Instant("Labels.License");
         lblEmail = Translater.Instant("Pages.Settings.Labels.Email");
         lblUpdates = Translater.Instant("Pages.Settings.Labels.Updates");
-        lblOpenIdConnect = Translater.Instant("Pages.Settings.Labels.OpenIdConnect");
+        lblSecurity = Translater.Instant("Pages.Settings.Fields.Security.Title");
         lblDatabase = Translater.Instant("Pages.Settings.Labels.Database");
         lblDbDescription = Translater.Instant("Pages.Settings.Fields.Database.Description");
         lblTest = Translater.Instant("Labels.Test");
@@ -190,6 +185,8 @@ public partial class Settings : InputRegister
         lblTestingDatabase = Translater.Instant("Pages.Settings.Messages.Database.TestingDatabase");
         lblFileServer = Translater.Instant("Pages.Settings.Labels.FileServer");
         lblFileServerDescription = Translater.Instant("Pages.Settings.Fields.FileServer.Description");
+        mdSecurityDescription = RenderMarkdown("Pages.Settings.Fields.Security.Description");
+        InitSecurityModes();
         Blocker.Show("Loading Settings");
         try
         {
@@ -200,6 +197,66 @@ public partial class Settings : InputRegister
         {
             Blocker.Hide();
         }
+    }
+
+    /// <summary>
+    /// Initiate the security modes avaiable
+    /// </summary>
+    private void InitSecurityModes()
+    {
+        SecurityOptions = new();
+        if (Profile.LicensedFor(LicenseFlags.UserSecurity) == false)
+        {
+            Model.Security = SecurityMode.Off;
+            return;
+        }
+
+        SecurityOptions = new()
+        {
+            new() { Label = $"Enums.{nameof(SecurityMode)}.{nameof(SecurityMode.Off)}", Value = SecurityMode.Off },
+            new() { Label = $"Enums.{nameof(SecurityMode)}.{nameof(SecurityMode.Local)}", Value = SecurityMode.Local }
+        };
+        if (Profile.LicensedFor(LicenseFlags.Enterprise) == false)
+        {
+            if(Model.Security == SecurityMode.OpenIdConnect)
+                Model.Security = SecurityMode.Off;
+            return;
+        }
+
+        SecurityOptions.Add(
+            new()
+            {
+                Label = $"Enums.{nameof(SecurityMode)}.{nameof(SecurityMode.OpenIdConnect)}",
+                Value = SecurityMode.OpenIdConnect
+            });
+    }
+
+    /// <summary>
+    /// Renders markdown to HTML
+    /// </summary>
+    /// <param name="text">the text to render</param>
+    /// <returns>the HTML</returns>
+    private string RenderMarkdown(string text)
+    {
+        text = Translater.TranslateIfNeeded(text);
+        List<string> lines = new();
+        foreach (var t in text.Split('\n'))
+        {
+            if (string.IsNullOrWhiteSpace(t))
+            {
+                lines.Add(string.Empty);
+                continue;
+            }
+
+            string html = Markdig.Markdown.ToHtml(t).Trim();
+            if (html.StartsWith("<p>") && html.EndsWith("</p>"))
+                html = html[3..^4].Trim();
+            html.Replace("<a ", "<a onclick=\"ff.openLink(event);return false;\" ");
+            lines.Add(html);
+        }
+
+        return string.Join("\n", lines);
+
     }
 
 
@@ -247,14 +304,16 @@ public partial class Settings : InputRegister
         this.IsSaving = true;
         try
         {
-
             bool valid = await this.Validate();
             if (valid == false)
                 return;
             
             await HttpHelper.Put<string>("/api/settings/ui-settings", this.Model);
+            if (Model.Security == SecurityMode.Off)
+                await ProfileService.ClearAccessToken();
 
             await ProfileService.Refresh();
+            InitSecurityModes();
 
             if (initialLannguage != Model.Language)
             {

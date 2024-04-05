@@ -39,11 +39,14 @@ public class ProfileController : Controller
         
         bool libs = await ServiceLoader.Load<LibraryService>().HasAny();
         bool flows = await ServiceLoader.Load<FlowService>().HasAny();
+        bool users = await ServiceLoader.Load<UserService>().HasAny();
 
         if (flows)
             profile.ConfigurationStatus |= ConfigurationStatus.Flows;
         if (libs)
             profile.ConfigurationStatus |= ConfigurationStatus.Libraries;
+        if (users)
+            profile.ConfigurationStatus |= ConfigurationStatus.Users;
         profile.IsWebView = Application.UsingWebView;
         var license = LicenseHelper.GetLicense();
         if (license.Status == LicenseStatus.Valid)

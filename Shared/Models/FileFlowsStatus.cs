@@ -125,5 +125,9 @@ public enum ConfigurationStatus
     /// <summary>
     /// Libraries are configured
     /// </summary>
-    Libraries = 2
+    Libraries = 2,
+    /// <summary>
+    /// Users are configured
+    /// </summary>
+    Users = 4
 }

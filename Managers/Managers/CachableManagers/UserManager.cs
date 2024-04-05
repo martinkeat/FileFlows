@@ -22,4 +22,11 @@ public class UserManager : CachedManager<User>
         return (await GetData()).FirstOrDefault(x => x.Name.ToLowerInvariant() == usernameOrEmail
                                                      || x.Email.ToLowerInvariant() == usernameOrEmail);
     }
+
+    /// <summary>
+    /// Gets if there are any users in the system
+    /// </summary>
+    /// <returns>true if there are any users</returns>
+    public Task<bool> HasAny()
+        => DatabaseAccessManager.Instance.ObjectManager.Any(typeof(User).FullName!);
 }

@@ -335,7 +335,7 @@ public class WebServer
         // need to scan for plugins before initing the translater as that depends on the plugins directory
         Helpers.PluginScanner.Scan();
 
-        Helpers.TranslaterHelper.InitTranslater(settings.Language?.EmptyAsNull() ?? "en");
+        TranslaterHelper.InitTranslater(settings.Language?.EmptyAsNull() ?? "en");
 
         LibraryWorker.ResetProcessing(internalOnly: true);
         WorkerManager.StartWorkers(

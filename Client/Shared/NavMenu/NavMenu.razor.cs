@@ -7,18 +7,33 @@ using System.Linq;
 using FileFlows.Client.Components.Dialogs;
 using FileFlows.Shared;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Routing;
 
 namespace FileFlows.Client.Shared;
 
+/// <summary>
+/// Navigation Menu
+/// </summary>
 public partial class NavMenu : IDisposable
 {
+    /// <summary>
+    /// Gets or sets the navigation service
+    /// </summary>
     [Inject] private INavigationService NavigationService { get; set; }
+    /// <summary>
+    /// Gets or sets the navigation manager
+    /// </summary>
     [Inject] private NavigationManager NavigationManager { get; set; }
     /// <summary>
     /// Gets or sets teh client service
     /// </summary>
     [Inject] private ClientService ClientService { get; set; }
-    [Inject] public IJSRuntime jSRuntime { get; set; }
+    /// <summary>
+    /// Gets or sets the JavaScript runtime
+    /// </summary>
+    [Inject] private IJSRuntime jSRuntime { get; set; }
+    
+    
     private List<NavMenuGroup> MenuItems = new List<NavMenuGroup>();
     private bool collapseNavMenu = true;
     
@@ -64,6 +79,8 @@ public partial class NavMenu : IDisposable
         lblChangePassword = Translater.Instant("Labels.ChangePassword");
         lblLogout = Translater.Instant("Labels.Logout");
         
+        NavigationManager.LocationChanged += NavigationManagerOnLocationChanged;
+        
         // App.Instance.OnFileFlowsSystemUpdated += FileFlowsSystemUpdated;
         
 
@@ -74,10 +91,30 @@ public partial class NavMenu : IDisposable
         this.ClientService.FileStatusUpdated += ClientServiceOnFileStatusUpdated;
         PausedService.OnPausedLabelChanged += PausedServiceOnOnPausedLabelChanged;
 
+        ProfileService.OnRefresh += ProfileServiceOnOnRefresh; 
         Profile = await ProfileService.Get();
         this.LoadMenu();
     }
-    
+
+    private void ProfileServiceOnOnRefresh()
+    {
+        this.LoadMenu();
+        StateHasChanged();
+    }
+
+    private void NavigationManagerOnLocationChanged(object sender, LocationChangedEventArgs e)
+    {
+        var lastRoute = e.Location?.Split('/').LastOrDefault();
+        if (string.IsNullOrWhiteSpace(lastRoute))
+            return;
+        var item = MenuItems.SelectMany(x => x.Items).FirstOrDefault(x => x.Url == lastRoute);
+        if (item == null)
+            return;
+        
+        Active = item;
+        StateHasChanged();
+    }
+
     private void PausedServiceOnOnPausedLabelChanged(string label)
     {
         if (nmiPause == null || nmiPause.Title == label)
@@ -290,7 +327,7 @@ public partial class NavMenu : IDisposable
 
         if (item.Url == "#logout")
         {
-            NavigationManager.NavigateTo("/login", forceLoad: true);
+            await ProfileService.Logout();
             return;
         }
 

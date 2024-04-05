@@ -1,0 +1,350 @@
+@{
+    Layout = null;
+    string urlPrefix = ViewBag.UrlPrefix ?? string.Empty;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>FileFlows</title>
+  <script>
+    var Mode = 0;
+    var Disabled = false;
+    
+    function switchMode(mode, event)
+    {      
+      if (event){
+        event.preventDefault();
+        event.stopPropagation();
+      }
+      if (Disabled)
+        return;
+      const elementIds = ['username', 'password', 'usernameOrEmail'];
+      for (const id of elementIds) {
+        document.getElementById(id).value = '';
+      }
+      Mode = mode;
+      if(mode === 1){
+        document.getElementById('mode-1').style.display = '';
+        document.getElementById('mode-0').style.display = 'none';
+        document.getElementById('usernameOrEmail').focus();
+      }
+      else{
+        document.getElementById('mode-0').style.display = '';
+        document.getElementById('mode-1').style.display = 'none';
+        document.getElementById('username').focus();
+      }        
+    }
+    
+    function setDisabled(disabled)
+    {
+      Disabled = disabled;
+      const elementIds = ['username', 'password', 'login', 'usernameOrEmail', 'cancel'];
+    
+      for (const id of elementIds) {
+        document.getElementById(id).disabled = disabled;
+      }
+      const otherIds = ['mode-0', 'mode-1', 'forgot-password'];
+      for (const id of otherIds) {
+        document.getElementById(id).className = disabled ? 'disabled' : '';
+      }
+    }
+    
+    function submitForm(event)
+    {
+      event.preventDefault();
+      event.stopPropagation();
+      if (Mode === 0)
+        doLogin();
+      else if (Mode === 1)
+        doReset()
+    }
+    
+    async function doLogin(){
+      let username = document.getElementById('username').value;
+      let password = document.getElementById('password').value;
+      if (!username || !password)
+        return;
+      setDisabled(true);
+      let response = await fetch('authorize', {
+       method: 'POST',
+       headers: { 'Content-Type': 'application/json' },
+       body: JSON.stringify({username: username, password: password })
+     });
+      try{
+      let body = await response.text();
+      if (!response.ok)
+      {
+        setDisabled(false);
+        showError(body);
+        return;
+      }
+      @if (string.IsNullOrWhiteSpace(urlPrefix))
+      {
+        <text>
+        setAccessToken(body);
+        window.location.href = '/';
+        </text>
+      }
+      else
+      {
+        <text>
+        window.location.href = '@(urlPrefix)auth-redirect.html?jwt=' + body;
+        </text>
+      }
+      }catch (err){
+        console.log('err', err);
+      }
+    }
+    
+    async function doReset(){
+      let usernameOrEmail = document.getElementById('usernameOrEmail').value;
+      if (!usernameOrEmail)
+        return;
+      setDisabled(true);
+      let response = await fetch('authorize/reset-password', {
+         method: 'POST',
+         headers: { 'Content-Type': 'application/json' },
+         body: JSON.stringify({usernameOrEmail: usernameOrEmail })
+      });
+      let body = await response.text();
+      setDisabled(false);
+      if (!response.ok)
+      {
+        showError(body);
+        return;
+      }
+      showSuccess(`@Translater.Instant("Pages.Login.Messages.PasswordReset")`);
+      switchMode(0);
+    }
+    
+    function showError(message){
+      Toast.error(message, null, null, true);
+    }
+    function showSuccess(message){
+      Toast.success(message, null, null, true);
+    }
+    function setAccessToken(token)
+    {
+      try
+      {
+        if (!token)
+          localStorage.removeItem('ACCESS_TOKEN');
+        else
+          localStorage.setItem('ACCESS_TOKEN', JSON.stringify(token));
+      } catch { }
+    }
+    
+    setAccessToken(null);
+  </script>
+  <link rel="icon" href="favicon.svg?v=@Globals.Version#">
+  <style>
+    html, body {
+      font-size: 14px;          
+    }
+    @@font-face {
+        font-family: 'Montserrat';
+        src: url("webfonts/Montserrat-VariableFont_wght.ttf") format("truetype-variations"); 
+    }
+
+    body {
+      --base-darker: rgb(14, 14, 14);
+      --base-darkest: rgb(7, 7, 7);
+      --base: rgb(21, 21, 21);
+      --base-lighter: rgb(28, 28, 28);
+      --input-background:rgb(49, 49, 49);
+      --color: rgb(240, 240, 240);
+      --accent: rgb(255, 0, 144);
+      --accent-rgb: 255, 0, 144;      
+      --success: #19622a;
+      --info: #17a2b8;
+      --warning: #91741d;
+      --error: #ff4d76;
+      --font-family: "Montserrat", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+      font-family: var(--font-family);
+      font-weight: 400;
+      color: var(--color) !important;
+      background: var(--base-darker) !important;
+      line-height: 2.2;
+      padding: 0;
+      margin: 0;
+    }
+    .login-page {
+      display: flex;
+      place-content: center;
+      height: 100vh;
+      align-items: center;
+    }
+    
+    .login-inner {
+      width: 20rem;
+      padding: 2rem;
+      background: #1b1b1b;
+      border-radius: 1rem;
+    }
+    
+    .logo {
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+    .logo img {
+      width: 12rem;
+    }
+    
+    .content {
+      display: flex;
+      flex-direction: column;
+      height: 14rem;
+    }
+    .content .input-field {
+      display: flex;
+      flex-direction: column;
+      background: var(--input-background);
+      width: calc(100% - 1rem);
+      margin: 0.5rem 0;
+      padding: 0.5rem;
+      border-radius: 0.5rem;
+    }
+    .content .input-field .input {
+      display: flex;
+    }
+    .content .input-field .icon {
+      width: 1rem;
+      margin-right: 0.35rem;
+    }
+    .content .input-field .input input {
+      width: 100%;
+      outline: none;
+    }
+    .content .input-field .input input[type=password] {
+      letter-spacing: 0.25rem;
+    }
+    .content a {
+      font-size: 0.9rem;
+      color: var(--color);
+      position: relative;
+      top: -0.1rem;
+      text-align: right;
+      text-decoration: none;
+    }
+    .content a:hover:not(.disabled) {
+      text-decoration: underline;
+    }
+    
+    button {
+      width: 100%;
+      margin: 1rem 0;    
+      height: 2.1875rem;
+      font-weight: normal;
+      outline: none !important;
+      line-height: initial;
+      box-shadow: none;
+      border-radius: unset !important;
+      font-size: 0.8rem !important;
+      text-transform: uppercase;
+      border: solid 1px var(--accent);
+      background-color: transparent;
+      color: var(--color);
+      overflow: hidden;
+      cursor:pointer;
+    }
+    button:hover:not(:disabled),
+    button:focus:not(:disabled){    
+      background-image: linear-gradient(rgba(var(--accent-rgb), 0.3), rgba(var(--accent-rgb), 0.3)) !important;
+      box-shadow: inset 0 -3px 0 0 var(--accent) !important;
+    }
+    
+    .footer {
+      text-align: right;
+    }
+    .footer.reset {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-gap: 0.5rem;
+    }
+    
+    input[type=text], input[type=password]{    
+      background: var(--input-background);
+      color: var(--color);
+      font-family: var(--font-family);
+      border: solid 1px transparent;
+      width: 100%;
+      outline: none;      
+         transition: background-color 5000s ease-in-out 0s,
+          color 5000s ease-in-out 0s !important;
+
+    }
+    #mode-0.disabled, #mode-1.disabled {    
+      opacity: 0.6;
+      cursor: wait;
+    }
+    #mode-0.disabled *, #mode-1.disabled * {
+      cursor: wait !important;
+    }
+     
+    
+    .toast-container {
+      right: 1.5rem !important;
+      transform: unset !important;
+    }
+
+  </style>
+  
+  <link href="css/toast.css?v=@Globals.Version" rel="stylesheet" />
+  <script src="scripts/toast.js?v=@Globals.Version"></script>
+</head>
+<body>
+<div>
+        
+  <form class="login-page" onsubmit="submitForm(event)">
+    <div class="login-inner">
+      <div class="logo">
+        <img src="/logo-color-full.svg" />
+      </div>
+      <div id="mode-0">
+        <div class="content">
+          <div class="email input-field">
+            <label for="username">@Translater.Instant("Pages.Login.Fields.Username")</label>
+            <div class="input">
+              <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path fill="#ffffff" d="M224 256c70.7 0 128-57.3 128-128S294.7 0 224 0 96 57.3 96 128s57.3 128 128 128zm89.6 32h-16.7c-22.2 10.2-46.9 16-72.9 16s-50.6-5.8-72.9-16h-16.7C60.2 288 0 348.2 0 422.4V464c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48v-41.6c0-74.2-60.2-134.4-134.4-134.4z"/></svg>
+              <input type="text" id="username" name="username" placeholder="username" autofocus />
+            </div>
+          </div>
+          <div class="password input-field">
+            <label for="password">@Translater.Instant("Pages.Login.Fields.Password")</label>
+            <div class="input">
+              <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path fill="#ffffff" d="M400 224h-24v-72C376 68.2 307.8 0 224 0S72 68.2 72 152v72H48c-26.5 0-48 21.5-48 48v192c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48V272c0-26.5-21.5-48-48-48zm-104 0H152v-72c0-39.7 32.3-72 72-72s72 32.3 72 72v72z"/></svg>
+              <input type="password" id="password" name="password" placeholder="············" />
+            </div>
+          </div>
+          <a href="#" id="forgot-password" onclick="switchMode(1, event);">@Translater.Instant("Pages.Login.Fields.ForgotPassword")</a>
+        </div>
+      
+        <div class="footer">
+          <button type="submit" id="login" class="login">@Translater.Instant("Pages.Login.Fields.Login")</button>
+        </div>
+      </div>
+      <div id="mode-1" style="display:none">
+        <div class="content">
+          <div class="password input-field">
+            <label for="usernameOrEmail">@Translater.Instant("Pages.Login.Fields.UsernameOrEmail")</label>
+            <div class="input">
+              <i class="fas fa-lock"></i>
+              <input type="text" id="usernameOrEmail" name="usernameOrEmail" placeholder="username" />
+            </div>
+          </div>
+      
+        </div>
+        
+        <div class="footer reset">
+          <button type="submit" class="reset" id="reset">@Translater.Instant("Pages.Login.Fields.Reset")</button>
+          <button class="login" id="cancel" onclick="switchMode(0, event)">@Translater.Instant("Pages.Login.Fields.Cancel")</button>
+        </div>
+      </div>
+    </div>
+  </form>
+  
+</div>
+</body>
+</html>

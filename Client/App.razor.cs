@@ -176,7 +176,7 @@ public partial class App : ComponentBase
     
     
     /// <summary>
-    /// Escape was pushed
+    /// Opens a url
     /// </summary>
     [JSInvokable]
     public async Task<bool> OpenUrl(string url)
@@ -186,6 +186,16 @@ public partial class App : ComponentBase
             return false;
         await HttpHelper.Post("/api/system/open-url?url=" + HttpUtility.UrlEncode(url));
         return true;
+    }
+
+    /// <summary>
+    /// Navigates to a route
+    /// </summary>
+    [JSInvokable]
+    public void NavigateTo(string url)
+    {
+        NavigationManager.NavigateTo(url);
+        StateHasChanged();
     }
 
     public async Task OpenHelp(string url)

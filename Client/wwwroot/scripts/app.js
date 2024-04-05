@@ -51,7 +51,10 @@ window.ff = {
     openLink: function(event) {
         event.preventDefault();
         let url = event.target.getAttribute('href');
-        ff.open(url);        
+        if(url.startsWith('/'))
+            window.ff.ffcsharp.invokeMethodAsync('NavigateTo', url)
+        else
+            ff.open(url);        
     },
     log: function (level, parameters) {
 

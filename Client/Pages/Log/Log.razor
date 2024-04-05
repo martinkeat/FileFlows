@@ -5,7 +5,7 @@
 
 <PageView FullWidth=true>
     <Head>
-        @if (Profile.LicensedFor(LicenseFlags.ExternalDatabase))
+        @if (Profile?.LicensedFor(LicenseFlags.ExternalDatabase) == true)
         {   
             <a class="btn" @onclick=@SearchPane.ToggleSearch>@lblSearch</a>
         }
