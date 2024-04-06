@@ -994,11 +994,11 @@
           "ApiToken-Help": "API Token used by processing nodes to connect to the server",
           "Description": "Here you can configure a single sign on provider using Open ID Connect.\n\nUsers must be added to the [Users](/users) page before they can sign in or before you can use this feature.",
           "Authority": "Authority",
-          "Authority-Help": "Enter the URL of the OpenID Connect provider (e.g., https://accounts.google.com/).",
+          "Authority-Help": "Enter the URL of the Open ID Connect provider (e.g., https://accounts.google.com/).",
           "ClientId": "Client ID",
-          "ClientId-Help": "The client ID registered with the OpenID Connect provider.",
+          "ClientId-Help": "The client ID registered with the Open ID Connect provider.",
           "ClientSecret": "Client Secret",
-          "ClientSecret-Help": "The client secret registered with the OpenID Connect provider."
+          "ClientSecret-Help": "The client secret registered with the Open ID Connect provider."
         }
       }
     },

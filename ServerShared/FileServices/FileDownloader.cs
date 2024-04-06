@@ -104,6 +104,7 @@ public class FileDownloader
             {
                 string error = (await response.Content.ReadAsStringAsync()).EmptyAsNull() ?? "Failed to remotely download the file";
                 logger.ELog("Download Failed: " + error);
+                logger.ELog("File Download URL: " + url);
                 return Result<bool>.Fail(error);
             }
 
