@@ -33,11 +33,11 @@ public class FileFlowsApiAuthorizeAttribute : Attribute, IAsyncAuthorizationFilt
     {
         if (LicenseHelper.IsLicensed(LicenseFlags.UserSecurity) == false)
             return;
-        
-        var appSettings = ServiceLoader.Load<AppSettingsService>().Settings;
-        if (appSettings.Security == SecurityMode.Off)
-            return;
 
+        var mode = AuthenticationHelper.GetSecurityMode();
+        if (mode == SecurityMode.Off)
+            return;
+        
         var settings = await ServiceLoader.Load<SettingsService>().Get();
         
         var token = context.HttpContext.Request.Headers["x-token"].ToString();
@@ -47,7 +47,7 @@ public class FileFlowsApiAuthorizeAttribute : Attribute, IAsyncAuthorizationFilt
             context.Result = new ContentResult
             {
                 StatusCode = 401,
-                Content = "Unauthorized: Invalid API token " + token,
+                Content = "Unauthorized: Invalid API token",
                 ContentType = "text/plain"
             };
             return;

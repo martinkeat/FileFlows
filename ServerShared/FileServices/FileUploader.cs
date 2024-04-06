@@ -31,6 +31,10 @@ public class FileUploader
     /// The api token
     /// </summary>
     private readonly string ApiToken;
+    /// <summary>
+    /// The remote node UID
+    /// </summary>
+    private readonly Guid RemoteNodeUid;
     
     /// <summary>
     /// Constructs an instance of the file uploader
@@ -39,12 +43,14 @@ public class FileUploader
     /// <param name="serverUrl">The URL where the file will be uploaded.</param>
     /// <param name="executorUid">The UID of the executor for the authentication</param>
     /// <param name="apiToken">the API token to use</param>
-    public FileUploader(ILogger logger, string serverUrl, Guid executorUid, string apiToken)
+    /// <param name="remoteNodeUid">the UID of the remote node</param>
+    public FileUploader(ILogger logger, string serverUrl, Guid executorUid, string apiToken, Guid remoteNodeUid)
     {
         this.logger = logger;
         this.serverUrl = serverUrl;
         this.executorUid = executorUid;
         this.ApiToken = apiToken;
+        this.RemoteNodeUid = remoteNodeUid;
     }
     
     /// <summary>
@@ -99,6 +105,7 @@ public class FileUploader
             request.Headers.Add("x-executor", executorUid.ToString());
             if(string.IsNullOrWhiteSpace(ApiToken) == false)
                 request.Headers.Add("x-token", ApiToken);
+            request.Headers.Add("x-node", RemoteNodeUid.ToString());
             request.Content = content;
             var response = await _client.SendAsync(request);
             
@@ -164,6 +171,7 @@ public class FileUploader
             request.Headers.Add("x-executor", executorUid.ToString());
             if(string.IsNullOrWhiteSpace(ApiToken) == false)
                 request.Headers.Add("x-token", ApiToken);
+            request.Headers.Add("x-node", RemoteNodeUid.ToString());
             request.Content = new StringContent(json, Encoding.UTF8, "application/json");;
             var response = await _client.SendAsync(request);
 

@@ -422,6 +422,8 @@ public class NodeParameters
                 if (result.IsFailed)
                     return;
                 var fi = result.Value;
+                if (fi == null)
+                    return;
                 UpdateVariables(new Dictionary<string, object>
                 {
                     { "ext", fi.Extension },

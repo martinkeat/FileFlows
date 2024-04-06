@@ -14,7 +14,7 @@ namespace FileFlows.Server.Controllers;
 /// Controller responsible for managing file-related operations.
 /// </summary>
 [Route("/remote/file-server")]
-[FileFlowsAuthorize]
+[FileFlowsApiAuthorize]
 [ApiExplorerSettings(IgnoreApi = true)]
 public class FileServerController : Controller
 {

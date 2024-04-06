@@ -245,6 +245,11 @@ public class Program
         FileSystemInfo file = lib.Folders ? new DirectoryInfo(workingFile) : new FileInfo(workingFile);
         bool fileExists = file.Exists; // set to variable so we can set this to false in debugging easily
         bool remoteFile = false;
+
+        #if(DEBUG)
+        if(args.IsServer == false)
+            fileExists = false;
+        #endif
         
 
         var flow = args.Config.Flows.FirstOrDefault(x => x.Uid == (lib.Flow?.Uid ?? Guid.Empty));
@@ -317,7 +322,7 @@ public class Program
             
                 remoteFile = true;
                 _fileService = new RemoteFileService(Uid, RemoteService.ServiceBaseUrl, args.WorkingDirectory, Logger,
-                    libFile.Name.Contains('/') ? '/' : '\\', RemoteService.ApiToken);
+                    libFile.Name.Contains('/') ? '/' : '\\', RemoteService.ApiToken, RemoteService.NodeUid);
             }
         }
 
@@ -356,7 +361,7 @@ public class Program
         LogInfo("Start Working File: " + info.WorkingFile);
         info.LibraryFile.OriginalSize = info.InitialSize;
         LogInfo("Initial Size: " + info.InitialSize);
-        LogInfo("File Service:"  + _fileService.GetType().Name);
+        LogInfo("File Service: "  + _fileService.GetType().Name);
         
 
         var runner = new Runner(info, flow, node, args.WorkingDirectory);

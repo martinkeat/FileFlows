@@ -14,19 +14,20 @@ public class LoggingMiddleware
     /// </summary>
     private readonly RequestDelegate _next;
 
+    private SettingsService _settingsService;
     /// <summary>
     /// Settings service
     /// </summary>
-    private SettingsService settingsService;
-    
-    /// <summary>
-    /// Initializes a new instance of the logging middleware
-    /// </summary>
-    /// <param name="settingsService">the settings service</param>
-    public LoggingMiddleware(SettingsService settingsService)
+    private SettingsService SettingsService
     {
-        this.settingsService = settingsService;
+        get
+        {
+            if (_settingsService == null)
+                _settingsService = ServiceLoader.Load<SettingsService>();
+            return _settingsService;
+        }
     }
+    
     
     /// <summary>
     /// Gets the logger for the request logger
@@ -57,7 +58,7 @@ public class LoggingMiddleware
         {
             try
             {
-                if (settingsService.Get().Result.LogEveryRequest)
+                if (SettingsService.Get().Result.LogEveryRequest)
                 {
                     _ = RequestLogger.Log((LogType) 999,
                         $"REQUEST [{context.Request?.Method}] [{context.Response?.StatusCode}]: {context.Request?.Path.Value}");
