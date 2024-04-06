@@ -44,7 +44,12 @@ public class FileFlowsApiAuthorizeAttribute : Attribute, IAsyncAuthorizationFilt
         
         if(token != settings.ApiToken)
         {
-            context.Result = new UnauthorizedResult();
+            context.Result = new ContentResult
+            {
+                StatusCode = 401,
+                Content = "Unauthorized: Invalid API token " + token,
+                ContentType = "text/plain"
+            };
             return;
         }
     }
