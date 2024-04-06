@@ -43,15 +43,21 @@ public class OpenIDController : Controller
 
         string idpAuthUrl = oidcConfig.AuthorizationEndpoint;
         string clientId = _settings.OidcClientId; // Replace with your client ID
-        string redirectUri = Url.Action("Callback", "OpenID", null, Request.Scheme); // Callback URL
-        if (string.IsNullOrWhiteSpace(_settings.OidcCallbackAddress) == false)
-            redirectUri = _settings.OidcCallbackAddress.TrimEnd('/') + redirectUri[redirectUri.IndexOf("/oidc")..];
+        string redirectUri = GetRedirectUrl();
 
         string redirectUrl = $"{idpAuthUrl}?client_id={clientId}&redirect_uri={redirectUri}&response_type=code&prompt=login";
 
         redirectUrl += "&scope=openid+profile+email";
         // Redirect the user to the IdP for authentication
         return Redirect(redirectUrl);
+    }
+
+    private string GetRedirectUrl()
+    {
+        string redirectUri = Url.Action("Callback", "OpenID", null, Request.Scheme); // Callback URL
+        if (string.IsNullOrWhiteSpace(_settings.OidcCallbackAddress) == false)
+            redirectUri = _settings.OidcCallbackAddress.TrimEnd('/') + redirectUri[redirectUri.IndexOf("/oidc")..];
+        return redirectUri;
     }
 
     /// <summary>
@@ -70,7 +76,7 @@ public class OpenIDController : Controller
             string? code = Request.Query["code"];
 
             // Perform token validation
-            var redirectUri = Url.Action("Callback", "OpenID", null, Request.Scheme); // Callback URL
+            var redirectUri = GetRedirectUrl();
 
             var tokenRequestContent = new FormUrlEncodedContent(new KeyValuePair<string, string>[]
             {
