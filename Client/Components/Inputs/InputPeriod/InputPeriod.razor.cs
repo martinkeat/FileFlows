@@ -8,14 +8,31 @@ namespace FileFlows.Client.Components.Inputs;
 /// </summary>
 public partial class InputPeriod : Input<int>
 {
+    /// <inheritdoc />
     public override bool Focus() => FocusUid();
 
+    /// <summary>
+    /// If updating the value
+    /// </summary>
     private bool UpdatingValue = false;
 
+    /// <summary>
+    /// Gets or sets the selected period
+    /// </summary>
     private int Period { get; set; }
 
+    /// <summary>
+    /// Gets or sets the number value
+    /// </summary>
     private int Number { get; set; }
 
+    /// <summary>
+    /// Gets or sets if the weeks is shown
+    /// </summary>
+    [Parameter]
+    public bool ShowWeeks { get; set; } = true;
+    
+    /// <inheritdoc />
     protected override void OnInitialized()
     {
         base.OnInitialized();
@@ -44,6 +61,10 @@ public partial class InputPeriod : Input<int>
     }
     
 
+    /// <summary>
+    /// Changes the value
+    /// </summary>
+    /// <param name="e">the change event</param>
     private async Task ChangeValue(ChangeEventArgs e)
     {
         if (int.TryParse(e.Value?.ToString() ?? "", out int value) == false)
@@ -66,6 +87,10 @@ public partial class InputPeriod : Input<int>
         this.ClearError();
     }
 
+    /// <summary>
+    /// Event called when a key is pressed
+    /// </summary>
+    /// <param name="e">the keyboard event</param>
     private async Task OnKeyDown(KeyboardEventArgs e)
     {
         if (e.Code == "Enter")
@@ -74,7 +99,10 @@ public partial class InputPeriod : Input<int>
             await OnClose.InvokeAsync();
     }
     
-    
+    /// <summary>
+    /// Event when the period changed
+    /// </summary>
+    /// <param name="args">the change event</param>
     private void PeriodSelectionChanged(ChangeEventArgs args)
     {
         UpdatingValue = true;

@@ -64,7 +64,9 @@ public class AuthorizeController : Controller
             return BadRequest(error);
         }
 
-        var jwt = AuthenticationHelper.CreateJwtToken(result.Value, Request.GetActualIP());
+        var settings = await ServiceLoader.Load<SettingsService>().Get();
+
+        var jwt = AuthenticationHelper.CreateJwtToken(result.Value, Request.GetActualIP(), settings.TokenExpiryMinutes);
         return Ok(jwt);
     }
 

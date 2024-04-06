@@ -113,6 +113,7 @@
                         @if (Model.Security != SecurityMode.Off)
                         {
                             <InputApiToken @bind-Value="Model.ApiToken" Label="Pages.Settings.Fields.Security.ApiToken" />
+                            <InputPeriod @bind-Value="Model.TokenExpiryMinutes" Label="Pages.Settings.Fields.Security.TokenExpiryMinutes" ShowWeeks="false" />
                         }
                         
                         @if (Model.Security == SecurityMode.OpenIdConnect)

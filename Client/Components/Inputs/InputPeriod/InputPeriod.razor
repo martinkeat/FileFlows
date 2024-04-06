@@ -12,7 +12,10 @@
                 <option selected=@(Period == 1) value="1">Minutes</option>
                 <option selected=@(Period == 60) value="60">Hours</option>
                 <option selected=@(Period == 1440) value="1440">Days</option>
-                <option selected=@(Period == 10080) value="10080">Weeks</option>
+                @if (ShowWeeks)
+                {
+                    <option selected=@(Period == 10080) value="10080">Weeks</option>
+                }
             </select>
         </div>
     </div>

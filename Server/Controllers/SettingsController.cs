@@ -1,4 +1,3 @@
-using System.Text.RegularExpressions;
 using FileFlows.RemoteServices;
 using FileFlows.Server.Authentication;
 using Microsoft.AspNetCore.Mvc;
@@ -120,6 +119,8 @@ public class SettingsController : Controller
         uiModel.RecreateDatabase = Settings.RecreateDatabase;
 
         uiModel.Security = ServiceLoader.Load<AppSettingsService>().Settings.Security;
+        if (uiModel.TokenExpiryMinutes < 1)
+            uiModel.TokenExpiryMinutes = 24 * 60;
         uiModel.OidcCallbackAddressPlaceholder = Url.Action(nameof(HomeController.Index), "Home", null, Request.Scheme);
         
         return uiModel;
@@ -203,6 +204,7 @@ public class SettingsController : Controller
             SmtpUser = model.SmtpUser ?? string.Empty,
             SmtpFromAddress = model.SmtpFromAddress ?? string.Empty,
                 
+            TokenExpiryMinutes = model.TokenExpiryMinutes,
             OidcAuthority = model.OidcAuthority ?? string.Empty,
             OidcClientId = model.OidcClientId ?? string.Empty,
             OidcClientSecret = model.OidcClientSecret ?? string.Empty,

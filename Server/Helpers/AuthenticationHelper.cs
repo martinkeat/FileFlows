@@ -35,8 +35,10 @@ public class AuthenticationHelper
     /// <param name="user">the user</param>
     /// <param name="ipAddress">the IP Address of the user</param>
     /// <returns>the JWT token</returns>
-    public static string CreateJwtToken(User user, string ipAddress)
+    public static string CreateJwtToken(User user, string ipAddress, int expiryMinutes)
     {
+        if (expiryMinutes < 1)
+            expiryMinutes = 24 * 60;
         string ip = ipAddress.Replace(":", "_");
         string code = Decrypter.Encrypt(user.Uid + ":" + ip + ":" + user.Name);
         var claims = new List<Claim>
@@ -54,7 +56,7 @@ public class AuthenticationHelper
         var tokenDescriptor = new SecurityTokenDescriptor
         {
             Subject = claimsIdentity,
-            Expires = DateTime.UtcNow.AddDays(7),
+            Expires = DateTime.UtcNow.AddMinutes(expiryMinutes),
             Issuer = "https://fileflows.com",
             Audience = "https://fileflows.com",
             SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(Encoding.ASCII.GetBytes(key)), SecurityAlgorithms.HmacSha256Signature)

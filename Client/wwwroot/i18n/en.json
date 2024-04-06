@@ -992,6 +992,8 @@
           "Mode-Help": "Enable user authentication to access FileFlows.\nWhen enabled users will have to login in and processing nodes will require the API Token to access the server.",
           "ApiToken": "API Token",
           "ApiToken-Help": "API Token used by processing nodes to connect to the server",
+          "TokenExpiryMinutes": "Token Expiry",
+          "TokenExpiryMinutes-Help": "The duration of the login token before it expires.",
           "Description": "Here you can configure a single sign on provider using Open ID Connect.\n\nUsers must be added to the [Users](/users) page before they can sign in or before you can use this feature.",
           "Authority": "Authority",
           "Authority-Help": "Enter the URL of the Open ID Connect provider (e.g., https://accounts.google.com/).",

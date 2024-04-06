@@ -185,6 +185,11 @@ public class Settings : FileFlowObject
     /// </summary>
     [Encrypted]
     public string OidcCallbackAddress { get; set; }
+    
+    /// <summary>
+    /// Gets or sets the token expiry in minutes
+    /// </summary>
+    public int TokenExpiryMinutes { get; set; }
 }
 
 /// <summary>

@@ -1,6 +1,8 @@
 .input-period-wrapper {
   display: flex;
   flex-direction: row;
+  width: 100%;
+  max-width: 40rem;
 }
 
 .period-minutes {
