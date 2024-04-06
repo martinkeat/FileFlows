@@ -100,6 +100,9 @@ public static class HttpContextExtensions
                 IssuerSigningKey = new SymmetricSecurityKey(jwtKey)
             }, out var validatedToken);
 
+            if (validatedToken.ValidTo < DateTime.UtcNow)
+                throw new Exception("Token has expired");
+
             // Token is valid, proceed with the request.
             return validatedToken;
         }
