@@ -95,15 +95,6 @@
                         <InputSwitch @bind-Value="@Model.KeepFailedFlowTempFiles" Label="Pages.Settings.Fields.KeepFailedFlowTempFiles" />
                         <InputSwitch @bind-Value="@Model.DisableTelemetry" Inverse="@true" Label="Pages.Settings.Fields.Telemetry" OnChangedValue="OnTelemetryChange"/>
                     </FlowTab>
-                    <FlowTab Title="@lblEmail" Visible="@(Model.Security == SecurityMode.Local)">
-                        <InputText @bind-Value="@Model.SmtpServer" Label="Pages.Settings.Fields.Smtp.Server" />
-                        <InputNumber @bind-Value="@Model.SmtpPort" Label="Pages.Settings.Fields.Smtp.Port" Min="1" Max="65535" />
-                        <InputSelect @bind-Value="@SmtpSecurity" Options=@SmtpSecurityTypes Label="Pages.Settings.Fields.Smtp.Security" AllowClear="false" />
-                        <InputText @bind-Value="@Model.SmtpUser" Label="Pages.Settings.Fields.Smtp.User" />
-                        <InputPassword @bind-Value="@Model.SmtpPassword" Label="Pages.Settings.Fields.Smtp.Password" />
-                        <InputText @bind-Value="@Model.SmtpFrom" Label="Pages.Settings.Fields.Smtp.From" />
-                        <InputText @bind-Value="@Model.SmtpFromAddress" Label="Pages.Settings.Fields.Smtp.FromAddress" />
-                    </FlowTab>
                     <FlowTab Title="@lblSecurity" Visible="@(LicensedFor(LicenseFlags.UserSecurity))">
                         <p style="white-space: pre-wrap">@((MarkupString)mdSecurityDescription)</p>
                         <hr />
@@ -132,6 +123,15 @@
                             <InputNumber @bind-Value="@Model.LoginMaxAttempts" Label="Pages.Settings.Fields.Security.MaxAttempts" />
                             <InputNumber @bind-Value="@Model.LoginLockoutMinutes" Label="Pages.Settings.Fields.Security.LockoutMinutes" />
                         }
+                    </FlowTab>
+                    <FlowTab Title="@lblEmail" Visible="@(Model.Security == SecurityMode.Local)">
+                        <InputText @bind-Value="@Model.SmtpServer" Label="Pages.Settings.Fields.Smtp.Server" />
+                        <InputNumber @bind-Value="@Model.SmtpPort" Label="Pages.Settings.Fields.Smtp.Port" Min="1" Max="65535" />
+                        <InputSelect @bind-Value="@SmtpSecurity" Options=@SmtpSecurityTypes Label="Pages.Settings.Fields.Smtp.Security" AllowClear="false" />
+                        <InputText @bind-Value="@Model.SmtpUser" Label="Pages.Settings.Fields.Smtp.User" />
+                        <InputPassword @bind-Value="@Model.SmtpPassword" Label="Pages.Settings.Fields.Smtp.Password" />
+                        <InputText @bind-Value="@Model.SmtpFrom" Label="Pages.Settings.Fields.Smtp.From" />
+                        <InputText @bind-Value="@Model.SmtpFromAddress" Label="Pages.Settings.Fields.Smtp.FromAddress" />
                     </FlowTab>
                     <FlowTab Title="@lblLicense">
                         <p class="box info">Here you can enter your license key to enable additional features
