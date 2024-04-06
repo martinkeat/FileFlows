@@ -29,4 +29,20 @@ public class UserManager : CachedManager<User>
     /// <returns>true if there are any users</returns>
     public Task<bool> HasAny()
         => DatabaseAccessManager.Instance.ObjectManager.Any(typeof(User).FullName!);
+
+    /// <summary>
+    /// Records a login for a user
+    /// </summary>
+    /// <param name="user">the user to record the login for</param>
+    public async Task RecordLogin(User user)
+    {
+        if (user == null)
+            return;
+        user.LastLoggedIn = DateTime.UtcNow;
+        await DatabaseAccessManager.Instance.ObjectManager.SetDataValue(
+            user.Uid,
+            typeof(User).FullName!,
+            nameof(user.LastLoggedIn),
+            user.LastLoggedIn);
+    }
 }

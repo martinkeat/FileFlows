@@ -27,9 +27,9 @@ public abstract class RemoteService
     }
 
     /// <summary>
-    /// Gets or sets the API Token
+    /// Gets or sets the Access Token
     /// </summary>
-    public static string ApiToken { get; set; }
+    public static string AccessToken { get; set; }
 
     /// <summary>
     /// Gets or sets the Node UID whose making these requests

@@ -162,7 +162,7 @@ public class AuthorizeController : Controller
         if(user == null)
             return Redirect("/error?msg=" + HttpUtility.UrlEncode("Password reset code is invalid or expired."));
 
-        string newPassword = CodeHelper.CreateNewPassword();
+        string newPassword = AuthenticationHelper.GenerateRandomPassword();
         
         user.Password = BCrypt.Net.BCrypt.HashPassword(newPassword);
         await service.Update(user);

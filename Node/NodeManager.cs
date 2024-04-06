@@ -155,7 +155,7 @@ public class NodeManager
         if (string.IsNullOrEmpty(settings.ServerUrl))
             return (false, "Server URL not set");
         
-        RemoteService.ApiToken = settings.ApiToken;
+        RemoteService.AccessToken = settings.AccessToken;
         var nodeService = ServiceLoader.Load<INodeService>();
         Shared.Models.ProcessingNode result;
         try

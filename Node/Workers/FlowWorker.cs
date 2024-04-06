@@ -260,7 +260,7 @@ public class FlowWorker : Worker
                 runnerParameters.ConfigPath = GetConfigurationDirectory();
                 runnerParameters.ConfigKey = GetConfigNoEncrypt(node2) ? "NO_ENCRYPT" : GetConfigKey(node2);
                 runnerParameters.BaseUrl = RemoteService.ServiceBaseUrl;
-                runnerParameters.ApiToken = RemoteService.ApiToken;
+                runnerParameters.AccessToken = RemoteService.AccessToken;
                 runnerParameters.RemoteNodeUid = RemoteService.NodeUid;
                 runnerParameters.IsDocker = Globals.IsDocker;
                 runnerParameters.IsInternalServerNode = isServer;

@@ -42,8 +42,8 @@
 					/>
 				</DockPanel>
 				
-				<TextBlock Text="API Token:" Grid.Row="1" Grid.Column="0" Margin="5 13 5 5" TextAlignment="Right" />
-				<TextBox Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2"  Text="{Binding ApiToken}" Watermark="Required if using user security" Foreground="white" 
+				<TextBlock Text="Access Token:" Grid.Row="1" Grid.Column="0" Margin="5 13 5 5" TextAlignment="Right" />
+				<TextBox Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2"  Text="{Binding AccessToken}" Watermark="Required if using user security" Foreground="white" 
 				                     Margin="0"  Height="38" Padding="7" Width="420" VerticalAlignment="Center"  />
 				
 				<ToggleSwitch Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" 

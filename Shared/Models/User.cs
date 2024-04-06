@@ -19,6 +19,11 @@ public class User : FileFlowObject
     /// Gets or sets the user role
     /// </summary>
     public UserRole Role { get; set; }
+    
+    /// <summary>
+    /// Gets or sets when the user last logged in, in UTC time
+    /// </summary>
+    public DateTime LastLoggedIn { get; set; }
 }
 
 /// <summary>

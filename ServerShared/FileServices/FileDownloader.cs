@@ -42,7 +42,7 @@ public class FileDownloader
     /// <summary>
     /// The api token
     /// </summary>
-    private readonly string ApiToken;
+    private readonly string AccessToken;
     /// <summary>
     /// The remote node UID
     /// </summary>
@@ -54,14 +54,14 @@ public class FileDownloader
     /// <param name="logger">the logger to use in the file downloader</param>
     /// <param name="serverUrl">The URL where the file will be uploaded.</param>
     /// <param name="executorUid">The UID of the executor for the authentication</param>
-    /// <param name="apiToken">the API token to use</param>
+    /// <param name="accessToken">the API token to use</param>
     /// <param name="remoteNodeUid">the UID of the remote node</param>
-    public FileDownloader(ILogger logger, string serverUrl, Guid executorUid, string apiToken, Guid remoteNodeUid)
+    public FileDownloader(ILogger logger, string serverUrl, Guid executorUid, string accessToken, Guid remoteNodeUid)
     {
         this.logger = logger;
         this.serverUrl = serverUrl;
         this.executorUid = executorUid;
-        this.ApiToken = apiToken;
+        this.AccessToken = accessToken;
         this.RemoteNodeUid = remoteNodeUid;
     }
 
@@ -99,8 +99,8 @@ public class FileDownloader
             
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, url + "/download");
             request.Headers.Add("x-executor", executorUid.ToString());
-            if(string.IsNullOrWhiteSpace(ApiToken) == false)
-                request.Headers.Add("x-token", ApiToken);
+            if(string.IsNullOrWhiteSpace(AccessToken) == false)
+                request.Headers.Add("x-token", AccessToken);
             request.Headers.Add("x-node", RemoteNodeUid.ToString());
             string json = JsonSerializer.Serialize(new { path });
             request.Content  = new StringContent(json, Encoding.UTF8, "application/json");
@@ -272,8 +272,8 @@ public class FileDownloader
             // Create the GET request with required headers
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url + "/size");
             request.Headers.Add("x-executor", executorUid.ToString());
-            if(string.IsNullOrWhiteSpace(ApiToken) == false)
-                request.Headers.Add("x-token", ApiToken);
+            if(string.IsNullOrWhiteSpace(AccessToken) == false)
+                request.Headers.Add("x-token", AccessToken);
             request.Headers.Add("x-node", RemoteNodeUid.ToString());
             string json = JsonSerializer.Serialize(new { path });
             request.Content  = new StringContent(json, Encoding.UTF8, "application/json");

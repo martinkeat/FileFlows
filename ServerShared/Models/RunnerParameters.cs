@@ -38,9 +38,9 @@ public class RunnerParameters
     /// </summary>
     public string BaseUrl { get; set; }
     /// <summary>
-    /// Gets or sets the API token 
+    /// Gets or sets the Access token 
     /// </summary>
-    public string ApiToken { get; set; }
+    public string AccessToken { get; set; }
     /// <summary>
     /// Gets or sets if running inside docker 
     /// </summary>

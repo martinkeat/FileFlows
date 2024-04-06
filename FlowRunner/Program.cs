@@ -102,7 +102,7 @@ public class Program
             NodeUid = parameters.NodeUid;
             LogInfo("Base URL: " + parameters.BaseUrl);
             RemoteService.ServiceBaseUrl = parameters.BaseUrl;
-            RemoteService.ApiToken = parameters.ApiToken;
+            RemoteService.AccessToken = parameters.AccessToken;
             RemoteService.NodeUid = parameters.RemoteNodeUid;
 
             string tempPath = parameters.TempPath;
@@ -322,7 +322,7 @@ public class Program
             
                 remoteFile = true;
                 _fileService = new RemoteFileService(Uid, RemoteService.ServiceBaseUrl, args.WorkingDirectory, Logger,
-                    libFile.Name.Contains('/') ? '/' : '\\', RemoteService.ApiToken, RemoteService.NodeUid);
+                    libFile.Name.Contains('/') ? '/' : '\\', RemoteService.AccessToken, RemoteService.NodeUid);
             }
         }
 

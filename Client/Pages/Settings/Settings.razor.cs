@@ -288,8 +288,8 @@ public partial class Settings : InputRegister
             if (Model is { SmtpPort: < 1})
                 Model.SmtpPort = 25;
 
-            if (Model != null && string.IsNullOrWhiteSpace(Model.ApiToken))
-                Model.ApiToken = Guid.NewGuid().ToString("N");
+            if (Model != null && string.IsNullOrWhiteSpace(Model.AccessToken))
+                Model.AccessToken = Guid.NewGuid().ToString("N");
         }
 
         this.StateHasChanged();

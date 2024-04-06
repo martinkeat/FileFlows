@@ -76,15 +76,26 @@ public class UserService
             return Result<User>.Fail(Translater.Instant("Pages.Login.Messages.InvalidUsernameOrPassword"));
 
         LoginAttempts.TryGetValue(user.Uid, out LoginAttempt? loginAttempt);
-        if (loginAttempt != null && loginAttempt.LockedOutUntil > DateTime.UtcNow)
+        if (loginAttempt != null && loginAttempt.LockedOutUntilUtc > DateTime.UtcNow)
             return Result<User>.Fail(Translater.Instant("Pages.Login.Messages.LockedOut"));
-
+        
         if (BCrypt.Net.BCrypt.Verify(password, user.Password) == false)
         {
+            var settings = await ServiceLoader.Load<SettingsService>().Get();
             loginAttempt ??= new();
+            int minutes = settings.LoginLockoutMinutes < 1 ? 20 : settings.LoginLockoutMinutes;
+            
+            if (loginAttempt.LastAttemptUtc < DateTime.UtcNow.AddMinutes(-minutes))
+                loginAttempt.Attempt = 0; // rest the attempts
+            
             loginAttempt.Attempt += 1;
-            if (loginAttempt.Attempt >= 10)
-                loginAttempt.LockedOutUntil = DateTime.UtcNow.AddMinutes(20);
+            loginAttempt.LastAttemptUtc = DateTime.UtcNow;
+            int maxAttempts = settings.LoginMaxAttempts < 1 ? 10 : settings.LoginMaxAttempts;
+            if (loginAttempt.Attempt >= maxAttempts)
+            {
+                loginAttempt.LockedOutUntilUtc = DateTime.UtcNow.AddMinutes(minutes);
+            }
+
             LoginAttempts[user.Uid] = loginAttempt;
             
             return Result<User>.Fail(Translater.Instant("Pages.Login.Messages.InvalidUsernameOrPassword"));
@@ -110,6 +121,14 @@ public class UserService
         await new UserManager().Update(user);
         return true;
     }
+    
+    /// <summary>
+    /// Records a login for a user
+    /// </summary>
+    /// <param name="user">the user to record the login for</param>
+    /// <returns>a task to await</returns>
+    public Task RecordLogin(User user)
+        => new UserManager().RecordLogin(user);
 
     /// <summary>
     /// Login attempts
@@ -128,6 +147,11 @@ public class UserService
         /// <summary>
         /// Gets or sets the date to lock ou that user until
         /// </summary>
-        public DateTime LockedOutUntil { get; set; }
+        public DateTime LockedOutUntilUtc { get; set; }
+        
+        /// <summary>
+        /// Gets or sets the last attempt
+        /// </summary>
+        public DateTime LastAttemptUtc { get; set; }
     }
 }

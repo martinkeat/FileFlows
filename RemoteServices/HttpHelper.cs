@@ -116,8 +116,8 @@ class HttpHelper
             Content = data != null ? AsJson(data) : null
         };
         
-        if(string.IsNullOrWhiteSpace(RemoteService.ApiToken) == false)
-            request.Headers.Add("x-token", RemoteService.ApiToken);
+        if(string.IsNullOrWhiteSpace(RemoteService.AccessToken) == false)
+            request.Headers.Add("x-token", RemoteService.AccessToken);
         request.Headers.Add("x-node", RemoteService.NodeUid.ToString());
 
         if (method == System.Net.Http.HttpMethod.Post && data == null)

@@ -990,11 +990,11 @@
           "Title": "Security",
           "Mode": "Mode",
           "Mode-Help": "Enable user authentication to access FileFlows.\nWhen enabled users will have to login in and processing nodes will require the API Token to access the server.",
-          "ApiToken": "API Token",
-          "ApiToken-Help": "API Token used by processing nodes to connect to the server",
+          "AccessToken": "Access Token",
+          "AccessToken-Help": "Access Token used by processing nodes to connect to the server",
           "TokenExpiryMinutes": "Token Expiry",
           "TokenExpiryMinutes-Help": "The duration of the login token before it expires.",
-          "Description": "Here you can configure a single sign on provider using Open ID Connect.\n\nUsers must be added to the [Users](/users) page before they can sign in or before you can use this feature.",
+          "Description": "Configuring user security will require users to login and processing nodes to provide the Access Token to connect.\n\n[Users](/users) must be added before they can sign in or before you can use this feature.",
           "Authority": "Authority",
           "Authority-Help": "Enter the URL of the Open ID Connect provider (e.g., https://accounts.google.com/).",
           "ClientId": "Client ID",
@@ -1002,7 +1002,12 @@
           "ClientSecret": "Client Secret",
           "ClientSecret-Help": "The client secret registered with the Open ID Connect provider.",
           "CallbackAddress": "Callback Address",
-          "CallbackAddress-Help": "An optional callback address, you can use this to override the default address this will send to the client.\n For example if you are behind a reverse proxy and FileFLows is listening on HTTP but the callback should occur on HTTPS."
+          "CallbackAddress-Help": "An optional callback address, you can use this to override the default address this will send to the client.\n For example if you are behind a reverse proxy and FileFLows is listening on HTTP but the callback should occur on HTTPS.",
+          "MaxAttempts": "Max Attempts",
+          "MaxAttempts-Help": "The maximum number of login attempts the user is allowed before they are temporarily blocked",
+          "LockoutMinutes": "Lockout Duration",
+          "LockoutMinutes-Suffix": "minutes",
+          "LockoutMinutes-Help": "The duration the user will be locked out for before they can reattempt a login."
         }
       }
     },
@@ -1024,6 +1029,11 @@
       "Single": "User",
       "Messages": {
         "CannotDeleteYourself": "You cannot delete yourself."
+      },
+      "Labels": {
+        "LastLoggedIn": "Last Logged In",
+        "Never": "Never",
+        "Administrator": "Administrator"
       },
       "Fields": {
         "IsAdmin": "Administrator",

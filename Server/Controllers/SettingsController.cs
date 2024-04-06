@@ -121,6 +121,10 @@ public class SettingsController : Controller
         uiModel.Security = ServiceLoader.Load<AppSettingsService>().Settings.Security;
         if (uiModel.TokenExpiryMinutes < 1)
             uiModel.TokenExpiryMinutes = 24 * 60;
+        if (uiModel.LoginLockoutMinutes < 1)
+            uiModel.LoginLockoutMinutes = 20;
+        if (uiModel.LoginMaxAttempts < 1)
+            uiModel.LoginMaxAttempts = 10;
         uiModel.OidcCallbackAddressPlaceholder = Url.Action(nameof(HomeController.Index), "Home", null, Request.Scheme);
         
         return uiModel;
@@ -194,7 +198,7 @@ public class SettingsController : Controller
             FileServerOwnerGroup = model.FileServerOwnerGroup,
             FileServerFilePermissions = model.FileServerFilePermissions,
             FileServerAllowedPaths = model.FileServerAllowedPathsString?.Split(new [] { "\r\n", "\r", "\n"}, StringSplitOptions.RemoveEmptyEntries),
-            ApiToken = model.ApiToken ?? string.Empty,
+            AccessToken = model.AccessToken ?? string.Empty,
             
             SmtpFrom = model.SmtpFrom ?? string.Empty,
             SmtpPassword = model.SmtpPassword ?? string.Empty,
@@ -205,12 +209,14 @@ public class SettingsController : Controller
             SmtpFromAddress = model.SmtpFromAddress ?? string.Empty,
                 
             TokenExpiryMinutes = model.TokenExpiryMinutes,
+            LoginLockoutMinutes = model.LoginLockoutMinutes < 1 ? 20 : model.LoginLockoutMinutes,
+            LoginMaxAttempts = model.LoginMaxAttempts < 1 ? 10 : model.LoginMaxAttempts,
             OidcAuthority = model.OidcAuthority ?? string.Empty,
             OidcClientId = model.OidcClientId ?? string.Empty,
             OidcClientSecret = model.OidcClientSecret ?? string.Empty,
             OidcCallbackAddress = model.OidcCallbackAddress ?? string.Empty,
         });
-        RemoteService.ApiToken = model.ApiToken;
+        RemoteService.AccessToken = model.AccessToken;
         // validate license it
         Settings.LicenseKey = model.LicenseKey?.Trim();
         Settings.LicenseEmail = model.LicenseEmail?.Trim();

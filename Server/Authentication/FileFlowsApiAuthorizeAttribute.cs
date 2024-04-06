@@ -42,7 +42,7 @@ public class FileFlowsApiAuthorizeAttribute : Attribute, IAsyncAuthorizationFilt
         
         var token = context.HttpContext.Request.Headers["x-token"].ToString();
         
-        if(token != settings.ApiToken)
+        if(token != settings.AccessToken)
         {
             context.Result = new ContentResult
             {

@@ -3,9 +3,9 @@ using Microsoft.AspNetCore.Components;
 namespace FileFlows.Client.Components.Inputs;
 
 /// <summary>
-/// API Token input
+/// Access Token input
 /// </summary>
-public partial class InputApiToken
+public partial class InputAccessToken
 {
     /// <summary>
     /// Gets or sets the clipboard service

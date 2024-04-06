@@ -315,7 +315,7 @@ public class WebServer
             Shared.Helpers.HttpHelper.GetDefaultHttpClient(Application.ServerUrl);
 
         RemoteService.ServiceBaseUrl = Application.ServerUrl;
-        RemoteService.ApiToken = settings.ApiToken;
+        RemoteService.AccessToken = settings.AccessToken;
         RemoteService.NodeUid = Application.RunningUid;
 
         app.MapHub<Hubs.FlowHub>("/flow");
@@ -402,7 +402,7 @@ public class WebServer
 
         client.Timeout = TimeSpan.FromSeconds(30); // Set the timeout to 30 seconds
         var settings = ServiceLoader.Load<AppSettingsService>().Settings;
-        var apiToken = (await ServiceLoader.Load<SettingsService>().Get()).ApiToken;
+        var accessToken = (await ServiceLoader.Load<SettingsService>().Get()).AccessToken;
 
         for (int i = 0; i < 15; i++) // Retry 15 times (15 * 2 seconds = 30 seconds)
         {
@@ -413,9 +413,9 @@ public class WebServer
                     Method = HttpMethod.Get ,
                     RequestUri = new Uri(url, UriKind.RelativeOrAbsolute)
                 };
-                if (settings.Security != SecurityMode.Off && LicenseHelper.IsLicensed(LicenseFlags.UserSecurity) && string.IsNullOrWhiteSpace(apiToken) == false)
+                if (settings.Security != SecurityMode.Off && LicenseHelper.IsLicensed(LicenseFlags.UserSecurity) && string.IsNullOrWhiteSpace(accessToken) == false)
                 {
-                    request.Headers.Add("x-token", apiToken);
+                    request.Headers.Add("x-token", accessToken);
                 }
 
                 var response = await client.SendAsync(request);

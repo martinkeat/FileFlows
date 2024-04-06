@@ -1,7 +1,6 @@
 using FileFlows.Server.Authentication;
 using FileFlows.Server.Helpers;
 using FileFlows.Server.Services;
-using FileFlows.ServerShared.Services;
 using FileFlows.Shared.Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -39,6 +38,7 @@ public class UserController : Controller
             Email = x.Email,
             Role = x.Role,
             Password = string.IsNullOrWhiteSpace(x.Password) ? string.Empty : DUMMY_PASSWORD,
+            LastLoggedIn = x.LastLoggedIn,
             DateCreated = x.DateCreated,
             DateModified = x.DateModified,
         }).ToList();
@@ -61,8 +61,9 @@ public class UserController : Controller
                 return BadRequest("Failed to locate existing user");
             user.Password = existing.Password;
         }
-        else if (string.IsNullOrWhiteSpace(user.Password) == false)
+        else
         {
+            user.Password = user.Password?.EmptyAsNull() ?? AuthenticationHelper.GenerateRandomPassword();
             user.Password = BCrypt.Net.BCrypt.HashPassword(user.Password);
         }
         var result = await service.Update(user);

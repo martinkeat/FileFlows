@@ -9,9 +9,22 @@ namespace FileFlows.Client.Pages;
 /// </summary>
 public partial class Users: ListPage<Guid, User>
 {
+    /// <inheritdoc />
     public override string ApiUrl => "/api/user";
 
+    /// <inheritdoc />
     public override string FetchUrl => $"{ApiUrl}";
+
+    private string lblLastLoggedIn, lblNever, lblAdministrator;
+
+    /// <inheritdoc />
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        lblLastLoggedIn = Translater.Instant("Pages.Users.Labels.LastLoggedIn");
+        lblNever = Translater.Instant("Pages.Users.Labels.Never");
+        lblAdministrator = Translater.Instant("Pages.Users.Labels.Administrator");
+    }
 
     /// <summary>
     /// Gets if they are licensed for this page

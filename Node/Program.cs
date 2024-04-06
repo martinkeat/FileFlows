@@ -93,7 +93,7 @@ public class Program
                 RemoteService.ServiceBaseUrl = "http://localhost:6868/";
             #endif
 
-            RemoteService.ApiToken = appSettings.ApiToken;
+            RemoteService.AccessToken = appSettings.AccessToken;
             
             if (string.IsNullOrEmpty(options.Server) == false)
                 AppSettings.ForcedServerUrl = options.Server;
@@ -193,7 +193,7 @@ public class Program
         AppSettings.ForcedServerUrl = Environment.GetEnvironmentVariable("ServerUrl");
         AppSettings.ForcedTempPath = Environment.GetEnvironmentVariable("TempPath");
         AppSettings.ForcedHostName = Environment.GetEnvironmentVariable("NodeName");
-        AppSettings.ForcedApiToken = Environment.GetEnvironmentVariable("ApiToken");
+        AppSettings.ForcedAccessToken = Environment.GetEnvironmentVariable("AccessToken");
 
         string mappings = Environment.GetEnvironmentVariable("NodeMappings");
         if (string.IsNullOrWhiteSpace(mappings) == false)

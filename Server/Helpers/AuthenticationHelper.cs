@@ -47,6 +47,9 @@ public class AuthenticationHelper
             new (ClaimTypes.Email, user.Email),
             new Claim("code", code)
         };
+
+        var service = ServiceLoader.Load<UserService>();
+        _ = service.RecordLogin(user);
     
         var claimsIdentity = new ClaimsIdentity(claims);
 
@@ -63,5 +66,42 @@ public class AuthenticationHelper
         };
         var token = tokenHandler.CreateToken(tokenDescriptor);
         return tokenHandler.WriteToken(token);
+    }
+
+    /// <summary>
+    /// Generates a random password with specified length and character requirements.
+    /// </summary>
+    /// <param name="length">Length of the password to generate.</param>
+    /// <returns>A randomly generated password.</returns>
+    public static string GenerateRandomPassword(int length = 20)
+    {
+        Random random = new Random(DateTime.UtcNow.Millisecond);
+        const string validChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+
+        StringBuilder password = new StringBuilder();
+        int numSpecialChars = random.Next(2, 4); // Randomly select 2 or 3 special characters
+        int numLetters = length - numSpecialChars;
+
+        // Generate random letters
+        for (int i = 0; i < numLetters; i++)
+        {
+            password.Append(validChars[random.Next(validChars.Length)]);
+        }
+
+        // Generate random special characters
+        string specialChars = "!@#$%^&*()-_=+";
+        for (int i = 0; i < numSpecialChars; i++)
+        {
+            password.Append(specialChars[random.Next(specialChars.Length)]);
+        }
+
+        // Shuffle the password characters
+        for (int i = 0; i < length; i++)
+        {
+            int randomIndex = random.Next(length);
+            (password[i], password[randomIndex]) = (password[randomIndex], password[i]);
+        }
+
+        return password.ToString();
     }
 }

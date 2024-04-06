@@ -86,26 +86,6 @@ class CodeHelper
             return Result<string>.Fail(ex.Message);
         }
     }
-
-    /// <summary>
-    /// Creates a randomly generated password
-    /// </summary>
-    /// <returns>a randomly generated password</returns>
-    public static string CreateNewPassword()
-    {
-        const string allowedChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()";
-        var passwordLength = 20;
-
-        var random = new Random();
-        var password = new char[passwordLength];
-
-        for (int i = 0; i < passwordLength; i++)
-        {
-            password[i] = allowedChars[random.Next(0, allowedChars.Length)];
-        }
-
-        return new string(password);
-    }
     
     /// <summary>
     /// Performs a SHA-512 hash on a string.

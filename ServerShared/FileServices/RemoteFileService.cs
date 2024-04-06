@@ -31,9 +31,9 @@ public class RemoteFileService : IFileService
     private static HttpClient _Client;
     private readonly LocalFileService _localFileService;
     /// <summary>
-    /// The api token
+    /// The access  token
     /// </summary>
-    private readonly string ApiToken;
+    private readonly string AccessToken;
     /// <summary>
     /// The remote node UID
     /// </summary>
@@ -47,15 +47,15 @@ public class RemoteFileService : IFileService
     /// <param name="tempPath">the path to the temporary runner directory</param>
     /// <param name="logger">the logger</param>
     /// <param name="pathSeparator">the path separator</param>
-    /// <param name="apiToken">the API token to use</param>
+    /// <param name="accessToken">the API token to use</param>
     /// <param name="remoteNodeUid">the UID of the remote node</param>
-    public RemoteFileService(Guid executorUid, string serverUrl, string tempPath, ILogger logger, char pathSeparator, string apiToken, Guid remoteNodeUid)
+    public RemoteFileService(Guid executorUid, string serverUrl, string tempPath, ILogger logger, char pathSeparator, string accessToken, Guid remoteNodeUid)
     {
         this.executorUid = executorUid;
         this.serverUrl = serverUrl;
         this.tempPath = tempPath;
         this.logger = logger;
-        this.ApiToken = apiToken;
+        this.AccessToken = accessToken;
         this.RemoteNodeUid = remoteNodeUid;
         this.PathSeparator = pathSeparator;
         this._localFileService = new();
@@ -69,8 +69,8 @@ public class RemoteFileService : IFileService
     private void OnHttpRequestCreated(HttpRequestMessage request)
     {
         request.Headers.Add("x-executor", executorUid.ToString());
-        if(string.IsNullOrWhiteSpace(ApiToken) == false)
-            request.Headers.Add("x-token", ApiToken);
+        if(string.IsNullOrWhiteSpace(AccessToken) == false)
+            request.Headers.Add("x-token", AccessToken);
     }
 
     /// <summary>
@@ -249,7 +249,7 @@ public class RemoteFileService : IFileService
         if (DirectoryExists(path).Is(true))
             return Result<string>.Fail("Cannot map a remote folder");
 
-        var result = new FileDownloader(logger, serverUrl, executorUid, ApiToken, RemoteNodeUid)
+        var result = new FileDownloader(logger, serverUrl, executorUid, AccessToken, RemoteNodeUid)
             .DownloadFile(path, filename).Result;
         if (result.IsFailed)
             return Result<string>.Fail(result.Error);
@@ -359,7 +359,7 @@ public class RemoteFileService : IFileService
         {
             if(FileIsLocal(PreparePath(ref destination)))
                 return _localFileService.FileMove(path, destination, overwrite);
-            var result = new FileUploader(logger, serverUrl, executorUid, ApiToken, RemoteNodeUid)
+            var result = new FileUploader(logger, serverUrl, executorUid, AccessToken, RemoteNodeUid)
                 .UploadFile(path, destination).Result;
             if (result.Success == false)
                 return Result<bool>.Fail(result.Error);
@@ -391,7 +391,7 @@ public class RemoteFileService : IFileService
         {
             if(FileIsLocal(PreparePath(ref destination)))
                 return _localFileService.FileCopy(path, destination, overwrite);
-            var result = new FileUploader(logger, serverUrl, executorUid, ApiToken, RemoteNodeUid)
+            var result = new FileUploader(logger, serverUrl, executorUid, AccessToken, RemoteNodeUid)
                 .UploadFile(path, destination).Result;
             if (result.Success == false)
                 return Result<bool>.Fail(result.Error);
@@ -401,7 +401,7 @@ public class RemoteFileService : IFileService
         if (FileIsLocal(PreparePath(ref destination)))
         {
             // download the file
-            var result = new FileDownloader(logger, serverUrl, executorUid, ApiToken, RemoteNodeUid)
+            var result = new FileDownloader(logger, serverUrl, executorUid, AccessToken, RemoteNodeUid)
                 .DownloadFile(path, destination).Result;
             if (result.IsFailed)
                 return Result<bool>.Fail(result.Error);

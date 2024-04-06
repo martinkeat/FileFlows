@@ -125,7 +125,7 @@ public class Settings : FileFlowObject
     /// Gets or sets the API token processing nodes will use to connect
     /// </summary>
     [Encrypted]
-    public string ApiToken { get; set; }
+    public string AccessToken { get; set; }
     
     /// <summary>
     /// Gets or sets the email server address
@@ -190,6 +190,16 @@ public class Settings : FileFlowObject
     /// Gets or sets the token expiry in minutes
     /// </summary>
     public int TokenExpiryMinutes { get; set; }
+    
+    /// <summary>
+    /// Gets or sets the max login attempts before locking out the user
+    /// </summary>
+    public int LoginMaxAttempts { get; set; }
+    
+    /// <summary>
+    /// Gets or sets the duration to lockout the user for
+    /// </summary>
+    public int LoginLockoutMinutes { get; set; }
 }
 
 /// <summary>

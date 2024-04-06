@@ -253,19 +253,19 @@ public class MainWindowViewModel:INotifyPropertyChanged
     }
 
 
-    private string _ApiToken = string.Empty;
+    private string _AccessToken = string.Empty;
     /// <summary>
-    /// Gets or sets the API Token
+    /// Gets or sets the Access Token
     /// </summary>
-    public string ApiToken
+    public string AccessToken
     {
-        get => _ApiToken;
+        get => _AccessToken;
         set
         {
-            if (_ApiToken?.EmptyAsNull() != value?.EmptyAsNull())
+            if (_AccessToken?.EmptyAsNull() != value?.EmptyAsNull())
             {
-                _ApiToken = value ?? string.Empty;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ApiToken)));
+                _AccessToken = value ?? string.Empty;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(AccessToken)));
             }
         }
     }
@@ -350,7 +350,7 @@ public class MainWindowViewModel:INotifyPropertyChanged
         if (ServerUrl.EndsWith("/") == false)
             ServerUrl += "/";
         
-        AppSettings.Instance.ApiToken = ApiToken;
+        AppSettings.Instance.AccessToken = AccessToken;
         AppSettings.Instance.ServerUrl = ServerUrl;
         
         _ = Window.SaveRegister();

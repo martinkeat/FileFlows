@@ -24,7 +24,7 @@ public class AppSettings
     /// <summary>
     /// Gets or sets a forced API Token 
     /// </summary>
-    public static string? ForcedApiToken { get; set; }
+    public static string? ForcedAccessToken { get; set; }
 
     /// <summary>
     /// Gets or sets mappings passed in via enviromental values
@@ -57,20 +57,20 @@ public class AppSettings
         set => _ServerUrl = value ?? String.Empty;
     }
 
-    private string _ApiToken = string.Empty;
+    private string _AccessToken = string.Empty;
     
     /// <summary>
-    /// Gets or sets the API Token
+    /// Gets or sets the Access Token
     /// </summary>
-    public string ApiToken
+    public string AccessToken
     {
         get
         {
-            if (string.IsNullOrEmpty(ForcedApiToken) == false)
-                return ForcedApiToken;
-            return _ApiToken;
+            if (string.IsNullOrEmpty(ForcedAccessToken) == false)
+                return ForcedAccessToken;
+            return _AccessToken;
         }
-        set => _ApiToken = value ?? String.Empty;
+        set => _AccessToken = value ?? String.Empty;
     }
 
     /// <summary>
