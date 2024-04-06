@@ -998,7 +998,9 @@
           "ClientId": "Client ID",
           "ClientId-Help": "The client ID registered with the Open ID Connect provider.",
           "ClientSecret": "Client Secret",
-          "ClientSecret-Help": "The client secret registered with the Open ID Connect provider."
+          "ClientSecret-Help": "The client secret registered with the Open ID Connect provider.",
+          "CallbackAddress": "Callback Address",
+          "CallbackAddress-Help": "An optional callback address, you can use this to override the default address this will send to the client.\n For example if you are behind a reverse proxy and FileFLows is listening on HTTP but the callback should occur on HTTPS."
         }
       }
     },

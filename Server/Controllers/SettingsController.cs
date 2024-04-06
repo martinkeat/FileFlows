@@ -120,6 +120,7 @@ public class SettingsController : Controller
         uiModel.RecreateDatabase = Settings.RecreateDatabase;
 
         uiModel.Security = ServiceLoader.Load<AppSettingsService>().Settings.Security;
+        uiModel.OidcCallbackAddressPlaceholder = Url.Action(nameof(HomeController.Index), "Home", null, Request.Scheme);
         
         return uiModel;
     }
@@ -205,6 +206,7 @@ public class SettingsController : Controller
             OidcAuthority = model.OidcAuthority ?? string.Empty,
             OidcClientId = model.OidcClientId ?? string.Empty,
             OidcClientSecret = model.OidcClientSecret ?? string.Empty,
+            OidcCallbackAddress = model.OidcCallbackAddress ?? string.Empty,
         });
         RemoteService.ApiToken = model.ApiToken;
         // validate license it

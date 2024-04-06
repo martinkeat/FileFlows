@@ -81,5 +81,10 @@ public class SettingsUiModel:Settings
     /// Gets or sets the security mode
     /// </summary>
     public SecurityMode Security { get; set; }
+    
+    /// <summary>
+    /// Gets or set the placeholder for the OIDC call back address
+    /// </summary>
+    public string OidcCallbackAddressPlaceholder { get; set; }
 
 }

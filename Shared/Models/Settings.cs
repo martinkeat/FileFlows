@@ -180,6 +180,11 @@ public class Settings : FileFlowObject
     /// </summary>
     [Encrypted]
     public string OidcClientSecret { get; set; }
+    /// <summary>
+    /// Gets or sets an optional open ID connect client callback address, if this is not set the originating address will be used
+    /// </summary>
+    [Encrypted]
+    public string OidcCallbackAddress { get; set; }
 }
 
 /// <summary>

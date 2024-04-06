@@ -44,6 +44,8 @@ public class OpenIDController : Controller
         string idpAuthUrl = oidcConfig.AuthorizationEndpoint;
         string clientId = _settings.OidcClientId; // Replace with your client ID
         string redirectUri = Url.Action("Callback", "OpenID", null, Request.Scheme); // Callback URL
+        if (string.IsNullOrWhiteSpace(_settings.OidcCallbackAddress) == false)
+            redirectUri = _settings.OidcCallbackAddress.TrimEnd('/') + redirectUri[redirectUri.IndexOf("/oidc")..];
 
         string redirectUrl = $"{idpAuthUrl}?client_id={clientId}&redirect_uri={redirectUri}&response_type=code&prompt=login";
 
