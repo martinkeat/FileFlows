@@ -311,8 +311,17 @@ public abstract class Input<T> : ComponentBase, IInput, IDisposable
         if(this.Visible != state)
         {
             this.Visible = state;
+            VisibleChanged(state);
             this.StateHasChanged();
         }
+    }
+
+    /// <summary>
+    /// Called when the visibility changed
+    /// </summary>
+    /// <param name="visible">the new visibility</param>
+    protected virtual void VisibleChanged(bool visible)
+    {
     }
 
     protected void ClearError() => this.ErrorMessage = "";

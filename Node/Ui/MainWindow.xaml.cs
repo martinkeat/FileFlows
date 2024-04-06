@@ -366,6 +366,7 @@ public class MainWindowViewModel:INotifyPropertyChanged
         this.Version = "FileFlows Node Version: " + Globals.Version;
         
         ServerUrl = AppSettings.Instance.ServerUrl;
+        AccessToken = AppSettings.Instance.AccessToken;
     }
 
     /// <summary>
