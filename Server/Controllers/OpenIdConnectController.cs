@@ -62,7 +62,7 @@ public class OpenIDController : Controller
     {
         var oidcConfig = await GetWellKnownConfig();
         if (oidcConfig == null)
-            return ErrorPage();
+            return ErrorPage("Failed to load OIDC well known config");
 
         try
         {
@@ -85,7 +85,7 @@ public class OpenIDController : Controller
             HttpResponseMessage tokenResponse = await _httpClient.PostAsync(tokenEndpoint, tokenRequestContent);
 
             if (tokenResponse.IsSuccessStatusCode == false)
-                return ErrorPage();
+                return ErrorPage("Failed to get token from OIDC provider");
 
             var tokenResponseContent = await tokenResponse.Content.ReadAsStringAsync();
             var tokenResult = JsonSerializer.Deserialize<OidcTokenResult>(tokenResponseContent);
@@ -103,23 +103,24 @@ public class OpenIDController : Controller
             HttpResponseMessage userInfoResponse = await _httpClient.SendAsync(request);
 
             if (userInfoResponse.IsSuccessStatusCode == false)
-                return ErrorPage();
+                return ErrorPage("Failed to retrieve user info.");
             
             var userInfoResponseContent = await userInfoResponse.Content.ReadAsStringAsync();
             var oidcUser = JsonSerializer.Deserialize<OidcUserInfo>(userInfoResponseContent);
 
             var service = ServiceLoader.Load<UserService>();
-            var user = await service.FindUser(oidcUser.Email?.EmptyAsNull() ?? oidcUser.Name);
+            string lookupName = oidcUser.Email?.EmptyAsNull() ?? oidcUser.Name;
+            var user = await service.FindUser(lookupName);
             if (user == null)
-                return ErrorPage();
+                return ErrorPage("Unable to find user: " + lookupName);
 
             var jwt = AuthenticationHelper.CreateJwtToken(user, Request.GetActualIP());
 
             return AuthRedirectPage(jwt);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            return ErrorPage();
+            return ErrorPage(ex.Message + Environment.NewLine + ex.StackTrace);
         }
     }
 
