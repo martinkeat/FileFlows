@@ -39,6 +39,7 @@ public class UserController : Controller
             Role = x.Role,
             Password = string.IsNullOrWhiteSpace(x.Password) ? string.Empty : DUMMY_PASSWORD,
             LastLoggedIn = x.LastLoggedIn,
+            LastLoggedInAddress = x.LastLoggedInAddress,
             DateCreated = x.DateCreated,
             DateModified = x.DateModified,
         }).ToList();
