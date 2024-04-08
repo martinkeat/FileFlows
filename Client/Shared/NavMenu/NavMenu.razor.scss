@@ -301,56 +301,6 @@ $maxItems: 15;
         }
     }
 }
-@media screen and (max-height: 820px)
-{
-    .nav-menu-group {
-        display:none;
-    }
-    .nav-item {
-        padding-bottom:0.1rem;
-    }
-    .nav-menu-container {
-        margin-top:1rem;
-    }
-}
-
-@media screen and (max-height:645px){
-    .support-links, .version-info {
-        display: none !important;
-    }
-}
-
-
-@media screen and (max-height:940px) and (min-height: 801px)
-{
-    .nav-item {
-        padding-bottom:0.25rem;
-        ::deep a {
-            height:2rem;
-        }
-    }
-    .nav-menu-group {
-        padding-top:0.25rem;
-    }
-}
-
-.paused-indicator {
-    @media screen and (max-height: 700px) {
-        display: none !important;
-    }
-
-    @media screen and (max-height: 800px) and (min-height: 605px) {
-        font-size: 2.75rem;
-        bottom: 5rem;
-    }
-    @media screen and (max-height: 940px) and (min-height: 801px) {
-
-        .paused-indicator {
-            font-size: 3.5rem;
-        }
-    }
-}
-
 
 .navbar-brand i {
     color:var(--color) !important;
@@ -384,5 +334,76 @@ $maxItems: 15;
     }
     .user-menu {
         display: flex;
+    }
+}
+
+
+
+
+
+
+@media screen and (max-height:590px){
+    .nav-menu-group {
+        display:none;
+    }
+    .nav-menu-container {
+        padding-top:1.25rem;
+    }
+    .nav-item {
+        padding-bottom:0.1rem;
+        height:2rem;
+    }
+    .support-links, .version-info {
+        display: none !important;
+    }
+    .paused-indicator {
+        display: none;
+    }
+}
+@media screen and (min-height:590.1px) and (max-height:660px){
+    .nav-menu-group {
+        display:none;
+    }
+    .nav-menu-container {
+        padding-top:1.25rem;
+    }
+    .nav-item {
+        padding-bottom:0.1rem;
+        height:2rem;
+    }
+    .paused-indicator {
+        display: none;
+    }
+}
+
+@media screen and (min-height:660.1px) and (max-height: 820px)
+{
+    .nav-menu-group {
+        display:none;
+    }
+    .nav-item {
+        padding-bottom:0.1rem;
+        height:2rem;
+    }
+    .nav-menu-container {
+        margin-top:1rem;
+    };
+    .paused-indicator {
+        font-size: 2.75rem;
+        bottom: 5rem;
+    }
+
+}
+@media screen and (min-height: 820.1px) and (max-height:980px) 
+{
+    .nav-item {
+        padding-bottom:0.25rem;
+        height:2rem;
+    }
+    .nav-menu-group {
+        padding-top:0.25rem;
+    }
+    .paused-indicator {
+        font-size: 3.5rem;
     }
 }
