@@ -1,3 +1,6 @@
+$maxGroups: 5;
+$maxItems: 15;
+
 .navbar-toggler {
     background-color: transparent;
     outline:none !important;
@@ -78,10 +81,10 @@
 }
 .paused-indicator {
     position: absolute;
-    bottom: 5.5rem;
+    bottom: 4.75rem;
     width: 100%;
     text-align: center;
-    font-size: 4.5rem;
+    font-size: 4rem;
     > span {
         cursor:pointer;
     }
@@ -311,14 +314,14 @@
     }
 }
 
-@media screen and (max-height:590px){
+@media screen and (max-height:645px){
     .support-links, .version-info {
         display: none !important;
     }
 }
 
 
-@media screen and (max-height:940px) and (min-height: 821px)
+@media screen and (max-height:940px) and (min-height: 801px)
 {
     .nav-item {
         padding-bottom:0.25rem;
@@ -332,15 +335,15 @@
 }
 
 .paused-indicator {
-    @media screen and (max-height: 655px) {
+    @media screen and (max-height: 700px) {
         display: none !important;
     }
 
-    @media screen and (max-height: 820px) and (min-height: 655px) {
+    @media screen and (max-height: 800px) and (min-height: 605px) {
         font-size: 2.75rem;
         bottom: 5rem;
     }
-    @media screen and (max-height: 940px) and (min-height: 821px) {
+    @media screen and (max-height: 940px) and (min-height: 801px) {
 
         .paused-indicator {
             font-size: 3.5rem;
