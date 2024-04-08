@@ -46,5 +46,10 @@ public class UserManager : CachedManager<User>
             typeof(User).FullName!,
             nameof(user.LastLoggedIn),
             user.LastLoggedIn);
+        await DatabaseAccessManager.Instance.ObjectManager.SetDataValue(
+            user.Uid,
+            typeof(User).FullName!,
+            nameof(user.LastLoggedInAddress),
+            user.LastLoggedInAddress);
     }
 }
