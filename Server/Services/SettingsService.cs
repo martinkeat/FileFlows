@@ -27,50 +27,6 @@ public class SettingsService // : ISettingsService
     }
 
     /// <summary>
-    /// Gets the file flows status
-    /// </summary>
-    /// <returns>the file flows status</returns>
-    public async Task<FileFlowsStatus> GetFileFlowsStatus()
-    {
-        FileFlowsStatus status = new();
-        status.IsWindows = OperatingSystem.IsWindows();
-        status.IsLinux = OperatingSystem.IsLinux();
-        status.IsMacOS = OperatingSystem.IsMacOS();
-        status.IsDocker = Globals.IsDocker;
-        status.IsWebView = Application.UsingWebView;
-        
-        var license = LicenseHelper.GetLicense();
-        if (license?.Status == LicenseStatus.Valid)
-        {
-            var settings = ServiceLoader.Load<AppSettingsService>().Settings;
-            status.Licensed = true;
-            status.ExternalDatabase = settings.DatabaseType != DatabaseType.Sqlite;
-            status.LicenseDashboards = (license.Flags & LicenseFlags.Dashboards) == LicenseFlags.Dashboards;
-            status.LicenseRevisions = (license.Flags & LicenseFlags.Revisions) == LicenseFlags.Revisions;
-            status.LicenseExternalDatabase = (license.Flags & LicenseFlags.ExternalDatabase) == LicenseFlags.ExternalDatabase;
-            status.LicenseTasks = (license.Flags & LicenseFlags.Tasks) == LicenseFlags.Tasks;
-            status.LicenseAutoUpdates = (license.Flags & LicenseFlags.AutoUpdates) == LicenseFlags.AutoUpdates;
-            status.LicenseWebhooks = (license.Flags & LicenseFlags.Webhooks) == LicenseFlags.Webhooks;
-            status.LicenseUserSecurity = (license.Flags & LicenseFlags.UserSecurity) == LicenseFlags.UserSecurity;
-            status.Security = settings.Security;
-            status.LicenseProcessingOrder = (license.Flags & LicenseFlags.ProcessingOrder) == LicenseFlags.ProcessingOrder;
-            status.LicenseFileServer = (license.Flags & LicenseFlags.FileServer) == LicenseFlags.FileServer;
-            status.LicenseEnterprise = (license.Flags & LicenseFlags.Enterprise) == LicenseFlags.Enterprise;
-        }
-
-        bool libs = await ServiceLoader.Load<LibraryService>().HasAny();
-        bool flows = await ServiceLoader.Load<FlowService>().HasAny();
-
-        if (flows)
-            status.ConfigurationStatus |= ConfigurationStatus.Flows;
-        if (libs)
-            status.ConfigurationStatus |= ConfigurationStatus.Libraries;
-        
-        return status;
-    }
-
-
-    /// <summary>
     /// Gets the current configuration revision number
     /// </summary>
     /// <returns>the current configuration revision number</returns>

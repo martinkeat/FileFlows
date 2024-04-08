@@ -269,6 +269,17 @@ public partial class FlowTable<TItem>: FlowTableBase,IDisposable, INotifyPropert
 
     private string FlowTableHotkey;
 
+    /// <summary>
+    /// Sets the selected items
+    /// </summary>
+    /// <param name="items">the items</param>
+    public void SetSelected(IEnumerable<TItem> items)
+    {
+        SelectedItems.Clear();
+        if(items != null)
+            SelectedItems.AddRange(items);
+    }
+
     protected override void OnInitialized()
     {
         FlowTableHotkey = Guid.NewGuid().ToString();

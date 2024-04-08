@@ -5,6 +5,7 @@ using Microsoft.OpenApi.Models;
 using System.Runtime.InteropServices;
 using FileFlows.Plugin;
 using FileFlows.RemoteServices;
+using FileFlows.Server.Authentication;
 using FileFlows.Server.Helpers;
 using FileFlows.Server.Hubs;
 using FileFlows.Server.Middleware;
@@ -280,6 +281,7 @@ public class WebServer
 
         app.UseMiddleware<ExceptionMiddleware>();
         app.UseMiddleware<LoggingMiddleware>();
+        app.UseMiddleware<FileFlowsIPAddressAuthorizeFilter>();
         // this is an experiment, may reuse it one day
         //app.UseMiddleware<UiMiddleware>();
         app.UseRouting();

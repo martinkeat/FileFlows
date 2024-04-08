@@ -34,6 +34,7 @@ public static class ServiceLoader
             .AddSingleton<UserService>()
             .AddSingleton<VariableService>()
             .AddSingleton<RevisionService>()
+            .AddSingleton<AccessControlService>()
             .AddSingleton<FlowRunnerService>()
             .BuildServiceProvider(); // Build the service provider
     }

@@ -24,7 +24,7 @@ public class AuthenticationHelper
         var settings = ServiceLoader.Load<AppSettingsService>().Settings;
         if (settings.Security is SecurityMode.Local or SecurityMode.Off)
             return settings.Security;
-        if (LicenseHelper.IsLicensed(LicenseFlags.Enterprise) == false)
+        if (LicenseHelper.IsLicensed(LicenseFlags.SingleSignOn) == false)
             return SecurityMode.Off;
         return settings.Security;
     }

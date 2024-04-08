@@ -43,30 +43,6 @@ public class SettingsController : Controller
     }
 
     /// <summary>
-    /// Gets the system status of FileFlows
-    /// </summary>
-    /// <returns>the system status of FileFlows</returns>
-    [HttpGet("fileflows-status")]
-    public async Task<FileFlowsStatus> GetFileFlowsStatus()
-    {
-        var status = await ServiceLoader.Load<SettingsService>().GetFileFlowsStatus();
-        var security = ServiceLoader.Load<AppSettingsService>().Settings.Security;
-        if (security != SecurityMode.Off)
-        {
-            var user = HttpContext.GetLoggedInUser().Result;
-            status.IsAdmin = (user.Role & UserRole.Admin) == UserRole.Admin;
-            status.ShowChangePassword = security == SecurityMode.Local;
-            status.ShowLogout = true;
-        }
-        else
-        {
-            status.IsAdmin = true;
-        }
-
-        return status;
-    }
-
-    /// <summary>
     /// Checks latest version from fileflows.com
     /// </summary>
     /// <returns>The latest version number if greater than current</returns>

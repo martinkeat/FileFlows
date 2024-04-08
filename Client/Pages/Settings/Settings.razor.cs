@@ -216,7 +216,7 @@ public partial class Settings : InputRegister
             new() { Label = $"Enums.{nameof(SecurityMode)}.{nameof(SecurityMode.Off)}", Value = SecurityMode.Off },
             new() { Label = $"Enums.{nameof(SecurityMode)}.{nameof(SecurityMode.Local)}", Value = SecurityMode.Local }
         };
-        if (Profile.LicensedFor(LicenseFlags.Enterprise) == false)
+        if (Profile.LicensedFor(LicenseFlags.SingleSignOn) == false)
         {
             if(Model.Security == SecurityMode.OpenIdConnect)
                 Model.Security = SecurityMode.Off;

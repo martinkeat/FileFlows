@@ -47,17 +47,20 @@ public class ProfileService
                 return _profile;
             var result = await HttpHelper.Get<Profile>("/api/profile");
             if (result.Success == false)
-            {
-#if(DEBUG)
-                NavigationManager.NavigateTo("http://localhost:6868/login", true);
-#else
-                NavigationManager.NavigateTo("/login", true);
-#endif
-                return null;
-            }
+                throw new UnauthorizedAccessException();
 
             _profile = result.Data;
             return _profile;
+        }
+        catch (Exception ex)
+        {
+#if(DEBUG)
+            NavigationManager.NavigateTo("http://localhost:6868/login", true);
+#else
+            NavigationManager.NavigateTo("/login", true);
+#endif
+            return null;
+            
         }
         finally
         {

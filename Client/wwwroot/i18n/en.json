@@ -1042,6 +1042,40 @@
         "Roles": "Roles"
       }
     },
+    "AccessControl": {
+      "Title": "Access Control",
+      "Single": "Access Control Entry",
+      "Columns": {
+        "Start": "Start",
+        "End": "End",
+        "Allow": "Allow"
+      },
+      "Buttons":{
+        "MoveUp": "Move Up",
+        "MoveDown": "Move Down"
+      }, 
+      "Messages": {
+        "InvalidIPAddress": "'{address}' is not a valid IP address.",
+        "FamilyMismatch": "The start and end IP addresses must be the same type",
+        "EndMustBeGreaterThan": "The end address must be greater than the start address",
+        "MoveFailed": "Failed to move entries"
+      },
+      "Labels": {
+        "Console": "Web Console",
+        "Remote": "Remote / Processing Nodes"
+      },
+      "Fields": {
+        "Description": "Description",
+        "Description-Placeholder": "An optional description to describe this entry",
+        "Start": "Start Address",
+        "Start-Help": "The start IP Address can be either IPv4 or IPv6",
+        "End": "End Address",
+        "End-Placeholder": "Optional end address",
+        "End-Help": "Optional end IP Address, must be greater than the start address if set and of the same type. Otherwise this end value will be ignored.",
+        "Allow": "Allow",
+        "Allow-Help": "If this access control entry is allowed to access the system or not."
+      }
+    },
     "FileFlowsTask":{
       "Title":"Task"
     },

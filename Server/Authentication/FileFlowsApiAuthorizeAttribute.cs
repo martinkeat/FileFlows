@@ -1,5 +1,6 @@
 using FileFlows.Server.Helpers;
 using FileFlows.Server.Services;
+using FileFlows.Shared.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 
@@ -31,9 +32,6 @@ public class FileFlowsApiAuthorizeAttribute : Attribute, IAsyncAuthorizationFilt
     /// <param name="context">the context</param>
     public async Task OnAuthorizationAsync(AuthorizationFilterContext context)
     {
-        if (LicenseHelper.IsLicensed(LicenseFlags.UserSecurity) == false)
-            return;
-
         var mode = AuthenticationHelper.GetSecurityMode();
         if (mode == SecurityMode.Off)
             return;

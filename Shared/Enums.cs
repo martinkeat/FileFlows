@@ -306,7 +306,15 @@ public enum LicenseFlags
     /// <summary>
     /// User security
     /// </summary>
-    UserSecurity = 512
+    UserSecurity = 512,
+    /// <summary>
+    /// Single Sign On
+    /// </summary>
+    SingleSignOn = 1024,
+    /// <summary>
+    /// Access control
+    /// </summary>
+    AccessControl = 2048
 }
 
 
