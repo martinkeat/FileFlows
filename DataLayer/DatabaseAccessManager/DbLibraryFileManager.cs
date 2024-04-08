@@ -156,7 +156,7 @@ internal class DbLibraryFileManager : BaseManager
         }
         catch (Exception ex)
         {
-            //Logger.Instance.ELog($"Error {(update ? "updating" :"adding")} library file: {ex.Message}");
+            Logger.ELog($"Error updating library file: {ex.Message}" + Environment.NewLine + sql);
             throw;
         }
 
@@ -170,101 +170,112 @@ internal class DbLibraryFileManager : BaseManager
     /// <param name="files">the files to insert</param>
     public async Task InsertBulk(LibraryFile[] files)
     {
-        using var db = await DbConnector.GetDb(write: true);
-        db.Db.BeginTransaction();
-        foreach (var file in files)
+        string sql = null;
+        try
         {
-            EnsureValusAreAcceptable(file);
+            using var db = await DbConnector.GetDb(write: true);
+            db.Db.BeginTransaction();
+            foreach (var file in files)
+            {
+                EnsureValusAreAcceptable(file);
+                List<object> parameters = new();
+                int offset = 0; //parameters.Count - 1;
 
-            List<object> parameters = new();
-            int offset = 0; //parameters.Count - 1;
+                bool postgres = DbType == DatabaseType.Postgres;
 
-            bool postgres = DbType == DatabaseType.Postgres;
+                sql = $"insert into {Wrap(nameof(LibraryFile))} ( " +
+                             $"{Wrap(nameof(LibraryFile.Uid))}, " +
+                             $"{Wrap(nameof(LibraryFile.Name))}, " +
+                             $"{Wrap(nameof(LibraryFile.Status))}, " +
+                             $"{Wrap(nameof(LibraryFile.Flags))}, " +
+                             $"{Wrap(nameof(LibraryFile.OriginalSize))}, " +
+                             $"{Wrap(nameof(LibraryFile.FinalSize))}, " +
+                             $"{Wrap("ProcessingOrder")}, " + // special case, since Order is reserved in sql
+                             $"{Wrap(nameof(LibraryFile.IsDirectory))}, " +
+                             $"{Wrap(nameof(LibraryFile.NoLongerExistsAfterProcessing))}, " +
 
-            string sql = $"insert into {Wrap(nameof(LibraryFile))} ( " +
-                         $"{Wrap(nameof(LibraryFile.Uid))}, " +
-                         $"{Wrap(nameof(LibraryFile.Name))}, " +
-                         $"{Wrap(nameof(LibraryFile.Status))}, " +
-                         $"{Wrap(nameof(LibraryFile.Flags))}, " +
-                         $"{Wrap(nameof(LibraryFile.OriginalSize))}, " +
-                         $"{Wrap(nameof(LibraryFile.FinalSize))}, " +
-                         $"{Wrap("ProcessingOrder")}, " + // special case, since Order is reserved in sql
-                         $"{Wrap(nameof(LibraryFile.IsDirectory))}, " +
-                         $"{Wrap(nameof(LibraryFile.NoLongerExistsAfterProcessing))}, " +
+                             $"{Wrap(nameof(LibraryFile.DateCreated))}, " +
+                             $"{Wrap(nameof(LibraryFile.DateModified))}, " +
+                             $"{Wrap(nameof(LibraryFile.CreationTime))}, " +
+                             $"{Wrap(nameof(LibraryFile.LastWriteTime))}, " +
+                             $"{Wrap(nameof(LibraryFile.HoldUntil))}, " +
+                             $"{Wrap(nameof(LibraryFile.ProcessingStarted))}, " +
+                             $"{Wrap(nameof(LibraryFile.ProcessingEnded))}, " +
 
-                         $"{Wrap(nameof(LibraryFile.DateCreated))}, " +
-                         $"{Wrap(nameof(LibraryFile.DateModified))}, " +
-                         $"{Wrap(nameof(LibraryFile.CreationTime))}, " +
-                         $"{Wrap(nameof(LibraryFile.LastWriteTime))}, " +
-                         $"{Wrap(nameof(LibraryFile.HoldUntil))}, " +
-                         $"{Wrap(nameof(LibraryFile.ProcessingStarted))}, " +
-                         $"{Wrap(nameof(LibraryFile.ProcessingEnded))}, " +
+                             $"{Wrap(nameof(LibraryFile.RelativePath))}, " +
+                             $"{Wrap(nameof(LibraryFile.Fingerprint))}, " +
+                             $"{Wrap(nameof(LibraryFile.FinalFingerprint))}, " +
+                             $"{Wrap(nameof(LibraryFile.LibraryUid))}, " +
+                             $"{Wrap(nameof(LibraryFile.LibraryName))}, " +
+                             $"{Wrap(nameof(LibraryFile.FlowUid))}, " +
+                             $"{Wrap(nameof(LibraryFile.FlowName))}, " +
+                             $"{Wrap(nameof(LibraryFile.DuplicateUid))}, " +
+                             $"{Wrap(nameof(LibraryFile.DuplicateName))}, " +
+                             $"{Wrap(nameof(LibraryFile.NodeUid))}, " +
+                             $"{Wrap(nameof(LibraryFile.NodeName))}, " +
+                             $"{Wrap(nameof(LibraryFile.WorkerUid))}, " +
+                             $"{Wrap(nameof(LibraryFile.ProcessOnNodeUid))}, " +
+                             $"{Wrap(nameof(LibraryFile.OutputPath))}, " +
+                             $"{Wrap(nameof(LibraryFile.OriginalMetadata))}, " +
+                             $"{Wrap(nameof(LibraryFile.FinalMetadata))}, " +
+                             $"{Wrap(nameof(LibraryFile.ExecutedNodes))}, " +
+                             $"{Wrap(nameof(LibraryFile.FailureReason))} " +
+                             " )" +
+                             $" values (@{offset++},@{offset++}," +
+                             ((int)file.Status) + ", " +
+                             ((int)file.Flags) + ", " +
+                             (file.OriginalSize) + ", " +
+                             (file.FinalSize) + ", " +
+                             (file.Order) + ", " +
+                             (file.IsDirectory ? (postgres ? "true" : "1") : (postgres ? "false" : "0")) + "," +
+                             (file.NoLongerExistsAfterProcessing
+                                 ? (postgres ? "true" : "1")
+                                 : (postgres ? "false" : "0")) +
+                             "," +
 
-                         $"{Wrap(nameof(LibraryFile.RelativePath))}, " +
-                         $"{Wrap(nameof(LibraryFile.Fingerprint))}, " +
-                         $"{Wrap(nameof(LibraryFile.FinalFingerprint))}, " +
-                         $"{Wrap(nameof(LibraryFile.LibraryUid))}, " +
-                         $"{Wrap(nameof(LibraryFile.LibraryName))}, " +
-                         $"{Wrap(nameof(LibraryFile.FlowUid))}, " +
-                         $"{Wrap(nameof(LibraryFile.FlowName))}, " +
-                         $"{Wrap(nameof(LibraryFile.DuplicateUid))}, " +
-                         $"{Wrap(nameof(LibraryFile.DuplicateName))}, " +
-                         $"{Wrap(nameof(LibraryFile.NodeUid))}, " +
-                         $"{Wrap(nameof(LibraryFile.NodeName))}, " +
-                         $"{Wrap(nameof(LibraryFile.WorkerUid))}, " +
-                         $"{Wrap(nameof(LibraryFile.ProcessOnNodeUid))}, " +
-                         $"{Wrap(nameof(LibraryFile.OutputPath))}, " +
-                         $"{Wrap(nameof(LibraryFile.OriginalMetadata))}, " +
-                         $"{Wrap(nameof(LibraryFile.FinalMetadata))}, " +
-                         $"{Wrap(nameof(LibraryFile.ExecutedNodes))}, " +
-                         $"{Wrap(nameof(LibraryFile.FailureReason))} " +
-                         " )" +
-                         $" values (@{offset++},@{offset++}," +
-                         ((int)file.Status) + ", " +
-                         ((int)file.Flags) + ", " +
-                         (file.OriginalSize) + ", " +
-                         (file.FinalSize) + ", " +
-                         (file.Order) + ", " +
-                         (file.IsDirectory ? (postgres ? "true" : "1") : (postgres ? "false" : "0")) + "," +
-                         (file.NoLongerExistsAfterProcessing ? (postgres ? "true" : "1") : (postgres ? "false" : "0")) +
-                         "," +
+                             DbConnector.FormatDateQuoted(file.DateCreated) + "," + //$"@{++offset}," + // date created
+                             DbConnector.FormatDateQuoted(file.DateModified) +
+                             "," + //$"@{++offset}," + // date modified
+                             DbConnector.FormatDateQuoted(file.CreationTime) + ", " +
+                             DbConnector.FormatDateQuoted(file.LastWriteTime) + ", " +
+                             DbConnector.FormatDateQuoted(file.HoldUntil) + ", " +
+                             DbConnector.FormatDateQuoted(file.ProcessingStarted) + ", " +
+                             DbConnector.FormatDateQuoted(file.ProcessingEnded) + ", " +
+                             $"@{offset++},@{offset++},@{offset++},@{offset++},@{offset++},@{offset++}," +
+                             $"@{offset++},@{offset++},@{offset++},@{offset++},@{offset++},@{offset++}," +
+                             $"@{offset++},@{offset++},@{offset++},@{offset++},@{offset++},@{offset++});\n";
 
-                         DbConnector.FormatDateQuoted(file.DateCreated) + "," + //$"@{++offset}," + // date created
-                         DbConnector.FormatDateQuoted(file.DateModified) + "," + //$"@{++offset}," + // date modified
-                         DbConnector.FormatDateQuoted(file.CreationTime) + ", " +
-                         DbConnector.FormatDateQuoted(file.LastWriteTime) + ", " +
-                         DbConnector.FormatDateQuoted(file.HoldUntil) + ", " +
-                         DbConnector.FormatDateQuoted(file.ProcessingStarted) + ", " +
-                         DbConnector.FormatDateQuoted(file.ProcessingEnded) + ", " +
-                         $"@{offset++},@{offset++},@{offset++},@{offset++},@{offset++},@{offset++}," +
-                         $"@{offset++},@{offset++},@{offset++},@{offset++},@{offset++},@{offset++}," +
-                         $"@{offset++},@{offset++},@{offset++},@{offset++},@{offset++},@{offset++});\n";
+                parameters.Add(DbType is DatabaseType.Sqlite ? file.Uid.ToString() : file.Uid);
+                parameters.Add(file.Name);
 
-            parameters.Add(DbType is DatabaseType.Sqlite ? file.Uid.ToString() : file.Uid);
-            parameters.Add(file.Name);
+                // we have to always include every value for the migration, otherwise if we use default and the data is migrated that data will change
+                parameters.Add(file.RelativePath);
+                parameters.Add(file.Fingerprint);
+                parameters.Add(file.FinalFingerprint ?? string.Empty);
+                parameters.Add(file.LibraryUid?.ToString() ?? string.Empty);
+                parameters.Add(file.LibraryName);
+                parameters.Add(file.FlowUid?.ToString() ?? string.Empty);
+                parameters.Add(file.FlowName ?? string.Empty);
+                parameters.Add(file.DuplicateUid?.ToString() ?? string.Empty);
+                parameters.Add(file.DuplicateName ?? string.Empty);
+                parameters.Add(file.NodeUid?.ToString() ?? string.Empty);
+                parameters.Add(file.NodeName ?? string.Empty);
+                parameters.Add(file.WorkerUid?.ToString() ?? string.Empty);
+                parameters.Add(file.ProcessOnNodeUid?.ToString() ?? string.Empty);
+                parameters.Add(file.OutputPath ?? string.Empty);
+                parameters.Add(JsonEncode(file.OriginalMetadata));
+                parameters.Add(JsonEncode(file.FinalMetadata));
+                parameters.Add(JsonEncode(file.ExecutedNodes));
+                parameters.Add(file.FailureReason ?? string.Empty);
+                await db.Db.ExecuteAsync(sql, parameters.ToArray());
+            }
 
-            // we have to always include every value for the migration, otherwise if we use default and the data is migrated that data will change
-            parameters.Add(file.RelativePath);
-            parameters.Add(file.Fingerprint);
-            parameters.Add(file.FinalFingerprint ?? string.Empty);
-            parameters.Add(file.LibraryUid?.ToString() ?? string.Empty);
-            parameters.Add(file.LibraryName);
-            parameters.Add(file.FlowUid?.ToString() ?? string.Empty);
-            parameters.Add(file.FlowName ?? string.Empty);
-            parameters.Add(file.DuplicateUid?.ToString() ?? string.Empty);
-            parameters.Add(file.DuplicateName ?? string.Empty);
-            parameters.Add(file.NodeUid?.ToString() ?? string.Empty);
-            parameters.Add(file.NodeName ?? string.Empty);
-            parameters.Add(file.WorkerUid?.ToString() ?? string.Empty);
-            parameters.Add(file.ProcessOnNodeUid?.ToString() ?? string.Empty);
-            parameters.Add(file.OutputPath ?? string.Empty);
-            parameters.Add(JsonEncode(file.OriginalMetadata));
-            parameters.Add(JsonEncode(file.FinalMetadata));
-            parameters.Add(JsonEncode(file.ExecutedNodes));
-            parameters.Add(file.FailureReason ?? string.Empty);
-            await db.Db.ExecuteAsync(sql, parameters.ToArray());
+            db.Db.CompleteTransaction();
         }
-        db.Db.CompleteTransaction();
+        catch (Exception ex)
+        {
+            Logger.ELog("Failed inserting library file: " + ex.Message + (string.IsNullOrWhiteSpace(sql) ? string.Empty : Environment.NewLine + sql));
+        }
     }
 
     /// <summary>
