@@ -17,8 +17,10 @@ public class AccessControlService
     /// <param name="type">The access control type</param>
     /// <returns>all the entries</returns>
     public async Task<List<AccessControlEntry>> GetAllAsync(AccessControlType? type)
-        => (await new AccessControlManager().GetAll()).Where(x => type == null || x.Type == type)
-            .OrderBy(x => x.Order).ToList();
+    {
+        var all = (await new AccessControlManager().GetAll()).Where(x => type == null || x.Type == type).ToList();
+        return all.Any() != true ? new List<AccessControlEntry>() : all.OrderBy(x => x.Order).ToList();
+    }
 
     /// <summary>
     /// Gets a access control entry by its UID
