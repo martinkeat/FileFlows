@@ -1028,7 +1028,8 @@
       "Title": "Users",
       "Single": "User",
       "Messages": {
-        "CannotDeleteYourself": "You cannot delete yourself."
+        "CannotDeleteYourself": "You cannot delete yourself.",
+        "EmailInUse": "Email address ''{email}'' is already in use by another user ''{user}''."
       },
       "Labels": {
         "LastLoggedIn": "Last Logged In",

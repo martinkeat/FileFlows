@@ -124,6 +124,10 @@ public abstract class CachedManager<T> where T : FileFlowObject, new()
         var existingName = await GetByName(item.Name);
         if (existingName != null && existingName.Uid != item.Uid)
             return Result<T>.Fail("ErrorMessages.NameInUse");
+
+        var customValid = await CustomUpdateValidate(item);
+        if (customValid.IsFailed)
+            return customValid;
         
         Logger.Instance.ILog($"Updating {item.GetType().Name}: '{item.Name}'");
         var result = await DatabaseAccessManager.Instance.FileFlowsObjectManager
@@ -137,6 +141,13 @@ public abstract class CachedManager<T> where T : FileFlowObject, new()
 
         return (await GetByUid(item.Uid))!;
     }
+
+    /// <summary>
+    /// Custom update validate that runs after the name validation
+    /// </summary>
+    /// <returns>the result</returns>
+    protected virtual Task<Result<T>> CustomUpdateValidate(T item)
+        => Task.FromResult(Result<T>.Success(item));
 
 
     /// <summary>

@@ -1,3 +1,5 @@
+using FileFlows.Plugin;
+
 namespace FileFlows.Managers;
 
 /// <summary>
@@ -21,6 +23,18 @@ public class UserManager : CachedManager<User>
         usernameOrEmail = usernameOrEmail.ToLowerInvariant();
         return (await GetData()).FirstOrDefault(x => x.Name.ToLowerInvariant() == usernameOrEmail
                                                      || x.Email.ToLowerInvariant() == usernameOrEmail);
+    }
+
+    /// <inheritdoc />
+    protected override async Task<Result<User>> CustomUpdateValidate(User item)
+    {
+        var other = (await GetAll()).FirstOrDefault(x =>
+            x.Email.ToLowerInvariant() == item.Email.ToLowerInvariant() && x.Uid != item.Uid);
+        if (other != null)
+            return Result<User>.Fail(Translater.Instant("Pages.Users.Messages.EmailInUse",
+                new { email = other.Email, user = other.Name }));
+
+        return item;
     }
 
     /// <summary>
