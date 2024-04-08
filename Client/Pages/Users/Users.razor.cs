@@ -15,13 +15,14 @@ public partial class Users: ListPage<Guid, User>
     /// <inheritdoc />
     public override string FetchUrl => $"{ApiUrl}";
 
-    private string lblLastLoggedIn, lblNever, lblAdministrator;
+    private string lblLastLoggedIn, lblNever, lblAdministrator, lblAddress;
 
     /// <inheritdoc />
     protected override void OnInitialized()
     {
         base.OnInitialized();
         lblLastLoggedIn = Translater.Instant("Pages.Users.Labels.LastLoggedIn");
+        lblAddress = Translater.Instant("Pages.Users.Labels.Address");
         lblNever = Translater.Instant("Pages.Users.Labels.Never");
         lblAdministrator = Translater.Instant("Pages.Users.Labels.Administrator");
     }

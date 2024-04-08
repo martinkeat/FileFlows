@@ -49,7 +49,7 @@ public class AuthenticationHelper
         };
 
         var service = ServiceLoader.Load<UserService>();
-        _ = service.RecordLogin(user);
+        _ = service.RecordLogin(user, ipAddress);
     
         var claimsIdentity = new ClaimsIdentity(claims);
 

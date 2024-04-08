@@ -126,9 +126,10 @@ public class UserService
     /// Records a login for a user
     /// </summary>
     /// <param name="user">the user to record the login for</param>
+    /// <param name="ipAddress">the IP Address</param>
     /// <returns>a task to await</returns>
-    public Task RecordLogin(User user)
-        => new UserManager().RecordLogin(user);
+    public Task RecordLogin(User user, string ipAddress)
+        => new UserManager().RecordLogin(user, ipAddress);
 
     /// <summary>
     /// Login attempts

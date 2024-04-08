@@ -31,7 +31,8 @@ public class AccessControlController : Controller
         if (entry.Uid == Guid.Empty)
         {
             // new entry
-            entry.Order = (await GetAll(entry.Type)).Max(x => x.Order) + 1;
+            var all = await GetAll(entry.Type);
+            entry.Order = all.Any() ? all.Max(x => x.Order) + 1 : 1;
         }
         var result = await ServiceLoader.Load<AccessControlService>().Update(entry);
         if (result.Failed(out string error))

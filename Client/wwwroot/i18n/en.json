@@ -1032,6 +1032,7 @@
       },
       "Labels": {
         "LastLoggedIn": "Last Logged In",
+        "Address": "Address",
         "Never": "Never",
         "Administrator": "Administrator"
       },

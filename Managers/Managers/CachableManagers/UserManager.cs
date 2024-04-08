@@ -34,11 +34,13 @@ public class UserManager : CachedManager<User>
     /// Records a login for a user
     /// </summary>
     /// <param name="user">the user to record the login for</param>
-    public async Task RecordLogin(User user)
+    /// <param name="ipAddress">the IP Address</param>
+    public async Task RecordLogin(User user, string ipAddress)
     {
         if (user == null)
             return;
         user.LastLoggedIn = DateTime.UtcNow;
+        user.LastLoggedInAddress = ipAddress ?? string.Empty;
         await DatabaseAccessManager.Instance.ObjectManager.SetDataValue(
             user.Uid,
             typeof(User).FullName!,

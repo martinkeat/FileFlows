@@ -41,7 +41,7 @@
                     }
                 </Cell>
             </FlowTableColumn>
-            <FlowTableColumn TItem="User" Width="14rem" MobileWidth="0">
+            <FlowTableColumn TItem="User" Width="14rem" MobileWidth="0" Align="FlowTableAlignment.Center">
                 <Header>
                     @lblLastLoggedIn
                 </Header>
@@ -55,6 +55,12 @@
                         @DateString(item.LastLoggedIn)
                     }
                 </Cell>
+            </FlowTableColumn>
+            <FlowTableColumn TItem="User" Width="18rem" MobileWidth="0" Align="FlowTableAlignment.Center">
+                <Header>
+                    @lblAddress
+                </Header>
+                <Cell Context="item">@item.LastLoggedInAddress</Cell>
             </FlowTableColumn>
         </Columns>
     </FlowTable>
