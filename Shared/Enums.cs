@@ -314,7 +314,11 @@ public enum LicenseFlags
     /// <summary>
     /// Access control
     /// </summary>
-    AccessControl = 2048
+    AccessControl = 2048,
+    /// <summary>
+    /// Auditing 
+    /// </summary>
+    Auditing = 4096
 }
 
 

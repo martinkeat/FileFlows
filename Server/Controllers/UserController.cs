@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using FileFlows.Server.Authentication;
 using FileFlows.Server.Helpers;
 using FileFlows.Server.Services;
@@ -11,7 +12,7 @@ namespace FileFlows.Server.Controllers;
 /// </summary>
 [Route("/api/user")]
 [FileFlowsAuthorize(UserRole.Admin)]
-public class UserController : Controller
+public class UserController : BaseController
 {
     /// <summary>
     /// Dummy password
@@ -54,6 +55,9 @@ public class UserController : Controller
     [HttpPost]
     public async Task<IActionResult> Save([FromBody] User user)
     {
+        if (user == null)
+            return BadRequest("User model required");
+        
         var service = ServiceLoader.Load<UserService>();
         if (user.Password == DUMMY_PASSWORD && user.Uid != Guid.Empty)
         {
@@ -67,7 +71,7 @@ public class UserController : Controller
             user.Password = user.Password?.EmptyAsNull() ?? AuthenticationHelper.GenerateRandomPassword();
             user.Password = BCrypt.Net.BCrypt.HashPassword(user.Password);
         }
-        var result = await service.Update(user);
+        var result = await service.Update(user, await GetAuditDetails());
         if (result.Failed(out string error))
             return BadRequest(error);
         return Ok(result.Value);

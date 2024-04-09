@@ -120,7 +120,7 @@ public class SqliteTests : DbLayerTest
             };
             
             string TYPE_NAME = library.GetType().FullName!;
-            db.FileFlowsObjectManager.AddOrUpdateObject(library).Wait();
+            db.FileFlowsObjectManager.AddOrUpdateObject(library, null).Wait();
 
             var created = db.FileFlowsObjectManager.Single<Library>(library.Uid).Result.Value;
             Assert.IsNotNull(created);
@@ -335,7 +335,7 @@ public class SqliteTests : DbLayerTest
             
             var db = new DatabaseAccessManager(Logger, dbType, connectionString);
             
-            db.FileFlowsObjectManager.AddOrUpdateObject(library).Wait();
+            db.FileFlowsObjectManager.AddOrUpdateObject(library, null).Wait();
 
             var created = db.FileFlowsObjectManager.Single<Library>(library.Uid).Result.Value;
             Assert.IsNotNull(created);
@@ -444,7 +444,7 @@ public class SqliteTests : DbLayerTest
                 LastScanned = DateTime.UtcNow
             };
             
-            db.FileFlowsObjectManager.AddOrUpdateObject(library).Wait();
+            db.FileFlowsObjectManager.AddOrUpdateObject(library, null).Wait();
 
             var created = db.FileFlowsObjectManager.Single<Library>(library.Uid).Result.Value;
             Assert.IsNotNull(created);

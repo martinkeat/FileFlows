@@ -12,7 +12,7 @@ namespace FileFlows.Server.Controllers;
 /// </summary>
 [Route("/api/node")]
 [FileFlowsAuthorize(UserRole.Nodes)]
-public class NodeController : Controller
+public class NodeController : BaseController
 {
     /// <summary>
     /// Gets a list of all processing nodes in the system
@@ -151,7 +151,7 @@ public class NodeController : Controller
                     internalNode.PreExecuteScript = node.PreExecuteScript;
                 
                 internalNode.Libraries = node.Libraries;
-                internalNode = await service.Update(internalNode);
+                internalNode = await service.Update(internalNode, await GetAuditDetails());
                 await CheckLicensedNodes(internalNode.Uid, internalNode.Enabled);
                 
                 await RevisionIncrement();
@@ -165,7 +165,7 @@ public class NodeController : Controller
             node.AllLibraries = ProcessingLibraries.All;
             node.Mappings = null; // no mappings for internal
             node.Variables ??= new();
-            node = await service.Update(node);
+            node = await service.Update(node, await GetAuditDetails());
             await CheckLicensedNodes(node.Uid, node.Enabled);
             await RevisionIncrement();
             return Ok(node);
@@ -177,7 +177,7 @@ public class NodeController : Controller
             if (existing == null)
                 return BadRequest("Node not found");
             node.Variables ??= new();
-            node = await service.Update(node);
+            node = await service.Update(node, await GetAuditDetails());
             Logger.Instance.ILog("Updated external processing node: " + node.Name);
             await CheckLicensedNodes(node.Uid, node.Enabled);
             await RevisionIncrement();
@@ -223,7 +223,7 @@ public class NodeController : Controller
         if (enable != null && node.Enabled != enable.Value)
         {
             node.Enabled = enable.Value;
-            node = await service.Update(node);
+            node = await service.Update(node, await GetAuditDetails());
         }
         await CheckLicensedNodes(uid, enable == true);
         return Ok(node);
@@ -249,7 +249,7 @@ public class NodeController : Controller
         if (string.IsNullOrEmpty(version) == false && node.Version != version)
         {
             node.Version = version;
-            node = await service.Update(node);
+            node = await service.Update(node, await GetAuditDetails());
         }
         else
         {
@@ -299,7 +299,7 @@ public class NodeController : Controller
                     KeyValuePair<string, string>(x.Value, string.Empty)
                 ).ToList()
         };
-        node = await service.Update(node);
+        node = await service.Update(node, await GetAuditDetails());
         node.SignalrUrl = "flow";
         await CheckLicensedNodes(Guid.Empty, false);
         return node;
@@ -322,7 +322,7 @@ public class NodeController : Controller
             {
                 Logger.Instance.ILog($"Changing processing node '{node.Name}' state from '{node.Enabled}' to '{enabled}'");
                 node.Enabled = enabled;
-                var result = await service.Update(node);
+                var result = await service.Update(node, await GetAuditDetails());
                 if (result.Failed(out string error))
                     Logger.Instance.ELog($"Failed updating node '{node.Name}': {error}");
             }
@@ -332,7 +332,7 @@ public class NodeController : Controller
                 if (current >= licensedNodes)
                 {
                     node.Enabled = false;
-                    await service.Update(node);
+                    await service.Update(node, await GetAuditDetails());
                     Logger.Instance.ILog($"Disabled processing node '{node.Name}' due to license restriction");
                 }
                 else

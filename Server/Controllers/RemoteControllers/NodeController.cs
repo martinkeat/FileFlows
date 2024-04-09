@@ -14,7 +14,7 @@ namespace FileFlows.Server.Controllers.RemoteControllers;
 [Route("/remote/node")]
 [FileFlowsApiAuthorize]
 [ApiExplorerSettings(IgnoreApi = true)]
-public class NodeController : Controller
+public class NodeController : BaseController
 {
     /// <summary>
     /// Get processing node by address
@@ -36,7 +36,7 @@ public class NodeController : Controller
         if (string.IsNullOrEmpty(version) == false && node.Version != version)
         {
             node.Version = version;
-            node = await service.Update(node);
+            node = await service.Update(node, await GetAuditDetails());
         }
         else
         {
@@ -65,7 +65,7 @@ public class NodeController : Controller
         if (string.IsNullOrEmpty(version) == false && node.Version != version)
         {
             node.Version = version;
-            node = await service.Update(node);
+            node = await service.Update(node, await GetAuditDetails());
         }
         else
         {
@@ -185,7 +185,7 @@ public class NodeController : Controller
                 existing.Architecture = model.Architecture;
                 existing.OperatingSystem = model.OperatingSystem;
                 existing.Version = model.Version;
-                existing = await service.Update(existing);
+                existing = await service.Update(existing, await GetAuditDetails());
             }
             existing.SignalrUrl = "flow";
             return existing;
@@ -226,7 +226,7 @@ public class NodeController : Controller
                            KeyValuePair<string, string>(x.Value, "")
                        )?.ToList() ?? new()
         };
-        node = await service.Update(node);
+        node = await service.Update(node, await GetAuditDetails());
         node.SignalrUrl = "flow";
         return node;
     }

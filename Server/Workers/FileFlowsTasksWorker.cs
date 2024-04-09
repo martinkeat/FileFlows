@@ -4,6 +4,7 @@ using FileFlows.ScriptExecution;
 using FileFlows.Server.Controllers;
 using FileFlows.Server.Helpers;
 using FileFlows.Server.Services;
+using FileFlows.ServerShared.Models;
 using FileFlows.ServerShared.Workers;
 using FileFlows.Shared.Models;
 using Logger = FileFlows.Shared.Logger;
@@ -136,7 +137,7 @@ public class FileFlowsTasksWorker: Worker
             while (task.RunHistory.Count > 10 && task.RunHistory.TryDequeue(out _));
         }
 
-        await ServiceLoader.Load<TaskService>().Update(task);
+        await ServiceLoader.Load<TaskService>().Update(task, auditDetails: AuditDetails.ForServer());
         return result;
     }
     

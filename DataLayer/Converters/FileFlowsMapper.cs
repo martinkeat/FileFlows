@@ -4,7 +4,6 @@ namespace FileFlows.DataLayer.Converters;
 
 public class FileFlowsMapper:DefaultMapper
 {
-    
     /// <summary>
     /// Dictionary to store static instances of subclasses of FileFlowsMapper&gt;T&lt;.
     /// Each subclass has its own static instance.

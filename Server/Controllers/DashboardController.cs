@@ -13,7 +13,7 @@ namespace FileFlows.Server.Controllers;
 /// </summary>
 [Route("/api/dashboard")]
 [FileFlowsAuthorize]
-public class DashboardController : Controller
+public class DashboardController : BaseController
 {
     /// <summary>
     /// The settings for the application
@@ -151,7 +151,7 @@ public class DashboardController : Controller
     [HttpPut]
     public async Task<IActionResult> Save([FromBody] Dashboard model)
     {
-        var result = await ServiceLoader.Load<DashboardService>().Update(model);
+        var result = await ServiceLoader.Load<DashboardService>().Update(model, await GetAuditDetails());
         if (result.Failed(out string error))
             return BadRequest(error);
         return Ok(result.Value);
@@ -173,7 +173,7 @@ public class DashboardController : Controller
         if (dashboard == null)
             throw new Exception("Dashboard not found");
         dashboard.Widgets = widgets ?? new List<Widget>();
-        var result = await service.Update(dashboard);
+        var result = await service.Update(dashboard, await GetAuditDetails());
         if (result.Failed(out string error))
             return BadRequest(error);
         return Ok(result.Value);

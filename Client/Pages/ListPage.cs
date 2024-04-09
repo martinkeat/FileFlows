@@ -13,6 +13,9 @@ public abstract class ListPage<U, T> : ComponentBase where T : IUniqueObject<U>
     /// Gets or sets the navigation manager
     /// </summary>
     [Inject] public NavigationManager NavigationManager { get; set; }
+    /// <summary>
+    /// Gets or sets the table instance
+    /// </summary>
     protected FlowTable<T> Table { get; set; }
     [CascadingParameter] public Blocker Blocker { get; set; }
     [CascadingParameter] public Editor Editor { get; set; }
@@ -76,6 +79,9 @@ public abstract class ListPage<U, T> : ComponentBase where T : IUniqueObject<U>
     {
         await Task.CompletedTask;
     }
+    /// <summary>
+    /// Waits for a render to occur
+    /// </summary>
     protected async Task WaitForRender()
     {
         _needsRendering = true;
@@ -85,6 +91,8 @@ public abstract class ListPage<U, T> : ComponentBase where T : IUniqueObject<U>
             await Task.Delay(50);
         }
     }
+    
+    /// <inheritdoc />
     protected override void OnAfterRender(bool firstRender)
     {
         _needsRendering = false;
@@ -261,6 +269,27 @@ public abstract class ListPage<U, T> : ComponentBase where T : IUniqueObject<U>
             await Load(selected.Uid);
     }
     
+    /// <summary>
+    /// Shows the audit log
+    /// </summary>
+    protected async Task AuditLog()
+    {
+        if (Profile.LicensedFor(LicenseFlags.Auditing) == false)
+            return;
+        
+        var selected = Table.GetSelected().FirstOrDefault();
+        if (selected == null)
+            return;
+        if(selected.Uid is Guid uid)
+            await AuditHistory.Instance.Show(uid, GetAuditTypeName());
+    }
+
+    /// <summary>
+    /// Gets the audit type name
+    /// </summary>
+    /// <returns>the audit type name</returns>
+    protected string GetAuditTypeName()
+        => typeof(T).FullName;
     
     /// <summary>
     /// Humanizes a date, eg 11 hours ago

@@ -20,6 +20,10 @@
                 <FlowTableButtonSeparator />                    
                 <FlowTableButton Clicked=Update SelectedOneOrMore="true" Icon="fas fa-cloud-download-alt" Label="Labels.Update" />
                 <FlowTableButton Clicked=UsedBy SelectedOne="true" Icon="fas fa-info-circle" Label="Labels.UsedBy" />
+                @if (Profile != null && Profile.LicensedFor(LicenseFlags.Auditing) && Profile.HasRole(UserRole.Admin))
+                {  
+                    <FlowTableButton Clicked=AuditLog SelectedOne="true" Icon="fas fa-clipboard-list" Label="Labels.Audit" />
+                }
                 <FlowTableButtonSeparator />    
                 <FlowTableButton Clicked=AboutAction SelectedOne="true" Icon="fas fa-info-circle" Label="Labels.About" />                
                 <FlowTableHelpButton HelpUrl="plugins" />

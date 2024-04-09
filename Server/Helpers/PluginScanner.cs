@@ -1,5 +1,6 @@
 ﻿using System.IO.Compression;
 using FileFlows.Server.Services;
+using FileFlows.ServerShared.Models;
 using FileFlows.Shared.Models;
 
 namespace FileFlows.Server.Helpers;
@@ -181,7 +182,7 @@ public class PluginScanner
                     {
                         Logger.Instance.ILog("Updating plugin: " + pi.Name);
                         plugin.DateModified = DateTime.UtcNow;
-                        service.Update(plugin).Wait();
+                        service.Update(plugin, auditDetails: AuditDetails.ForServer()).Wait();
                     }
                 }
                 else
@@ -194,7 +195,7 @@ public class PluginScanner
                     plugin.DateCreated = DateTime.UtcNow;
                     plugin.DateModified = DateTime.UtcNow;
                     plugin.Enabled = true;
-                    service.Update(plugin).Wait();
+                    service.Update(plugin, auditDetails: AuditDetails.ForServer()).Wait();
                 }
             }
             catch (Exception ex)
@@ -217,7 +218,7 @@ public class PluginScanner
                 // mark as deleted.
                 plugin.Deleted = true;
                 plugin.DateModified = DateTime.UtcNow;
-                service.Update(plugin).Wait();
+                service.Update(plugin, auditDetails: AuditDetails.ForServer()).Wait();
             }
         }
 

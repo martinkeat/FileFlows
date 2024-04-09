@@ -1,5 +1,6 @@
 ﻿using FileFlows.Managers;
 using FileFlows.Plugin;
+using FileFlows.ServerShared.Models;
 using FileFlows.ServerShared.Services;
 using FileFlows.Shared.Models;
 
@@ -44,7 +45,8 @@ public class VariableService : IVariableService
     /// Updates a variable
     /// </summary>
     /// <param name="variable">the variable to update</param>
+    /// <param name="auditDetails">The audit details</param>
     /// <returns>the result</returns>
-    public Task<Result<Variable>> Update(Variable variable)
-        => new VariableManager().Update(variable);
+    public Task<Result<Variable>> Update(Variable variable, AuditDetails? auditDetails)
+        => new VariableManager().Update(variable, auditDetails);
 }

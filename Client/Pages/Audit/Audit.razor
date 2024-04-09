@@ -1,0 +1,59 @@
+@namespace FileFlows.Client.Pages
+@using FileFlows.Shared.Models
+
+@page "/audit"
+
+<PageView>
+
+    <Head>
+    </Head>
+
+    <Body>
+        
+    <FlowTable @ref="Table" Data="Data" TItem="AuditEntry" Selection="SelectionMode.None" TableIdentifier="AuditLog">
+        <Columns>
+            <FlowTableColumn TItem="AuditEntry" Width="12rem">
+                <Header>
+                    Date
+                </Header>
+                <Cell Context="item">
+                    <span>@item.LogDate.ToLocalTime()</span>
+                </Cell>
+            </FlowTableColumn>
+            <FlowTableColumn TItem="AuditEntry" Width="12rem">
+                <Header>
+                    Action
+                </Header>
+                <Cell Context="item">
+                    <span>@item.Action</span>
+                </Cell>
+            </FlowTableColumn>
+            <FlowTableColumn TItem="AuditEntry" Width="12rem">
+                <Header>
+                    Operator
+                </Header>
+                <Cell Context="item">
+                    <span>@item.OperatorName</span>
+                </Cell>
+            </FlowTableColumn>
+            <FlowTableColumn TItem="AuditEntry" Width="12rem">
+                <Header>
+                    IP Address
+                </Header>
+                <Cell Context="item">
+                    <span>@item.IPAddress</span>
+                </Cell>
+            </FlowTableColumn>
+            <FlowTableColumn TItem="AuditEntry">
+                <Header>
+                    Summary
+                </Header>
+                <Cell Context="item">
+                    <span>@item.Summary</span>
+                </Cell>
+            </FlowTableColumn>
+        </Columns>
+    </FlowTable>
+    </Body>
+
+</PageView>

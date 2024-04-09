@@ -4,6 +4,7 @@ using FileFlows.DataLayer.Converters;
 using FileFlows.DataLayer.Helpers;
 using FileFlows.DataLayer.Models;
 using FileFlows.Plugin;
+using FileFlows.ServerShared.Models;
 using FileFlows.Shared;
 using FileFlows.Shared.Attributes;
 using FileFlows.Shared.Json;
@@ -122,15 +123,17 @@ internal  class FileFlowsObjectManager
     /// Adds or updates an object in the database
     /// </summary>
     /// <param name="obj">The object being added or updated</param>
+    /// <param name="auditDetails">The audit details</param>
     /// <param name="saveRevision">if the revision should be saved</param>
     /// <typeparam name="T">The type of object being added or updated</typeparam>
     /// <returns>The updated object</returns>
-    public async Task<Result<(DbObject dbo, bool changed)>> AddOrUpdateObject<T>(T obj, bool saveRevision = false) where T : FileFlowObject, new()
+    public async Task<Result<(DbObject dbo, bool changed)>> AddOrUpdateObject<T>(T obj, AuditDetails auditDetails, bool saveRevision = false) where T : FileFlowObject, new()
     {
         try
         {
             var dbo = ConvertToDbObject(obj);
             DbObject? dbObject = null;
+            bool newObject = false;
             if (obj.Uid != Guid.Empty)
             {
                 try
@@ -162,6 +165,7 @@ internal  class FileFlowsObjectManager
                     Data = dbo.Data
                 };
                 await dbom.Insert(dbObject);
+                newObject = true;
                 changed = true;
             }
             else if (dbo.Name != dbObject.Name || dbo.Data != dbObject.Data)
@@ -179,17 +183,44 @@ internal  class FileFlowsObjectManager
                 await dbom.Update(dbObject);
             }
 
-            if (changed && saveRevision)
+            if (changed)
             {
-                await DatabaseAccessManager.Instance.RevisionManager.Insert(new()
+                Guid? revisionUid = null;
+                if (saveRevision)
                 {
-                    RevisionDate = DateTime.UtcNow,
-                    RevisionUid = dbo.Uid,
-                    RevisionCreated = dbo.DateCreated,
-                    RevisionName = dbo.Name,
-                    RevisionType = dbo.Type,
-                    RevisionData = dbo.Data
-                });
+                    revisionUid = Guid.NewGuid();
+                    await DatabaseAccessManager.Instance.RevisionManager.Insert(new()
+                    {
+                        Uid = revisionUid.Value,
+                        RevisionDate = DateTime.UtcNow,
+                        RevisionUid = dbo.Uid,
+                        RevisionCreated = dbo.DateCreated,
+                        RevisionName = dbo.Name,
+                        RevisionType = dbo.Type,
+                        RevisionData = dbo.Data
+                    });
+                }
+
+                if (auditDetails != null)
+                {
+                    await DatabaseAccessManager.Instance.AuditManager.Insert(new()
+                    {
+                        Action = newObject ? AuditAction.Added : AuditAction.Updated,
+                        RevisionUid = revisionUid,
+                        //Summary = newObject ? "ItemAdded" : "ItemUpdated",
+                        LogDate = DateTime.UtcNow,
+                        ObjectType = dbo.Type,
+                        ObjectUid = dbo.Uid,
+                        OperatorName = auditDetails.UserName,
+                        OperatorUid = auditDetails.UserUid,
+                        OperatorType = OperatorType.User,
+                        IPAddress = auditDetails.IPAddress,
+                        Parameters = new ()
+                        {
+                            { nameof(obj.Name), obj.Name }
+                        }
+                    });
+                }
             }
 
             return (dbObject, changed);

@@ -28,7 +28,7 @@ public class LibraryControllerTests:CacheControllerTestBase
                 Type = 0,
             }
         };
-        return new FileFlows.Server.Services.FlowService().Update(flow).Result;
+        return new FileFlows.Server.Services.FlowService().Update(flow, null).Result;
     }
     
     // /// <summary>

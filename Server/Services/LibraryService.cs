@@ -1,5 +1,6 @@
 ﻿using FileFlows.Managers;
 using FileFlows.Plugin;
+using FileFlows.ServerShared.Models;
 using FileFlows.ServerShared.Services;
 using FileFlows.Shared.Models;
 
@@ -29,9 +30,10 @@ public class LibraryService : ILibraryService
     /// Updates an library
     /// </summary>
     /// <param name="library">the library being updated</param>
+    /// <param name="auditDetails">The audit details</param>
     /// <returns>the result of the update, if successful the updated item</returns>
-    public Task<Result<Library>> Update(Library library)
-        => new LibraryManager().Update(library);
+    public Task<Result<Library>> Update(Library library, AuditDetails? auditDetails)
+        => new LibraryManager().Update(library, auditDetails);
 
     /// <summary>
     /// Deletes items matching the UIDs

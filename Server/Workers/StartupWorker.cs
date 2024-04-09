@@ -1,5 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 using FileFlows.Server.Services;
+using FileFlows.ServerShared.Models;
 using FileFlows.ServerShared.Workers;
 
 namespace FileFlows.Server.Workers;
@@ -47,6 +48,6 @@ public class StartupWorker:Worker
                                        Globals.IsMac ? OperatingSystemType.Mac :
                                        Globals.IsFreeBsd ? OperatingSystemType.FreeBsd :
                                        OperatingSystemType.Unknown;
-        service.Update(internalNode).Wait();
+        service.Update(internalNode, auditDetails: AuditDetails.ForServer()).Wait();
     }
 }

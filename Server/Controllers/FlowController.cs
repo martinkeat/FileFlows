@@ -21,7 +21,7 @@ namespace FileFlows.Server.Controllers;
 /// </summary>
 [Route("/api/flow")]
 [FileFlowsAuthorize(UserRole.Flows)]
-public class FlowController : Controller
+public class FlowController : BaseController
 {
     const int DEFAULT_XPOS = 450;
     const int DEFAULT_YPOS = 50;
@@ -278,7 +278,7 @@ public class FlowController : Controller
         flow.DateModified = DateTime.UtcNow;
         flow.DateCreated = DateTime.UtcNow;
         flow.Name = await service.GetNewUniqueName(flow.Name);
-        return await service.Update(flow);
+        return await service.Update(flow, await GetAuditDetails());
     }
 
 
@@ -317,7 +317,7 @@ public class FlowController : Controller
         if (enable != null)
         {
             flow.Enabled = enable.Value;
-            flow = await service.Update(flow);
+            flow = await service.Update(flow, await GetAuditDetails());
         }
 
         return flow;
@@ -345,7 +345,7 @@ public class FlowController : Controller
             foreach (var other in others)
             {
                 other.Default = false;
-                await service.Update(other);
+                await service.Update(other, await GetAuditDetails());
             }
         }
 
@@ -353,7 +353,7 @@ public class FlowController : Controller
             return;
 
         flow.Default = isDefault;
-        await service.Update(flow);
+        await service.Update(flow, await GetAuditDetails());
     }
     /// <summary>
     /// Delete flows from the system
@@ -834,7 +834,7 @@ public class FlowController : Controller
         
         Logger.Instance.ILog($"Saving Flow '{model.Name}'");
 
-        model = await service.Update(model);
+        model = await service.Update(model, await GetAuditDetails());
         if(nameChanged)
             _ = new ObjectReferenceUpdater().RunAsync();
 
@@ -861,7 +861,7 @@ public class FlowController : Controller
             return; // name already is the requested name
 
         flow.Name = name;
-        flow = await service.Update(flow);
+        flow = await service.Update(flow, await GetAuditDetails());
 
         // update any object references
         var lfService = ServiceLoader.Load<LibraryFileService>();

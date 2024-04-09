@@ -80,7 +80,17 @@ public class Globals
     /// The UID of the internal processing node
     /// </summary>
     public static readonly Guid InternalNodeUid = new Guid("bf47da28-051e-452e-ad21-c6a3f477fea9");
-
+    
+    /// <summary>
+    /// The name of the internal processing node
+    /// </summary>
+    public const string OperatorFileFlowsServerName = "FileFlows Server";
+    /// <summary>
+    /// The UID of the internal processing node
+    /// </summary>
+    public static readonly Guid OperatorFileFlowsServerUid = new Guid("07ecd8bd-79a6-454d-8033-e64693fc2f7b");
+    
+    
     /// <summary>
     /// The name of the special script ot alter file display names
     /// </summary>

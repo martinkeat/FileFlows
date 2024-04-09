@@ -449,7 +449,7 @@ public partial class Settings : InputRegister
     /// <returns>A comma-separated string of the enum values present in the given flags.</returns>
     string LicenseFlagsToString(LicenseFlags myValue)
     {
-        string myString = "";
+        List<string> components = new();
 
         foreach (LicenseFlags enumValue in Enum.GetValues(typeof(LicenseFlags)))
         {
@@ -457,17 +457,11 @@ public partial class Settings : InputRegister
                 continue;
             if (myValue.HasFlag(enumValue))
             {
-                myString += SplitWordsOnCapitalLetters(enumValue.ToString()) + "\n";
+                components.Add(SplitWordsOnCapitalLetters(enumValue.ToString()));
             }
         }
 
-        // Remove the trailing comma if any
-        if (!string.IsNullOrEmpty(myString))
-        {
-            myString = myString.TrimEnd('\n');
-        }
-
-        return myString;
+        return string.Join("\n", components.OrderBy(x => x.ToLowerInvariant()));
     }
     
     /// <summary>

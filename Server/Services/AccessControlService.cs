@@ -1,6 +1,7 @@
 using System.Net;
 using FileFlows.Managers;
 using FileFlows.Plugin;
+using FileFlows.ServerShared.Models;
 using FileFlows.Shared.Helpers;
 using FileFlows.Shared.Models;
 
@@ -34,9 +35,10 @@ public class AccessControlService
     /// Updates a access control entry
     /// </summary>
     /// <param name="entry">the access control entry to update</param>
+    /// <param name="auditDetails">The audit details</param>
     /// <returns>the update result</returns>
-    public Task<Result<AccessControlEntry>> Update(AccessControlEntry entry)
-        => new AccessControlManager().Update(entry);
+    public Task<Result<AccessControlEntry>> Update(AccessControlEntry entry, AuditDetails? auditDetails)
+        => new AccessControlManager().Update(entry, auditDetails);
 
     /// <summary>
     /// Deletes the given access control entries

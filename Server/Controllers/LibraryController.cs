@@ -13,7 +13,7 @@ namespace FileFlows.Server.Controllers;
 /// </summary>
 [Route("/api/library")]
 [FileFlowsAuthorize(UserRole.Libraries)]
-public class LibraryController : Controller
+public class LibraryController : BaseController
 {
     private static bool? _HasLibraries;
     /// <summary>
@@ -87,7 +87,7 @@ public class LibraryController : Controller
         }
         
         bool newLib = library.Uid == Guid.Empty;
-        var result  = await service.Update(library);
+        var result  = await service.Update(library, await GetAuditDetails());
         if (result.Failed(out string error))
             return BadRequest(error);
 
@@ -133,7 +133,7 @@ public class LibraryController : Controller
         if (library.Enabled != enable)
         {
             library.Enabled = enable;
-            library = await service.Update(library);
+            library = await service.Update(library, await GetAuditDetails());
         }
         return library;
     }
@@ -172,7 +172,7 @@ public class LibraryController : Controller
             if (item == null)
                 continue;
             item.LastScanned = DateTime.MinValue;
-            await service.Update(item);
+            await service.Update(item, await GetAuditDetails());
         }
 
         _ = Task.Run(async () =>

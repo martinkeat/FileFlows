@@ -51,6 +51,8 @@
     "Rescan": "Rescan",
     "Reprocess": "Reprocess",
     "Revisions":"Revisions",
+    "Audit": "Audit",
+    "NoAuditHistoryAvailable": "No audit history available",
     "Restore":"Restore",
     "RestoredMessage":"{type} restored",
     "RestoredFailedMessage":"Failed to restore {type}",
@@ -146,6 +148,16 @@
       "Last24Hours":"Last 24 Hours",
       "Last3Days":"Last 3 Days"
     }
+  },
+  "AuditActions": {
+    "Added": "{Type} ''{Name}'' added",
+    "Updated": "{Type} ''{Name}'' updated",
+    "Deleted": "{Type} ''{Name}'' deleted",
+    "Login": "User ''{User}'' logged in",
+    "LoginFailed": "User ''{User}'' log failed",
+    "ChangePassword": "User ''{User}'' changed password",
+    "PasswordResetRequest": "User ''{User}'' requested a password reset",
+    "PasswordReset": "User ''{User}'' reset their password"
   },
   "Dialogs":{
     "ChangePassword": {
@@ -1077,6 +1089,9 @@
         "Allow": "Allow",
         "Allow-Help": "If this access control entry is allowed to access the system or not."
       }
+    },
+    "Audit": {
+      "Title": "Audit Log"
     },
     "FileFlowsTask":{
       "Title":"Task"

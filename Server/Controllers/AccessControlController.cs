@@ -10,7 +10,7 @@ namespace FileFlows.Server.Controllers;
 /// </summary>
 [Route("/api/acl")]
 [FileFlowsAuthorize(UserRole.Admin)]
-public class AccessControlController : Controller
+public class AccessControlController : BaseController
 {
     /// <summary>
     /// Get all access control entries in the system
@@ -34,9 +34,10 @@ public class AccessControlController : Controller
             var all = await GetAll(entry.Type);
             entry.Order = all.Any() ? all.Max(x => x.Order) + 1 : 1;
         }
-        var result = await ServiceLoader.Load<AccessControlService>().Update(entry);
+        var result = await ServiceLoader.Load<AccessControlService>().Update(entry, await GetAuditDetails());
         if (result.Failed(out string error))
             return BadRequest(error);
+        
         return Ok(result.Value);
     }
 

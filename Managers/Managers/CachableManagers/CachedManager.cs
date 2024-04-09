@@ -1,5 +1,6 @@
 using FileFlows.DataLayer.Models;
 using FileFlows.Plugin;
+using FileFlows.ServerShared.Models;
 using FileFlows.Shared.Helpers;
 
 namespace FileFlows.Managers;
@@ -111,9 +112,10 @@ public abstract class CachedManager<T> where T : FileFlowObject, new()
     /// Updates an item
     /// </summary>
     /// <param name="item">the item being updated</param>
+    /// <param name="auditDetails">the audit details</param>
     /// <param name="dontIncrementConfigRevision">if this is a revision object, if the revision should be updated</param>
     /// <returns>the result of the update, if successful the updated item</returns>
-    public async Task<Result<T>> Update(T item, bool dontIncrementConfigRevision = false)
+    public async Task<Result<T>> Update(T item, AuditDetails? auditDetails, bool dontIncrementConfigRevision = false)
     {
         if (item == null)
             return Result<T>.Fail("No model");
@@ -131,7 +133,7 @@ public abstract class CachedManager<T> where T : FileFlowObject, new()
         
         Logger.Instance.ILog($"Updating {item.GetType().Name}: '{item.Name}'");
         var result = await DatabaseAccessManager.Instance.FileFlowsObjectManager
-            .AddOrUpdateObject(item, saveRevision: SaveRevisions);
+            .AddOrUpdateObject(item, auditDetails, saveRevision: SaveRevisions);
         
         if (result is { IsFailed: false, Value.changed: true } && dontIncrementConfigRevision == false)
             await IncrementConfigurationRevision();

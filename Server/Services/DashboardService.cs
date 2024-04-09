@@ -1,5 +1,6 @@
 using FileFlows.Managers;
 using FileFlows.Plugin;
+using FileFlows.ServerShared.Models;
 using FileFlows.Shared.Models;
 
 namespace FileFlows.Server.Services;
@@ -35,7 +36,8 @@ public class DashboardService
     /// Updates an item
     /// </summary>
     /// <param name="item">the item being updated</param>
+    /// <param name="auditDetails">The audit details</param>
     /// /// <returns>the result of the update, if successful the updated item</returns>
-    public Task<Result<Dashboard>> Update(Dashboard item)
-        => new DashboardManager().Update(item, dontIncrementConfigRevision: true);
+    public Task<Result<Dashboard>> Update(Dashboard item, AuditDetails? auditDetails)
+        => new DashboardManager().Update(item, auditDetails, dontIncrementConfigRevision: true);
 }

@@ -2,6 +2,7 @@
 using FileFlows.Plugin;
 using FileFlows.ServerShared;
 using FileFlows.ServerShared.Helpers;
+using FileFlows.ServerShared.Models;
 
 namespace FileFlows.Managers;
 
@@ -106,7 +107,7 @@ public class NodeManager : CachedManager<ProcessingNode>
             node.Value.Version = Globals.Version;
         }
 
-        await manager.AddOrUpdateObject((FileFlowObject)node.Value!);
+        await manager.AddOrUpdateObject((FileFlowObject)node.Value!, auditDetails: AuditDetails.ForServer());
 
         return true;
     }

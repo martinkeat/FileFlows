@@ -1,6 +1,7 @@
 ﻿using FileFlows.DataLayer.Helpers;
 using FileFlows.Server.Helpers;
 using FileFlows.ServerShared;
+using FileFlows.ServerShared.Models;
 
 namespace FileFlows.Managers;
 
@@ -38,7 +39,7 @@ public class VariableManager : CachedManager<Variable>
                     {
                         Name = variable.Item1,
                         Value = variable.Item2
-                    }).Wait();
+                    }, auditDetails: AuditDetails.ForServer()).Wait();
                 }
                 catch (Exception ex)
                 {
@@ -49,7 +50,7 @@ public class VariableManager : CachedManager<Variable>
             {
                 // bad encryption, restore the default
                 dbVariable.Value = variable.Item2;
-                Update(dbVariable).Wait();
+                Update(dbVariable, auditDetails: AuditDetails.ForServer()).Wait();
             }
         }
     }

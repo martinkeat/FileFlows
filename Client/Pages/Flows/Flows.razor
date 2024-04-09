@@ -39,6 +39,10 @@
                 {
                     <FlowTableButton Clicked=Revisions SelectedOne="true" Icon="fas fa-history" Label="Labels.Revisions" />
                 }
+                @if (Profile != null && Profile.LicensedFor(LicenseFlags.Auditing) && Profile.HasRole(UserRole.Admin))
+                {
+                    <FlowTableButton Clicked=AuditLog SelectedOne="true" Icon="fas fa-clipboard-list" Label="Labels.Audit" />
+                }
                 <FlowTableButtonSeparator />
                 <FlowTableHelpButton HelpUrl="flows" />
             </ToolBar>

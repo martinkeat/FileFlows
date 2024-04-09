@@ -55,8 +55,9 @@ public class AuthorizeController : Controller
         if (string.IsNullOrWhiteSpace(model?.Password))
             return BadRequest("Password is required");
 
+        string ipAddress = Request.GetActualIP();
         var service = ServiceLoader.Load<UserService>();
-        var result = await service.ValidateLogin(model.Username, model.Password);
+        var result = await service.ValidateLogin(model.Username, model.Password, ipAddress);
         if (result.Failed(out string error))
         {
             var random = new Random(DateTime.Now.Millisecond);
@@ -66,7 +67,7 @@ public class AuthorizeController : Controller
 
         var settings = await ServiceLoader.Load<SettingsService>().Get();
 
-        var jwt = AuthenticationHelper.CreateJwtToken(result.Value, Request.GetActualIP(), settings.TokenExpiryMinutes);
+        var jwt = AuthenticationHelper.CreateJwtToken(result.Value, ipAddress, settings.TokenExpiryMinutes);
         return Ok(jwt);
     }
 
@@ -91,9 +92,10 @@ public class AuthorizeController : Controller
 
         var service = ServiceLoader.Load<UserService>();
         var changed = await service.ChangePassword(user, model.OldPassword, newPassword);
-        if (changed)
-            return Ok();
-        return BadRequest("Dialogs.ChangePassword.InvalidPassword");
+        if (changed == false)
+            return BadRequest("Dialogs.ChangePassword.InvalidPassword");
+        await ServiceLoader.Load<AuditService>().AuditPasswordChange(user.Uid, user.Email, HttpContext.Request.GetActualIP());
+        return Ok();
     }
 
     /// <summary>
@@ -137,6 +139,8 @@ public class AuthorizeController : Controller
     The FileFlows Team
     ");
         
+        await ServiceLoader.Load<AuditService>().AuditPasswordResetRequest(user.Uid, user.Email, HttpContext.Request.GetActualIP());
+        
         return Ok();
     }
     
@@ -165,7 +169,9 @@ public class AuthorizeController : Controller
         string newPassword = AuthenticationHelper.GenerateRandomPassword();
         
         user.Password = BCrypt.Net.BCrypt.HashPassword(newPassword);
-        await service.Update(user);
+        await service.Update(user, auditDetails: null); // null as we audit this manually
+        
+        await ServiceLoader.Load<AuditService>().AuditPasswordReset(user.Uid, user.Email, HttpContext.Request.GetActualIP());
         
         await Emailer.Send(user.Email, user.Email, "FileFlows New Password",
             $@"Dear {user.Name},

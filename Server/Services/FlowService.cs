@@ -1,5 +1,6 @@
 ﻿using FileFlows.Managers;
 using FileFlows.Plugin;
+using FileFlows.ServerShared.Models;
 
 namespace FileFlows.Server.Services;
 
@@ -49,9 +50,10 @@ public class FlowService : IFlowService
     /// Updates a flow
     /// </summary>
     /// <param name="flow">the flow to update</param>
+    /// <param name="auditDetails">The audit details</param>
     /// <returns>the result of the update</returns>
-    public Task<Result<Flow>> Update(Flow flow)
-        => new FlowManager().Update(flow);
+    public Task<Result<Flow>> Update(Flow flow, AuditDetails auditDetails)
+        => new FlowManager().Update(flow, auditDetails);
 
     /// <summary>
     /// Deletes the given flows

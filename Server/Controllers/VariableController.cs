@@ -10,7 +10,7 @@ namespace FileFlows.Server.Controllers;
 /// </summary>
 [Route("/api/variable")]
 [FileFlowsAuthorize(UserRole.Variables)]
-public class VariableController : Controller
+public class VariableController : BaseController
 {   
     /// <summary>
     /// Get all variables configured in the system
@@ -46,7 +46,7 @@ public class VariableController : Controller
     [HttpPost]
     public async Task<IActionResult> Save([FromBody] Variable variable)
     {
-        var result = await ServiceLoader.Load<VariableService>().Update(variable);
+        var result = await ServiceLoader.Load<VariableService>().Update(variable, await GetAuditDetails());
         if (result.Failed(out string error))
             return BadRequest(error);
         return Ok(result.Value);

@@ -12,7 +12,7 @@ namespace FileFlows.Server.Controllers;
 /// </summary>
 [Route("/api/script")]
 [FileFlowsAuthorize(UserRole.Scripts)]
-public class ScriptController : Controller
+public class ScriptController : BaseController
 {
 
     /// <summary>
@@ -102,8 +102,8 @@ public class ScriptController : Controller
     /// <param name="script">The script to save</param>
     /// <returns>the saved script instance</returns>
     [HttpPost]
-    public Task<Script> Save([FromBody] Script script)
-        => new ScriptService().Save(script);
+    public async Task<Script> Save([FromBody] Script script)
+        => await new ScriptService().Save(script, await GetAuditDetails());
 
 
     /// <summary>
@@ -149,7 +149,7 @@ public class ScriptController : Controller
         // will throw if any errors
         name = name.Replace(".js", "").Replace(".JS", "");
         name = service.GetNewUniqueName(name);
-        return await service.Save(new () { Name = name, Code = code, Repository = false});
+        return await service.Save(new () { Name = name, Code = code, Repository = false}, await GetAuditDetails());
     }
 
     /// <summary>
@@ -172,7 +172,7 @@ public class ScriptController : Controller
         script.Repository = false;
         script.Uid = script.Name;
         script.Type = type;
-        return await service.Save(script);
+        return await service.Save(script, await GetAuditDetails());
     }
     
     /// <summary>

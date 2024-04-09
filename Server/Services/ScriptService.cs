@@ -5,6 +5,7 @@ using FileFlows.ScriptExecution;
 using FileFlows.Server.Controllers;
 using FileFlows.Server.Helpers;
 using FileFlows.ServerShared.FileServices;
+using FileFlows.ServerShared.Models;
 using FileFlows.ServerShared.Services;
 using FileFlows.Shared.Helpers;
 using FileFlows.Shared.Models;
@@ -239,8 +240,9 @@ public class ScriptService:IScriptService
     /// Saves a script
     /// </summary>
     /// <param name="script">The script to save</param>
+    /// <param name="auditDetails">The audit details</param>
     /// <returns>the saved script instance</returns>
-    public async Task<Script> Save(Script script)
+    public async Task<Script> Save(Script script, AuditDetails auditDetails)
     {
         ValidateScript(script.Code, false, new Dictionary<string, object>());
         
@@ -258,7 +260,7 @@ public class ScriptService:IScriptService
         {
             if (DeleteScript(script.Uid, script.Type))
             {
-                await UpdateScriptReferences(script.Uid, script.Name);
+                await UpdateScriptReferences(script.Uid, script.Name, auditDetails);
             }
             script.Uid = script.Name;
         }
@@ -440,7 +442,7 @@ public class ScriptService:IScriptService
     }
     
     
-    private async Task UpdateScriptReferences(string oldName, string newName)
+    private async Task UpdateScriptReferences(string oldName, string newName, AuditDetails auditDetails)
     {
         var service = ServiceLoader.Load<FlowService>();
         var flows = await service.GetAllAsync();
@@ -459,7 +461,7 @@ public class ScriptService:IScriptService
             }
             if(changed)
             {
-                service.Update(flow);
+                await service.Update(flow, auditDetails);
             }
         }
 
@@ -470,7 +472,7 @@ public class ScriptService:IScriptService
             if (task.Script != oldName)
                 continue;
             task.Script = newName;
-            taskService.Update(task);
+            await taskService.Update(task, auditDetails);
         }
     }
     

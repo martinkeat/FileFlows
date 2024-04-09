@@ -29,7 +29,7 @@ internal class TestDataHelper
             LastScanned = DateTime.UtcNow,
             Schedule = schedule?.EmptyAsNull() ?? new string('1', 672)
         };
-        dam.FileFlowsObjectManager.AddOrUpdateObject(lib).Wait();
+        dam.FileFlowsObjectManager.AddOrUpdateObject(lib, null).Wait();
         return lib;
     }
 

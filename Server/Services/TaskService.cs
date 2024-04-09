@@ -1,5 +1,6 @@
 using FileFlows.Managers;
 using FileFlows.Plugin;
+using FileFlows.ServerShared.Models;
 using FileFlows.Shared.Models;
 
 namespace FileFlows.Server.Services;
@@ -36,9 +37,10 @@ public class TaskService
     /// Updates a task
     /// </summary>
     /// <param name="task">the task to update</param>
+    /// <param name="auditDetails">The audit details</param>
     /// <returns>the update result</returns>
-    public Task<Result<FileFlowsTask>> Update(FileFlowsTask task)
-        => new TaskManager().Update(task);
+    public Task<Result<FileFlowsTask>> Update(FileFlowsTask task, AuditDetails? auditDetails)
+        => new TaskManager().Update(task, auditDetails);
 
     /// <summary>
     /// Deletes the given tasks

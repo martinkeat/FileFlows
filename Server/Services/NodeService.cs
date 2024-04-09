@@ -47,7 +47,7 @@ public class NodeService //: INodeService
             }
 
             if (update)
-                manager.Update(internalNode).Wait();
+                manager.Update(internalNode, auditDetails: AuditDetails.ForServer()).Wait();
         }
     }
 
@@ -94,7 +94,7 @@ public class NodeService //: INodeService
 #else
             TempPath = DirectoryHelper.IsDocker ? "/temp" : Path.Combine(DirectoryHelper.BaseDirectory, "Temp"),
 #endif
-        });
+        }, auditDetails: AuditDetails.ForServer());
         node.SignalrUrl = "flow";
         return node;
     } 
@@ -154,9 +154,10 @@ public class NodeService //: INodeService
     /// Updates a processing node
     /// </summary>
     /// <param name="node">the node to update</param>
+    /// <param name="auditDetails">The audit details</param>
     /// <returns>the update result</returns>
-    public Task<Result<ProcessingNode>> Update(ProcessingNode node)
-        => new NodeManager().Update(node);
+    public Task<Result<ProcessingNode>> Update(ProcessingNode node, AuditDetails? auditDetails)
+        => new NodeManager().Update(node, auditDetails);
 
     /// <summary>
     /// Deletes the given nodes

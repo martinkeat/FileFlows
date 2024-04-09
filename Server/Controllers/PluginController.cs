@@ -17,7 +17,7 @@ namespace FileFlows.Server.Controllers;
 /// </summary>
 [Route("/api/plugin")]
 [FileFlowsAuthorize(UserRole.Plugins)]
-public class PluginController : Controller
+public class PluginController : BaseController
 {
     /// <summary>
     /// Get the plugins translation file
@@ -297,7 +297,7 @@ public class PluginController : Controller
         var newJson = json ?? string.Empty;
         if (newJson == oldSettings)
             return;
-        await service.SetSettingsJson(packageName, newJson);
+        await service.SetSettingsJson(packageName, newJson, await GetAuditDetails());
         await new SettingsService().RevisionIncrement();
     }
 
@@ -318,7 +318,7 @@ public class PluginController : Controller
         if (enable != null && plugin.Enabled != enable.Value)
         {
             plugin.Enabled = enable.Value;
-            await service.Update(plugin);
+            await service.Update(plugin, await GetAuditDetails());
         }
 
         return plugin;

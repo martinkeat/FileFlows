@@ -43,7 +43,8 @@ public class PluginManager : CachedManager<PluginInfo>
     /// </summary>
     /// <param name="name">the name of the plugin</param>
     /// <param name="json">the plugin json</param>
-    public async Task SetPluginSettings(string name, string json)
+    /// <param name="auditDetails">The audit details</param>
+    public async Task SetPluginSettings(string name, string json, AuditDetails auditDetails)
     {
         var manager = DatabaseAccessManager.Instance.FileFlowsObjectManager;
         var existing = await GetPluginSettings(name);
@@ -58,6 +59,6 @@ public class PluginManager : CachedManager<PluginInfo>
             Name = name,
             DateCreated = DateTime.UtcNow,
             Json = json
-        }, saveRevision: true);
+        }, auditDetails, saveRevision: true);
     }
 }

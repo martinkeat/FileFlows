@@ -1,5 +1,6 @@
 using FileFlows.Managers;
 using FileFlows.Plugin;
+using FileFlows.ServerShared.Models;
 using FileFlows.Shared.Models;
 
 namespace FileFlows.Server.Services;
@@ -51,9 +52,10 @@ public class UserService
     /// Updates a user
     /// </summary>
     /// <param name="user">the user to update</param>
+    /// <param name="auditDetails">The audit details</param>
     /// <returns>the update result</returns>
-    public Task<Result<User>> Update(User user)
-        => new UserManager().Update(user);
+    public Task<Result<User>> Update(User user, AuditDetails? auditDetails)
+        => new UserManager().Update(user, auditDetails);
 
     /// <summary>
     /// Deletes the given user
@@ -68,8 +70,9 @@ public class UserService
     /// </summary>
     /// <param name="username">the username</param>
     /// <param name="password">the password</param>
+    /// <param name="ipAddress">the IP address the request came from</param>
     /// <returns>the user if valid</returns>
-    public async Task<Result<User>> ValidateLogin(string username, string password)
+    public async Task<Result<User>> ValidateLogin(string username, string password, string ipAddress)
     {
         var user = await GetByName(username);
         if (user == null)
@@ -77,8 +80,11 @@ public class UserService
 
         LoginAttempts.TryGetValue(user.Uid, out LoginAttempt? loginAttempt);
         if (loginAttempt != null && loginAttempt.LockedOutUntilUtc > DateTime.UtcNow)
+        {
+            await ServiceLoader.Load<AuditService>().AuditLoginFail(user.Uid, user.Name, ipAddress);
             return Result<User>.Fail(Translater.Instant("Pages.Login.Messages.LockedOut"));
-        
+        }
+
         if (BCrypt.Net.BCrypt.Verify(password, user.Password) == false)
         {
             var settings = await ServiceLoader.Load<SettingsService>().Get();
@@ -96,6 +102,7 @@ public class UserService
                 loginAttempt.LockedOutUntilUtc = DateTime.UtcNow.AddMinutes(minutes);
             }
 
+            await ServiceLoader.Load<AuditService>().AuditLoginFail(user.Uid, user.Name, ipAddress);
             LoginAttempts[user.Uid] = loginAttempt;
             
             return Result<User>.Fail(Translater.Instant("Pages.Login.Messages.InvalidUsernameOrPassword"));
@@ -118,18 +125,21 @@ public class UserService
         if (BCrypt.Net.BCrypt.Verify(oldPassword, user.Password) == false)
             return false;
         user.Password = BCrypt.Net.BCrypt.HashPassword(newPassword);
-        await new UserManager().Update(user);
+        await new UserManager().Update(user, null); // nul here since we already audit the password change
         return true;
     }
-    
+
     /// <summary>
     /// Records a login for a user
     /// </summary>
     /// <param name="user">the user to record the login for</param>
     /// <param name="ipAddress">the IP Address</param>
     /// <returns>a task to await</returns>
-    public Task RecordLogin(User user, string ipAddress)
-        => new UserManager().RecordLogin(user, ipAddress);
+    public async Task RecordLogin(User user, string ipAddress)
+    {
+        await new UserManager().RecordLogin(user, ipAddress);
+        await ServiceLoader.Load<AuditService>().AuditLogin(user.Uid, user.Name, ipAddress);
+    }
 
     /// <summary>
     /// Login attempts

@@ -10,7 +10,7 @@ namespace FileFlows.Server.Controllers;
 /// </summary>
 [Route("/api/task")]
 [FileFlowsAuthorize(UserRole.Tasks)]
-public class TaskController : Controller
+public class TaskController : BaseController
 {
     /// <summary>
     /// Get all scheduled tasks configured in the system
@@ -46,7 +46,7 @@ public class TaskController : Controller
     [HttpPost]
     public async Task<IActionResult> Save([FromBody] FileFlowsTask fileFlowsTask)
     {
-        var result = await ServiceLoader.Load<TaskService>().Update(fileFlowsTask);
+        var result = await ServiceLoader.Load<TaskService>().Update(fileFlowsTask, await GetAuditDetails());
         if (result.Failed(out string error))
             return BadRequest(error);
         return Ok(result.Value);

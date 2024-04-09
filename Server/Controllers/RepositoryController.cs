@@ -12,7 +12,7 @@ namespace FileFlows.Server.Controllers;
 /// </summary>
 [Route("/api/repository")]
 [FileFlowsAuthorize(UserRole.Flows | UserRole.Plugins | UserRole.Scripts)]
-public class RepositoryController : Controller
+public class RepositoryController : BaseController
 {
     /// <summary>
     /// Gets the scripts
@@ -149,7 +149,7 @@ public class RepositoryController : Controller
             }
 
             flow.ReadOnly = true;
-            await service.Update(flow);
+            await service.Update(flow, await GetAuditDetails());
         }
     }
     

@@ -11,10 +11,11 @@ using FileFlows.Shared.Models;
 
 
 namespace FileFlows.Server.Services;
+
 /// <summary>
 /// Plugin service
 /// </summary>
-public class PluginService : IPluginService
+public class PluginService
 {
     /// <summary>
     /// Get the plugin info for a specific plugin by package name
@@ -33,14 +34,22 @@ public class PluginService : IPluginService
         => new PluginManager().GetByUid(uid);
 
 
-    /// <inheritdoc />
+    /// <summary>
+    /// Get all plugin infos
+    /// </summary>
+    /// <returns>all plugin infos</returns>
     public Task<List<PluginInfo>> GetAllAsync()
         => new PluginManager().GetAll();
     
-    /// <inheritdoc />
-    public async Task<PluginInfo> Update(PluginInfo pluginInfo)
+    /// <summary>
+    /// Updates plugin info
+    /// </summary>
+    /// <param name="pluginInfo">the plugin info</param>
+    /// <param name="auditDetails">The audit details</param>
+    /// <returns>the updated plugininfo</returns>
+    public async Task<PluginInfo> Update(PluginInfo pluginInfo, AuditDetails? auditDetails)
     {
-        var result = await new PluginManager().Update(pluginInfo, false);
+        var result = await new PluginManager().Update(pluginInfo, auditDetails, false);
         return result.IsFailed ? null : result.Value;
     }
 
@@ -172,8 +181,9 @@ public class PluginService : IPluginService
     /// </summary>
     /// <param name="name">the name of the plugin</param>
     /// <param name="json">the plugin json</param>
-    public Task SetSettingsJson(string name, string json)
-        => new PluginManager().SetPluginSettings(name, json);
+    /// <param name="auditDetails">The audit details</param>
+    public Task SetSettingsJson(string name, string json, AuditDetails? auditDetails)
+        => new PluginManager().SetPluginSettings(name, json, auditDetails);
     
     
     /// <summary>
