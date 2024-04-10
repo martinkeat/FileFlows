@@ -1,21 +1,17 @@
-.audit-history {
+.audit-entry-viewer{
   position:fixed;
   right:0;
   top:0;
   bottom:0;
-  width: min(90rem, 70vw);
+  width: min(80rem, 65vw);
   max-width: 100vw;
   min-width: min(50rem, 100vw);
   background:var(--base-darker);
-  z-index:6;
+  z-index:8;
   &.maximised {
-    width:100vw !important;    
+    width:100vw !important;
   }
 }
 .background-overlay {
-  z-index: 5 !important;
-}
-
-.view-changes {
-  cursor:pointer;
+  z-index: 7 !important;
 }

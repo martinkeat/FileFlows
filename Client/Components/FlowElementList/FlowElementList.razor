@@ -34,7 +34,7 @@
                         
                         <div class="group @(expanded || Filtering ? "expanded" : "collapsed")">
                             <div class="group-title" @onclick="() => SelectGroup(grp.Key)">
-                                @Helpers.FlowHelper.FormatLabel(grp.Key.Replace("Nodes", string.Empty))
+                                @FlowHelper.FormatLabel(grp.Key.Replace("Nodes", string.Empty))
                                 <span class="count" style="border-color:var(--flow-@(mostCommonFlowType)">@grp.Count()</span>
                                 @if (Filtering == false)
                                 {   

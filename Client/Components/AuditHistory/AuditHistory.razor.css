@@ -17,4 +17,8 @@
   z-index: 5 !important;
 }
 
+.view-changes {
+  cursor: pointer;
+}
+
 /*# sourceMappingURL=AuditHistory.razor.css.map */

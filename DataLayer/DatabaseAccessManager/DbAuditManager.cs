@@ -41,10 +41,11 @@ internal class DbAuditManager : BaseManager
                      Wrap(nameof(entry.Action)) + ", " +
                      Wrap(nameof(entry.ObjectType)) + ", " +
                      Wrap(nameof(entry.ObjectUid)) + ", " +
-                     Wrap(nameof(entry.Parameters)) + ", " +
                      Wrap(nameof(entry.RevisionUid)) + ", " +
+                     Wrap(nameof(entry.Parameters)) + ", " +
+                     Wrap(nameof(entry.Changes)) + ", " +
                      Wrap(nameof(entry.LogDate)) + ") " +
-                     " values (@0, @1, @2, @3, @4, @5, @6, @7, @8," +
+                     " values (@0, @1, @2, @3, @4, @5, @6, @7, @8, @9, " +
                      DbConnector.FormatDateQuoted(entry.LogDate) + ")";
         try
         {
@@ -57,8 +58,10 @@ internal class DbAuditManager : BaseManager
                 (int)entry.Action,
                 entry.ObjectType,
                 entry.ObjectUid.ToString(),
-                entry.Parameters == null || entry.Parameters.Any() == false ? string.Empty : JsonSerializer.Serialize(entry.Parameters),
-                entry.RevisionUid?.ToString() ?? string.Empty);
+                entry.RevisionUid?.ToString() ?? string.Empty,
+                entry.Parameters?.Any() != true ? string.Empty : JsonSerializer.Serialize(entry.Parameters),
+                entry.Changes?.Any() != true ? string.Empty : JsonSerializer.Serialize(entry.Changes)
+            );
         }
         catch (Exception ex)
         {

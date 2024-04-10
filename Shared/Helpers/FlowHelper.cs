@@ -1,7 +1,7 @@
-namespace FileFlows.Client.Helpers;
-
-using System.Text.RegularExpressions;
 using FileFlows.Plugin;
+using FileFlows.Shared.Models;
+
+namespace FileFlows.Shared.Helpers;
 
 /// <summary>
 /// Helper used by the Flow page
@@ -27,5 +27,25 @@ public class FlowHelper
     {
         return Regex.Replace(name.Replace("_", " "), "(?<=[A-Za-z])(?=[A-Z][a-z])|(?<=[a-z0-9])(?=[0-9]?[A-Z])", " ")
             .Replace("Ffmpeg", "FFmpeg");
+    }
+
+    /// <summary>
+    /// Gets the flow part name
+    /// </summary>
+    /// <param name="part">the part</param>
+    /// <returns>the flow part name</returns>
+    public static string GetFlowPartName(FlowPart part)
+    {
+        if (string.IsNullOrWhiteSpace(part.Name) == false)
+            return part.Name;
+        
+        if (part.Type == FlowElementType.Script)
+            return part.FlowElementUid[7..]; // 7 to remove Script:
+        
+        if (part.Type == FlowElementType.SubFlow)
+            return part.Name?.EmptyAsNull() ?? "Sub Flow";
+        
+        string typeName = part.FlowElementUid[(part.FlowElementUid.LastIndexOf(".", StringComparison.Ordinal) + 1)..];
+        return Translater.TranslateIfHasTranslation($"Flow.Parts.{typeName}.Label", FlowHelper.FormatLabel(typeName));
     }
 }

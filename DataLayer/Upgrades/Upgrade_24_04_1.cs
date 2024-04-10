@@ -62,8 +62,9 @@ CREATE TABLE AuditLog
     Action          INT                NOT NULL,
     ObjectType      VARCHAR(255)       NOT NULL,
     ObjectUid       VARCHAR(36)        NOT NULL,
+    RevisionUid     VARCHAR(36)        NOT NULL,
     Parameters      TEXT               NOT NULL,
-    RevisionUid     VARCHAR(36)        NOT NULL
+    Changes         TEXT               NOT NULL
 );
 
 CREATE INDEX IF NOT EXISTS idx_AuditLog_OperatorUid ON AuditLog (OperatorUid);

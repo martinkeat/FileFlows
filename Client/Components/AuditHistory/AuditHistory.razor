@@ -14,7 +14,8 @@
                 </Head>
 
                 <Body>
-                <FlowTable @ref=Table TItem="AuditEntry" Selection="SelectionMode.None" Data=@Data TableIdentifier="AuditHistory">
+                <FlowTable @ref=Table TItem="AuditEntry" Selection="SelectionMode.None" Data=@Data 
+                           TableIdentifier="AuditHistory" DoubleClick="View">
                     <Columns>
                         <FlowTableColumn TItem="AuditEntry" Width="14rem">
                             <Header>
@@ -53,7 +54,14 @@
                                 Summary
                             </Header>
                             <Cell Context="item">
-                                <span>@item.Summary</span>
+                                @if (item.Changes?.Any() == true)
+                                {
+                                    <a class="view-changes" @onclick="() => View(item)">@item.Summary</a>
+                                }
+                                else
+                                {
+                                    <span>@item.Summary</span>
+                                }
                             </Cell>
                         </FlowTableColumn>
                     </Columns>

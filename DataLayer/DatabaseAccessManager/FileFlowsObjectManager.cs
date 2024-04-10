@@ -133,12 +133,15 @@ internal  class FileFlowsObjectManager
         {
             var dbo = ConvertToDbObject(obj);
             DbObject? dbObject = null;
+            T? original = null;
             bool newObject = false;
             if (obj.Uid != Guid.Empty)
             {
                 try
                 {
                     dbObject = await dbom.Single(obj.Uid);
+                    if(dbObject != null)
+                        original = Convert<T>(dbObject);
                 }
                 catch (Exception)
                 {
@@ -146,7 +149,6 @@ internal  class FileFlowsObjectManager
             }
 
             bool changed = false;
-
             if (dbObject == null)
             {
                 if (obj.Uid == Guid.Empty)
@@ -203,22 +205,24 @@ internal  class FileFlowsObjectManager
 
                 if (auditDetails != null)
                 {
+                    var changes = ObjectComparer.GetChanges(obj, original);
+
                     await DatabaseAccessManager.Instance.AuditManager.Insert(new()
                     {
                         Action = newObject ? AuditAction.Added : AuditAction.Updated,
                         RevisionUid = revisionUid,
-                        //Summary = newObject ? "ItemAdded" : "ItemUpdated",
                         LogDate = DateTime.UtcNow,
                         ObjectType = dbo.Type,
                         ObjectUid = dbo.Uid,
                         OperatorName = auditDetails.UserName,
                         OperatorUid = auditDetails.UserUid,
-                        OperatorType = OperatorType.User,
+                        OperatorType = auditDetails.OperatorType,
                         IPAddress = auditDetails.IPAddress,
                         Parameters = new ()
                         {
                             { nameof(obj.Name), obj.Name }
-                        }
+                        },
+                        Changes = changes
                     });
                 }
             }

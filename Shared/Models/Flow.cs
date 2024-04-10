@@ -18,6 +18,7 @@ public class Flow : FileFlowObject
     /// <summary>
     /// Gets or sets the revision of this flow
     /// </summary>
+    [DontAudit]
     public int Revision { get; set; }
 
     /// <summary>
@@ -28,6 +29,7 @@ public class Flow : FileFlowObject
     /// <summary>
     /// Gets or sets the template this flow is based on
     /// </summary>
+    [DontAudit]
     public string Template { get; set; }
     
     /// <summary>

@@ -1,3 +1,5 @@
+using FileFlows.Shared.Models;
+
 namespace FileFlows.ServerShared.Models;
 
 /// <summary>
@@ -17,16 +19,21 @@ public class AuditDetails
     /// Gets or sets the name of the user performing this action
     /// </summary>
     public string UserName { get; init; }
+    /// <summary>
+    /// Gets or sets the operator type
+    /// </summary>
+    public OperatorType OperatorType { get; set; } = OperatorType.User;
 
     /// <summary>
     /// Gets the audit details for the server
     /// </summary>
     /// <returns>the server</returns>
     public static AuditDetails ForServer()
-        => new AuditDetails()
+        => new ()
         {
             UserName = Globals.OperatorFileFlowsServerName,
             UserUid = Globals.OperatorFileFlowsServerUid,
+            OperatorType = OperatorType.System,
             IPAddress = ""
         };
 }

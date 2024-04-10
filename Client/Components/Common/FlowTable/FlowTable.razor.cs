@@ -189,7 +189,12 @@ public partial class FlowTable<TItem>: FlowTableBase,IDisposable, INotifyPropert
     /// Gets or sets if the head row should be hidden
     /// </summary>
     [Parameter] public bool HideHead { get; set; }
-
+    
+    /// <summary>
+    /// Gets or sets if the toolbar should be hidden
+    /// </summary>
+    [Parameter] public bool HideToolbar { get; set; }
+    
     private Dictionary<TItem, string> DisplayData { get; set; } = new ();
 
     private readonly List<TItem> SelectedItems = new ();

@@ -52,6 +52,7 @@
     "Reprocess": "Reprocess",
     "Revisions":"Revisions",
     "Audit": "Audit",
+    "Value": "Value",
     "NoAuditHistoryAvailable": "No audit history available",
     "Restore":"Restore",
     "RestoredMessage":"{type} restored",

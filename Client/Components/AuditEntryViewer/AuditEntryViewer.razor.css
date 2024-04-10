@@ -1,0 +1,20 @@
+.audit-entry-viewer {
+  position: fixed;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: min(80rem, 65vw);
+  max-width: 100vw;
+  min-width: min(50rem, 100vw);
+  background: var(--base-darker);
+  z-index: 8;
+}
+.audit-entry-viewer.maximised {
+  width: 100vw !important;
+}
+
+.background-overlay {
+  z-index: 7 !important;
+}
+
+/*# sourceMappingURL=AuditEntryViewer.razor.css.map */

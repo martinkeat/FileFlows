@@ -138,6 +138,7 @@
 .flowtable-row > span.no-height {
   height: unset;
   line-height: unset;
+  margin-bottom: auto;
 }
 
 .flowtable-header-row {

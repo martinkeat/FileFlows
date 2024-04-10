@@ -131,6 +131,7 @@ public class Library : FileFlowObject
     /// <summary>
     /// When the library was last scanned
     /// </summary>
+    [DontAudit]
     public DateTime LastScanned { get; set; }
 
     

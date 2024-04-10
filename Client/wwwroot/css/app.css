@@ -536,6 +536,12 @@ a.btn {
   margin-right: 0.75rem;
   color: inherit;
 }
+.ff-toast svg {
+  width: 1rem;
+  position: relative;
+  top: 0.1rem;
+  left: 0.15rem;
+}
 .ff-toast .toast-close {
   right: 0.75rem;
   color: var(--color) !important;
@@ -2637,6 +2643,13 @@ html, body {
 
 a, .btn-link {
   color: var(--accent) !important;
+}
+
+td a, span.column a {
+  color: var(--table-link-color) !important;
+}
+td a:hover, span.column a:hover {
+  text-decoration: underline !important;
 }
 
 .loading-version {

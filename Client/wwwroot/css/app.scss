@@ -48,6 +48,13 @@ a, .btn-link {
     color: var(--accent) !important;
 }
 
+td a, span.column a {
+    color: var(--table-link-color) !important;
+    &:hover {
+        text-decoration:underline !important;
+    }
+}
+
 
 .loading-version {
     position:fixed;

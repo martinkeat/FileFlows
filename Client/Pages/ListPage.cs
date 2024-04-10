@@ -288,7 +288,7 @@ public abstract class ListPage<U, T> : ComponentBase where T : IUniqueObject<U>
     /// Gets the audit type name
     /// </summary>
     /// <returns>the audit type name</returns>
-    protected string GetAuditTypeName()
+    protected virtual string GetAuditTypeName()
         => typeof(T).FullName;
     
     /// <summary>

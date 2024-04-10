@@ -37,20 +37,26 @@ public class AuditEntry
     /// </summary>
     public Guid ObjectUid { get; set; }
     /// <summary>
-    /// Gets or sets the summary of the audit
+    /// Gets or sets the optional revision UID of the change
     /// </summary>
-    [DbIgnore]
-    [Ignore]
-    public string Summary { get; set; }
+    public Guid? RevisionUid { get; set; }
     /// <summary>
     /// Gets or sets the summary parameters
     /// </summary>
     [SerializedColumn]
     public Dictionary<string, object> Parameters { get; set; }
     /// <summary>
-    /// Gets or sets the optional revision UID of the change
+    /// Gets or sets the changes made to the object
     /// </summary>
-    public Guid? RevisionUid { get; set; }
+    [SerializedColumn]
+    public Dictionary<string, object> Changes { get; set; }
+    
+    /// <summary>
+    /// Gets or sets the summary of the audit
+    /// </summary>
+    [DbIgnore]
+    [Ignore]
+    public string Summary { get; set; }
 }
 
 /// <summary>

@@ -43,6 +43,10 @@ public partial class Flows : ListPage<Guid, FlowListModel>
         lblInUse = Translater.Instant("Labels.InUse");
     }
 
+    /// <inheritdoc />
+    protected override string GetAuditTypeName()
+        => typeof(FileFlows.Shared.Models.Flow).FullName;
+
     async Task Enable(bool enabled, ffFlow flowWrapper)
     {
         Blocker.Show();
