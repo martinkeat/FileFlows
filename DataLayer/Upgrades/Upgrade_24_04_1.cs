@@ -24,9 +24,29 @@ public class Upgrade_24_04_1
         var connector = DatabaseConnectorLoader.LoadConnector(logger, dbType, connectionString);
         using var db = connector.GetDb(true).Result;
 
+        DeleteOldLibraryFiles(logger, db, connector);
         AddAuditTable(logger, db, connector);
 
         return true;
+    }
+
+
+    /// <summary>
+    /// Deletes rogue library files
+    /// </summary>
+    /// <param name="logger">the logger</param>
+    /// <param name="db">the db connection</param>
+    /// <param name="connector">the connector</param>
+    private void DeleteOldLibraryFiles(ILogger logger, DatabaseConnection db, IDatabaseConnector connector)
+    {
+        string sql = $@"delete 
+from {connector.WrapFieldName("LibraryFile")} 
+where {connector.WrapFieldName("LibraryUid")} not in (
+    select {connector.WrapFieldName("Uid")}
+    from {connector.WrapFieldName("DbObject")} 
+    where {connector.WrapFieldName("Type")} like '%.Library'
+)";
+        db.Db.Execute(sql);
     }
 
 
