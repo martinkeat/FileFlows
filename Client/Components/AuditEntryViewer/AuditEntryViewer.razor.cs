@@ -1,3 +1,6 @@
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Web;
 using FileFlows.Client.Components.Common;
 using Humanizer;
 using Microsoft.AspNetCore.Components;
@@ -110,7 +113,7 @@ public partial class AuditEntryViewer
         Data = entry.Changes.Select(x => new EntryViewerData()
         {
             Name = x.Key,
-            Value = x.Value
+            Value = x.Key == "Parts" ? RenderParts(x.Value.ToString()) : x.Value
         }).ToList();
 
         await AwaitRender();
@@ -137,6 +140,42 @@ public partial class AuditEntryViewer
     {
         if (AwaitingRender)
             AwaitingRender = false;
+    }
+
+    private MarkupString RenderParts(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return new MarkupString(string.Empty);
+        List<string> lines = new();
+        Regex fromTo = new Regex(@"([^:]+):\s*'([^']+)'\s+to\s+'([^']+)'$");
+        foreach (var line in value.Split('\n'))
+        {
+            if (string.IsNullOrWhiteSpace(line))
+            {
+                lines.Add(string.Empty);
+                continue;
+            }
+
+            var fromToMatch = fromTo.Match(line);
+            if (fromToMatch.Success)
+            {
+                lines.Add("<b>" + HttpUtility.HtmlEncode(fromToMatch.Groups[1].Value) + ":</b> " +
+                          "<b>'</b>" + HttpUtility.HtmlEncode(fromToMatch.Groups[2].Value) + "<b>'</b> to " +
+                          "<b>'</b>" + HttpUtility.HtmlEncode(fromToMatch.Groups[3].Value) + "<b>'</b>");
+                continue;
+            }
+
+            int index = line.IndexOf(":", StringComparison.Ordinal);
+            if (index > 0)
+            {
+                lines.Add("<b>" + HttpUtility.HtmlEncode(line[..index]) + ":</b> " +
+                          HttpUtility.HtmlEncode(line[(index + 1)..]));
+                continue;
+            }
+            lines.Add(HttpUtility.HtmlEncode(line));
+        }
+
+        return new MarkupString(string.Join("<br/>", lines));
     }
     
     /// <summary>

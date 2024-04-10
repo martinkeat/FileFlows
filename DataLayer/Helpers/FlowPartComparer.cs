@@ -1,4 +1,5 @@
 using System.Text;
+using System.Text.RegularExpressions;
 using FileFlows.Shared;
 using FileFlows.Shared.Helpers;
 using FileFlows.Shared.Models;
@@ -101,12 +102,7 @@ public static class FlowPartComparer
                 string newYaml = converter2.DoConvert(newValue, 2).Replace("\r\n", "\n").TrimEnd();
                 if (oldYaml == newYaml || (string.IsNullOrWhiteSpace(oldYaml) && string.IsNullOrWhiteSpace(newYaml)))
                     continue;
-                if (property.Name is nameof(FlowPart.xPos) or nameof(FlowPart.yPos))
-                {
-                    // just record the new value, no need to record the old for these basic changes
-                    changedProperties.AppendLine($"    {property.Name}: {newYaml.Trim()}");
-                }
-                else if (property.Name == nameof(FlowPart.Model) && newValue is IDictionary<string, object> newModel &&
+                if (property.Name == nameof(FlowPart.Model) && newValue is IDictionary<string, object> newModel &&
                          oldValue is IDictionary<string, object> oldModel)
                 {
                     var additions = newModel.Where(x => oldModel.ContainsKey(x.Key) == false)
@@ -121,31 +117,20 @@ public static class FlowPartComparer
                         string yaml = converter1.DoConvert(item.Value);
                         if (string.IsNullOrWhiteSpace(yaml))
                             continue;
-                        changedProperties.AppendLine($"  + {item.Key}: {yaml}");
+                        RecordValueChnage(changedProperties, item.Key, null, yaml);
                     }
                     foreach (var item in changes)
                     {
                         string yamlNew = converter1.DoConvert(item.Value);
                         string yamlOld = converter1.DoConvert(oldModel[item.Key]);
-                        if (yamlNew?.EmptyAsNull() == yamlOld?.EmptyAsNull())
-                            continue;
-                        if (string.IsNullOrWhiteSpace(yamlOld) == false && string.IsNullOrWhiteSpace(yamlNew) == false)
-                        {
-                            changedProperties.AppendLine($"    {item.Key}");
-                            changedProperties.AppendLine($"      - {yamlOld}");
-                            changedProperties.AppendLine($"      + {yamlNew}");
-                        }
-                        else if(string.IsNullOrWhiteSpace(yamlOld))
-                            changedProperties.AppendLine($"  - {item.Key}: {yamlOld}");
-                        else if(string.IsNullOrWhiteSpace(yamlNew))
-                            changedProperties.AppendLine($"  + {item.Key}: {yamlNew}");
+                        RecordValueChnage(changedProperties, item.Key, yamlOld, yamlNew);
                     }
                     foreach (var item in deletions)
                     {
                         string yaml = converter1.DoConvert(item.Value);
                         if (string.IsNullOrWhiteSpace(yaml))
                             continue;
-                        changedProperties.AppendLine($"  - {item.Key}: {yaml}");
+                        RecordValueChnage(changedProperties, item.Key, yaml, null);
                     }
                 }
                 else
@@ -160,42 +145,48 @@ public static class FlowPartComparer
                         newYaml = newYaml.Trim();
                     if (property.Name == nameof(FlowPart.OutputConnections))
                     {
-                        // the output connections have been converted to 'Output [num]: [Input]'
-                        if (string.IsNullOrWhiteSpace(oldYaml) == false)
-                        {
-                            foreach (string output in oldYaml.Trim().Split('\n'))
-                            {
-                                if (string.IsNullOrWhiteSpace(output) == false)
-                                    changedProperties.AppendLine("  - " + output.Trim());
-                            }
-                        }
-                        if (string.IsNullOrWhiteSpace(newYaml) == false)
-                        {
-                            foreach (string output in newYaml.Trim().Split('\n'))
-                            {
-                                if (string.IsNullOrWhiteSpace(output) == false)
-                                    changedProperties.AppendLine("  + " + output.Trim());
-                            }
-                        }
+                        var oldParts = oldYaml?.Split(':');
+                        var newParts = newYaml?.Split(':');
+                        if (oldParts?.Length != 2 && newParts?.Length != 2)
+                            continue; // shouldn't happen
+                        
+                        string name = oldParts?.FirstOrDefault() ?? newParts?.FirstOrDefault() ?? string.Empty;
+                        RecordValueChnage(changedProperties, name, oldParts?.LastOrDefault()?.Trim() ?? string.Empty, newParts?.LastOrDefault()?.Trim() ?? string.Empty);
                     }
                     else
                     {
-                        if (string.IsNullOrWhiteSpace(oldYaml) == false && string.IsNullOrWhiteSpace(newYaml) == false)
-                        {
-                            changedProperties.AppendLine($"    {property.Name}");
-                            changedProperties.AppendLine($"      - {oldYaml.TrimEnd()}");
-                            changedProperties.AppendLine($"      + {newYaml.TrimEnd()}");
-                        }
-                        else if (string.IsNullOrWhiteSpace(oldYaml) == false)
-                            changedProperties.AppendLine($"  - {property.Name}: {oldYaml.TrimEnd()}");
-                        else if (string.IsNullOrWhiteSpace(newYaml) == false)
-                            changedProperties.AppendLine($"  + {property.Name}: {newYaml.TrimEnd()}");
+                        RecordValueChnage(changedProperties, property.Name, oldYaml, newYaml);
                     }
                 }
             }
         }
 
         return changedProperties.ToString();
+    }
+
+    private static void RecordValueChnage(StringBuilder changedProperties, string name, string oldValue, string newValue, int indent = 2)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            return;
+        if (oldValue?.EmptyAsNull() == newValue?.EmptyAsNull())
+            return;
+        if (string.IsNullOrWhiteSpace(oldValue) == false && string.IsNullOrWhiteSpace(newValue) == false)
+        {
+            if (oldValue.IndexOf("\n", StringComparison.Ordinal) < 0 && newValue.IndexOf("\n", StringComparison.Ordinal) < 0)
+            {
+                // basic value change
+                changedProperties.AppendLine(new string(' ', indent * 4) + $"{name}: '{oldValue}' to '{newValue}'");
+                return;
+            }
+            changedProperties.AppendLine(new string(' ', indent * 4) + $"{name}");
+            changedProperties.AppendLine(new string(' ', indent * 4) + $"  {oldValue.TrimEnd()}");
+            changedProperties.AppendLine(new string(' ', indent * 4) + $"  {newValue.TrimEnd()}");
+        }
+        else if (string.IsNullOrWhiteSpace(oldValue) == false)
+            changedProperties.AppendLine(new string(' ', indent * 4) + $"{name}: {oldValue.TrimEnd()}");
+        else if (string.IsNullOrWhiteSpace(newValue) == false)
+            changedProperties.AppendLine(new string(' ', indent * 4) + $"{name}: {newValue.TrimEnd()}");
+        
     }
 
     /// <summary>

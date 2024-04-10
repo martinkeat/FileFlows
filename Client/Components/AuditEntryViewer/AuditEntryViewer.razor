@@ -29,7 +29,14 @@
                                 @lblValue
                             </Header>
                             <Cell Context="item">
-                                <span style="white-space: pre">@item.Value.ToString()</span>
+                                @if (item.Value is MarkupString mkString)
+                                {
+                                    <span style="white-space: pre">@mkString</span>
+                                }
+                                else
+                                {
+                                    <span style="white-space: pre">@item.Value.ToString()</span>
+                                }
                             </Cell>
                         </FlowTableColumn>
                     </Columns>
