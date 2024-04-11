@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Text.Json;
 using Type = System.Type;
 
 namespace FileFlows.DataLayer.Helpers;
@@ -78,7 +79,21 @@ public class ValueComparer : IEqualityComparer<object>
     /// <inheritdoc/>
     public new bool Equals(object x, object y)
     {
-        return x != null && y != null && x.Equals(y);
+        if (x == y)
+            return true;
+        if (x == null || y == null)
+            return false;
+        if (x.Equals(y))
+            return true;
+
+        Type type = x.GetType();
+        if (type.IsPrimitive || type.IsValueType || type == typeof(string) || type == typeof(decimal) ||
+            type == typeof(DateTime))
+            return x.Equals(y);
+        
+        string jsonX = JsonSerializer.Serialize(x);
+        string jsonY = JsonSerializer.Serialize(x);
+        return jsonX == jsonY;
     }
 
     /// <inheritdoc/>

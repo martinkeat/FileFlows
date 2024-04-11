@@ -45,6 +45,12 @@ public partial class Audit : ComponentBase
     /// The search filter
     /// </summary>
     private AuditSearchFilter Filter = new();
+    /// <summary>
+    /// The column titles
+    /// </summary>
+    private string lblDate, lblType, lblAction, lblOperator, lblIPAddress, lblSummary;
+
+    private Dictionary<AuditAction, string> AuditActionTranslations = new();
     
     /// <inheritdoc />
     protected override async Task OnInitializedAsync()
@@ -55,6 +61,14 @@ public partial class Audit : ComponentBase
             NavigationManager.NavigateTo("/");
             return;
         }
+        lblDate = Translater.Instant("Pages.Audit.Columns.Date"); 
+        lblType = Translater.Instant("Pages.Audit.Columns.Type");
+        lblAction = Translater.Instant("Pages.Audit.Columns.Action");
+        lblOperator = Translater.Instant("Pages.Audit.Columns.Operator");
+        lblIPAddress = Translater.Instant("Pages.Audit.Columns.IPAddress");
+        lblSummary = Translater.Instant("Pages.Audit.Columns.Summary");
+        foreach (var action in Enum.GetValues<AuditAction>())
+            AuditActionTranslations[action] = Translater.Instant($"Enums.{nameof(AuditAction)}.{action}"); 
         _ = Load();
     }
     
@@ -114,5 +128,44 @@ public partial class Audit : ComponentBase
     /// </summary>
     /// <param name="data">the data to set</param>
     protected virtual void SetTableData(List<AuditEntry> data) => Table?.SetData(data, clearSelected: false);
+    
+    
 
+    /// <summary>
+    /// Views the object
+    /// </summary>
+    /// <param name="entry">the audit entry</param>
+    private async Task View(AuditEntry entry)
+    {
+        if (entry?.Changes?.Any() != true)
+            return;
+        await AuditEntryViewer.Instance.Show(entry);
+    }
+
+    /// <summary>
+    /// Gets the type name to show
+    /// </summary>
+    /// <param name="fullname">the fullname of the type</param>
+    /// <returns>the type name</returns>
+    private string GetTypeName(string fullname)
+    {
+        if (string.IsNullOrWhiteSpace(fullname))
+            return string.Empty;
+        string name = fullname.Split('.').Last();
+        if(Translater.CanTranslate($"Pages.{name}.Title", out string pageTitle))
+            return pageTitle;
+        return name.Humanize();
+    }
+
+    /// <summary>
+    /// Gets the audit action name
+    /// </summary>
+    /// <param name="action">the action</param>
+    /// <returns>the audit action name</returns>
+    private string GetAuditActionName(AuditAction action)
+    {
+        if (AuditActionTranslations.TryGetValue(action, out var name))
+            return name;
+        return action.ToString();
+    }
 }

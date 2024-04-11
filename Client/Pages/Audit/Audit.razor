@@ -1,5 +1,6 @@
 @namespace FileFlows.Client.Pages
 @using FileFlows.Shared.Models
+@using Humanizer
 
 @page "/audit"
 
@@ -14,23 +15,31 @@
         <Columns>
             <FlowTableColumn TItem="AuditEntry" Width="12rem">
                 <Header>
-                    Date
+                    @lblDate
                 </Header>
                 <Cell Context="item">
                     <span>@item.LogDate.ToLocalTime()</span>
                 </Cell>
             </FlowTableColumn>
-            <FlowTableColumn TItem="AuditEntry" Width="12rem">
+            <FlowTableColumn TItem="AuditEntry" Width="8rem">
                 <Header>
-                    Action
+                    @lblType
                 </Header>
                 <Cell Context="item">
-                    <span>@item.Action</span>
+                    <span>@GetTypeName(item.ObjectType)</span>
+                </Cell>
+            </FlowTableColumn>
+            <FlowTableColumn TItem="AuditEntry" Width="14rem">
+                <Header>
+                    @lblAction
+                </Header>
+                <Cell Context="item">
+                    <span>@GetAuditActionName(item.Action)</span>
                 </Cell>
             </FlowTableColumn>
             <FlowTableColumn TItem="AuditEntry" Width="12rem">
                 <Header>
-                    Operator
+                    @lblOperator
                 </Header>
                 <Cell Context="item">
                     <span>@item.OperatorName</span>
@@ -38,7 +47,7 @@
             </FlowTableColumn>
             <FlowTableColumn TItem="AuditEntry" Width="12rem">
                 <Header>
-                    IP Address
+                    @lblIPAddress
                 </Header>
                 <Cell Context="item">
                     <span>@item.IPAddress</span>
@@ -46,10 +55,17 @@
             </FlowTableColumn>
             <FlowTableColumn TItem="AuditEntry">
                 <Header>
-                    Summary
+                    @lblSummary
                 </Header>
                 <Cell Context="item">
-                    <span>@item.Summary</span>
+                    @if (item.Changes?.Any() == true)
+                    {
+                        <a class="view-changes" @onclick="() => View(item)">@item.Summary</a>
+                    }
+                    else
+                    {
+                        <span>@item.Summary</span>
+                    }
                 </Cell>
             </FlowTableColumn>
         </Columns>

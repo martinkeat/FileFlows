@@ -1,7 +1,6 @@
-using System.Collections;
-using System.Text;
-using System.Text.RegularExpressions;
-using FileFlows.Shared.Models;
+using System.Reflection;
+using FileFlows.Shared.Attributes;
+using NPoco;
 
 namespace FileFlows.DataLayer.Helpers;
 
@@ -23,10 +22,14 @@ public class AuditValueHelper
     {
         if (PrimitiveConverter.CanConvert(t))
             return new PrimitiveConverter();
+        if (ObjectReferenceConverter.CanConvert(t))
+            return new ObjectReferenceConverter();
         if (OutputConnectionConverter.CanConvert(t))
             return new OutputConnectionConverter(newSource, oldSource);
         if (FlowPartsConverter.CanConvert(t))
             return new FlowPartsConverter(newSource, oldSource);
+        if (FlowFieldsConverter.CanConvert(t))
+            return new FlowFieldsConverter(newSource, oldSource);
         if (IDictionaryConverter.CanConvert(t) || newSource is IDictionary<string, object> || oldSource is IDictionary<string, object>)
             return new IDictionaryConverter(newSource, oldSource);
         if (EnumerableConverter.CanConvert(t))
@@ -34,7 +37,14 @@ public class AuditValueHelper
         return new GenericObjectConverter(t, newSource, oldSource);
     }
     
-    public static Dictionary<string, string> Convert(Type type, object newValue, object oldValue, int indent)
+    /// <summary>
+    /// Audit the changes in an object
+    /// </summary>
+    /// <param name="type">the type of object being audited</param>
+    /// <param name="newValue">the new value</param>
+    /// <param name="oldValue">the old value</param>
+    /// <returns>any changes in the object</returns>
+    public static Dictionary<string, string> Audit(Type type, object newValue, object oldValue)
     {
         Dictionary<string, string>  changedProperties = new ();
 
@@ -42,7 +52,7 @@ public class AuditValueHelper
 
         foreach (var property in properties)
         {
-            if (property.CanRead == false || property.CanWrite == false || property.Name is "Capacity")
+            if (ShouldAudit(property) == false)
                 continue;
             try
             {
@@ -62,13 +72,28 @@ public class AuditValueHelper
 
         return changedProperties;
     }
+    
     /// <summary>
-    /// Determines if a type implements IEnumerable interface.
+    /// Checks if a property should be audited
     /// </summary>
-    /// <param name="type">The type to check.</param>
-    /// <returns>True if the type implements IEnumerable, otherwise false.</returns>
-    private static bool IsEnumerable(Type type)
+    /// <param name="property">The property to check.</param>
+    /// <returns>True if the property should be auditted.</returns>
+    public static bool ShouldAudit(PropertyInfo property)
     {
-        return typeof(IEnumerable).IsAssignableFrom(type);
+        if (property.CanWrite == false || property.CanRead == false)
+            return false;
+        if (property.Name is "Capacity")
+            return false;
+        if (property.PropertyType == typeof(DateTime))
+            return false;
+        if (property.PropertyType == typeof(TimeSpan))
+            return false;
+        if(property.GetCustomAttribute<DbIgnoreAttribute>() != null)
+            return false;
+        if (property.GetCustomAttribute<IgnoreAttribute>() != null)
+            return false;
+        if (property.GetCustomAttribute<DontAuditAttribute>() != null)
+            return false;
+        return true;
     }
 }

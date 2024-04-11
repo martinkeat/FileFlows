@@ -28,10 +28,6 @@ public partial class AuditEntryViewer
     /// </summary>
     private AuditEntry Entry;
     /// <summary>
-    /// The title of the viewer
-    /// </summary>
-    private string Title;
-    /// <summary>
     /// If the viewer is visible or not
     /// </summary>
     private bool Visible;
@@ -51,11 +47,19 @@ public partial class AuditEntryViewer
     /// The table data
     /// </summary>
     private List<EntryViewerData> Data = new();
-    
+    /// <summary>
+    /// The title of the viewer
+    /// </summary>
+    private string lblTitle;
     /// <summary>
     /// The label to show in the value column
     /// </summary>
     private string lblValue;
+
+    /// <summary>
+    /// The label to show in the field column
+    /// </summary>
+    private string lblField;
 
     /// <summary>
     /// Constructs a new instance of the Audit entry viewer component
@@ -69,7 +73,9 @@ public partial class AuditEntryViewer
     protected override void OnInitialized()
     {
         lblClose = Translater.Instant("Labels.Close");
-        lblValue = Translater.Instant("Label.Value");
+        lblTitle = Translater.Instant("Dialogs.AuditEntry.ViewerTitle");
+        lblValue = Translater.Instant("Dialogs.AuditEntry.Columns.Value");
+        lblField = Translater.Instant("Dialogs.AuditEntry.Columns.Field");
     }
     
     /// <summary>
@@ -96,7 +102,6 @@ public partial class AuditEntryViewer
         }
         
         this.Entry = entry;
-        Title = Translater.Instant("Labels.Audit");
         Instance.ShowTask = new ();
         Visible = true;
         _ = ShowActual(entry);

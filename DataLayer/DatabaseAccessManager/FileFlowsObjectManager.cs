@@ -205,7 +205,7 @@ internal  class FileFlowsObjectManager
 
                 if (auditDetails != null)
                 {
-                    var changes = ObjectComparer.GetChanges(obj, original);
+                    var changes = AuditValueHelper.Audit(typeof(T), obj, original);
 
                     await DatabaseAccessManager.Instance.AuditManager.Insert(new()
                     {
@@ -222,7 +222,7 @@ internal  class FileFlowsObjectManager
                         {
                             { nameof(obj.Name), obj.Name }
                         },
-                        Changes = changes
+                        Changes = changes.ToDictionary(x => x.Key, x => (object)x.Value)
                     });
                 }
             }

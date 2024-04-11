@@ -55,6 +55,10 @@ public partial class AuditHistory
     /// The table instance
     /// </summary>
     public FlowTable<AuditEntry> Table { get; set; }
+    /// <summary>
+    /// The column titles
+    /// </summary>
+    private string lblDate, lblAction, lblOperator, lblIPAddress, lblSummary;
 
     /// <summary>
     /// Constructs a new instance of the Audit history component
@@ -68,6 +72,11 @@ public partial class AuditHistory
     protected override void OnInitialized()
     {
         lblClose = Translater.Instant("Labels.Close");
+        lblDate = Translater.Instant("Pages.Audit.Columns.Date"); 
+        lblAction = Translater.Instant("Pages.Audit.Columns.Action");
+        lblOperator = Translater.Instant("Pages.Audit.Columns.Operator");
+        lblIPAddress = Translater.Instant("Pages.Audit.Columns.IPAddress");
+        lblSummary = Translater.Instant("Pages.Audit.Columns.Summary");
     }
     
     /// <summary>

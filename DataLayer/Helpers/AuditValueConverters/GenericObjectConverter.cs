@@ -38,7 +38,7 @@ public class GenericObjectConverter : IAuditValueConverter
 
         foreach (var property in properties)
         {
-            if (property.CanRead == false || property.CanWrite == false || property.Name is "Capacity")
+            if (AuditValueHelper.ShouldAudit(property) == false)
                 continue;
             try
             {

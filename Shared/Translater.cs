@@ -192,4 +192,27 @@ public class Translater
             return @default;
         }
     }
+
+    /// <summary>
+    /// Checks if a string can be translated
+    /// </summary>
+    /// <param name="key">the key to translate</param>
+    /// <param name="translation">the translation if succeeded</param>
+    /// <returns>true if can translate</returns>
+    public static bool CanTranslate(string key, out string translation)
+    {
+        translation = string.Empty;
+        try
+        {
+            if (Language.ContainsKey(key) == false)
+                return false;
+            string msg = Language[key];
+            translation = Formatter.FormatMessage(msg, new { });
+            return true;
+        }
+        catch (Exception)
+        {
+            return false;
+        }
+    }
 }

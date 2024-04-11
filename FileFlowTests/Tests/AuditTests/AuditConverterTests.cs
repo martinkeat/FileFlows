@@ -147,7 +147,7 @@ public class AuditConverterTests
             }
         };
 
-        var diff = AuditValueHelper.Convert(typeof(Flow), flowNew, flowOld, 0);
+        var diff = AuditValueHelper.Audit(typeof(Flow), flowNew, flowOld);
     }
 
 

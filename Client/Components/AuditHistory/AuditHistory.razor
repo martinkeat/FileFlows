@@ -19,7 +19,7 @@
                     <Columns>
                         <FlowTableColumn TItem="AuditEntry" Width="14rem">
                             <Header>
-                                Date
+                                @lblDate
                             </Header>
                             <Cell Context="item">
                                 <span>@item.LogDate.ToLocalTime()</span>
@@ -27,7 +27,7 @@
                         </FlowTableColumn>
                         <FlowTableColumn TItem="AuditEntry" Width="12rem">
                             <Header>
-                                Action
+                                @lblAction
                             </Header>
                             <Cell Context="item">
                                 <span>@item.Action</span>
@@ -35,7 +35,7 @@
                         </FlowTableColumn>
                         <FlowTableColumn TItem="AuditEntry" Width="12rem">
                             <Header>
-                                Operator
+                                @lblOperator
                             </Header>
                             <Cell Context="item">
                                 <span>@item.OperatorName</span>
@@ -43,7 +43,7 @@
                         </FlowTableColumn>
                         <FlowTableColumn TItem="AuditEntry" Width="12rem">
                             <Header>
-                                IP Address
+                                @lblIPAddress
                             </Header>
                             <Cell Context="item">
                                 <span>@item.IPAddress</span>
@@ -51,7 +51,7 @@
                         </FlowTableColumn>
                         <FlowTableColumn TItem="AuditEntry">
                             <Header>
-                                Summary
+                                @lblSummary
                             </Header>
                             <Cell Context="item">
                                 @if (item.Changes?.Any() == true)

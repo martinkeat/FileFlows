@@ -139,7 +139,7 @@ public class AuthorizeController : Controller
     The FileFlows Team
     ");
         
-        await ServiceLoader.Load<AuditService>().AuditPasswordResetRequest(user.Uid, user.Email, HttpContext.Request.GetActualIP());
+        await ServiceLoader.Load<AuditService>().AuditPasswordResetRequest(user.Uid, user.Name, HttpContext.Request.GetActualIP());
         
         return Ok();
     }
@@ -171,7 +171,7 @@ public class AuthorizeController : Controller
         user.Password = BCrypt.Net.BCrypt.HashPassword(newPassword);
         await service.Update(user, auditDetails: null); // null as we audit this manually
         
-        await ServiceLoader.Load<AuditService>().AuditPasswordReset(user.Uid, user.Email, HttpContext.Request.GetActualIP());
+        await ServiceLoader.Load<AuditService>().AuditPasswordReset(user.Uid, user.Name, HttpContext.Request.GetActualIP());
         
         await Emailer.Send(user.Email, user.Email, "FileFlows New Password",
             $@"Dear {user.Name},

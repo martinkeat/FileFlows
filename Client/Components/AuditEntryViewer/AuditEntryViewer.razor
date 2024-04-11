@@ -7,7 +7,7 @@
         <div class="background-overlay"></div>
         <div class="audit-entry-viewer @(Maximised ? "maximised" : "")">
 
-            <ViContainer Title="@Title" AlwaysShowTitle=@true Maximise=true OnMaximised=@OnMaximised>
+            <ViContainer Title="@lblTitle" AlwaysShowTitle=@true Maximise=true OnMaximised=@OnMaximised>
 
                 <Head>
                     <button @onclick=@Close>@lblClose</button>
@@ -18,7 +18,7 @@
                     <Columns>
                         <FlowTableColumn TItem="EntryViewerData" Width="14rem" NoHeight="true">
                             <Header>
-                                @Globals.lblName
+                                @lblField
                             </Header>
                             <Cell Context="item">
                                 <span>@item.Name</span>

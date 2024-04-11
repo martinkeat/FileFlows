@@ -52,7 +52,6 @@
     "Reprocess": "Reprocess",
     "Revisions":"Revisions",
     "Audit": "Audit",
-    "Value": "Value",
     "NoAuditHistoryAvailable": "No audit history available",
     "Restore":"Restore",
     "RestoredMessage":"{type} restored",
@@ -155,12 +154,19 @@
     "Updated": "{Type} ''{Name}'' updated",
     "Deleted": "{Type} ''{Name}'' deleted",
     "Login": "User ''{User}'' logged in",
-    "LoginFailed": "User ''{User}'' log failed",
+    "LoginFailed": "User ''{User}'' login failed",
     "ChangePassword": "User ''{User}'' changed password",
     "PasswordResetRequest": "User ''{User}'' requested a password reset",
     "PasswordReset": "User ''{User}'' reset their password"
   },
   "Dialogs":{
+    "AuditEntry": {
+      "ViewerTitle": "Changes",
+      "Columns": {
+        "Value": "Value",
+        "Field": "Field"
+      }
+    },
     "ChangePassword": {
       "Title": "Change Password",
       "PasswordMismatch": "Passwords don't match.",
@@ -200,6 +206,16 @@
     }
   },
   "Enums": {
+    "AuditAction": {
+      "Added": "Added",
+      "Updated": "Updated",
+      "Deleted": "Deleted",
+      "Login": "Login",
+      "LoginFailed": "Login Failed",
+      "ChangePassword": "Change Password",
+      "PasswordResetRequest": "Password Reset Request",
+      "PasswordReset": "Password Reset"
+    },
     "Days": {
       "Monday": "Monday",
       "Tuesday": "Tuesday",
@@ -1092,7 +1108,15 @@
       }
     },
     "Audit": {
-      "Title": "Audit Log"
+      "Title": "Audit Log",
+      "Columns": {
+        "Date": "Date",
+        "Type": "Type",
+        "Action": "Action",
+        "Operator":  "Operator",
+        "IPAddress": "IP Address",
+        "Summary":  "Summary"
+      }
     },
     "FileFlowsTask":{
       "Title":"Task"

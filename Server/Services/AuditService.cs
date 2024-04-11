@@ -42,8 +42,7 @@ public class AuditService
             Action = AuditAction.Login,
             IPAddress = ipAddress,
             ObjectType = typeof(User).FullName!,
-            ObjectUid = userUid,
-            //Summary = $@"{userName} logged in"
+            ObjectUid = userUid
         });
     }
 
@@ -63,8 +62,7 @@ public class AuditService
             Action = AuditAction.LoginFailed,
             IPAddress = ipAddress,
             ObjectType = typeof(User).FullName!,
-            ObjectUid = userUid,
-            //Summary = $@"{userName} log in attempt failed"
+            ObjectUid = userUid
         });
     } 
 
@@ -84,8 +82,7 @@ public class AuditService
             Action = AuditAction.ChangePassword,
             IPAddress = ipAddress,
             ObjectType = typeof(User).FullName!,
-            ObjectUid = userUid,
-            //Summary = $@"{userName} changed their password"
+            ObjectUid = userUid
         });
     }
 
@@ -105,8 +102,7 @@ public class AuditService
             Action = AuditAction.PasswordResetRequest,
             IPAddress = ipAddress,
             ObjectType = typeof(User).FullName!,
-            ObjectUid = userUid,
-            //Summary = $@"{userName} requested a password reset"
+            ObjectUid = userUid
         });
     }
 
@@ -126,8 +122,7 @@ public class AuditService
             Action = AuditAction.PasswordReset,
             IPAddress = ipAddress,
             ObjectType = typeof(User).FullName!,
-            ObjectUid = userUid,
-            //Summary = $@"{userName} reset their password"
+            ObjectUid = userUid
         });
     }
     #endregion
