@@ -164,6 +164,8 @@ public partial class Audit : ComponentBase
         if (string.IsNullOrWhiteSpace(fullname))
             return string.Empty;
         string name = fullname.Split('.').Last();
+        if (name.StartsWith("Plugin", StringComparison.InvariantCulture))
+            name = "Plugin";
         if(Translater.CanTranslate($"Pages.{name}.Title", out string pageTitle))
             return pageTitle;
         return name.Humanize();
