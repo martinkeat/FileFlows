@@ -45,7 +45,7 @@ public class GenericObjectConverter : IAuditValueConverter
                 var ov = oldValue == null ? null : property.GetValue(oldValue);
                 var nv = newValue == null ? null : property.GetValue(newValue);
 
-                var converter = AuditValueHelper.GetConverter(property.PropertyType, newSource, oldSource);
+                var converter = AuditValueHelper.GetConverter(property.PropertyType, newSource, oldSource, property);
                 var diff = converter.Convert(nv, ov);
                 if (string.IsNullOrWhiteSpace(diff))
                     continue;

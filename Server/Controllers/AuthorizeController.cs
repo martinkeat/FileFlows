@@ -26,7 +26,13 @@ public class AuthorizeController : Controller
     {
         var mode = AuthenticationHelper.GetSecurityMode();
         if (mode == SecurityMode.Off)
+        {
+            #if(DEBUG)
+            return Redirect("http://localhost:5276");
+            #endif
             return Redirect("/");
+        }
+
         var service = ServiceLoader.Load<SettingsService>();
         if (mode == SecurityMode.OpenIdConnect)
             return RedirectToAction(nameof(OpenIDController.Login), nameof(OpenIDController)[..^10]);

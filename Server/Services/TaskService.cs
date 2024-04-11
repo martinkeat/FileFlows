@@ -46,7 +46,8 @@ public class TaskService
     /// Deletes the given tasks
     /// </summary>
     /// <param name="uids">the UID of the tasks to delete</param>
+    /// <param name="auditDetails">the audit details</param>
     /// <returns>a task to await</returns>
-    public Task Delete(Guid[] uids)
-        => new TaskManager().Delete(uids);
+    public Task Delete(Guid[] uids, AuditDetails auditDetails)
+        => new TaskManager().Delete(uids, auditDetails);
 }

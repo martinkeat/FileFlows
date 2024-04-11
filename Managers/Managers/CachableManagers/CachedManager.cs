@@ -207,16 +207,17 @@ public abstract class CachedManager<T> where T : FileFlowObject, new()
     /// Deletes items matching the UIDs
     /// </summary>
     /// <param name="uids">the UIDs of the items to delete</param>
-    public async Task Delete(params Guid[] uids)
+    /// <param name="auditDetails">the audit details</param>
+    public async Task Delete(Guid[] uids, AuditDetails auditDetails)
     {
         if (uids?.Any() != true)
             return;
         
-        await DatabaseAccessManager.Instance.FileFlowsObjectManager.Delete(uids);
+        await DatabaseAccessManager.Instance.FileFlowsObjectManager.Delete(uids, auditDetails);
         await IncrementConfigurationRevision();
         
         if(UseCache)
-            Refresh();
+            await Refresh();
     }
 
     

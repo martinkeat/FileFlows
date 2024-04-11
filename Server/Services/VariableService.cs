@@ -19,9 +19,10 @@ public class VariableService : IVariableService
     /// Deletes the given variables
     /// </summary>
     /// <param name="uids">the UID of the variables to delete</param>
+    /// <param name="auditDetails">the audit details</param>
     /// <returns>a task to await</returns>
-    public Task Delete(Guid[] uids)
-        => new VariableManager().Delete(uids);
+    public Task Delete(Guid[] uids, AuditDetails auditDetails)
+        => new VariableManager().Delete(uids, auditDetails);
 
     /// <summary>
     /// Gets a variable by its UID

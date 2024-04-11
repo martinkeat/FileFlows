@@ -106,6 +106,9 @@ class LicenseHelper
         var key = service.Settings.LicenseKey;
         if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(key))
         {
+            _License = null;
+            _LastLicenseEmail = string.Empty;
+            _LastLicenseKey = string.Empty;
             service.Settings.LicenseCode = string.Empty;
             service.Save();
             return;

@@ -59,9 +59,10 @@ public class FlowService : IFlowService
     /// Deletes the given flows
     /// </summary>
     /// <param name="uids">the UID of the flows to delete</param>
+    /// <param name="auditDetails">the audit details</param>
     /// <returns>a task to await</returns>
-    public Task Delete(Guid[] uids)
-        => new FlowManager().Delete(uids);
+    public Task Delete(Guid[] uids, AuditDetails auditDetails)
+        => new FlowManager().Delete(uids, auditDetails);
 
     
     /// <summary>

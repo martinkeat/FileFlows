@@ -204,7 +204,7 @@ public class NodeController : BaseController
             .FirstOrDefault(x => x.Address == Globals.InternalNodeName)?.Uid ?? Guid.Empty;
         if (model.Uids.Contains(internalNode))
             throw new Exception("ErrorMessages.CannotDeleteInternalNode");
-        await ServiceLoader.Load<NodeService>().Delete(model.Uids);
+        await ServiceLoader.Load<NodeService>().Delete(model.Uids, await GetAuditDetails());
     }
 
     /// <summary>

@@ -5,6 +5,7 @@ using FileFlows.DataLayer.Converters;
 using FileFlows.DataLayer.Helpers;
 using FileFlows.DataLayer.Models;
 using FileFlows.Plugin;
+using FileFlows.ServerShared.Models;
 using FileFlows.Shared;
 using FileFlows.Shared.Models;
 
@@ -272,16 +273,46 @@ internal  class DbObjectManager : BaseManager
     /// Delete items from a database
     /// </summary>
     /// <param name="uids">the UIDs of the items to delete</param>
-    public async Task Delete(params Guid[] uids)
+    /// <param name="auditDetails">The audit details</param>
+    public async Task Delete(Guid[] uids, AuditDetails auditDetails)
     {
         if (uids?.Any() != true)
             return; // nothing to delete
 
         string strUids = string.Join(",", uids.Select(x => "'" + x.ToString() + "'"));
-        
-        using var db = await DbConnector.GetDb(write: true);
-        await db.Db.ExecuteAsync($"delete from {Wrap(nameof(DbObject))}" +
-                                 $" where {Wrap(nameof(DbObject.Uid))} in ({strUids})");
+        List<DbObject> deleted = null;
+
+        using (var db = await DbConnector.GetDb(write: true))
+        {
+            deleted = db.Db.Fetch<DbObject>($"select * from {Wrap(nameof(DbObject))} " +
+                                                $" where {Wrap(nameof(DbObject.Uid))} in ({strUids})");
+            if (deleted?.Any() != true)
+                return; // nothing to delete
+
+            await db.Db.ExecuteAsync($"delete from {Wrap(nameof(DbObject))}" +
+                                     $" where {Wrap(nameof(DbObject.Uid))} in ({strUids})");
+        }
+
+        if (auditDetails == null)
+            return; // nothing to audit
+        foreach (var item in deleted)
+        {
+            await DatabaseAccessManager.Instance.AuditManager.Insert(new()
+            {
+                Action = AuditAction.Deleted,
+                ObjectUid = item.Uid,
+                OperatorName = auditDetails.UserName,
+                OperatorUid = auditDetails.UserUid,
+                OperatorType = auditDetails.OperatorType,
+                IPAddress = auditDetails.IPAddress,
+                ObjectType = item.Type,
+                LogDate = DateTime.UtcNow,
+                Parameters = new()
+                {
+                    { "Name", item.Name }
+                }
+            });
+        }
     }
     
     /// <summary>

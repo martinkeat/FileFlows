@@ -16,7 +16,7 @@ namespace FileFlows.Server.Controllers;
 /// </summary>
 [Route("/api/settings")]
 [FileFlowsAuthorize(UserRole.Admin)]
-public class SettingsController : Controller
+public class SettingsController : BaseController
 {
     /// <summary>
     /// Dummy password to use in place of passwords
@@ -191,7 +191,7 @@ public class SettingsController : Controller
             OidcClientId = model.OidcClientId ?? string.Empty,
             OidcClientSecret = model.OidcClientSecret ?? string.Empty,
             OidcCallbackAddress = model.OidcCallbackAddress ?? string.Empty,
-        });
+        }, await GetAuditDetails());
         RemoteService.AccessToken = model.AccessToken;
         // validate license it
         Settings.LicenseKey = model.LicenseKey?.Trim();
@@ -217,14 +217,15 @@ public class SettingsController : Controller
     
     /// <summary>
     /// Save the system settings
-    /// </summary>
+    /// </summary> 
     /// <param name="model">the system settings to save</param>
+    /// <param name="auditDetails">the audit details</param>
     /// <returns>The saved system settings</returns>
-    internal async Task Save(Settings model)
+    internal async Task Save(Settings model, AuditDetails auditDetails)
     {
         if (model == null)
             return;
-        await ServiceLoader.Load<SettingsService>().Save(model);
+        await ServiceLoader.Load<SettingsService>().Save(model, auditDetails);
     }
 
     private bool IsConnectionSame(string original, string newConnection)

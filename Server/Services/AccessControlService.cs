@@ -44,9 +44,10 @@ public class AccessControlService
     /// Deletes the given access control entries
     /// </summary>
     /// <param name="uids">the UID of the access control entry to delete</param>
+    /// <param name="auditDetails">the audit details</param>
     /// <returns>a task to await</returns>
-    public Task Delete(Guid[] uids)
-        => new AccessControlManager().Delete(uids);
+    public Task Delete(Guid[] uids, AuditDetails auditDetails)
+        => new AccessControlManager().Delete(uids, auditDetails);
 
     /// <summary>
     /// Moves access control entries
@@ -54,8 +55,9 @@ public class AccessControlService
     /// <param name="uids">The UIDs to move</param>
     /// <param name="type">The type of entries being moved</param>
     /// <param name="up">If the items are being moved up or down</param>
-    public Task Move(Guid[] uids, AccessControlType type, bool up)
-        => new AccessControlManager().Move(uids, type, up);
+    /// <param name="auditDetails">the audit details</param>
+    public Task Move(Guid[] uids, AccessControlType type, bool up, AuditDetails auditDetails)
+        => new AccessControlManager().Move(uids, type, up, auditDetails);
 
     /// <summary>
     /// Checks if the IP Address is allowed to access this

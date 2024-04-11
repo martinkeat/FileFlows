@@ -1,6 +1,7 @@
 using System.Threading;
 using FileFlows.Client.Components;
 using FileFlows.Client.Components.Common;
+using FileFlows.ServerShared.Models;
 using Humanizer;
 using Microsoft.AspNetCore.Components;
 
@@ -104,9 +105,20 @@ public partial class Audit : ComponentBase
             {
                 foreach (var d in result.Data)
                 {
+                    if (d.ObjectType?.EndsWith(".Settings") == true)
+                    {
+                        d.Summary = Translater.Instant("AuditActions.SettingsUpdated");
+                        continue;
+                    }
+
                     d.Parameters ??= new();
-                    if(string.IsNullOrEmpty(d.ObjectType) == false)
-                        d.Parameters["Type"] = d.ObjectType[(d.ObjectType.LastIndexOf(".", StringComparison.Ordinal) + 1)..].Humanize();
+                    if (string.IsNullOrEmpty(d.ObjectType) == false)
+                    {
+                        d.Parameters["Type"] = d.ObjectType.Contains(".Plugin")
+                            ? "Plugin"
+                            : d.ObjectType[(d.ObjectType.LastIndexOf(".", StringComparison.Ordinal) + 1)..].Humanize();
+                    }
+
                     d.Parameters["User"] = d.OperatorName;
                     d.Summary = Translater.Instant($"AuditActions.{d.Action}", d.Parameters);
                 }

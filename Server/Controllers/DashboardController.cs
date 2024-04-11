@@ -140,8 +140,8 @@ public class DashboardController : BaseController
     /// <param name="uid">The UID of the dashboard to delete</param>
     /// <returns>an awaited task</returns>
     [HttpDelete("{uid}")]
-    public Task Delete([FromRoute] Guid uid)
-        => ServiceLoader.Load<DashboardService>().Delete(uid);
+    public async Task Delete([FromRoute] Guid uid)
+        => await ServiceLoader.Load<DashboardService>().Delete(new [] { uid }, await GetAuditDetails());
 
     /// <summary>
     /// Saves a dashboard

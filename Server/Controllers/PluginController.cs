@@ -157,8 +157,8 @@ public class PluginController : BaseController
     /// <param name="model">A reference model containing UIDs to delete</param>
     /// <returns>an awaited task</returns>
     [HttpDelete]
-    public Task Delete([FromBody] ReferenceModel<Guid> model)
-        => new PluginService().Delete(model.Uids);
+    public async Task Delete([FromBody] ReferenceModel<Guid> model)
+        => await new PluginService().Delete(model.Uids, await GetAuditDetails());
 
     /// <summary>
     /// Download plugins into the FileFlows system

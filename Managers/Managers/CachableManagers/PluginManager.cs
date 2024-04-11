@@ -1,5 +1,10 @@
-﻿using FileFlows.Plugin;
+﻿using System.Dynamic;
+using FileFlows.DataLayer.Helpers;
+using FileFlows.DataLayer.Models;
+using FileFlows.Plugin;
 using FileFlows.ServerShared.Models;
+using Jint.Native.Json;
+using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace FileFlows.Managers;
 
@@ -48,17 +53,70 @@ public class PluginManager : CachedManager<PluginInfo>
     {
         var manager = DatabaseAccessManager.Instance.FileFlowsObjectManager;
         var existing = await GetPluginSettings(name);
+        string oldJson = null;
+        bool isNew = false;
+        Result<(DbObject dbo, bool changed)> result;
         if (existing.IsFailed == false && existing.Value != null)
         {
+            oldJson = existing.Value.Json;
             existing.Value.Json = json;
-            await manager.Update(existing.Value);
-            return;
+            result = await manager.AddOrUpdateObject(existing.Value, null);
+        }
+        else
+        {
+            isNew = true;
+            result = await manager.AddOrUpdateObject(new PluginSettingsModel()
+            {
+                Name = name,
+                DateCreated = DateTime.UtcNow,
+                Json = json
+            }, null, saveRevision: true);
         }
         
-        await manager.AddOrUpdateObject(new PluginSettingsModel() {
-            Name = name,
-            DateCreated = DateTime.UtcNow,
-            Json = json
-        }, auditDetails, saveRevision: true);
+        if (result.IsFailed || result.Value.changed == false || auditDetails == null)
+            return;
+
+        try
+        {
+            var oldSettings = oldJson == null ? null : JsonSerializer.Deserialize<IDictionary<string, object>>(oldJson);
+            var newSettings = JsonSerializer.Deserialize<IDictionary<string, object>>(json);
+            var diff = IDictionaryConverter.GetDifferences(newSettings, oldSettings, null, null);
+            if (diff?.Any() != true)
+                return;
+            Dictionary<string, object> changes = new();
+            foreach (var d in diff)
+            {
+                if (d == null)
+                    continue; // shouldnt happen
+                int index = d.IndexOf(": ", StringComparison.Ordinal);
+                if (index < 1)
+                    continue;
+                var key = d[..index];
+                var value = d[(index + 2)..];
+                if (value?.ToLowerInvariant() == "removed" || value?.Contains("' to ''", StringComparison.InvariantCulture) == true)
+                    changes[key] = "Removed";
+                else
+                    changes[key] = "Updated";// we don't want to audit these settings as they are usually sensitive data, eg access tokens
+            }
+
+            await new AuditManager().Audit(new()
+            {
+                ObjectType = result.Value.dbo.Type,
+                Action = AuditAction.Updated,
+                LogDate = DateTime.UtcNow,
+                ObjectUid = result.Value.dbo.Uid,
+                OperatorName = auditDetails.UserName,
+                OperatorType = auditDetails.OperatorType,
+                IPAddress = auditDetails.IPAddress,
+                Parameters = new()
+                {
+                    { "Name", name }
+                },
+                Changes = changes
+            });
+        }
+        catch (Exception)
+        {
+        }
     }
 }

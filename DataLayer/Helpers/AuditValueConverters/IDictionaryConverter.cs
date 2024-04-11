@@ -28,7 +28,22 @@ public class IDictionaryConverter : IAuditValueConverter
         => type == typeof(ExpandoObject);
     
     /// <inheritdoc />
-    public string? Convert(object newValue, object oldValue)
+    public string? Convert(object? newValue, object? oldValue)
+    {
+        var diff = GetDifferences(newValue, oldValue, newSource, oldSource);
+        return diff?.Any() != true ? null : string.Join("\n", diff).TrimEnd(); 
+    }
+    
+    
+    /// <summary>
+    /// Gets the differences from one value to another
+    /// </summary>
+    /// <param name="newValue">the new value</param>
+    /// <param name="oldValue">the old value</param>
+    /// <param name="newSource">the new source object</param>
+    /// <param name="oldSource">the old source object</param>
+    /// <returns>the differences</returns>
+    public static List<string>? GetDifferences(object? newValue, object? oldValue, object? newSource, object? oldSource)
     {
         IDictionary<string, object>? newDict = newValue as IDictionary<string, object>;
         IDictionary<string, object>? oldDict = oldValue as IDictionary<string, object>;
@@ -57,7 +72,7 @@ public class IDictionaryConverter : IAuditValueConverter
         foreach (var item in additions)
             diff.Add($"{item.Key}: {item.Value}");
         foreach (var item in deletions)
-            diff.Add($"{item.Key}: removed");
+            diff.Add($"{item.Key}: Removed");
         foreach (var item in changes)
         {
             object oldItem = null;
@@ -83,7 +98,6 @@ public class IDictionaryConverter : IAuditValueConverter
                 }
             }
         }
-
-        return string.Join("\n", diff).TrimEnd(); 
+        return diff;
     }
 }

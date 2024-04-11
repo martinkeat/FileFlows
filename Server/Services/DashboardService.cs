@@ -29,8 +29,9 @@ public class DashboardService
     /// Deletes items matching the UIDs
     /// </summary>
     /// <param name="uids">the UIDs of the items to delete</param>
-    public Task Delete(params Guid[] uids)
-        => new DashboardManager().Delete(uids);
+    /// <param name="auditDetails">the audit details</param>
+    public Task Delete(Guid[] uids, AuditDetails auditDetails)
+        => new DashboardManager().Delete(uids, auditDetails);
 
     /// <summary>
     /// Updates an item

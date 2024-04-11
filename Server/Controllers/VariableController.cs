@@ -58,6 +58,6 @@ public class VariableController : BaseController
     /// <param name="model">A reference model containing UIDs to delete</param>
     /// <returns>an awaited task</returns>
     [HttpDelete]
-    public Task Delete([FromBody] ReferenceModel<Guid> model)
-        => ServiceLoader.Load<VariableService>().Delete(model.Uids);
+    public async Task Delete([FromBody] ReferenceModel<Guid> model)
+        => await ServiceLoader.Load<VariableService>().Delete(model.Uids, await GetAuditDetails());
 }

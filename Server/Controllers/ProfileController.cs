@@ -49,7 +49,7 @@ public class ProfileController : Controller
             profile.ConfigurationStatus |= ConfigurationStatus.Users;
         profile.IsWebView = Application.UsingWebView;
         var license = LicenseHelper.GetLicense();
-        if (license.Status == LicenseStatus.Valid)
+        if (license?.Status == LicenseStatus.Valid)
         {
             profile.License = license.Flags;
         }

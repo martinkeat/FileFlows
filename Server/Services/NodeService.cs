@@ -163,9 +163,10 @@ public class NodeService //: INodeService
     /// Deletes the given nodes
     /// </summary>
     /// <param name="uids">the UID of the nodes to delete</param>
+    /// <param name="auditDetails">the audit details</param>
     /// <returns>a task to await</returns>
-    public Task Delete(Guid[] uids)
-        => new NodeManager().Delete(uids);
+    public Task Delete(Guid[] uids, AuditDetails auditDetails)
+        => new NodeManager().Delete(uids, auditDetails);
 
     /// <summary>
     /// Gets the total files each node has processed

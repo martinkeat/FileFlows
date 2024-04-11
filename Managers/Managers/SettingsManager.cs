@@ -53,7 +53,7 @@ public class SettingsManager
         try
         {
             Instance.Revision += 1;
-            await DatabaseAccessManager.Instance.FileFlowsObjectManager.Update(Instance);
+            await DatabaseAccessManager.Instance.FileFlowsObjectManager.AddOrUpdateObject(Instance, null);
         }
         catch (Exception ex)
         {
@@ -69,14 +69,15 @@ public class SettingsManager
     /// Updates the settings
     /// </summary>
     /// <param name="model">the settings</param>
-    public async Task Update(Settings model)
+    /// <param name="auditDetails">the audit details</param>
+    public async Task Update(Settings model, AuditDetails auditDetails)
     {
         await _semaphore.WaitAsync();
         try
         {
             model.Revision = Math.Max(model.Revision, Instance.Revision) +  1;
             Instance = model;
-            await DatabaseAccessManager.Instance.FileFlowsObjectManager.Update(Instance);
+            await DatabaseAccessManager.Instance.FileFlowsObjectManager.AddOrUpdateObject(Instance, auditDetails);
         }
         finally
         {

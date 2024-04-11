@@ -70,7 +70,8 @@ public class PluginService
     /// Deletes items matching the UIDs
     /// </summary>
     /// <param name="uids">the UIDs of the items to delete</param>
-    public async Task Delete(params Guid[] uids)
+    /// <param name="auditDetails">the audit details</param>
+    public async Task Delete(Guid[] uids, AuditDetails auditDetails)
     {
         if (uids?.Any() != true)
             return;
@@ -78,7 +79,7 @@ public class PluginService
         var manager = new PluginManager();
         
         var deleting = (await manager.GetAll()).Where(x => uids.Contains(x.Uid));
-        await manager.Delete(uids);
+        await manager.Delete(uids, auditDetails);
         foreach(var item in deleting)
         {
             PluginScanner.Delete(item.PackageName);

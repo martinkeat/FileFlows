@@ -1,3 +1,5 @@
+using FileFlows.ServerShared.Models;
+
 namespace FileFlows.Managers;
 
 /// <summary>
@@ -17,7 +19,8 @@ public class AccessControlManager : CachedManager<AccessControlEntry>
     /// <param name="uids">The UIDs to move</param>
     /// <param name="type">The type of entries being moved</param>
     /// <param name="up">If the items are being moved up or down</param>
-    public async Task Move(Guid[] uids, AccessControlType type, bool up)
+    /// <param name="auditDetails">the audit details</param>
+    public async Task Move(Guid[] uids, AccessControlType type, bool up, AuditDetails auditDetails)
     {
         if (uids?.Any() != true)
             return; // nothing to do
@@ -74,7 +77,7 @@ public class AccessControlManager : CachedManager<AccessControlEntry>
             }
 
             foreach (var item in updating)
-                await DatabaseAccessManager.Instance.FileFlowsObjectManager.Update(item);
+                await DatabaseAccessManager.Instance.FileFlowsObjectManager.AddOrUpdateObject(item, auditDetails);
 
             // refreshes the data if needed
             await Refresh();

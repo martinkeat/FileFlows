@@ -150,6 +150,7 @@
     }
   },
   "AuditActions": {
+    "SettingsUpdated": "Settings updated",
     "Added": "{Type} ''{Name}'' added",
     "Updated": "{Type} ''{Name}'' updated",
     "Deleted": "{Type} ''{Name}'' deleted",

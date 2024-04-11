@@ -235,26 +235,29 @@ internal  class FileFlowsObjectManager
             return Result<(DbObject dbo, bool changed)>.Fail("Error: " + ex.Message);
         }
     }
+
     
-    /// <summary>
-    /// Updates a FileFlowObject
-    /// </summary>
-    /// <param name="item">the item to update</param>
-    public async Task Update(FileFlowObject item)
-    {
-        item.DateModified = DateTime.UtcNow;
-        if (item.Uid == Guid.Empty)
-            item.Uid = Guid.NewGuid();
-        var dbo = ConvertToDbObject(item);
-        await dbom.Update(dbo);
-    }
+    // /// <summary>
+    // /// Updates a FileFlowObject
+    // /// </summary>
+    // /// <param name="auditDetails">The audit details</param>
+    // /// <param name="item">the item to update</param>
+    // public async Task Update(FileFlowObject item, AuditDetails auditDetails)
+    // {
+    //     item.DateModified = DateTime.UtcNow;
+    //     if (item.Uid == Guid.Empty)
+    //         item.Uid = Guid.NewGuid();
+    //     var dbo = ConvertToDbObject(item);
+    //     await dbom.Update(dbo);
+    // }
 
 
     /// <summary>
     /// Delete items from a database
     /// </summary>
     /// <param name="uids">the UIDs of the items to delete</param>
-    public Task Delete(Guid[] uids) => dbom.Delete(uids);
+    /// <param name="auditDetails">The audit details</param>
+    public Task Delete(Guid[] uids, AuditDetails auditDetails) => dbom.Delete(uids, auditDetails);
 
 
 

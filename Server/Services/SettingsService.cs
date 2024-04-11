@@ -1,6 +1,7 @@
 ﻿using FileFlows.Managers;
 using FileFlows.Plugin;
 using FileFlows.Server.Helpers;
+using FileFlows.ServerShared.Models;
 using FileFlows.Shared.Models;
 
 namespace FileFlows.Server.Services;
@@ -107,7 +108,12 @@ public class SettingsService // : ISettingsService
     public Task RevisionIncrement()
         => new SettingsManager().RevisionIncrement();
 
-    public async Task Save(Settings model)
+    /// <summary>
+    /// Saves the settings
+    /// </summary>
+    /// <param name="model">the settings model</param>
+    /// <param name="auditDetails">the audit details</param>
+    public async Task Save(Settings model, AuditDetails auditDetails)
     {
         var settings = await Get() ?? model;
         model.Name = settings.Name;
@@ -115,6 +121,6 @@ public class SettingsService // : ISettingsService
         model.DateCreated = settings.DateCreated;
         model.IsWindows = OperatingSystem.IsWindows();
         model.IsDocker = Application.Docker;
-        await new SettingsManager().Update(model);
+        await new SettingsManager().Update(model, auditDetails);
     }
 }

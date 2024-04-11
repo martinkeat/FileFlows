@@ -21,7 +21,7 @@ namespace FileFlows.Server.Controllers;
 /// </summary>
 [Route("/api/system")]
 [FileFlowsAuthorize]
-public class SystemController:Controller
+public class SystemController:BaseController
 {
     /// <summary>
     /// Opens a URL in the host OS
@@ -66,7 +66,7 @@ public class SystemController:Controller
             ClientServiceManager.Instance.SystemPaused(duration);
         }
 
-        await service.Save(settings);
+        await service.Save(settings, await GetAuditDetails());
     }
 
 

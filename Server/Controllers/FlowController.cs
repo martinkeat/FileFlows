@@ -365,7 +365,7 @@ public class FlowController : BaseController
     {
         if (model?.Uids?.Any() != true)
             return; // nothing to delete
-        await ServiceLoader.Load<FlowService>().Delete(model.Uids);
+        await ServiceLoader.Load<FlowService>().Delete(model.Uids, await GetAuditDetails());
         await UpdateHasFlows();
     }
 

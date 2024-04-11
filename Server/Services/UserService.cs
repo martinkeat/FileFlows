@@ -61,9 +61,10 @@ public class UserService
     /// Deletes the given user
     /// </summary>
     /// <param name="uids">the UID of the tasks to delete</param>
+    /// <param name="auditDetails">the audit details</param>
     /// <returns>a task to await</returns>
-    public Task Delete(Guid[] uids)
-        => new UserManager().Delete(uids);
+    public Task Delete(Guid[] uids, AuditDetails auditDetails)
+        => new UserManager().Delete(uids, auditDetails);
 
     /// <summary>
     /// Validate the login

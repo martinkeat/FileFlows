@@ -17,9 +17,12 @@ public class AuditValueHelper
     /// <param name="t">the type</param>
     /// <param name="newSource">the overall source new object</param>
     /// <param name="oldSource">the overall source old object</param>
+    /// <param name="propertyInfo">Optional property info</param>
     /// <returns>the converter if available</returns>
-    public static IAuditValueConverter GetConverter(Type t, object? newSource, object? oldSource)
+    public static IAuditValueConverter GetConverter(Type t, object? newSource, object? oldSource, PropertyInfo? propertyInfo = null)
     {
+        if (propertyInfo?.GetCustomAttribute<EncryptedAttribute>() != null)
+            return new EncryptedValueConverter();
         if (PrimitiveConverter.CanConvert(t))
             return new PrimitiveConverter();
         if (ObjectReferenceConverter.CanConvert(t))
@@ -59,7 +62,7 @@ public class AuditValueHelper
                 var ov = oldValue == null ? null : property.GetValue(oldValue);
                 var nv = newValue == null ? null : property.GetValue(newValue);
 
-                var converter = GetConverter(property.PropertyType, newValue, oldValue);
+                var converter = GetConverter(property.PropertyType, newValue, oldValue, property);
                 var diff = converter.Convert(nv, ov);
                 if (string.IsNullOrWhiteSpace(diff))
                     continue;

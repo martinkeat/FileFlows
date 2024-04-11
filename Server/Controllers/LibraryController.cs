@@ -151,7 +151,7 @@ public class LibraryController : BaseController
         // delete the files first
         await ServiceLoader.Load<LibraryFileService>().DeleteByLibrary(model.Uids);
         // then delete the libraries
-        await ServiceLoader.Load<LibraryService>().Delete(model.Uids);
+        await ServiceLoader.Load<LibraryService>().Delete(model.Uids, await GetAuditDetails());
 
         await UpdateHasLibraries();
         RefreshCaches();

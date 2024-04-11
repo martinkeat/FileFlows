@@ -89,7 +89,7 @@ public class UserController : BaseController
         if(user != null && model.Uids.Contains(user.Uid))
             return BadRequest("Pages.Users.Messages.CannotDeleteYourself");
            
-        await ServiceLoader.Load<UserService>().Delete(model.Uids);
+        await ServiceLoader.Load<UserService>().Delete(model.Uids, await GetAuditDetails());
         return Ok();
     }
 }

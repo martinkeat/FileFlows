@@ -210,7 +210,7 @@ public class PluginScanner
             {
                 Logger.Instance.DLog("Delete old plugin: " + plugin.Name);
                 // its an old style plugin, perm delete it
-                service.Delete(plugin.Uid).Wait();
+                service.Delete(new[] { plugin.Uid }, AuditDetails.ForServer()).Wait();
             }
             else
             {

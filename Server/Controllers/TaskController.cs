@@ -58,8 +58,8 @@ public class TaskController : BaseController
     /// <param name="model">A reference model containing UIDs to delete</param>
     /// <returns>an awaited task</returns>
     [HttpDelete]
-    public Task Delete([FromBody] ReferenceModel<Guid> model)
-        => ServiceLoader.Load<TaskService>().Delete(model.Uids);
+    public async Task Delete([FromBody] ReferenceModel<Guid> model)
+        => await ServiceLoader.Load<TaskService>().Delete(model.Uids, await GetAuditDetails());
 
 
     /// <summary>
