@@ -24,7 +24,7 @@ public class AuditValueHelper
         if (propertyInfo?.GetCustomAttribute<EncryptedAttribute>() != null)
             return new EncryptedValueConverter();
         if (PrimitiveConverter.CanConvert(t))
-            return new PrimitiveConverter();
+            return new PrimitiveConverter(t);
         if (ObjectReferenceConverter.CanConvert(t))
             return new ObjectReferenceConverter();
         if (OutputConnectionConverter.CanConvert(t))
