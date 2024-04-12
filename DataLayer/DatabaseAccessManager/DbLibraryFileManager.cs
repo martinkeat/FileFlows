@@ -9,6 +9,7 @@ using FileFlows.ServerShared.Models;
 using FileFlows.Shared;
 using FileFlows.Shared.Json;
 using FileFlows.Shared.Models;
+using FileHelper = FileFlows.Plugin.Helpers.FileHelper;
 
 namespace FileFlows.DataLayer;
 
@@ -317,24 +318,44 @@ internal class DbLibraryFileManager : BaseManager
     /// Gets a library file if it is known
     /// </summary>
     /// <param name="path">the path of the library file</param>
+    /// <param name="libraryUid">[Optional] the UID of the library the file is in, if not passed in then the first file with the name will be used</param>
     /// <returns>the library file if it is known</returns>
-    public async Task<LibraryFile?> GetFileIfKnown(string path)
+    public async Task<LibraryFile?> GetFileIfKnown(string path, Guid? libraryUid)
     {
+        if (string.IsNullOrWhiteSpace(path))
+            return null;
         using var db = await DbConnector.GetDb();
-        return await db.Db.FirstOrDefaultAsync<LibraryFile>($"where {Wrap(nameof(LibraryFile.Name))} = @0 or " +
-                                                            $" {Wrap(nameof(LibraryFile.OutputPath))} = @0", path);
+        string where = "where ";
+        if (libraryUid != null)
+            where += $" {Wrap(nameof(LibraryFile.LibraryUid))} = '{libraryUid.Value}' and ";
+        string whereOutput;
+        string folder = FileHelper.GetDirectory(path);
+        if (string.IsNullOrWhiteSpace(folder) == false)
+        {
+            whereOutput =
+                $"({Wrap(nameof(LibraryFile.OutputPath))} = @0 and {Wrap(nameof(LibraryFile.OutputPath))} like @1)";
+        }
+        else
+        {
+            whereOutput = $"{Wrap(nameof(LibraryFile.OutputPath))} = @0";
+        }
+
+        string sql =
+            $"select * from {Wrap(nameof(LibraryFile))} {where} ({Wrap(nameof(LibraryFile.Name))} = @0 or {whereOutput})";
+        return await db.Db.FirstOrDefaultAsync<LibraryFile>(sql, path, folder + "%");
     }
 
     /// <summary>
     /// Gets a library file if it is known by its fingerprint
     /// </summary>
+    /// <param name="libraryUid">The UID of the library</param>
     /// <param name="fingerprint">the fingerprint of the library file</param>
     /// <returns>the library file if it is known</returns>
-    public async Task<LibraryFile?> GetFileByFingerprint(string fingerprint)
+    public async Task<LibraryFile?> GetFileByFingerprint(Guid libraryUid, string fingerprint)
     {
         string sql =
-            $"select * from {Wrap(nameof(LibraryFile))} where {Wrap(nameof(LibraryFile.Fingerprint))} = @0 or " +
-            $" {Wrap(nameof(LibraryFile.FinalFingerprint))} = @0";
+            $"select * from {Wrap(nameof(LibraryFile))} where {Wrap(nameof(LibraryFile.LibraryUid))} = '{libraryUid}' and " +
+            $"( {Wrap(nameof(LibraryFile.Fingerprint))} = @0 or {Wrap(nameof(LibraryFile.FinalFingerprint))} = @0 )";
         try
         {
             using var db = await DbConnector.GetDb();
@@ -1371,26 +1392,16 @@ where {Wrap(nameof(LibraryFile.Status))} = 1 and {Wrap(nameof(LibraryFile.Proces
     /// <summary>
     /// Gets a list of all filenames and the file creation times
     /// </summary>
-    /// <param name="includeOutput">if output names should be included</param>
+    /// <param name="libraryUid">the UID of the library</param>
     /// <returns>a list of all filenames</returns>
-    public async Task<List<KnownFileInfo>> GetKnownLibraryFilesWithCreationTimes(bool includeOutput)
+    public async Task<List<KnownFileInfo>> GetKnownLibraryFilesWithCreationTimes(Guid libraryUid)
     {
         using var db = await DbConnector.GetDb();
         var list = await db.Db.FetchAsync<KnownFileInfo>(
             $"select {Wrap(nameof(KnownFileInfo.Name))},{Wrap(nameof(KnownFileInfo.Status))}," +
             $" {Wrap(nameof(KnownFileInfo.CreationTime))},{Wrap(nameof(KnownFileInfo.LastWriteTime))}" +
-            $" from {Wrap(nameof(LibraryFile))} ");
-        if (includeOutput)
-        {
-            var outputFiles = await db.Db.FetchAsync<KnownFileInfo>(
-                $"select {Wrap(nameof(LibraryFile.OutputPath))} as {Wrap(nameof(KnownFileInfo.Name))},{Wrap(nameof(KnownFileInfo.Status))}," +
-                $" {Wrap(nameof(KnownFileInfo.CreationTime))},{Wrap(nameof(KnownFileInfo.LastWriteTime))}" +
-                $" from {Wrap(nameof(LibraryFile))} " +
-                $" where {Wrap(nameof(LibraryFile.OutputPath))} != '' and {Wrap(nameof(LibraryFile.OutputPath))} != {Wrap(nameof(LibraryFile.Name))} ");
-
-            list = list.Union(outputFiles).Distinct().ToList();
-        }
-
+            $" from {Wrap(nameof(LibraryFile))} " +
+            $" where {Wrap(nameof(LibraryFile.LibraryUid))} = '{libraryUid}'");
         return list;
     }
 

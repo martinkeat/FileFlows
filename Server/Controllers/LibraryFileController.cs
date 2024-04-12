@@ -400,9 +400,10 @@ public class LibraryFileController : Controller //ControllerStore<LibraryFile>
     /// Processes a file or adds it to the queue to add to the system
     /// </summary>
     /// <param name="filename">the filename of the file to process</param>
-    /// <returns></returns>
+    /// <param name="libraryUid">[Optional] the UID of the library the file is in, if not passed in then the first file with the name will be used</param>
+    /// <returns>the HTTP response, 200 for an ok, otherwise bad request</returns>
     [HttpPost("process-file")]
-    public async Task<IActionResult> ProcessFile([FromQuery] string filename)
+    public async Task<IActionResult> ProcessFile([FromQuery] string filename, [FromQuery] Guid? libraryUid)
     {
         try
         {
@@ -410,7 +411,7 @@ public class LibraryFileController : Controller //ControllerStore<LibraryFile>
                 return BadRequest("Filename not set");
 
             var service = ServiceLoader.Load<LibraryFileService>();
-            var file = await service.GetFileIfKnown(filename);
+            var file = await service.GetFileIfKnown(filename, libraryUid);
             if (file != null)
             {
                 if ((int)file.Status < 2)

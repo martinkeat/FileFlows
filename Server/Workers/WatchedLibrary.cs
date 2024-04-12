@@ -16,22 +16,42 @@ namespace FileFlows.Server.Workers;
 /// </summary>
 public class WatchedLibrary:IDisposable
 {
+    /// <summary>
+    /// The file system watcher that watches for file system events
+    /// </summary>
     private FileSystemWatcher Watcher;
+    
+    /// <summary>
+    /// Gets or sets the library being watched
+    /// </summary>
     public Library Library { get;private set; } 
 
-    public bool ScanComplete { get;private set; } = false;
+    /// <summary>
+    /// Gets or sets if the scan is complete
+    /// </summary>
+    public bool ScanComplete { get;private set; }
+    
     /// <summary>
     /// Gets if the scanner should be used instead of file watched for this library
     /// </summary>
     public bool UseScanner { get; private set; }
-    private bool Disposed = false;
+    
+    /// <summary>
+    /// If this is disposed or not
+    /// </summary>
+    private bool Disposed;
 
-    private Mutex ScanMutex = new Mutex();
+    /// <summary>
+    /// The scan mutex
+    /// </summary>
+    private readonly Mutex ScanMutex = new ();
 
-    private Queue<string> QueuedFiles = new Queue<string>();
+    /// <summary>
+    /// The queue of files to process
+    /// </summary>
+    private readonly Queue<string> QueuedFiles = new ();
 
-    //private BackgroundWorker worker;
-    private System.Timers.Timer QueueTimer;
+    private readonly System.Timers.Timer QueueTimer;
 
     /// <summary>
     /// Constructs a instance of a Watched Library
@@ -54,8 +74,6 @@ public class WatchedLibrary:IDisposable
         
         QueueTimer = new();
         QueueTimer.Elapsed += QueueTimerOnElapsed;
-        //QueueTimer.AutoReset = false;
-        //QueueTimer.Interval = 1;
         QueueTimer.AutoReset = true;
         QueueTimer.Interval = 5 * 60 * 1000;
         QueueTimer.Start();
@@ -81,7 +99,7 @@ public class WatchedLibrary:IDisposable
     private void QueueTimerOnElapsed(object? sender, ElapsedEventArgs e)
         => ProcessQueue();
 
-    private SemaphoreSlim processorLock= new (1);
+    private readonly SemaphoreSlim processorLock= new (1);
     
     /// <summary>
     /// Processes the queue
@@ -91,12 +109,17 @@ public class WatchedLibrary:IDisposable
         if (processorLock.Wait(1000) == false)
             return;
 
-        Task.Run(async () =>
+        Task.Run(() =>
         {
             try
             {
-                while (QueuedFiles.Any())
+                while (true)
                 {
+                    lock (QueuedFiles)
+                    {
+                        if (QueuedFiles.Any() == false)
+                            break;
+                    }
                     ProcessQueuedItem();
                 }
             }
@@ -273,10 +296,10 @@ public class WatchedLibrary:IDisposable
     private string GetRelativePath(string fullpath)
     {
         int skip = Library.Path.Length;
-        if (Library.Path.EndsWith("/") == false && Library.Path.EndsWith("\\") == false)
+        if (Library.Path.EndsWith('/') == false && Library.Path.EndsWith('\\') == false)
             ++skip;
 
-        return fullpath.Substring(skip);
+        return fullpath[skip..];
     }
 
     private bool MatchesDetection(string fullpath)
@@ -325,7 +348,7 @@ public class WatchedLibrary:IDisposable
     private (bool known, string? fingerprint, ObjectReference? duplicate) IsKnownFile(string fullpath, FileSystemInfo fsInfo)
     {
         var service = ServiceLoader.Load<LibraryFileService>();
-        var knownFile = service.GetFileIfKnown(fullpath).Result;
+        var knownFile = service.GetFileIfKnown(fullpath, Library.Uid).Result;
         string? fingerprint = null;
         if (knownFile != null)
         {
@@ -389,7 +412,7 @@ public class WatchedLibrary:IDisposable
             fingerprint = FileHelper.CalculateFingerprint(fullpath);
             if (string.IsNullOrEmpty(fingerprint) == false)
             {
-                knownFile = service.GetFileByFingerprint(fingerprint).Result;
+                knownFile = service.GetFileByFingerprint(Library.Uid, fingerprint).Result;
                 if (knownFile != null)
                 {
                     if (knownFile.Name != fullpath && Library.UpdateMovedFiles && knownFile.LibraryUid == Library.Uid)
@@ -690,8 +713,8 @@ public class WatchedLibrary:IDisposable
             }
             else
             {
-                var service = new Server.Services.LibraryFileService();
-                var knownFiles = service.GetKnownLibraryFilesWithCreationTimes().Result;
+                var service = new LibraryFileService();
+                var knownFiles = service.GetKnownLibraryFilesWithCreationTimes(Library.Uid).Result;
 
                 var files = GetFiles(new DirectoryInfo(Library.Path));
                 var settings = new SettingsService().Get().Result;
@@ -702,13 +725,14 @@ public class WatchedLibrary:IDisposable
 
                     if (MatchesDetection(file.FullName) == false)
                         continue;
-                
+
                     if (knownFiles.TryGetValue(file.FullName.ToLowerInvariant(), out KnownFileInfo info))
                     {
                         if (Library.DownloadsDirectory && info.Status == FileStatus.Processed)
                         {
                             
-                        }else if (DatesAreSame(file, info))
+                        }
+                        else if (DatesAreSame(file, info))
                             continue;
                     }
 

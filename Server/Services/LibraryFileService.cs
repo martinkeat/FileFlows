@@ -570,17 +570,19 @@ public class LibraryFileService : ILibraryFileService
     /// Gets a library file if it is known
     /// </summary>
     /// <param name="path">the path of the library file</param>
+    /// <param name="libraryUid">[Optional] the UID of the library the file is in, if not passed in then the first file with the name will be used</param>
     /// <returns>the library file if it is known</returns>
-    public Task<LibraryFile?>GetFileIfKnown(string path)
-        => new LibraryFileManager().GetFileIfKnown(path);
+    public Task<LibraryFile?>GetFileIfKnown(string path, Guid? libraryUid)
+        => new LibraryFileManager().GetFileIfKnown(path, libraryUid);
 
     /// <summary>
     /// Gets a library file if it is known by its fingerprint
     /// </summary>
+    /// <param name="libraryUid">The UID of the library</param>
     /// <param name="fingerprint">the fingerprint of the library file</param>
     /// <returns>the library file if it is known</returns>
-    public Task<LibraryFile?>  GetFileByFingerprint(string fingerprint)
-        => new LibraryFileManager().GetFileByFingerprint(fingerprint);
+    public Task<LibraryFile?>  GetFileByFingerprint(Guid libraryUid, string fingerprint)
+        => new LibraryFileManager().GetFileByFingerprint(libraryUid, fingerprint);
 
     /// <summary>
     /// Updates a moved file in the database
@@ -593,12 +595,12 @@ public class LibraryFileService : ILibraryFileService
     /// <summary>
     /// Gets a list of all filenames and the file creation times
     /// </summary>
-    /// <param name="includeOutput">if output names should be included</param>
-    /// <returns>a list of all filenames</returns>
-    public async Task<Dictionary<string, KnownFileInfo>> GetKnownLibraryFilesWithCreationTimes(bool includeOutput = false)
+    /// <param name="libraryUid">the UID of the library</param>
+    /// <returns>a dictionary of all files by their lowercase filename</returns>
+    public async Task<Dictionary<string, KnownFileInfo>> GetKnownLibraryFilesWithCreationTimes(Guid libraryUid)
     {
-        var data = await new LibraryFileManager().GetKnownLibraryFilesWithCreationTimes(includeOutput);
-        return data.ToDictionary(x => x.Name, x => x);
+        var data = await new LibraryFileManager().GetKnownLibraryFilesWithCreationTimes(libraryUid);
+        return data.DistinctBy(x => x.Name.ToLowerInvariant()).ToDictionary(x => x.Name.ToLowerInvariant());
     }
 
     /// <summary>

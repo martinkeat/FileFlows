@@ -2,8 +2,7 @@
   height: 5.5rem;
   position: relative;
   top: 0.75rem;
-  padding: 1.5rem 0;
-  right: 0.25rem;
+  padding: 1.5rem 0.5rem;
 }
 
 @media screen and (max-width: 578px) {
@@ -11,5 +10,3 @@
     display: none;
   }
 }
-
-/*# sourceMappingURL=Libraries.razor.css.map */

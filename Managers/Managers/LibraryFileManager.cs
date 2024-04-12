@@ -19,17 +19,19 @@ public class LibraryFileManager
     /// Gets a library file if it is known
     /// </summary>
     /// <param name="path">the path of the library file</param>
+    /// <param name="libraryUid">[Optional] the UID of the library the file is in, if not passed in then the first file with the name will be used</param>
     /// <returns>the library file if it is known</returns>
-    public Task<LibraryFile?> GetFileIfKnown(string path)
-        => DatabaseAccessManager.Instance.LibraryFileManager.GetFileIfKnown(path);
+    public Task<LibraryFile?> GetFileIfKnown(string path, Guid? libraryUid)
+        => DatabaseAccessManager.Instance.LibraryFileManager.GetFileIfKnown(path, libraryUid);
     
     /// <summary>
     /// Gets a library file if it is known by its fingerprint
     /// </summary>
+    /// <param name="libraryUid">The UID of the library</param>
     /// <param name="fingerprint">the fingerprint of the library file</param>
     /// <returns>the library file if it is known</returns>
-    public Task<LibraryFile?> GetFileByFingerprint(string fingerprint)
-        => DatabaseAccessManager.Instance.LibraryFileManager.GetFileByFingerprint(fingerprint);
+    public Task<LibraryFile?> GetFileByFingerprint(Guid libraryUid, string fingerprint)
+        => DatabaseAccessManager.Instance.LibraryFileManager.GetFileByFingerprint(libraryUid, fingerprint);
 
     /// <summary>
     /// Adds a files 
@@ -249,10 +251,10 @@ public class LibraryFileManager
     /// <summary>
     /// Gets a list of all filenames and the file creation times
     /// </summary>
-    /// <param name="includeOutput">if output names should be included</param>
+    /// <param name="libraryUid">the UID of the library</param>
     /// <returns>a list of all filenames</returns>
-    public Task<List<KnownFileInfo>> GetKnownLibraryFilesWithCreationTimes(bool includeOutput = false)
-        => DatabaseAccessManager.Instance.LibraryFileManager.GetKnownLibraryFilesWithCreationTimes(includeOutput);
+    public Task<List<KnownFileInfo>> GetKnownLibraryFilesWithCreationTimes(Guid libraryUid)
+        => DatabaseAccessManager.Instance.LibraryFileManager.GetKnownLibraryFilesWithCreationTimes(libraryUid);
 
 
     /// <summary>

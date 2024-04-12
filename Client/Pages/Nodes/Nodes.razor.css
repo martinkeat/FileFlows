@@ -47,18 +47,21 @@ span.icon .architecture.arm {
 .priority {
   align-self: center;
   text-align: center;
-  font-size: 1.5rem;
+  font-size: 1.35rem;
   font-weight: var(--bold, 600);
-  padding-top: 0.5rem;
+  padding-top: 1rem;
 }
 .priority span {
+  --item-size:3.5rem;
   border: solid 2px var(--accent);
-  border-radius: 4rem;
-  width: 4rem;
-  height: 4rem;
-  display: inline-block;
-  line-height: 4rem;
+  border-radius: 3rem;
+  width: var(--item-size);
+  height: var(--item-size);
+  line-height: var(--item-size);
   margin-top: 1rem;
+  display: inline-flex;
+  place-items: center;
+  justify-content: center;
 }
 
 @media screen and (max-width: 660px) {
@@ -82,5 +85,3 @@ span.icon .architecture.arm {
     display: none;
   }
 }
-
-/*# sourceMappingURL=Nodes.razor.css.map */
