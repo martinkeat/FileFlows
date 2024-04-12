@@ -37,14 +37,34 @@ public class Upgrade_24_04_1
     /// <param name="connector">the connector</param>
     private void DeleteOldLibraryFiles(ILogger logger, DatabaseConnection db, IDatabaseConnector connector)
     {
-        string sql = $@"delete 
+        try
+        {
+            string sql;
+            if (connector.Type == DatabaseType.Postgres)
+            {
+                sql = $@"DELETE FROM {connector.WrapFieldName("LibraryFile")}
+                WHERE {connector.WrapFieldName("LibraryUid")} NOT IN (
+                    SELECT CAST({connector.WrapFieldName("Uid")} AS UUID)
+                    FROM {connector.WrapFieldName("DbObject")}
+                    WHERE {connector.WrapFieldName("Type")} LIKE '%.Library'
+                )";
+            }
+            else
+            {
+                sql = $@"delete 
 from {connector.WrapFieldName("LibraryFile")} 
 where {connector.WrapFieldName("LibraryUid")} not in (
     select {connector.WrapFieldName("Uid")}
     from {connector.WrapFieldName("DbObject")} 
     where {connector.WrapFieldName("Type")} like '%.Library'
 )";
-        db.Db.Execute(sql);
+            }
+
+            db.Db.Execute(sql);
+        }
+        catch (Exception)
+        {
+        }
     }
 
 
