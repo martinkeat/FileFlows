@@ -1,34 +1,30 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
-    <PropertyGroup>
-        <TargetFramework>net7.0</TargetFramework>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <Nullable>enable</Nullable>
-        <AssemblyName>FileFlows.DataLayer</AssemblyName>
-        <RootNamespace>FileFlows.DataLayer</RootNamespace>
-    </PropertyGroup>
-
-    <ItemGroup>
-        <PackageReference Include="Microsoft.Data.Sqlite" Version="8.0.3" />
-        <PackageReference Include="MySqlBackup.NET" Version="2.3.8" />
-        <PackageReference Include="Npgsql" Version="8.0.2" />
-        <PackageReference Include="NPoco" Version="5.7.1" />
-        <PackageReference Include="MySqlConnector" Version="2.3.6" />
-        <PackageReference Include="System.Data.SQLite.Core" Version="1.0.118" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <ProjectReference Include="..\Plugin\Plugin.csproj" />
-      <ProjectReference Include="..\ServerShared\ServerShared.csproj" />
-      <ProjectReference Include="..\Shared\Shared.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <EmbeddedResource Include="Scripts\MySql\DeleteOldLogs.sql" />
-      <EmbeddedResource Include="Scripts\MySql\Tables.sql" />
-      <EmbeddedResource Include="Scripts\Postgres\Tables.sql" />
-      <EmbeddedResource Include="Scripts\Sqlite\Tables.sql" />
-      <None Remove="Scripts\SqlServer\Tables.sql" />
-      <EmbeddedResource Include="Scripts\SqlServer\Tables.sql" />
-    </ItemGroup>
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AssemblyName>FileFlows.DataLayer</AssemblyName>
+    <RootNamespace>FileFlows.DataLayer</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="MySqlBackup.NET" Version="2.3.8" />
+    <PackageReference Include="Npgsql" Version="8.0.2" />
+    <PackageReference Include="NPoco" Version="5.7.1" />
+    <PackageReference Include="MySqlConnector" Version="2.3.6" />
+    <PackageReference Include="System.Data.SQLite.Core" Version="1.0.118" />
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="8.0.4" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Plugin\Plugin.csproj" />
+    <ProjectReference Include="..\ServerShared\ServerShared.csproj" />
+    <ProjectReference Include="..\Shared\Shared.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Scripts\MySql\DeleteOldLogs.sql" />
+    <EmbeddedResource Include="Scripts\MySql\Tables.sql" />
+    <EmbeddedResource Include="Scripts\Postgres\Tables.sql" />
+    <EmbeddedResource Include="Scripts\Sqlite\Tables.sql" />
+    <None Remove="Scripts\SqlServer\Tables.sql" />
+    <EmbeddedResource Include="Scripts\SqlServer\Tables.sql" />
+  </ItemGroup>
 </Project>

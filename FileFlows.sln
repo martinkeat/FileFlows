@@ -1,4 +1,4 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
@@ -19,13 +19,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FileFlowTests", "FileFlowTe
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FlowRunner", "FlowRunner\FlowRunner.csproj", "{91772B3A-AE4D-4817-9D3A-44073ECDE626}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScriptExecution", "ScriptExecution\ScriptExecution.csproj", "{09568E2E-EBE2-447D-9628-19C618AE7461}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ScriptExecution", "ScriptExecution\ScriptExecution.csproj", "{09568E2E-EBE2-447D-9628-19C618AE7461}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataLayer", "DataLayer\DataLayer.csproj", "{FDCE8821-3228-42C9-8639-A279E51E2EE3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataLayer", "DataLayer\DataLayer.csproj", "{FDCE8821-3228-42C9-8639-A279E51E2EE3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Managers", "Managers\Managers.csproj", "{508AFEAB-0FF3-45AD-89CE-D78B30A4F2D2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Managers", "Managers\Managers.csproj", "{508AFEAB-0FF3-45AD-89CE-D78B30A4F2D2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RemoteServices", "RemoteServices\RemoteServices.csproj", "{0C0D563E-4D7C-4A94-B6B6-51D4D1B41D01}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RemoteServices", "RemoteServices\RemoteServices.csproj", "{0C0D563E-4D7C-4A94-B6B6-51D4D1B41D01}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

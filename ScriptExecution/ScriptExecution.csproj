@@ -1,23 +1,19 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
-    <PropertyGroup>
-        <TargetFramework>net7.0</TargetFramework>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <Nullable>enable</Nullable>
-        <AssemblyName>FileFlows.ScriptExecution</AssemblyName>
-        <RootNamespace>FileFlows.ScriptExecution</RootNamespace>
-        <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
-    </PropertyGroup>
-
-    <ItemGroup>
-      <PackageReference Include="Jint" Version="3.0.0-beta-2038" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <None Remove="Jint.dll" />
-      <EmbeddedResource Include="Jint.dll" />
-      <None Remove="Esprima.dll" />
-      <EmbeddedResource Include="Esprima.dll" />
-    </ItemGroup>
-
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AssemblyName>FileFlows.ScriptExecution</AssemblyName>
+    <RootNamespace>FileFlows.ScriptExecution</RootNamespace>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Jint" Version="3.0.0-beta-2038" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="Jint.dll" />
+    <EmbeddedResource Include="Jint.dll" />
+    <None Remove="Esprima.dll" />
+    <EmbeddedResource Include="Esprima.dll" />
+  </ItemGroup>
 </Project>
