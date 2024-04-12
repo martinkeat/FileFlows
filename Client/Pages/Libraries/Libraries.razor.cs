@@ -27,9 +27,9 @@ public partial class Libraries : ListPage<Guid, Library>
             Enabled = true, 
             ScanInterval = 60, 
             FileSizeDetectionInterval = 5,
-            UseFingerprinting = true,
+            UseFingerprinting = false,
             UpdateMovedFiles = true,
-            Schedule = new String('1', 672)
+            Schedule = new string('1', 672)
         });
     }
 
