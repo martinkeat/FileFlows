@@ -100,3 +100,23 @@ ALTER TABLE LibraryFile ADD INDEX (Status);
 ALTER TABLE LibraryFile ADD INDEX (DateModified);
 -- index to make library file status/skybox faster
 ALTER TABLE LibraryFile ADD INDEX (Status, HoldUntil, LibraryUid);
+
+
+
+CREATE TABLE AuditLog
+(
+    OperatorUid     VARCHAR(36)        NOT NULL,
+    OperatorName    VARCHAR(255)       NOT NULL,
+    OperatorType    INT                NOT NULL,
+    IPAddress       VARCHAR(50)        NOT NULL,
+    LogDate         datetime,
+    Action          INT                NOT NULL,
+    ObjectType      VARCHAR(255)       NOT NULL,
+    ObjectUid       VARCHAR(36)        NOT NULL,
+    RevisionUid     VARCHAR(36)        NOT NULL,
+    Parameters      TEXT               NOT NULL,
+    Changes         TEXT               NOT NULL
+);
+
+ALTER TABLE AuditLog ADD INDEX (OperatorUid);
+ALTER TABLE AuditLog ADD INDEX (LogDate);

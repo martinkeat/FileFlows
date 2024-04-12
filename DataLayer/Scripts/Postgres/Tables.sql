@@ -101,9 +101,6 @@ CREATE INDEX ON "LibraryFile" ("DateModified");
 -- index to make library file status/skybox faster
 CREATE INDEX ON "LibraryFile" ("Status", "HoldUntil", "LibraryUid");
 
-
-
-
 CREATE TABLE "AuditLog"
 (
     "OperatorUid"     VARCHAR(36)        NOT NULL,

@@ -1,7 +1,5 @@
 using FileFlows.DataLayer.DatabaseConnectors;
-using FileFlows.DataLayer.Models;
 using FileFlows.Plugin;
-using FileFlows.Shared.Models;
 using DatabaseType = FileFlows.Shared.Models.DatabaseType;
 using ILogger = FileFlows.Plugin.ILogger;
 
@@ -60,6 +58,14 @@ where {connector.WrapFieldName("LibraryUid")} not in (
     {
         if (connector.Type == DatabaseType.Sqlite)
             AddAuditTable_Sqlite(logger, db, connector);
+        else if(connector.Type == DatabaseType.Postgres)
+            AddAuditTable_Postgres(logger, db, connector);
+        else if(connector.Type == DatabaseType.MySql)
+            AddAuditTable_MySql(logger, db, connector);
+        else if (connector.Type == DatabaseType.SqlServer)
+            AddAuditTable_SqlServer(logger, db, connector);
+        else
+            throw new Exception("Invalid database type: " + connector.Type); // shouldnt happen
     }
 
 
@@ -89,6 +95,99 @@ CREATE TABLE AuditLog
 
 CREATE INDEX IF NOT EXISTS idx_AuditLog_OperatorUid ON AuditLog (OperatorUid);
 CREATE INDEX IF NOT EXISTS idx_AuditLog_LogDate ON AuditLog (LogDate);
+";
+        db.Db.Execute(sql);
+    }
+
+
+    /// <summary>
+    /// Adds the audit table for MySql
+    /// </summary>
+    /// <param name="logger">the logger</param>
+    /// <param name="db">the db connection</param>
+    /// <param name="connector">the connector</param>
+    private void AddAuditTable_MySql(ILogger logger, DatabaseConnection db, IDatabaseConnector connector)
+    {
+        string sql = @"
+
+CREATE TABLE AuditLog
+(
+    OperatorUid     VARCHAR(36)        NOT NULL,
+    OperatorName    VARCHAR(255)       NOT NULL,
+    OperatorType    INT                NOT NULL,
+    IPAddress       VARCHAR(50)        NOT NULL,
+    LogDate         datetime,
+    Action          INT                NOT NULL,
+    ObjectType      VARCHAR(255)       NOT NULL,
+    ObjectUid       VARCHAR(36)        NOT NULL,
+    RevisionUid     VARCHAR(36)        NOT NULL,
+    Parameters      TEXT               NOT NULL,
+    Changes         TEXT               NOT NULL
+);
+
+ALTER TABLE AuditLog ADD INDEX (OperatorUid);
+ALTER TABLE AuditLog ADD INDEX (LogDate);
+";
+        db.Db.Execute(sql);
+    }
+    
+    /// <summary>
+    /// Adds the audit table for Postgres
+    /// </summary>
+    /// <param name="logger">the logger</param>
+    /// <param name="db">the db connection</param>
+    /// <param name="connector">the connector</param>
+    private void AddAuditTable_Postgres(ILogger logger, DatabaseConnection db, IDatabaseConnector connector)
+    {
+        string sql = @"
+
+CREATE TABLE ""AuditLog""
+(
+    ""OperatorUid""     VARCHAR(36)        NOT NULL,
+    ""OperatorName""    VARCHAR(255)       NOT NULL,
+    ""OperatorType""    INT                NOT NULL,
+    ""IPAddress""       VARCHAR(50)        NOT NULL,
+    ""LogDate""         TIMESTAMP          DEFAULT CURRENT_TIMESTAMP,    
+    ""Action""          INT                NOT NULL,
+    ""ObjectType""      VARCHAR(255)       NOT NULL,
+    ""ObjectUid""       VARCHAR(36)        NOT NULL,
+    ""RevisionUid""     VARCHAR(36)        NOT NULL,
+    ""Parameters""      TEXT               NOT NULL,
+    ""Changes""         TEXT               NOT NULL
+);
+CREATE INDEX ON ""AuditLog"" (""OperatorUid"");
+CREATE INDEX ON ""AuditLog"" (""LogDate"");
+";
+        db.Db.Execute(sql);
+    }
+    
+    /// <summary>
+    /// Adds the audit table for SqlServer
+    /// </summary>
+    /// <param name="logger">the logger</param>
+    /// <param name="db">the db connection</param>
+    /// <param name="connector">the connector</param>
+    private void AddAuditTable_SqlServer(ILogger logger, DatabaseConnection db, IDatabaseConnector connector)
+    {
+        string sql = @"
+
+CREATE TABLE AuditLog
+(
+    OperatorUid     VARCHAR(36)        NOT NULL,
+    OperatorName    VARCHAR(255)       NOT NULL,
+    OperatorType    INT                NOT NULL,
+    IPAddress       VARCHAR(50)        NOT NULL,
+    LogDate         datetime,
+    Action          INT                NOT NULL,
+    ObjectType      VARCHAR(255)       NOT NULL,
+    ObjectUid       VARCHAR(36)        NOT NULL,
+    RevisionUid     VARCHAR(36)        NOT NULL,
+    Parameters      NVARCHAR(MAX)      NOT NULL,
+    Changes         NVARCHAR(MAX)      NOT NULL
+);
+
+CREATE INDEX ix_AuditLog_OperatorUid ON AuditLog (OperatorUid);
+CREATE INDEX ix_AuditLog_LogDate ON AuditLog (LogDate);
 ";
         db.Db.Execute(sql);
     }
