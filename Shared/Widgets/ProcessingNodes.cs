@@ -19,7 +19,7 @@ public class ProcessingNodes:WidgetDefinition
     /// Gets the URL
     /// </summary>
     public override string Url => "/api/node/overview";
-    
+
     /// <summary>
     /// Gets the Icon
     /// </summary>

@@ -44,9 +44,9 @@ public class NodeController : BaseController
                 node.Status = ProcessingNodeStatus.Disabled;
             else if (TimeHelper.InSchedule(node.Schedule) == false)
                 node.Status = ProcessingNodeStatus.OutOfSchedule;
-            else if (node.Version != Globals.Version)
+            else if (node.Version != Globals.Version && node.Uid != Globals.InternalNodeUid)
                 node.Status = ProcessingNodeStatus.VersionMismatch;
-            else if (node.LastSeen < DateTime.UtcNow.AddMinutes(-5))
+            else if (node.LastSeen < DateTime.UtcNow.AddMinutes(-5) && node.Uid != Globals.InternalNodeUid)
                 node.Status = ProcessingNodeStatus.Offline;
             else if (FlowRunnerService.Executors.Any(x => x.Value.NodeUid == node.Uid))
                 node.Status = ProcessingNodeStatus.Processing;
