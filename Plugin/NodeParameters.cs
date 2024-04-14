@@ -393,6 +393,7 @@ public class NodeParameters
         {
             if (IsDirectory)
             {
+                Variables.TryAdd("folder.OriginalName", LibraryFileName);
                 var di = new DirectoryInfo(filename);
                 UpdateVariables(new Dictionary<string, object>
                 {
@@ -418,6 +419,7 @@ public class NodeParameters
             }
             else
             {
+                Variables.TryAdd("file.OriginalName", LibraryFileName);
                 var result = FileService.FileInfo(filename);
                 if (result.IsFailed)
                     return;

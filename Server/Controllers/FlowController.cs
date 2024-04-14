@@ -888,6 +888,7 @@ public class FlowController : BaseController
         if (dir)
         {
             variables.Add("folder.Name", "FolderName");
+            variables["folder.OriginalName"] = "/original/file/on/server.txt";
             variables.Add("folder.FullName", windows ? @"C:\Folder\SubFolder" : "/folder/subfolder");
             variables.Add("folder.Date", DateTime.UtcNow);
             variables.Add("folder.Date.Day", DateTime.UtcNow.Day);
@@ -900,6 +901,7 @@ public class FlowController : BaseController
         else
         {
             variables.Add("ext", ".mkv");
+            variables["file.OriginalName"] = "/original/file/on/server.txt";
             variables.Add("file.Name", "Filename.ext");
             variables.Add("file.NameNoExtension", "Filename");
             variables.Add("file.Extension", ".mkv");
