@@ -52,7 +52,7 @@ public class Condition
     /// <param name="initialValue">the initial value of the field</param>
     /// <param name="value">the value to evaluate for</param>
     /// <param name="isNot">if the condition should NOT match the value</param>
-    public Condition(ElementField field, object initialValue, object value = null, bool isNot = false)
+    public Condition(ElementField field, object? initialValue, object value = null, bool isNot = false)
     {
         this.Property = field.Name;
         this.Value = value;
@@ -65,7 +65,7 @@ public class Condition
     /// </summary>
     /// <param name="field">the field</param>
     /// <param name="initialValue">the fields initial value</param>
-    public void SetField(ElementField field, object initialValue)
+    public void SetField(ElementField field, object? initialValue)
     {
         this.Field = field;
         this.Field.ValueChanged += Field_ValueChanged;
@@ -77,7 +77,7 @@ public class Condition
     /// </summary>
     /// <param name="sender">the sender object</param>
     /// <param name="value">the new field value</param>
-    private void Field_ValueChanged(object sender, object value)
+    private void Field_ValueChanged(object sender, object? value)
     {
         bool matches = this.Matches(value);
         matches = !matches; // reverse this as we matches mean enabled, so we want disabled
@@ -90,7 +90,7 @@ public class Condition
     /// </summary>
     /// <param name="value">the value to test the condition against</param>
     /// <returns>true if the condition is matches</returns>
-    public virtual bool Matches(object value)
+    public virtual bool Matches(object? value)
         => Matches(this.Value, value, this.IsNot);
 
     /// <summary>
@@ -100,7 +100,7 @@ public class Condition
     /// <param name="value">the value to test</param>
     /// <param name="isNot">if the result should be inverted</param>
     /// <returns>the result of the match</returns>
-    protected static bool Matches(object expected, object value, bool isNot)
+    protected static bool Matches(object? expected, object? value, bool isNot)
     {
         bool matches = false;
         string strValue = expected?.ToString() ?? string.Empty;

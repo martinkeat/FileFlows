@@ -13,10 +13,9 @@ public class AnyCondition : Condition
     /// <param name="initialValue">the initial value of the field</param>
     /// <param name="values">the value to evaluate for</param>
     /// <param name="isNot">if the condition should NOT match the value</param>
-    public AnyCondition(ElementField field, object initialValue, object values = null, bool isNot = false) : base(field, initialValue)
+    public AnyCondition(ElementField field, object? initialValue, object values = null, bool isNot = false) 
+        : base(field, initialValue, values, isNot)
     {
-        this.Value = values;
-        this.IsNot = isNot;
     }
 
     /// <summary>
@@ -24,7 +23,7 @@ public class AnyCondition : Condition
     /// </summary>
     /// <param name="value">the value to test the condition against</param>
     /// <returns>true if the condition is matches</returns>
-    public override bool Matches(object value)
+    public override bool Matches(object? value)
     {
         if (this.Value == null)
             return false;

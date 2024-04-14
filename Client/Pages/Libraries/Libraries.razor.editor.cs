@@ -326,6 +326,14 @@ public partial class Libraries : ListPage<Guid, Library>
                      (nameof(library.DetectFileSize), "size", false)
                  })
         {
+            MatchRange? initialValue = prop.Item1 switch
+            {
+                nameof(Library.DetectFileCreation) => library.DetectFileCreation,
+                nameof(library.DetectFileLastWritten) => library.DetectFileLastWritten,
+                nameof(library.DetectFileSize) => library.DetectFileSize,
+                _ => null
+            };
+            
             var efDetection = new ElementField
             {
                 InputType = FormInputType.Select,
@@ -348,7 +356,7 @@ public partial class Libraries : ListPage<Guid, Library>
                 Name = prop.Item1 + "Upper",
                 Conditions = new List<Condition>
                 {
-                    new AnyCondition(efDetection, prop.Item1, new [] { MatchRange.Between, MatchRange.NotBetween})
+                    new AnyCondition(efDetection, initialValue, new [] { MatchRange.Between, MatchRange.NotBetween})
                 }
             });
             
