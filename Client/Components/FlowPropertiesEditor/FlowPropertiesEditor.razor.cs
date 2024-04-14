@@ -43,10 +43,21 @@ public partial class FlowPropertiesEditor
     /// </summary>
     public bool Visible { get; private set; }
 
+    private Guid? _FlowVariables_FlowUid;
     private List<KeyValuePair<string, string>> _FlowVariables;
     private List<KeyValuePair<string, string>> FlowVariables
     {
-        get => _FlowVariables;
+        get
+        {
+            if (Flow != null && _FlowVariables_FlowUid != Flow.Uid)
+            {
+                // refresh the list
+                _FlowVariables = Flow.Properties.Variables?.Select(x => new KeyValuePair<string, string>(x.Key, x.Value.ToString()))
+                    ?.ToList() ?? new ();
+                _FlowVariables_FlowUid = Flow.Uid;
+            }
+            return _FlowVariables;
+        }
         set
         {
             _FlowVariables = value ?? new ();
@@ -73,8 +84,6 @@ public partial class FlowPropertiesEditor
             return;
         }
 
-        _FlowVariables = Flow.Properties.Variables?.Select(x => new KeyValuePair<string, string>(x.Key, x.Value.ToString()))
-            ?.ToList() ?? new ();
         foreach (var field in Flow.Properties.Fields)
         {
             if (field.DefaultValue is JsonElement jsonElement)
