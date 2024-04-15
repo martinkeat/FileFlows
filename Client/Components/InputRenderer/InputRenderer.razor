@@ -260,6 +260,14 @@
                 }
             }
             break;
+        case FormInputType.Date:
+        {
+            var value = GetValue<DateTime>(field.Name);
+            <InputDate Field=@field Label="@label" Value="@value" ReadOnly=@readOnly 
+                       ValueChanged="@(x => UpdateValue(field, x))" HideLabel=@hideLabel 
+                       OnSubmit=@OnSubmit OnClose=@OnClose Help=@field.HelpText />
+        }
+            break;
         case FormInputType.Time:
         {
             var value = GetValue<TimeSpan>(field.Name);

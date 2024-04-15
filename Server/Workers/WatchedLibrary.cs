@@ -319,23 +319,27 @@ public class WatchedLibrary:IDisposable
     /// <returns>true if matches detection, otherwise false</returns>
     public static bool MatchesDetection(Library library, FileSystemInfo info, long size)
     {
-        if(MatchesValue((int)DateTime.UtcNow.Subtract(info.CreationTimeUtc).TotalMinutes, library.DetectFileCreation, library.DetectFileCreationLower, library.DetectFileCreationUpper) == false)
+        if(MatchesValue((int)DateTime.UtcNow.Subtract(info.CreationTimeUtc).TotalMinutes, library.DetectFileCreation, library.DetectFileCreationLower, library.DetectFileCreationUpper, info.CreationTimeUtc, library.DetectFileCreationDate) == false)
             return false;
 
-        if(MatchesValue((int)DateTime.UtcNow.Subtract(info.LastWriteTimeUtc).TotalMinutes, library.DetectFileLastWritten, library.DetectFileLastWrittenLower, library.DetectFileLastWrittenUpper) == false)
+        if(MatchesValue((int)DateTime.UtcNow.Subtract(info.LastWriteTimeUtc).TotalMinutes, library.DetectFileLastWritten, library.DetectFileLastWrittenLower, library.DetectFileLastWrittenUpper, info.LastWriteTimeUtc, library.DetectFileLastWrittenDate) == false)
             return false;
         
-        if(MatchesValue(size, library.DetectFileSize, library.DetectFileSizeLower, library.DetectFileSizeUpper) == false)
+        if(MatchesValue(size, library.DetectFileSize, library.DetectFileSizeLower, library.DetectFileSizeUpper, null, null) == false)
             return false;
         
         return true;
         
     }
     
-    private static bool MatchesValue(long value, MatchRange range, long low, long high)
+    private static bool MatchesValue(long value, MatchRange range, long low, long high, DateTime? dateValue, DateTime? dateTest)
     {
         if (range == MatchRange.Any)
             return true;
+        if (range == MatchRange.After)
+            return dateValue > dateTest;
+        if (range == MatchRange.Before)
+            return dateValue < dateTest;
         
         if (range == MatchRange.GreaterThan)
             return value > low;

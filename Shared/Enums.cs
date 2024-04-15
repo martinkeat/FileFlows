@@ -167,7 +167,15 @@ public enum MatchRange
     /// <summary>
     /// Not between values specified
     /// </summary>
-    NotBetween = 4
+    NotBetween = 4,
+    /// <summary>
+    /// After a specific date
+    /// </summary>
+    After = 5,
+    /// <summary>
+    /// Before a specific date
+    /// </summary>
+    Before = 6
 }
 
 

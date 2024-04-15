@@ -147,7 +147,11 @@ public enum FormInputType
     /// <summary>
     /// Time
     /// </summary>
-    Time = 32
+    Time = 32,
+    /// <summary>
+    /// Date
+    /// </summary>
+    Date = 33,
 }
 
 

@@ -1,0 +1,8 @@
+@namespace FileFlows.Client.Components.Inputs
+@inherits Input<DateTime>
+
+<InputWrapper Input="@this">
+    <div>
+        <input type="datetime-local" id="@Uid" autocomplete="off" @bind-value="@LocalDate" />
+    </div>
+</InputWrapper>

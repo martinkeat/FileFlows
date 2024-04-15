@@ -308,59 +308,75 @@ public partial class Libraries : ListPage<Guid, Library>
             InputType = FormInputType.Label,
             Name = "DetectionDescription"
         });
-        var matchParameters = new Dictionary<string, object>
-        {
-            { "AllowClear", false },
-            { "Options", new List<ListOption> {
-                new () { Value = (int)MatchRange.Any, Label = $"Enums.{nameof(MatchRange)}.{nameof(MatchRange.Any)}" },
-                new () { Value = MatchRange.GreaterThan, Label = $"Enums.{nameof(MatchRange)}.{nameof(MatchRange.GreaterThan)}" },
-                new () { Value = MatchRange.LessThan, Label = $"Enums.{nameof(MatchRange)}.{nameof(MatchRange.LessThan)}" },
-                new () { Value = MatchRange.Between, Label = $"Enums.{nameof(MatchRange)}.{nameof(MatchRange.Between)}" },
-                new () { Value = MatchRange.NotBetween, Label = $"Enums.{nameof(MatchRange)}.{nameof(MatchRange.NotBetween)}" }
-            } }
-        };
         foreach (var prop in new[]
                  {
-                     (nameof(Library.DetectFileCreation), "date", true),
-                     (nameof(library.DetectFileLastWritten), "date", true),
-                     (nameof(library.DetectFileSize), "size", false)
+                     (Field: nameof(Library.DetectFileCreation), Type: "date", AddSeparator: true, InitialValue: library.DetectFileCreation),
+                     (Field: nameof(library.DetectFileLastWritten), Type: "date", AddSeparator: true, InitialValue: library.DetectFileLastWritten),
+                     (Field: nameof(library.DetectFileSize), Type: "size", AddSeparator: false, InitialValue: library.DetectFileSize)
                  })
         {
-            MatchRange? initialValue = prop.Item1 switch
+            var matchParameters = new Dictionary<string, object>
             {
-                nameof(Library.DetectFileCreation) => library.DetectFileCreation,
-                nameof(library.DetectFileLastWritten) => library.DetectFileLastWritten,
-                nameof(library.DetectFileSize) => library.DetectFileSize,
-                _ => null
+                { "AllowClear", false },
+                { "Options", new List<ListOption> {
+                    new () { Value = (int)MatchRange.Any, Label = $"Enums.{nameof(MatchRange)}.{nameof(MatchRange.Any)}" },
+                    new () { Value = MatchRange.GreaterThan, Label = $"Enums.{nameof(MatchRange)}.{nameof(MatchRange.GreaterThan)}" },
+                    new () { Value = MatchRange.LessThan, Label = $"Enums.{nameof(MatchRange)}.{nameof(MatchRange.LessThan)}" },
+                    new () { Value = MatchRange.Between, Label = $"Enums.{nameof(MatchRange)}.{nameof(MatchRange.Between)}" },
+                    new () { Value = MatchRange.NotBetween, Label = $"Enums.{nameof(MatchRange)}.{nameof(MatchRange.NotBetween)}" }
+                } }
             };
+            if (prop.Type == "date")
+            {
+                ((List<ListOption>)matchParameters["Options"]).AddRange(new ListOption[]
+                {
+                    new () { Value = MatchRange.After, Label = $"Enums.{nameof(MatchRange)}.{nameof(MatchRange.After)}" },
+                    new () { Value = MatchRange.Before, Label = $"Enums.{nameof(MatchRange)}.{nameof(MatchRange.Before)}" }
+                });
+            }
             
             var efDetection = new ElementField
             {
                 InputType = FormInputType.Select,
-                Name = prop.Item1,
+                Name = prop.Field,
                 Parameters = matchParameters
             };
             fields.Add(efDetection);
             fields.Add(new ElementField
             {
-                InputType = prop.Item2 == "date" ? FormInputType.Period : FormInputType.FileSize,
-                Name = prop.Item1 + "Lower",
+                InputType = prop.Type == "date" ? FormInputType.Period : FormInputType.FileSize,
+                Name = prop.Field + "Lower",
                 Conditions = new List<Condition>
                 {
-                    new (efDetection, prop.Item1, value: (int)MatchRange.Any, isNot: true)
+                    new AnyCondition(efDetection, prop.InitialValue, new []
+                    {
+                        MatchRange.GreaterThan, MatchRange.LessThan, MatchRange.Between, MatchRange.NotBetween
+                    })
                 }
             });
             fields.Add(new ElementField
             {
-                InputType = prop.Item2 == "date" ? FormInputType.Period : FormInputType.FileSize,
-                Name = prop.Item1 + "Upper",
+                InputType = prop.Type == "date" ? FormInputType.Period : FormInputType.FileSize,
+                Name = prop.Field + "Upper",
                 Conditions = new List<Condition>
                 {
-                    new AnyCondition(efDetection, initialValue, new [] { MatchRange.Between, MatchRange.NotBetween})
+                    new AnyCondition(efDetection, prop.InitialValue, new [] { MatchRange.Between, MatchRange.NotBetween})
+                }
+            });
+            fields.Add(new ElementField
+            {
+                InputType = FormInputType.Date,
+                Name = prop.Field + "Date",
+                Conditions = new List<Condition>
+                {
+                    new AnyCondition(efDetection, prop.InitialValue, new []
+                    {
+                        MatchRange.After, MatchRange.Before
+                    })
                 }
             });
             
-            if(prop.Item3)
+            if(prop.AddSeparator)
                 fields.Add(ElementField.Separator());
         }
 

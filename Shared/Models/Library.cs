@@ -49,6 +49,10 @@ public class Library : FileFlowObject
     /// </summary>
     public int DetectFileCreationUpper { get; set; }
     /// <summary>
+    /// Gets or sets the date value for file creation date
+    /// </summary>
+    public DateTime? DetectFileCreationDate { get; set; }
+    /// <summary>
     /// Gets or sets the lower value for file creation last written
     /// </summary>
     public long DetectFileLastWrittenLower { get; set; }
@@ -56,6 +60,10 @@ public class Library : FileFlowObject
     /// Gets or sets the upper value for file creation last written
     /// </summary>
     public int DetectFileLastWrittenUpper { get; set; }
+    /// <summary>
+    /// Gets or sets the date value for file last written date
+    /// </summary>
+    public DateTime? DetectFileLastWrittenDate { get; set; }
     /// <summary>
     /// Gets or sets the lower value for file size
     /// </summary>

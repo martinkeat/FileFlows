@@ -265,7 +265,9 @@
       "GreaterThan": "Greater Than",
       "LessThan": "Less Than",
       "Between": "Between",
-      "NotBetween": "Not Between"
+      "NotBetween": "Not Between",
+      "After": "After",
+      "Before": "Before"
     },
     "ProcessingOrder":{
       "AsFound": "As Found (Default)",
@@ -659,9 +661,11 @@
         "DetectFileCreation": "File Creation",
         "DetectFileCreationLower": "",
         "DetectFileCreationUpper": "",
+        "DetectFileCreationDate": "",
         "DetectFileLastWritten": "File Last Written",
         "DetectFileLastWrittenLower": "",
         "DetectFileLastWrittenUpper": "",
+        "DetectFileLastWrittenDate": "",
         "DetectFileSize": "File Size",
         "DetectFileSizeLower": "",
         "DetectFileSizeUpper": "",
