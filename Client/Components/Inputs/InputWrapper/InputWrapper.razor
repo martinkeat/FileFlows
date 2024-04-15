@@ -1,4 +1,3 @@
-@using Microsoft.Extensions.Logging
 @namespace FileFlows.Client.Components.Inputs
 
 @if(Input?.Visible == false)
@@ -40,7 +39,10 @@
 @if (invalid && Input?.Disabled != true)
 {
     <div x-id="error-@Input?.Field?.Name" class="row mt-0 error">
-        <div class="input-label"></div>
+        @if (Input?.HideLabel != true)
+        {
+            <div class="input-label"></div>
+        }
         <div class="input-value">
             <span class="error-text">@Input.ErrorMessage</span>
         </div>
@@ -49,7 +51,10 @@
 @if (string.IsNullOrEmpty(HelpHtml) == false)
 {
     <div class="row mt-0 @(invalid ? "error" : "") @(Input?.Disabled == true ? "disabled" : "") @(Input?.HideLabel == true ? "hide-label": "")">
-        <div class="input-label"></div>
+        @if (Input?.HideLabel != true)
+        {
+            <div class="input-label"></div>
+        }
         <div class="input-value">
             <span class="help-text">
                 @((MarkupString)HelpHtml)

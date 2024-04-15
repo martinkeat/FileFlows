@@ -1,7 +1,8 @@
 ﻿@namespace FileFlows.Client.Components.Common
 
 <div>
-    <input id="@Uid" @ref="eleInput" type="text" @bind-value="Value" @bind-value:event="oninput" autocomplete="off" @onkeydown="OnKeyDown" data-disable-movement="@(VariablesShown ? "1" : null)" />
+    <input id="@Uid" @ref="eleInput" type="text" @bind-value="Value" @bind-value:event="oninput" autocomplete="off" 
+           @onkeydown="OnKeyDown" data-disable-movement="@(VariablesShown ? "1" : null)" @onblur="OnBlur" />
 
     <div class="input-variables dropdown-menu @(VariablesShown && VariablesFiltered.Any() ? "show": "")">
         @for(int i=0;i<VariablesFiltered.Count;i++)

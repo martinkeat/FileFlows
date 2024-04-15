@@ -152,6 +152,10 @@ public abstract class Input<T> : ComponentBase, IInput, IDisposable
 
     protected T _Value;
     private bool _ValueUpdating = false;
+    /// <summary>
+    /// Gets if the value is currently updating
+    /// </summary>
+    protected bool ValueIsUpdating => _ValueUpdating;
     [Parameter]
     public T Value
     {

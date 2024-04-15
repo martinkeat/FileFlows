@@ -12,8 +12,9 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach (var kv in Data)
+                @foreach (var key in Data.Keys)
                 {
+                    var kv = Data[key];
                     <tr class="@(kv.Key == DuplicateKey ? "invalid" : "")">
                         <td>
                             @if (HasOptions)
@@ -25,16 +26,27 @@
                                     }
                                 </select>
                             }
+                            else if(ShowVariables)
+                            {
+                                <VariableInput Variables=@Variables @bind-Value="@kv.Key" Blur="@OnBlur"  />
+                            }
                             else
                             {
                                 <input type="text" @bind-value="kv.Key" @onblur="OnBlur"/>
                             }
                         </td>
                         <td>
-                            <input type="text" @bind-value="kv.Value" @onblur="OnBlur" />
+                            @if(ShowVariables)
+                            {
+                                <VariableInput Variables=@Variables @bind-Value="@kv.Value" Blur="@OnBlur" />
+                            }
+                            else
+                            {
+                                <input type="text" @bind-value="kv.Value" @onblur="OnBlur"/>
+                            }
                         </td>
                         <td>
-                            <i class="fas fa-trash" @onclick="() => Remove(kv)"></i>
+                            <i class="fas fa-trash" @onclick="() => Remove(key)"></i>
                         </td>
                     </tr>
                 }
@@ -49,13 +61,24 @@
                                 }
                             </select>
                         }
+                        else if(ShowVariables)
+                        {
+                            <VariableInput Uid="@(Uid + "-new-key")" Variables=@Variables @bind-Value="@NewKey" />
+                        }
                         else
                         {
                             <input id="@Uid" type="text" @bind-value="NewKey"/>
                         }
                     </td>
                     <td>
-                        <input type="text" @bind-value="NewValue" @onblur="BlurAdd" />
+                        @if(ShowVariables)
+                        {
+                             <VariableInput Uid="@(Uid + "-new-value")" Variables=@Variables @bind-Value="NewValue" Blur="@BlurAdd"  />
+                        }
+                        else
+                        {
+                            <input type="text" @bind-value="NewValue" @onblur="BlurAdd" />
+                        }
                     </td>
                     <td>                        
                         <i class="fas fa-plus" @onclick="Add"></i>

@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using System.Text.Json;
 
 namespace FileFlows.Shared.Helpers;
 
@@ -53,5 +54,34 @@ public class ObjectHelper
                 property.SetValue(destination, value);
             }
         }
+    }
+    
+    
+    /// <summary>
+    /// Gets the length of the enumerable or array.
+    /// </summary>
+    /// <param name="obj">The object to check.</param>
+    /// <returns>The length of the enumerable or array. Returns -1 if the object is not enumerable.</returns>
+    public static int GetArrayLength(object obj)
+    {
+        if (obj is IEnumerable enumerable)
+        {
+            if (obj.GetType().IsArray)
+            {
+                // If it's an array, use Length property
+                var array = obj as Array;
+                return array?.Length ?? 0;
+            }
+            
+            return enumerable.Cast<object>().Count();
+        }
+        if (obj is JsonElement jsonElement && jsonElement.ValueKind == JsonValueKind.Array)
+        {
+            // If it's a JsonValueKind.Array, use GetArrayLength() method
+            return jsonElement.GetArrayLength();
+        }
+        
+        // If not enumerable, return 0
+        return 0;
     }
 }

@@ -29,11 +29,37 @@ public partial class InputKeyValue : Input<List<KeyValuePair<string, string>>>
     /// </summary>
     [Parameter]
     public List<ListOption> Options { get; set; }
+    
+    /// <summary>
+    /// Gets or sets if variables are allowed in the values
+    /// </summary>
+    [Parameter] public bool ShowVariables { get; set; }
 
+    /// <summary>
+    /// Gets or sets if duplicates are allowed
+    /// </summary>
+    [Parameter] public bool AllowDuplicates { get; set; }
+    
     /// <summary>
     /// The data for the input
     /// </summary>
-    private List<KeyValue> Data = new List<KeyValue>();
+    private Dictionary<Guid, KeyValue> Data = new ();
+    
+    
+    /// <summary>
+    /// The variables dictionary
+    /// </summary>
+    private Dictionary<string, object> _Variables = new ();
+
+    /// <summary>
+    /// Gets or sets the variables available
+    /// </summary>
+    [Parameter]
+    public Dictionary<string, object> Variables
+    {
+        get => _Variables;
+        set { _Variables = value ?? new Dictionary<string, object>(); }
+    }
 
     private string DuplicateKey = null; // one time we do want null....
 
@@ -51,7 +77,7 @@ public partial class InputKeyValue : Input<List<KeyValuePair<string, string>>>
         if (Value == null)
             Value = new List<KeyValuePair<string, string>>();
 
-        this.Data = Value.Select(x => new KeyValue {  Key = x.Key, Value = x.Value }).ToList();
+        this.Data = Value.Select(x => new KeyValue {  Key = x.Key, Value = x.Value }).ToDictionary(x => Guid.NewGuid());
         if(Field != null)
             this.Field.ValueChanged += FieldOnValueChanged;
 
@@ -60,6 +86,9 @@ public partial class InputKeyValue : Input<List<KeyValuePair<string, string>>>
 
     private void FieldOnValueChanged(object sender, object value)
     {
+        if (ValueIsUpdating)
+            return;
+        
         if (value == null)
             return;
         if(value is List<KeyValuePair<string,string>> kvps == false)
@@ -71,10 +100,10 @@ public partial class InputKeyValue : Input<List<KeyValuePair<string, string>>>
         bool differences = false;
         foreach (var kvp in kvps)
         {
-            var existing = this.Data.FirstOrDefault(x => x.Key == kvp.Key);
+            var existing = this.Data.Values.FirstOrDefault(x => x.Value == kvp.Key);
             if (existing == null)
             {
-                Data.Add(new() { Key = kvp.Key, Value = kvp.Value });
+                Data[Guid.NewGuid()] = new () { Key = kvp.Key, Value = kvp.Value };
                 differences = true;
             }
             else if (existing.Value != kvp.Value)
@@ -92,10 +121,10 @@ public partial class InputKeyValue : Input<List<KeyValuePair<string, string>>>
     /// <summary>
     /// Remove an item from the list
     /// </summary>
-    /// <param name="kv">the item to remove</param>
-    void Remove(KeyValue kv)
+    /// <param name="key">the key of the item to remove</param>
+    void Remove(Guid key)
     {
-        this.Data.Remove(kv);
+        this.Data.Remove(key);
         CheckForDuplicates();
         UpdateBindValue();
     }
@@ -122,7 +151,7 @@ public partial class InputKeyValue : Input<List<KeyValuePair<string, string>>>
             return;
         key = key.Trim();
 
-        this.Data.Add(new KeyValue {  Key = key, Value = value });
+        this.Data[Guid.NewGuid()] = new () {  Key = key, Value = value };
 
         CheckForDuplicates();
 
@@ -156,7 +185,7 @@ public partial class InputKeyValue : Input<List<KeyValuePair<string, string>>>
         }
 
 
-        this.Value = this.Data.Select(x => new KeyValuePair<string, string>(x.Key, x.Value)).ToList();
+        this.Value = this.Data.Values.Select(x => new KeyValuePair<string, string>(x.Key, x.Value)).ToList();
         return true;
     }
 
@@ -178,9 +207,11 @@ public partial class InputKeyValue : Input<List<KeyValuePair<string, string>>>
     /// <returns>true if there are duplicates, otherwise false</returns>
     private bool CheckForDuplicates()
     {
+        if (AllowDuplicates)
+            return true; // theyre allowed duplicates
         if (HasOptions)
             return true; // dont care about duplicates using dropdown
-        DuplicateKey = this.Data?.GroupBy(x => x.Key, x => x)?.FirstOrDefault(x => x.Count() > 1)?.Select(x => x.Key)?.FirstOrDefault();
+        DuplicateKey = this.Data?.Values?.GroupBy(x => x.Key, x => x)?.FirstOrDefault(x => x.Count() > 1)?.Select(x => x.Key)?.FirstOrDefault();
         if (DuplicateKey != null)
         {
             Logger.Instance.WLog("Duplicates found, " + DuplicateKey);

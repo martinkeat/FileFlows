@@ -108,6 +108,15 @@ public class FlowEditor : IDisposable
             string name = Translater.Instant($"Flow.Parts.{type}.Label", suppressWarnings: true);
             if (name == "Label")
                 name = FlowHelper.FormatLabel(type);
+            
+            if (p.FlowElementUid == "FileFlows.BasicNodes.Functions.Matches" && p.Model is IDictionary<string, object> dict)
+            {
+                // special case, outputs is determine by the "Matches" count
+                if (dict.TryGetValue("MatchConditions", out object oMatches))
+                {
+                    p.Outputs = ObjectHelper.GetArrayLength(oMatches) + 1; // add +1 for not matching
+                }
+            }
             p.Name = name;
         }
 
@@ -281,4 +290,6 @@ public class FlowEditor : IDisposable
         this.IsDirty = true;
         FlowPage.TriggerStateHasChanged();
     }
+    
+    
 } 

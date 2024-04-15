@@ -1,6 +1,6 @@
+using System.Collections;
 using Microsoft.AspNetCore.Components;
 using FileFlows.Client.Components;
-using FileFlows.Client.Helpers;
 using ffPart = FileFlows.Shared.Models.FlowPart;
 using ffElement = FileFlows.Shared.Models.FlowElement;
 using ff = FileFlows.Shared.Models.Flow;
@@ -652,9 +652,17 @@ public partial class Flow : ComponentBase, IDisposable
         {
             var newModel = newModelTask.Result;
             int outputs = -1;
-            if (part.Model is IDictionary<string, object> dictNew)
+            if (part.Model is IDictionary<string, object> dictNew && dictNew != null)
             {
-                if (dictNew?.ContainsKey("Outputs") == true && int.TryParse(dictNew["Outputs"]?.ToString(), out outputs)) { }
+                if (dictNew.TryGetValue("Outputs", out object oOutputs) && int.TryParse(oOutputs?.ToString(), out outputs)) { }
+                else if (part.FlowElementUid == "FileFlows.BasicNodes.Functions.Matches")
+                {
+                    // special case, outputs is determine by the "Matches" count
+                    if (dictNew?.TryGetValue("MatchConditions", out object oMatches) == true)
+                    {
+                        outputs = ObjectHelper.GetArrayLength(oMatches) + 1; // add +1 for not matching
+                    }
+                }
             }
             ActiveFlow?.MarkDirty();
             return new { outputs, model = newModel };
