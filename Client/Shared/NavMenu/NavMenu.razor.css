@@ -275,6 +275,9 @@
 .bubbles .bubble.Processing {
   --bubble-color: var(--green);
 }
+.bubbles .bubble.OnHold {
+  --bubble-color: var(--yellow);
+}
 .bubbles .bubble.d-00 {
   min-width: 1.5rem;
 }
@@ -397,5 +400,3 @@
     font-size: 3.5rem;
   }
 }
-
-/*# sourceMappingURL=NavMenu.razor.css.map */

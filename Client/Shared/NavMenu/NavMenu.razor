@@ -59,13 +59,17 @@
                        @onclick="() => Click(item)">
                         <span class="icon @item.Icon" aria-hidden="true"></span>
                         <span class="text-label">@item.Title</span>
-                        @if (item.Url == "library-files" && (Processing > 0 || Failed > 0 || Unprocessed > 0))
+                        @if (item.Url == "library-files" && (Processing > 0 || Failed > 0 || Unprocessed > 0 || OnHold > 0))
                         {
                             <ul class="bubbles">
                                 <li title="Unprocessed" class="bubble Unprocessed d-@(new string('0', Unprocessed.ToString().Length))">@Unprocessed</li>
                                 @if (Processing > 0)
                                 {
                                     <li title="Processing" class="bubble Processing d-@(new string('0', Processing.ToString().Length))">@Processing</li>
+                                }
+                                @if (OnHold > 0)
+                                {
+                                    <li title="On Hold" class="bubble OnHold d-@(new string('0', OnHold.ToString().Length))">@OnHold</li>
                                 }
                                 @if (Failed > 0)
                                 {

@@ -53,7 +53,7 @@ public partial class NavMenu : IDisposable
     /// </summary>
     private bool UserMenuOpened = false;
 
-    private int Unprocessed = -1, Processing = -1, Failed = -1;
+    private int Unprocessed = -1, Processing = -1, Failed = -1, OnHold = -1;
     /// <summary>
     /// Gets or sets the paused service
     /// </summary>
@@ -66,8 +66,10 @@ public partial class NavMenu : IDisposable
 
     private List<NavMenuItem> UserMenu = new();
     private Profile Profile;
-
-    // private BackgroundTask bubblesTask;
+    /// <summary>
+    /// If the bubbles have been loaded at least once
+    /// </summary>
+    private bool bubblesLoadedOnce = false;
 
     /// <inheritdoc />
     protected async override Task OnInitializedAsync()
@@ -81,12 +83,7 @@ public partial class NavMenu : IDisposable
         
         NavigationManager.LocationChanged += NavigationManagerOnLocationChanged;
         
-        // App.Instance.OnFileFlowsSystemUpdated += FileFlowsSystemUpdated;
-        
-
-        // bubblesTask = new BackgroundTask(TimeSpan.FromMilliseconds(10_000), () => _ = RefreshBubbles());
         _ = RefreshBubbles();
-        // bubblesTask.Start();
         
         this.ClientService.FileStatusUpdated += ClientServiceOnFileStatusUpdated;
         PausedService.OnPausedLabelChanged += PausedServiceOnOnPausedLabelChanged;
@@ -129,21 +126,31 @@ public partial class NavMenu : IDisposable
         Unprocessed = data.Where(x => x.Status == FileStatus.Unprocessed).Select(x => x.Count).FirstOrDefault();
         Processing = data.Where(x => x.Status == FileStatus.Processing).Select(x => x.Count).FirstOrDefault();
         Failed = data.Where(x => x.Status == FileStatus.ProcessingFailed).Select(x => x.Count).FirstOrDefault();
+        OnHold = data.Where(x => x.Status == FileStatus.OnHold).Select(x => x.Count).FirstOrDefault();
         this.StateHasChanged();
     }
 
     private async Task RefreshBubbles()
     {
-        bool hasFocus = await jSRuntime.InvokeAsync<bool>("eval", "document.hasFocus()");
-        if (hasFocus == false)
-            return;
-        
+        if (bubblesLoadedOnce) // if loaded once, check document has focus
+        {
+            bool hasFocus = await jSRuntime.InvokeAsync<bool>("eval", "document.hasFocus()");
+            if (hasFocus == false)
+                return;
+        }
+        else
+        {
+            // else we want to load it once to just show the data
+            bubblesLoadedOnce = true;
+        }
+
         var sResult = await HttpHelper.Get<List<LibraryStatus>>("/api/library-file/status");
         if (sResult.Success == false || sResult.Data?.Any() != true)
             return;
         Unprocessed = sResult.Data.Where(x => x.Status == FileStatus.Unprocessed).Select(x => x.Count).FirstOrDefault();
         Processing = sResult.Data.Where(x => x.Status == FileStatus.Processing).Select(x => x.Count).FirstOrDefault();
         Failed = sResult.Data.Where(x => x.Status == FileStatus.ProcessingFailed).Select(x => x.Count).FirstOrDefault();
+        OnHold = sResult.Data.Where(x => x.Status == FileStatus.OnHold).Select(x => x.Count).FirstOrDefault();
         this.StateHasChanged();
     }
     

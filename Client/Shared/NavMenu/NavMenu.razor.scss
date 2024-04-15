@@ -284,6 +284,9 @@ $maxItems: 15;
         &.Processing {
             --bubble-color: var(--green);
         }
+        &.OnHold {
+            --bubble-color: var(--yellow);
+        }
         &.d-00 {
             min-width: 1.5rem;
         }
