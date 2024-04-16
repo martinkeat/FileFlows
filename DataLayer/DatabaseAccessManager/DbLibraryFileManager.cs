@@ -1438,6 +1438,11 @@ FROM {Wrap(nameof(LibraryFile))}";
                    DbConnector.FormatDateQuoted(filter.FromDate.Year > 1970 ? filter.FromDate : new DateTime(1970,1,1)) + " and " +
                    DbConnector.FormatDateQuoted(filter.ToDate.Year < 2200 ? filter.ToDate : new DateTime(2200,12, 31)));
 
+        if (filter.Status != null)
+        {
+            wheres.Add(Wrap(nameof(LibraryFile.Status)) + " = " + ((int)filter.Status.Value));
+        }
+
         if (string.IsNullOrWhiteSpace(filter.LibraryName) == false)
         {
             wheres.Add("lower(" + Wrap(nameof(LibraryFile.LibraryName)) + ") " +

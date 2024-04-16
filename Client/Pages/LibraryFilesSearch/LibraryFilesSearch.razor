@@ -69,6 +69,17 @@
         </div>
     </div>
     <div class="search-field input">
+        <div class="label">Status</div>
+        <div class="value">
+            <select @bind="SearchModel.Status">
+                @foreach (var opt in StatusOptions)
+                {
+                    <option value=@opt.Value>@opt.Label</option>
+                }
+            </select>
+        </div>
+    </div>
+    <div class="search-field input">
         <div class="label">Date</div>
         <div class="value">
             <DateRangePicker OnRangeSelect=@OnRangeSelect Ranges=@DateRangeHelper.DateRanges TimePicker="true" TimePicker24Hour="true" DateFormat="@($"d MMM HH:mm")">
