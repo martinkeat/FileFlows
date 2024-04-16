@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Server + Client" type="CompoundRunConfigurationType">
-    <toRun name="Client: FileFlows" type="LaunchSettings" />
+    <toRun name="Client: WebApplication2" type="LaunchSettings" />
     <toRun name="Server" type="LaunchSettings" />
     <method v="2" />
   </configuration>

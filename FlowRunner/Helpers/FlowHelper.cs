@@ -127,9 +127,10 @@ public class FlowHelper
     /// <param name="logger">The logger used to log</param>
     /// <param name="part">the part in the flow</param>
     /// <param name="variables">the variables that are executing in the flow from NodeParameters</param>
+    /// <param name="runner">the runner</param>
     /// <returns>the node instance</returns>
     /// <exception cref="Exception">If the flow element type cannot be found</exception>
-    internal static Result<Node> LoadFlowElement(ILogger logger, FlowPart part, Dictionary<string, object> variables)
+    internal static Result<Node> LoadFlowElement(ILogger logger, FlowPart part, Dictionary<string, object> variables, Runner runner)
     {
         if (part.Type == FlowElementType.Script)
         {
@@ -148,14 +149,13 @@ public class FlowHelper
         
         if (part.FlowElementUid.EndsWith(".GotoFlow"))
         {
-            // special case, dont use the BasicNodes execution of this, use the runners execution,
+            // special case, don't use the BasicNodes execution of this, use the runners execution,
             // we have more control and can load it as a sub flow
             if (part.Model is IDictionary<string, object> dictModel == false)
                 return Result<Node>.Fail("Failed to load model for GotoFlow flow element.");
 
             if (dictModel.TryGetValue("Flow", out object oFlow) == false || oFlow == null)
                 return Result<Node>.Fail("Failed to get flow from GotoFlow model.");
-
             ObjectReference? orFlow;
             string json = JsonSerializer.Serialize(oFlow);
             try
@@ -176,6 +176,15 @@ public class FlowHelper
             var gotoFlow = Program.Config.Flows.FirstOrDefault(x => x.Uid == orFlow.Uid);
             if(gotoFlow == null)
                 return Result<Node>.Fail("Failed to locate Flow defined in the GotoFlow flow element.");
+
+            if (dictModel.TryGetValue("UpdateFlowUsed", out object oUpdateFlowUsed) && oUpdateFlowUsed?.ToString()?.ToLowerInvariant() == "true")
+            {
+                runner.Info.LibraryFile.Flow = new()
+                {
+                    Uid = gotoFlow.Uid,
+                    Name = gotoFlow.Name
+                };
+            }
 
             return new ExecuteFlow()
             {

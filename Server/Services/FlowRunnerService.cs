@@ -1,10 +1,8 @@
 ﻿using System.Text.RegularExpressions;
 using FileFlows.DataLayer;
-using FileFlows.Managers;
 using FileFlows.Plugin;
 using FileFlows.Server.Helpers;
 using FileFlows.Server.Hubs;
-using FileFlows.Shared.Helpers;
 
 namespace FileFlows.Server.Services;
 
@@ -233,8 +231,13 @@ public class FlowRunnerService : IFlowRunnerService
                     existing.ProcessingEnded = DateTime.UtcNow; // this avoid a "2022 years ago" issue
                 if(existing.ProcessingEnded > DateTime.UtcNow)
                     existing.ProcessingEnded = DateTime.UtcNow;
-                if(string.IsNullOrWhiteSpace(existing.Flow?.Name))
+                
+                if (updated.Flow?.Uid != null && updated.Flow.Uid != Guid.Empty &&
+                    updated.Flow.Uid != existing.Flow?.Uid)
                     existing.Flow = updated.Flow;
+                else if(string.IsNullOrWhiteSpace(existing.Flow?.Name))
+                    existing.Flow = updated.Flow;
+                
                 await lfService.Update(existing);
                 var library = await ServiceLoader.Load<LibraryService>().GetByUidAsync(existing.Library.Uid);
                 
