@@ -90,6 +90,20 @@ public class ProcessingNode: FileFlowObject
     /// Gets or sets the permissions to set
     /// </summary>
     public string Permissions { get; set; }
+
+    /// <summary>
+    /// Gets or sets the permissions to set
+    /// </summary>
+    public int? PermissionsFiles
+    {
+        // this will change in a few versions and Permissions property will be removed
+        get => int.TryParse(Permissions, out int value) ? value : null;
+        set => Permissions = value?.ToString("D3");
+    }
+    /// <summary>
+    /// Gets or sets the permissions to set for folders
+    /// </summary>
+    public int? PermissionsFolders { get; set; }
     /// <summary>
     /// Gets or sets if this node can process all libraries
     /// </summary>

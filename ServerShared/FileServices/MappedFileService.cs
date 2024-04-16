@@ -38,11 +38,11 @@ public class MappedFileService : IFileService
     /// <param name="node">The processing node used for mapping file operations.</param>
     public MappedFileService(ProcessingNode node)
     {
-        if (int.TryParse(node.Permissions, out var permissions) == false)
-            permissions = 666;
+        int permissions = node.PermissionsFiles ?? Globals.DefaultPermissionsFile;
         _localFileService = new LocalFileService()
         {
-            Permissions = permissions
+            PermissionsFile = permissions,
+            PermissionsFolder = node.PermissionsFolders ?? Globals.DefaultPermissionsFile
         };
         _node = node;
     }

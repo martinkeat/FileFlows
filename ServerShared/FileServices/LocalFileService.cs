@@ -29,7 +29,12 @@ public class LocalFileService : IFileService
     /// <summary>
     /// Gets or sets the permissions to use for files
     /// </summary>
-    public int? Permissions { get; set; }
+    public int? PermissionsFile { get; set; }
+    
+    /// <summary>
+    /// Gets or sets the permissions to use for folders
+    /// </summary>
+    public int? PermissionsFolder { get; set; }
     
     /// <summary>
     /// Gets or sets the owner:group to use for files
@@ -441,47 +446,32 @@ public class LocalFileService : IFileService
         return true;
     }
 
-    public void SetPermissions(string path, int? permissions = null, Action<string> logMethod = null)
+    /// <summary>
+    /// Sets permissions on a file or foolder
+    /// </summary>
+    /// <param name="path">the path</param>
+    /// <param name="logMethod">the log method</param>
+    public void SetPermissions(string path, Action<string> logMethod = null)
     {
         logMethod ??= (string message) => Logger?.ILog(message);
-        
-        permissions = permissions != null && permissions > 0 ? permissions : Permissions;
-        if (permissions == null || permissions < 1)
-            permissions = 777;
-        
 
-        if ((File.Exists(path) == false && Directory.Exists(path) == false))
+        bool isFile = File.Exists(path);
+        bool isFolder = Directory.Exists(path);
+        if(isFile == false && isFolder == false)
         {
             logMethod("SetPermissions: File doesnt existing, skipping");
             return;
         }
-        
+
+        int permissions = isFile ? (PermissionsFile ?? Globals.DefaultPermissionsFile) : (PermissionsFolder ?? Globals.DefaultPermissionsFolder);
+
         StringLogger stringLogger = new StringLogger();
 
-        bool isFile = new FileInfo(path).Exists;
-
         FileHelper.SetPermissions(stringLogger, path, file: isFile,
-            permissions: permissions.Value.ToString("D3"));
+            permissions: permissions);
         
         FileHelper.ChangeOwner(stringLogger, path, file: isFile, ownerGroup: OwnerGroup);
         
         logMethod(stringLogger.ToString());
-        
-        return;
-        
-
-        if (OperatingSystem.IsLinux())
-        {
-            var filePermissions = FileHelper.ConvertLinuxPermissionsToUnixFileMode(permissions.Value);
-            if (filePermissions == UnixFileMode.None)
-            {
-                logMethod("SetPermissions: Invalid file permissions: " + permissions.Value);
-                return;
-            }
-            
-            File.SetUnixFileMode(path, filePermissions);
-            logMethod($"SetPermissions: Permission [{filePermissions}] set on file: " + path);
-        }
-
     }
 }

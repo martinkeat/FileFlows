@@ -140,7 +140,7 @@ public class NodeController : BaseController
                 internalNode.TempPath = node.TempPath;
                 internalNode.DontChangeOwner = node.DontChangeOwner;
                 internalNode.DontSetPermissions = node.DontSetPermissions;
-                internalNode.Permissions = node.Permissions;
+                internalNode.PermissionsFiles = node.PermissionsFiles;
                 internalNode.AllLibraries = node.AllLibraries;
                 internalNode.MaxFileSizeMb = node.MaxFileSizeMb;
                 internalNode.Variables = node.Variables ?? new();

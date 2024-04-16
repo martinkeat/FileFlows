@@ -44,7 +44,8 @@ public class FileServerController : Controller
         {
             AllowedPaths = allowedPaths,
             CheckProtectivePaths = true,
-            Permissions = settings.FileServerFilePermissions < 1 ? 777 : settings.FileServerFilePermissions
+            PermissionsFile = settings.FileServerFilePermissions < 1 ? Globals.DefaultPermissionsFile : settings.FileServerFilePermissions,
+            PermissionsFolder = settings.FileServerFolderPermissions < 1 ? Globals.DefaultPermissionsFolder : settings.FileServerFolderPermissions
         };
     }
 

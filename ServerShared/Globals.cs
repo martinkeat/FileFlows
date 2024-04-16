@@ -11,7 +11,7 @@ public class Globals
     /// Gets the version of FileFlows
     /// </summary>
     #if(DEBUG)
-    public static readonly string Version = DateTime.UtcNow.ToString("yy.MM") + ".1.2606";
+    public static readonly string Version = DateTime.UtcNow.ToString("yy.MM") + ".1.3000";
     #else
     public const string Version = "23.10.2.2469";
     #endif
@@ -46,9 +46,7 @@ public class Globals
     /// <summary>
     /// Gets if this is running on an ARM CPU
     /// </summary>
-    public static bool IsArm =>
-        System.Runtime.InteropServices.RuntimeInformation.ProcessArchitecture == Architecture.Arm
-        || System.Runtime.InteropServices.RuntimeInformation.ProcessArchitecture == Architecture.Arm64;
+    public static bool IsArm => RuntimeInformation.ProcessArchitecture is Architecture.Arm or Architecture.Arm64;
 
     /// <summary>
     /// Gets or sets if this node is running inside a docker container
@@ -109,6 +107,15 @@ public class Globals
     public static string FileFlowsDotComUrl => (CustomFileFlowsDotComUrl?.EmptyAsNull() ??
                                                 Environment.GetEnvironmentVariable("FFURL")?.EmptyAsNull() ??
                                                 "https://fileflows.com").TrimEnd('/');
+
+    /// <summary>
+    /// The Default permissions for files on a unix like system
+    /// </summary>
+    public const int DefaultPermissionsFile = 644;
+    /// <summary>
+    /// The Default permissions for folder on a unix like system
+    /// </summary>
+    public const int DefaultPermissionsFolder = 755;
 
     /// <summary>
     /// The base url for Plugin 

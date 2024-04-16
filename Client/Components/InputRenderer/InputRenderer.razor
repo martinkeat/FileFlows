@@ -100,8 +100,10 @@
                 {
                     (min, max) = GetRange(field);
                 }
+                var zeroAsEmpty = GetParameter<bool>(field, "ZeroAsEmpty");
                 <InputNumber TItem="int" Field=@field Label="@label" Value="@value" ReadOnly=@readOnly ValueChanged="@(x => UpdateValue(field, x))"
-    Validators=@field.Validators Placeholder="@field.Placeholder" Min="@min" Max="@max" HideLabel=@hideLabel OnSubmit=@OnSubmit OnClose=@OnClose Help=@field.HelpText />
+                             Validators=@field.Validators Placeholder="@field.Placeholder" Min="@min" Max="@max" HideLabel=@hideLabel 
+                             OnSubmit=@OnSubmit OnClose=@OnClose Help=@field.HelpText ZeroAsEmpty="@zeroAsEmpty" />
             }
             break;
         case FormInputType.NumberPercent:

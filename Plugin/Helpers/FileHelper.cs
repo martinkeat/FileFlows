@@ -19,7 +19,11 @@ public class FileHelper
     /// <summary>
     /// Gets or sets the file permissions used when setting permissions
     /// </summary>
-    public static string Permissions { get; set; }
+    public static int Permissions { get; set; }
+    /// <summary>
+    /// Gets or sets the permissions to set for folders
+    /// </summary>
+    public static int PermissionsFolders { get; set; }
     
     /// <summary>
     /// Creates a directory if it doesn't already exist.
@@ -195,9 +199,8 @@ public class FileHelper
     /// <param name="recursive">True to apply permissions recursively to all items within a directory; otherwise, false.</param>
     /// <param name="file">True if the provided path is a file; otherwise, false (assumed to be a directory).</param>
     /// <returns>True if setting permissions succeeds; otherwise, false.</returns>
-    public static bool SetPermissions(ILogger logger, string filePath, bool recursive = true, bool file = false, string permissions = null)
+    public static bool SetPermissions(ILogger logger, string filePath, bool recursive = true, bool file = false, int? permissions = null)
     {
-        permissions = permissions?.EmptyAsNull() ?? Permissions?.EmptyAsNull() ?? "777";
         if (DontSetPermissions)
         {
             logger?.ILog("SetPermissions is turned off, skipping");
@@ -211,6 +214,7 @@ public class FileHelper
             return true; // its macos, lets just pretend we did this
 
         bool log = filePath.Contains("Runner-") == false;
+        permissions ??= file == false ? PermissionsFolders : Permissions;
 
         if (file == false)
         {

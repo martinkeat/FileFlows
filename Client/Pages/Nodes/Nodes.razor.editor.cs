@@ -322,9 +322,27 @@ public partial class Nodes : ListPage<Guid, ProcessingNode>
 
         fields.Add(new ElementField
         {
-            InputType = FormInputType.Text,
-            Name = nameof(node.Permissions),
-            DisabledConditions = new List<Condition> { condition }
+            InputType = FormInputType.Int,
+            Name = nameof(node.PermissionsFiles),
+            DisabledConditions = new List<Condition> { condition },
+            Placeholder = ServerShared.Globals.DefaultPermissionsFile.ToString("D3"),
+            Parameters = new ()
+            {
+                { nameof(InputNumber<int>.Max), 777 },
+                { nameof(InputNumber<int>.ZeroAsEmpty), true }
+            }
+        });
+        fields.Add(new ElementField
+        {
+            InputType = FormInputType.Int,
+            Name = nameof(node.PermissionsFolders),
+            DisabledConditions = new List<Condition> { condition },
+            Placeholder = ServerShared.Globals.DefaultPermissionsFolder.ToString("D3"),
+            Parameters = new ()
+            {
+                { nameof(InputNumber<int>.Max), 777 },
+                { nameof(InputNumber<int>.ZeroAsEmpty), true }
+            }
         });
         return fields;
     }

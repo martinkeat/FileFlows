@@ -106,10 +106,16 @@ public class Settings : FileFlowObject
     public bool FileServerDisabled { get; set; }
     
     /// <summary>
-    /// Gets or sets the file permissions to set on the file/folders
+    /// Gets or sets the file permissions to set on the file
     /// Only used on Unix based systems
     /// </summary>
     public int FileServerFilePermissions { get; set; }
+    
+    /// <summary>
+    /// Gets or sets the folder permissions to set on the folders
+    /// Only used on Unix based systems
+    /// </summary>
+    public int FileServerFolderPermissions { get; set; }
     
     /// <summary>
     /// Gets or sets the owner group to use
