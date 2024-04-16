@@ -107,6 +107,27 @@ window.ff = {
         anchorElement.click();
         anchorElement.remove();
     },
+    saveTextAsFile: function (fileName, textContent) {
+        // Create a Blob with the file contents
+        let blob = new Blob([textContent], { type: 'text/plain' });
+
+        // Create a temporary anchor element
+        let a = document.createElement("a");
+        document.body.appendChild(a);
+
+        // Set the object URL as the anchor's href
+        a.href = window.URL.createObjectURL(blob);
+
+        // Set the file name
+        a.download = fileName;
+
+        // Trigger a click event on the anchor to initiate download
+        a.click();
+
+        // Cleanup
+        window.URL.revokeObjectURL(a.href);
+        document.body.removeChild(a);
+    },
     copyToClipboard: function (text) {
         if (window.clipboardData && window.clipboardData.setData) {
             // Internet Explorer-specific code path to prevent textarea being shown while dialog is visible.

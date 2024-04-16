@@ -44,7 +44,7 @@
                     <Head>
                         @if (ShowDownload)
                         {
-                            <a href="@DownloadUrl" class="btn btn-download" target="_blank"><span>@lblDownloadButton</span></a>
+                            <button @onclick=@(() => DoDownload())>@lblDownloadButton</button>
                         }
 
                         @foreach (var btn in AdditionalButtons)

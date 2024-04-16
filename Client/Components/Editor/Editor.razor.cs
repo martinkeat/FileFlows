@@ -26,7 +26,7 @@ public partial class Editor : InputRegister, IDisposable
     /// <summary>
     /// Gets or sets the JavaScript runtime
     /// </summary>
-    [Inject] IJSRuntime jsRuntime { get; set; }
+    [Inject] public IJSRuntime jsRuntime { get; private set; }
     
     
     /// <summary>
@@ -380,6 +380,23 @@ public partial class Editor : InputRegister, IDisposable
         this.OnClosed?.Invoke();
     }
 
+    /// <summary>
+    /// Closes the editor, intended to be called by an external source
+    /// E.g. to allow something that opened the editor, the ability to close it outside of it
+    /// </summary>
+    public async Task Closed()
+    {
+        OpenTask?.TrySetCanceled();
+        this.Visible = false;
+        if(this.Fields != null)
+            this.Fields.Clear();
+        if(this.Tabs != null)
+            this.Tabs.Clear();
+
+        await this.WaitForRender();
+        this.OnClosed?.Invoke();
+    }
+
     private string ModelToJsonForCompare(ExpandoObject model)
     {
         string json = model == null ? string.Empty : JsonSerializer.Serialize(Model);
@@ -634,7 +651,15 @@ public partial class Editor : InputRegister, IDisposable
     {
         if (string.IsNullOrWhiteSpace(HelpUrl))
             return;
-        App.Instance.OpenHelp(HelpUrl.ToLowerInvariant());
+        _ = App.Instance.OpenHelp(HelpUrl.ToLowerInvariant());
+    }
+
+    private async Task DoDownload()
+    {
+        if (string.IsNullOrWhiteSpace(DownloadUrl))
+            return;
+        
+        await jsRuntime.InvokeVoidAsync("ff.downloadFile", DownloadUrl);
     }
 
     protected void OnMaximised(bool maximised)
@@ -751,14 +776,14 @@ public class EditorOpenArgs
     /// </summary>
     public string DownloadUrl { get; set; }
     /// <summary>
-    /// Gets or sets if a prompt should be shown the the user if they try to close the editor with changes
+    /// Gets or sets if a prompt should be shown the user if they try to close the editor with changes
     /// </summary>
     public bool PromptUnsavedChanges  { get; set; }
     /// <summary>
     /// Gets or sets 
     /// </summary>
     public IEnumerable<ActionButton> AdditionalButtons { get; set; }
-
+    
     /// <summary>
     /// Gets or sets if the fields scrollbar should be hidden
     /// </summary>

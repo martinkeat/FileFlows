@@ -43,6 +43,7 @@
     "SubFlow": "Sub Flow",
     "SubFlows": "Sub Flows",
     "DownloadLog": "Download Log",
+    "DownloadLogShort": "Log",
     "UnsavedChanges": "Unsaved Changes",
     "Enabled": "Enabled",
     "Export": "Export",
@@ -720,6 +721,11 @@
       },
       "Labels": {
         "ScanTriggered": "Scanned triggered for all enabled libraries"
+      },
+      "Messages": {
+        "FailedToReprocess": "Failed to reprocess",
+        "FailedToDownloadLog": "Failed to download log",
+        "ReprocessingFile": "File sent for reprocessing"
       }
     },
     "Log": {

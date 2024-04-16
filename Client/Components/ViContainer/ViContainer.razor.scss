@@ -50,8 +50,9 @@
         margin-left:1rem;
         margin-right: -0.5rem;
         ::deep button {
-            width:7rem;
-            padding:unset;
+            min-width:7rem;
+            width:fit-content;
+            padding: 0 0.75rem;
         }
         ::deep a {
             width: 7rem;

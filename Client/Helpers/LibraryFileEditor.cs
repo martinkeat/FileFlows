@@ -1,6 +1,7 @@
 using FileFlows.Client.Components;
 using FileFlows.Client.Components.Inputs;
 using FileFlows.Plugin;
+using Microsoft.JSInterop;
 
 namespace FileFlows.Client.Helpers;
 
@@ -32,7 +33,7 @@ public class LibraryFileEditor
     public static async Task Open(Blocker blocker, Editor editor, Guid libraryItemUid)
     {
         LibraryFileModel model = null;
-        string logUrl = ApIUrl + "/" + libraryItemUid+ "/log";
+        string logUrl = ApIUrl + "/" + libraryItemUid + "/log";
         blocker.Show();
         try
         {
@@ -105,17 +106,31 @@ public class LibraryFileEditor
                 });
             }
 
-            string downloadUrl = $"{ApIUrl}/{libraryItemUid}/log/download";
-            #if(DEBUG)
-            downloadUrl = "http://localhost:6868" + downloadUrl;
-            #endif
-
+            var additionalButtons = new ActionButton[]
+            {
+                model.Status is FileStatus.Processed or FileStatus.MappingIssue or FileStatus.MissingLibrary
+                    or FileStatus.ProcessingFailed or FileStatus.FlowNotFound
+                    or FileStatus.ReprocessByFlow
+                    ? new()
+                    {
+                        Label = App.Instance.IsMobile ? "Labels.DownloadLogShort" : "Labels.DownloadLog",
+                        Clicked = (sender, e) => _ = DownloadLog(sender, libraryItemUid)
+                    }
+                    : null,
+                model.Status == FileStatus.ProcessingFailed
+                    ? new()
+                    {
+                        Label = "Pages.LibraryFiles.Buttons.Reproess",
+                        Clicked = (sender, e) => _ = Reprocess(sender, libraryItemUid)
+                    }
+                    : null
+            }.Where(x => x != null).ToArray();
             if (App.Instance.IsMobile)
             {
                 await editor.Open(new()
                 {
                     TypeName = "Pages.LibraryFile", Title = model.RelativePath, Model = model, Tabs = tabs,
-                    Large = true, ReadOnly = true, NoTranslateTitle = true
+                    Large = true, ReadOnly = true, NoTranslateTitle = true, AdditionalButtons = additionalButtons 
                 });
             }
             else
@@ -123,8 +138,7 @@ public class LibraryFileEditor
                 await editor.Open(new()
                 {
                     TypeName = "Pages.LibraryFile", Title = model.RelativePath, Model = model, Tabs = tabs,
-                    Large = true, ReadOnly = true, NoTranslateTitle = true,
-                    DownloadButtonLabel = "Labels.DownloadLog", DownloadUrl = downloadUrl
+                    Large = true, ReadOnly = true, NoTranslateTitle = true, AdditionalButtons = additionalButtons
                 });
                 
             }
@@ -134,6 +148,56 @@ public class LibraryFileEditor
             // just show basic info
             await editor.Open(new () { TypeName = "Pages.LibraryFile", Title = model.RelativePath, Fields = GetInfoTab(model), Model = model, Large = true, ReadOnly = true, NoTranslateTitle = true});
         }
+    }
+
+    /// <summary>
+    /// Downloads the library files log file
+    /// </summary>
+    /// <param name="sender">the sender</param>
+    /// <param name="uid">the UID of the library file</param>
+    private static async Task DownloadLog(object sender, Guid uid)
+    {
+        if (sender is Editor editor == false)
+            return;
+        string downloadUrl = $"{ApIUrl}/{uid}/log/download";
+#if(DEBUG)
+        downloadUrl = "http://localhost:6868" + downloadUrl;
+#endif
+        var result = await HttpHelper.Get<string>(downloadUrl);
+        if (result.Success == false)
+        {
+            Toast.ShowError(Translater.Instant("Pages.LibraryFiles.Messages.FailedToDownloadLog"));
+            return;
+        }
+
+        await editor.jsRuntime.InvokeVoidAsync("ff.saveTextAsFile", $"{uid}.log", result.Body);
+    }
+
+    /// <summary>
+    /// Reprocess the file
+    /// </summary>
+    /// <param name="sender">the sender</param>
+    /// <param name="uid">the UID of the library file</param>
+    private static async Task Reprocess(object sender, Guid uid)
+    {
+        if (sender is Editor editor == false)
+            return;
+        
+        string url = $"{ApIUrl}/reprocess";
+#if(DEBUG)
+        url = "http://localhost:6868" + url;
+#endif
+        var result = await HttpHelper.Post(url, new { Uids = new[] { uid } });
+        if (result.Success == false)
+        {
+            var msg = result.Body?.EmptyAsNull() ?? Translater.Instant("Pages.LibraryFiles.Messages.FailedToReprocess");
+            Toast.ShowError(msg);
+            return;
+        }
+        Toast.ShowSuccess(Translater.Instant("Pages.LibraryFiles.Messages.ReprocessingFile"));
+        
+        await editor.Closed();
+        
     }
 
     private static List<ElementField> GetInfoTab(LibraryFileModel item)

@@ -43,8 +43,9 @@
   margin-right: -0.5rem;
 }
 .top-row .other ::deep button {
-  width: 7rem;
-  padding: unset;
+  min-width: 7rem;
+  width: fit-content;
+  padding: 0 0.75rem;
 }
 .top-row .other ::deep a {
   width: 7rem;
@@ -101,5 +102,3 @@
 .fa-window-maximize:hover {
   color: var(--accent);
 }
-
-/*# sourceMappingURL=ViContainer.razor.css.map */
