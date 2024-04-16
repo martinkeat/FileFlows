@@ -314,17 +314,14 @@ public partial class Nodes : ListPage<Guid, ProcessingNode>
         };
         fields.Add(efDontSetPermissions);
 
-        var condition = new Condition()
-        {
-            Value = false
-        };
-        condition.SetField(efDontSetPermissions, node.DontSetPermissions);
-
         fields.Add(new ElementField
         {
             InputType = FormInputType.Int,
             Name = nameof(node.PermissionsFiles),
-            DisabledConditions = new List<Condition> { condition },
+            DisabledConditions = new List<Condition>
+            {
+                new (efDontSetPermissions,node.DontSetPermissions, value: false)
+            },
             Placeholder = ServerShared.Globals.DefaultPermissionsFile.ToString("D3"),
             Parameters = new ()
             {
@@ -336,7 +333,10 @@ public partial class Nodes : ListPage<Guid, ProcessingNode>
         {
             InputType = FormInputType.Int,
             Name = nameof(node.PermissionsFolders),
-            DisabledConditions = new List<Condition> { condition },
+            DisabledConditions = new List<Condition>
+            {
+                new (efDontSetPermissions,node.DontSetPermissions, value: false)
+            },
             Placeholder = ServerShared.Globals.DefaultPermissionsFolder.ToString("D3"),
             Parameters = new ()
             {
