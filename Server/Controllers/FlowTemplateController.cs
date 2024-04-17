@@ -36,17 +36,16 @@ public class FlowTemplateController : Controller
                     .ToList();
                 foreach (var template in templates)
                 {
-                    template.MissingDependencies = template.Plugins.Where(pl =>
+                    template.MissingDependencies = template.Plugins?.Where(pl =>
                             plugins.Contains(
                                 pl.ToLowerInvariant().Replace(" ", string.Empty).Replace("nodes", string.Empty)) ==
                             false)
-                        .ToList();
+                        ?.ToList() ?? new ();
                 }
 
-                var results = templates.Union(await LocalFlows())
+                templates = templates.Union(await LocalFlows())
                     .Where(x => x.Type == type || type == any)
                     .ToList();
-                templates.AddRange(results);
             }
             else
             {

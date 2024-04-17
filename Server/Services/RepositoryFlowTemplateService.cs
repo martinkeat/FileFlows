@@ -29,7 +29,7 @@ public class RepositoryFlowTemplateService
             FetchedAt = DateTime.UtcNow; 
         }
 
-        return Templates;
+        return Templates.ToList(); // clone it so they dont alter this list
     }
     
     /// <summary>
