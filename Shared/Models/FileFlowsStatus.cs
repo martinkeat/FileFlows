@@ -119,15 +119,23 @@ public class FileFlowsStatus
 public enum ConfigurationStatus
 {
     /// <summary>
+    /// Initial configuration done
+    /// </summary>
+    InitialConfig = 1,
+    /// <summary>
+    /// The EULA has been accepted
+    /// </summary>
+    EulaAccepted = 2,
+    /// <summary>
     /// Flows are configured
     /// </summary>
-    Flows = 1,
+    Flows = 4,
     /// <summary>
     /// Libraries are configured
     /// </summary>
-    Libraries = 2,
+    Libraries = 8,
     /// <summary>
     /// Users are configured
     /// </summary>
-    Users = 4
+    Users = 16
 }

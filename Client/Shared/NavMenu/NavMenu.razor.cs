@@ -90,6 +90,18 @@ public partial class NavMenu : IDisposable
 
         ProfileService.OnRefresh += ProfileServiceOnOnRefresh; 
         Profile = await ProfileService.Get();
+
+        if ((Profile.ConfigurationStatus & ConfigurationStatus.InitialConfig) != ConfigurationStatus.InitialConfig || 
+            (Profile.ConfigurationStatus & ConfigurationStatus.EulaAccepted) != ConfigurationStatus.EulaAccepted)
+        {
+            if (Profile.IsAdmin == false)
+            {
+                await ProfileService.Logout("Labels.AdminRequired");
+                return;
+            }
+            NavigationManager.NavigateTo("/initial-config");
+            return;
+        }
         this.LoadMenu();
     }
 

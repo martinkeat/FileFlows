@@ -41,6 +41,12 @@ public class ProfileController : Controller
         bool flows = await ServiceLoader.Load<FlowService>().HasAny();
         bool users = await ServiceLoader.Load<UserService>().HasAny();
 
+        var settings = await ServiceLoader.Load<SettingsService>().Get();
+
+        if (settings.InitialConfigDone)
+            profile.ConfigurationStatus |= ConfigurationStatus.InitialConfig;
+        if (settings.EulaAccepted)
+            profile.ConfigurationStatus |= ConfigurationStatus.EulaAccepted;
         if (flows)
             profile.ConfigurationStatus |= ConfigurationStatus.Flows;
         if (libs)

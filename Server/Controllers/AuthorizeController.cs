@@ -20,9 +20,10 @@ public class AuthorizeController : Controller
     /// <summary>
     /// Login page/route
     /// </summary>
+    /// <param name="message">Optional message to show</param>
     /// <returns>the login page/route</returns>
     [HttpGet("login")]
-    public async Task<IActionResult> LoginPage()
+    public async Task<IActionResult> LoginPage([FromQuery] string? message = null)
     {
         var mode = AuthenticationHelper.GetSecurityMode();
         if (mode == SecurityMode.Off)
@@ -39,12 +40,17 @@ public class AuthorizeController : Controller
         #if(DEBUG)
         ViewBag.UrlPrefix = "http://localhost:5276/";
         #endif
+        
 
         if (Translater.InitDone == false)
         {
             var settings = await ServiceLoader.Load<SettingsService>().Get();
             TranslaterHelper.InitTranslater(settings.Language?.EmptyAsNull() ?? "en");
         }
+
+        if (string.IsNullOrWhiteSpace(message) == false)
+            ViewBag.Message = Translater.TranslateIfNeeded(message);
+        
         return View("Login");
     }
 

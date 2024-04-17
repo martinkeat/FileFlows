@@ -1,4 +1,5 @@
 using System.Threading;
+using System.Web;
 using Microsoft.AspNetCore.Components;
 
 namespace FileFlows.Client.Services;
@@ -112,14 +113,16 @@ public class ProfileService
     /// <summary>
     /// Performs a logout
     /// </summary>
-    public async Task Logout()
+    /// <param name="message">Optional message to show on the login page</param>
+    public async Task Logout(string? message = null)
     {
         await LocalStorageService.SetAccessToken(null);
         HttpHelper.Client.DefaultRequestHeaders.Authorization = null;
+        string suffix = string.IsNullOrWhiteSpace(message) ? string.Empty : "?msg=" + HttpUtility.UrlEncode(message);
 #if(DEBUG)
-        NavigationManager.NavigateTo("http://localhost:6868/login", true);
+        NavigationManager.NavigateTo("http://localhost:6868/login" + suffix, true);
 #else
-        NavigationManager.NavigateTo("/login", true);
+        NavigationManager.NavigateTo("/login" + suffix, true);
 #endif
     }
 

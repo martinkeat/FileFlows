@@ -136,6 +136,7 @@
     "FlowElements": "Flow Elements",
     "ChangePassword": "Change Password",
     "Logout": "Logout",
+    "AdminRequired": "Administrator required to complete installation.",
     "ObsoleteConfirm": {
       "Title": "Obsolete Flow Element",
       "Message": "It is recommended you switch to a different flow element.",

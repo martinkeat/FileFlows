@@ -206,6 +206,16 @@ public class Settings : FileFlowObject
     /// Gets or sets the duration to lockout the user for
     /// </summary>
     public int LoginLockoutMinutes { get; set; }
+
+    /// <summary>
+    /// Gets or sets if the initial configuration is done
+    /// </summary>
+    public bool InitialConfigDone { get; set; }
+
+    /// <summary>
+    /// Gets or sets if the EULA has been accepted
+    /// </summary>
+    public bool EulaAccepted { get; set; }
 }
 
 /// <summary>

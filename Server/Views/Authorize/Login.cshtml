@@ -137,6 +137,10 @@
     }
     
     setAccessToken(null);
+    @if (string.IsNullOrWhiteSpace(ViewBag.Message))
+    {
+      <text>showError(`@HtmlEncoder.Encode(ViewBag.Message))`);</text>
+    }
   </script>
   <link rel="icon" href="favicon.svg?v=@Globals.Version#">
   <style>

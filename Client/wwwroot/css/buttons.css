@@ -16,15 +16,15 @@ button:not(.flowtable-button):not(.navbar-toggler):not(.dd-btn), a.btn, .btn-sel
   overflow: hidden;
 }
 button:not(.flowtable-button):not(.navbar-toggler):not(.dd-btn):hover:not(:disabled), button:not(.flowtable-button):not(.navbar-toggler):not(.dd-btn):active:not(:disabled), a.btn:hover:not(:disabled), a.btn:active:not(:disabled), .btn-select:hover:not(:disabled), .btn-select:active:not(:disabled) {
-  background-image: linear-gradient(rgba(var(--accent-rgb), 0.3), rgba(var(--accent-rgb), 0.3)) !important;
-  box-shadow: inset 0 -3px 0 0 var(--accent) !important;
+  background-image: var(--btn-background-image, linear-gradient(rgba(var(--accent-rgb), 0.3), rgba(var(--accent-rgb), 0.3))) !important;
+  box-shadow: var(--btn-box-shadow, inset 0 -3px 0 0 var(--accent)) !important;
 }
 button:not(.flowtable-button):not(.navbar-toggler):not(.dd-btn):disabled, a.btn:disabled, .btn-select:disabled {
   border-color: var(--input-background);
   color: var(--input-background);
 }
 button:not(.flowtable-button):not(.navbar-toggler):not(.dd-btn):focus, a.btn:focus, .btn-select:focus {
-  background: rgba(var(--accent-rgb), 0.2) !important;
+  background: var(--btn-focus-background, rgba(var(--accent-rgb), 0.2)) !important;
 }
 
 a.btn {
@@ -43,5 +43,3 @@ a.btn {
   background: var(--base);
   color: var(--color);
 }
-
-/*# sourceMappingURL=buttons.css.map */

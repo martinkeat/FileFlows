@@ -1,0 +1,8 @@
+@namespace FileFlows.Client.Components.Common
+
+@if (Visible)
+{
+    <div class="flow-page @(IsActive() ? "active" : "")">
+        @ChildContent
+    </div>
+}

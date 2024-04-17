@@ -1,0 +1,54 @@
+@using Humanizer
+@namespace FileFlows.Client.Components.Common
+
+<div class="flow-wizard @(DisableChanging ? "disabled" :"")">
+
+    <div class="flow-wizard-buttons">
+        @foreach(var wp in Pages)
+        {
+            if (wp.Visible == false)
+            {
+                continue;
+            }
+
+            var className = $"wizard-button wb-{wp.Title.Dehumanize()} {(ActivePage == wp ? "active" : "")}";
+            
+            <span class="@className" @onclick="() => SelectPage(wp)" disabled="@(DisableChanging && ActivePage != wp)">
+                @if (string.IsNullOrEmpty(wp.Icon) == false)
+                {
+                    <i class="@wp.Icon" />
+                    @if (ActivePage == wp)
+                    {
+                        @wp.Title
+                    }
+                }
+                else
+                {
+                    @wp.Title
+                }
+            </span>
+        }
+    </div>
+
+    <div class="flow-wizard-content">
+        <CascadingValue IsFixed=true Value=this>
+            @ChildContent
+        </CascadingValue>
+        
+        <div class="flow-wizard-navigation-buttons">
+            @if (ActivePage != Pages.FirstOrDefault())
+            {
+                <span class="previous" @onclick="Previous">Previous</span>
+            }
+            @if (ActivePage != Pages.LastOrDefault())
+            {
+                 <span class="next" @onclick="Next">Next</span>
+            }
+            else
+            {
+                <span class="finish" @onclick="Finish">Finish</span>
+            }
+        </div>
+    </div>
+
+</div>

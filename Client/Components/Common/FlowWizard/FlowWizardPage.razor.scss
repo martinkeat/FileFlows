@@ -1,0 +1,6 @@
+.flow-page{
+  display:none;
+  &.active {
+    display:block;
+  }
+}
