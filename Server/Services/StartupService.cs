@@ -1,5 +1,6 @@
 using FileFlows.Managers.InitializationManagers;
 using FileFlows.Plugin;
+using FileFlows.Server.DefaultTemplates;
 using FileFlows.Server.Helpers;
 using FileFlows.Shared.Models;
 
@@ -170,7 +171,9 @@ public class StartupService
         if (upgradeRequired.Failed(out error))
             return Result<bool>.Fail(error);
 
-        if (upgradeRequired.Value.Required == false)
+        bool needsUpgrade = upgradeRequired.Value.Required == false; 
+
+        if (needsUpgrade == false)
             return true;
         
         UpdateStatus("Backing up old database...");
@@ -181,9 +184,59 @@ public class StartupService
         if(upgradeResult.Failed(out error))
             return Result<bool>.Fail(error);
         
+        UpdateStatus("Updating Templates...");
+        UpdateTemplates();
+        
         return true;
     }
-    
+
+    /// <summary>
+    /// Updates the templates
+    /// </summary>
+    private void UpdateTemplates()
+    {
+        var libraryTemplates = TemplateLoader.GetLibraryTemplates();
+        if (libraryTemplates?.Any() == true)
+        {
+            Logger.Instance.ILog("Extracting Library Templates");
+            foreach (var template in libraryTemplates)
+            {
+                Logger.Instance.ILog("Embedded Library Template: " + GetShortName(template));
+                TemplateLoader.ExtractTo(template, DirectoryHelper.TemplateDirectoryLibrary);
+            }
+        }
+        else
+        {
+            Logger.Instance.WLog("No embedded library templates found");
+        }
+
+        // delete the old flow template files
+        // var oldFlowTemplates = Directory.GetFiles(DirectoryHelper.TemplateDirectoryFlow, "Templates_*.json");
+        // foreach(var file in oldFlowTemplates)
+        //     File.Delete(file);
+        
+        var flowTemplates = TemplateLoader.GetFlowTemplates();
+        if (flowTemplates?.Any() == true)
+        {
+            Logger.Instance.ILog("Extracting Flow Templates");
+            foreach (var template in flowTemplates)
+            {
+                Logger.Instance.ILog("Embedded Flow Template: " + GetShortName(template));
+                TemplateLoader.ExtractTo(template, DirectoryHelper.TemplateDirectoryFlow);
+            }
+        }
+        else
+        {
+            Logger.Instance.WLog("No embedded flow templates found");
+        }
+
+        string GetShortName(string path)
+        {
+            int index = path.IndexOf("DefaultTemplates.");
+            return path[(index + "DefaultTemplates.".Length)..];
+        }
+    }
+
     /// <summary>
     /// Prepares the database
     /// </summary>

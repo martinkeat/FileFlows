@@ -1,9 +1,7 @@
 ﻿using System.Text.RegularExpressions;
-using FileFlows.Plugin;
 using FileFlows.Server.Authentication;
 using FileFlows.Server.Helpers;
 using FileFlows.Server.Services;
-using FileFlows.Shared.Helpers;
 using FileFlows.Shared.Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,12 +15,6 @@ namespace FileFlows.Server.Controllers;
 [FileFlowsAuthorize(UserRole.Flows)]
 public class FlowTemplateController : Controller
 {
-    const int DEFAULT_XPOS = 450;
-    const int DEFAULT_YPOS = 50;
-    private static List<FlowTemplateModel> Templates;
-    private static DateTime FetchedAt = DateTime.MinValue;
-    private static readonly string FlowTemplatesFile = Path.Combine(DirectoryHelper.TemplateDirectoryFlow, "flow-templates.json");
-    
     /// <summary>
     /// Gets all the flow templates
     /// </summary>
@@ -31,20 +23,18 @@ public class FlowTemplateController : Controller
     [HttpGet]
     public async Task<List<FlowTemplateModel>> GetAll([FromQuery] FlowType? type)
     {
-        List<FlowTemplateModel> templates = new();
-        if (true || Templates == null || FetchedAt < DateTime.UtcNow.AddMinutes(-10))
-            await RefreshTemplates();
+        List<FlowTemplateModel> templates = await ServiceLoader.Load<RepositoryFlowTemplateService>().GetTemplates();
         FlowType any = (FlowType)(-1);
         if (type == null)
             type = any;
         if (type == any || type != FlowType.SubFlow)
         {
-            if (Templates?.Any() == true)
+            if (templates.Any())
             {
                 var plugins = (await new PluginService().GetAllAsync()).Where(x => x.Enabled)
                     .Select(x => x.Name.Replace(" ", string.Empty).ToLowerInvariant().Replace("nodes", string.Empty))
                     .ToList();
-                foreach (var template in Templates)
+                foreach (var template in templates)
                 {
                     template.MissingDependencies = template.Plugins.Where(pl =>
                             plugins.Contains(
@@ -53,7 +43,7 @@ public class FlowTemplateController : Controller
                         .ToList();
                 }
 
-                var results = (Templates ?? new()).Union(await LocalFlows())
+                var results = templates.Union(await LocalFlows())
                     .Where(x => x.Type == type || type == any)
                     .ToList();
                 templates.AddRange(results);
@@ -165,10 +155,10 @@ public class FlowTemplateController : Controller
     [HttpPost]
     public async Task<IActionResult> FetchTemplate([FromBody] FlowTemplateModel model)
     {
-        string json;
+        Flow flow;
         if (model.Path == "subflow")
         {
-            json = @"{
+            string json = @"{
     ""Name"": ""Sub Flow"",
     ""Type"": 2,
     ""Revision"": 1,
@@ -193,10 +183,11 @@ public class FlowTemplateController : Controller
       }
     ]
   }";
+            flow = JsonSerializer.Deserialize<Flow>(json);
         }
         else if (model.Path == "default:File")
         {
-            json =  @"{
+            string json =  @"{
     ""Name"": ""File"",
     ""Type"": 0,
     ""Revision"": 2,
@@ -225,121 +216,28 @@ public class FlowTemplateController : Controller
       }
     ]
   }";
+            flow = JsonSerializer.Deserialize<Flow>(json);
         }
         else if (model.Path.StartsWith("local:"))
         {
             var uid = Guid.Parse(model.Path[6..]);
             var tFlow = await ServiceLoader.Load<FlowService>().GetByUidAsync(uid);
-            json = JsonSerializer.Serialize(tFlow); // we serialize this so any changes we make arent on the original flow object
+            string json = JsonSerializer.Serialize(tFlow); // we serialize this so any changes we make arent on the original flow object
+            json = TemplateHelper.ReplaceOutputPathVariable(json);
+            flow = JsonSerializer.Deserialize<Flow>(json);
         }
         else
         {
-            string fileName = Path.Combine(DirectoryHelper.TemplateDirectoryFlow,
-                MakeSafeFilename(model.Path.Replace(".json", "_" + model.Revision + ".json")));
-            if (System.IO.File.Exists(fileName) == false)
-            {
-                // need to download the flow template from github
-                var result =
-                    await HttpHelper.Get<string>(
-                        "https://raw.githubusercontent.com/revenz/FileFlowsRepository/master/" + model.Path);
-                if (result.Success == false)
-                    return BadRequest("Failed to download from repository");
-                await System.IO.File.WriteAllTextAsync(fileName, result.Data);
-                json = result.Data;
-            }
-            else
-            {
-                json = await System.IO.File.ReadAllTextAsync(fileName);
-            }
+            var result = await ServiceLoader.Load<RepositoryFlowTemplateService>().LoadFlowTemplate(model.Path, model.Revision);
+            if (result.Failed(out string error))
+                return BadRequest(error);
+            flow = result.Value;
         }
 
-        json = TemplateHelper.ReplaceOutputPathVariable(json);
-
-        var flow = JsonSerializer.Deserialize<Flow>(json);
         
         model.Fields = FlowFieldToTemplateField(flow);
         model.Flow = flow;
         return Ok(model);
-    }
-
-    /// <summary>
-    /// Refreshes the templates
-    /// </summary>
-    async Task RefreshTemplates()
-    {
-        RequestResult<List<FlowTemplateModel>> result = null;
-        try
-        {
-            result = await HttpHelper.Get<List<FlowTemplateModel>>(
-                "https://raw.githubusercontent.com/revenz/FileFlowsRepository/master/flows.json?dt=" +
-                DateTime.UtcNow.Ticks);
-        }
-        catch (Exception ex)
-        {
-            Logger.Instance?.ELog("Failed to load flow templates from github: " + ex.Message);
-        }
-        
-        if (result?.Success != true)
-        {
-            // try loading from disk
-            LoadFlowTemplatesFromLocalStorage();
-            if (Templates == null)
-                return;
-            
-        }
-        else
-        {
-            Templates = result.Data;
-            if (Templates == null)
-                return;
-            
-            FetchedAt = DateTime.UtcNow;
-
-            // save to disk
-            string json = JsonSerializer.Serialize(result.Data);
-            _ = System.IO.File.WriteAllTextAsync(FlowTemplatesFile, json);
-        }
-
-        
-        Templates = Templates.OrderBy(x => x.Name.IndexOf(" ", StringComparison.Ordinal) < 0 ? 1 : Regex.IsMatch(x.Name, "^[\\w]+ File") ? 2 : 3)
-            .ThenBy(x => x.Author == "FileFlows" ? 1 : 2)
-            .ThenBy(x => Regex.IsMatch(x.Name, @"^Convert [\w]+$") ? 1 : 2)
-            .ThenBy(x => x.Name)
-            .ToList();
-    }
-
-    /// <summary>
-    /// Loads the flows templates from the local storage
-    /// </summary>
-    private void LoadFlowTemplatesFromLocalStorage()
-    {
-        if(System.IO.File.Exists(FlowTemplatesFile) == false)
-            return;
-        try
-        {
-            string json = System.IO.File.ReadAllText(FlowTemplatesFile);
-            Templates = JsonSerializer.Deserialize<List<FlowTemplateModel>>(json);
-            FetchedAt = DateTime.UtcNow;
-        }
-        catch (Exception ex)
-        {
-            Logger.Instance.WLog("Error parsing flow-templates.json, deleting:  " + ex.Message);
-            System.IO.File.Delete(FlowTemplatesFile);
-        }
-    }
-    
-    /// <summary>
-    /// Makes a string safe for use as a filename by removing or replacing invalid characters.
-    /// </summary>
-    /// <param name="input">The input string representing the desired filename.</param>
-    /// <returns>A safe filename with invalid characters replaced by underscores.</returns>
-    static string MakeSafeFilename(string input)
-    {
-        // Remove or replace invalid characters
-        string invalidCharsRegex = string.Join("", Path.GetInvalidFileNameChars());
-        string safeFilename = Regex.Replace(input, "[" + Regex.Escape(invalidCharsRegex) + "]", "_");
-
-        return safeFilename;
     }
     
     /// <summary>
