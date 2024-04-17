@@ -7,7 +7,7 @@
     <Head>
         @if (Profile?.LicensedFor(LicenseFlags.ExternalDatabase) == true)
         {   
-            <a class="btn" @onclick=@SearchPane.ToggleSearch>@lblSearch</a>
+            <button @onclick=@SearchPane.ToggleSearch>@lblSearch</button>
         }
         else
         {
@@ -18,9 +18,9 @@
                 <option value=@((int)LogType.Debug)>Debug</option>
             </select>
         }
-        @if (String.IsNullOrEmpty(DownloadUrl) == false)
+        @if (string.IsNullOrEmpty(DownloadUrl) == false)
         {
-            <a href="@DownloadUrl?source=@SearchModel.Source" class="btn" target="_blank"><span>@lblDownload</span></a>
+            <button @onclick="() => DownloadLog()">@lblDownload</button>
         }
     </Head>
     <Body>

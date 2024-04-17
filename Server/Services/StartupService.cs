@@ -134,6 +134,7 @@ public class StartupService
     /// <param name="message">the message</param>
     void UpdateStatus(string message)
     {
+        Logger.Instance.ILog(message);
         OnStatusUpdate?.Invoke(message);
     }
     
@@ -176,6 +177,9 @@ public class StartupService
         if (needsUpgrade == false)
             return true;
         
+        UpdateStatus("Updating Templates...");
+        UpdateTemplates();
+        
         UpdateStatus("Backing up old database...");
         upgrader.Backup(upgradeRequired.Value.Current, appSettingsService.Settings);
         
@@ -184,8 +188,6 @@ public class StartupService
         if(upgradeResult.Failed(out error))
             return Result<bool>.Fail(error);
         
-        UpdateStatus("Updating Templates...");
-        UpdateTemplates();
         
         return true;
     }

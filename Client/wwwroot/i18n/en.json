@@ -590,6 +590,7 @@
         "Duplicated": "Flow ''{name}'' duplicated",
         "DeleteUsed":"You cannot delete a flow that is in use",
         "LoadingTemplates":"Loading Templates",
+        "FailedToExport": "Failed to export flow(s).",
         "FailureFlowDescription": "This is a special flow type that will be executed if any flow fails.\nFileFlows will search for the 'Default' Failure Flow to use if a flow fails, if not found then processing will immediately stop."
       }
     },
@@ -732,7 +733,8 @@
     "Log": {
       "Title": "Log",
       "Labels":{
-        "AutoRefresh":"Auto Refresh"
+        "AutoRefresh":"Auto Refresh",
+        "FailedToDownloadLog": "Failed to download log."
       }
     },
     "Login": {

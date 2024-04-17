@@ -79,7 +79,28 @@ public partial class Flows : ListPage<Guid, FlowListModel>
 #if (DEBUG)
         url = "http://localhost:6868" + url;
 #endif
-        await jsRuntime.InvokeVoidAsync("ff.downloadFile", new object[] { url, items.Count() == 1 ? items[0].Name + ".json" : "Flows.zip" });
+
+        if (items.Count == 1)
+        {
+            var result = await HttpHelper.Get<string>(url);
+            if (result.Success == false)
+            {
+                Toast.ShowError(Translater.Instant("Pages.Flows.Messages.FailedToExport"));
+                return;
+            }
+
+            await jsRuntime.InvokeVoidAsync("ff.saveTextAsFile", items[0].Name + ".json", result.Body);
+        }
+        else
+        {
+            var result = await HttpHelper.Get<byte[]>(url);
+            if (result.Success == false)
+            {
+                Toast.ShowError(Translater.Instant("Pages.Flows.Messages.FailedToExport"));
+                return;
+            }
+            await jsRuntime.InvokeVoidAsync("ff.saveByteArrayAsFile", "Flows.zip", result.Data);
+        }
     }
 
     private async Task Import()

@@ -10,10 +10,12 @@
   overflow: auto;
 }
 
+button {
+  margin-right: 0.5rem;
+}
+
 .auto-refresh {
   margin-right: 1rem;
   position: relative;
   top: 3px;
 }
-
-/*# sourceMappingURL=Log.razor.css.map */

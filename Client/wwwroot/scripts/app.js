@@ -128,6 +128,28 @@ window.ff = {
         window.URL.revokeObjectURL(a.href);
         document.body.removeChild(a);
     },
+    saveByteArrayAsFile: function (fileName, byteArray) {
+        // Convert byte array to Blob
+        let blob = new Blob([byteArray], { type: 'application/octet-stream' });
+
+        // Create a temporary anchor element
+        let link = document.createElement('a');
+
+        // Set the href attribute of the anchor element to the Blob object URL
+        link.href = window.URL.createObjectURL(blob);
+
+        // Set the download attribute to specify the file name
+        link.download = fileName;
+
+        // Append the anchor element to the body
+        document.body.appendChild(link);
+
+        // Programmatically click the anchor element to trigger the download
+        link.click();
+
+        // Remove the anchor element from the DOM
+        document.body.removeChild(link);
+    },
     copyToClipboard: function (text) {
         if (window.clipboardData && window.clipboardData.setData) {
             // Internet Explorer-specific code path to prevent textarea being shown while dialog is visible.

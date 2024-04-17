@@ -9,10 +9,22 @@ using Microsoft.JSInterop;
 namespace FileFlows.Client.Pages;
 
 
+/// <summary>
+/// Log Page
+/// </summary>
 public partial class Log : ComponentBase
 {
+    /// <summary>
+    /// Gets or sets the blocker
+    /// </summary>
     [CascadingParameter] Blocker Blocker { get; set; }
+    /// <summary>
+    /// Gets or sets the JavaScript runtime
+    /// </summary>
     [Inject] protected IJSRuntime jsRuntime { get; set; }
+    /// <summary>
+    /// Gets or sets the navigation manager
+    /// </summary>
     [Inject] NavigationManager NavigationManager { get; set; }
     private string LogText { get; set; }
     private string lblDownload, lblSearch, lblSearching;
@@ -176,5 +188,20 @@ public partial class Log : ComponentBase
     {
         SearchModel.FromDate = range.Start.Date;
         SearchModel.ToDate = range.End.Date;
+    }
+
+    /// <summary>
+    /// Downloads the log
+    /// </summary>
+    private async Task DownloadLog()
+    {
+        var result = await HttpHelper.Get<string>(DownloadUrl);
+        if (result.Success == false)
+        {
+            Toast.ShowError(Translater.Instant("Pages.Log.Labels.FailedToDownloadLog"));
+            return;
+        }
+
+        await jsRuntime.InvokeVoidAsync("ff.saveTextAsFile", $"FileFlows.log", result.Body);
     }
 }
