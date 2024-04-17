@@ -172,7 +172,7 @@ public class StartupService
         if (upgradeRequired.Failed(out error))
             return Result<bool>.Fail(error);
 
-        bool needsUpgrade = upgradeRequired.Value.Required == false; 
+        bool needsUpgrade = upgradeRequired.Value.Required; 
 
         if (needsUpgrade == false)
             return true;
