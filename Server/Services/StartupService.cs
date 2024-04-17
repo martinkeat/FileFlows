@@ -44,7 +44,7 @@ public class StartupService
                 UpdateStatus(error);
                 return Result<bool>.Fail(error);
             }
-
+            
             if (DatabaseExists()) // only upgrade if it does exist
             {
                 if (Upgrade().Failed(out error))
@@ -70,6 +70,9 @@ public class StartupService
                 UpdateStatus(error);
                 return Result<bool>.Fail(error);
             }
+        
+            UpdateStatus("Updating Templates...");
+            UpdateTemplates();
 
             return true;
         }
@@ -177,8 +180,6 @@ public class StartupService
         if (needsUpgrade == false)
             return true;
         
-        UpdateStatus("Updating Templates...");
-        UpdateTemplates();
         
         UpdateStatus("Backing up old database...");
         upgrader.Backup(upgradeRequired.Value.Current, appSettingsService.Settings);
