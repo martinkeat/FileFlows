@@ -214,9 +214,9 @@ public class StartupService
         }
 
         // delete the old flow template files
-        // var oldFlowTemplates = Directory.GetFiles(DirectoryHelper.TemplateDirectoryFlow, "Templates_*.json");
-        // foreach(var file in oldFlowTemplates)
-        //     File.Delete(file);
+        var oldFlowTemplates = Directory.GetFiles(DirectoryHelper.TemplateDirectoryFlow, "Templates_*.json");
+        foreach(var file in oldFlowTemplates)
+             File.Delete(file);
         
         var flowTemplates = TemplateLoader.GetFlowTemplates();
         if (flowTemplates?.Any() == true)
