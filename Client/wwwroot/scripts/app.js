@@ -1,5 +1,6 @@
 window.dashboardElementResized = new Event('dashboardElementResized', {});
 var ffcsharp;
+var ACCESS_TOKEN;
 
 window.ff = {
     setCSharp(csharp) {
