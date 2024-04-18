@@ -148,8 +148,15 @@
   background: rgba(var(--input-background-rgb), 0.3) !important;
 }
 
-::deep .flowtable-body {
+.flowtable:not(.hide-head.hide-toolbar) ::deep .flowtable-body {
   height: calc(100% - 2.4rem);
+}
+
+.flowtable.hide-head.hide-toolbar ::deep .flowtable-body {
+  border-top: solid 1px var(--input-background);
+}
+
+::deep .flowtable-body {
   overflow-y: scroll;
   border-left: solid 1px var(--input-background);
   border-bottom: solid 1px var(--input-background);
@@ -265,5 +272,3 @@
 .column ::deep label {
   pointer-events: auto;
 }
-
-/*# sourceMappingURL=FlowTable.razor.css.map */

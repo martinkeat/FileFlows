@@ -1,13 +1,10 @@
-using System.Net;
 using System.Dynamic;
 using System.Text.RegularExpressions;
-using FileFlows.Plugin;
 using FileFlows.Server.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using FileFlows.Server.Helpers;
 using FileFlows.Server.Services;
 using FileFlows.Shared.Models;
-using FileFlows.Shared.Helpers;
 using Microsoft.AspNetCore.Authorization;
 
 namespace FileFlows.Server.Controllers;

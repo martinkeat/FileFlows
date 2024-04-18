@@ -45,4 +45,9 @@ public class PluginPackageInfo
     /// Gets or sets the available flow elements/node in this plugin
     /// </summary>
     public string[] Elements { get; set; }
+    
+    /// <summary>
+    /// Gets or sets the icon
+    /// </summary>
+    public string Icon { get; set; }
 }

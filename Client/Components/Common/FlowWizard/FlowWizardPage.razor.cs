@@ -16,7 +16,7 @@ public partial class FlowWizardPage : ComponentBase
     private bool _Visible = true;
 
     /// <summary>
-    /// Gets or sets a value indicating whether the page tab is visible.
+    /// Gets or sets a value indicating whether the page is visible.
     /// </summary>
     [Parameter]
     public bool Visible
@@ -37,24 +37,89 @@ public partial class FlowWizardPage : ComponentBase
     /// <summary>
     /// Gets or sets the title of the page.
     /// </summary>
-    [Parameter]
-    public string Title
+    [Parameter] public string Title
     {
         get => _Title;
         set { _Title = Translater.TranslateIfNeeded(value); }
     }
 
+    private string _Description;
+
+    /// <summary>
+    /// Gets or sets the description of the page.
+    /// </summary>
+    [Parameter] public string Description
+    {
+        get => _Description;
+        set { _Description = Translater.TranslateIfNeeded(value); }
+    }
+
     /// <summary>
     /// Gets or sets the icon associated with the page.
     /// </summary>
-    [Parameter]
-    public string Icon { get; set; }
+    [Parameter] public string Icon { get; set; }
 
     /// <summary>
     /// Gets or sets the content of the page.
     /// </summary>
+    [Parameter] public RenderFragment ChildContent { get; set; }
+
+    private bool _Disabled;
+
+    /// <summary>
+    /// Gets or sets if this page is disabled
+    /// </summary>
     [Parameter]
-    public RenderFragment ChildContent { get; set; }
+    public bool Disabled
+    {
+        get => _Disabled;
+        set
+        {
+            if (_Disabled == value)
+                return;
+            _Disabled = value;
+            StateHasChanged();
+            Wizard?.TriggerStateHasChanged();
+        }
+    }
+
+    private bool _NextDisabled;
+    
+    /// <summary>
+    /// Gets or sets if the next button is disabled on this page
+    /// </summary>
+    [Parameter]
+    public bool NextDisabled
+    {
+        get => _NextDisabled;
+        set
+        {
+            if (_NextDisabled == value)
+                return;
+            _NextDisabled = value;
+            StateHasChanged();
+            Wizard?.TriggerStateHasChanged();
+        }
+    }
+
+    private bool _Invalid;
+
+    /// <summary>
+    /// Gets or sets if this page is invalid
+    /// </summary>
+    [Parameter]
+    public bool Invalid
+    {
+        get => _Invalid;
+        set
+        {
+            if (_Invalid == value)
+                return;
+            _Invalid = value;
+            StateHasChanged();
+            Wizard?.TriggerStateHasChanged();
+        }
+    }
 
 
     /// <summary>

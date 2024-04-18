@@ -169,8 +169,19 @@
     background: rgba(var(--input-background-rgb), 0.3) !important;
 }
 
+.flowtable:not(.hide-head.hide-toolbar)
+{
+    ::deep .flowtable-body {
+        height: calc(100% - 2.4rem);
+    }
+}
+.flowtable.hide-head.hide-toolbar
+{
+    ::deep .flowtable-body {
+        border-top: solid 1px $borderColor;
+    }
+}
 ::deep .flowtable-body {
-    height: calc(100% - 2.4rem);
     overflow-y: scroll;
     border-left: solid 1px $borderColor;
     border-bottom: solid 1px $borderColor;

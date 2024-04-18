@@ -24,22 +24,40 @@ public class TranslaterHelper
         #if(DEBUG)
         wwwroot = wwwroot[..wwwroot.IndexOf("/bin")] + "/wwwroot";
         #endif
-        
-        wwwroot = Path.Combine(wwwroot, "i18n", $"{langCode}.json");
 
         List<string> json = new List<string>();
-        if (File.Exists(wwwroot))
-            json.Add(File.ReadAllText(wwwroot));
+        
+        if (langCode != "en")
+        {
+            // add en as base
+            LoadLanguage(wwwroot, "en", json);
+        }
+        LoadLanguage(wwwroot, langCode, json);
+        Translater.Init(json.ToArray());
+    }
+
+    /// <summary>
+    /// Loads the language strings into the json list
+    /// </summary>
+    /// <param name="wwwroot">the wwwroot path</param>
+    /// <param name="langCode">the language code to load</param>
+    /// <param name="json">the JSON</param>
+    private static void LoadLanguage(string wwwroot, string langCode, List<string> json)
+    {
+        var langFile = Path.Combine(wwwroot, "i18n", $"{langCode}.json");
+
+        if (File.Exists(langFile))
+            json.Add(File.ReadAllText(langFile));
         else
-            Logger.Instance.ILog("Language file not found: " + wwwroot);
+            Logger.Instance.ILog("Language file not found: " + langFile);
 
         foreach (var file in new DirectoryInfo(DirectoryHelper.PluginsDirectory)
-                                    .GetFiles($"*{langCode}.json", SearchOption.AllDirectories)
-                                    .OrderByDescending(x => x.CreationTime)
-                                    .DistinctBy(x => x.Name))
+                     .GetFiles($"*{langCode}.json", SearchOption.AllDirectories)
+                     .OrderByDescending(x => x.CreationTime)
+                     .DistinctBy(x => x.Name))
         {
             json.Add(File.ReadAllText(file.FullName));
         }
-        Translater.Init(json.ToArray());
+        
     }
 }

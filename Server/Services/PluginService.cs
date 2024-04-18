@@ -261,7 +261,6 @@ public class PluginService
     /// <returns>a list of plugins</returns>
     internal async Task<Result<List<PluginPackageInfo>>> GetPluginPackagesActual(bool missing = false)
     {
-        Version ffVersion = new Version(Globals.Version);
         List<PluginPackageInfo> data = new List<PluginPackageInfo>();
         try
         {

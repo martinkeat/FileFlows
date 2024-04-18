@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Components;
-using ffElement = FileFlows.Shared.Models.FlowElement;
 using FileFlows.Client.Components.Inputs;
 using FileFlows.Plugin;
 using FileFlows.Client.Components.Common;
@@ -26,12 +25,17 @@ public partial class PluginBrowser : ComponentBase
 
     private bool Loading = false;
 
+    /// <inheritdoc />
     protected override void OnInitialized()
     {
         lblClose = Translater.Instant("Labels.Close");
         lblTitle = Translater.Instant("Pages.Plugins.Labels.PluginBrowser");
     }
 
+    /// <summary>
+    /// Opens the plugin browser
+    /// </summary>
+    /// <returns>returns true if one or more plugins were downloaded</returns>
     internal Task<bool> Open()
     {
         this.Visible = true;
@@ -43,6 +47,9 @@ public partial class PluginBrowser : ComponentBase
         return OpenTask.Task;
     }
 
+    /// <summary>
+    /// Loads the plugins
+    /// </summary>
     private async Task LoadData()
     {
         this.Loading = true;

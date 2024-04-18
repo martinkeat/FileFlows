@@ -25,6 +25,11 @@ public partial class FlowWizard : ComponentBase
     /// Gets or sets if the pages cannot be changed
     /// </summary>
     [Parameter] public bool DisableChanging { get; set; }
+    
+    /// <summary>
+    /// Gets or sets if the finish button is disabled
+    /// </summary>
+    [Parameter] public bool FinishDisabled { get; set; }
 
     /// <summary>
     /// Represents a collection of pages.
@@ -52,7 +57,7 @@ public partial class FlowWizard : ComponentBase
     /// <param name="page">The page to select.</param>
     private void SelectPage(FlowWizardPage page)
     {
-        if (DisableChanging) return;
+        if (DisableChanging || page.Disabled) return;
         ActivePage = page;
         OnPageChanged.InvokeAsync(Pages.IndexOf(page));
     }
@@ -102,6 +107,9 @@ public partial class FlowWizard : ComponentBase
     /// </summary>
     private void Next()
     {
+        if (ActivePage?.NextDisabled == true)
+            return;
+        
         int index = Pages.IndexOf(ActivePage) + 1;
         if(index <= Pages.Count - 1)
             SelectPage(Pages[index]);
@@ -114,4 +122,10 @@ public partial class FlowWizard : ComponentBase
     {
         
     }
+
+    /// <summary>
+    /// Triggers a state has change event
+    /// </summary>
+    public void TriggerStateHasChanged()
+        => StateHasChanged();
 }

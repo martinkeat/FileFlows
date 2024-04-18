@@ -3,3 +3,33 @@
   display: flex;
   background: var(--gray-dark);
 }
+
+h1 {
+  font-size: 1.1rem;
+}
+
+.eula-page .switch {
+  margin-top: 2rem;
+}
+.eula-page .switch span {
+  cursor: pointer;
+}
+.eula-page ::deep h1 {
+  font-size: 1.1rem;
+}
+
+.pre-text {
+  white-space: pre-line;
+}
+
+ol {
+  margin: 2rem 0;
+}
+
+.table-item .icon i {
+  font-size: 1.8rem;
+}
+.table-item .icon img {
+  width: 2rem;
+  min-width: 2rem;
+}

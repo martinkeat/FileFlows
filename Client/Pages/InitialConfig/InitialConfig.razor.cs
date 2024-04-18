@@ -1,4 +1,5 @@
 using FileFlows.Client.Components;
+using FileFlows.Client.Components.Common;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 
@@ -34,6 +35,24 @@ public partial class InitialConfig : ComponentBase
     /// </summary>
     protected Profile Profile { get; private set; }
 
+    /// <summary>
+    /// The markup string of the EULA
+    /// </summary>
+    private MarkupString msEula;
+    
+    /// <summary>
+    /// Gets or sets if the EULA has been accepted
+    /// </summary>
+    private bool EulaAccepted { get; set; }
+    
+    /// <summary>
+    /// Gets or sets a list of available plugins
+    /// </summary>
+    private List<PluginPackageInfo> AvailablePlugins { get; set; }
+
+    private FlowTable<PluginPackageInfo> PluginTable;
+    private string lblFlowElement, lblFlowElements;
+
     /// <inheritdoc />
     protected override async Task OnInitializedAsync()
     {
@@ -50,5 +69,18 @@ public partial class InitialConfig : ComponentBase
             NavigationManager.NavigateTo("/");
             return;
         }
+        string html = Markdig.Markdown.ToHtml(EULA).Trim();
+        msEula = new MarkupString(html);
+        lblFlowElement = Translater.Instant("Labels.FlowElement");
+        lblFlowElements = Translater.Instant("Labels.FlowElements");
+
+        await GetPlugins();
+    }
+
+    private async Task GetPlugins()
+    {
+        var request = await HttpHelper.Get<List<PluginPackageInfo>>("/api/plugin/plugin-packages");
+        if (request.Success)
+            AvailablePlugins = request.Data;
     }
 }

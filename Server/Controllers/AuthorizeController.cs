@@ -39,6 +39,8 @@ public class AuthorizeController : Controller
             return RedirectToAction(nameof(OpenIDController.Login), nameof(OpenIDController)[..^10]);
         #if(DEBUG)
         ViewBag.UrlPrefix = "http://localhost:5276/";
+        #else
+        ViewBag.UrlPrefix = string.Empty;
         #endif
         
 
@@ -48,9 +50,7 @@ public class AuthorizeController : Controller
             TranslaterHelper.InitTranslater(settings.Language?.EmptyAsNull() ?? "en");
         }
 
-        if (string.IsNullOrWhiteSpace(message) == false)
-            ViewBag.Message = Translater.TranslateIfNeeded(message);
-        
+        ViewBag.Message = Translater.TranslateIfNeeded(message);
         return View("Login");
     }
 

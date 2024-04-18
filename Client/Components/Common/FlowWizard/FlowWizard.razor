@@ -11,7 +11,8 @@
                 continue;
             }
 
-            var className = $"wizard-button wb-{wp.Title.Dehumanize()} {(ActivePage == wp ? "active" : "")}";
+            var className = $"wizard-button wb-{wp.Title.Dehumanize()} {(ActivePage == wp ? "active" : "")} " +
+                            $"{(wp.Disabled ? "disabled" : "")} {(wp.Invalid ? "invalid": "")}";
             
             <span class="@className" @onclick="() => SelectPage(wp)" disabled="@(DisableChanging && ActivePage != wp)">
                 @if (string.IsNullOrEmpty(wp.Icon) == false)
@@ -31,10 +32,14 @@
     </div>
 
     <div class="flow-wizard-content">
+        @if (string.IsNullOrWhiteSpace(ActivePage?.Description) == false)
+        {
+            <div class="page-description">@ActivePage.Description</div>
+        }
         <CascadingValue IsFixed=true Value=this>
             @ChildContent
         </CascadingValue>
-        
+
         <div class="flow-wizard-navigation-buttons">
             @if (ActivePage != Pages.FirstOrDefault())
             {
@@ -42,7 +47,7 @@
             }
             @if (ActivePage != Pages.LastOrDefault())
             {
-                 <span class="next" @onclick="Next">Next</span>
+                <span class="next @(ActivePage?.NextDisabled == true ? "disabled" : "")" @onclick="Next">Next</span>
             }
             else
             {

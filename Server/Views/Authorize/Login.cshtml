@@ -1,6 +1,6 @@
 @{
     Layout = null;
-    string urlPrefix = ViewBag.UrlPrefix ?? string.Empty;
+    string urlPrefix = ViewBag?.UrlPrefix ?? string.Empty;
 }
 
 <!DOCTYPE html>
@@ -8,6 +8,9 @@
 <html>
 <head>
   <title>FileFlows</title>
+
+  <link href="css/toast.css?v=@Globals.Version" rel="stylesheet" />
+  <script src="scripts/toast.js?v=@Globals.Version"></script>
   <script>
     var Mode = 0;
     var Disabled = false;
@@ -137,7 +140,7 @@
     }
     
     setAccessToken(null);
-    @if (string.IsNullOrWhiteSpace(ViewBag.Message))
+    @if (string.IsNullOrWhiteSpace(ViewBag.Message) == false)
     {
       <text>showError(`@HtmlEncoder.Encode(ViewBag.Message))`);</text>
     }
@@ -294,9 +297,6 @@
     }
 
   </style>
-  
-  <link href="css/toast.css?v=@Globals.Version" rel="stylesheet" />
-  <script src="scripts/toast.js?v=@Globals.Version"></script>
 </head>
 <body>
 <div>

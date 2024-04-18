@@ -111,12 +111,12 @@ public class Translater
 
     private static string Lookup(string[] possibleKeys, bool supressWarnings = false)
     {
-        foreach (string key in possibleKeys)
+        foreach (var key in possibleKeys)
         {
-            if (String.IsNullOrWhiteSpace(key))
+            if (string.IsNullOrWhiteSpace(key))
                 continue;
-            if (Language.ContainsKey(key))
-                return Language[key];
+            if (Language.TryGetValue(key, out var lookup))
+                return lookup;
         }
         if (possibleKeys[0].EndsWith("-Help") || possibleKeys[0].EndsWith("-Placeholder") || possibleKeys[0].EndsWith("-Suffix") || possibleKeys[0].EndsWith("-Prefix") || possibleKeys[0].EndsWith(".Description"))
             return "";
@@ -127,7 +127,7 @@ public class Translater
         string result = possibleKeys?.FirstOrDefault() ?? "";
         if(supressWarnings == false && result.EndsWith(".UID") == false && result.StartsWith("Flow.Parts.") == false)
             Logger.Instance.WLog("Failed to lookup key: " + result);
-        result = result.Substring(result.LastIndexOf(".") + 1);
+        result = result[(result.LastIndexOf(".", StringComparison.Ordinal) + 1)..];
 
         return result;
     }
