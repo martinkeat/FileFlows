@@ -119,10 +119,13 @@ public partial class NavMenu : IDisposable
         var lastRoute = e?.Location?.Split('/')?.LastOrDefault();
         if (string.IsNullOrWhiteSpace(lastRoute))
             return;
-        var item = MenuItems.SelectMany(x => x.Items).FirstOrDefault(x => x.Url == lastRoute);
+        
+        var item = MenuItems.Where(x => x.Items != null)
+            .SelectMany(x => x.Items)
+            .FirstOrDefault(x => x?.Url == lastRoute);
         if (item == null)
             return;
-        
+
         Active = item;
         StateHasChanged();
     }
