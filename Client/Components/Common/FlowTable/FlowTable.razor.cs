@@ -195,6 +195,16 @@ public partial class FlowTable<TItem>: FlowTableBase,IDisposable, INotifyPropert
     /// </summary>
     [Parameter] public bool HideToolbar { get; set; }
     
+    /// <summary>
+    /// Gets or sets if clicking will clear existing selected items
+    /// </summary>
+    [Parameter] public bool DontClearOnClick { get; set; }
+    
+    /// <summary>
+    /// Gets or sets force selections that the user cannot de-select
+    /// </summary>
+    [Parameter] public List<TItem> ForcedSelection { get; set; }
+    
     private Dictionary<TItem, string> DisplayData { get; set; } = new ();
 
     private readonly List<TItem> SelectedItems = new ();
@@ -434,8 +444,11 @@ public partial class FlowTable<TItem>: FlowTableBase,IDisposable, INotifyPropert
     {
         bool changed = false;
         bool wasSelected = this.SelectedItems.Contains(item);
+
+        if (ForcedSelection?.Contains(item) == true)
+            return;
         
-        if (e.CtrlKey || e.OffsetX < 35) // FF-1073 - 35 makes it easier to select multiple without unselecting others
+        if (e.CtrlKey || e.OffsetX < 35 || DontClearOnClick) // FF-1073 - 35 makes it easier to select multiple without unselecting others
         {
             // multiselect changing one item
             if (wasSelected)

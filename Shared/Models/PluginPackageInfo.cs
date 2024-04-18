@@ -50,4 +50,9 @@ public class PluginPackageInfo
     /// Gets or sets the icon
     /// </summary>
     public string Icon { get; set; }
+    
+    /// <summary>
+    /// Gets or sets if the plugin is installed
+    /// </summary>
+    public bool Installed { get; set; }
 }

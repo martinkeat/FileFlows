@@ -3,6 +3,8 @@
   "Labels": {
     "VersionNumber": "Version: {version}",
     "Version":"Version",
+    "Loading": "Loading",
+    "Installed": "Installed",
     "Save": "Save",
     "Saving": "Saving",
     "Execute": "Execute",

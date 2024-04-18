@@ -22,6 +22,11 @@ public partial class FlowWizard : ComponentBase
     [Parameter] public EventCallback<int> OnPageChanged { get; set; }
     
     /// <summary>
+    /// Gets or sets an event when a finish is clicked
+    /// </summary>
+    [Parameter] public EventCallback OnFinish { get; set; }
+    
+    /// <summary>
     /// Gets or sets if the pages cannot be changed
     /// </summary>
     [Parameter] public bool DisableChanging { get; set; }
@@ -97,9 +102,17 @@ public partial class FlowWizard : ComponentBase
     /// </summary>
     private void Previous()
     {
-        int index = Pages.IndexOf(ActivePage) - 1;
-        if(index >= 0)
-            SelectPage(Pages[index]);
+        int index = Pages.IndexOf(ActivePage);
+        while (true)
+        {
+            index--;
+            if (index < 0)
+                return;
+            if (Pages[index].Visible)
+                break;
+        }
+        
+        SelectPage(Pages[index]);
     }
     
     /// <summary>
@@ -110,9 +123,16 @@ public partial class FlowWizard : ComponentBase
         if (ActivePage?.NextDisabled == true)
             return;
         
-        int index = Pages.IndexOf(ActivePage) + 1;
-        if(index <= Pages.Count - 1)
-            SelectPage(Pages[index]);
+        int index = Pages.IndexOf(ActivePage);
+        while (true)
+        {
+            index++;
+            if (index >= Pages.Count)
+                return;
+            if (Pages[index].Visible)
+                break;
+        }
+        SelectPage(Pages[index]);
     }
 
     /// <summary>
@@ -120,7 +140,7 @@ public partial class FlowWizard : ComponentBase
     /// </summary>
     private void Finish()
     {
-        
+        OnFinish.InvokeAsync();
     }
 
     /// <summary>

@@ -53,7 +53,7 @@ public class PluginUpdaterWorker : Worker
                     continue;
                 }
 
-                var dlResult = pluginDownloader.Download(Version.Parse(package.Version), package.Package);
+                var dlResult = pluginDownloader.Download(Version.Parse(package.Version), package.Package).Result;
 
                 if (dlResult.Success == false)
                 {

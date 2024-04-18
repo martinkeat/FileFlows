@@ -133,7 +133,9 @@
                         @if(Selection!= SelectionMode.None)
                         {
                             <label class="flowtable-select" style="width:2rem;min-width:2rem;max-width:2rem;align-self: center;">
-                                <input type="checkbox" @onchange="(e) => CheckItem(e, item.Key)" checked="@(SelectedItems?.Contains(item.Key) == true)"
+                                <input type="checkbox" @onchange="(e) => CheckItem(e, item.Key)" 
+                                       disabled="@(ForcedSelection?.Contains(item.Key))"
+                                       checked="@(ForcedSelection?.Contains(item.Key) == true || SelectedItems?.Contains(item.Key) == true)"
                                        onclick="ff.stopSelectPropagation(event)" />                        
                             </label>
                         }

@@ -91,9 +91,11 @@ public partial class PluginBrowser : ComponentBase
         this.Visible = false;
     }
 
+    /// <summary>
+    /// Downloads the selected plugins
+    /// </summary>
     private async Task Download()
     {
-#if (!DEMO)
         var selected = Table.GetSelected().ToArray();
         var items = selected;
         if (items.Any() == false)
@@ -120,7 +122,6 @@ public partial class PluginBrowser : ComponentBase
             this.StateHasChanged();
         }
         await LoadData();
-#endif
     }
 
     private async Task ViewAction()

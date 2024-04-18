@@ -22,14 +22,14 @@ public class PluginDownloader
     /// <param name="version">the version of the plugin to download</param>
     /// <param name="packageName">the package name of the plugin to download</param>
     /// <returns>the download result</returns>
-    internal (bool Success, byte[] Data) Download(Version version, string packageName)
+    internal async Task<(bool Success, byte[] Data)> Download(Version version, string packageName)
     {
         Logger.Instance.ILog("Downloading Plugin Package: " + packageName);
         Version ffVersion = new Version(Globals.Version);
         try
         {
             string url = Globals.PluginBaseUrl + "/download/" + packageName + $"?version={version}&rand=" + DateTime.UtcNow.ToFileTime();
-            var dlResult = HttpHelper.Get<byte[]>(url).Result;
+            var dlResult = await HttpHelper.Get<byte[]>(url);
             if (dlResult.Success)
                 return (true, dlResult.Data);
             throw new Exception(dlResult.Body?.EmptyAsNull() ?? "Unexpected error");

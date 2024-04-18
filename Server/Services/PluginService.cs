@@ -287,16 +287,47 @@ public class PluginService
             }
         }
         catch (Exception) { }
-        
 
+        // remove plugins already installed
+        var installed = (await new Services.PluginService().GetAllAsync())
+            .Where(x => x.Deleted != true).Select(x => x.PackageName).ToList();
+        
         if (missing)
         {
-            // remove plugins already installed
-            var installed = (await new Services.PluginService().GetAllAsync())
-                .Where(x => x.Deleted != true).Select(x => x.PackageName).ToList();
             data = data.Where(x => installed.Contains(x.Package) == false).ToList();
+        }
+        else
+        {
+            foreach (var d in data)
+            {
+                d.Installed = installed.Contains(d.Package);
+            }
         }
 
         return data.OrderBy(x => x.Name).ToList();
+    }
+
+    /// <summary>
+    /// Download pluges
+    /// </summary>
+    /// <param name="plugins">the plugins to download</param>
+    public async Task DownloadPlugins(List<PluginPackageInfo> plugins)
+    {
+        var pluginDownloader = new PluginDownloader();
+        foreach(var package in plugins)
+        {
+            try
+            {
+                var dlResult = await pluginDownloader.Download(Version.Parse(package.Version), package.Package);
+                if (dlResult.Success)
+                {
+                    PluginScanner.UpdatePlugin(package.Package, dlResult.Data);
+                }
+            }
+            catch (Exception ex)
+            { 
+                Logger.Instance?.ELog($"Failed downloading plugin package: '{package}' => {ex.Message}");
+            }
+        }
     }
 }

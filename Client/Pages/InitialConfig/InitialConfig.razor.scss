@@ -4,6 +4,10 @@
   display: flex;
   background: var(--gray-dark);
 }
+.loading-background {
+  height: 100vh;
+  background:black;
+}
 
 h1 {
   font-size:1.1rem;
@@ -39,5 +43,9 @@ ol {
       width: 2rem;
       min-width: 2rem;
     }
+  }
+  .description {
+    white-space: pre-line;
+    padding-right:1rem;
   }
 }

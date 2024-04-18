@@ -375,4 +375,43 @@ public class SettingsController : BaseController
             }
         }
     }
+
+    /// <summary>
+    /// Saves the initial configuration
+    /// </summary>
+    /// <param name="model">the model</param>
+    /// <returns>the response</returns>
+    [HttpPost("initial-config")]
+    public async Task<IActionResult> SaveInitialConfiguration([FromBody] InitialConfigurationModel model)
+    {
+        if (model.EulaAccepted == false)
+            return BadRequest("EULA not accepted");
+        if (model.Plugins?.Any() == true)
+        {
+            var pluginService = ServiceLoader.Load<PluginService>();
+            await pluginService.DownloadPlugins(model.Plugins);
+        }
+
+        var service = ServiceLoader.Load<SettingsService>();
+        var settings = await service.Get();
+        settings.EulaAccepted = model.EulaAccepted;
+        settings.InitialConfigDone = true;
+        await service.Save(settings, await GetAuditDetails());
+        return Ok();
+    }
+
+    /// <summary>
+    /// The initial configuration model
+    /// </summary>
+    public class InitialConfigurationModel
+    {
+        /// <summary>
+        /// Gets or sets the plugins to download
+        /// </summary>
+        public List<PluginPackageInfo> Plugins { get; set; }
+        /// <summary>
+        /// Gets or sets if the EULA was accepted
+        /// </summary>
+        public bool EulaAccepted { get; set; }
+    }
 }

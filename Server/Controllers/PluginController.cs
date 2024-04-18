@@ -128,7 +128,7 @@ public class PluginController : BaseController
                 continue;
             }
 
-            var dlResult = pluginDownloader.Download(Version.Parse(ppi.Version), ppi.Package);
+            var dlResult = await pluginDownloader.Download(Version.Parse(ppi.Version), ppi.Package);
             if (dlResult.Success == false)
             {
                 Logger.Instance.WLog("PluginUpdate: Failed to download plugin");
@@ -163,27 +163,12 @@ public class PluginController : BaseController
     /// <param name="model">A list of plugins to download</param>
     /// <returns>an awaited task</returns>
     [HttpPost("download")]
-    public void Download([FromBody] DownloadModel model)
+    public async Task Download([FromBody] DownloadModel model)
     {
         if (model == null || model.Packages?.Any() != true)
             return; // nothing to delete
 
-        var pluginDownloader = new PluginDownloader();
-        foreach(var package in model.Packages)
-        {
-            try
-            {
-                var dlResult = pluginDownloader.Download(Version.Parse(package.Version), package.Package);
-                if (dlResult.Success)
-                {
-                    PluginScanner.UpdatePlugin(package.Package, dlResult.Data);
-                }
-            }
-            catch (Exception ex)
-            { 
-                Logger.Instance?.ELog($"Failed downloading plugin package: '{package}' => {ex.Message}");
-            }
-        }
+        await ServiceLoader.Load<PluginService>().DownloadPlugins(model.Packages);
     }
 
     /// <summary>

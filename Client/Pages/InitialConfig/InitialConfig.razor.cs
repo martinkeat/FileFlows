@@ -50,12 +50,16 @@ public partial class InitialConfig : ComponentBase
     /// </summary>
     private List<PluginPackageInfo> AvailablePlugins { get; set; }
 
+    private List<PluginPackageInfo> ForcedPlugins;
+
     private FlowTable<PluginPackageInfo> PluginTable;
-    private string lblFlowElement, lblFlowElements;
+    private string lblInstalled;
+    private bool loaded;
 
     /// <inheritdoc />
     protected override async Task OnInitializedAsync()
     {
+        Blocker.Show("Labels.Loading");
         Profile = await ProfileService.Get();
         if (Profile.IsAdmin == false)
         {
@@ -71,16 +75,58 @@ public partial class InitialConfig : ComponentBase
         }
         string html = Markdig.Markdown.ToHtml(EULA).Trim();
         msEula = new MarkupString(html);
-        lblFlowElement = Translater.Instant("Labels.FlowElement");
-        lblFlowElements = Translater.Instant("Labels.FlowElements");
+        lblInstalled = Translater.Instant("Labels.Installed");
 
         await GetPlugins();
+        Blocker.Hide();
+        loaded = true;
     }
 
     private async Task GetPlugins()
     {
         var request = await HttpHelper.Get<List<PluginPackageInfo>>("/api/plugin/plugin-packages");
-        if (request.Success)
-            AvailablePlugins = request.Data;
+        if (request.Success == false)
+            return;
+
+        AvailablePlugins = request.Data.OrderBy(x => x.Installed ? 0 : 1)
+            .ThenBy(x => x.Name.ToLowerInvariant()).ToList();
+        ForcedPlugins = AvailablePlugins.Where(x => x.Installed).ToList();
+    }
+
+    /// <summary>
+    /// Savss the initial configuration
+    /// </summary>
+    private async Task Save()
+    {
+        if (EulaAccepted == false)
+        {
+            Toast.ShowError("Accept the EULA to continue.");
+            return;
+        }
+
+        var plugins = PluginTable.GetSelected().ToList();
+        
+        Blocker.Show("Labels.Saving");
+        try
+        {
+            var result = await HttpHelper.Post("/api/settings/initial-config", new
+            {
+                EulaAccepted,
+                Plugins = plugins
+            });
+            if (result.Success)
+            {
+                await ProfileService.Refresh();
+                NavigationManager.NavigateTo("/");
+                return;
+            }
+        }
+        catch (Exception)
+        {
+            
+        }
+        
+        Toast.ShowError("Failed to save initial configuration.");
+        Blocker.Hide();
     }
 }
