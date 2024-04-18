@@ -124,6 +124,11 @@ public class PluginScanner
                     plugin.PackageName = pi.PackageName;
                     isDifferent = true;
                 }
+                if (isNew || plugin.Name != pi.Name)
+                {
+                    plugin.Name = pi.Name;
+                    isDifferent = true;
+                }
                 if (isNew || plugin.Version != pi.Version)
                 {
                     plugin.Version = pi.Version;

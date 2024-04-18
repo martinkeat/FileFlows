@@ -88,6 +88,16 @@ public abstract class CachedManager<T> where T : FileFlowObject, new()
 
     /// <summary>
     /// Gets a item by it's name
+    /// This is virtual so plugins can override it and use the package name
+    /// </summary>
+    /// <param name="item">the item to get by name</param>
+    /// <param name="ignoreCase">if case should be ignored</param>
+    /// <returns>the item</returns>
+    protected virtual Task<T?> GetByName(T item, bool ignoreCase = true)
+        => GetByName(item.Name, ignoreCase);
+    
+    /// <summary>
+    /// Gets a item by it's name
     /// </summary>
     /// <param name="name">the name of the item</param>
     /// <param name="ignoreCase">if case should be ignored</param>
@@ -123,7 +133,7 @@ public abstract class CachedManager<T> where T : FileFlowObject, new()
         if (string.IsNullOrWhiteSpace(item.Name))
             return Result<T>.Fail("ErrorMessages.NameRequired");
 
-        var existingName = await GetByName(item.Name);
+        var existingName = await GetByName(item);
         if (existingName != null && existingName.Uid != item.Uid)
             return Result<T>.Fail("ErrorMessages.NameInUse");
 

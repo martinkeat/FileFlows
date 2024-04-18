@@ -44,6 +44,18 @@ public class PluginManager : CachedManager<PluginInfo>
         => DatabaseAccessManager.Instance.FileFlowsObjectManager.GetByName<PluginSettingsModel>(name);
 
     /// <summary>
+    /// Gets a plugin by its package name
+    /// </summary>
+    /// <param name="item">the plugin</param>
+    /// <param name="ignoreCase">if case should be ignored</param>
+    /// <returns>the plugin if found</returns>
+    protected override async Task<PluginInfo?> GetByName(PluginInfo item, bool ignoreCase = true)
+    {
+        var all = await GetAll();
+        return all.FirstOrDefault(x => x.PackageName.Equals(item.PackageName, StringComparison.InvariantCultureIgnoreCase));
+    }
+
+    /// <summary>
     /// Sets the plugin settings
     /// </summary>
     /// <param name="name">the name of the plugin</param>

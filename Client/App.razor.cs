@@ -34,8 +34,6 @@ public partial class App : ComponentBase
 
     public FileFlows.Shared.Models.Flow NewFlowTemplate { get; set; }
 
-    public static FileFlows.Shared.Models.Settings Settings;
-
     public static int PageSize { get; set; }
 
     /// <summary>
