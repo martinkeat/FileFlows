@@ -279,6 +279,7 @@ public class PluginService
 #if (!DEBUG)
                     if(string.IsNullOrWhiteSpace(plugin.MinimumVersion) == false)
                     {
+                        Version ffVersion = new Version(Globals.Version);
                         if (ffVersion < new Version(plugin.MinimumVersion))
                             continue;
                     }
