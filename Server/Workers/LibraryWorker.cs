@@ -8,7 +8,7 @@ namespace FileFlows.Server.Workers;
 /// <summary>
 /// Worker to monitor libraries
 /// </summary>
-public class LibraryWorker : Worker
+public class LibraryWorker : ServerWorker
 {
     
     private Dictionary<string, WatchedLibrary> WatchedLibraries = new ();
@@ -113,7 +113,7 @@ public class LibraryWorker : Worker
         LibrariesLastUpdated = DateTime.UtcNow;
     }
 
-    protected override void Execute()
+    protected override void ExecuteActual(Settings settings)
     {
         if(LibrariesLastUpdated < DateTime.UtcNow.AddHours(-1))
             UpdateLibrariesInstance();

@@ -14,7 +14,7 @@ namespace FileFlows.Server.Workers;
 /// <summary>
 /// A worker that runs FileFlows Tasks
 /// </summary>
-public class FileFlowsTasksWorker: Worker
+public class FileFlowsTasksWorker: ServerWorker
 {
     /// <summary>
     /// Gets the instance of the tasks worker
@@ -62,7 +62,7 @@ public class FileFlowsTasksWorker: Worker
     /// <summary>
     /// Executes any tasks
     /// </summary>
-    protected override void Execute()
+    protected override void ExecuteActual(Settings settings)
     {
         if (LicenseHelper.IsLicensed(LicenseFlags.Tasks) == false)
             return;

@@ -2,13 +2,14 @@
 using FileFlows.Server.Controllers;
 using FileFlows.Server.Services;
 using FileFlows.ServerShared.Workers;
+using FileFlows.Shared.Models;
 
 namespace FileFlows.Server.Workers;
 
 /// <summary>
 /// Worker to update plugins
 /// </summary>
-public class PluginUpdaterWorker : Worker
+public class PluginUpdaterWorker : ServerWorker
 {
     /// <summary>
     /// Constructs a new plugin update worker
@@ -18,12 +19,9 @@ public class PluginUpdaterWorker : Worker
         Trigger();
     }
 
-    /// <summary>
-    /// Executes the worker
-    /// </summary>
-    protected override void Execute()
+    /// <inheritdoc />
+    protected override void ExecuteActual(Settings settings)
     {
-        var settings = ServiceLoader.Load<SettingsService>().Get().Result;
 #if (DEBUG)
         settings = null;
 #endif

@@ -265,7 +265,7 @@ public class PluginService
         try
         {
             string url = Globals.PluginBaseUrl + $"?version={Globals.Version}&rand={DateTime.UtcNow.ToFileTime()}";
-            var plugins = await HttpHelper.Get<IEnumerable<PluginPackageInfo>>(url);
+            var plugins = await HttpHelper.Get<IEnumerable<PluginPackageInfo>>(url, timeoutSeconds: 10);
             if (plugins.Success == false)
             {
                 if (plugins.StatusCode == HttpStatusCode.PreconditionFailed)
@@ -289,7 +289,7 @@ public class PluginService
         catch (Exception) { }
 
         // remove plugins already installed
-        var installed = (await new Services.PluginService().GetAllAsync())
+        var installed = (await new PluginService().GetAllAsync())
             .Where(x => x.Deleted != true).Select(x => x.PackageName).ToList();
         
         if (missing)

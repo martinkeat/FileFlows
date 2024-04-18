@@ -15,10 +15,6 @@ public partial class InitialConfig : ComponentBase
     /// Gets or sets blocker instance
     /// </summary>
     [CascadingParameter] Blocker Blocker { get; set; }
-    /// <summary>
-    /// Gets or sets the javascript runtime used
-    /// </summary>
-    [Inject] IJSRuntime jsRuntime { get; set; }
     
     /// <summary>
     /// Gets or sets the navigation manager used
@@ -33,7 +29,7 @@ public partial class InitialConfig : ComponentBase
     /// <summary>
     /// Gets the profile
     /// </summary>
-    protected Profile Profile { get; private set; }
+    private Profile Profile { get; set; }
 
     /// <summary>
     /// The markup string of the EULA
@@ -50,10 +46,24 @@ public partial class InitialConfig : ComponentBase
     /// </summary>
     private List<PluginPackageInfo> AvailablePlugins { get; set; }
 
+    /// <summary>
+    /// The plugins that are forced checked and cannot be unchecked
+    /// These are plugins that are already installed
+    /// </summary>
     private List<PluginPackageInfo> ForcedPlugins;
 
+    /// <summary>
+    /// The Plugin flowtable
+    /// </summary>
     private FlowTable<PluginPackageInfo> PluginTable;
+    /// <summary>
+    /// Label for "Installed" shown next to installed plugins
+    /// </summary>
     private string lblInstalled;
+    /// <summary>
+    /// If this component is fully loaded or not.
+    /// Is false until the plugins have been loaded which may take a second or two
+    /// </summary>
     private bool loaded;
 
     /// <inheritdoc />
@@ -77,11 +87,17 @@ public partial class InitialConfig : ComponentBase
         msEula = new MarkupString(html);
         lblInstalled = Translater.Instant("Labels.Installed");
 
-        await GetPlugins();
+        // only show plugins if they haven't configured the system yet
+        if((Profile.ConfigurationStatus & ConfigurationStatus.InitialConfig) != ConfigurationStatus.InitialConfig)
+            await GetPlugins();
+        
         Blocker.Hide();
         loaded = true;
     }
 
+    /// <summary>
+    /// Gets the plugins from the backend
+    /// </summary>
     private async Task GetPlugins()
     {
         var request = await HttpHelper.Get<List<PluginPackageInfo>>("/api/plugin/plugin-packages");
@@ -117,15 +133,20 @@ public partial class InitialConfig : ComponentBase
             if (result.Success)
             {
                 await ProfileService.Refresh();
-                NavigationManager.NavigateTo("/");
+                if((Profile.ConfigurationStatus & ConfigurationStatus.Flows) != ConfigurationStatus.Flows)
+                    NavigationManager.NavigateTo("/flows/00000000-0000-0000-0000-000000000000");
+                else if((Profile.ConfigurationStatus & ConfigurationStatus.Libraries) != ConfigurationStatus.Libraries)
+                    NavigationManager.NavigateTo("/libraries");
+                else
+                    NavigationManager.NavigateTo("/");
                 return;
             }
         }
         catch (Exception)
         {
-            
+            // ignored
         }
-        
+
         Toast.ShowError("Failed to save initial configuration.");
         Blocker.Hide();
     }

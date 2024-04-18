@@ -1,12 +1,13 @@
 using FileFlows.Server.Helpers;
 using FileFlows.ServerShared.Workers;
+using FileFlows.Shared.Models;
 
 namespace FileFlows.Server.Workers;
 
 /// <summary>
 /// Worker to validate and refresh the user license
 /// </summary>
-class LicenseValidatorWorker : Worker
+class LicenseValidatorWorker : ServerWorker
 {
     
     /// <summary>
@@ -16,8 +17,6 @@ class LicenseValidatorWorker : Worker
     {
     }
 
-    /// <summary>
-    /// Executes the worker
-    /// </summary>
-    protected override void Execute() => LicenseHelper.Update().Wait();
+    /// <inheritdoc />
+    protected override void ExecuteActual(Settings settings) => LicenseHelper.Update().Wait();
 }

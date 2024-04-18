@@ -11,7 +11,7 @@ namespace FileFlows.Server.Workers;
 /// A worker that monitors FlowRunners and will cancel
 /// any "dead" runners
 /// </summary>
-public class FlowRunnerMonitor:Worker
+public class FlowRunnerMonitor:ServerWorker
 {
     private List<Guid> StartUpRunningFiles;
     private DateTime StartedAt = DateTime.UtcNow;
@@ -24,7 +24,7 @@ public class FlowRunnerMonitor:Worker
         StartUpRunningFiles = FlowRunnerService.ExecutingLibraryFiles().Result;
     }
 
-    protected override void Execute()
+    protected override void ExecuteActual(Settings settings)
     {
         var service = ServiceLoader.Load<FlowRunnerService>();
         service.AbortDisconnectedRunners().Wait();

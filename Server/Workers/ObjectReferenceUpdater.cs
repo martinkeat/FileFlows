@@ -2,6 +2,7 @@ using FileFlows.Server.Controllers;
 using FileFlows.Server.Services;
 using FileFlows.ServerShared.Services;
 using FileFlows.ServerShared.Workers;
+using FileFlows.Shared.Models;
 using FlowService = FileFlows.Server.Services.FlowService;
 using LibraryFileService = FileFlows.Server.Services.LibraryFileService;
 using LibraryService = FileFlows.Server.Services.LibraryService;
@@ -11,7 +12,7 @@ namespace FileFlows.Server.Workers;
 /// <summary>
 /// Worker that will update all object references if names change
 /// </summary>
-public class ObjectReferenceUpdater:Worker
+public class ObjectReferenceUpdater:ServerWorker
 {
     private static bool IsRunning = false;
     /// <summary>
@@ -21,7 +22,8 @@ public class ObjectReferenceUpdater:Worker
     {
     }
 
-    protected override void Execute()
+    /// <inheritdoc />
+    protected override void ExecuteActual(Settings settings)
     {
         Run();
     }

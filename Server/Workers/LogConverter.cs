@@ -1,13 +1,14 @@
 using FileFlows.Server.Controllers;
 using FileFlows.Server.Helpers;
 using FileFlows.ServerShared.Workers;
+using FileFlows.Shared.Models;
 
 namespace FileFlows.Server.Workers;
 
 /// <summary>
 /// Worker that will convert logs to/from a compressed format, depending on the system setting
 /// </summary>
-public class LogConverter:Worker
+public class LogConverter:ServerWorker
 {
     /// <summary>
     /// Creates a new instance of the Log Converter 
@@ -16,7 +17,8 @@ public class LogConverter:Worker
     {
     }
 
-    protected override void Execute()
+    /// <inheritdoc />
+    protected override void ExecuteActual(Settings settings)
     {
         Run();
     }

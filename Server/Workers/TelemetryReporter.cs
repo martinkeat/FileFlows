@@ -1,4 +1,5 @@
 ﻿using System.Runtime.InteropServices;
+using FileFlows.Server.Helpers;
 using FileFlows.Server.Services;
 using FileFlows.ServerShared.Workers;
 using FileFlows.Shared.Helpers;
@@ -7,26 +8,24 @@ using FlowService = FileFlows.Server.Services.FlowService;
 using LibraryFileService = FileFlows.Server.Services.LibraryFileService;
 using LibraryService = FileFlows.Server.Services.LibraryService;
 using NodeService = FileFlows.Server.Services.NodeService;
-using SettingsService = FileFlows.Server.Services.SettingsService;
 
 namespace FileFlows.Server.Workers;
 
-public class TelemetryReporter : Worker
+public class TelemetryReporter : ServerWorker
 {
     public TelemetryReporter() : base(ScheduleType.Daily, 5)
     {
         Trigger();
     }
 
-    protected override void Execute()
+    protected override void ExecuteActual(Settings settings)
     {
         try
         {
 // #if (DEBUG && false)
 //             return;
 // #else
-            var settings = ServiceLoader.Load<SettingsService>().Get().Result;
-            if (settings?.DisableTelemetry == true)
+            if (settings?.DisableTelemetry == true && LicenseHelper.IsLicensed())
                 return; // they have turned it off, dont report anything
 
             bool isDocker = Application.Docker;

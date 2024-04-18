@@ -95,7 +95,10 @@
                         }
                         <InputNumber @bind-Value="@Model.ProcessFileCheckInterval" Label="Pages.Settings.Fields.ProcessFileCheckInterval" Min=5 Max=86400 />
                         <InputSwitch @bind-Value="@Model.KeepFailedFlowTempFiles" Label="Pages.Settings.Fields.KeepFailedFlowTempFiles" />
-                        <InputSwitch @bind-Value="@Model.DisableTelemetry" Inverse="@true" Label="Pages.Settings.Fields.Telemetry" OnChangedValue="OnTelemetryChange"/>
+                        @if (IsLicensed)
+                        {
+                            <InputSwitch @bind-Value="@Model.DisableTelemetry" Inverse="@true" Label="Pages.Settings.Fields.Telemetry" OnChangedValue="OnTelemetryChange"/>
+                        }
                     </FlowTab>
                     <FlowTab Title="@lblSecurity" Visible="@(LicensedFor(LicenseFlags.UserSecurity))">
                         <p style="white-space: pre-wrap">@((MarkupString)mdSecurityDescription)</p>

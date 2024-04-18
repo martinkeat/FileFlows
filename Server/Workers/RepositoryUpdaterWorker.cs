@@ -1,13 +1,14 @@
 using System.Text.RegularExpressions;
 using FileFlows.Server.Services;
 using FileFlows.ServerShared.Workers;
+using FileFlows.Shared.Models;
 
 namespace FileFlows.Server.Workers;
 
 /// <summary>
 /// A worker that runs FileFlows Tasks
 /// </summary>
-public class RepositoryUpdaterWorker: Worker
+public class RepositoryUpdaterWorker: ServerWorker
 {
     private static RepositoryUpdaterWorker Instance;
     
@@ -21,10 +22,8 @@ public class RepositoryUpdaterWorker: Worker
         Execute();
     }
     
-    /// <summary>
-    /// Executes any tasks
-    /// </summary>
-    protected sealed override void Execute()
+    /// <inheritdoc />
+    protected override void ExecuteActual(Settings settings)
     {
         var service = new RepositoryService();
         service.Init().Wait();

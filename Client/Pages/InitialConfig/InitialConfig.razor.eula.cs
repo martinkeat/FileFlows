@@ -37,6 +37,26 @@ You are permitted to load the FileFlows software (for example a PC, laptop, mobi
 
 Users who obtain a paid license gain expanded rights, including the ability to use the software for commercial purposes. By purchasing a license, users agree to abide by the terms of the paid license agreement, which may include additional provisions and usage rights. Contact FileFlows for information on obtaining a paid license for commercial use.
 
+# **Data Collection and Telemetry**
+
+FileFlows collects telemetry data from your use of the Software. This data is anonymous and general in scope, and may include but is not limited to:
+
+- Flow elements being used
+- Scripts being used
+- Number of files processed
+- Number of files failed processing
+- Database type
+- Version installed
+- Operating system
+- Architecture (e.g., ARM, x64, etc.)
+- Number of processing nodes
+- Number of file runners
+- Storage saved
+- Flow templates being used
+- Library templates being used
+
+This data is collected to improve the performance, features, and usability of the Software. By accepting this EULA, you consent to the collection of such telemetry data.
+
 # **Intellectual Property and Ownership**
 
 FileFlows shall at all times retain ownership of the Software as originally downloaded by you and all subsequent downloads of the Software by you. The Software (and the copyright, and other intellectual property rights of whatever nature in the Software, including any modifications made thereto) are and shall remain the property of FileFlows.

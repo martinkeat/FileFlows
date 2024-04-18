@@ -27,6 +27,15 @@ public class ServerUpdater : UpdaterWorker
         Instance = this;
     }
 
+    /// <inheritdoc />
+    protected override void Execute()
+    {
+        var settings = ServiceLoader.Load<SettingsService>().Get().Result;
+        if (settings.EulaAccepted == false)
+            return; // cannot execute if EULA not accepted
+        base.Execute();
+    }
+
     /// <summary>
     /// Pre-check to run before executing
     /// </summary>

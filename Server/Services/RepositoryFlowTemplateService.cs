@@ -126,8 +126,20 @@ public class RepositoryFlowTemplateService
             var result = await HttpHelper.Get<string>("https://raw.githubusercontent.com/revenz/FileFlowsRepository/master/" + path);
             if (result.Success == false)
                 return Result<Flow>.Fail("Failed to download from repository");
-            await File.WriteAllTextAsync(fileName, result.Data);
-            json = result.Data;
+            try
+            {
+                var dir = new FileInfo(fileName).Directory;
+                if (dir.Exists == false)
+                    dir.Create();
+
+                await File.WriteAllTextAsync(fileName, result.Data);
+                json = result.Data;
+            }
+            catch (Exception ex)
+            {
+                Logger.Instance.ELog("Error saving template: "+ ex.Message);
+                return Result<Flow>.Fail("Failed to save template");
+            }
         }
         else
         {

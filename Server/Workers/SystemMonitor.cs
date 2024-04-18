@@ -1,8 +1,8 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
-using FileFlows.Server.Helpers;
 using FileFlows.Server.Services;
 using FileFlows.ServerShared.Models;
+using FileFlows.ServerShared.Workers;
 using FileFlows.Shared.Models;
 
 namespace FileFlows.Server.Workers;
@@ -10,7 +10,7 @@ namespace FileFlows.Server.Workers;
 /// <summary>
 /// Worker that monitors system information
 /// </summary>
-public class SystemMonitor:FileFlows.ServerShared.Workers.Worker
+public class SystemMonitor:Worker
 {
     public readonly FixedSizedQueue<SystemValue<float>> CpuUsage = new (2000);
     public readonly FixedSizedQueue<SystemValue<float>> MemoryUsage = new (2000);
