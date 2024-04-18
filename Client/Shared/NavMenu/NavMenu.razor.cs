@@ -113,7 +113,10 @@ public partial class NavMenu : IDisposable
 
     private void NavigationManagerOnLocationChanged(object sender, LocationChangedEventArgs e)
     {
-        var lastRoute = e.Location?.Split('/').LastOrDefault();
+        if (MenuItems?.Any() != true)
+            return;
+        
+        var lastRoute = e?.Location?.Split('/')?.LastOrDefault();
         if (string.IsNullOrWhiteSpace(lastRoute))
             return;
         var item = MenuItems.SelectMany(x => x.Items).FirstOrDefault(x => x.Url == lastRoute);
