@@ -134,11 +134,7 @@ public partial class InitialConfig : ComponentBase
             {
                 await ProfileService.Refresh();
                 if ((Profile.ConfigurationStatus & ConfigurationStatus.Flows) != ConfigurationStatus.Flows)
-                {
-                    NavigationManager.NavigateTo(Profile.IsWebView
-                        ? "/flows"
-                        : "/flows/00000000-0000-0000-0000-000000000000");
-                }
+                    NavigationManager.NavigateTo("/flows/00000000-0000-0000-0000-000000000000", Profile.IsWebView);
                 else if((Profile.ConfigurationStatus & ConfigurationStatus.Libraries) != ConfigurationStatus.Libraries)
                     NavigationManager.NavigateTo("/libraries");
                 else
