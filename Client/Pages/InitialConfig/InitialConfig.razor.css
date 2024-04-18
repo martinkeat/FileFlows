@@ -30,6 +30,9 @@ h1 {
 ol {
   margin: 2rem 0;
 }
+ol li + li {
+  margin-top: 1rem;
+}
 
 .table-item .icon i {
   font-size: 1.8rem;

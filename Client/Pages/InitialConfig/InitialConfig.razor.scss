@@ -32,6 +32,9 @@ h1 {
 }
 ol {
   margin: 2rem 0;
+  li + li {
+    margin-top:1rem;
+  }
 }
 
 .table-item {

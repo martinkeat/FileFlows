@@ -100,7 +100,7 @@ public class LibraryFileService : ILibraryFileService
         var settings = await new SettingsService().Get();
         if (settings.IsPaused)
             return NextFileResult(NextLibraryFileStatus.SystemPaused);
-
+        
         var node = await nodeService.GetByUidAsync(nodeUid);
         if (node != null && node.Version != nodeVersion)
         {
@@ -121,6 +121,9 @@ public class LibraryFileService : ILibraryFileService
             }
         }
 
+        if(settings.EulaAccepted == false)
+            return NextFileResult(NextLibraryFileStatus.SystemPaused);
+        
         if (await NodeEnabled(node) == false)
             return NextFileResult(NextLibraryFileStatus.NodeNotEnabled);
 
