@@ -95,7 +95,24 @@ public class SQLiteConnector : IDatabaseConnector
         bool exists = db.Db.ExecuteScalar<int>("SELECT COUNT(*) AS CNTREC FROM pragma_table_info(@0) WHERE name=@1", table, column) > 0;
         return exists;
     }
-    
+
+    /// <inheritdoc />
+    public async Task<bool> TableExists(string table, DatabaseConnection? db = null)
+    {
+        const string sql = "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name=@0";
+        if (db == null)
+        {
+            using var db2 = await GetDb(false);
+            bool tableExists = db2.Db.ExecuteScalar<int>(sql, table) > 0;
+            return tableExists;
+        }
+        else
+        {
+            bool tableExists = db.Db.ExecuteScalar<int>(sql, table) > 0;
+            return tableExists;
+        }
+    }
+
     /// <inheritdoc />
     public async Task CreateColumn(string table, string column, string type, string defaultValue)
     {

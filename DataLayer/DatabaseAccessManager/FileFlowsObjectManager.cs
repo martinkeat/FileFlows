@@ -320,7 +320,7 @@ internal  class FileFlowsObjectManager
     /// <param name="dbObject">the DbObject instance to convert</param>
     /// <typeparam name="T">the type to convert to</typeparam>
     /// <returns>the converetd object</returns>
-    private T? Convert<T>(DbObject dbObject) where T : FileFlowObject, new()
+    internal static T? Convert<T>(DbObject dbObject) where T : FileFlowObject, new()
     {
         if (dbObject == null)
             return default;

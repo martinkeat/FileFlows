@@ -1,3 +1,4 @@
+using System.Data.Common;
 using FileFlows.DataLayer.Converters;
 using FileFlows.Plugin;
 using NPoco;
@@ -99,6 +100,27 @@ public class PostgresConnector : IDatabaseConnector
             table_name = @0
         AND column_name = @1", table, column);
         return result > 0;
+    }
+    
+    /// <inheritdoc />
+    public async Task<bool> TableExists(string table, DatabaseConnection? db = null)
+    {
+        string sql = @"
+        SELECT COUNT(*)
+        FROM information_schema.columns
+        WHERE
+            table_name = @0";
+        if (db == null)
+        {
+            using var db2 = await GetDb(false);
+            var result = db2.Db.ExecuteScalar<int>(sql, table);
+            return result > 0;
+        }
+        else
+        {
+            var result = db.Db.ExecuteScalar<int>(sql, table);
+            return result > 0;
+        }
     }
 
     /// <inheritdoc />

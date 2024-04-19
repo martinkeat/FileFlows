@@ -72,6 +72,14 @@ public interface IDatabaseConnector
     string TimestampDiffSeconds(string start, string end, string asColumn);
 
     /// <summary>
+    /// Check to see if a table exists
+    /// </summary>
+    /// <param name="table">the table to check</param>
+    /// <param name="db">optional connection</param>
+    /// <returns>true if the table exists, otherwise false</returns>
+    Task<bool> TableExists(string table, DatabaseConnection? db = null);
+
+    /// <summary>
     /// Check to see if a column exists
     /// </summary>
     /// <param name="table">the table to check</param>

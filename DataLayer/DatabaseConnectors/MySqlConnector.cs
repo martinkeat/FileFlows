@@ -97,6 +97,29 @@ public class MySqlConnector : IDatabaseConnector
     }
 
     /// <inheritdoc />
+    public async Task<bool> TableExists(string table, DatabaseConnection? db = null)
+    {
+        const string sql = $@"SELECT count(*) 
+        FROM information_schema.COLUMNS 
+        WHERE 
+            TABLE_SCHEMA = @0 
+        AND TABLE_NAME = @1";
+        string dbName = GetDatabaseName(this.ConnectionString);
+        if (db == null)
+        {
+            using var db2 = await GetDb(false);
+            var result = db2.Db.ExecuteScalar<int>(sql, dbName, table);
+            return result > 0;
+        }
+        else
+        {
+            var result = db.Db.ExecuteScalar<int>(sql, dbName, table);
+            return result > 0;
+            
+        }
+    }
+
+    /// <inheritdoc />
     public async Task CreateColumn(string table, string column, string type, string defaultValue)
     {
         if (type.ToLowerInvariant().IndexOf("varchar", StringComparison.InvariantCulture) > 0)

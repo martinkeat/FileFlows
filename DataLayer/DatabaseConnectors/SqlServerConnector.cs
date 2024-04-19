@@ -98,6 +98,23 @@ public class SqlServerConnector : IDatabaseConnector
     }
     
     /// <inheritdoc />
+    public async Task<bool> TableExists(string table, DatabaseConnection? db = null)
+    {
+        const string sql = "SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_NAME = @0";
+        if (db == null)
+        {
+            using var db2 = await GetDb(false);
+            var result = db2.Db.ExecuteScalar<int>(sql, table);
+            return result > 0;
+        }
+        else
+        {
+            var result = db.Db.ExecuteScalar<int>(sql, table);
+            return result > 0;
+        }
+    }
+    
+    /// <inheritdoc />
     public async Task CreateColumn(string table, string column, string type, string defaultValue)
     {
         string sql = $@"ALTER TABLE {table} ADD {column} {type}" + (string.IsNullOrWhiteSpace(defaultValue) ? "" : $" DEFAULT {defaultValue}");

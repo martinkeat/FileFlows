@@ -103,6 +103,7 @@ public class Upgrader
             return true; // way to old, or new install
         
         var manager = GetUpgradeManager(appSettingsService.Settings);
+        DataLayer.Helpers.Decrypter.EncryptionKey = appSettingsService.Settings.EncryptionKey;
         if (currentVersion < new Version(24, 2))
         {
             Logger.Instance.ILog("Running 24.2 upgrade");
@@ -120,7 +121,7 @@ public class Upgrader
             Logger.Instance.ILog("Running 24.3.5 upgrade");
             new Upgrade_24_03_5(Logger.Instance, appSettingsService, manager).Run();
         }
-        
+
         if (currentVersion < new Version(24, 4, 1))
         {
             Logger.Instance.ILog("Running 24.4.1 upgrade");
@@ -133,7 +134,7 @@ public class Upgrader
         var result = manager.SaveCurrentVersion().Result;
         if (result.IsFailed)
             return result;
-        
+
         Logger.Instance.ILog("Finished checking upgrade scripts");
         return true;
     }

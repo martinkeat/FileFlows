@@ -1,5 +1,9 @@
 using FileFlows.DataLayer.DatabaseConnectors;
+using FileFlows.DataLayer.Models;
 using FileFlows.Plugin;
+using FileFlows.ServerShared;
+using FileFlows.Shared.Models;
+using Microsoft.Extensions.Logging;
 using DatabaseType = FileFlows.Shared.Models.DatabaseType;
 using ILogger = FileFlows.Plugin.ILogger;
 
@@ -21,11 +25,56 @@ public class Upgrade_24_04_1
     {
         var connector = DatabaseConnectorLoader.LoadConnector(logger, dbType, connectionString);
         using var db = connector.GetDb(true).Result;
-
+        
         DeleteOldLibraryFiles(logger, db, connector);
         AddAuditTable(logger, db, connector);
+        SetInitialConfigDone(logger, db, connector);
 
         return true;
+    }
+
+    /// <summary>
+    /// Sets the initial configuration as done
+    /// </summary>
+    /// <param name="logger">the logger</param>
+    /// <param name="db">the db connection</param>
+    /// <param name="connector">the connector</param>
+    private void SetInitialConfigDone(ILogger logger, DatabaseConnection db, IDatabaseConnector connector)
+    {
+        var dbo =
+            db.Db.SingleOrDefault<DbObject>(
+                $"where {connector.WrapFieldName("Type")} = 'FileFlows.Shared.Models.Settings'");
+        if (dbo == null)
+        {
+            logger.ILog("Setting Initial Configuration: failed settings not found");
+            return;
+        }
+
+        try
+        {
+            var settings = FileFlowsObjectManager.Convert<Settings>(dbo);
+            if (settings == null)
+            {
+                logger.ILog("Setting Initial Configuration: Failed to convert to settings object");
+                return;
+            }
+
+            settings.InitialConfigDone = true;
+            settings.EulaAccepted = false;
+
+            dbo = FileFlowsObjectManager.ConvertToDbObject(settings);
+            bool updated = db.Db.Execute(
+                $"update {connector.WrapFieldName("DbObject")} set {connector.WrapFieldName("Data")} = @0 " +
+                $"where {connector.WrapFieldName("Type")} = 'FileFlows.Shared.Models.Settings'", dbo.Data) > 0;
+            if (updated)
+                logger.ILog("Setting Initial Configuration: Completed");
+            else
+                logger.WLog("Setting Initial Configuration: Failed");
+        }
+        catch (Exception ex)
+        {
+            logger.ELog("Setting Initial Configuration Error: " + ex.Message);
+        }
     }
 
 
@@ -76,6 +125,9 @@ where {connector.WrapFieldName("LibraryUid")} not in (
     /// <param name="connector">the connector</param>
     private void AddAuditTable(ILogger logger, DatabaseConnection db, IDatabaseConnector connector)
     {
+        if (connector.TableExists("AuditLog", db: db).Result)
+            return;
+        
         if (connector.Type == DatabaseType.Sqlite)
             AddAuditTable_Sqlite(logger, db, connector);
         else if(connector.Type == DatabaseType.Postgres)
