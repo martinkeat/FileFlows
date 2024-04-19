@@ -155,6 +155,9 @@ public class SettingsController : BaseController
 
         await Save(new ()
         {
+            EulaAccepted = model.EulaAccepted,
+            InitialConfigDone = model.InitialConfigDone,
+            
             PausedUntil = model.PausedUntil,
             Language = model.Language,
             LogFileRetention = model.LogFileRetention,
