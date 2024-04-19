@@ -2,6 +2,7 @@
 using FileFlows.Plugin;
 using FileFlows.Server.Services;
 using FileFlows.Shared.Models;
+using ILogger = FileFlows.Plugin.ILogger;
 
 namespace FileFlows.Server.Upgrade;
 
@@ -37,6 +38,8 @@ public class Upgrader
             return (false, new Version()); // database has not been initialized
 
         var version = versionResult.Value;
+        Logger.Instance.ILog("Current Database Version: " + version);
+        Logger.Instance.ILog("Expected Database Version: " + LATEST_DB_VERSION);
         return (version < LATEST_DB_VERSION, version);
     }
 
