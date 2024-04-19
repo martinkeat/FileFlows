@@ -102,6 +102,7 @@ public class ProfileService
             _profile.Role = newProfile.Role;
             _profile.Security = newProfile.Security;
             _profile.IsWebView = newProfile.IsWebView;
+            _profile.UsersEnabled = newProfile.UsersEnabled;
         }
         finally
         {

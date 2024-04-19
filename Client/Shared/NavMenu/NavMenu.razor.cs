@@ -236,7 +236,7 @@ public partial class NavMenu : IDisposable
                 Items = new List<NavMenuItem>
                 {
                     new ("Pages.Settings.Title", "fas fa-cogs", "settings"),
-                    Profile.LicensedFor(LicenseFlags.Auditing) ? new ("Pages.Audit.Title", "fas fa-clipboard-list", "audit") : null,
+                    Profile.LicensedFor(LicenseFlags.Auditing) && Profile.UsersEnabled ? new ("Pages.Audit.Title", "fas fa-clipboard-list", "audit") : null,
                     Profile.LicensedFor(LicenseFlags.UserSecurity) ? new ("Pages.Users.Title", "fas fa-users", "users") : null,
                     Profile.LicensedFor(LicenseFlags.AccessControl) ? new ("Pages.AccessControl.Title", "fas fa-shield-alt", "access-control") : null
                 }

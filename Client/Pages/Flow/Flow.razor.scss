@@ -377,3 +377,9 @@
         }
     }
 }
+
+@-moz-document url-prefix() {
+    #flow-zoomer {
+        display: none !important;
+    }
+}

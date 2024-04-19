@@ -333,4 +333,8 @@
   outline: none;
 }
 
-/*# sourceMappingURL=Flow.razor.css.map */
+@-moz-document url-prefix() {
+  #flow-zoomer {
+    display: none !important;
+  }
+}

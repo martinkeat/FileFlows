@@ -207,6 +207,8 @@ public partial class Plugins : ListPage<Guid, PluginInfoModel>
     private string GetPluginHelpUrl(PluginInfoModel plugin, bool settings = false)
     {
         string name = plugin.Name;
+        if (plugin.PackageName.EndsWith("Nodes") && plugin.Name is "Discord" or "Email" == false)
+            name += " Nodes"; // for now will be removed later
         name = name.Replace(" ", "-").ToLowerInvariant();
         string url = $"https://fileflows.com/docs/plugins/{name}";
         if (settings)

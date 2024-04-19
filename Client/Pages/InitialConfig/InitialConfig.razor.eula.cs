@@ -57,6 +57,11 @@ FileFlows collects telemetry data from your use of the Software. This data is an
 
 This data is collected to improve the performance, features, and usability of the Software. By accepting this EULA, you consent to the collection of such telemetry data.
 
+
+# **Disclaimer Regarding Data Management**
+
+FileFlows allows users to create custom flows to manage their files and folders, including actions that involve deleting specific files. While users have the freedom to design flows according to their preferences and requirements, FileFlows is not liable for any unintended data loss or damage resulting from the use of its services. Users are solely responsible for ensuring the accuracy and safety of their flows and for taking appropriate precautions to prevent accidental data loss. FileFlows encourages users to review their flows carefully before execution and to back up their important data regularly to mitigate the risk of data loss.
+
 # **Intellectual Property and Ownership**
 
 FileFlows shall at all times retain ownership of the Software as originally downloaded by you and all subsequent downloads of the Software by you. The Software (and the copyright, and other intellectual property rights of whatever nature in the Software, including any modifications made thereto) are and shall remain the property of FileFlows.

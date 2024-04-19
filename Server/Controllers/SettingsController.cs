@@ -152,6 +152,11 @@ public class SettingsController : BaseController
             var existing = await ServiceLoader.Load<SettingsService>().Get();
             model.SmtpPassword = existing.SmtpPassword;
         }
+        
+        // validate license it
+        Settings.LicenseKey = model.LicenseKey?.Trim();
+        Settings.LicenseEmail = model.LicenseEmail?.Trim();
+        await LicenseHelper.Update();
 
         await Save(new ()
         {
@@ -196,10 +201,6 @@ public class SettingsController : BaseController
             OidcCallbackAddress = model.OidcCallbackAddress ?? string.Empty,
         }, await GetAuditDetails());
         RemoteService.AccessToken = model.AccessToken;
-        // validate license it
-        Settings.LicenseKey = model.LicenseKey?.Trim();
-        Settings.LicenseEmail = model.LicenseEmail?.Trim();
-        await LicenseHelper.Update();
         
         Settings.Security = model.Security;
         

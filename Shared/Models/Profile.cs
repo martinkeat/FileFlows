@@ -72,4 +72,9 @@ public class Profile
     /// </summary>
     [JsonIgnore]
     public bool IsAdmin => Role == UserRole.Admin;
+
+    /// <summary>
+    /// Gets or sets if users are enabled and in use
+    /// </summary>
+    public bool UsersEnabled { get; set; }
 }
