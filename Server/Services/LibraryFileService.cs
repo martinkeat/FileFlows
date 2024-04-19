@@ -410,7 +410,7 @@ public class LibraryFileService : ILibraryFileService
                     // this node has less than or equal number of runners
                     continue;
                 }
-                Logger.Instance.ILog($"Loading balancing '{other.Name}' can process file and is processing less '{otherRunners}', skipping node: '{node.Name}': {file.Name}");
+                Logger.Instance.ILog($"Load balancing '{other.Name}' can process file and is processing less '{otherRunners}', skipping node: '{node.Name}': {file.Name}");
                 return true;
             }
             
