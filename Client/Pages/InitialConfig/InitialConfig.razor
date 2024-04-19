@@ -12,13 +12,28 @@ else
     <div class="initial-config">
         <FlowWizard FinishDisabled="@(EulaAccepted == false)" OnFinish="() => _ = Save()">
             <FlowWizardPage Title="Welcome" Description="Welcome to FileFlows">
-                <div class="pre-text">
-                    Welcome to FileFlows! Thank you for choosing our software.
+                @if (onlyEula == false)
+                {
+                    <div class="pre-text">
+                        Welcome to FileFlows! Thank you for choosing our software.
 
-                    This wizard will guide you through the essential setup steps, including accepting the EULA and selecting plugins to add functionality based on your preferences.
+                        This wizard will guide you through the essential setup steps, including accepting the EULA and selecting plugins to add functionality based on your preferences.
 
-                    Choose from a variety of plugins tailored to process different types of files, such as video, audio, and images.
-                </div>
+                        Choose from a variety of plugins tailored to process different types of files, such as video, audio, and images.
+                    </div>
+                }
+                else
+                {
+                    <div class="pre-text">
+                        We've recently updated our End-User License Agreement (EULA). 
+                        
+                        Please take a moment to review and accept the updated terms before you continue.
+
+                        Your acceptance is required to proceed with using FileFlows.
+
+                        Thank you for choosing FileFlows.
+                    </div>
+                }
             </FlowWizardPage>
             <FlowWizardPage Title="EULA" NextDisabled="@(EulaAccepted == false)" Description="End-User License Agreement of FileFlows">
                 <div class="eula-page">
@@ -87,17 +102,17 @@ else
 
 
             </FlowWizardPage>
-            <FlowWizardPage Title="Finish" Disabled="@(EulaAccepted == false)" Description="Initial Configuration Complete">
+            <FlowWizardPage Title="Finish" Disabled="@(EulaAccepted == false)" Visible="(onlyEula == false)" Description="Initial Configuration Complete">
 
                 You've successfully configured FileFlows to suit your needs. Now it's time to put it to work!
 
                 <ol>
-                    <li><b>Create Your First Flow:</b> Utilize the plugins you've selected to craft your first flow.
+                    <li><span>Create Your First Flow:</span> Utilize the plugins you've selected to craft your first flow.
                         Whether it's processing video files, audio tracks, images, or any other type of file, your flow
                         empowers you to tailor the handling of your files to your specific needs, whether they're simple
                         or complex.
                     </li>
-                    <li><b>Create A Library:</b> Establish a library to automate file processing.
+                    <li><span>Create A Library:</span> Establish a library to automate file processing.
                         Your library will automatically detect and process files based on your specified criteria,
                         simplifying your workflow without the need for manual intervention.
                     </li>

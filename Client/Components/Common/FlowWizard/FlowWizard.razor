@@ -41,11 +41,11 @@
         </CascadingValue>
 
         <div class="flow-wizard-navigation-buttons">
-            @if (ActivePage != Pages.FirstOrDefault())
+            @if (ActivePage != Pages.FirstOrDefault(x => x.Visible))
             {
                 <span class="previous" @onclick="Previous">Previous</span>
             }
-            @if (ActivePage != Pages.LastOrDefault())
+            @if (ActivePage != Pages.LastOrDefault(x => x.Visible))
             {
                 <span class="next @(ActivePage?.NextDisabled == true ? "disabled" : "")" @onclick="Next">Next</span>
             }

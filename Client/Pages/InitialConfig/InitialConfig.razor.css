@@ -33,6 +33,9 @@ ol {
 ol li + li {
   margin-top: 1rem;
 }
+ol li > span {
+  font-weight: var(--bold, 600);
+}
 
 .table-item .icon i {
   font-size: 1.8rem;

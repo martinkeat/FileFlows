@@ -66,6 +66,11 @@ public partial class InitialConfig : ComponentBase
     /// </summary>
     private bool loaded;
 
+    /// <summary>
+    /// If only the EULA needs accepting
+    /// </summary>
+    private bool onlyEula;
+
     /// <inheritdoc />
     protected override async Task OnInitializedAsync()
     {
@@ -88,7 +93,9 @@ public partial class InitialConfig : ComponentBase
         lblInstalled = Translater.Instant("Labels.Installed");
 
         // only show plugins if they haven't configured the system yet
-        if((Profile.ConfigurationStatus & ConfigurationStatus.InitialConfig) != ConfigurationStatus.InitialConfig)
+        onlyEula = (Profile.ConfigurationStatus & ConfigurationStatus.InitialConfig) ==
+                   ConfigurationStatus.InitialConfig; 
+        if(onlyEula == false)
             await GetPlugins();
         
         Blocker.Hide();
@@ -120,7 +127,7 @@ public partial class InitialConfig : ComponentBase
             return;
         }
 
-        var plugins = PluginTable.GetSelected().ToList();
+        var plugins = onlyEula ? null : PluginTable?.GetSelected()?.ToList();
         
         Blocker.Show("Labels.Saving");
         try
@@ -133,7 +140,9 @@ public partial class InitialConfig : ComponentBase
             if (result.Success)
             {
                 await ProfileService.Refresh();
-                if ((Profile.ConfigurationStatus & ConfigurationStatus.Flows) != ConfigurationStatus.Flows)
+                if(onlyEula)
+                    NavigationManager.NavigateTo("/");
+                else if ((Profile.ConfigurationStatus & ConfigurationStatus.Flows) != ConfigurationStatus.Flows)
                     NavigationManager.NavigateTo("/flows/00000000-0000-0000-0000-000000000000", Profile.IsWebView);
                 else if((Profile.ConfigurationStatus & ConfigurationStatus.Libraries) != ConfigurationStatus.Libraries)
                     NavigationManager.NavigateTo("/libraries");

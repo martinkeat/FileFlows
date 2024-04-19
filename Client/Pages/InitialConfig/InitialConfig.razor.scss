@@ -35,6 +35,9 @@ ol {
   li + li {
     margin-top:1rem;
   }
+  li > span {
+    font-weight: var(--bold, 600);
+  }
 }
 
 .table-item {
