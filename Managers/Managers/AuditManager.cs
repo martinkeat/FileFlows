@@ -7,6 +7,15 @@ public class AuditManager
 {
     private FairSemaphore _semaphore = new(1);
 
+    /// <summary>
+    /// Gets or sets if audits should be performed
+    /// </summary>
+    public static bool PerformAudits
+    {
+        get => DbAuditManager.PerformAudits;
+        set => DbAuditManager.PerformAudits = value;
+    }
+
 
     /// <summary>
     /// Performs a search of the audit log

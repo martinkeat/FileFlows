@@ -354,7 +354,7 @@ public class LibraryFileService : ILibraryFileService
     private async Task<bool> HigherPriorityWaiting(ProcessingNode node, LibraryFile file, List<Library> allLibraries)
     {
         var allNodes = (await ServiceLoader.Load<NodeService>().GetAllAsync()).Where(x => 
-            x.Uid != node.Uid && x.Priority > node.Priority && x.Enabled);
+            x.Uid != node.Uid && x.Priority >= node.Priority && x.Enabled);
         var allLibrariesUids = allLibraries.Select(x => x.Uid).ToList();
         var executors = FlowRunnerService.Executors.Values.GroupBy(x => x.NodeUid)
             .ToDictionary(x => x.Key, x => x.Count());
@@ -398,6 +398,20 @@ public class LibraryFileService : ILibraryFileService
 
                 Logger.Instance.ILog("Higher priority node is offline: " + other.Name + ", last seen: " + lastSeen);
                 continue; // 10 minute cut off, give it some grace period
+            }
+
+            if (other.Priority == node.Priority)
+            {
+                // now check for load balance, the other node can process this, but so can this node.
+                var otherRunners = executors.GetValueOrDefault(other.Uid, 0);
+                var nodeRunners = executors.GetValueOrDefault(node.Uid, 0);
+                if (nodeRunners <= otherRunners)
+                {
+                    // this node has less than or equal number of runners
+                    continue;
+                }
+                Logger.Instance.ILog($"Loading balancing '{other.Name}' can process file and is processing less '{otherRunners}', skipping node: '{node.Name}': {file.Name}");
+                return true;
             }
             
             // the "other" node is higher priority, its not maxed out, its in-schedule, so we dont want the "node"

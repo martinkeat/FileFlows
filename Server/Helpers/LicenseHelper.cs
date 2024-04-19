@@ -1,5 +1,6 @@
 using System.Security.Cryptography;
 using System.Text;
+using FileFlows.Managers;
 using FileFlows.Server.Services;
 using FileFlows.Shared.Helpers;
 
@@ -80,6 +81,11 @@ class LicenseHelper
         return _License;
     }
     
+    /// <summary>
+    /// Loads the license from a code
+    /// </summary>
+    /// <param name="code">the license code</param>
+    /// <returns>the license or null if not licensed</returns>
     internal static License? FromCode(string code)
     {
         if (string.IsNullOrWhiteSpace(code))
@@ -106,6 +112,7 @@ class LicenseHelper
         var key = service.Settings.LicenseKey;
         if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(key))
         {
+            AuditManager.PerformAudits = false;
             _License = null;
             _LastLicenseEmail = string.Empty;
             _LastLicenseKey = string.Empty;
@@ -136,11 +143,13 @@ class LicenseHelper
             if (license == null)
                 return;
             
+
             // could reach the server, license request was good, record it.
             _License = license;
             _LastLicenseEmail = email;
             _LastLicenseKey = key;
             _LastUpdate = DateTime.UtcNow;
+            AuditManager.PerformAudits = (license.Flags & LicenseFlags.Auditing) == LicenseFlags.Auditing;
 
             // code is good, save it
             service.Settings.LicenseCode = licenseCode;
@@ -156,9 +165,18 @@ class LicenseHelper
 #endif
     }
     
+    /// <summary>
+    /// License validation model
+    /// </summary>
     class LicenseValidationModel
     {
+        /// <summary>
+        /// Gets or sets the email address of the license
+        /// </summary>
         public string EmailAddress { get; set; }
+        /// <summary>
+        /// Gets or sets the email address for the license
+        /// </summary>
         public string Key { get; set; }
     }
 

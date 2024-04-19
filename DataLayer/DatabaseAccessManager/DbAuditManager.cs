@@ -22,11 +22,18 @@ internal class DbAuditManager : BaseManager
     }
 
     /// <summary>
+    /// Gets or sets if audits should be performed
+    /// </summary>
+    public static bool PerformAudits { get; set; }
+
+    /// <summary>
     /// Inserts a new audit entry
     /// </summary>
     /// <param name="entry">the new audit entry</param>
     public async Task Insert(AuditEntry entry)
     {
+        if (PerformAudits == false)
+            return;
         if (entry.LogDate < new DateTime(2020, 1, 1))
             entry.LogDate = DateTime.UtcNow;
         if (string.IsNullOrWhiteSpace(entry.OperatorName) || string.IsNullOrWhiteSpace(entry.IPAddress) ||
@@ -77,6 +84,8 @@ internal class DbAuditManager : BaseManager
     /// <returns>the result</returns>
     public async Task<List<AuditEntry>> Search(AuditSearchFilter filter)
     {
+        if (PerformAudits == false)
+            return new();
         string sql = "select * from " + Wrap("AuditLog");
         sql += $" order by {Wrap(nameof(AuditEntry.LogDate))} desc ";
         int limit = 1000;
@@ -100,6 +109,9 @@ internal class DbAuditManager : BaseManager
     /// <returns>the audit history of the object</returns>
     public async Task<List<AuditEntry>> ObjectHistory(string type, Guid uid)
     {
+        if (PerformAudits == false)
+            return new();
+        
         string sql = "select * from " + Wrap("AuditLog");
         sql += $" where {Wrap(nameof(AuditEntry.ObjectType))} = @0 and {Wrap(nameof(AuditEntry.ObjectUid))} = '{uid}'"; 
         sql += $" order by {Wrap(nameof(AuditEntry.LogDate))} desc ";
