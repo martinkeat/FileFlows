@@ -25,7 +25,7 @@ public class TelemetryReporter : ServerWorker
 // #if (DEBUG && false)
 //             return;
 // #else
-            if (settings?.DisableTelemetry == true && LicenseHelper.IsLicensed())
+            if (settings.DisableTelemetry == true && LicenseHelper.IsLicensed())
                 return; // they have turned it off, dont report anything
 
             bool isDocker = Application.Docker;
@@ -116,7 +116,7 @@ public class TelemetryReporter : ServerWorker
 
 //#endif
         }
-        catch (Exception)
+        catch (Exception ex)
         {
             // FF-410: silent fail, may not have an internet connection
         }

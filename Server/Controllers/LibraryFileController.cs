@@ -36,7 +36,7 @@ public class LibraryFileController : Controller //ControllerStore<LibraryFile>
     /// <param name="sortBy">[Optional] sort by method</param>
     /// <returns>a slimmed down list of files with only needed information</returns>
     [HttpGet("list-all")]
-    public async Task<LibraryFileDatalistModel> ListAll([FromQuery] FileStatus status, [FromQuery] int page = 0, 
+    public async Task<LibraryFileDatalistModel> ListAll([FromQuery] int status, [FromQuery] int page = 0, 
         [FromQuery] int pageSize = 0, [FromQuery] string filter = null, [FromQuery] Guid? node = null, 
         [FromQuery] Guid? library = null, [FromQuery] Guid? flow = null, [FromQuery] FilesSortBy? sortBy = null)
     {
@@ -55,7 +55,7 @@ public class LibraryFileController : Controller //ControllerStore<LibraryFile>
         };
         var lfFilter = new LibraryFileFilter()
         {
-            Status = status,
+            Status = (FileStatus)status,
             Skip = page * pageSize,
             Rows = pageSize,
             Filter = filter,
@@ -78,7 +78,7 @@ public class LibraryFileController : Controller //ControllerStore<LibraryFile>
         return new()
         {
             Status = lfStatus,
-            LibraryFiles = LibaryFileListModelHelper.ConvertToListModel(files, status, libraries, nodeNames)
+            LibraryFiles = LibaryFileListModelHelper.ConvertToListModel(files, (FileStatus)status, libraries, nodeNames)
         };
     }
 

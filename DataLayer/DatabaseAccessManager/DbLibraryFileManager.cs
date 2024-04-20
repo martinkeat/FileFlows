@@ -84,6 +84,7 @@ internal class DbLibraryFileManager : BaseManager
     public async Task Update(LibraryFile file)
     {
         EnsureValusAreAcceptable(file);
+        Logger.ILog($"Updating Library File [Status: {file.Status}] => {file.Name}");
 
         string strOriginalMetadata = JsonEncode(file.OriginalMetadata);
         string strFinalMetadata = JsonEncode(file.FinalMetadata);
@@ -432,6 +433,8 @@ internal class DbLibraryFileManager : BaseManager
                      $" set {Wrap(nameof(LibraryFile.Status))} = {iStatus} " + hold + 
                      $" where {Wrap(nameof(LibraryFile.Uid))} in ({inStr})";
         
+        Logger.ILog($"Updating Library Files Status: {status}");
+        
         using var db = await DbConnector.GetDb();
         return await db.Db.ExecuteAsync(sql) > 0;
     }
@@ -549,7 +552,7 @@ internal class DbLibraryFileManager : BaseManager
         string inStr = string.Join(",", uids.Select(x => $"'{x}'"));
         string sql = $"update {Wrap(nameof(LibraryFile))} set " +
                      $" {Wrap(nameof(LibraryFile.Flags))} = {Wrap(nameof(LibraryFile.Flags))} | {((int)LibraryFileFlags.ForceProcessing)}" +
-                     $" where {Wrap(nameof(LibraryFile.Uid))} in ({inStr})'";
+                     $" where {Wrap(nameof(LibraryFile.Uid))} in ({inStr})";
         
         using var db = await DbConnector.GetDb();
         return await db.Db.ExecuteAsync(sql) > 0;

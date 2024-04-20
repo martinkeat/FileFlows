@@ -68,7 +68,7 @@ public partial class LibraryFiles : ListPage<Guid, LibaryFileListModel>, IDispos
         this.StateHasChanged();
     }
 
-    public override string FetchUrl => $"{ApiUrl}/list-all?status={SelectedStatus}&page={PageIndex}&pageSize={App.PageSize}" +
+    public override string FetchUrl => $"{ApiUrl}/list-all?status={(int)SelectedStatus}&page={PageIndex}&pageSize={App.PageSize}" +
                                        $"&filter={Uri.EscapeDataString(filterStatus == SelectedStatus ? filter ?? string.Empty : string.Empty)}" +
                                        (SelectedNode == null ? "" : $"&node={SelectedNode}") + 
                                        (SelectedFlow == null ? "" : $"&flow={SelectedFlow}") + 
