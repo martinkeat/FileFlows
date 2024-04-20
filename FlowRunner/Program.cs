@@ -187,7 +187,7 @@ public class Program
                 LogInfo("Error: " + ex.Message + Environment.NewLine + ex.StackTrace);
                 ex = ex.InnerException;
             }
-            return (int)FileStatus.ProcessingFailed;;
+            return (int)FileStatus.ProcessingFailed;
         }
     }
 
@@ -216,7 +216,7 @@ public class Program
         }
 
         if ((node.Address == "FileFlowsServer" || node.SignalrUrl == "flow") && string.IsNullOrEmpty(RemoteService.ServiceBaseUrl) == false)
-            FlowRunnerCommunicator.SignalrUrl = RemoteService.ServiceBaseUrl.EndsWith("/")
+            FlowRunnerCommunicator.SignalrUrl = RemoteService.ServiceBaseUrl.EndsWith('/')
                 ? RemoteService.ServiceBaseUrl + "flow"
                 : RemoteService.ServiceBaseUrl + "/flow";
         else

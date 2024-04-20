@@ -394,7 +394,7 @@ public class Runner
     {
         DateTime start = DateTime.UtcNow;
         Info.LibraryFile.Status = status;
-        if (status == FileStatus.Processed || status == FileStatus.ReprocessByFlow)
+        if (status is FileStatus.Processed or FileStatus.ReprocessByFlow)
         {
             Info.LibraryFile.ProcessingEnded = DateTime.UtcNow;
         }

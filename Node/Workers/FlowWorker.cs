@@ -333,7 +333,13 @@ public class FlowWorker : Worker
                     if (exitCode != 0)
                     {
                         Logger.Instance?.ELog("Error executing runner: Invalid exit code: " + exitCode);
-                        libFile.Status = (FileStatus)exitCode;
+                        if (Enum.IsDefined(typeof(FileStatus), exitCode))
+                            libFile.Status = (FileStatus)exitCode;
+                        else
+                        {
+                            libFile.Status = FileStatus.ProcessingFailed;
+                            Logger.Instance?.ILog("Invalid exit code, setting file as failed");
+                        }
                         FinishWork(processUid, node2, libFile);
                     }
                 }
