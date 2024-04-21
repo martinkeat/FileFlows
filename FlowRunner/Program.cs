@@ -238,7 +238,9 @@ public class Program
         if (lib == null)
         {
             LogInfo("Library was not found, deleting library file");
+            libFile.Status = FileStatus.MissingLibrary;
             libfileService.Delete(libFile.Uid).Wait();
+            FinishEarly(libFile);
             return (true, false);
         }
 

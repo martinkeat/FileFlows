@@ -163,104 +163,103 @@ public class FlowRunnerService : IFlowRunnerService
             ClientServiceManager.Instance.FinishProcessing(updated);
             var lfService= ServiceLoader.Load<LibraryFileService>();
             var existing = await lfService.Get(updated.Uid);
-            if (existing != null)
+            if (existing == null)
+                return;
+        
+            existing.OutputPath = updated.OutputPath?.EmptyAsNull() ?? existing.OutputPath;
+            Logger.Instance.ILog(
+                $"Recording final size for '{updated.FinalSize}' for '{updated.Name}' status: {updated.Status}");
+            if (updated.FinalSize > 0)
+                existing.FinalSize = updated.FinalSize;
+            if (updated.OriginalSize > 0)
+                existing.OriginalSize = updated.OriginalSize;
+            
+            if (info.WorkingFile == existing.Name)
             {
-                existing.OutputPath = updated.OutputPath?.EmptyAsNull() ?? existing.OutputPath;
-                Logger.Instance.ILog(
-                    $"Recording final size for '{updated.FinalSize}' for '{updated.Name}' status: {updated.Status}");
-                if (updated.FinalSize > 0)
-                    existing.FinalSize = updated.FinalSize;
-                if (updated.OriginalSize > 0)
-                    existing.OriginalSize = updated.OriginalSize;
-                
-                if (info.WorkingFile == existing.Name)
+                var file = new FileInfo(info.WorkingFile);
+                if (file.Exists)
                 {
-                    var file = new FileInfo(info.WorkingFile);
-                    if (file.Exists)
-                    {
-                        // if file replaced original update the creation time to match
-                        if (existing.CreationTime != file.CreationTimeUtc)
-                            existing.CreationTime = file.CreationTimeUtc;
-                        if (existing.LastWriteTime != file.LastWriteTimeUtc)
-                            existing.LastWriteTime = file.LastWriteTimeUtc;
-                    }
+                    // if file replaced original update the creation time to match
+                    if (existing.CreationTime != file.CreationTimeUtc)
+                        existing.CreationTime = file.CreationTimeUtc;
+                    if (existing.LastWriteTime != file.LastWriteTimeUtc)
+                        existing.LastWriteTime = file.LastWriteTimeUtc;
                 }
-
-
-                existing.NoLongerExistsAfterProcessing = new FileInfo(existing.Name).Exists == false;
-                if (updated.FinalSize > 0)
-                    existing.FinalSize = updated.FinalSize;
-                existing.OutputPath = updated.OutputPath;
-
-                if (string.IsNullOrWhiteSpace(existing.OutputPath) == false)
-                {
-                    if (existing.Name.StartsWith("/"))
-                    {
-                        // start file was a linux file
-                        // check if libfile.OutputPath is using \ instead of / for linux filenames
-                        if (existing.OutputPath.StartsWith(@"\\") == false)
-                        {
-                            existing.OutputPath = existing.OutputPath.Replace(@"\", "/");
-                        }
-                    }
-                    else if (Regex.IsMatch(existing.Name, "^[a-zA-Z]:") || existing.Name.StartsWith(@"\\")
-                                                                       || existing.Name.StartsWith(@"//"))
-                    {
-                        // Windows-style path in Name or UNC path
-                        existing.OutputPath = existing.OutputPath.Replace("/", @"\");
-                    }
-                }
-
-                existing.ProcessingEnded = updated.ProcessingEnded;
-                existing.Fingerprint = updated.Fingerprint;
-                existing.FinalFingerprint = updated.FinalFingerprint;
-                existing.ExecutedNodes = updated.ExecutedNodes ?? new List<ExecutedNode>();
-                Logger.Instance.DLog("FinishWork: Executed flow elements: " +
-                                     string.Join(", ", existing.ExecutedNodes.Select(x => x.NodeUid)));
-                
-                if (updated.OriginalMetadata != null)
-                    existing.OriginalMetadata = updated.OriginalMetadata;
-                if (updated.FinalMetadata != null)
-                    existing.FinalMetadata = updated.FinalMetadata;
-                existing.Status = updated.Status;
-                if (updated.ProcessingStarted > new DateTime(2020, 1, 1))
-                    existing.ProcessingStarted = updated.ProcessingStarted;
-                if (updated.ProcessingEnded > new DateTime(2020, 1, 1))
-                    existing.ProcessingEnded = updated.ProcessingEnded;
-                if (existing.ProcessingEnded < new DateTime(2020, 1, 1))
-                    existing.ProcessingEnded = DateTime.UtcNow; // this avoid a "2022 years ago" issue
-                if(existing.ProcessingEnded > DateTime.UtcNow)
-                    existing.ProcessingEnded = DateTime.UtcNow;
-                
-                if (updated.Flow?.Uid != null && updated.Flow.Uid != Guid.Empty &&
-                    updated.Flow.Uid != existing.Flow?.Uid)
-                    existing.Flow = updated.Flow;
-                else if(string.IsNullOrWhiteSpace(existing.Flow?.Name))
-                    existing.Flow = updated.Flow;
-                
-                await lfService.Update(existing);
-                var library = await ServiceLoader.Load<LibraryService>().GetByUidAsync(existing.Library.Uid);
-                
-                if (existing.Status == FileStatus.ProcessingFailed)
-                {
-                    SystemEvents.TriggerLibraryFileProcessedFailed(existing, library);
-                    
-                    if(new SettingsService().Get()?.Result?.HideProcessingFinishedNotifications != true)
-                        ClientServiceManager.Instance.SendToast(LogType.Error, "Failed processing: " + FileDisplayNameService.GetDisplayName(info.LibraryFile));
-                }
-                else
-                {
-                    SystemEvents.TriggerLibraryFileProcessedSuccess(existing, library);
-                    if(new SettingsService().Get()?.Result?.HideProcessingFinishedNotifications != true)
-                        ClientServiceManager.Instance.SendToast(LogType.Info, "Finished processing: " + FileDisplayNameService.GetDisplayName(info.LibraryFile));
-                }
-
-                SystemEvents.TriggerLibraryFileProcessed(existing, library);
-
-                await ServiceLoader.Load<StatisticService>()
-                    .RecordStorageSaved(library.Name, existing.OriginalSize, existing.FinalSize);
-
             }
+
+
+            existing.NoLongerExistsAfterProcessing = new FileInfo(existing.Name).Exists == false;
+            if (updated.FinalSize > 0)
+                existing.FinalSize = updated.FinalSize;
+            existing.OutputPath = updated.OutputPath;
+
+            if (string.IsNullOrWhiteSpace(existing.OutputPath) == false)
+            {
+                if (existing.Name.StartsWith("/"))
+                {
+                    // start file was a linux file
+                    // check if libfile.OutputPath is using \ instead of / for linux filenames
+                    if (existing.OutputPath.StartsWith(@"\\") == false)
+                    {
+                        existing.OutputPath = existing.OutputPath.Replace(@"\", "/");
+                    }
+                }
+                else if (Regex.IsMatch(existing.Name, "^[a-zA-Z]:") || existing.Name.StartsWith(@"\\")
+                                                                   || existing.Name.StartsWith(@"//"))
+                {
+                    // Windows-style path in Name or UNC path
+                    existing.OutputPath = existing.OutputPath.Replace("/", @"\");
+                }
+            }
+
+            existing.ProcessingEnded = updated.ProcessingEnded;
+            existing.Fingerprint = updated.Fingerprint;
+            existing.FinalFingerprint = updated.FinalFingerprint;
+            existing.ExecutedNodes = updated.ExecutedNodes ?? new List<ExecutedNode>();
+            Logger.Instance.DLog("FinishWork: Executed flow elements: " +
+                                 string.Join(", ", existing.ExecutedNodes.Select(x => x.NodeUid)));
+            
+            if (updated.OriginalMetadata != null)
+                existing.OriginalMetadata = updated.OriginalMetadata;
+            if (updated.FinalMetadata != null)
+                existing.FinalMetadata = updated.FinalMetadata;
+            existing.Status = updated.Status;
+            if (updated.ProcessingStarted > new DateTime(2020, 1, 1))
+                existing.ProcessingStarted = updated.ProcessingStarted;
+            if (updated.ProcessingEnded > new DateTime(2020, 1, 1))
+                existing.ProcessingEnded = updated.ProcessingEnded;
+            if (existing.ProcessingEnded < new DateTime(2020, 1, 1))
+                existing.ProcessingEnded = DateTime.UtcNow; // this avoid a "2022 years ago" issue
+            if(existing.ProcessingEnded > DateTime.UtcNow)
+                existing.ProcessingEnded = DateTime.UtcNow;
+            
+            if (updated.Flow?.Uid != null && updated.Flow.Uid != Guid.Empty &&
+                updated.Flow.Uid != existing.Flow?.Uid)
+                existing.Flow = updated.Flow;
+            else if(string.IsNullOrWhiteSpace(existing.Flow?.Name))
+                existing.Flow = updated.Flow;
+            
+            await lfService.Update(existing);
+            var library = await ServiceLoader.Load<LibraryService>().GetByUidAsync(existing.Library.Uid);
+            
+            if (existing.Status == FileStatus.ProcessingFailed)
+            {
+                SystemEvents.TriggerLibraryFileProcessedFailed(existing, library);
+                
+                if(new SettingsService().Get()?.Result?.HideProcessingFinishedNotifications != true)
+                    ClientServiceManager.Instance.SendToast(LogType.Error, "Failed processing: " + FileDisplayNameService.GetDisplayName(info.LibraryFile));
+            }
+            else
+            {
+                SystemEvents.TriggerLibraryFileProcessedSuccess(existing, library);
+                if(new SettingsService().Get()?.Result?.HideProcessingFinishedNotifications != true)
+                    ClientServiceManager.Instance.SendToast(LogType.Info, "Finished processing: " + FileDisplayNameService.GetDisplayName(info.LibraryFile));
+            }
+
+            SystemEvents.TriggerLibraryFileProcessed(existing, library);
+
+            await ServiceLoader.Load<StatisticService>()
+                .RecordStorageSaved(library.Name, existing.OriginalSize, existing.FinalSize);
         }
         
         await ClientServiceManager.Instance.UpdateFileStatus();
