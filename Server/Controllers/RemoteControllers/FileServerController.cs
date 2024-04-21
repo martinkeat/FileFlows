@@ -53,6 +53,9 @@ public class FileServerController : Controller
         };
         Logger.Instance.DLog("FileService Directory Permissions: " + _localFileService.PermissionsFolder);
         Logger.Instance.DLog("FileService File Permissions: " + _localFileService.PermissionsFile);
+
+        FileHelper.Permissions = _localFileService.PermissionsFile.Value;
+        FileHelper.PermissionsFolders = _localFileService.PermissionsFolder.Value;
     }
 
     /// <summary>
