@@ -498,7 +498,11 @@ public class Runner
         Plugin.Helpers.FileHelper.DontChangeOwner = Node.DontChangeOwner;
         Plugin.Helpers.FileHelper.DontSetPermissions = Node.DontSetPermissions;
         Plugin.Helpers.FileHelper.Permissions = Node.PermissionsFolders ?? Globals.DefaultPermissionsFile;
+        if (Plugin.Helpers.FileHelper.Permissions is < 0 or > 777)
+            Plugin.Helpers.FileHelper.Permissions = Globals.DefaultPermissionsFile;
         Plugin.Helpers.FileHelper.PermissionsFolders = Node.PermissionsFolders ?? Globals.DefaultPermissionsFolder;
+        if (Plugin.Helpers.FileHelper.PermissionsFolders is < 0 or > 777)
+            Plugin.Helpers.FileHelper.PermissionsFolders = Globals.DefaultPermissionsFolder;
 
         nodeParameters.RunnerUid = Info.Uid;
         nodeParameters.TempPath = WorkingDir;

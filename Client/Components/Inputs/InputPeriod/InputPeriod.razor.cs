@@ -41,7 +41,8 @@ public partial class InputPeriod : Input<int>
 
         if (Value > 0)
         {
-            foreach (int p in new [] { 10080, 1440, 60, 1})
+            var ranges = ShowWeeks ? new[] { 10080, 1440, 60, 1 } : new[] { 1440, 60, 1 };
+            foreach (int p in ranges)
             {
                 if (Value % p == 0)
                 {

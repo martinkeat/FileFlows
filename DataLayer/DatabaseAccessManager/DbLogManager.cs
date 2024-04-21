@@ -109,7 +109,7 @@ WHERE {Wrap(nameof(DbLogMessage.LogDate))} < (
     {
         string sql = $@"
 select * from {Wrap(nameof(DbLogMessage))}
-where {Wrap(nameof(DbLogMessage.Type))} <= {(int)filter.Type}
+where {Wrap(nameof(DbLogMessage.Type))} {(filter.TypeIncludeHigherSeverity ? "<=" : "=")} {(int)filter.Type}
 and {Wrap(nameof(DbLogMessage.ClientUid))} = {SqlHelper.Escape(filter.Source)}
 and ( {Wrap(nameof(DbLogMessage.LogDate))} between {DbConnector.FormatDateQuoted(filter.FromDate)}
 and {DbConnector.FormatDateQuoted(filter.ToDate)} )

@@ -73,7 +73,7 @@ public class LogController : Controller
         if (LicenseHelper.IsLicensed(LicenseFlags.ExternalDatabase) == false)
             return "Not using external database, cannot search";
         
-        if (filter.Source == "HTTP")
+        if (filter.Source == "HTTP5")
             return LogToHtml.Convert(LoggingMiddleware.RequestLogger.GetTail(1000));
 
         var service = ServiceLoader.Load<Server.Services.DatabaseLogService>();

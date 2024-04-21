@@ -181,6 +181,7 @@ public class SettingsController : BaseController
             FileServerDisabled = model.FileServerDisabled,
             FileServerOwnerGroup = model.FileServerOwnerGroup,
             FileServerFilePermissions = model.FileServerFilePermissions,
+            FileServerFolderPermissions = model.FileServerFolderPermissions,
             FileServerAllowedPaths = model.FileServerAllowedPathsString?.Split(new [] { "\r\n", "\r", "\n"}, StringSplitOptions.RemoveEmptyEntries),
             AccessToken = model.AccessToken ?? string.Empty,
             

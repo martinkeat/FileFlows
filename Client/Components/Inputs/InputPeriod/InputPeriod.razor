@@ -4,17 +4,17 @@
 <InputWrapper Input="@this">
     <div class="input-period-wrapper">
         <div class="period-minutes">
-            <input id=@Uid type="number" value="@Number" disabled=@(Disabled || ReadOnly ? string.Empty : null) 
+            <input id="@Uid" type="number" value="@Number" disabled="@(Disabled || ReadOnly ? string.Empty : null)" 
                 @onchange="ChangeValue" placeholder="@Placeholder" min="1" @onkeydown="OnKeyDown" />
         </div>
         <div class="period-period">
             <select @onchange="PeriodSelectionChanged">
-                <option selected=@(Period == 1) value="1">Minutes</option>
-                <option selected=@(Period == 60) value="60">Hours</option>
-                <option selected=@(Period == 1440) value="1440">Days</option>
+                <option selected="@(Period == 1)" value="1">Minutes</option>
+                <option selected="@(Period == 60)" value="60">Hours</option>
+                <option selected="@(Period == 1440)" value="1440">Days</option>
                 @if (ShowWeeks)
                 {
-                    <option selected=@(Period == 10080) value="10080">Weeks</option>
+                    <option selected="@(Period == 10080)" value="10080">Weeks</option>
                 }
             </select>
         </div>
