@@ -28,6 +28,8 @@ public class FileServerController : Controller
     /// </summary>
     private readonly LocalFileService _localFileService;
 
+    private StringLogger lfsLogger;
+
     /// <summary>
     /// Constructs the controller
     /// </summary>
@@ -40,13 +42,17 @@ public class FileServerController : Controller
             .Distinct()
             .ToArray();
         Logger.Instance.DLog("Allowed File Server Paths: \n" + string.Join("\n", allowedPaths));
+        lfsLogger = new StringLogger();
         _localFileService = new LocalFileService()
         {
             AllowedPaths = allowedPaths,
             CheckProtectivePaths = true,
             PermissionsFile = settings.FileServerFilePermissions < 1 ? Globals.DefaultPermissionsFile : settings.FileServerFilePermissions,
-            PermissionsFolder = settings.FileServerFolderPermissions < 1 ? Globals.DefaultPermissionsFolder : settings.FileServerFolderPermissions
+            PermissionsFolder = settings.FileServerFolderPermissions < 1 ? Globals.DefaultPermissionsFolder : settings.FileServerFolderPermissions,
+            Logger = lfsLogger
         };
+        Logger.Instance.DLog("FileService Directory Permissions: " + _localFileService.PermissionsFolder);
+        Logger.Instance.DLog("FileService File Permissions: " + _localFileService.PermissionsFile);
     }
 
     /// <summary>
@@ -155,7 +161,10 @@ public class FileServerController : Controller
         if (result.IsFailed)
             return StatusCode(500, result.Error);
         
-        return Ok(true);
+        
+        string log = lfsLogger.ToString();
+        Logger.Instance.DLog("Remote Delete Directory: " + log);
+        return Ok(log);
     }
 
     /// <summary>
@@ -171,7 +180,10 @@ public class FileServerController : Controller
         var result = _localFileService.DirectoryMove(request.Path, request.Destination);
         if (result.IsFailed)
             return StatusCode(500, result.Error);
-        return Ok(true);
+        
+        string log = lfsLogger.ToString();
+        Logger.Instance.DLog("Remote Move Directory: " + log);
+        return Ok(log);
     }
 
     /// <summary>
@@ -187,7 +199,9 @@ public class FileServerController : Controller
         var result = _localFileService.DirectoryCreate(path);
         if (result.IsFailed)
             return StatusCode(500, result.Error);
-        return Ok(true);
+        string log = lfsLogger.ToString();
+        Logger.Instance.DLog("Remote Create Directory: " + log);
+        return Ok(log);
     }
 
 

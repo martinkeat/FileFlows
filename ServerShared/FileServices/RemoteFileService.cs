@@ -140,7 +140,7 @@ public class RemoteFileService : IFileService
         try
         {
             var result = HttpHelper.Post<bool>(GetUrl("directory/exists"), new { path }).Result;
-            return result.Data == true;
+            return result.Data;
         }
         catch (Exception)
         {
@@ -155,12 +155,13 @@ public class RemoteFileService : IFileService
             return _localFileService.DirectoryDelete(path, recursive);
         try
         {
-            var result = HttpHelper.Post<bool>(GetUrl("directory/delete"), new
+            var result = HttpHelper.Post<string>(GetUrl("directory/delete"), new
             {
                 path,
                 recursive
             }).Result;
-            return result.Data;
+            logger.ILog(result.Data);
+            return true;
         }
         catch (Exception ex)
         {
@@ -183,12 +184,13 @@ public class RemoteFileService : IFileService
 
         try
         {
-            var result = HttpHelper.Post<bool>(GetUrl("directory/move"), new
+            var result = HttpHelper.Post<string>(GetUrl("directory/move"), new
             {
                 path,
                 destination
             }).Result;
-            return result.Data;
+            logger.ILog(result.Data);
+            return true;
         }
         catch (Exception ex)
         {
@@ -203,8 +205,9 @@ public class RemoteFileService : IFileService
             return _localFileService.DirectoryCreate(path);
         try
         {
-            var result = HttpHelper.Post<bool>(GetUrl("directory/create"), new { path }).Result;
-            return result.Data;
+            var result = HttpHelper.Post<string>(GetUrl("directory/create"), new { path }).Result;
+            logger.ILog(result.Data);
+            return true;
         }
         catch (Exception ex)
         {
