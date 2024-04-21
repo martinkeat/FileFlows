@@ -51,7 +51,7 @@ public class LocalFileService : IFileService
         get
         {
             if (_PermissionsFolder is null or < 1 or > 777)
-                return Globals.DefaultPermissionsFolder
+                return Globals.DefaultPermissionsFolder;
             return _PermissionsFolder.Value;
         }
         set => _PermissionsFolder = value;
