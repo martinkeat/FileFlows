@@ -284,8 +284,8 @@ public class Program
         {
             // doesnt exist
             LogInfo("Library file does not exist, deleting from library files: " + file.FullName);
-            libfileService.Delete(libFile.Uid).Wait();
             FinishEarly(libFile);
+            libfileService.Delete(libFile.Uid).Wait();
             return (true, false);
         }
         else
