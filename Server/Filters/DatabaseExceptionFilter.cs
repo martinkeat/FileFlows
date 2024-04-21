@@ -25,10 +25,12 @@ public class DatabaseExceptionFilter : IExceptionFilter
             return;
         
         // Get the exception message
-        string exceptionMessage = context.Exception.ToString();
+        string exceptionMessage = context.Exception.StackTrace ?? string.Empty;
 
         // Check if the exception message contains "at Npgsql.NpgsqlConnection.Open"
-        if (exceptionMessage.Contains("at Npgsql.NpgsqlConnection.Open") == false)
+        if (exceptionMessage.Contains("at Npgsql.NpgsqlConnection.Open") == false && 
+            exceptionMessage.Contains("at Npgsql.Internal.NpgsqlConnector.Open") == false && 
+            exceptionMessage.Contains("NpgsqlConnector.Connect") == false)
             return;
         
         // Redirect to "/database-offline"
