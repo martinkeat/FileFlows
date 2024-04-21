@@ -298,8 +298,9 @@ public class RemoteFileService : IFileService
             return _localFileService.FileDelete(path);
         try
         {
-            var result = HttpHelper.Post<bool>(GetUrl("file/delete"), new { path }).Result;
-            return result.Data;
+            var result = HttpHelper.Post<string>(GetUrl("file/delete"), new { path }).Result;
+            logger.ILog(result.Data);
+            return true;
         }
         catch (Exception ex)
         {
@@ -373,13 +374,16 @@ public class RemoteFileService : IFileService
         try
         {
             logger.ILog("Moving file via RemoteFileService file/move: " + path);
-            var result = HttpHelper.Post<bool>(GetUrl("file/move"), new
+            var result = HttpHelper.Post<string>(GetUrl("file/move"), new
             {
                 path,
                 destination,
                 overwrite
             }).Result;
-            return result.Data;
+            if (result.Success == false)
+                return false;
+            logger.ILog(result.Data);
+            return true;
         }
         catch (Exception ex)
         {
@@ -414,13 +418,16 @@ public class RemoteFileService : IFileService
 
         try
         {
-            var result = HttpHelper.Post<bool>(GetUrl("file/copy"), new
+            var result = HttpHelper.Post<string>(GetUrl("file/copy"), new
             {
                 path,
                 destination,
                 overwrite
             }).Result;
-            return result.Data;
+            if (result.Success == false)
+                return false;
+            logger.ILog(result.Data);
+            return true;
         }
         catch (Exception ex)
         {

@@ -266,7 +266,12 @@ public class FileServerController : Controller
         var result = _localFileService.FileDelete(path);
         if (result.IsFailed)
             return StatusCode(500, result.Error);
-        return Ok(result.Value);
+        if (result.Value == false)
+            return StatusCode(500, "Failed to delete");
+        
+        string log = lfsLogger.ToString();
+        Logger.Instance.DLog("Remote Deleted File: " + log);
+        return Ok(log);
     }
 
     /// <summary>
@@ -330,7 +335,12 @@ public class FileServerController : Controller
         var result = _localFileService.FileMove(request.Path, request.Destination, request.Overwrite);
         if (result.IsFailed)
             return StatusCode(500, result.Error);
-        return Ok(result.Value);
+        if (result.Value == false)
+            return StatusCode(500, "Failed to move file");
+        
+        string log = lfsLogger.ToString();
+        Logger.Instance.DLog("Remote Move File: " + log);
+        return Ok(log);
     }
 
     /// <summary>
@@ -346,7 +356,12 @@ public class FileServerController : Controller
         var result = _localFileService.FileCopy(request.Path, request.Destination, request.Overwrite);
         if (result.IsFailed)
             return StatusCode(500, result.Error);
-        return Ok(result.Value);
+        if (result.Value == false)
+            return StatusCode(500, "Failed to copy file");
+        
+        string log = lfsLogger.ToString();
+        Logger.Instance.DLog("Remote Copy File: " + log);
+        return Ok(log);
     }
 
     [HttpPost("file/append-text")]
