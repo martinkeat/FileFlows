@@ -47,8 +47,8 @@ public class FileServerController : Controller
         {
             AllowedPaths = allowedPaths,
             CheckProtectivePaths = true,
-            PermissionsFile = settings.FileServerFilePermissions < 1 ? Globals.DefaultPermissionsFile : settings.FileServerFilePermissions,
-            PermissionsFolder = settings.FileServerFolderPermissions < 1 ? Globals.DefaultPermissionsFolder : settings.FileServerFolderPermissions,
+            PermissionsFile = settings.FileServerFilePermissions is < 1 or > 777 ? Globals.DefaultPermissionsFile : settings.FileServerFilePermissions,
+            PermissionsFolder = settings.FileServerFolderPermissions is < 1 or > 777 ? Globals.DefaultPermissionsFolder : settings.FileServerFolderPermissions,
             Logger = lfsLogger
         };
         Logger.Instance.DLog("FileService Directory Permissions: " + _localFileService.PermissionsFolder);
