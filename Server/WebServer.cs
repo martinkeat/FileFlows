@@ -6,11 +6,13 @@ using System.Runtime.InteropServices;
 using FileFlows.Plugin;
 using FileFlows.RemoteServices;
 using FileFlows.Server.Authentication;
+using FileFlows.Server.Filters;
 using FileFlows.Server.Helpers;
 using FileFlows.Server.Hubs;
 using FileFlows.Server.Middleware;
 using FileFlows.Server.Services;
 using FileFlows.ServerShared.Workers;
+using FileFlows.Shared.Models;
 using Microsoft.AspNetCore.SignalR;
 using FlowRunnerService = FileFlows.Server.Services.FlowRunnerService;
 using HttpMethod = System.Net.Http.HttpMethod;
@@ -136,7 +138,7 @@ public class WebServer
 
             return;
         }
-        
+
         var builder = WebApplication.CreateBuilder(args);
 
         builder.WebHost.ConfigureKestrel((context, options) =>
@@ -152,7 +154,7 @@ public class WebServer
         Task.Run(() => OnStatusUpdate?.Invoke(WebServerState.Starting, "Starting web server", serverUrl));
 
         // Add services to the container.
-        
+
         // Dynamically register services from the console application's service provider
         builder.Services.AddSingleton<AppSettingsService>(x => ServiceLoader.Load<AppSettingsService>());
         builder.Services.AddSingleton<SettingsService>(x => ServiceLoader.Load<SettingsService>());
@@ -167,8 +169,17 @@ public class WebServer
         builder.Services.AddSingleton<VariableService>(x => ServiceLoader.Load<VariableService>());
         builder.Services.AddSingleton<RevisionService>(x => ServiceLoader.Load<RevisionService>());
         builder.Services.AddSingleton<FlowRunnerService>(x => ServiceLoader.Load<FlowRunnerService>());
+
+        // do this so the settings object is loaded
+        var settings = ServiceLoader.Load<SettingsService>().Get().Result;
+        var appSettings = ServiceLoader.Load<AppSettingsService>().Settings;
         
-        builder.Services.AddControllersWithViews();
+        builder.Services.AddControllersWithViews(options =>
+        {
+            if(appSettings.DatabaseType != DatabaseType.Sqlite)
+                options.Filters.Add<DatabaseExceptionFilter>();
+        });
+        
         builder.Services.AddSignalR();
         builder.Services.AddResponseCompression();
         builder.Services.AddControllers().AddJsonOptions(options =>
@@ -180,9 +191,6 @@ public class WebServer
         });
         builder.Services.AddMvc();
         
-        // do this so the settings object is loaded
-        var settings = ServiceLoader.Load<SettingsService>().Get().Result;
-        var appSettings = ServiceLoader.Load<AppSettingsService>().Settings;
         
         builder.Services.AddSwaggerGen(c =>
         {
