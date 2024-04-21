@@ -214,7 +214,8 @@ public class FileHelper
             return true; // its macos, lets just pretend we did this
 
         bool log = filePath.Contains("Runner-") == false;
-        permissions ??= file == false ? PermissionsFolders : Permissions;
+        if(permissions is null or < 1 or > 777)
+            permissions = file == false ? PermissionsFolders : Permissions;
 
         if (file == false)
         {
@@ -260,7 +261,7 @@ public class FileHelper
 
                 if (process.ExitCode == 0)
                 {
-                    logger?.ILog($"Permissions [{permissions}] set on file: {filePath}");
+                    logger?.ILog($"Permissions [{permissions}] set on {(file ? "file": "folder")}: {filePath}");
                     return true;
                 }
 

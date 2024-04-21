@@ -25,16 +25,37 @@ public class LocalFileService : IFileService
     /// and a boolean indicating whether to clean special characters.
     /// </remarks>
     public ReplaceVariablesDelegate ReplaceVariables { get; set; }
-    
+
+    private int? _PermissionsFile;
+
     /// <summary>
     /// Gets or sets the permissions to use for files
     /// </summary>
-    public int? PermissionsFile { get; set; }
-    
+    public int? PermissionsFile
+    {
+        get
+        {
+            if (_PermissionsFile is null or < 1 or > 777)
+                return Globals.DefaultPermissionsFile;
+            return _PermissionsFile.Value;
+        }
+        set => _PermissionsFile = value;
+    }
+
+    private int? _PermissionsFolder;
     /// <summary>
     /// Gets or sets the permissions to use for folders
     /// </summary>
-    public int? PermissionsFolder { get; set; }
+    public int? PermissionsFolder 
+    {
+        get
+        {
+            if (_PermissionsFolder is null or < 1 or > 777)
+                return Globals.DefaultPermissionsFolder
+            return _PermissionsFolder.Value;
+        }
+        set => _PermissionsFolder = value;
+    }
     
     /// <summary>
     /// Gets or sets the owner:group to use for files
@@ -467,8 +488,7 @@ public class LocalFileService : IFileService
 
         StringLogger stringLogger = new StringLogger();
 
-        FileHelper.SetPermissions(stringLogger, path, file: isFile,
-            permissions: permissions);
+        FileHelper.SetPermissions(stringLogger, path, file: isFile, permissions: permissions);
         
         FileHelper.ChangeOwner(stringLogger, path, file: isFile, ownerGroup: OwnerGroup);
         
