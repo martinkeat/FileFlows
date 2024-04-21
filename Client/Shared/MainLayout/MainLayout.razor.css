@@ -78,7 +78,7 @@
     background-size: cover;
     background-repeat: no-repeat;
   }
-  .sidebar.collapsed ::deep .navbar-brand svg {
+  .sidebar.collapsed ::deep .navbar-brand svg, .sidebar.collapsed ::deep .navbar-brand img {
     display: none;
   }
   .sidebar.collapsed ::deep .nav-menu-group {
@@ -117,5 +117,3 @@
     display: none !important;
   }
 }
-
-/*# sourceMappingURL=MainLayout.razor.css.map */
