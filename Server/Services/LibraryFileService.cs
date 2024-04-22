@@ -368,6 +368,10 @@ public class LibraryFileService : ILibraryFileService
             // check if this node is maxed out
             if (executors.ContainsKey(other.Uid) && executors[other.Uid] >= other.FlowRunners)
                 continue; // its maxed out
+
+            if (Version.TryParse(other.Version, out Version? otherVersion) == false || otherVersion == null ||
+                otherVersion < Globals.MinimumNodeVersion)
+                continue; // version mismatch
             
             // check if other can process this library
             var nodeLibraries = node.Libraries?.Select(x => x.Uid)?.ToList() ?? new();
