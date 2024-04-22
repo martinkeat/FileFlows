@@ -1,3 +1,4 @@
+using FileFlows.Managers.InitializationManagers;
 using FileFlows.Server.Services;
 
 namespace FileFlows.Server.Controllers;
@@ -28,7 +29,8 @@ public class HomeController : Controller
     [HttpGet("database-offline")]
     public IActionResult DatabaseOffline()
     {
-        var result = new StartupService().CanConnectToDatabase();
+        var appSettingsService = ServiceLoader.Load<AppSettingsService>();
+        var result = MigrationManager.CanConnect(appSettingsService.Settings.DatabaseType, appSettingsService.Settings.DatabaseConnection);
         if (result is { IsFailed: false, Value: true })
         {
             // no longer disconnected

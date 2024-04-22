@@ -90,7 +90,7 @@ public class StartupService
     /// <summary>
     /// Tests a connection to a database
     /// </summary>
-    internal Result<bool> CanConnectToDatabase()
+    private Result<bool> CanConnectToDatabase()
         => MigrationManager.CanConnect(appSettingsService.Settings.DatabaseType,
             appSettingsService.Settings.DatabaseConnection);
 
