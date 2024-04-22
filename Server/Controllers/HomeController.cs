@@ -1,3 +1,5 @@
+using FileFlows.Server.Services;
+
 namespace FileFlows.Server.Controllers;
 
 using Microsoft.AspNetCore.Mvc;
@@ -26,6 +28,12 @@ public class HomeController : Controller
     [HttpGet("database-offline")]
     public IActionResult DatabaseOffline()
     {
+        var result = new StartupService().CanConnectToDatabase();
+        if (result is { IsFailed: false, Value: true })
+        {
+            // no longer disconnected
+            return Redirect("/");
+        }
         ViewBag.Title = "Database Offline";
         ViewBag.Message = "Database is offline.\nPlease check the database is running and FileFlows has access to it.";
         return View("Error");
