@@ -1,3 +1,4 @@
+using System.Net;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 
@@ -34,6 +35,11 @@ public class DatabaseExceptionFilter : IExceptionFilter
             return;
         
         // Redirect to "/database-offline"
-        context.Result = new RedirectResult("/database-offline");
+        // Prepare the response with the redirect URL
+        context.HttpContext.Response.StatusCode = (int)HttpStatusCode.Redirect;
+        context.HttpContext.Response.Headers["Location"] = "/database-offline";
+        context.HttpContext.Response.ContentType = "text/plain";
+        context.HttpContext.Response.WriteAsync("/database-offline");
+        context.ExceptionHandled = true; // Ensure the exception is handled
     }
 }

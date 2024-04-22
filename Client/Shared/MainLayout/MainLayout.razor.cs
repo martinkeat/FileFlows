@@ -31,6 +31,7 @@ public partial class MainLayout : LayoutComponentBase
     protected override async Task OnInitializedAsync()
     {
         HttpHelper.On401 = On401;
+        HttpHelper.OnRedirect = OnRedirect;
         App.Instance.NavMenuCollapsed = await LocalStorage.GetItemAsync<bool>("NavMenuCollapsed");
             
         this.ClientService.Connected += ClientServiceOnConnected;
@@ -44,6 +45,15 @@ public partial class MainLayout : LayoutComponentBase
         #else
         NavigationManager.NavigateTo("/login", true);
         #endif
+    }
+
+    /// <summary>
+    /// Redirect result from HTTP helper
+    /// </summary>
+    /// <param name="location">the location</param>
+    private void OnRedirect(string location)
+    {
+        NavigationManager.NavigateTo(location, true);
     }
 
     private void ClientServiceOnDisconnected()

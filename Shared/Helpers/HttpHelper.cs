@@ -21,6 +21,12 @@ public class HttpHelper
     /// </summary>
     public static Action On401 { get; set; }
 
+    
+    /// <summary>
+    /// Gets or sets the redirect handler
+    /// </summary>
+    public static Action<string> OnRedirect { get; set; }
+    
     /// <summary>
     /// Gets or sets the HTTP Client used
     /// </summary>
@@ -247,6 +253,13 @@ public class HttpHelper
             if (response.StatusCode == HttpStatusCode.Unauthorized && On401 != null)
             {
                 On401();
+            }
+
+            if (response.StatusCode == HttpStatusCode.Redirect && OnRedirect != null && 
+                response.Headers.TryGetValues("Location", out var locationValues) && 
+                locationValues.FirstOrDefault() is string location && string.IsNullOrWhiteSpace(location) == false)
+            {
+                OnRedirect(location);
             }
 
             if (noLog == false && string.IsNullOrWhiteSpace(body) == false)
