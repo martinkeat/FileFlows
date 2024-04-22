@@ -36,7 +36,7 @@ public class DatabaseExceptionFilter : IExceptionFilter
         
         // Redirect to "/database-offline"
         // Prepare the response with the redirect URL
-        context.HttpContext.Response.StatusCode = (int)HttpStatusCode.Redirect;
+        context.HttpContext.Response.StatusCode = (int)HttpStatusCode.ServiceUnavailable;
         context.HttpContext.Response.Headers["Location"] = "/database-offline";
         context.HttpContext.Response.ContentType = "text/plain";
         context.HttpContext.Response.WriteAsync("/database-offline");

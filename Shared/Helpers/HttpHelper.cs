@@ -255,7 +255,7 @@ public class HttpHelper
                 On401();
             }
 
-            if (response.StatusCode == HttpStatusCode.Redirect && OnRedirect != null && 
+            if (response.StatusCode == HttpStatusCode.ServiceUnavailable && OnRedirect != null && 
                 response.Headers.TryGetValues("Location", out var locationValues) && 
                 locationValues.FirstOrDefault() is string location && string.IsNullOrWhiteSpace(location) == false)
             {
