@@ -35,9 +35,9 @@ public class ExceptionMiddleware
             
             string exceptionMessage = ex.StackTrace ?? string.Empty;
             // Check if the exception message contains "at Npgsql.NpgsqlConnection.Open"
-            if (exceptionMessage.Contains("at Npgsql.NpgsqlConnection.Open") == false &&
-                exceptionMessage.Contains("at Npgsql.Internal.NpgsqlConnector.Open") == false &&
-                exceptionMessage.Contains("NpgsqlConnector.Connect") == false)
+            if (exceptionMessage.Contains("at Npgsql.NpgsqlConnection.Open") ||
+                exceptionMessage.Contains("at Npgsql.Internal.NpgsqlConnector.Open") ||
+                exceptionMessage.Contains("NpgsqlConnector.Connect"))
             {
                 Logger.Instance.ELog("ExceptionMiddleware: Database is offline");
                 await context.Response.WriteAsync("Database is offline");
