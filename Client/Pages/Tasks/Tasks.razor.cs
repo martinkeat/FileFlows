@@ -7,7 +7,7 @@ using Humanizer;
 
 namespace FileFlows.Client.Pages;
 
-public partial class Tasks: ListPage<Guid, FileFlowsTask>
+public partial class Tasks : ListPage<Guid, FileFlowsTask>
 {
     public override string ApiUrl => "/api/task";
 

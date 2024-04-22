@@ -195,6 +195,7 @@ public class PluginService
     public async Task<IEnumerable<PluginInfoModel>> GetPluginInfoModels(bool includeElements = true)
     {
         var plugins = (await new Services.PluginService().GetAllAsync())
+            .OrderBy(x => x.Name)
             .Where(x => x.Deleted == false);
         List<PluginInfoModel> pims = new List<PluginInfoModel>();
         var packagesResult = await GetPluginPackagesActual();
@@ -220,7 +221,7 @@ public class PluginService
                 Description = plugin.Description,   
                 Elements = includeElements ? plugin.Elements : null
             };
-            var package = packages.FirstOrDefault(x => x.Name.ToLower().Replace(" ", "") == plugin.Name.ToLower().Replace(" ", ""));
+            var package = packages.FirstOrDefault(x => x.Package.ToLowerInvariant().Replace(" ", "") == plugin.PackageName.ToLowerInvariant().Replace(" ", ""));
             pim.LatestVersion = VersionHelper.VersionDateString(package?.Version ?? string.Empty);
             pims.Add(pim);
 

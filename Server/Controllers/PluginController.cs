@@ -108,7 +108,8 @@ public class PluginController : BaseController
             if (plugin == null)
                 continue;
 
-            var ppi = plugins.FirstOrDefault(x => x.Name.Replace(" ", "").ToLower() == plugin.Name.Replace(" ", "").ToLower());
+            var ppi = plugins.FirstOrDefault(x => x.Package.Replace(" ", "").ToLowerInvariant() 
+                                                  == plugin.PackageName.Replace(" ", "").ToLowerInvariant());
 
             if (ppi == null)
             {

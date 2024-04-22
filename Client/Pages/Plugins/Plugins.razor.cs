@@ -15,13 +15,14 @@ public partial class Plugins : ListPage<Guid, PluginInfoModel>
 
     private string lblSettings, lblInUse, lblFlowElement, lblFlowElements;
 
-    protected override void OnInitialized()
+    /// <inheritdoc />
+    protected override async Task OnInitializedAsync()
     {
+        base.OnInitializedAsync();
         lblSettings = Translater.Instant("Labels.Settings");
         lblInUse = Translater.Instant("Labels.InUse");
         lblFlowElement = Translater.Instant("Labels.FlowElement");
         lblFlowElements = Translater.Instant("Labels.FlowElements");
-        _ = Load(default);
     }
 
     protected override string DeleteMessage => "Pages.Plugins.Messages.DeletePlugins";
