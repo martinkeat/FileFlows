@@ -50,6 +50,14 @@ public class Upgrader
     /// <param name="settings">the application settings</param>
     internal void Backup(Version currentVersion, AppSettings settings)
     {
+        // backup server.config
+        string serverConfig = Path.Combine(DirectoryHelper.DataDirectory, "server.config");
+        string scBackup = serverConfig.Replace(".config",
+            "-" + currentVersion.Major + "." + currentVersion.Minor + "." + currentVersion.Build +
+            ".config");
+        if(File.Exists(serverConfig))
+            File.Copy(serverConfig, scBackup, true);
+        
         // first backup the database
         if (settings.DatabaseType == DatabaseType.Sqlite)
         {
