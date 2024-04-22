@@ -40,4 +40,12 @@ public class InfoController : Controller
     [HttpGet("update-available")]
     public Task<object> UpdateAvailable()
         => new StatusService().UpdateAvailable();
+
+    /// <summary>
+    /// Gets the library status overview
+    /// </summary>
+    /// <returns>the library status overview</returns>
+    [HttpGet("library-status")]
+    public Task<List<LibraryStatus>> GetStatus()
+        => ServiceLoader.Load<LibraryFileService>().GetStatus();
 }

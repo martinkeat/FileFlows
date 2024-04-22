@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Globalization;
 using System.Reflection;
 using Microsoft.AspNetCore.Components;
 
@@ -60,6 +61,8 @@ public partial class InputTable:Input<object>
         object pValue = prop.GetValue(value);
         if (pValue == null)
             return string.Empty;
+        if (pValue is DateTime dt)
+            return dt.ToLocalTime().ToString(CultureInfo.CurrentCulture);
         return pValue.ToString();
     }
 

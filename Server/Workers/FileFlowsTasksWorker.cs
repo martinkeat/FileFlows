@@ -56,6 +56,7 @@ public class FileFlowsTasksWorker: ServerWorker
         }
         
         dict.TryAdd("FileFlows.Url", Application.ServerUrl);
+        dict["FileFlows.AccessToken"] = ServiceLoader.Load<SettingsService>().Get()?.Result?.AccessToken;
         return dict;
     }
 
