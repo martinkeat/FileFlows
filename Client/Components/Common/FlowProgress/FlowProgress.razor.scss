@@ -1,0 +1,73 @@
+
+.flow-progress-bar{
+  height:3rem;
+  display: flex;
+  flex-direction: row;
+  width:100%;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  background: #13191b;
+  border: solid 2px #33b2df;
+  font-size: 0.8rem;
+  position:relative;
+
+  div {
+    font-weight: var(--bold, 600);
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    white-space: pre-wrap;
+    text-align: center;
+    line-height: 1.2;
+  }
+  span.percent {
+    position: absolute;
+    top:0;
+    left:0;
+    right:0;
+    bottom:0;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: var(--bold, 600);
+    font-size: 0.9rem;
+  }
+}
+
+.flow-progress.has-current {
+  position: relative;
+  margin-top: 2rem;
+  margin-bottom: 0.5rem;
+  .flow-progress-bar.overall{
+    border-bottom: none;
+    span.percent {
+      bottom:1.5rem;
+    }
+  }
+}
+
+
+.bar-value {
+  border-top-right-radius: 0.5rem;
+  border-bottom-right-radius: 0.5rem;
+  background: #33b2df61;
+  background: linear-gradient(to right, rgba(51, 178, 223, 0.25), rgba(51, 178, 223, 0.5));
+}
+
+.current
+{
+  border-color: #ff0090;
+  height: 1.5rem;
+  bottom: 0;
+  border-top-right-radius: 0;
+  border-top-left-radius: 0;
+  position: absolute;
+  .bar-value {
+    background:#ff009061;
+  }
+  span.percent {
+    font-size:0.7rem;
+  }
+}

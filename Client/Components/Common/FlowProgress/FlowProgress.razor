@@ -1,0 +1,23 @@
+@namespace FileFlows.Client.Components.Common
+@{
+    
+    var overall = Info.TotalParts == 0 ? 100 : ((Info.CurrentPart / (double)Info.TotalParts)) * 100;
+    var current = Info.CurrentPartPercent;
+
+    bool hasCurrent = current > 0;
+}
+
+<div class="flow-progress @(hasCurrent ? "has-current" : "")">
+    <div class="flow-progress-bar overall">
+        <div class="bar-value" style="width:@overall%"></div>
+        <span class="percent">@overall.ToString("#")%</span>
+    </div>
+
+    @if (hasCurrent)
+    {
+        <div class="flow-progress-bar current">
+            <div class="bar-value" style="width:@current%"></div>
+            <span class="percent">@current.ToString("#")%</span>
+        </div>
+    }
+</div>
