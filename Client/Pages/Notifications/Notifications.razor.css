@@ -1,0 +1,20 @@
+.table-item {
+  min-height: 2.5rem;
+}
+
+.message {
+  white-space: pre-wrap;
+}
+
+.icon.info {
+  color: var(--info);
+}
+.icon.warning {
+  color: var(--warning);
+}
+.icon.error {
+  color: var(--error);
+}
+.icon.critical {
+  color: var(--danger);
+}

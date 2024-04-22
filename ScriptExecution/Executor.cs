@@ -191,7 +191,8 @@ public class Executor
             foreach (var arg in AdditionalArguments ?? new ())
                 engine.SetValue(arg.Key, arg.Value);
             
-            Logger.DLog("Executing code: \n\n" + tcode + "\n\n" + new string('-', 30));
+            if(DontLogCode == false)
+                Logger.DLog("Executing code: \n\n" + tcode + "\n\n" + new string('-', 30));
             engine.AddModule("Script", tcode);
             var ns = engine.ImportModule("Script");
             var result = ns.Get("result");

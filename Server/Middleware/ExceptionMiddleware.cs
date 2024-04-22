@@ -1,4 +1,5 @@
 using System.Net;
+using FileFlows.Server.Services;
 
 namespace FileFlows.Server.Middleware;
 
@@ -39,6 +40,7 @@ public class ExceptionMiddleware
                 exceptionMessage.Contains("at Npgsql.Internal.NpgsqlConnector.Open") ||
                 exceptionMessage.Contains("NpgsqlConnector.Connect"))
             {
+                _ = ServiceLoader.Load<NotificationService>().RecordDatabaseOffline();
                 Logger.Instance.ELog("ExceptionMiddleware: Database is offline");
                 await context.Response.WriteAsync("Database is offline");
             }

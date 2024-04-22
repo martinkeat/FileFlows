@@ -38,6 +38,7 @@ public static class ServiceLoader
             .AddSingleton<FlowRunnerService>()
             .AddSingleton<RepositoryFlowTemplateService>()
             .AddSingleton<AuditService>()
+            .AddSingleton<NotificationService>()
             .BuildServiceProvider(); // Build the service provider
     }
     

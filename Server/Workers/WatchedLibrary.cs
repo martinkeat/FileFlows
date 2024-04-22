@@ -234,6 +234,10 @@ public class WatchedLibrary:IDisposable
             {
                 Logger.Instance.WLog($"Failed access checks for file: " + fullpath +"\n" +
                                      "These checks can be disabled in library settings, but ensure the flow can read and write to the library.");
+
+                _ = ServiceLoader.Load<NotificationService>().Record(NotificationSeverity.Information,
+                    $"'{Library.Name}' failed access checks for file", fullpath);
+                
                 return;
             }
 
@@ -762,6 +766,10 @@ public class WatchedLibrary:IDisposable
                 ex = ex.InnerException;
 
             Logger.Instance.ELog("WatchedLibrary: Failed scanning for files: " + ex.Message + Environment.NewLine + ex.StackTrace);
+
+            _ = ServiceLoader.Load<NotificationService>().Record(NotificationSeverity.Warning,
+                $"'{Library.Name}' failed scanning for files",
+                ex.Message);
         }
         finally
         {

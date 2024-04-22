@@ -122,7 +122,7 @@ public class ScriptExecutor:IScriptExecutor
             return new FileFlowsTaskRun()
             {
                 Log = FixLog(sbLog),
-                Success = true,
+                Success = ((returnValue as bool? ?? true as bool?)!).Value,
                 ReturnValue = returnValue
             };
         }

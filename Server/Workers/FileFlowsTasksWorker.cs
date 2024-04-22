@@ -125,11 +125,17 @@ public class FileFlowsTasksWorker: ServerWorker
             }
         }
 
-        var result = ScriptExecutor.Execute(code, variables);
+        var result = ScriptExecutor.Execute(code, variables, dontLogCode: true);
         if(result.Success)
             Logger.Instance.ILog($"Task '{task.Name}' completed in: " + (DateTime.UtcNow.Subtract(dtStart)) + "\n" + result.Log);
         else
+        {
             Logger.Instance.ELog($"Error executing task '{task.Name}: " + result.ReturnValue + "\n" + result.Log);
+            
+            _ = ServiceLoader.Load<NotificationService>().Record(NotificationSeverity.Information,
+                $"Error executing task '{task.Name}': " + result.ReturnValue, result.Log);
+        }
+
         task.LastRun = DateTime.UtcNow;
         task.RunHistory ??= new Queue<FileFlowsTaskRun>(10);
         lock (task.RunHistory)

@@ -1155,6 +1155,9 @@
         "Log": "Log"
       }
     },
+    "Notifications": {
+      "Title": "Notifications"
+    },
     "Task":{ 
       "Title":"Task",
       "Fields": {

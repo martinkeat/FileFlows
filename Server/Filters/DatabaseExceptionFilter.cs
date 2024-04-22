@@ -1,4 +1,5 @@
 using System.Net;
+using FileFlows.Server.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 
@@ -41,5 +42,6 @@ public class DatabaseExceptionFilter : IExceptionFilter
         context.HttpContext.Response.ContentType = "text/plain";
         context.HttpContext.Response.WriteAsync("/database-offline");
         context.ExceptionHandled = true; // Ensure the exception is handled
+        _ = ServiceLoader.Load<NotificationService>().RecordDatabaseOffline();
     }
 }
