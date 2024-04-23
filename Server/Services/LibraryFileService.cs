@@ -2,14 +2,13 @@ using FileFlows.Managers;
 using FileFlows.Server.Helpers;
 using FileFlows.Server.Hubs;
 using FileFlows.ServerShared.Models;
-using FileFlows.ServerShared.Services;
 using FileFlows.ServerShared.Workers;
 using FileFlows.Shared.Models;
 using Humanizer;
 
 namespace FileFlows.Server.Services;
 
-public class LibraryFileService : ILibraryFileService
+public class LibraryFileService 
 {
     private static SemaphoreSlim NextFileSemaphore = new SemaphoreSlim(1);
     

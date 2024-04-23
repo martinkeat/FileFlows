@@ -6,16 +6,12 @@ namespace FileFlows.RemoteServices;
 /// </summary>
 public class LibraryFileService : RemoteService, ILibraryFileService
 {
-    /// <summary>
-    /// Deletes library files
-    /// </summary>
-    /// <param name="uids">The UIDs to delete</param>
-    /// <returns>a completed task</returns>
-    public async Task Delete(params Guid[] uids)
+    /// <inheritdoc />
+    public async Task Delete(Guid uid)
     {
         try
         {
-            await HttpHelper.Delete($"{ServiceBaseUrl}/remote/library-file", new ReferenceModel<Guid> { Uids = uids });                
+            await HttpHelper.Delete($"{ServiceBaseUrl}/remote/library-file/{uid}");                
         }
         catch (Exception)
         {

@@ -28,11 +28,11 @@ public interface ILibraryFileService
     Task<LibraryFile?> Get(Guid uid);
 
     /// <summary>
-    /// Deletes library files
+    /// Deletes a library file
     /// </summary>
-    /// <param name="uids">a list of UIDs to delete</param>
+    /// <param name="uid">The UID to delete</param>
     /// <returns>a completed task</returns>
-    Task Delete(params Guid[] uids);
+    Task Delete(Guid uid);
 
     /// <summary>
     /// Saves the full library file log

@@ -79,31 +79,27 @@ public class LibraryFileController : Controller
     
     
     /// <summary>
-    /// Delete library files from disk
+    /// Delete a library files from disk and the database
     /// </summary>
-    /// <param name="model">A reference model containing UIDs to delete</param>
+    /// <param name="uid">the UID of the file to delete</param>
     /// <returns>an awaited task</returns>
-    [HttpDelete("delete-files")]
-    public async Task<string> DeleteFiles([FromBody] ReferenceModel<Guid> model)
+    [HttpDelete("{uid}")]
+    public async Task<string> DeleteFile([FromRoute] Guid uid)
     {
-        List<Guid> deleted = new();
         bool failed = false;
-        foreach (var uid in model.Uids)
+        var lf = await GetLibraryFile(uid);
+        if (lf == null)
+            return string.Empty;
+        
+        if (System.IO.File.Exists(lf.Name))
         {
-            var lf = await GetLibraryFile(uid);
-            if (System.IO.File.Exists(lf.Name) == false)
-                continue;
             if (DeleteFile(lf.Name) == false)
             {
                 failed = true;
-                continue;
             }
-
-            deleted.Add(lf.Uid);
         }
 
-        if (deleted.Any())
-            await ServiceLoader.Load<LibraryFileService>().Delete(deleted.ToArray());
+        await ServiceLoader.Load<LibraryFileService>().Delete(uid);
 
         return failed ? Translater.Instant("ErrorMessages.NotAllFilesCouldBeDeleted") : string.Empty;
 
