@@ -283,6 +283,7 @@ public class Program
         else if (args.IsServer || libfileService.ExistsOnServer(libFile.Uid).Result == false)
         {
             // doesnt exist
+            libFile.Status = FileStatus.Processed;
             LogInfo("Library file does not exist, deleting from library files: " + file.FullName);
             FinishEarly(libFile);
             libfileService.Delete(libFile.Uid).Wait();
