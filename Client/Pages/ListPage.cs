@@ -75,6 +75,9 @@ public abstract class ListPage<U, T> : ComponentBase where T : IUniqueObject<U>
 
     public virtual string FetchUrl => ApiUrl;
 
+    /// <summary>
+    /// Called after the data is loaded
+    /// </summary>
     public async virtual Task PostLoad()
     {
         await Task.CompletedTask;

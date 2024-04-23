@@ -77,6 +77,23 @@
                                 }
                             </ul>
                         }
+                        else if (item.Url == "notifications" && Profile?.UnreadNotifications?.Total > 0)
+                        {
+                            <ul class="bubbles">
+                                @if (Profile.UnreadNotifications.Warning > 0)
+                                {
+                                    <li title="Warning" class="bubble warning d-@(new string('0', Profile.UnreadNotifications.Warning.ToString().Length))">@Profile.UnreadNotifications.Warning</li>
+                                }
+                                @if (Profile.UnreadNotifications.Error  > 0)
+                                {
+                                    <li title="Error" class="bubble error d-@(new string('0', Profile.UnreadNotifications.Error.ToString().Length))">@Profile.UnreadNotifications.Error</li>
+                                }
+                                @if (Profile.UnreadNotifications.Critical  > 0)
+                                {
+                                    <li title="Critical" class="bubble critical d-@(new string('0', Profile.UnreadNotifications.Critical.ToString().Length))">@Profile.UnreadNotifications.Critical</li>
+                                }
+                            </ul>
+                        }
                     </a>
                     @{
                         string stepLabel = GetStepLabel(item);

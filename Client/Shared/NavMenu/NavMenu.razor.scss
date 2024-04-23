@@ -333,15 +333,18 @@ $maxItems: 15;
             --bubble-color: var(--blue);
         }
 
-        &.Failed {
+        &.Failed, &.critical {
             --bubble-color: var(--red);
         }
 
         &.Processing {
             --bubble-color: var(--green);
         }
-        &.OnHold {
+        &.OnHold, &.warning {
             --bubble-color: var(--yellow);
+        }
+        &.error {
+            --bubble-color: #d46a29;
         }
         &.d-00 {
             min-width: 1.5rem;

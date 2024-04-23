@@ -1,11 +1,5 @@
-using System.Threading;
-using System.Threading.Tasks.Dataflow;
-using Microsoft.Extensions.Logging;
 using Microsoft.JSInterop;
-using System.Collections.Generic;
-using System.Linq;
 using FileFlows.Client.Components.Dialogs;
-using FileFlows.Shared;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Routing;
 
@@ -247,8 +241,17 @@ public partial class NavMenu : IDisposable
                 Items = new List<NavMenuItem>
                 {
                     new ("Pages.Settings.Title", "fas fa-cogs", "settings"),
-                    new ("Pages.Notifications.Title", "fas fa-bullhorn", "notifications"),
                     Profile.LicensedFor(LicenseFlags.Auditing) && Profile.UsersEnabled ? new ("Pages.Audit.Title", "fas fa-clipboard-list", "audit") : null,
+                    new ("Pages.Notifications.Title", "fas fa-bullhorn", "notifications")
+                }
+            });
+            
+            MenuItems.Add(new NavMenuGroup
+            {
+                Name = Translater.Instant("MenuGroups.Security"),
+                Icon = "fas fa-user-shield",
+                Items = new List<NavMenuItem>
+                {
                     Profile.LicensedFor(LicenseFlags.UserSecurity) ? new ("Pages.Users.Title", "fas fa-users", "users") : null,
                     Profile.LicensedFor(LicenseFlags.AccessControl) ? new ("Pages.AccessControl.Title", "fas fa-shield-alt", "access-control") : null
                 }

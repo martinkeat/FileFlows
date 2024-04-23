@@ -2,6 +2,10 @@
   min-height:2.5rem;
 }
 
+.title {
+  font-weight: var(--bold, 600);
+}
+
 .message {
   white-space:pre-wrap;
 }
@@ -11,12 +15,12 @@
     color:var(--info);
   }
   &.warning {
-    color:var(--warning);
+    color:var(--yellow);
   }
   &.error {
-    color:var(--error);
+    color:#d46a29;
   }
   &.critical {
-    color:var(--danger);
+    color:var(--red);
   }
 }

@@ -2,6 +2,10 @@
   min-height: 2.5rem;
 }
 
+.title {
+  font-weight: var(--bold, 600);
+}
+
 .message {
   white-space: pre-wrap;
 }
@@ -10,11 +14,11 @@
   color: var(--info);
 }
 .icon.warning {
-  color: var(--warning);
+  color: var(--yellow);
 }
 .icon.error {
-  color: var(--error);
+  color: #d46a29;
 }
 .icon.critical {
-  color: var(--danger);
+  color: var(--red);
 }

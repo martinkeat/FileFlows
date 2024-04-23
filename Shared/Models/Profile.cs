@@ -47,6 +47,10 @@ public class Profile
     /// </summary>
     public ConfigurationStatus ConfigurationStatus { get; set; }
 
+    /// <summary>
+    /// Gets or sets the number of unread notifications
+    /// </summary>
+    public UnreadNotifications UnreadNotifications { get; set; }
     
     
     
@@ -77,4 +81,30 @@ public class Profile
     /// Gets or sets if users are enabled and in use
     /// </summary>
     public bool UsersEnabled { get; set; }
+}
+/// <summary>
+/// Represents the unread notifications containing critical, error, and warning counts.
+/// </summary>
+public class UnreadNotifications
+{
+    /// <summary>
+    /// Gets the count of critical notifications.
+    /// </summary>
+    public int Critical { get; init; }
+
+    /// <summary>
+    /// Gets the count of error notifications.
+    /// </summary>
+    public int Error { get; init; }
+
+    /// <summary>
+    /// Gets the count of warning notifications.
+    /// </summary>
+    public int Warning { get; init; }
+
+    /// <summary>
+    /// Gets the total number of unread notifications.
+    /// </summary>
+    [JsonIgnore]
+    public int Total => Critical + Error + Warning;
 }

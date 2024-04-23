@@ -63,6 +63,9 @@ public class ProfileController : Controller
                                    await ServiceLoader.Load<UserService>().HasAny();
         }
 
+        if (profile.IsAdmin)
+            profile.UnreadNotifications = await ServiceLoader.Load<NotificationService>().GetUnreadNotificationsCount();
+
         return Ok(profile);
     }
 }

@@ -30,6 +30,7 @@ public class NotificationService
                 Date = DateTime.UtcNow,
                 Severity = severity,
                 Title = title,
+                Read = severity is NotificationSeverity.Information, // dont count info, thats alwayus unread
                 Message = message ?? string.Empty
             };
             if (severity is NotificationSeverity.Information)
@@ -55,13 +56,21 @@ public class NotificationService
     /// <summary>
     /// Gets all the notifications
     /// </summary>
+    /// <param name="markAsRead">If the notifications should now be marked as read</param>
     /// <returns>all the notifications</returns>
-    public async Task<IEnumerable<Notification>> GetAll()
+    public async Task<IEnumerable<Notification>> GetAll(bool markAsRead = false)
     {
         await _semaphore.WaitAsync();
         try
         {
-            return _Notifications.Union(_LowNotifications).OrderByDescending(x => x.Date).ToList();
+            var list = _Notifications.Union(_LowNotifications).OrderByDescending(x => x.Date).ToList();
+            if (markAsRead)
+            {
+                foreach (var n in list)
+                    n.Read = true;
+            }
+
+            return list;
         }
         finally
         {
@@ -87,5 +96,32 @@ public class NotificationService
         }
         
         await Record(NotificationSeverity.Critical, "Database Offline");
+    }
+
+    /// <summary>
+    /// Gets the number of unread notifications
+    /// </summary>
+    /// <returns>the number of unread notifications</returns>
+    /// <exception cref="NotImplementedException"></exception>
+    public async Task<UnreadNotifications> GetUnreadNotificationsCount()
+    {
+        await _semaphore.WaitAsync();
+        try
+        {
+            var critical =  _Notifications.Count(x => x is { Severity: NotificationSeverity.Critical, Read: false });
+            var error =  _Notifications.Count(x => x is { Severity: NotificationSeverity.Error, Read: false });
+            var warning =  _Notifications.Count(x => x is { Severity: NotificationSeverity.Warning, Read: false });
+            
+            return new()
+            {
+                Critical = critical,
+                Error = error,
+                Warning = warning
+            };
+        }
+        finally
+        {
+            _semaphore.Release();
+        }
     }
 }

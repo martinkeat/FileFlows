@@ -313,14 +313,17 @@
 .bubbles .bubble.Unprocessed {
   --bubble-color: var(--blue);
 }
-.bubbles .bubble.Failed {
+.bubbles .bubble.Failed, .bubbles .bubble.critical {
   --bubble-color: var(--red);
 }
 .bubbles .bubble.Processing {
   --bubble-color: var(--green);
 }
-.bubbles .bubble.OnHold {
+.bubbles .bubble.OnHold, .bubbles .bubble.warning {
   --bubble-color: var(--yellow);
+}
+.bubbles .bubble.error {
+  --bubble-color: #d46a29;
 }
 .bubbles .bubble.d-00 {
   min-width: 1.5rem;
