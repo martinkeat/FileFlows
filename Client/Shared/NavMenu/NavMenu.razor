@@ -28,8 +28,8 @@
     </button>
 </div>
 
-<div class="nav-menu-container @NavMenuCssClass" @onclick="ToggleNavMenu">
-    <ul class="nav flex-column">
+<div class="nav-menu-container @(hideNavMenu ? "hide-menu" : "")">
+    <ul id="ul-nav-menu" class="nav flex-column">
         @foreach (var group in MenuItems)
         {
             if (group.Items.Any(x => x != null) == false)
@@ -90,22 +90,24 @@
         }
     </ul>
     
-    @if (App.Instance.IsMobile == false && Profile?.HasRole(UserRole.PauseProcessing) == true)
-    {
-        <div class="paused-indicator">
-            <span class="@(PausedService.IsPaused ? "paused" : "not-paused")" @onclick="() => PausedService.Toggle()" title="@PausedService.PausedLabel">
-                <i class="far fa-pause-circle"/>
-            </span>
-        </div>
-    }
-    
-    <div class="support-links">
-        <a href="https://fileflows.com/forum" rel="noreferrer" target="_blank" title="@lblForum"><i class="fas fa-comments"></i></a>
-        <a href="https://fileflows.com/discord" rel="noreferrer" target="_blank" title="@lblDiscord"><i class="fab fa-discord"></i></a>
-    </div> 
+    <div class="nav-menu-footer">
+        @if (App.Instance.IsMobile == false && Profile?.HasRole(UserRole.PauseProcessing) == true)
+        {
+            <div class="paused-indicator">
+                <span class="@(PausedService.IsPaused ? "paused" : "not-paused")" @onclick="() => PausedService.Toggle()" title="@PausedService.PausedLabel">
+                    <i class="far fa-pause-circle"/>
+                </span>
+            </div>
+        }
+        
+        <div class="support-links">
+            <a href="https://fileflows.com/forum" rel="noreferrer" target="_blank" title="@lblForum"><i class="fas fa-comments"></i></a>
+            <a href="https://fileflows.com/discord" rel="noreferrer" target="_blank" title="@lblDiscord"><i class="fab fa-discord"></i></a>
+        </div> 
 
-    <div class="version-info">
-        @lblVersion: <a href="https://fileflows.com/docs/versions" rel="noreferrer" target="_blank">@Globals.Version</a>
+        <div class="version-info">
+            @lblVersion: <a href="https://fileflows.com/docs/versions" rel="noreferrer" target="_blank">@Globals.Version</a>
+        </div>
     </div>
 </div>
 

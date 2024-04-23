@@ -35,7 +35,11 @@ public partial class NavMenu : IDisposable
     
     
     private List<NavMenuGroup> MenuItems = new List<NavMenuGroup>();
-    private bool collapseNavMenu = true;
+    /// <summary>
+    /// This is if the menu is hidden, only used on mobile to hide the menu completely
+    /// Different from collapsing which is shown on non-mobile when the menu is just the icons
+    /// </summary>
+    private bool hideNavMenu = true;
     
     /// <summary>
     /// Gets or sets the change password dialog
@@ -46,7 +50,6 @@ public partial class NavMenu : IDisposable
 
     private string lblVersion, lblHelp, lblForum, lblDiscord, lblChangePassword, lblLogout;
 
-    private string NavMenuCssClass => collapseNavMenu ? "collapse" : null;
     private NavMenuItem nmiFlows, nmiLibraries, nmiPause;
     /// <summary>
     /// If the user menu is opened or closed
@@ -70,6 +73,9 @@ public partial class NavMenu : IDisposable
     /// If the bubbles have been loaded at least once
     /// </summary>
     private bool bubblesLoadedOnce = false;
+
+    private bool InitDone = false;
+    private IJSObjectReference jsNavMenu;
 
     /// <inheritdoc />
     protected async override Task OnInitializedAsync()
@@ -102,6 +108,10 @@ public partial class NavMenu : IDisposable
             NavigationManager.NavigateTo("/initial-config");
             return;
         }
+        
+        
+        var jsObjectReference = await jSRuntime.InvokeAsync<IJSObjectReference>("import", $"./Shared/NavMenu/NavMenu.razor.js?v={Globals.Version}");
+        jsNavMenu = await jsObjectReference.InvokeAsync<IJSObjectReference>("createNavMenu");
         this.LoadMenu();
     }
 
@@ -174,6 +184,7 @@ public partial class NavMenu : IDisposable
     
     void LoadMenu()
     {
+        this.InitDone = false;
         this.MenuItems.Clear();
         nmiPause = Profile.HasRole(UserRole.PauseProcessing) ? new(PausedService.PausedLabel, "far fa-pause-circle", "#pause") : null;
 
@@ -299,12 +310,24 @@ public partial class NavMenu : IDisposable
         catch (Exception)
         {
         }
+
+        NavMenuCollapsedUpdated(App.Instance.NavMenuCollapsed);
+        this.InitDone = false;
     }
 
     private void FileFlowsSystemUpdated(FileFlowsStatus system)
     {
         this.LoadMenu();
         this.StateHasChanged();
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (InitDone == false && MenuItems?.Any() == true)
+        {
+            jsNavMenu?.InvokeVoidAsync("resizeMenu");
+            InitDone = true;
+        }
     }
 
     private string GetStepLabel(NavMenuItem nmi)
@@ -329,7 +352,7 @@ public partial class NavMenu : IDisposable
 
     private void ToggleNavMenu()
     {
-        collapseNavMenu = !collapseNavMenu;
+        hideNavMenu = !hideNavMenu;
     }
 
     async Task Click(NavMenuItem item)
@@ -364,7 +387,7 @@ public partial class NavMenu : IDisposable
         {
             await jSRuntime.InvokeVoidAsync("eval", $"document.title = 'FileFlows'");
             SetActive(item);
-            collapseNavMenu = true;
+            hideNavMenu = true;
             this.StateHasChanged();
         }
     }
@@ -388,6 +411,20 @@ public partial class NavMenu : IDisposable
     private void ToggleUserMenu()
     {
         UserMenuOpened = !UserMenuOpened;
+    }
+
+    /// <summary>
+    /// Updates if the nav menu is collapsed
+    /// </summary>
+    /// <param name="collapsed">if it is collapsed or not</param>
+    public void NavMenuCollapsedUpdated(bool collapsed)
+    {
+        _ = jsNavMenu.InvokeVoidAsync("menuSet", new object []
+        {
+            MenuItems.Count, 
+            MenuItems.SelectMany(x => x.Items).Count(x => x != nmiPause),
+            collapsed
+        });
     }
 }
 

@@ -70,6 +70,7 @@ public partial class MainLayout : LayoutComponentBase
     {
         App.Instance.NavMenuCollapsed = !App.Instance.NavMenuCollapsed;
         LocalStorage.SetItemAsync("NavMenuCollapsed", App.Instance.NavMenuCollapsed);
+        Menu.NavMenuCollapsedUpdated(App.Instance.NavMenuCollapsed);
     }
 
     public void ShowSearch()

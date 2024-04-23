@@ -23,6 +23,8 @@
     height: 100vh;
     position: sticky;
     top: 0;
+    display: flex;
+    flex-direction: column;
   }
   .main {
     position: relative;
@@ -81,6 +83,9 @@
   .sidebar.collapsed ::deep .navbar-brand svg, .sidebar.collapsed ::deep .navbar-brand img {
     display: none;
   }
+  .sidebar.collapsed ::deep .navbar-brand i {
+    display: none;
+  }
   .sidebar.collapsed ::deep .nav-menu-group {
     display: none;
   }
@@ -88,7 +93,10 @@
     padding-left: 0 !important;
   }
   .sidebar.collapsed ::deep .nav-item a {
-    padding-left: 0.75rem !important;
+    padding-left: 0.4rem !important;
+  }
+  .sidebar.collapsed ::deep .nav-item a span {
+    text-align-last: center;
   }
   .sidebar.collapsed ::deep .text-label {
     display: none;
@@ -105,7 +113,7 @@
     width: 3.75rem;
   }
   .sidebar.collapsed ::deep li.nav-item:hover {
-    width: 10rem;
+    width: 12rem;
   }
   .sidebar.collapsed ::deep li.nav-item:hover .text-label {
     display: unset;

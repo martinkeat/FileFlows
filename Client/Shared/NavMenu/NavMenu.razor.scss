@@ -11,7 +11,7 @@ $maxItems: 15;
 }
 
 .top-row {
-    height: 3.5rem;
+    height: 4.5rem;
 }
 
 .navbar-brand, .page-title {
@@ -31,6 +31,21 @@ $maxItems: 15;
     }
 }
 
+.nav-menu-container
+{
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    .nav {
+        flex:1;
+    }
+    &.init-not-done {
+        ul {
+            // visibility: hidden;
+        }
+    }
+}
+
 .nav {
     .fas, .far, .fab {
         width: 2rem;
@@ -42,18 +57,14 @@ $maxItems: 15;
 
 .nav-menu-group, .nav-item {
     font-size: 0.9rem;
-    padding-bottom: 0.5rem;
 }
 
 .nav-menu-group {
     padding-left: 1rem;
     text-transform: uppercase;
     font-weight:var(--nav-menu-bold, 700);
-    padding-top:0.5rem;
-
-    &:first-of-type {
-        padding-top: 1.5rem;
-    }
+    display: inline-flex;
+    align-items: end;
 
     .icon {
         display: none;
@@ -62,9 +73,12 @@ $maxItems: 15;
 
 .nav-item {
     position: relative;
+    overflow: hidden;
+    display:inline-flex;
+    
     ::deep a {
-        padding-left:2rem;
-        height: 2.2rem;
+        padding: 0 0 0 2rem;
+        width:100%;
         display: flex;
         align-items: center;
         color: var(--color) !important;
@@ -80,8 +94,6 @@ $maxItems: 15;
     }
 }
 .paused-indicator {
-    position: absolute;
-    bottom: 4.75rem;
     width: 100%;
     text-align: center;
     font-size: 4rem;
@@ -97,8 +109,6 @@ $maxItems: 15;
     }
 }
 .support-links {
-    position: absolute;
-    bottom: 3rem;
     width: 100%;
     text-align: center;
     font-size: 1.5rem;
@@ -113,11 +123,7 @@ $maxItems: 15;
         }
     }
 }
-@media screen and (min-width:850px) {
-    .nav-item.discord, .nav-item.forum {
-        display: none;
-    }
-}
+
 .page.collapsed {
     .support-links {
         display: none;
@@ -133,9 +139,14 @@ $maxItems: 15;
         right: unset;
         left:2rem;
     }
+    .nav-menu-footer {
+        text-align: center;
+    }
     .paused-indicator {
         font-size:2rem !important;
-        bottom:0.5rem !important;
+        span {
+            padding-right: 0 !important;
+        }
     }
 }
 
@@ -152,24 +163,66 @@ $maxItems: 15;
     .navbar-toggler {
         display: none;
     }
+    .nav-menu-container, #ul-nav-menu {
+        flex-wrap: nowrap;
+    }
 
-    .collapse {
-        /* Never collapse the sidebar for wide screens */
-        display: block;
+    .hide-menu {
+        /* Never hide-menu the sidebar for wide screens */
+        display: flex;
+        flex-direction: column;
     }
     .navbar-brand {
         display:unset;
     }
     .version-info {
-        display: unset;
-        position: absolute;
-        bottom: 1rem;
+        display: inline-block;
         width: 100%;
-        text-align: center;
         color: rgba(var(--color-rgb), 0.4);
+        margin-top:0.5rem;
+    }
+    
+    .nav-menu-footer {
+        height: fit-content;
+        text-align: center;
+        padding-bottom:0.5rem;
     }
 }
+@media (min-width: 850px) and (max-height: 870px) {
+    .nav-menu-footer {
+        .paused-indicator { font-size:3rem; } 
+    }
+}
+@media (min-width: 850px) and (max-height: 820px) {
+    .nav-menu-footer {
+        div:not(:last-child) {
+            display:inline;
+        }
+        .paused-indicator { 
+            font-size:1.5rem;
+            > span {
+                padding-right: 0.75rem;
+            }
+            .not-paused {
+                color: rgba(var(--color-rgb), 0.4) !important;
+                opacity: 1 !important;
+            }
+        }
+    }
+}
+@media (min-width: 850px) and (max-height: 600px) {
+    .nav-menu-footer {
+        display:none;
+    }
+}
+
 @media (max-width: 849.99px) {
+    .nav-menu-container.hide-menu {
+        display:none;
+    }
+    .nav-item.discord, .nav-item.forum {
+        display: none;
+    }
     .nav-item.flows {
         display:none;
     }
@@ -187,6 +240,9 @@ $maxItems: 15;
         .text-label {
             margin-left:1rem;
         }
+    }
+    .nav-item {
+        height:5.5rem;
     }
     .nav-menu-container:not(.collapsed)
     {
@@ -337,91 +393,5 @@ $maxItems: 15;
     }
     .user-menu {
         display: flex;
-    }
-}
-
-
-
-
-
-
-@media screen and (max-height:610px) and (min-width:850px)
-{
-    .nav-menu-group {
-        display:none;
-    }
-    .nav-menu-container {
-        padding-top:1.25rem;
-    }
-    .nav-item {
-        padding-bottom:0.1rem;
-        height:2rem;
-    }
-    .support-links, .version-info {
-        display: none !important;
-    }
-    .paused-indicator {
-        display: none;
-    }
-}
-@media screen and (min-height:610.1px) and (max-height:660px) and (min-width:850px)
-{
-    .nav-menu-group {
-        display:none;
-    }
-    .nav-menu-container {
-        padding-top:1.25rem;
-    }
-    .nav-item {
-        padding-bottom:0.1rem;
-        height:2rem;
-    }
-    .paused-indicator {
-        display: none;
-    }
-}
-
-@media screen and (min-height:660.1px) and (max-height: 820px) and (min-width:850px)
-{
-    .nav-menu-group {
-        display:none;
-    }
-    .nav-item {
-        padding-bottom:0.1rem;
-        height:2rem;
-    }
-    .nav-menu-container {
-        margin-top:1rem;
-    };
-    .paused-indicator {
-        font-size: 2.75rem;
-        bottom: 5rem;
-    }
-
-}
-@media screen and (min-height: 820.1px) and (max-height:940px) and (min-width:850px)
-{
-    .nav-item {
-        padding-bottom:0.25rem;
-        height:2rem;
-    }
-    .nav-menu-group {
-        padding-top:0.25rem;
-    }
-    .paused-indicator {
-        font-size: 3.5rem;
-    }
-}
-
-@media screen and (min-height: 940.1px) and (max-height:1010px) and (min-width:850px)
-{
-    .nav-item {
-        padding-bottom:0.25rem;
-    }
-    .nav-menu-group {
-        padding-top:0.25rem;
-    }
-    .paused-indicator {
-        font-size: 3.5rem;
     }
 }

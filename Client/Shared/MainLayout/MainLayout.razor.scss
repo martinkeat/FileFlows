@@ -25,6 +25,8 @@
         height: 100vh;
         position: sticky;
         top: 0;
+        display:flex;
+        flex-direction: column;
     }
 
     .main {
@@ -87,6 +89,9 @@
                 svg, img {
                     display:none;
                 }
+                i {
+                    display:none;
+                }
             }
 
             .nav-menu-group {
@@ -97,7 +102,10 @@
                 padding-left: 0 !important;
 
                 a {
-                    padding-left: 0.75rem !important;
+                    padding-left: 0.4rem !important;
+                    span {
+                        text-align-last: center;
+                    }
                 }
             }
 
@@ -119,7 +127,7 @@
                 }
 
                 &:hover {
-                    width: 10rem;
+                    width: 12rem;
 
                     .text-label {
                         display: unset;
