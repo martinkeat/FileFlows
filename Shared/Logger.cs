@@ -1,5 +1,7 @@
-using System.Runtime.InteropServices;
+using System.Drawing;
+using System.IO;
 using System.Threading.Tasks;
+using FileFlows.Shared.Widgets;
 
 namespace FileFlows.Shared;
 
@@ -47,7 +49,6 @@ public class Logger : ILogger
     /// </summary>
     /// <param name="args">the arguments for the log message</param>
     public void ELog(params object[] args) => Log(LogType.Error, args);
-
 
     /// <summary>
     /// Gets the last number of log lines

@@ -111,6 +111,11 @@ public class NodeParameters
     public Func<string, bool>? HasPluginActual { get; set; }
     
     /// <summary>
+    /// Gets or sets the actoin responsible for logging an image
+    /// </summary>
+    public Action<string>? LogImageActual { get; set; }
+    
+    /// <summary>
     /// Gets or sets the function responsible for rendering a template
     /// </summary>
     public Func<string, string>? RenderTemplate { get; set; }
@@ -379,6 +384,18 @@ public class NodeParameters
         if (HasPluginActual == null) return false;
         return HasPluginActual(name);
     }
+
+    /// <summary>
+    /// Logs an image
+    /// </summary>
+    /// <param name="path">the path to the image</param>
+    public void LogImage(string path)
+        => LogImageActual?.Invoke(path);
+    
+    /// <summary>
+    /// Gets the imgae helper
+    /// </summary>
+    public IImageHelper ImageHelper { get; init; }
 
     private bool initDone = false;
     

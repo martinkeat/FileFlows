@@ -1,4 +1,6 @@
 using System.Text;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Processing;
 
 namespace FileFlows.FlowRunner;
 
@@ -27,6 +29,57 @@ public class FlowLogger : ILogger
     /// </summary>
     /// <param name="args">the arguments for the log message</param>
     public void ELog(params object[] args) => Log(LogType.Error, args);
+
+    /// <summary>
+    /// Logs an image
+    /// </summary>
+    /// <param name="path">the path to the image</param>
+    public void Image(string path)
+    {
+        if (string.IsNullOrWhiteSpace(path) || System.IO.File.Exists(path) == false)
+            return;
+        try
+        {
+            // Convert the image to base64 encoded JPEG
+            string base64Image;
+            // Load the image
+            using (var image = SixLabors.ImageSharp.Image.Load(path))
+            {
+                // Downscale the image while preserving aspect ratio to fit within 640x480
+                image.Mutate(x => x.Resize(new ResizeOptions
+                {
+                    Mode = ResizeMode.Max,
+                    Size = new(640, 480)
+                }));
+
+                using (MemoryStream stream = new MemoryStream())
+                {
+                    image.SaveAsJpeg(stream);
+                    byte[] bytes = stream.ToArray();
+                    base64Image = Convert.ToBase64String(bytes);
+                }
+            }
+
+            string message = "data:image/jpeg;base64," + base64Image + ":640x480";
+            
+#if(DEBUG) // we dont need this in the log here, only dev when we dont capture the console output
+            log.Add(message);
+#endif
+            
+            Console.WriteLine(message);
+            lock (Messages)
+            {
+                Messages.Append(message);
+            }
+
+            _ = Flush();
+        }
+        catch (Exception ex)
+        {
+            WLog($"Failed logging image '{path}': {ex.Message}");
+        }
+    }
+
     /// <summary>
     /// Logs a information message
     /// </summary>
@@ -110,8 +163,7 @@ public class FlowLogger : ILogger
             x.GetType().IsPrimitive || x is string ? x.ToString() :
             JsonSerializer.Serialize(x)));
         log.Add(message);
-        if(type != LogType.Debug)
-            Console.WriteLine(message);
+        Console.WriteLine(message);
 
         int count = 0;
         lock (Messages)
@@ -153,7 +205,8 @@ public class FlowLogger : ILogger
     /// Gets the full log as a string
     /// </summary>
     /// <returns>the full log as a string</returns>
-    public override string ToString() => String.Join(Environment.NewLine, log);
+    public override string ToString()
+        => string.Join(Environment.NewLine, log);
 
     /// <summary>
     /// Gets the last number of log lines

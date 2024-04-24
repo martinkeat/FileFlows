@@ -24,6 +24,12 @@ public class LogToHtml
         {
             if (string.IsNullOrWhiteSpace(line))
                 continue;
+
+            if (line.StartsWith("data:image/"))
+            {
+                colorized.AppendLine(GetImageLine(line));
+                continue;
+            }
             try
             {
                 colorized.Append("<div class=\"line\">");
@@ -39,6 +45,28 @@ public class LogToHtml
             .Replace("\\u0022", "\"")
             .Replace("\\u0027", "'");
         return result;
+    }
+    
+    /// <summary>
+    /// Constructs an HTML img tag based on the input line
+    /// </summary>
+    /// <param name="line">The input line containing image data.</param>
+    /// <returns>An HTML img tag representing the image data.</returns>
+    private static string GetImageLine(string line)
+    {
+        var parts = line.Split(':');
+        if (parts.Length == 3)
+        {
+            var sizeParts = parts[2].Split('x');
+            if (sizeParts.Length == 2)
+            {
+                var width = sizeParts.First();
+                var height = sizeParts.Last();
+                return $"<img src=\"data:{parts[1]}\" width=\"{width}\" height=\"{height}\" />";
+            }
+            return $"<img src=\"data:{parts[1]}\" />";
+        }
+        return $"<img src=\"data:{line}\" />";
     }
 
     static Regex regTime = new Regex(@"[\d]{2}:[\d]{2}:[\d]{2}\.[\d]+");

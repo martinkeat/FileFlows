@@ -120,7 +120,7 @@ public class LibraryFileEditor
                 model.Status == FileStatus.ProcessingFailed
                     ? new()
                     {
-                        Label = "Pages.LibraryFiles.Buttons.Reproess",
+                        Label = "Pages.LibraryFiles.Buttons.Reprocess",
                         Clicked = (sender, e) => _ = Reprocess(sender, libraryItemUid)
                     }
                     : null

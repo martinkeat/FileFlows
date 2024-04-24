@@ -5,7 +5,6 @@ namespace FileFlows.Plugin;
 /// </summary>
 public interface ILogger
 {
-
     /// <summary>
     /// Logs a information message
     /// </summary>
@@ -29,7 +28,6 @@ public interface ILogger
     /// </summary>
     /// <param name="args">the arguments for the log message</param>
     void ELog(params object[] args);
-
     
     /// <summary>
     /// Gets the last number of log lines

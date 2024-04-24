@@ -8,7 +8,7 @@ public class KeyValueAttribute : FormInputAttribute
     /// <summary>
     /// Gets or sets the property that holds additional options for the key-value pair.
     /// </summary>
-    public string OptionsProperty { get; set; }
+    public string? OptionsProperty { get; set; }
     
     /// <summary>
     /// Gets or sets if variables should be shown
@@ -27,7 +27,7 @@ public class KeyValueAttribute : FormInputAttribute
     /// <param name="optionsProperty">The property that holds additional options for the key-value pair.</param>
     /// <param name="showVariables">if variables should be shown</param>
     /// <param name="allowDuplicates">if duplicates are allowed</param>
-    public KeyValueAttribute(int order, string optionsProperty = null, bool showVariables = false, bool allowDuplicates = false) : base(
+    public KeyValueAttribute(int order, string? optionsProperty = null, bool showVariables = false, bool allowDuplicates = false) : base(
         FormInputType.KeyValue, order)
     {
         this.OptionsProperty = optionsProperty;

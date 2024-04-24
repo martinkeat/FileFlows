@@ -434,7 +434,9 @@ public class Runner
             Node = new () { Uid = Node.Uid, Name = Node.Name, Type = Node.Address },
             Enterprise = Program.Config.Enterprise,
             LibraryFileName = Info.LibraryFile.Name,
-            IsRemote = Info.IsRemote
+            IsRemote = Info.IsRemote,
+            LogImageActual = logger.Image,
+            ImageHelper = new ImageHelper(logger)
         };
 
         // set the method to replace variables
@@ -462,6 +464,7 @@ public class Runner
             task.Wait();
             return task.Result.Success;
         };
+        
         var renderer = new ScribanRenderer();
         nodeParameters.RenderTemplate = (template) =>
             renderer.Render(nodeParameters, template);
