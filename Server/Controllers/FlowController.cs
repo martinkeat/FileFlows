@@ -931,6 +931,8 @@ public class FlowController : BaseController
             variables.Add("folder.Orig.FullName",
                 windows ? @"C:\OriginalFolder\SubFolder" : "/originalFolder/subfolder");
         }
+        variables["library.Name"] = "My Library";
+        variables["library.Path"] = "/library/path";
 
         //p.FlowElementUid == FileFlows.VideoNodes.DetectBlackBars
         var flowElements = await GetElements(Guid.Empty, (FlowType)(-1));
