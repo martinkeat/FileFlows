@@ -1,3 +1,4 @@
+using FileFlows.Server.Cli;
 using FileFlows.Server.Services;
 using FileFlows.Shared.Helpers;
 
@@ -16,30 +17,8 @@ public class Program
     [STAThread] // need for Photino.net on windows
     public static void Main(string[] args)
     {
-#if DEBUG
-        // args = new[] { "--minimal-gui" };    
-#endif
-        if (args.Any(x =>
-                x.ToLower() == "--help" || x.ToLower() == "-?" || x.ToLower() == "/?" || x.ToLower() == "/help" ||
-                x.ToLower() == "-help"))
-        {
-            Console.WriteLine("FileFlows v" + Globals.Version);
-            Console.WriteLine("--gui: To show the full GUI");
-            Console.WriteLine("--minimal-gui: To show the limited GUI application");
-            Console.WriteLine(
-                "--base-dir: Optional override to set where the base data files will be read/saved to");
+        if (CommandLine.Process(args))
             return;
-        }
-
-
-        if (Globals.IsLinux && args?.Any(x => x == "--systemd") == true)
-        {
-            if (args?.Any(x => x == "--uninstall") == true)
-                SystemdService.Uninstall(false);
-            else
-                SystemdService.Install(DirectoryHelper.BaseDirectory, isNode: false);
-            return;
-        }
         
         Application app = ServiceLoader.Provider.GetRequiredService<Application>();
         app.Run(args);

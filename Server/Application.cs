@@ -16,13 +16,23 @@ public class Application
     /// <summary>
     /// Gets or sets an optional entry point that launched this
     /// </summary>
-    public static string? EntryPoint { get; private set; }
+    public static string? EntryPoint { get; internal set; }
 
     /// <summary>
     /// Gets if this is running inside a docker container
     /// </summary>
     public static bool Docker => ServerShared.Globals.IsDocker;
 
+
+    /// <summary>
+    /// Gets or sets if should show the minimal GUI
+    /// </summary>
+    public static bool ShowMinimalGui { get; set; }
+
+    /// <summary>
+    /// Gets or sets if should show the GUI
+    /// </summary>
+    public static bool ShowGui { get; set; }
 
     /// <summary>
     /// Gets or sets the server url
@@ -40,28 +50,15 @@ public class Application
     /// </summary>
     public static bool UsingWebView { get; private set; }
 
-    public Application()
-    {
-    }
-
+    /// <summary>
+    /// Runst the application
+    /// </summary>
+    /// <param name="args">the command line arguments</param>
     public void Run(string[] args)
     {
         try
         {
-            Globals.IsDocker = args?.Any(x => x == "--docker") == true;
-            Globals.IsSystemd = args?.Any(x => x == "--systemd-service") == true;
-            var baseDir = args.SkipWhile((arg, index) => arg != "--base-dir" || index == args.Length - 1).Skip(1)
-                .FirstOrDefault();
-            if (string.IsNullOrWhiteSpace(baseDir) == false)
-                DirectoryHelper.BaseDirectory = baseDir;
-
-            bool minimalGui = Globals.IsDocker == false &&
-                              args?.Any(x => x.ToLowerInvariant().Trim() == "--minimal-gui") == true;
-            bool fullGui = Globals.IsDocker == false && args?.Any(x => x.ToLowerInvariant().Trim() == "--gui") == true;
-            bool noGui = fullGui == false && minimalGui == false;
-
-            Application.EntryPoint = args.SkipWhile((arg, index) => arg != "--entry-point" || index == args.Length - 1)
-                .Skip(1).FirstOrDefault();
+            bool noGui = ShowGui == false && ShowMinimalGui == false;
 
             if (string.IsNullOrWhiteSpace(EntryPoint) == false && OperatingSystem.IsMacOS())
                 File.WriteAllText(Path.Combine(DirectoryHelper.BaseDirectory, "version.txt"),
@@ -119,7 +116,7 @@ public class Application
                 Console.WriteLine("Starting FileFlows Server...");
                 WebServer.Start(args);
             }
-            else if (fullGui)
+            else if (ShowGui)
             {
                 UsingWebView = true;
 
@@ -145,7 +142,7 @@ public class Application
                 });
                 webview.Open();
             }
-            else if (minimalGui)
+            else if (ShowMinimalGui)
             {
                 // do this first, to populate the Port so the Minimal UI shows the correct url
                 string serverUrl = WebServer.GetServerUrl(args);

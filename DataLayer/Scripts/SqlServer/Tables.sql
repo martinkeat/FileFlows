@@ -6,7 +6,7 @@ CREATE TABLE FileFlows
 CREATE TABLE DbObject
 (
     Uid             VARCHAR(36)        NOT NULL          PRIMARY KEY,
-    Name            VARCHAR(1024)      NOT NULL,
+    Name            NVARCHAR(1024)     NOT NULL,
     Type            VARCHAR(255)       NOT NULL,
     DateCreated     datetime           default           getdate(),
     DateModified    datetime           default           getdate(),
@@ -37,7 +37,7 @@ CREATE TABLE RevisionedObject
 (
     Uid             VARCHAR(36)        NOT NULL          PRIMARY KEY,
     RevisionUid     VARCHAR(36)        NOT NULL,
-    RevisionName    VARCHAR(1024)      NOT NULL,
+    RevisionName    NVARCHAR(1024)     NOT NULL,
     RevisionType    VARCHAR(255)       NOT NULL,
     RevisionDate    datetime           default           getdate(),
     RevisionCreated datetime           default           getdate(),
@@ -48,12 +48,12 @@ CREATE TABLE LibraryFile
 (
     -- common fields from DbObject
     Uid                 VARCHAR(36)        NOT NULL          PRIMARY KEY,
-    Name                VARCHAR(1024)      NOT NULL,
+    Name                NVARCHAR(1024)     NOT NULL,
     DateCreated         datetime           default           getdate()      NOT NULL,
     DateModified        datetime           default           getdate()      NOT NULL,
 
     -- properties
-    RelativePath        VARCHAR(1024)      NOT NULL,
+    RelativePath        NVARCHAR(1024)     NOT NULL,
     Status              int                NOT NULL,
     ProcessingOrder     int                NOT NULL,
     Fingerprint         VARCHAR(255)       NOT NULL,
@@ -74,19 +74,19 @@ CREATE TABLE LibraryFile
 
     -- references
     LibraryUid          varchar(36)        NOT NULL,
-    LibraryName         VARCHAR(100)       NOT NULL,
+    LibraryName         NVARCHAR(100)      NOT NULL,
     FlowUid             varchar(36)        NOT NULL,
-    FlowName            VARCHAR(100)       NOT NULL,
+    FlowName            NVARCHAR(100)      NOT NULL,
     DuplicateUid        varchar(36)        NOT NULL,
-    DuplicateName       VARCHAR(1024)      NOT NULL,
+    DuplicateName       NVARCHAR(1024)     NOT NULL,
     NodeUid             varchar(36)        NOT NULL,
-    NodeName            VARCHAR(100)       NOT NULL,
+    NodeName            NVARCHAR(100)      NOT NULL,
     WorkerUid           varchar(36)        NOT NULL,
     ProcessOnNodeUid    varchar(36)        NOT NULL,
 
     -- output
-    OutputPath          VARCHAR(1024)      NOT NULL,
-    FailureReason       VARCHAR(512)       NOT NULL,
+    OutputPath          NVARCHAR(1024)     NOT NULL,
+    FailureReason       NVARCHAR(512)      NOT NULL,
     NoLongerExistsAfterProcessing          bit                      not null,
 
     -- json data
@@ -103,7 +103,7 @@ CREATE INDEX ix_Status_HoldUntil_LibraryUid ON LibraryFile (Status, HoldUntil, L
 CREATE TABLE AuditLog
 (
     OperatorUid     VARCHAR(36)        NOT NULL,
-    OperatorName    VARCHAR(255)       NOT NULL,
+    OperatorName    NVARCHAR(255)      NOT NULL,
     OperatorType    INT                NOT NULL,
     IPAddress       VARCHAR(50)        NOT NULL,
     LogDate         datetime,
