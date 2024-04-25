@@ -834,10 +834,12 @@ input[type=file]{
     }
     button {
         width:2rem !important;
+        min-width: 2rem !important;
         border:none !important;
         position:absolute;
         right:0;
         height: 2rem !important;
+        padding: unset !important;
         &:disabled i {
             color: rgba(var(--color-rgb), 0.35) !important;
         }

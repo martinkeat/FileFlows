@@ -3382,10 +3382,12 @@ hr {
 }
 .dashboard-selector button {
   width: 2rem !important;
+  min-width: 2rem !important;
   border: none !important;
   position: absolute;
   right: 0;
   height: 2rem !important;
+  padding: unset !important;
 }
 .dashboard-selector button:disabled i {
   color: rgba(var(--color-rgb), 0.35) !important;
