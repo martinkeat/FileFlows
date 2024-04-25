@@ -126,13 +126,19 @@ public class FileFlowsTasksWorker: ServerWorker
         }
 
         var result = ScriptExecutor.Execute(code, variables, dontLogCode: true);
-        if(result.Success)
-            Logger.Instance.ILog($"Task '{task.Name}' completed in: " + (DateTime.UtcNow.Subtract(dtStart)) + "\n" + result.Log);
+        if (result.Success)
+        {
+            Logger.Instance.ILog($"Task '{task.Name}' completed in: " + (DateTime.UtcNow.Subtract(dtStart)) + "\n" +
+                                 result.Log);
+
+            _ = ServiceLoader.Load<NotificationService>().Record(NotificationSeverity.Information,
+                $"Task executed successfully '{task.Name}'");
+        }
         else
         {
             Logger.Instance.ELog($"Error executing task '{task.Name}: " + result.ReturnValue + "\n" + result.Log);
             
-            _ = ServiceLoader.Load<NotificationService>().Record(NotificationSeverity.Information,
+            _ = ServiceLoader.Load<NotificationService>().Record(NotificationSeverity.Warning,
                 $"Error executing task '{task.Name}': " + result.ReturnValue, result.Log);
         }
 
