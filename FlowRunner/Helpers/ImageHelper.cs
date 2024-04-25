@@ -1,7 +1,6 @@
 using FileFlows.Plugin;
 using FileFlows.Plugin.Helpers;
 using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Drawing;
 using SixLabors.ImageSharp.Drawing.Processing;
 using SixLabors.ImageSharp.Formats.Jpeg;
 using SixLabors.ImageSharp.PixelFormats;
@@ -35,7 +34,7 @@ public class ImageHelper : IImageHelper
         }
 
         // Check if the image file exists
-        if (!File.Exists(imagePath))
+        if (File.Exists(imagePath) == false)
         {
             Logger?.WLog($"Image file does not exist: {imagePath}");
             return;
@@ -50,6 +49,65 @@ public class ImageHelper : IImageHelper
             
             // Overwrite the original image file with the modified image
             image.Save(imagePath);
+        }
+    }
+
+    /// <inheritdoc />
+    public Result<(int Width, int Height)> GetDimensions(string imagePath)
+    {
+        if (File.Exists(imagePath) == false)
+            return Result<(int Width, int Height)>.Fail("Image does not exist");
+        try
+        {
+            using var image = Image.Load<Rgb24>(imagePath);
+            return (image.Width, image.Height);
+        }
+        catch (Exception ex)
+        {
+            return Result<(int Width, int Height)>.Fail(ex.Message);
+        }
+    }
+
+    /// <inheritdoc />
+    public Result<bool> ConvertToJpeg(string imagePath, string destination)
+    {
+        if (File.Exists(imagePath) == false)
+            return Result<bool>.Fail("Image does not exist");
+        try
+        {
+            using var image = Image.Load(imagePath);
+            image.Save(destination, new JpegEncoder());
+            return Result<bool>.Success(true);
+        }
+        catch (Exception ex)
+        {
+            return Result<bool>.Fail(ex.Message);
+        }
+    }
+
+    /// <inheritdoc />
+    public Result<bool> Resize(string imagePath, int width, int height, string destination)
+    {
+        // Validate input size
+        if ((width == 0 && height == 0) || width < 0 || height < 0)
+            return Result<bool>.Fail("Width and height must be positive values, or one dimension must be 0 to maintain aspect ratio.");
+
+        if (File.Exists(imagePath) == false)
+            return Result<bool>.Fail("Image does not exist");
+        
+        try
+        {
+            using var image = Image.Load(imagePath);
+            
+            image.Mutate(x => x.Resize(width, height));
+            image.Save(destination);
+            
+            return Result<bool>.Success(true);
+        }
+        catch (Exception ex)
+        {
+            // Return failure with the error message
+            return Result<bool>.Fail(ex.Message);
         }
     }
 }
