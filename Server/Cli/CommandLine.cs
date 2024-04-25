@@ -25,34 +25,29 @@ internal static class CommandLine
                 PrintHelp(logger);
                 return true;
             }
-            string cmdSwitch = args[0].ToLower();
-            var types = GetCommandTypes();
-            foreach (var type in types)
+            var commands = GetCommands();
+            for (int i = 0; i < args.Length; i++)
             {
-                var command = Activator.CreateInstance(type) as Command;
-                var commandSwitch = command?.Switch?.Replace("-", "")?.ToLowerInvariant();
+                var cmdSwitch = args[i];
                 var cliSwitch = cmdSwitch.TrimStart('-', '/').Replace("-", "").ToLowerInvariant();
-                if(commandSwitch == cliSwitch)
+                var command = commands.FirstOrDefault(x => x.Switch.ToLowerInvariant().Replace("-", "")
+                                                           == cliSwitch);
+                if (command == null)
+                    continue;
+                try
                 {
-                    if (SecondArgumentHelp(args))
-                    {
-                        command.PrintHelp(logger);
-                        return true;
-                    }
-                    try
-                    {
-                        command.ParseArguments(logger, args.Skip(1).ToArray());
-                    }
-                    catch(Exception exArgs)
-                    {
-                        command.PrintHelp(logger);
-                        logger.ILog("");
-                        logger.ILog(exArgs.Message);
-                        return true;
-                    }
-                    if(command.Run(logger))
-                        return true;
+                    command.ParseArguments(logger, args.Skip(i + 1).ToArray());
                 }
+                catch (Exception exArgs)
+                {
+                    command.PrintHelp(logger);
+                    logger.ILog("");
+                    logger.ILog(exArgs.Message);
+                    return true;
+                }
+
+                if (command.Run(logger))
+                    return true;
             }
         }
         catch (Exception ex)
@@ -79,10 +74,13 @@ internal static class CommandLine
         return Regex.IsMatch(arg.ToLower(), @"^([\-]{0,2}|[/]?)(help|\?)$");
     }
 
-    private static Type[] GetCommandTypes()
+    private static Command[] GetCommands()
     {
-        return typeof(Command).Assembly.GetTypes().Where(x => 
-            x.BaseType == typeof(Command) && x.IsAbstract == false).ToArray();
+        var commands = typeof(Command).Assembly.GetTypes().Where(x =>
+                x.BaseType == typeof(Command) && x.IsAbstract == false)
+            .Select(x => Activator.CreateInstance(x) as Command)
+            .Where(x => x != null).ToArray() ?? new Command[] { };
+        return commands!;
     }
 
     internal static void PrintHelp(Plugin.ILogger logger)
@@ -90,12 +88,12 @@ internal static class CommandLine
         logger.ILog("FileFlows v" + Globals.Version);
         logger.ILog("");
         List<(string, string)> args = new ();
-        foreach(var type in GetCommandTypes())
+        foreach(var command in GetCommands())
         {
             try
             {
-                if(Activator.CreateInstance(type) is Command { PrintToConsole: true } instance)
-                    args.Add(("--" + instance.Switch, instance.Description));
+                if(command.PrintToConsole)
+                    args.Add(("--" + command.Switch, command.Description));
             }
             catch (Exception) { }
         }

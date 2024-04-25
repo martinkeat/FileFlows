@@ -53,7 +53,7 @@ public abstract class Command
             {
                 arg = args[i].TrimStart('-', '/');
                 if (commandLineArgs.TryGetValue(arg, out p) == false)
-                    throw new Exception("Unknown command: " + args[i]);
+                    break;
                 
                 if (i == args.Length - 1)
                     break;
