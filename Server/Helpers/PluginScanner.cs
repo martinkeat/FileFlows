@@ -183,6 +183,9 @@ public class PluginScanner
 
                 if (Version.TryParse(pi.Version, out Version piVersion) && piVersion != null)
                 {
+                    #if(DEBUG)
+                    piVersion = new(0, 8, 3, 324);
+                    #endif
                     if (piVersion.Major < 23)
                     {
                         _ = ServiceLoader.Load<NotificationService>().Record(NotificationSeverity.Critical,

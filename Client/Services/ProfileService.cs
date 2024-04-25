@@ -103,6 +103,7 @@ public class ProfileService
             _profile.Security = newProfile.Security;
             _profile.IsWebView = newProfile.IsWebView;
             _profile.UsersEnabled = newProfile.UsersEnabled;
+            _profile.UnreadNotifications = newProfile.UnreadNotifications;
         }
         finally
         {
