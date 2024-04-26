@@ -1,19 +1,21 @@
 /**
  * Creates the InputTextArea instance and returns it
+ * @param dotNetObject The calling dotnet object
  * @param uid the UID of the textarea element
  * @param variables the Dictionary<string, object> from C# of available variables to show
  * @returns {InputTextArea} the input text area javascript instance
  */
-export function createInputTextArea(uid, variables)
+export function createInputTextArea(dotNetObject, uid, variables)
 {
-    return new InputTextArea(uid, variables);
+    return new InputTextArea(dotNetObject, uid, variables);
 }
 
 /**
  * InputTextArea JavaScript file
  */
 export class InputTextArea {
-    constructor(uid, variables) {
+    constructor(dotNetObject, uid, variables) {
+        this.dotNetObject = dotNetObject;
         this.uid = uid;
         this.variables = variables;
         this.dropdownIndex = 0;
@@ -24,20 +26,21 @@ export class InputTextArea {
 
         // Create dropdown element
         this.dropdown = document.createElement("ul");
-        this.dropdown.id = "dropdown";
-        this.dropdown.className = "dropdown";
+        this.dropdown.id = "ta-var-dropdown-" + uid;
+        this.dropdown.className = "ta-var-dropdown";
         this.dropdown.style.position = "absolute";
         this.dropdown.style.display = "none"; // Initially hidden
         document.body.appendChild(this.dropdown);
 
         // Event listeners
         this.textarea.addEventListener("keydown", this.handleKeydown.bind(this));
+        this.textarea.addEventListener('click', this.handleClick.bind(this))
 
 
         // CSS for the dropdown
         const dropdownStyle = document.createElement("style");
         dropdownStyle.textContent = `
-            .dropdown {
+            .ta-var-dropdown {
                 background: var(--base-lighter);
                 border: solid 1px var(--input-background);
                 padding: 5px;
@@ -46,26 +49,34 @@ export class InputTextArea {
                 max-height: 14rem;
                 overflow: auto;
             }
-            .dropdown li {
+            .ta-var-dropdown li {
                 cursor: pointer;
                 padding: 3px;
             }
-            .dropdown li:hover {
+            .ta-var-dropdown li:hover {
                 background-color: var(--accent);
             }
-            .dropdown li.selected {
+            .ta-var-dropdown li.selected {
                 background-color: rgba(var(--accent-rgb), 0.7);
             }
         `;
         document.head.appendChild(dropdownStyle);
     }
+    
+    updateValue(value) {
+        this.dotNetObject.invokeMethodAsync("updateValue", value);
+    }
+
+    handleClick(event)
+    {
+        if (this.isDropdownVisible())
+        {
+            this.removeBrackets();            
+        }
+    }
 
     handleKeydown(event) {
         if (event.key === "{") {
-            this.updateDropdown(""); // Call updateDropdown with an empty string to show all variables initially
-            this.textarea.setRangeText("{", this.textarea.selectionStart, this.textarea.selectionEnd, "end");
-            this.textarea.setRangeText("}", this.textarea.selectionEnd, this.textarea.selectionEnd, "end");
-            this.textarea.setSelectionRange(this.textarea.selectionEnd - 1, this.textarea.selectionEnd - 1);
             this.showDropdown();
             event.preventDefault();
         } else if (this.isDropdownVisible()) {
@@ -95,6 +106,7 @@ export class InputTextArea {
                 if (this.isValidVariable(potentialVariable)) {
                     // Update currentVariable and filter variables based on the typed key
                     this.updateVariableText(potentialVariable); // Call updateVariableText method
+                    this.selectItem(0);
                 }
             }
             event.preventDefault();
@@ -146,6 +158,12 @@ export class InputTextArea {
         }
     }
     showDropdown() {
+        this.currentVariable = '';
+        this.updateDropdown(""); // Call updateDropdown with an empty string to show all variables initially
+        this.textarea.setRangeText("{", this.textarea.selectionStart, this.textarea.selectionEnd, "end");
+        this.textarea.setRangeText("}", this.textarea.selectionEnd, this.textarea.selectionEnd, "end");
+        this.textarea.setSelectionRange(this.textarea.selectionEnd - 1, this.textarea.selectionEnd - 1);
+        
         // Cache the text before and after the cursor
         this.cursorPosition = this.textarea.selectionStart;
         this.textBeforeCursor = this.textarea.value.substring(0, this.cursorPosition - 1); // -1 for {
@@ -167,6 +185,7 @@ export class InputTextArea {
         this.dropdown.style.width = rect.width + "px";
 
         this.dropdown.style.display = "block";
+        this.selectItem(0);
     }
 
 
@@ -185,13 +204,16 @@ export class InputTextArea {
         const listItems = this.dropdown.getElementsByTagName("li");
         let newIndex;
 
-        if (direction === "next") {
+        if(direction === 0){
+            newIndex = 0;
+        } else if (direction === "next") {
             newIndex = this.dropdownIndex < listItems.length - 1 ? this.dropdownIndex + 1 : 0;
         } else {
             newIndex = this.dropdownIndex > 0 ? this.dropdownIndex - 1 : listItems.length - 1;
         }
 
-        listItems[this.dropdownIndex].classList.remove("selected");
+        if(listItems.length > this.dropdownIndex)
+            listItems[this.dropdownIndex].classList.remove("selected");
         listItems[newIndex].classList.add("selected");
 
         // Scroll into view only if the selected item is not fully visible
@@ -210,8 +232,9 @@ export class InputTextArea {
         this.textarea.value = newText;
 
         // Set cursor position after inserted variable
-        const newCursorPosition = this.textBeforeCursor.length + selectedVariable.length + 1;
+        const newCursorPosition = this.textBeforeCursor.length + selectedVariable.length + 2;
         this.textarea.setSelectionRange(newCursorPosition, newCursorPosition);
+        this.updateValue(newText);
     }
 
     isValidVariable(partialVariable) {

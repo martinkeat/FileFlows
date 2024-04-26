@@ -34,23 +34,17 @@ public partial class InputTextArea : Input<string>
     }
 
     /// <summary>
+    /// Gets or sets the variables available
+    /// </summary>
+    [Parameter]
+    public Dictionary<string, object>? Variables { get; set; }
+    
+    /// <summary>
     /// Overrides the ValueUpdated method to clear any error associated with the input value update.
     /// </summary>
     protected override void ValueUpdated()
     {
         ClearError();
-    }
-    
-    /// <summary>
-    /// Asynchronously handles the key down event for the text area input.
-    /// </summary>
-    /// <param name="e">The KeyboardEventArgs representing the key down event.</param>
-    private async Task OnKeyDown(KeyboardEventArgs e)
-    {
-        if (e.Code == "Enter" && e.ShiftKey) // for textarea the shortcut to submit is shift enter
-            await OnSubmit.InvokeAsync();
-        else if (e.Code == "Escape")
-            await OnClose.InvokeAsync();
     }
     
     /// <summary>
@@ -62,27 +56,45 @@ public partial class InputTextArea : Input<string>
     protected override async Task OnInitializedAsync()
     {
         base.OnInitialized();
-        var jsObjectReference = await jSRuntime.InvokeAsync<IJSObjectReference>("import", $"./Components/Inputs/InputTextArea/InputTextArea.razor.js?v={Globals.Version}");
-        await jsObjectReference.InvokeVoidAsync("createInputTextArea", this.Uid, new Dictionary<string, object>
+        // #if(DEBUG)
+        // var jsObjectReference = await jSRuntime.InvokeAsync<IJSObjectReference>("import",
+        //     $"./Components/Inputs/InputTextArea/InputTextArea.razor.js?v={Globals.Version}");
+        // await jsObjectReference.InvokeVoidAsync("createInputTextArea", DotNetObjectReference.Create(this), Uid, new Dictionary<string, object>
+        // {
+        //     { "a.alfred", "alfred" },
+        //     { "a.batman", "batman" },
+        //     { "a.batgirl", "batgirl" },
+        //     { "a.b.c", "ccccc" },
+        //     { "a.b.d", "dddd" },
+        //     { "b.alfred", "alfred" },
+        //     { "b.batman", "batman" },
+        //     { "b.batgirl", "batgirl" },
+        //     { "b.b.c", "ccccc" },
+        //     { "b.b.d", "dddd" },
+        //     { "c.alfred", "alfred" },
+        //     { "c.batman", "batman" },
+        //     { "c.batgirl", "batgirl" },
+        //     { "c.b.c", "ccccc" },
+        //     { "c.b.d", "dddd" },
+        //     { "library.Name", "some library" },
+        //     { "library.UID", Guid.NewGuid() },
+        //     { "MyVariable", "my variable value" },
+        // });
+        // #else
+        if (Variables?.Any() == true)
         {
-            { "a.alfred", "alfred" },
-            { "a.batman", "batman" },
-            { "a.batgirl", "batgirl" },
-            { "a.b.c", "ccccc" },
-            { "a.b.d", "dddd" },
-            { "b.alfred", "alfred" },
-            { "b.batman", "batman" },
-            { "b.batgirl", "batgirl" },
-            { "b.b.c", "ccccc" },
-            { "b.b.d", "dddd" },
-            { "c.alfred", "alfred" },
-            { "c.batman", "batman" },
-            { "c.batgirl", "batgirl" },
-            { "c.b.c", "ccccc" },
-            { "c.b.d", "dddd" },
-            { "library.Name", "some library" },
-            { "library.UID", Guid.NewGuid() },
-            { "MyVariable", "my variable value" },
-        });
+            var jsObjectReference = await jSRuntime.InvokeAsync<IJSObjectReference>("import",
+                $"./Components/Inputs/InputTextArea/InputTextArea.razor.js?v={Globals.Version}");
+            await jsObjectReference.InvokeVoidAsync("createInputTextArea", DotNetObjectReference.Create(this), Uid, Variables);
+        }
+        //#endif
+    }
+    
+    [JSInvokable("updateValue")]
+    public Task UpdateValue(string value)
+    {
+        this.Value = value;
+        StateHasChanged(); 
+        return Task.CompletedTask;
     }
 }
