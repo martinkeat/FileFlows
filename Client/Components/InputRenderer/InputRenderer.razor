@@ -58,8 +58,12 @@
         case FormInputType.TextArea:
             {
                 var value = GetValue<string>(field.Name) ?? "";
+                var variables = GetParameter<bool>(field, "Variables") ? field.Variables : null;
                 <InputTextArea Field=@field Label="@label" Value="@value" ReadOnly=@readOnly ValueChanged="@(x => UpdateValue(field, x))"
-    Validators=@field.Validators Placeholder="@field.Placeholder" HideLabel=@hideLabel OnSubmit=@OnSubmit OnClose=@OnClose Help=@field.HelpText />
+                               Validators=@field.Validators Placeholder="@field.Placeholder" HideLabel=@hideLabel 
+                               Variables="@variables"
+                               OnSubmit=@OnSubmit OnClose=@OnClose Help=@field.HelpText
+                />
             }
             break;
         case FormInputType.Template:
