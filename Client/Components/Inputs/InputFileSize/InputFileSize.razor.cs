@@ -8,20 +8,31 @@ namespace FileFlows.Client.Components.Inputs;
 /// </summary>
 public partial class InputFileSize : Input<long>
 {
+    /// <inheritdoc />
     public override bool Focus() => FocusUid();
 
+    /// <summary>
+    /// If the value is currently being updated, so events like value changes should be ingored
+    /// </summary>
     private bool UpdatingValue = false;
 
+    /// <summary>
+    /// Gets or sets the unit for the number
+    /// </summary>
     private long Unit { get; set; }
 
+    /// <summary>
+    /// Gets or sets the number in the input field
+    /// </summary>
     private long Number { get; set; }
 
+    
+    /// <inheritdoc />
     protected override void OnInitialized()
     {
         base.OnInitialized();
 
         this.Unit = 1000;
-        Logger.Instance.ILog("Start value: ", this.Value);
 
         if (Value > 0)
         {
@@ -38,13 +49,17 @@ public partial class InputFileSize : Input<long>
         }
         else
         {
-            Number = 10;
-            Unit = 1000000;
+            Number = base.Field?.Name == "ProbeSize" ? 5 : 10;
+            Unit = 1_000_000;
             Value = Number * Unit;
         }
     }
 
-    private async Task ChangeValue(ChangeEventArgs e)
+    /// <summary>
+    /// When the number field changes
+    /// </summary>
+    /// <param name="e">the event</param>
+    private void ChangeValue(ChangeEventArgs e)
     {
         if (int.TryParse(e.Value?.ToString() ?? "", out int value) == false)
             return;
@@ -66,6 +81,10 @@ public partial class InputFileSize : Input<long>
         this.ClearError();
     }
 
+    /// <summary>
+    /// When a key is pressed in the number field
+    /// </summary>
+    /// <param name="e">the event</param>
     private async Task OnKeyDown(KeyboardEventArgs e)
     {
         if (e.Code == "Enter")
@@ -75,6 +94,10 @@ public partial class InputFileSize : Input<long>
     }
     
     
+    /// <summary>
+    /// When the unit select value changes
+    /// </summary>
+    /// <param name="args">the event arguments</param>
     private void UnitSelectionChanged(ChangeEventArgs args)
     {
         UpdatingValue = true;
@@ -93,5 +116,4 @@ public partial class InputFileSize : Input<long>
             UpdatingValue = false;
         }
     }
-
 }

@@ -318,7 +318,7 @@ public class FileHelper
     }
     
     /// <summary>
-    /// Extracts the short filename from the given path.
+    /// Extracts the short filename from the given path.  Ie the filename without the directory
     /// </summary>
     /// <param name="path">The path from which to extract the short filename.</param>
     /// <returns>The short filename from the given path.</returns>
@@ -337,6 +337,22 @@ public class FileHelper
         return parts[^1]; // Using array index -1 to get the last element
     }
     
+    /// <summary>
+    /// Gets the filename without its extension.
+    /// </summary>
+    /// <param name="filename">The full filename including its extension.</param>
+    /// <returns>The filename without its extension.</returns>
+    public string GetShortFileNameWithoutExtension(string filename)
+    {
+        if (string.IsNullOrEmpty(filename))
+            return string.Empty;
+
+        var shortname = GetShortFileName(filename);
+
+        var extensionIndex = shortname.LastIndexOf('.');
+        return extensionIndex < 0 ? string.Empty : shortname[(extensionIndex + 1)..];
+    }
+   
     
     /// <summary>
     /// Extracts the full directory path from the given path.

@@ -308,13 +308,13 @@ public partial class LibraryFiles : ListPage<Guid, LibaryFileListModel>, IDispos
 
         if (await Confirm.Show("Labels.Cancel",
             Translater.Instant("Labels.CancelItems", new { count = selected.Length })) == false)
-            return; // rejected the confirm
+            return; // rejected the confirmation
 
         Blocker.Show();
         this.StateHasChanged();
         try
         {
-            foreach(var item in selected)
+            foreach (var item in selected)
                 await HttpHelper.Delete($"/api/worker/by-file/{item.Uid}");
 
         }

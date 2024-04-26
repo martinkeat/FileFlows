@@ -119,9 +119,24 @@ public class WorkerController : Controller
     /// <param name="uid">The UID of the library file to abort</param>
     /// <returns>An awaited task</returns>
     [HttpDelete("by-file/{uid}")]
-    public Task AbortByFile(Guid uid)
-        => ServiceLoader.Load<FlowRunnerService>().AbortByFile(uid);
-    
+    public async Task AbortByFile(Guid uid)
+    {
+        // get the runner that processing this file
+        var service = ServiceLoader.Load<FlowRunnerService>();
+        var runner = await service.FindRunner(uid);
+        if (runner.IsFailed)
+        {
+            Logger.Instance.WLog("Failed to find runner to cancel file: " + uid);
+            // fall back abort, shouldn't happen, but this is a way to abort
+            await service.AbortByFile(uid);
+        }
+        else
+        {
+            // call the same abort as from the dashboard
+            await Abort(runner.Value, uid);
+        }
+    }
+
     /// <summary>
     /// Abort work 
     /// </summary>

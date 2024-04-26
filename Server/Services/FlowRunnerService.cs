@@ -334,8 +334,34 @@ public class FlowRunnerService : IFlowRunnerService
         await Abort(executorId, uid);
         await ClientServiceManager.Instance.UpdateExecutors(Executors);
     }
-    
-    
+
+    /// <summary>
+    /// Tries to find the runner UID for a given library file
+    /// </summary>
+    /// <param name="libraryFileUid">the UID of the library file</param>
+    /// <returns>The Runners UID if found, otherwise a failure result</returns>
+    public async Task<Result<Guid>> FindRunner(Guid libraryFileUid)
+    {
+        await executorsSempahore.WaitAsync();
+        try
+        {
+            foreach (Guid key in Executors.Keys)
+            {
+                if (Executors[key].LibraryFile?.Uid == libraryFileUid)
+                {
+                    return key;
+                }
+            }
+
+            return Result<Guid>.Fail("Not found");
+        }
+        finally
+        {
+            executorsSempahore.Release();
+        }
+    }
+
+
     /// <summary>
     /// Abort work 
     /// </summary>
