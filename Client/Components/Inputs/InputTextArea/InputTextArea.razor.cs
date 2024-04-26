@@ -1,6 +1,7 @@
 
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
+using Microsoft.JSInterop;
 
 namespace FileFlows.Client.Components.Inputs;
 
@@ -9,6 +10,11 @@ namespace FileFlows.Client.Components.Inputs;
 /// </summary>
 public partial class InputTextArea : Input<string>
 {  
+    /// <summary>
+    /// Gets or sets the JavaScript runtime
+    /// </summary>
+    [Inject] private IJSRuntime jSRuntime { get; set; }
+    
     /// <summary>
     /// Overrides the Focus method to focus on the element with the specified UID.
     /// </summary>
@@ -45,5 +51,38 @@ public partial class InputTextArea : Input<string>
             await OnSubmit.InvokeAsync();
         else if (e.Code == "Escape")
             await OnClose.InvokeAsync();
+    }
+    
+    /// <summary>
+    /// The javascript textarea object
+    /// </summary>
+    private IJSObjectReference jsTextArea;
+
+    /// <inheritdoc />
+    protected override async Task OnInitializedAsync()
+    {
+        base.OnInitialized();
+        var jsObjectReference = await jSRuntime.InvokeAsync<IJSObjectReference>("import", $"./Components/Inputs/InputTextArea/InputTextArea.razor.js?v={Globals.Version}");
+        await jsObjectReference.InvokeVoidAsync("createInputTextArea", this.Uid, new Dictionary<string, object>
+        {
+            { "a.alfred", "alfred" },
+            { "a.batman", "batman" },
+            { "a.batgirl", "batgirl" },
+            { "a.b.c", "ccccc" },
+            { "a.b.d", "dddd" },
+            { "b.alfred", "alfred" },
+            { "b.batman", "batman" },
+            { "b.batgirl", "batgirl" },
+            { "b.b.c", "ccccc" },
+            { "b.b.d", "dddd" },
+            { "c.alfred", "alfred" },
+            { "c.batman", "batman" },
+            { "c.batgirl", "batgirl" },
+            { "c.b.c", "ccccc" },
+            { "c.b.d", "dddd" },
+            { "library.Name", "some library" },
+            { "library.UID", Guid.NewGuid() },
+            { "MyVariable", "my variable value" },
+        });
     }
 }

@@ -1,6 +1,6 @@
 /**
  * Creates the NavMenu instance and returns it
- * @returns {NavMenu} the navmenu itenace
+ * @returns {NavMenu} the navmenu instance
  */
 export function createNavMenu()
 {

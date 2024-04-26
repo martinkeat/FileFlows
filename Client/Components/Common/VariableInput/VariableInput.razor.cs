@@ -11,6 +11,9 @@ public partial class VariableInput:ComponentBase
 {
     private string _Uid = Guid.NewGuid().ToString();
 
+    /// <summary>
+    /// Gets or sets the UID of the control
+    /// </summary>
     [Parameter]
     public string Uid
     {
@@ -21,17 +24,29 @@ public partial class VariableInput:ComponentBase
 
     private Dictionary<string, object> _Variables = new Dictionary<string, object>();
 
+    /// <summary>
+    /// Gets or sets the variables available to show
+    /// </summary>
     [Parameter]
     public Dictionary<string, object> Variables
     {
         get => _Variables;
-        set { _Variables = value ?? new Dictionary<string, object>(); }
+        set => _Variables = value ?? new Dictionary<string, object>();
     }
+    /// <summary>
+    /// Gets or sets the filtered list of variables to show
+    /// </summary>
     private List<string> VariablesFiltered { get; set; } = new List<string>();
 
+    /// <summary>
+    /// The input element
+    /// </summary>
     private ElementReference eleInput;
 
     private string _Value;
+    /// <summary>
+    /// Gets or sets the value 
+    /// </summary>
     [Parameter]
     public string Value
     {
@@ -45,12 +60,21 @@ public partial class VariableInput:ComponentBase
             ValueChanged.InvokeAsync(_Value);
         }
     }
+    /// <summary>
+    /// Gets or sets the placeholder text
+    /// </summary>
     [Parameter]
     public string Placeholder { get; set; }
 
+    /// <summary>
+    /// Gets or sets a callback for when the value changes
+    /// </summary>
     [Parameter]
     public EventCallback<string> ValueChanged { get; set; }
 
+    /// <summary>
+    /// Gets or sets a callback for when the value is submitted
+    /// </summary>
     [Parameter]
     public EventCallback SubmitEvent { get; set; }
     [Parameter]
@@ -76,14 +100,21 @@ public partial class VariableInput:ComponentBase
 
     private string FilterText = string.Empty;
 
+    /// <summary>
+    /// Gets or sets the JavaScript runtime
+    /// </summary>
     [Inject] IJSRuntime jsRuntime { get; set; }
 
+    /// <summary>
+    /// Focuses the input
+    /// </summary>
     public void Focus()
     {
         _ = jsRuntime.InvokeVoidAsync("eval", $"document.getElementById('{Uid}').focus()");
     }
 
 
+    /// <inheritdoc />
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
@@ -91,6 +122,10 @@ public partial class VariableInput:ComponentBase
         await base.OnAfterRenderAsync(firstRender);
     }
 
+    /// <summary>
+    /// Event that occurs when a keyboard button is pressed
+    /// </summary>
+    /// <param name="args">the arguments</param>
     private async Task OnKeyDown(KeyboardEventArgs args)
     {
         if (args.Key == "{")
@@ -124,6 +159,10 @@ public partial class VariableInput:ComponentBase
         }
     }
 
+    /// <summary>
+    /// Gets or sets the arguments that occur when a key down event in the variables occurs
+    /// </summary>
+    /// <param name="args">the variables</param>
     private async Task VariablesKeyDown(KeyboardEventArgs args)
     {
         if (args.Key == "ArrowDown")
