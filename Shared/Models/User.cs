@@ -86,6 +86,10 @@ public enum UserRole
     /// </summary>
     PauseProcessing = 2048,
     /// <summary>
+    /// Docker Mod role
+    /// </summary>
+    DockerMods = 4096,
+    /// <summary>
     /// Administrator
     /// </summary>
     Admin = 65535

@@ -39,6 +39,7 @@
     "Refresh": "Refresh",
     "Download": "Download",
     "Default":"Default",
+    "Repository": "Repository",
     "Type": "Type",
     "Scripts": "Scripts",
     "Plugins": "Plugins",
@@ -343,6 +344,7 @@
     "Configuration": "Configuration",
     "Extensions": "Extensions",
     "System": "System",
+    "Security": "Security",
     "Information": "Information",
     "User": "User",
     "Admin": "Admin"
@@ -513,6 +515,18 @@
         "Upcoming": "Upcoming",
         "RecentlyFinished": "Recently Finished",
         "WorkingFile": "Working File"
+      }
+    },
+    "DockerMod": {
+      "Title": "DockerMod",
+      "Plural": "DockerMods",
+      "Messages":
+      {
+        "Updating": "Updating"
+      },
+      "Fields": {
+        "Description": "Description",
+        "Code": "Code"
       }
     },
     "Flow": {

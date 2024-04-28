@@ -1,0 +1,85 @@
+@namespace FileFlows.Client.Pages
+@using FileFlows.Shared.Models
+@inherits ListPage<Guid, DockerMod>
+
+@page "/dockermods"
+
+<PageView ClassName="flex">
+
+    <Head>
+    </Head>
+
+    <Body>
+        
+        <FlowTable @ref="Table" Data="@Data" TItem="DockerMod" Selection="SelectionMode.Multiple"
+            DoubleClick="@DoubleClick" TableIdentifier="DockerMods"  DisableColumn="(item) => !item.Enabled">
+            <ToolBar>            
+                <FlowTableButton Clicked=Add Icon="fas fa-plus" Label="Labels.Add" />
+                <FlowTableButton Clicked=Edit SelectedOne="true" Icon="fas fa-edit" Label="Labels.Edit" />
+                <FlowTableButton Clicked=Delete SelectedOneOrMore="true" Icon="fas fa-trash" Label="Labels.Delete" />
+                <FlowTableButtonSeparator />
+                <FlowTableButton Clicked=OpenBrowser Icon="fas fa-code-branch" Label="Labels.Repository"/>
+                <FlowTableButton Clicked=Update SelectedOneOrMore="true" Icon="fas fa-cloud-download-alt" Label="Labels.Update" />
+                @if (Profile != null && Profile.LicensedFor(LicenseFlags.Auditing) && Profile.HasRole(UserRole.Admin))
+                {  
+                    <FlowTableButton Clicked=AuditLog SelectedOne="true" Icon="fas fa-clipboard-list" Label="Labels.Audit" />
+                }
+                <FlowTableButtonSeparator />               
+                <FlowTableHelpButton HelpUrl="dockermods" />
+            </ToolBar>
+
+            <Columns>
+                <FlowTableColumn TItem="DockerMod" NoHeight="true">
+                    <Header>
+                        @Globals.lblName
+                    </Header>
+                    <Cell Context="item">
+                        <div class="table-item">
+                            <span class="icon">
+                                @if(string.IsNullOrWhiteSpace(item.Icon))
+                                {
+                                    <i class="icon fab fa-docker"></i>
+                                }
+                                else if (item.Icon.StartsWith("svg:"))
+                                {
+                                    <img src="/icons/@(item.Icon[4..]).svg"/>
+                                }
+                                else
+                                {
+                                    var parts = item.Icon.Split(':');
+                                    if (parts.Length == 2)
+                                    {
+                                        <i class="icon @parts[0]" style="color:@parts[1]"></i>
+                                    }
+                                    else
+                                    {
+                                        <i class="icon @item.Icon"></i>
+                                    }
+                                }
+                            </span>
+                            <div class="center">
+                                <span class="name"><span>@item.Name</span></span>
+                                <span>@item.Description</span>
+                                <div class="info">
+                                    @if (item.LatestRevision > item.Revision)
+                                    {
+                                        <IconValue Color="IconValueColor.Pink" OnClick="() => Update(item.Uid)" 
+                                                   Icon="fas fa-cloud-download-alt" Value="@item.LatestRevision.ToString()" />
+                                    }
+                                </div>
+                            </div>
+                            <div class="right">
+                                <span class="top-right @(item.LatestRevision > item.Revision ? "warning" :"")">@item.Revision</span>
+                                <FlowSwitch Value="@item.Enabled" ValueChanged="@(args => { item.Enabled = args; _ = Enable(args, item); })"  />
+                            </div>
+                        </div>
+                            
+                    </Cell>
+                </FlowTableColumn>
+            </Columns>
+        </FlowTable>
+    </Body>
+
+</PageView>
+
+<DockerModBrowser @ref="Browser" />

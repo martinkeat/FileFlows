@@ -59,9 +59,10 @@
             {
                 var value = GetValue<string>(field.Name) ?? "";
                 var variables = GetParameter<bool>(field, "Variables") ? field.Variables : null;
+                var rows = GetParameter<int>(field, "Rows");
                 <InputTextArea Field=@field Label="@label" Value="@value" ReadOnly=@readOnly ValueChanged="@(x => UpdateValue(field, x))"
                                Validators=@field.Validators Placeholder="@field.Placeholder" HideLabel=@hideLabel 
-                               Variables="@variables"
+                               Variables="@variables" Rows="@rows"
                                OnSubmit=@OnSubmit OnClose=@OnClose Help=@field.HelpText
                 />
             }
@@ -76,7 +77,7 @@
             }
             <InputCode Field=@field Label="@label" Value="@value" ReadOnly=@readOnly ValueChanged="@(x => UpdateValue(field, x))"
                        Validators=@field.Validators Variables=@field.Variables Placeholder="@field.Placeholder" HideLabel=@hideLabel 
-                       Template="true" OnSubmit=@OnSubmit OnClose=@OnClose Help=@field.HelpText />
+                       Language="liquid" OnSubmit=@OnSubmit OnClose=@OnClose Help=@field.HelpText />
         }
             break;
         case FormInputType.Password:
@@ -109,6 +110,14 @@
                              Validators=@field.Validators Placeholder="@field.Placeholder" Min="@min" Max="@max" HideLabel=@hideLabel 
                              OnSubmit=@OnSubmit OnClose=@OnClose Help=@field.HelpText ZeroAsEmpty="@zeroAsEmpty" />
             }
+            break;
+        case FormInputType.IconPicker:
+        {
+            var value = GetValue<string>(field.Name);
+            <InputIconPicker Field=@field Label="@label" Value="@value" ReadOnly=@readOnly ValueChanged="@(x => UpdateValue(field, x))"
+                         Validators=@field.Validators Placeholder="@field.Placeholder" HideLabel=@hideLabel 
+                         OnSubmit=@OnSubmit OnClose=@OnClose Help=@field.HelpText  />
+        }
             break;
         case FormInputType.NumberPercent:
         {
@@ -223,9 +232,10 @@
         case FormInputType.Code:
             {
                 var value = GetValue<string>(field.Name);
+                var language = GetParameter<string>(field, nameof(InputCode.Language));
                 <InputCode Field=@field Label="@label" Value="@value" ReadOnly=@readOnly ValueChanged="@(x => UpdateValue(field, x))"
                            Validators=@field.Validators Variables=@field.Variables Placeholder="@field.Placeholder" HideLabel=@hideLabel 
-                           OnSubmit=@OnSubmit OnClose=@OnClose Help=@field.HelpText />
+                           OnSubmit=@OnSubmit OnClose=@OnClose Help=@field.HelpText Language="@language" />
             }
             break;
         case FormInputType.Schedule:

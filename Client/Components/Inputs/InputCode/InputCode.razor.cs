@@ -6,6 +6,7 @@ using Microsoft.JSInterop;
 using System.Collections.Generic;
 using FileFlows.Plugin;
 using Microsoft.AspNetCore.Components.Web;
+using NPoco.Expressions;
 
 namespace FileFlows.Client.Components.Inputs;
 
@@ -17,10 +18,11 @@ public partial class InputCode : Input<string>, IDisposable
     private MonacoEditor CodeEditor { get; set; }
 
     private Dictionary<string, object> _Variables = new ();
+    
     /// <summary>
-    /// Gets or sets if this is a template otherwise its code
+    /// Gets or sets the language the editor is editing
     /// </summary>
-    [Parameter] public bool Template { get; set; }
+    [Parameter] public string Language { get; set; }
     
     [Parameter]
     public Dictionary<string, object> Variables
@@ -29,6 +31,8 @@ public partial class InputCode : Input<string>, IDisposable
         set { _Variables = value ?? new Dictionary<string, object>(); }
     }
 
+    private IJSObjectReference jsInputCode;
+    
     private StandaloneEditorConstructionOptions EditorConstructionOptions(MonacoEditor editor)
     {
         return new StandaloneEditorConstructionOptions
@@ -36,7 +40,7 @@ public partial class InputCode : Input<string>, IDisposable
             AutomaticLayout = true,
             Minimap = new EditorMinimapOptions { Enabled = false },
             Theme = "vs-dark",
-            Language = Template ? "liquid" : "javascript",
+            Language = Language?.EmptyAsNull() ?? "javascript",
             Value = this.Value?.Trim() ?? "",
             ReadOnly = this.Editor.ReadOnly
         };
@@ -48,7 +52,17 @@ public partial class InputCode : Input<string>, IDisposable
         {
             // var shared = await HttpHelper.Get<Dictionary<string, string>>("/api/script/basic-list?type=Shared");
             
-            await jsRuntime.InvokeVoidAsync("ffCode.initModel", Variables, null);//, shared.Success ? shared.Data : null);
+            var jsObjectReference = await jsRuntime.InvokeAsync<IJSObjectReference>("import", $"./Components/Inputs/InputCode/InputCode.razor.js?v={Globals.Version}");
+            jsInputCode = await jsObjectReference.InvokeAsync<IJSObjectReference>("createInputCode", new object[] { DotNetObjectReference.Create(this) });
+            if (Language == "shell")
+            {
+                await jsInputCode.InvokeVoidAsync("shellEditor");
+            }
+            else
+            {
+                await jsInputCode.InvokeVoidAsync("jsEditor", Variables,
+                    null); //, shared.Success ? shared.Data : null);
+            }
         });
         InitialValue = this.Value;
     }
@@ -59,8 +73,7 @@ public partial class InputCode : Input<string>, IDisposable
         this.Editor.OnCancel += Editor_OnCancel;
         this.Editor.OnClosed += Editor_Closed;
         
-        var dotNetObjRef = DotNetObjectReference.Create(this);
-        jsRuntime.InvokeVoidAsync("ff.codeCaptureSave", new object[] { dotNetObjRef });
+        jsInputCode.InvokeVoidAsync("codeCaptureSave");
         base.OnInitialized();
     }
 
@@ -141,7 +154,7 @@ public partial class InputCode : Input<string>, IDisposable
 
     public void Dispose()
     {
-        jsRuntime.InvokeVoidAsync("ff.codeUncaptureSave");
+        jsInputCode.InvokeVoidAsync("codeUncaptureSave");
         if (this.Editor != null)
         {
             this.Editor.OnCancel -= Editor_OnCancel;

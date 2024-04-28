@@ -1,0 +1,58 @@
+@namespace FileFlows.Client.Components.Inputs
+@using System.IO
+@using FileFlows.Client.Components.Dialogs
+@inherits Input<string>
+
+<InputWrapper Input="@this">
+    <div class="input-icon-picker-wrapper">
+        @if (string.IsNullOrEmpty(Value) == false)
+        {
+            @if (Value.StartsWith("data:"))
+            {
+                <img src="@Value" @onclick="@Choose" />
+            }
+            else
+            {
+                <i class="icon @Value"  @onclick="@Choose"></i>
+            }
+        }
+        else
+        {
+            <button @onclick=@Choose>Choose</button>
+        }
+        <Microsoft.AspNetCore.Components.Forms.InputFile @ref="fileInput" id="fileInput" OnChange="HandleFileSelected" style="display:none;" accept="image/*"/>
+    </div>
+</InputWrapper>
+
+<Modal Title="Pick Icon" Visible="@ModalOpened">
+
+    <Body>
+    <div class="icon-picker-modal-body">
+    <div class="filter">
+        <input type="text" @bind-value="@Filter" @bind-value:event="oninput" placeholder="Filter..."/>
+    </div>
+    <ul class="icon-list">
+        @foreach (var icon in Icons)
+        {
+            if (string.IsNullOrEmpty(Filter) == false && icon.Contains(Filter.ToLowerInvariant()) == false)
+            {
+                continue;
+            }
+
+            <li @onclick="() => SelectIcon(icon)" @ondblclick="() => DblClick(icon)"
+                class="@(icon == SelectedIcon ? "selected" : "")">
+                <i class="@icon"></i>
+            </li>
+        }
+    </ul>
+    </div>
+    </Body>
+    <Footer>
+        <div class="icon-picker-modal-footer">
+            <button @onclick=@Upload>Upload</button>
+            <div class="spacer"></div>
+            <button @onclick="() => DblClick(SelectedIcon)" disabled="@(SelectedIcon == null ? "disabled" : null)">Select</button>
+            <button @onclick=@Cancel>Cancel</button>
+        </div>
+    </Footer>
+</Modal>

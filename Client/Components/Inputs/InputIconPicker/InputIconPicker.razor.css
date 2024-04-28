@@ -1,0 +1,80 @@
+input {
+  width: 100% !important;
+  height: 2.1875rem;
+}
+
+.input-icon-picker-wrapper {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  max-width: 40rem;
+}
+.input-icon-picker-wrapper img, .input-icon-picker-wrapper i {
+  max-height: 4rem;
+  object-fit: contain;
+  width: 7rem;
+  margin-right: 0.5rem;
+  font-size: 2.5rem;
+  cursor: pointer;
+}
+.input-icon-picker-wrapper button {
+  width: fit-content;
+  min-width: fit-content;
+  padding: 0 1rem;
+  margin: 0 0.5rem 0 0;
+  border: none;
+  background: rgba(var(--input-background-rgb), 0.5);
+}
+.input-icon-picker-wrapper button:hover {
+  box-shadow: none !important;
+  border: solid 1px var(--accent);
+}
+.input-icon-picker-wrapper:focus-within button {
+  border-left: solid 1px var(--accent);
+}
+.input-icon-picker-wrapper ::deep > div {
+  flex-grow: 1;
+}
+
+.icon-picker-modal-body {
+  width: min(12 * (3rem + 1px), 90vw);
+  height: min(32.2rem, 80vw);
+  display: flex;
+  flex-direction: column;
+}
+.icon-picker-modal-body input {
+  margin-bottom: 0.5rem;
+  padding-left: 0.5rem;
+}
+
+.icon-picker-modal-footer {
+  display: flex;
+  justify-content: space-between;
+}
+.icon-picker-modal-footer .spacer {
+  flex-grow: 1;
+}
+.icon-picker-modal-footer button + button {
+  margin-left: 0.5rem;
+}
+
+ul.icon-list {
+  list-style: none;
+  display: inline-flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  overflow: auto;
+  margin: 0;
+  padding: 0 0 0.5rem 0;
+}
+ul.icon-list li {
+  font-size: 2rem;
+  border: solid 1px transparent;
+  padding: 0;
+  height: 3rem;
+  width: 3rem;
+  text-align: center;
+}
+ul.icon-list li.selected {
+  border-color: var(--accent);
+}

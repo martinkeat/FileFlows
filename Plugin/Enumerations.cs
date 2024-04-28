@@ -152,6 +152,10 @@ public enum FormInputType
     /// Date
     /// </summary>
     Date = 33,
+    /// <summary>
+    /// Icon Picker
+    /// </summary>
+    IconPicker = 34
 }
 
 

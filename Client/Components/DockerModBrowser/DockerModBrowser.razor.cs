@@ -6,14 +6,14 @@ using FileFlows.Client.Components.Common;
 namespace FileFlows.Client.Components;
 
 /// <summary>
-/// Browser for Plugins
+/// Browser for DockerMods
 /// </summary>
-public partial class PluginBrowser : ComponentBase
+public partial class DockerModBrowser : ComponentBase
 {
     /// <summary>
-    /// The URL to get the Plugins
+    /// The URL to get the DockerMods
     /// </summary>
-    const string ApiUrl = "/api/plugin";
+    const string ApiUrl = "/api/docker";
     /// <summary>
     /// Gets or sets the blocker
     /// </summary>
@@ -25,7 +25,7 @@ public partial class PluginBrowser : ComponentBase
     /// <summary>
     /// Gets or sets the table
     /// </summary>
-    public FlowTable<PluginPackageInfo> Table { get; set; }
+    public FlowTable<DockerMod> Table { get; set; }
     /// <summary>
     /// Gets or sets if this is visible
     /// </summary>
@@ -67,7 +67,7 @@ public partial class PluginBrowser : ComponentBase
     {
         this.Visible = true;
         this.Loading = true;
-        this.Table.Data = new List<PluginPackageInfo>();
+        this.Table.Data = new List<DockerMod>();
         OpenTask = new TaskCompletionSource<bool>();
         _ = LoadData();
         this.StateHasChanged();
@@ -84,7 +84,7 @@ public partial class PluginBrowser : ComponentBase
         this.StateHasChanged();
         try
         {
-            var result = await HttpHelper.Get<List<PluginPackageInfo>>(ApiUrl + "/plugin-packages?missing=true");
+            var result = await HttpHelper.Get<List<DockerMod>>(ApiUrl + "/plugin-packages?missing=true");
             if (result.Success == false)
             {
                 Toast.ShowError(result.Body, duration: 15_000);
@@ -138,7 +138,7 @@ public partial class PluginBrowser : ComponentBase
         try
         {
             this.Updated = true;
-            var result = await HttpHelper.Post(ApiUrl + "/download", new { Packages = items });
+            var result = await HttpHelper.Post(ApiUrl + "/download", new { Items = items });
             if (result.Success == false)
             {
                 // close this and show message
@@ -170,58 +170,36 @@ public partial class PluginBrowser : ComponentBase
     /// <summary>
     /// Views the item
     /// </summary>
-    /// <param name="plugin">the item</param>
-    private async Task View(PluginPackageInfo plugin)
+    /// <param name="item">the item</param>
+    private async Task View(DockerMod item)
     {
-        await Editor.Open(new () { TypeName = "Pages.Plugins", Title = plugin.Name, Fields = new List<ElementField>
+        await Editor.Open(new () { TypeName = "Pages.DockerMods", Title = item.Name, Fields = new List<ElementField>
         {
-            new ElementField
+            new ()
             {
-                Name = nameof(plugin.Name),
+                Name = nameof(item.Name),
                 InputType = FormInputType.TextLabel
             },
-            new ElementField
+            new ()
             {
-                Name = nameof(plugin.Authors),
+                Name = nameof(item.Author),
                 InputType = FormInputType.TextLabel
             },
-            new ElementField
+            new ()
             {
-                Name = nameof(plugin.Version),
+                Name = nameof(item.Revision),
                 InputType = FormInputType.TextLabel
             },
-            new ElementField
+            new ()
             {
-                Name = nameof(plugin.Url),
-                InputType = FormInputType.TextLabel,
-                Parameters = new Dictionary<string, object>
-                {
-                    { nameof(InputTextLabel.Link), true }
-                }
-            },
-            new ElementField
-            {
-                Name = nameof(plugin.Description),                    
+                Name = nameof(item.Description),                    
                 InputType = FormInputType.TextLabel,
                 Parameters = new Dictionary<string, object>
                 {
                     { nameof(InputTextLabel.Pre), true }
                 }
-            },
-            new ElementField
-            {
-                Name = nameof(plugin.Elements),
-                InputType = FormInputType.Checklist,
-                Parameters = new Dictionary<string, object>
-                {
-                    { nameof(InputChecklist.ListOnly), true },
-                    { 
-                        nameof(InputChecklist.Options), 
-                        plugin.Elements.Select(x => new ListOption{ Label = x, Value = x }).ToList()
-                    }
-                }
-            },
-        }, Model = plugin, ReadOnly= true});
+            }
+        }, Model = item, ReadOnly= true});
     }
 
 }
