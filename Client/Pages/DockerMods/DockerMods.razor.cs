@@ -19,7 +19,7 @@ public partial class DockerMods : ListPage<Guid, DockerMod>
     /// <summary>
     /// Gets or sets the DockerMod Browser isntance
     /// </summary>
-    private DockerModBrowser Browser { get; set; }
+    private RepositoryBrowser Browser { get; set; }
 
     /// <summary>
     /// Gets or sets the JavaScript runtime
@@ -101,21 +101,13 @@ public partial class DockerMods : ListPage<Guid, DockerMod>
     /// </summary>
     private async Task Export()
     {
-        var mod = Table?.GetSelected()?.FirstOrDefault();
-        if (mod == null)
+        var item = Table?.GetSelected()?.FirstOrDefault();
+        if (item == null)
             return;
-
-        var sb = new StringBuilder();
-        sb.AppendLine("# --------------------------------------------------------------------------------------------------------------------------------------------");
-        sb.AppendLine("# Name: " + mod.Name);
-        sb.AppendLine("# Description: " + mod.Description.Replace("\n", "\n# "));
-        sb.AppendLine("# Author: Enter Your Name");
-        sb.AppendLine("# Revision: " + mod.Revision);
-        sb.AppendLine("# Icon: " + mod.Icon);
-        sb.AppendLine("# --------------------------------------------------------------------------------------------------------------------------------------------");
-        sb.AppendLine();
-        sb.Append(mod.Code);
-
-        await jsRuntime.InvokeVoidAsync("ff.saveTextAsFile", $"{mod.Name}.sh", sb.ToString());       
+        string url = $"{ApiUrl}/export/{item.Uid}";
+#if (DEBUG)
+        url = "http://localhost:6868" + url;
+#endif
+        await jsRuntime.InvokeVoidAsync("ff.downloadFile", new object[] { url, item.Name + ".yaml" });
     }
 }

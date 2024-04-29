@@ -1,7 +1,7 @@
 using FileFlows.Plugin;
 using FileFlows.Server.Authentication;
-using FileFlows.Server.Helpers;
 using FileFlows.Server.Services;
+using FileFlows.ServerShared.Models;
 using FileFlows.Shared.Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,9 +11,84 @@ namespace FileFlows.Server.Controllers;
 /// Controller for the Repository
 /// </summary>
 [Route("/api/repository")]
-[FileFlowsAuthorize(UserRole.Flows | UserRole.Plugins | UserRole.Scripts)]
+[FileFlowsAuthorize(UserRole.Flows | UserRole.Plugins | UserRole.Scripts | UserRole.DockerMods)]
 public class RepositoryController : BaseController
 {
+    /// <summary>
+    /// Gets the repository objects by types
+    /// </summary>
+    /// <param name="type">the type of objects to get</param>
+    /// <param name="missing">only include missing objects not downloaded</param>
+    /// <returns>a collection of objects</returns>
+    [HttpGet("by-type/{type}")]
+    public async Task<IEnumerable<RepositoryObject>> GetByType([FromRoute] string type, [FromQuery] bool missing = true)
+    {
+        var repo = await new RepositoryService().GetRepository();
+        var objects = (type.ToLowerInvariant() switch
+        {
+            "dockermod" => repo.DockerMods,
+            _ => new List<RepositoryObject>()
+        }).Where(x => x.MinimumVersion == null || new Version(Globals.Version) >= x.MinimumVersion);
+        
+        if (missing)
+        {
+            var known = type.ToLowerInvariant() switch
+            {
+                "dockermod" => CanAccess(UserRole.DockerMods) ? (await ServiceLoader.Load<DockerModService>().GetAll()).Select(x => x.Name).ToList() : [],
+                _ => []
+            };
+
+            objects = objects.Where(x => known.Contains(x.Path) == false && known.Contains(x.Name) == false).ToList();
+        }
+        return objects;
+    }
+    
+    
+    /// <summary>
+    /// Download script into the FileFlows system
+    /// </summary>
+    /// <param name="type">the type of objects to download</param>
+    /// <param name="objects">A list of objects to download</param>
+    /// <returns>an awaited task</returns>
+    [HttpPost("download/{type}")]
+    public async Task<IActionResult> DownloadByType([FromRoute] string type, [FromBody] List<RepositoryObject> objects)
+    {
+        if (objects?.Any() != true)
+            return Ok(); // nothing to download
+
+        Func<string, AuditDetails, Task<Result<bool>>>? processor = null;
+
+        switch (type.ToLowerInvariant())
+        {
+            case "dockermod":
+            {
+                if (CanAccess(UserRole.DockerMods) == false)
+                    throw new UnauthorizedAccessException();
+
+                var dmService = ServiceLoader.Load<DockerModService>();
+                processor = dmService.ImportFromRepository;
+            }
+            break;
+        }
+
+        if (processor == null)
+            return BadRequest("Invalid type");
+        
+        var service = ServiceLoader.Load<RepositoryService>();
+        var auditDetails = await GetAuditDetails();
+        foreach (var ro in objects)
+        {
+            var result = await service.GetContent(ro.Path);
+            if (result.Failed(out string error))
+                return BadRequest(error);
+            var rr = await processor(result.Value, auditDetails);
+            if (rr.Failed(out error))
+                return BadRequest(error);
+        }
+
+        return Ok();
+    }
+    
     /// <summary>
     /// Gets the scripts
     /// </summary>

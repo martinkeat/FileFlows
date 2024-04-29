@@ -33,7 +33,10 @@ public class FileFlowsAuthorizeAttribute : Attribute, IAsyncAuthorizationFilter
     public async Task OnAuthorizationAsync(AuthorizationFilterContext context)
     {
         if (AuthenticationHelper.GetSecurityMode() == SecurityMode.Off)
+        {
+            context.HttpContext.Items["USER_ROLE"] = UserRole.Admin;
             return;
+        }
 
         UserRole roleToTest = Role;
         
@@ -63,6 +66,7 @@ public class FileFlowsAuthorizeAttribute : Attribute, IAsyncAuthorizationFilter
             context.Result = new UnauthorizedResult();
             return;
         }
+        context.HttpContext.Items["USER_ROLE"] = UserRole.Admin;
 
         if ((int)roleToTest == 0)
             return; // any role

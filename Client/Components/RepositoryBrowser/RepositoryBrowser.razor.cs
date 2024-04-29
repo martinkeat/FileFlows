@@ -6,14 +6,10 @@ using FileFlows.Client.Components.Common;
 namespace FileFlows.Client.Components;
 
 /// <summary>
-/// Browser for DockerMods
+/// Browser for generic Repository Objects
 /// </summary>
-public partial class DockerModBrowser : ComponentBase
+public partial class RepositoryBrowser : ComponentBase
 {
-    /// <summary>
-    /// The URL to get the DockerMods
-    /// </summary>
-    const string ApiUrl = "/api/docker";
     /// <summary>
     /// Gets or sets the blocker
     /// </summary>
@@ -25,7 +21,7 @@ public partial class DockerModBrowser : ComponentBase
     /// <summary>
     /// Gets or sets the table
     /// </summary>
-    public FlowTable<DockerMod> Table { get; set; }
+    public FlowTable<RepositoryObject> Table { get; set; }
     /// <summary>
     /// Gets or sets if this is visible
     /// </summary>
@@ -52,11 +48,20 @@ public partial class DockerModBrowser : ComponentBase
     /// </summary>
     private bool Loading = false;
 
+    /// <summary>
+    /// Gets or sets the type
+    /// </summary>
+    [Parameter] public string Type { get; set; }
+
+    /// <summary>
+    /// Gets or sets if icons should be shown
+    /// </summary>
+    [Parameter] public bool Icons { get; set; }
+    
     /// <inheritdoc />
     protected override void OnInitialized()
     {
         lblClose = Translater.Instant("Labels.Close");
-        lblTitle = Translater.Instant("Pages.Plugins.Labels.PluginBrowser");
     }
 
     /// <summary>
@@ -67,7 +72,7 @@ public partial class DockerModBrowser : ComponentBase
     {
         this.Visible = true;
         this.Loading = true;
-        this.Table.Data = new List<DockerMod>();
+        this.Table.Data = new List<RepositoryObject>();
         OpenTask = new TaskCompletionSource<bool>();
         _ = LoadData();
         this.StateHasChanged();
@@ -84,7 +89,7 @@ public partial class DockerModBrowser : ComponentBase
         this.StateHasChanged();
         try
         {
-            var result = await HttpHelper.Get<List<DockerMod>>(ApiUrl + "/plugin-packages?missing=true");
+            var result = await HttpHelper.Get<List<RepositoryObject>>("/api/repository/by-type/" + this.Type);
             if (result.Success == false)
             {
                 Toast.ShowError(result.Body, duration: 15_000);
@@ -138,7 +143,7 @@ public partial class DockerModBrowser : ComponentBase
         try
         {
             this.Updated = true;
-            var result = await HttpHelper.Post(ApiUrl + "/download", new { Items = items });
+            var result = await HttpHelper.Post($"/api/repository/download/{Type}", items);
             if (result.Success == false)
             {
                 // close this and show message
@@ -171,9 +176,9 @@ public partial class DockerModBrowser : ComponentBase
     /// Views the item
     /// </summary>
     /// <param name="item">the item</param>
-    private async Task View(DockerMod item)
+    private async Task View(RepositoryObject item)
     {
-        await Editor.Open(new () { TypeName = "Pages.DockerMods", Title = item.Name, Fields = new List<ElementField>
+        await Editor.Open(new () { TypeName = "Pages.RepositoryObject", Title = item.Name, Fields = new List<ElementField>
         {
             new ()
             {

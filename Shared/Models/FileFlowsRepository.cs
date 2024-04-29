@@ -41,6 +41,10 @@ public class FileFlowsRepository
     /// Gets or sets the sub flows
     /// </summary>
     public List<RepositoryObject> SubFlows { get; set; } = new ();
+    /// <summary>
+    /// Gets or sets the DockerMods
+    /// </summary>
+    public List<RepositoryObject> DockerMods { get; set; } = new ();
 }
 
 /// <summary>
@@ -51,7 +55,7 @@ public class RepositoryObject
     /// <summary>
     /// Gets or sets the path of the script
     /// </summary>
-    public string Path { get; set; } = string.Empty;
+    public string? Path { get; set; } = string.Empty;
 
     /// <summary>
     /// Gets or sets the name
@@ -71,7 +75,7 @@ public class RepositoryObject
     /// <summary>
     /// Gets or sets the minimum version of FileFlows this object requires
     /// </summary>
-    public Version MinimumVersion { get; set; }
+    public Version? MinimumVersion { get; set; }
     
     /// <summary>
     /// Gets or sets an optional UID of the object
@@ -86,5 +90,10 @@ public class RepositoryObject
     /// <summary>
     /// Gets or sets a list of sub flows this object depends on
     /// </summary>
-    public List<Guid> SubFlows { get; set; }
+    public List<Guid>? SubFlows { get; set; }
+    
+    /// <summary>
+    /// Gets or sets an optional Icon
+    /// </summary>
+    public string? Icon { get; set; }
 }

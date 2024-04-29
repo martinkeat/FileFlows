@@ -1,0 +1,97 @@
+@namespace FileFlows.Client.Components
+
+<div class="browser-wrapper @(Visible ? "visible" : "")">
+    <div class="background-overlay"></div>
+    <div class="browser">
+
+        <ViContainer Title="@lblTitle" Icon="fas fa-puzzle-piece" FullWidth=@true AlwaysShowTitle=@true>
+
+            <Head>
+                <button @onclick=@Close>@lblClose</button>
+            </Head>
+
+            <Body>
+                <div class="browser-content">
+                    <FlowTable @ref="Table" TItem="RepositoryObject" Selection="SelectionMode.Multiple" DoubleClick="@View" TableIdentifier="PluginBrowser">
+                        <ToolBar>                    
+                            <FlowTableButton Clicked=ViewAction SelectedOne="true" Icon="fas fa-info-circle" Label="Labels.View" />                                
+                            <FlowTableButton Clicked=Download SelectedOneOrMore="true" Icon="fas fa-cloud-download-alt" Label="Labels.Download" />                                
+                        </ToolBar>
+                        <Columns>
+
+                            @if (Icons)
+                            {<FlowTableColumn TItem="RepositoryObject" NoHeight="true">
+                                <Header>
+                                    @Globals.lblName
+                                </Header>
+                                <Cell Context="item">
+                                    <div class="table-item">
+                                        <span class="icon">
+                                            @if(string.IsNullOrWhiteSpace(item.Icon))
+                                            {
+                                                <i class="icon fab fa-docker"></i>
+                                            }
+                                            else if (item.Icon.StartsWith("svg:"))
+                                            {
+                                                <img src="/icons/@(item.Icon[4..]).svg"/>
+                                            }
+                                            else
+                                            {
+                                                var parts = item.Icon.Split(':');
+                                                if (parts.Length == 2)
+                                                {
+                                                    <i class="icon @parts[0]" style="color:@parts[1]"></i>
+                                                }
+                                                else
+                                                {
+                                                    <i class="icon @item.Icon"></i>
+                                                }
+                                            }
+                                        </span>
+                                        <div class="center">
+                                            <span class="name"><span>@item.Name</span></span>
+                                            <span>@item.Description</span>
+                                        </div>
+                                        <div class="right">
+                                            <span class="top-right">@item.Revision</span>
+                                        </div>
+                                    </div>
+                                        
+                                </Cell>
+                            </FlowTableColumn>
+                            }
+                            else
+                            {
+                                <FlowTableColumn TItem="RepositoryObject" Width="10rem">
+                                    <Header>
+                                        @Globals.lblName
+                                    </Header>
+                                    <Cell Context="item">
+                                        <span>@item.Name</span>
+                                    </Cell>
+                                </FlowTableColumn>
+                                <FlowTableColumn TItem="RepositoryObject" Width="8rem">
+                                    <Header>
+                                        Revision
+                                    </Header>
+                                    <Cell Context="item">
+                                        <span>@item.Revision</span>
+                                    </Cell>
+                                </FlowTableColumn>
+                                <FlowTableColumn TItem="RepositoryObject" Pre=@true>
+                                    <Header>
+                                        Description
+                                    </Header>
+                                    <Cell Context="item">
+                                        <span>@item.Description</span>
+                                    </Cell>
+                                </FlowTableColumn>
+                            }
+                        </Columns>
+                    </FlowTable>
+                </div>
+            </Body>
+        </ViContainer>
+    </div>
+
+</div>

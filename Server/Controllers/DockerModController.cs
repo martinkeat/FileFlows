@@ -1,7 +1,9 @@
+using System.Text;
 using FileFlows.Server.Authentication;
 using FileFlows.Server.Services;
 using FileFlows.Shared.Models;
 using Microsoft.AspNetCore.Mvc;
+using YamlDotNet.Serialization;
 
 namespace FileFlows.Server.Controllers;
 
@@ -33,5 +35,21 @@ public class DockerModController : BaseController
         if (result.Failed(out string error))
             BadRequest(error);
         return result.Value;
+    }
+
+    /// <summary>
+    /// Exports a DockerMod
+    /// </summary>
+    /// <param name="uid">the UID of the DockerMod</param>
+    /// <returns>The file download result</returns>
+    [HttpGet("export/{uid}")]
+    public async Task<IActionResult> Export([FromRoute] Guid uid)
+    {
+        var mod = await ServiceLoader.Load<DockerModService>().Export(uid);
+        if (mod.IsFailed)
+            return NotFound();
+        
+        var data = Encoding.UTF8.GetBytes(mod.Value.Content);
+        return File(data, "application/octet-stream", mod.Value.Name + ".sh");
     }
 }

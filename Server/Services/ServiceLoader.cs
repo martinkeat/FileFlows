@@ -39,6 +39,7 @@ public static class ServiceLoader
             .AddSingleton<RepositoryFlowTemplateService>()
             .AddSingleton<AuditService>()
             .AddSingleton<DockerModService>()
+            .AddSingleton<RepositoryService>()
             .AddSingleton<NotificationService>()
             .BuildServiceProvider(); // Build the service provider
     }

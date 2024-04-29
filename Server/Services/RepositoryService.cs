@@ -46,7 +46,8 @@ class RepositoryService
                 SharedScripts = new(),
                 SystemScripts = new(),
                 WebhookScripts = new (),
-                SubFlows = new ()
+                SubFlows = new (),
+                DockerMods = new ()
             };
         }
     }
@@ -89,15 +90,15 @@ class RepositoryService
         {
             if (obj.MinimumVersion > new Version(Globals.Version))
                 continue;
-            string output = obj.Path;
+            var output = obj.Path;
             output = Regex.Replace(output, @"^Scripts\/[^\/]+\/", string.Empty);
             output = Regex.Replace(output, @"^Templates\/[^\/]+\/", string.Empty);
             output = Path.Combine(destination, output);
             if (force == false && File.Exists(output))
             {
                 // check the revision
-                string existing = File.ReadAllText(output);
-                var jsonMatch = Regex.Match(existing, @"(""revision""[\s]*:|@revision)[\s]*([\d]+)");
+                var existing = await File.ReadAllTextAsync(output);
+                var jsonMatch = Regex.Match(existing, """("revision"[\s]*:|@revision)[\s]*([\d]+)""");
                 if (jsonMatch?.Success == true)
                 {
                     int revision = int.Parse(jsonMatch.Groups[2].Value);
