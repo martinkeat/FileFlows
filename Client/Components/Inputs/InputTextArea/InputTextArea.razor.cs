@@ -13,7 +13,7 @@ public partial class InputTextArea : Input<string>
     /// <summary>
     /// Gets or sets the JavaScript runtime
     /// </summary>
-    [Inject] private IJSRuntime jSRuntime { get; set; }
+    [Inject] private IJSRuntime jsRuntime { get; set; }
     
     /// <summary>
     /// Overrides the Focus method to focus on the element with the specified UID.
@@ -46,11 +46,6 @@ public partial class InputTextArea : Input<string>
     {
         ClearError();
     }
-    
-    /// <summary>
-    /// The javascript textarea object
-    /// </summary>
-    private IJSObjectReference jsTextArea;
 
     /// <inheritdoc />
     protected override async Task OnInitializedAsync()
@@ -83,7 +78,7 @@ public partial class InputTextArea : Input<string>
         // #else
         if (Variables?.Any() == true)
         {
-            var jsObjectReference = await jSRuntime.InvokeAsync<IJSObjectReference>("import",
+            var jsObjectReference = await jsRuntime.InvokeAsync<IJSObjectReference>("import",
                 $"./Components/Inputs/InputTextArea/InputTextArea.razor.js?v={Globals.Version}");
             await jsObjectReference.InvokeVoidAsync("createInputTextArea", DotNetObjectReference.Create(this), Uid, Variables);
         }

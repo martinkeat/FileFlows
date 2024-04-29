@@ -18,11 +18,27 @@ public partial class InputIconPicker : Input<string>
     private bool ModalOpened = false;
     private string SelectedIcon;
     private string Filter = string.Empty;
+    private string Color;
+    private string Icon;
+    private string IconColor;
+
+    /// <inheritdoc />
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        var parts = (Value ?? string.Empty).Split(':');
+        Icon = parts.FirstOrDefault();
+        IconColor = parts.Length > 1 ? parts[1] : string.Empty;
+        Color = IconColor;
+    }
 
     /// <inheritdoc />
     protected override void ValueUpdated()
     {
         ClearError();
+        var parts = (Value ?? string.Empty).Split(':');
+        Icon = parts.FirstOrDefault();
+        IconColor = parts.Length > 1 ? parts[1] : string.Empty;
     }
     
     /// <summary>
@@ -52,6 +68,8 @@ public partial class InputIconPicker : Input<string>
         {
             // Read the file as base64 string
             Value= await ConvertToBase64(file);
+            ModalOpened = false;
+            StateHasChanged();
         }
     }
     public static async Task<string> ConvertToBase64(IBrowserFile file)
@@ -70,7 +88,7 @@ public partial class InputIconPicker : Input<string>
 
     private void DblClick(string icon)
     {
-        this.Value = icon;
+        this.Value = icon + (string.IsNullOrWhiteSpace(Color) ? string.Empty : ":" + Color);
         ModalOpened = false;
     }
 

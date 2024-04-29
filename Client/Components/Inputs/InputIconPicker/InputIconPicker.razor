@@ -1,5 +1,4 @@
 @namespace FileFlows.Client.Components.Inputs
-@using System.IO
 @using FileFlows.Client.Components.Dialogs
 @inherits Input<string>
 
@@ -13,7 +12,7 @@
             }
             else
             {
-                <i class="icon @Value"  @onclick="@Choose"></i>
+                <i class="icon @Icon" style="color: @IconColor" @onclick="@Choose"></i>
             }
         }
         else
@@ -28,23 +27,26 @@
 
     <Body>
     <div class="icon-picker-modal-body">
-    <div class="filter">
-        <input type="text" @bind-value="@Filter" @bind-value:event="oninput" placeholder="Filter..."/>
-    </div>
-    <ul class="icon-list">
-        @foreach (var icon in Icons)
-        {
-            if (string.IsNullOrEmpty(Filter) == false && icon.Contains(Filter.ToLowerInvariant()) == false)
+        <div class="icon-picker-modal-body-top">
+            <div class="filter">
+                <input type="text" @bind-value="@Filter" @bind-value:event="oninput" placeholder="Filter..."/>
+            </div>
+            <FlowColorPicker @bind-Value="@Color"></FlowColorPicker>
+        </div>
+        <ul class="icon-list" style="color:@Color">
+            @foreach (var icon in Icons)
             {
-                continue;
-            }
+                if (string.IsNullOrEmpty(Filter) == false && icon.Contains(Filter.ToLowerInvariant()) == false)
+                {
+                    continue;
+                }
 
-            <li @onclick="() => SelectIcon(icon)" @ondblclick="() => DblClick(icon)"
-                class="@(icon == SelectedIcon ? "selected" : "")">
-                <i class="@icon"></i>
-            </li>
-        }
-    </ul>
+                <li @onclick="() => SelectIcon(icon)" @ondblclick="() => DblClick(icon)"
+                    class="@(icon == SelectedIcon ? "selected" : "")">
+                    <i class="@icon"></i>
+                </li>
+            }
+        </ul>
     </div>
     </Body>
     <Footer>
