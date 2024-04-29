@@ -1,4 +1,8 @@
+using System.Text;
+using System.Text.Json;
 using FileFlows.Client.Components;
+using Microsoft.AspNetCore.Components;
+using Microsoft.JSInterop;
 
 namespace FileFlows.Client.Pages;
 
@@ -17,12 +21,10 @@ public partial class DockerMods : ListPage<Guid, DockerMod>
     /// </summary>
     private DockerModBrowser Browser { get; set; }
 
-
-    /// <inheritdoc />
-    protected override async Task OnInitializedAsync()
-    {
-        base.OnInitializedAsync();
-    }
+    /// <summary>
+    /// Gets or sets the JavaScript runtime
+    /// </summary>
+    [Inject] protected IJSRuntime jsRuntime { get; set; }
 
 
 
@@ -92,5 +94,28 @@ public partial class DockerMods : ListPage<Guid, DockerMod>
                 ?.ToList();
         }
         return base.PostLoad();
+    }
+
+    /// <summary>
+    /// Exports a DockerHub command
+    /// </summary>
+    private async Task Export()
+    {
+        var mod = Table?.GetSelected()?.FirstOrDefault();
+        if (mod == null)
+            return;
+
+        var sb = new StringBuilder();
+        sb.AppendLine("# --------------------------------------------------------------------------------------------------------------------------------------------");
+        sb.AppendLine("# Name: " + mod.Name);
+        sb.AppendLine("# Description: " + mod.Description.Replace("\n", "\n# "));
+        sb.AppendLine("# Author: Enter Your Name");
+        sb.AppendLine("# Revision: " + mod.Revision);
+        sb.AppendLine("# Icon: " + mod.Icon);
+        sb.AppendLine("# --------------------------------------------------------------------------------------------------------------------------------------------");
+        sb.AppendLine();
+        sb.Append(mod.Code);
+
+        await jsRuntime.InvokeVoidAsync("ff.saveTextAsFile", $"{mod.Name}.sh", sb.ToString());       
     }
 }
