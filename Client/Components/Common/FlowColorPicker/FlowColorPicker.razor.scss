@@ -92,7 +92,17 @@ button {
   height:100%;
   width:2rem;
   background-color: rgba(0, 0, 0, 0);
-  background-image: linear-gradient(rgb(204, 0, 0) 0%, rgb(153, 153, 0) 17%, rgb(51, 204, 0) 33%, rgb(0, 204, 204) 50%, rgb(0, 0, 204) 66%, rgb(204, 0, 204) 83%, rgb(204, 0, 0) 100%);
+  //background-image: linear-gradient(rgb(204, 0, 0) 0%, rgb(153, 153, 0) 17%, rgb(51, 204, 0) 33%, rgb(0, 204, 204) 50%, rgb(0, 0, 204) 66%, rgb(204, 0, 204) 83%, rgb(204, 0, 0) 100%);
+
+  background-image: linear-gradient(to bottom,
+    rgb(255, 0, 0),  /* Red */
+    rgb(255, 255, 0), /* Yellow */
+    rgb(0, 255, 0),   /* Green */
+    rgb(0, 255, 255), /* Cyan */
+    rgb(0, 0, 255),   /* Blue */
+    rgb(255, 0, 255), /* Magenta */
+    rgb(255, 0, 0)    /* Red */
+    );
 }
 .crosshair
 {

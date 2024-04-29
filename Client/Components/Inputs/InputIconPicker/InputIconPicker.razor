@@ -4,7 +4,7 @@
 
 <InputWrapper Input="@this">
     <div class="input-icon-picker-wrapper">
-        @if (string.IsNullOrEmpty(Value) == false)
+        @if (string.IsNullOrEmpty(Value) == false && Value.StartsWith(':') == false)
         {
             @if (Value.StartsWith("data:"))
             {
@@ -53,7 +53,7 @@
         <div class="icon-picker-modal-footer">
             <button @onclick=@Upload>Upload</button>
             <div class="spacer"></div>
-            <button @onclick="() => DblClick(SelectedIcon)" disabled="@(SelectedIcon == null ? "disabled" : null)">Select</button>
+            <button @onclick="() => DblClick(SelectedIcon)" disabled="@string.IsNullOrEmpty(SelectedIcon)">Select</button>
             <button @onclick=@Cancel>Cancel</button>
         </div>
     </Footer>

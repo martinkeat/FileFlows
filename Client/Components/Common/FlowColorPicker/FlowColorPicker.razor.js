@@ -15,11 +15,15 @@ class FlowColorPicker
     visible = false;
     input;
     baseR = 0; baseG = 0; baseB = 0;
+    // Define the new gradient colors
     gradients = [
-        [204, 0, 0, 0], [153, 153, 0, 17],
-        [51, 204, 0, 33], [0, 204, 204, 50],
-        [0, 0, 204, 66], [204, 0, 204, 83],
-        [204, 0, 0, 100]
+        [255, 0, 0],   // Red
+        [255, 255, 0], // Yellow
+        [0, 255, 0],   // Green
+        [0, 255, 255], // Cyan
+        [0, 0, 255],   // Blue
+        [255, 0, 255], // Magenta
+        [255, 0, 0]    // Red (repeated for smooth transition)
     ];
 
     constructor(dotNetObject, uid, initialValue) {
@@ -53,11 +57,12 @@ class FlowColorPicker
                 this.close();
             });
         }
-        this.initSlider(picker, initialValue);
-        this.initArea(picker, initialValue);
+        this.initSlider(picker);
+        this.initArea(picker);
+        this.manualEntry();
     }
 
-    initArea(picker, initialValue) {
+    initArea(picker) {
         let crosshair = picker.querySelector('.crosshair');
 
         document.addEventListener('click', (event) => {
@@ -87,7 +92,7 @@ class FlowColorPicker
         });
     }
 
-    initSlider(picker, initialValue) {
+    initSlider(picker) {
         let sliderIndicator = picker.querySelector('.color-slider-bar-indicator');
         let colorSlider = picker.querySelector('.color-slider');
         colorSlider.addEventListener('click', (event) => {
@@ -117,34 +122,38 @@ class FlowColorPicker
         let percent = e.offsetY / 150.3;
         percent = Math.max(0, Math.min(1, percent));
 
-        let c1r = 0, c1g = 0, c1b = 0, c2r = 0, c2g = 0, c2b = 0, start = 0, end = 100;
-        for (let i = 0; i < this.gradients.length - 1; i++)
-        {
-            let g1 = this.gradients[i];
-            let g2 = this.gradients[i + 1];
-            if (percent * 100 > g2[3])
-                continue;
+        let gradientIndex = Math.floor(percent * (this.gradients.length - 1));
 
-            start = g1[3];
-            end = g2[3];
-            c1r = g1[0]; c1g = g1[1]; c1b = g1[2];
-            c2r = g2[0]; c2g = g2[1]; c2b = g2[2];
-            break;
+        let c1r = this.gradients[gradientIndex][0];
+        let c1g = this.gradients[gradientIndex][1];
+        let c1b = this.gradients[gradientIndex][2];
+
+        let c2r, c2g, c2b;
+        if (gradientIndex < this.gradients.length - 1) {
+            c2r = this.gradients[gradientIndex + 1][0];
+            c2g = this.gradients[gradientIndex + 1][1];
+            c2b = this.gradients[gradientIndex + 1][2];
+        } else {
+            c2r = this.gradients[gradientIndex][0];
+            c2g = this.gradients[gradientIndex][1];
+            c2b = this.gradients[gradientIndex][2];
         }
 
-        // say percent is .42
-        // start = 33, end is 50
-        // percent 0 == 33, 100 = 50, 50 = 41.5
-        let shifted = (percent * 100) - start; // 42 - 33 = 9
-        let newP = shifted / (end - start); // 9 / (50 - 33) == 0.529
+        let start = (gradientIndex / (this.gradients.length - 1)) * 100;
+        let end = ((gradientIndex + 1) / (this.gradients.length - 1)) * 100;
+
+        let shifted = (percent * 100) - start;
+        let newP = shifted / (end - start);
 
         this.baseR = this.adjustPercent(c1r, c2r, newP);
         this.baseG = this.adjustPercent(c1g, c2g, newP);
         this.baseB = this.adjustPercent(c1b, c2b, newP);
+
         this.BaseColor = this.rgbToString(this.baseR, this.baseG, this.baseB);
         this.colorPickerRgb.style.backgroundColor = this.BaseColor;
 
-        this.calculateColor();
+        if(!e.dontCalculateColor)
+            this.calculateColor();
     }
 
     calculateColor()
@@ -200,27 +209,102 @@ class FlowColorPicker
 
     manualEntry() {
         let v = this.input.value;
-        if(!v) return;
-        if(!/^#[a-fA-F0-9]{6}$/.test(v))
-            return; // not a valid color
+        if (!v) return;
+        if (!/^#[a-fA-F0-9]{6}$/.test(v)) return; // not a valid color
+
+        // Update the color picker with the entered color
         this.updateValue(v);
-        // make this color pure bright, to find it in the wheel
-        let r = parseInt(v.substring(1, 2), 16);
-        let g = parseInt(v.substring(3, 2), 16);
-        let b = parseInt(v.substring(5, 2), 16);
+
+        // Make the entered color pure bright to find it in the wheel
+        let r = parseInt(v.substring(1, 3), 16); // Extracting red value
+        let g = parseInt(v.substring(3, 5), 16); // Extracting green value
+        let b = parseInt(v.substring(5, 7), 16); // Extracting blue value
+
+        // Adjust the color to its pure bright form
         r = this.adjustPercent(255, r, 1);
         g = this.adjustPercent(255, g, 1);
         b = this.adjustPercent(255, b, 1);
         r = this.adjustPercent(0, r, 1);
         g = this.adjustPercent(0, g, 1);
         b = this.adjustPercent(0, b, 1);
-        let adjusted = this.rgbToString(r, g, b);
-        for(let i=0;i<this.gradients.length - 1;i++){
-            let g1 = this.gradients[i];
-            let g2 = this.gradients[i + 1];
-            let diffRed   = Math.abs(g1[0] - g2[0]);
-            let diffGreen = Math.abs(g1[1] - g2[1]);
-            let diffBlue  = Math.abs(g1[2] - g2[2]);
+
+
+        // Calculate the position of the slider based on the color
+        let selectedColorIndex = 0;
+        let minDistance = Infinity;
+        for (let i = 0; i < this.gradients.length; i++) {
+            let [gr, gg, gb] = this.gradients[i];
+            let distance = Math.abs(r - gr) + Math.abs(g - gg) + Math.abs(b - gb);
+            if (distance < minDistance) {
+                minDistance = distance;
+                selectedColorIndex = i;
+            }
         }
+
+        // Calculate the position of the slider based on the selected color index
+        let sliderPosition = (selectedColorIndex / (this.gradients.length - 1)) * 150.3; // Adjust as needed
+        
+        this.moveSlider({ offsetY: sliderPosition, dontCalculateColor: true});
+        this.currentValue = v;
+        
+        // Update the position of the slider
+        let sliderIndicator = this.picker.querySelector('.color-slider-bar-indicator');
+        sliderIndicator.style.top = sliderPosition + 'px';
+
+
+        // Calculate the position of the crosshair based on the green and blue values
+        let crosshairX = (g / 255) * 211.2; // 211.2 is the width of the color area
+        let crosshairY = (b / 255) * 147.1; // 147.1 is the height of the color area
+
+        // Update the position of the crosshair
+        let crosshair = this.picker.querySelector('.crosshair');
+        crosshair.style.left = (crosshairX + 5.5) + 'px'; // 5.5 is half the width of the crosshair
+        crosshair.style.top = (crosshairY + 6) + 'px'; // 6 is half the height of the crosshair
+
+    }
+
+    // Convert RGB to Lab
+    rgbToLab(r, g, b) {
+        // Convert RGB to XYZ
+        let x = 0.4124564 * r + 0.3575761 * g + 0.1804375 * b;
+        let y = 0.2126729 * r + 0.7151522 * g + 0.072175 * b;
+        let z = 0.0193339 * r + 0.119192 * g + 0.9503041 * b;
+    
+        // Normalize XYZ
+        x /= 95.047;
+        y /= 100;
+        z /= 108.883;
+    
+        // Convert XYZ to Lab
+        x = x > 0.008856 ? Math.pow(x, 1 / 3) : (7.787 * x) + (16 / 116);
+        y = y > 0.008856 ? Math.pow(y, 1 / 3) : (7.787 * y) + (16 / 116);
+        z = z > 0.008856 ? Math.pow(z, 1 / 3) : (7.787 * z) + (16 / 116);
+    
+        let L = (116 * y) - 16;
+        let a = 500 * (x - y);
+        let b2 = 200 * (y - z);
+    
+        return [L, a, b2];
+    }
+
+    rgbToHsl(r, g, b) {
+        r /= 255, g /= 255, b /= 255;
+        let max = Math.max(r, g, b), min = Math.min(r, g, b);
+        let h, s, l = (max + min) / 2;
+
+        if (max === min) {
+            h = s = 0; // achromatic
+        } else {
+            let d = max - min;
+            s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+            switch (max) {
+                case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+                case g: h = (b - r) / d + 2; break;
+                case b: h = (r - g) / d + 4; break;
+            }
+            h /= 6;
+        }
+
+        return [h, s, l];
     }
 }
