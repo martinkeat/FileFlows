@@ -159,6 +159,7 @@ public class LanguageHelper
             new () {English = "French",French = "fran\u00E7ais",German = "Franz\u00F6sisch",Iso2 = "fre",Iso1 = "fr", Aliases = new [] { "fra" }},
             new () {English = "French, Middle (ca.1400-1600)",French = "fran\u00E7ais moyen (1400-1600)",German = "Mittelfranz\u00F6sisch",Iso2 = "frm"},
             new () {English = "French, Old (842-ca.1400)",French = "fran\u00E7ais ancien (842-ca.1400)",German = "Altfranz\u00F6sisch",Iso2 = "fro"},
+            new () {English = "French (Canada)", French = "Français (Canada)", German = "Französisch (Kanada)", Iso2 = "fra-CA", Iso1 = "fr-CA"},
             new () {English = "Northern Frisian",French = "frison septentrional",German = "Nordfriesisch",Iso2 = "frr"},
             new () {English = "Eastern Frisian",French = "frison oriental",German = "Ostfriesisch",Iso2 = "frs"},
             new () {English = "Western Frisian",French = "frison occidental",German = "Friesisch",Iso2 = "fry",Iso1 = "fy"},
