@@ -1,0 +1,28 @@
+@namespace FileFlows.Client.Components.Common
+
+<span class="icon">
+    @if(string.IsNullOrWhiteSpace(Icon))
+    {
+        <i class="icon @DefaultIcon"></i>
+    }
+    else if (Icon.StartsWith("svg:"))
+    {
+        <img src="/icons/@(Icon[4..]).svg"/>
+    }
+    else if (Icon.StartsWith("data:"))
+    {
+        <img src="@Icon" />
+    }
+    else
+    {
+        var parts = Icon.Split(':');
+        if (parts.Length == 2)
+        {
+            <i class="icon @parts[0]" style="color:@parts[1]"></i>
+        }
+        else
+        {
+            <i class="icon @Icon"></i>
+        }
+    }
+</span>

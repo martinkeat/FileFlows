@@ -316,7 +316,8 @@
       "Tasks": "Tasks",
       "Webhooks": "Webhooks",
       "Log": "Log",
-      "PauseProcessing": "Pause Processing"
+      "PauseProcessing": "Pause Processing",
+      "DockerMods": "DockerMods"
     }
   },
   "ErrorMessages": {
@@ -520,6 +521,10 @@
     "DockerMod": {
       "Title": "DockerMod",
       "Plural": "DockerMods",
+      "Labels": {
+        "UpdateAvailable": "Update Available",
+        "Revision": "Revision"
+      },
       "Messages":
       {
         "Updating": "Updating"
@@ -1171,6 +1176,15 @@
     },
     "Notifications": {
       "Title": "Notifications"
+    },
+    "RepositoryObject": {
+      "Title": "Repository Object",
+      "Fields": {
+        "Author": "Author",
+        "Revision": "Revision",
+        "Description": "Description",
+        "Code": "Code"
+      }
     },
     "Task":{ 
       "Title":"Task",

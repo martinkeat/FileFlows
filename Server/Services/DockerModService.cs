@@ -21,6 +21,13 @@ public class DockerModService
     /// <returns>the DockerMod if found, otherwise null</returns>
     public Task<DockerMod?> GetByUid(Guid uid)
         => new DockerModManager().GetByUid(uid);
+    /// <summary>
+    /// Gets a DockerMod by its name
+    /// </summary>
+    /// <param name="name">the name of the DockerMod</param>
+    /// <returns>the DockerMod if found, otherwise null</returns>
+    public Task<DockerMod?> GetByName(string name)
+        => new DockerModManager().GetByName(name);
 
     /// <summary>
     /// Gets all DockerMods in the system
@@ -75,31 +82,74 @@ public class DockerModService
     /// <param name="auditDetails">The audit details</param>
     public async Task<Result<bool>> ImportFromRepository(string content, AuditDetails? auditDetails)
     {
-        // Serialize the DockerMod object to YAML
-        var match = Regex.Match(content, "(?s)# [-]{60,}(.*?)# [-]{60,}");
-        if (match?.Success != true)
-            return Result<bool>.Fail("Invalid script content");
-
-        var head = match.Value;
-        content = content.Replace(head, string.Empty).Trim();
+        var modResult = Parse(content);
+        if (modResult.Failed(out string error))
+            return Result<bool>.Fail(error);
         
-        string yaml = string.Join("\n", head.Split('\n').Where(x => x.StartsWith("# -----") == false)
-            .Select(x => x[2..]));
-        string code = content;
-        
-        // Deserialize YAML to DockerMod object
-        var deserializer = new DeserializerBuilder()
-            .WithNamingConvention(PascalCaseNamingConvention.Instance)
-            .Build();
+        var mod = modResult.Value;
 
-        var mod = deserializer.Deserialize<DockerMod>(yaml);
-        mod.Code = code;
-        mod.Repository = true;
+        var existing = await GetByName(mod.Name);
+        if (existing != null)
+        {
+            if(mod.Repository == false)
+                return Result<bool>.Fail("Cannot update non-repository DockerMod");
+            existing.Code = mod.Code;
+            existing.Revision = mod.Revision;
+            existing.Author = mod.Author;
+            existing.Description = mod.Description;
+            existing.Icon = mod.Icon;
+            mod = existing;
+        }
 
         var result = await Save(mod, auditDetails);
-        if (result.Failed(out string error))
+        if (result.Failed(out error))
             return Result<bool>.Fail(error);
 
         return true;
     }
+
+    /// <summary>
+    /// Parses the content of a DockerMod from the repository and returns the result
+    /// </summary>
+    /// <param name="content">the DockerMod repository content</param>
+    /// <returns>The DockerMod</returns>
+    public Result<DockerMod> Parse(string content)
+    {
+        try
+        {
+            var match = Regex.Match(content, "(?s)# [-]{60,}(.*?)# [-]{60,}");
+            if (match?.Success != true)
+                return Result<DockerMod>.Fail("Invalid DockerMod content");
+
+            var head = match.Value;
+            content = content.Replace(head, string.Empty).Trim();
+
+            var yaml = string.Join("\n", head.Split('\n').Where(x => x.StartsWith("# -----") == false)
+                .Select(x => x[2..]));
+            var code = content;
+
+            // Deserialize YAML to DockerMod object
+            var deserializer = new DeserializerBuilder()
+                .WithNamingConvention(PascalCaseNamingConvention.Instance)
+                .Build();
+
+            var mod = deserializer.Deserialize<DockerMod>(yaml);
+            mod.Code = code;
+            mod.Repository = true;
+            return mod;
+        }
+        catch (Exception ex)
+        {
+            return Result<DockerMod>.Fail(ex.Message);
+        }
+    }
+
+    /// <summary>
+    /// Deletes the given DockerMods
+    /// </summary>
+    /// <param name="uids">the UID of the DockerMods to delete</param>
+    /// <param name="auditDetails">the audit details</param>
+    /// <returns>a task to await</returns>
+    public Task Delete(Guid[] uids, AuditDetails auditDetails)
+        => new DockerModManager().Delete(uids, auditDetails);
 }

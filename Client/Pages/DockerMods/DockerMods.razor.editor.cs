@@ -16,7 +16,11 @@ public partial class DockerMods
         fields.Add(new ()
         {
             Name = nameof(item.Name),
-            InputType = FormInputType.Text
+            InputType = FormInputType.Text,
+            Parameters = new ()
+            {
+                { nameof(InputCode.ReadOnly), item.Repository}
+            }
         });
         fields.Add(new ()
         {
@@ -24,13 +28,18 @@ public partial class DockerMods
             InputType = FormInputType.TextArea,
             Parameters = new ()
             {
-                { nameof(InputTextArea.Rows), 3}
+                { nameof(InputTextArea.Rows), 3},
+                { nameof(InputCode.ReadOnly), item.Repository}
             }
         });
         fields.Add(new ()
         {
             Name = nameof(item.Icon),
-            InputType = FormInputType.IconPicker
+            InputType = FormInputType.IconPicker,
+            Parameters = new ()
+            {
+                { nameof(InputCode.ReadOnly), item.Repository}
+            }
         });
         fields.Add(new ()
         {
@@ -42,13 +51,15 @@ public partial class DockerMods
             InputType = FormInputType.Code,
             Parameters = new ()
             {
-                { nameof(InputCode.Language), "shell" }
+                { nameof(InputCode.Language), "shell" },
+                { nameof(InputCode.ReadOnly), item.Repository}
             }
         });
         
         var result = await Editor.Open(new()
         {
-            TypeName = "Pages.DockerMod", Title = "Pages.DockerMod.Title", Model = item, SaveCallback = Save, Fields = fields,
+            TypeName = "Pages.DockerMod", Title = "Pages.DockerMod.Title", Model = item,
+            SaveCallback = Save, ReadOnly = item.Repository, Fields = fields,
             HelpUrl = "https://fileflows.com/docs/webconsole/dockermods"
         });
         return true;

@@ -1,3 +1,4 @@
+using FileFlows.Client.ClientModels;
 using Microsoft.AspNetCore.Components;
 using FileFlows.Client.Components.Inputs;
 using FileFlows.Plugin;
@@ -57,11 +58,23 @@ public partial class RepositoryBrowser : ComponentBase
     /// Gets or sets if icons should be shown
     /// </summary>
     [Parameter] public bool Icons { get; set; }
+
+    /// <summary>
+    /// Gets or sets the icon to show in the title bar
+    /// </summary>
+    [Parameter] public string Icon { get; set; }
+
+    /// <summary>
+    /// Gets or sets the title
+    /// </summary>
+    [Parameter]
+    public string Title { get; set; }
     
     /// <inheritdoc />
     protected override void OnInitialized()
     {
         lblClose = Translater.Instant("Labels.Close");
+        lblTitle = Translater.TranslateIfNeeded(Title?.EmptyAsNull() ?? "Labels.Repository");
     }
 
     /// <summary>
@@ -178,33 +191,24 @@ public partial class RepositoryBrowser : ComponentBase
     /// <param name="item">the item</param>
     private async Task View(RepositoryObject item)
     {
-        await Editor.Open(new () { TypeName = "Pages.RepositoryObject", Title = item.Name, Fields = new List<ElementField>
+        Blocker.Show();
+        List<ElementField> fields;
+        object model;
+        try
         {
-            new ()
-            {
-                Name = nameof(item.Name),
-                InputType = FormInputType.TextLabel
-            },
-            new ()
-            {
-                Name = nameof(item.Author),
-                InputType = FormInputType.TextLabel
-            },
-            new ()
-            {
-                Name = nameof(item.Revision),
-                InputType = FormInputType.TextLabel
-            },
-            new ()
-            {
-                Name = nameof(item.Description),                    
-                InputType = FormInputType.TextLabel,
-                Parameters = new Dictionary<string, object>
-                {
-                    { nameof(InputTextLabel.Pre), true }
-                }
-            }
-        }, Model = item, ReadOnly= true});
+            var result = await HttpHelper.Post<FormFieldsModel>($"/api/repository/{Type}/fields", item);
+            if (result.Success == false)
+                return;
+            fields = result.Data.Fields;
+            model = result.Data.Model;
+        }
+        finally
+        {
+            Blocker.Hide();
+        }
+
+        await Editor.Open(new () { TypeName = "Pages.RepositoryObject", Title = item.Name, Fields = fields, 
+            Model = model, ReadOnly= true});
     }
 
 }

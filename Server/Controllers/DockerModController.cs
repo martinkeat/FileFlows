@@ -3,7 +3,6 @@ using FileFlows.Server.Authentication;
 using FileFlows.Server.Services;
 using FileFlows.Shared.Models;
 using Microsoft.AspNetCore.Mvc;
-using YamlDotNet.Serialization;
 
 namespace FileFlows.Server.Controllers;
 
@@ -19,8 +18,21 @@ public class DockerModController : BaseController
     /// </summary>
     /// <returns>a list of all DockerMods</returns>
     [HttpGet]
-    public async Task<IEnumerable<DockerMod>> GetAll() 
-        => (await ServiceLoader.Load<DockerModService>().GetAll()).OrderBy(x => x.Name.ToLowerInvariant());
+    public async Task<IEnumerable<DockerMod>> GetAll()
+    {
+        var items = (await ServiceLoader.Load<DockerModService>().GetAll())
+            .OrderBy(x => x.Name.ToLowerInvariant());
+        var repo = await ServiceLoader.Load<RepositoryService>().GetRepository();
+        foreach (var item in items)
+        {
+            if (item.Repository == false)
+                continue;
+            var ro = repo.DockerMods.FirstOrDefault(x => x.Name.Equals(item.Name, StringComparison.InvariantCultureIgnoreCase));
+            if (ro != null)
+                item.LatestRevision = ro.Revision;
+        }
+        return items;
+    }
 
     /// <summary>
     /// Saves a DockerMod
@@ -51,5 +63,35 @@ public class DockerModController : BaseController
         
         var data = Encoding.UTF8.GetBytes(mod.Value.Content);
         return File(data, "application/octet-stream", mod.Value.Name + ".sh");
+    }
+
+    /// <summary>
+    /// Delete DockerMods from the system
+    /// </summary>
+    /// <param name="model">A reference model containing UIDs to delete</param>
+    /// <returns>an awaited task</returns>
+    [HttpDelete]
+    public async Task Delete([FromBody] ReferenceModel<Guid> model)
+        => await ServiceLoader.Load<DockerModService>().Delete(model.Uids, await GetAuditDetails());
+    
+    /// <summary>
+    /// Set state of a DockerMod node
+    /// </summary>
+    /// <param name="uid">The UID of the DockerMod</param>
+    /// <param name="enable">Whether or not this DockerMod is enabled</param>
+    /// <returns>an awaited task</returns>
+    [HttpPut("state/{uid}")]
+    public async Task<IActionResult> SetState([FromRoute] Guid uid, [FromQuery] bool? enable)
+    {
+        var service = ServiceLoader.Load<DockerModService>();
+        var item = await service.GetByUid(uid);
+        if (item == null)
+            return BadRequest("DockerMod not found.");
+        if (enable != null && item.Enabled != enable.Value)
+        {
+            item.Enabled = enable.Value;
+            item = await service.Save(item, await GetAuditDetails());
+        }
+        return Ok(item);
     }
 }

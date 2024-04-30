@@ -12,11 +12,11 @@ class RepositoryService
 {
     private FileFlowsRepository repo;
     const string BASE_URL = "https://raw.githubusercontent.com/revenz/FileFlowsRepository/master/";
-
+    private DateTime lastFetched = DateTime.MinValue;
 
     public async Task Init()
     {
-        repo = await GetRepository();
+        await GetRepository();
     }
 
     /// <summary>
@@ -26,13 +26,17 @@ class RepositoryService
     /// <exception cref="Exception">If failed to load the repository</exception>
     internal async Task<FileFlowsRepository> GetRepository()
     {
+        if (repo != null && lastFetched > DateTime.UtcNow.AddMinutes(-5))
+                return repo;
         string url = BASE_URL + "repo.json?ts=" + DateTime.UtcNow.ToFileTimeUtc();
         try
         {
             var srResult = await HttpHelper.Get<FileFlowsRepository>(url);
             if (srResult.Success == false)
                 throw new Exception(srResult.Body);
-            return srResult.Data;
+            repo = srResult.Data;
+            lastFetched = DateTime.UtcNow;
+            return repo;
         }
         catch (Exception ex)
         {

@@ -26,6 +26,17 @@ public partial class DockerMods : ListPage<Guid, DockerMod>
     /// </summary>
     [Inject] protected IJSRuntime jsRuntime { get; set; }
 
+    /// <summary>
+    /// Translated strings
+    /// </summary>
+    private string lblUpdateAvailable, lblRevision;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        lblUpdateAvailable = Translater.Instant("Pages.DockerMod.Labels.UpdateAvailable");
+        lblRevision = Translater.Instant("Pages.DockerMod.Labels.Revision");
+    }
 
 
     Task Add()
@@ -64,7 +75,8 @@ public partial class DockerMods : ListPage<Guid, DockerMod>
         Data.Clear();
         try
         {
-            var result = await HttpHelper.Post($"{ApiUrl}/update", new ReferenceModel<Guid> { Uids = items });
+            await HttpHelper.Post($"/api/repository/DockerMod/update", new ReferenceModel<Guid> { Uids = items });
+            await Refresh();
         }
         finally
         {

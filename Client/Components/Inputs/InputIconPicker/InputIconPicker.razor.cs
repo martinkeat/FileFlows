@@ -26,10 +26,13 @@ public partial class InputIconPicker : Input<string>
     protected override void OnInitialized()
     {
         base.OnInitialized();
-        var parts = (Value ?? string.Empty).Split(':');
-        Icon = parts.FirstOrDefault();
-        IconColor = parts.Length > 1 ? parts[1] : string.Empty;
-        Color = IconColor;
+        if (Value?.StartsWith("data:") != true)
+        {
+            var parts = (Value ?? string.Empty).Split(':');
+            Icon = parts.FirstOrDefault();
+            IconColor = parts.Length > 1 ? parts[1] : string.Empty;
+            Color = IconColor;
+        }
     }
 
     /// <inheritdoc />
@@ -46,6 +49,8 @@ public partial class InputIconPicker : Input<string>
     /// </summary>
     async Task Choose()
     {
+        if (ReadOnly) return;
+    
         Filter = string.Empty;
         SelectedIcon = string.Empty;
         ModalOpened = true;

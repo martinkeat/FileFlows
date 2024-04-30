@@ -1,3 +1,4 @@
+using System.Net;
 using FileFlows.Plugin;
 using FileFlows.Server.Authentication;
 using FileFlows.Server.Services;
@@ -28,7 +29,9 @@ public class RepositoryController : BaseController
         {
             "dockermod" => repo.DockerMods,
             _ => new List<RepositoryObject>()
-        }).Where(x => x.MinimumVersion == null || new Version(Globals.Version) >= x.MinimumVersion);
+        }).Where(x => x.MinimumVersion == null || new Version(Globals.Version) >= x.MinimumVersion)
+        .OrderBy(x => x.Name.ToLowerInvariant())
+        .ToList();
         
         if (missing)
         {
@@ -42,7 +45,6 @@ public class RepositoryController : BaseController
         }
         return objects;
     }
-    
     
     /// <summary>
     /// Download script into the FileFlows system
@@ -89,6 +91,146 @@ public class RepositoryController : BaseController
         return Ok();
     }
     
+    /// <summary>
+    /// Gets the fields for a repository object
+    /// </summary>
+    /// <param name="type">the type of objects to download</param>
+    /// <param name="ro">A object to get the fields for</param>
+    /// <returns>The fields</returns>
+    [HttpPost("{type}/fields")]
+    public async Task<IActionResult> GetFields([FromRoute] string type, [FromBody] RepositoryObject ro)
+    {
+        if (ro == null)
+            return BadRequest("No object passed in"); // nothing to download
+        
+        var service = ServiceLoader.Load<RepositoryService>();
+        var result = await service.GetContent(ro.Path);
+        if (result.Failed(out string error))
+            return BadRequest(error);
+
+        switch (type.ToLowerInvariant())
+        {
+            case "dockermod":
+            {
+                if (CanAccess(UserRole.DockerMods) == false)
+                    throw new UnauthorizedAccessException();
+
+                var dmService = ServiceLoader.Load<DockerModService>();
+                var modResult = dmService.Parse(result.Value);
+                if (modResult.Failed(out error))
+                    return BadRequest(error);
+                var form = new FormFieldsModel()
+                {
+                    Model = modResult.Value,
+                    Fields = GetElementFields(modResult.Value.Code, "shell")
+                };
+                return Ok(form);
+            }
+            break;
+        }
+
+        return BadRequest("Invalid Type");
+
+        
+        List<ElementField> GetElementFields(string code = null, string language = null)
+        {
+            var fields = new List<ElementField>
+            {
+                new()
+                {
+                    Name = nameof(ro.Name),
+                    InputType = FormInputType.TextLabel
+                },
+                new()
+                {
+                    Name = nameof(ro.Author),
+                    InputType = FormInputType.TextLabel
+                },
+                new()
+                {
+                    Name = nameof(ro.Revision),
+                    InputType = FormInputType.TextLabel
+                },
+                new()
+                {
+                    Name = nameof(ro.Description),
+                    InputType = FormInputType.TextLabel,
+                    Parameters = new Dictionary<string, object>
+                    {
+                        { "Pre", true }
+                    }
+                }
+            };
+            if (string.IsNullOrWhiteSpace(code) == false)
+            {
+                fields.Add(
+                new()
+                {
+                    Name = "Code",
+                    InputType = FormInputType.Code,
+                    Parameters = new Dictionary<string, object>
+                    {
+                        { "Language", language }
+                    }
+                });
+            }
+
+            return fields;
+        }
+    }
+
+
+    /// <summary>
+    /// Updates the repository objects
+    /// </summary>
+    /// <param name="type">the type of objects to update</param>
+    /// <param name="model">The list of objects to update</param>
+    /// <returns>The result</returns>
+    [HttpPost("{type}/update")]
+    public async Task<IActionResult> GetFields([FromRoute] string type, [FromBody] ReferenceModel<Guid> model)
+    {
+        if (model?.Uids?.Any() == false)
+            return Ok(); // nothing to update
+
+        var service = ServiceLoader.Load<RepositoryService>();
+        var repo = await service.GetRepository();
+        List<RepositoryObject>? toUpdate = null;
+        Func<string, AuditDetails?, Task<Result<bool>>>? updater = null;
+        switch (type.ToLowerInvariant())
+        {
+            case "dockermod":
+                if (CanAccess(UserRole.DockerMods) == false)
+                    return Unauthorized();
+                var dmService = ServiceLoader.Load<DockerModService>();
+                toUpdate = (await dmService.GetAll()).Select(x =>
+                {
+                    if (x.Repository == false) return null;
+                    if (model.Uids.Contains(x.Uid) == false) 
+                        return null;
+                    var repoObject = repo.DockerMods.FirstOrDefault(y => y.Name.Equals(x.Name, StringComparison.InvariantCultureIgnoreCase));
+                    if (repoObject == null || repoObject.Revision <= x.Revision)
+                        return null;
+                    return repoObject;
+                }).Where(x => x != null).Select(x => x!).ToList();
+                updater = dmService.ImportFromRepository;
+                break;
+        }
+
+        if (toUpdate?.Any() != true || updater == null)
+            return Ok();
+
+        var auditDetails = await GetAuditDetails();
+        foreach (var ro in toUpdate)
+        {
+            var cResult = await service.GetContent(ro.Path);
+            if (cResult.IsFailed)
+                continue;
+            await updater(cResult.Value, auditDetails);
+        }
+
+        return Ok();
+    }
+
     /// <summary>
     /// Gets the scripts
     /// </summary>

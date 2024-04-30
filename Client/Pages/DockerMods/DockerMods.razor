@@ -36,31 +36,10 @@
                     </Header>
                     <Cell Context="item">
                         <div class="table-item">
-                            <span class="icon">
-                                @if(string.IsNullOrWhiteSpace(item.Icon))
-                                {
-                                    <i class="icon fab fa-docker"></i>
-                                }
-                                else if (item.Icon.StartsWith("svg:"))
-                                {
-                                    <img src="/icons/@(item.Icon[4..]).svg"/>
-                                }
-                                else
-                                {
-                                    var parts = item.Icon.Split(':');
-                                    if (parts.Length == 2)
-                                    {
-                                        <i class="icon @parts[0]" style="color:@parts[1]"></i>
-                                    }
-                                    else
-                                    {
-                                        <i class="icon @item.Icon"></i>
-                                    }
-                                }
-                            </span>
+                            <TableItemIcon Icon="@item.Icon" DefaultIcon="fab fa-docker" />
                             <div class="center">
                                 <span class="name"><span>@item.Name</span></span>
-                                <span>@item.Description</span>
+                                <span class="description">@item.Description</span>
                                 <div class="info">
                                     @if (item.LatestRevision > item.Revision)
                                     {
@@ -70,8 +49,15 @@
                                 </div>
                             </div>
                             <div class="right">
-                                <span class="top-right @(item.LatestRevision > item.Revision ? "warning" :"")">@item.Revision</span>
-                                <FlowSwitch Value="@item.Enabled" ValueChanged="@(args => { item.Enabled = args; _ = Enable(args, item); })"  />
+                                @if (item.LatestRevision > item.Revision)
+                                {
+                                    <span class="top-right warning">@lblUpdateAvailable</span>
+                                }
+                                else
+                                {
+                                    <span class="top-right">@lblRevision: @item.Revision</span>
+                                }
+                                <FlowSwitch Value="@item.Enabled" ValueChanged="@(args => { item.Enabled = args; _ = Enable(args, item); })"/>
                             </div>
                         </div>
                             
@@ -83,4 +69,4 @@
 
 </PageView>
 
-<RepositoryBrowser @ref="Browser" Type="DockerMod" Icons="true"  />
+<RepositoryBrowser @ref="Browser" Type="DockerMod" Icons="true" Icon="fab fa-docker" />
