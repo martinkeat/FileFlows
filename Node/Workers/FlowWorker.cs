@@ -26,11 +26,6 @@ public class FlowWorker : Worker
     public readonly Guid Uid = Guid.NewGuid();
 
     private readonly string _configKeyDefault = Guid.NewGuid().ToString();
-
-    /// <summary>
-    /// A collection of executed docker mods
-    /// </summary>
-    private Dictionary<Guid, int> ExecutedDockerMods = new();
     
     /// <summary>
     /// Gets if the config encryption key 
@@ -757,43 +752,7 @@ public class FlowWorker : Worker
         
         foreach (var mod in mods)
         {
-            var file = Path.Combine(directory, mod.Name + ".sh");
-            try
-            {
-                File.WriteAllText(file, mod.Code);
-                
-                // Set execute permission for the file
-                Process.Start("chmod", $"+x {file}").WaitForExit();
-
-                if (ExecutedDockerMods.ContainsKey(mod.Uid) && ExecutedDockerMods[mod.Uid] == mod.Revision)
-                    continue; // already executed
-                
-                // Run the file and capture output to string
-                var process = Process.Start(new ProcessStartInfo
-                {
-                    FileName = file,
-                    RedirectStandardOutput = true,
-                    UseShellExecute = false
-                });
-                if (process != null)
-                {
-                    var output = process.StandardOutput.ReadToEnd();
-                    process.WaitForExit();
-                    
-                    var totalLength = 120;
-                    var modNameLength = mod.Name.Length;
-                    var sideLength = (totalLength - modNameLength - 14) / 2; // Subtracting 14 for the length of " Docker Mod: "
-                    var header = new string('-', sideLength) + " Docker Mod: " + mod.Name + new string('-', sideLength + (modNameLength % 2));
-                    Logger.Instance.ILog("\n" + header + "\n" + output + "\n" +
-                                         new string('-', totalLength));
-                    
-                    ExecutedDockerMods[mod.Uid] = mod.Revision;
-                }
-            }
-            catch (Exception ex)
-            {
-                Logger.Instance.WLog("Failed Running DockerMod: " + ex.Message);
-            }
+            DockerModHelper.Execute(mod);
         }
     }
 

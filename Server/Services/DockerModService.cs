@@ -1,4 +1,3 @@
-using System.Text;
 using System.Text.RegularExpressions;
 using FileFlows.Managers;
 using FileFlows.Plugin;
@@ -21,6 +20,7 @@ public class DockerModService
     /// <returns>the DockerMod if found, otherwise null</returns>
     public Task<DockerMod?> GetByUid(Guid uid)
         => new DockerModManager().GetByUid(uid);
+    
     /// <summary>
     /// Gets a DockerMod by its name
     /// </summary>
@@ -49,9 +49,9 @@ public class DockerModService
         if (Globals.IsDocker && result.Success(out DockerMod updated))
         {
             if(updated.Enabled)
-                WriteDockerMod(updated);
+                DockerModHelper.Execute(updated);
             else
-                DeleteDockerModFromDisk(updated);
+                DockerModHelper.DeleteFromDisk(updated);
         }
         return result;
     }
@@ -201,16 +201,5 @@ public class DockerModService
         {
             Logger.Instance.WLog($"Failed writing DockerMod '{mod.Name}': {ex.Message}");
         }
-    }
-
-    /// <summary>
-    /// Deletes a DockerMod from disk
-    /// </summary>
-    /// <param name="mod">the DockerMod to delete</param>
-    private void DeleteDockerModFromDisk(DockerMod mod)
-    {
-        var file = Path.Combine(DirectoryHelper.DockerModsDirectory, mod.Name + ".sh");
-        if(File.Exists(file))
-            File.Delete(file);
     }
 }
