@@ -67,7 +67,7 @@ public class DataConverter : JsonConverter<FileFlowObject>
 
                 var encrypted = prop.GetCustomAttribute<EncryptedAttribute>();
                 if (encrypted != null)
-                    propValue = Decrypter.Encrypt(propValue as string);
+                    propValue = Decrypter.Encrypt(propValue as string ?? string.Empty);
 
                 writer.WritePropertyName(prop.Name);
                 JsonSerializer.Serialize(writer, propValue, prop.PropertyType, options);
@@ -111,7 +111,7 @@ public class DataConverter<T> : JsonConverter<T>
     /// <param name="options">The <see cref="JsonSerializerOptions"/> being used.</param>
     public override void Write(Utf8JsonWriter writer, T value, JsonSerializerOptions options)
     {
-        var properties = value.GetType().GetProperties();
+        var properties = value!.GetType().GetProperties();
 
         writer.WriteStartObject();
 
@@ -131,7 +131,7 @@ public class DataConverter<T> : JsonConverter<T>
 
             var encrypted = prop.GetCustomAttribute<EncryptedAttribute>();
             if (encrypted != null)
-                propValue = Helpers.Decrypter.Encrypt(propValue as string);
+                propValue = Helpers.Decrypter.Encrypt(propValue as string ?? string.Empty);
 
             writer.WritePropertyName(prop.Name);
             JsonSerializer.Serialize(writer, propValue, prop.PropertyType, options);

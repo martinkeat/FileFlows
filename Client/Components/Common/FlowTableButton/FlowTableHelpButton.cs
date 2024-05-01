@@ -20,7 +20,7 @@ namespace FileFlows.Client.Components.Common
             this._Label = Translater.Instant("Labels.Help");
         }
 
-        public override async Task OnClick()
+        public override Task OnClick()
         {
             string url = this.HelpUrl;            
             if (string.IsNullOrEmpty(HelpUrl))
@@ -29,6 +29,7 @@ namespace FileFlows.Client.Components.Common
                 url = "https://fileflows.com/docs/webconsole/" + url;
 
             App.Instance.OpenHelp(url.ToLowerInvariant());
+            return Task.CompletedTask;
         }
     }
 }

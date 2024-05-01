@@ -8,18 +8,7 @@ namespace FileFlows.DataLayer.Helpers;
 /// Provides functionality to convert enumerable objects to a string representation highlighting additions and deletions.
 /// </summary>
 public class EnumerableConverter : IAuditValueConverter
-{
-    private readonly Type objectType;
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="EnumerableConverter"/> class with the specified object type.
-    /// </summary>
-    /// <param name="objectType">The type of the object.</param>
-    public EnumerableConverter(Type objectType)
-    {
-        this.objectType = objectType;
-    }
-
+{ 
     /// <summary>
     /// Determines whether the specified type can be converted by this converter.
     /// </summary>
@@ -28,7 +17,7 @@ public class EnumerableConverter : IAuditValueConverter
     public static bool CanConvert(Type type) => typeof(IEnumerable).IsAssignableFrom(type);
 
     /// <inheritdoc/>
-    public string? Convert(object newValue, object oldValue)
+    public string Convert(object? newValue, object? oldValue)
     {
         var oldList = GetValues(oldValue);
         var newList = GetValues(newValue);
@@ -36,7 +25,7 @@ public class EnumerableConverter : IAuditValueConverter
         var additions = newList.Except(oldList, new ValueComparer()).Select(item => $"+ {item}").ToList();
         var deletions = oldList.Except(newList, new ValueComparer()).Select(item => $"- {item}").ToList();
 
-        List<string> diff = new List<string>();
+        List<string> diff = new ();
         diff.AddRange(additions);
         diff.AddRange(deletions);
 
@@ -48,7 +37,7 @@ public class EnumerableConverter : IAuditValueConverter
     /// </summary>
     /// <param name="obj">The object from which to retrieve values.</param>
     /// <returns>A list of values contained in the object.</returns>
-    private List<object> GetValues(object obj)
+    private List<object> GetValues(object? obj)
     {
         if (obj == null)
             return new List<object>();
@@ -77,7 +66,7 @@ public class EnumerableConverter : IAuditValueConverter
 public class ValueComparer : IEqualityComparer<object>
 {
     /// <inheritdoc/>
-    public new bool Equals(object x, object y)
+    public new bool Equals(object? x, object? y)
     {
         if (x == y)
             return true;

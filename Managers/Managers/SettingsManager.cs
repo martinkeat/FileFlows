@@ -9,7 +9,7 @@ public class SettingsManager
 {
     private static FairSemaphore _semaphore = new(1);
     // Special case, we always cache the settings, as it is constantly looked up
-    private static Settings Instance;
+    private static Settings? Instance;
 
     static SettingsManager()
     {
@@ -35,14 +35,14 @@ public class SettingsManager
     /// Gets the system settings
     /// </summary>
     /// <returns>the system settings</returns>
-    public Task<Settings> Get() => Task.FromResult(Instance);
+    public Task<Settings> Get() => Task.FromResult(Instance)!;
 
     /// <summary>
     /// Gets the current configuration revision number
     /// </summary>
     /// <returns>the current configuration revision number</returns>
     public Task<int> GetCurrentConfigurationRevision()
-        => Task.FromResult(Instance.Revision);
+        => Task.FromResult(Instance!.Revision);
     
     /// <summary>
     /// Increments the revision
@@ -52,7 +52,7 @@ public class SettingsManager
         await _semaphore.WaitAsync();
         try
         {
-            Instance.Revision += 1;
+            Instance!.Revision += 1;
             await DatabaseAccessManager.Instance.FileFlowsObjectManager.AddOrUpdateObject(Instance, null);
         }
         catch (Exception ex)
@@ -75,7 +75,7 @@ public class SettingsManager
         await _semaphore.WaitAsync();
         try
         {
-            model.Revision = Math.Max(model.Revision, Instance.Revision) +  1;
+            model.Revision = Math.Max(model.Revision, Instance!.Revision) +  1;
             Instance = model;
             await DatabaseAccessManager.Instance.FileFlowsObjectManager.AddOrUpdateObject(Instance, auditDetails);
         }

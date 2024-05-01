@@ -525,7 +525,7 @@ public class Upgrade_24_03_2
         /// <summary>
         /// Gets or sets the Name
         /// </summary>
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
         /// <summary>
         /// Gets or sets the type
         /// </summary>
@@ -533,7 +533,7 @@ public class Upgrade_24_03_2
         /// <summary>
         /// Gets or sets the data
         /// </summary>
-        public string Data { get; set; }
+        public string Data { get; set; } = string.Empty;
     }
     
     /// <summary>
@@ -549,7 +549,7 @@ public class Upgrade_24_03_2
         /// <summary>
         /// Gets or sets the type of object
         /// </summary>
-        public string Type { get; set; }
+        public string Type { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the date and time when the object was created.
@@ -576,7 +576,7 @@ public class Upgrade_24_03_2
         /// <summary>
         /// Gets or sets the name of the file
         /// </summary>
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the date and time when the file was created.
@@ -591,7 +591,7 @@ public class Upgrade_24_03_2
         /// <summary>
         /// Gets or sets the relative path
         /// </summary>
-        public string RelativePath { get; set; }
+        public string RelativePath { get; set; } = string.Empty;
         
         /// <summary>
         /// Gets or sets the status
@@ -606,12 +606,12 @@ public class Upgrade_24_03_2
         /// <summary>
         /// Gets or sets the Fingerprint
         /// </summary>
-        public string Fingerprint { get; set; }
+        public string Fingerprint { get; set; } = string.Empty;
         
         /// <summary>
         /// Gets or sets the final Fingerprint
         /// </summary>
-        public string FinalFingerprint { get; set; }
+        public string FinalFingerprint { get; set; } = string.Empty;
         
         /// <summary>
         /// Gets or sets if its a directory
@@ -666,52 +666,52 @@ public class Upgrade_24_03_2
         /// <summary>
         /// Gets or sets the library name
         /// </summary>
-        public string LibraryName { get; set; }
+        public string LibraryName { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the flow uid
         /// </summary>
-        public string FlowUid { get; set; }
+        public string FlowUid { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the flow name
         /// </summary>
-        public string FlowName { get; set; }
+        public string FlowName { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the duplicate uid
         /// </summary>
-        public string DuplicateUid { get; set; }
+        public string DuplicateUid { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the duplicate name
         /// </summary>
-        public string DuplicateName { get; set; }
+        public string DuplicateName { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the node uid
         /// </summary>
-        public string NodeUid { get; set; }
+        public string NodeUid { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the node name
         /// </summary>
-        public string NodeName { get; set; }
+        public string NodeName { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the worker uid
         /// </summary>
-        public string WorkerUid { get; set; }
+        public string WorkerUid { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the output path
         /// </summary>
-        public string OutputPath { get; set; }
+        public string OutputPath { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the failure reason
         /// </summary>
-        public string FailureReason { get; set; }
+        public string FailureReason { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets if the file no longer exists after processing
@@ -721,22 +721,22 @@ public class Upgrade_24_03_2
         /// <summary>
         /// Gets or sets the original metadata
         /// </summary>
-        public string OriginalMetadata { get; set; }
+        public string OriginalMetadata { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the final metadata
         /// </summary>
-        public string FinalMetadata { get; set; }
+        public string FinalMetadata { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the executed nodes
         /// </summary>
-        public string ExecutedNodes { get; set; }
+        public string ExecutedNodes { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the node to process this file on
         /// </summary>
-        public string ProcessOnNodeUid { get; set; }
+        public string ProcessOnNodeUid { get; set; } = string.Empty;
     }
     
     
@@ -753,7 +753,7 @@ public class Upgrade_24_03_2
         /// <summary>
         /// Gets or sets the name of the statistic
         /// </summary>
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the type
@@ -763,7 +763,7 @@ public class Upgrade_24_03_2
         /// <summary>
         /// Gets or sets the string value
         /// </summary>
-        public string StringValue { get; set; }
+        public string StringValue { get; set; } = string.Empty;
     
         /// <summary>
         /// Gets or sets the number value

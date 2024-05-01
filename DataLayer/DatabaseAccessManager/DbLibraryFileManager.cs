@@ -28,14 +28,6 @@ internal class DbLibraryFileManager : BaseManager
         : base(logger, dbType, dbConnector)
     {
     }
-
-    /// <summary>
-    /// Wraps a field name
-    /// </summary>
-    /// <param name="name">the name to wrap</param>
-    /// <returns>the wrapped field name</returns>
-    private string Wrap(string name)
-        => DbConnector.WrapFieldName(name);
     
     /// <summary>
     /// Converts a datetime to a string for the database
@@ -171,7 +163,7 @@ internal class DbLibraryFileManager : BaseManager
     /// <param name="files">the files to insert</param>
     public async Task InsertBulk(LibraryFile[] files)
     {
-        string sql = null;
+        string? sql = null;
         try
         {
             using var db = await DbConnector.GetDb(write: true);
@@ -378,7 +370,7 @@ internal class DbLibraryFileManager : BaseManager
     /// <param name="uids">the UIDs of the files to remove</param>
     public async Task Delete(params Guid[] uids)
     {
-        if (uids?.Any() == false)
+        if (uids?.Any() != true)
             return;
         
         string inStr = string.Join(",", uids.Select(x => $"'{x}'"));
@@ -395,7 +387,7 @@ internal class DbLibraryFileManager : BaseManager
     /// <param name="libraryUids">the UIDs of the libraries to remove</param>
     public async Task DeleteByLibrary(params Guid[] libraryUids)
     {
-        if (libraryUids?.Any() == false)
+        if (libraryUids?.Any() != true)
             return;   
         string inStr = string.Join(",", libraryUids.Select(x => $"'{x}'"));
         string sql = $"delete from  {Wrap(nameof(LibraryFile))} " +
@@ -632,7 +624,7 @@ internal class DbLibraryFileManager : BaseManager
     /// <param name="status">the status of the call</param>
     /// <param name="file">the library file to process</param>
     /// <returns>the next library file result</returns>
-    private NextLibraryFileResult NextFileResult(NextLibraryFileStatus? status = null, LibraryFile file = null)
+    private NextLibraryFileResult NextFileResult(NextLibraryFileStatus? status = null, LibraryFile? file = null)
     {
         NextLibraryFileResult result = new();
         if (status != null)

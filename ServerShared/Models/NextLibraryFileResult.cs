@@ -11,7 +11,7 @@ public class NextLibraryFileResult
     /// <summary>
     /// Gets or sets the library file to process
     /// </summary>
-    public LibraryFile File { get; set; }
+    public LibraryFile? File { get; set; }
 
     /// <summary>
     /// Gets or sets the status of the call

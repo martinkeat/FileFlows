@@ -25,9 +25,11 @@ public class WebhookController : Controller
     {
         if(LicenseHelper.IsLicensed(LicenseFlags.Webhooks) == false)
             return new List<Webhook>();
-        return (await new ScriptController().GetAllByType(ScriptType.Webhook))
-            .Select(x => FromScript(x))
-            .Where(x => x != null);
+        var all = await new ScriptController().GetAllByType(ScriptType.Webhook);
+        var results = all.Select(x => FromScript(x))
+            .Where(x => x != null)
+            .Select(x => x!).ToList();
+        return results;
     }
 
     /// <summary>

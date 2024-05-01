@@ -15,8 +15,8 @@ public class EncryptedValueConverter : IAuditValueConverter
     /// <inheritdoc />
     public string? Convert(object? newValue, object? oldValue)
     {
-        string strNew = newValue as string;
-        string strOld = oldValue as string;
+        var strNew = newValue as string;
+        var strOld = oldValue as string;
         if (strNew == null && strOld == null)
             return null;
         if (strNew == strOld)

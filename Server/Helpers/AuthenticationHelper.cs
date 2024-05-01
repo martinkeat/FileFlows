@@ -34,6 +34,7 @@ public class AuthenticationHelper
     /// </summary>
     /// <param name="user">the user</param>
     /// <param name="ipAddress">the IP Address of the user</param>
+    /// <param name="expiryMinutes">the number of minutes until his token expires</param>
     /// <returns>the JWT token</returns>
     public static string CreateJwtToken(User user, string ipAddress, int expiryMinutes)
     {

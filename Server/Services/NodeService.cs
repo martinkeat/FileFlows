@@ -51,15 +51,6 @@ public class NodeService //: INodeService
         }
     }
 
-    //
-    // /// <summary>
-    // /// Clears all workers on the node.
-    // /// This is called when a node first starts up, if a node crashed when workers were running this will reset them
-    // /// </summary>
-    // /// <param name="nodeUid">The UID of the node</param>
-    // /// <returns>a completed task</returns>
-    // public Task ClearWorkersAsync(Guid nodeUid) => new WorkerController(null).Clear(nodeUid);
-
     /// <inheritdoc />
     public Task<ProcessingNode> Register(string serverUrl, string address, string tempPath, List<RegisterModelMapping> mappings)
     {
@@ -92,7 +83,7 @@ public class NodeService //: INodeService
 #if (DEBUG)
             TempPath = windows ? @"d:\videos\temp" : Path.Combine(DirectoryHelper.BaseDirectory, "Temp"),
 #else
-            TempPath = DirectoryHelper.IsDocker ? "/temp" : Path.Combine(DirectoryHelper.BaseDirectory, "Temp"),
+            TempPath = Globals.IsDocker ? "/temp" : Path.Combine(DirectoryHelper.BaseDirectory, "Temp"),
 #endif
         }, auditDetails: AuditDetails.ForServer());
         node.SignalrUrl = "flow";

@@ -182,8 +182,12 @@ class RepositoryService
     internal async Task UpdateScripts()
     {
         var files = Directory.GetFiles(DirectoryHelper.ScriptsDirectory, "*.js", SearchOption.AllDirectories);
-        List<string> knownPaths = repo.FlowScripts.Union(repo.FunctionScripts).Union(repo.SharedScripts)
-            .Union(repo.SystemScripts).Where(x => new Version(Globals.Version) >= x.MinimumVersion).Select(x => x.Path).ToList();
+        var knownPaths = repo.FlowScripts.Union(repo.FunctionScripts).Union(repo.SharedScripts)
+            .Union(repo.SystemScripts).Where(x => new Version(Globals.Version) >= x.MinimumVersion)
+            .Select(x => x.Path)
+            .Where(x => x != null)
+            .Select(x => x!)
+            .ToList();
         await UpdateObjects(files, knownPaths);
     }
     
@@ -195,7 +199,10 @@ class RepositoryService
     internal async Task UpdateTemplates()
     {
         var files = Directory.GetFiles(DirectoryHelper.TemplateDirectory, "*.json", SearchOption.AllDirectories);
-        List<string> knownPaths = repo.LibraryTemplates.Union(repo.FlowTemplates).Where(x => new Version(Globals.Version) >= x.MinimumVersion).Select(x => x.Path).ToList();
+        var knownPaths = repo.LibraryTemplates.Union(repo.FlowTemplates)
+            .Where(x => new Version(Globals.Version) >= x.MinimumVersion && x.Path != null)
+            .Select(x => x.Path!)
+            .ToList();
         await UpdateObjects(files, knownPaths);
     }
 

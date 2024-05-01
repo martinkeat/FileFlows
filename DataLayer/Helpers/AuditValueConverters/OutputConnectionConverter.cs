@@ -28,9 +28,9 @@ public class OutputConnectionConverter : IAuditValueConverter
     /// <inheritdoc />
     public string? Convert(object? newValue, object? oldValue)
     {
-        List<FlowConnection>? newConnections = newValue as List<FlowConnection>;
-        List<FlowConnection>? oldConnections = oldValue as List<FlowConnection>;
-        if (newConnections?.Any() != true && oldConnections?.Any() != true)
+        List<FlowConnection>? newConnections = newValue as List<FlowConnection> ?? new ();
+        List<FlowConnection>? oldConnections = oldValue as List<FlowConnection> ?? new ();
+        if (newConnections.Any() != true && oldConnections.Any() != true)
             return null;
 
         Dictionary<Guid, string> partDict = new();
@@ -65,7 +65,7 @@ public class OutputConnectionConverter : IAuditValueConverter
             diff.Add((connection.Output, 2, $"Output {connection.Output}: '{GetPartName(connection.InputNode)}' removed"));
         foreach (var connection in changes)
         {
-            var oldConnection = oldConnections.FirstOrDefault(x => x.Output == connection.Output);
+            var oldConnection = oldConnections!.FirstOrDefault(x => x.Output == connection.Output);
             if(oldConnection != null) // shouldn't happen
                 diff.Add((connection.Output, 3, $"Output {connection.Output}: '{GetPartName(oldConnection.InputNode)}' to '{GetPartName(connection.InputNode)}'"));
         }

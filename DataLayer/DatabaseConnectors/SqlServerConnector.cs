@@ -3,6 +3,7 @@ using FileFlows.DataLayer.Converters;
 using FileFlows.Plugin;
 using Microsoft.Data.SqlClient;
 using NPoco;
+using NPoco.DatabaseTypes;
 using DatabaseType = FileFlows.Shared.Models.DatabaseType;
 using MySqlConnectorFactory = MySqlConnector.MySqlConnectorFactory;
 
@@ -61,7 +62,7 @@ public class SqlServerConnector : IDatabaseConnector
     /// <returns>the new connection</returns>
     private DatabaseConnection CreateConnection()
     {
-        var db = new Database(ConnectionString, null, SqlClientFactory.Instance);
+        var db = new Database(ConnectionString, new SqlServerDatabaseType(), SqlClientFactory.Instance);
         db.Mappers = new()
         {
             GuidNullableConverter.UseInstance(),

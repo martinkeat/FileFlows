@@ -7,6 +7,11 @@ using FileFlows.Client.Helpers;
 
 namespace FileFlows.Client.Pages;
 
+/// <summary>
+/// List Page
+/// </summary>
+/// <typeparam name="U">The type of Unique Identifier</typeparam>
+/// <typeparam name="T">The type bound in the list</typeparam>
 public abstract class ListPage<U, T> : ComponentBase where T : IUniqueObject<U>
 {
     /// <summary>
@@ -17,15 +22,36 @@ public abstract class ListPage<U, T> : ComponentBase where T : IUniqueObject<U>
     /// Gets or sets the table instance
     /// </summary>
     protected FlowTable<T> Table { get; set; }
+    /// <summary>
+    /// Gets or sets the blocker
+    /// </summary>
     [CascadingParameter] public Blocker Blocker { get; set; }
+    /// <summary>
+    /// Gets or sets the editor
+    /// </summary>
     [CascadingParameter] public Editor Editor { get; set; }
+    /// <summary>
+    /// Translations
+    /// </summary>
     public string lblAdd, lblEdit, lblDelete, lblDeleting, lblRefresh;
     
 
+    /// <summary>
+    /// Gets the API URL for the list
+    /// </summary>
     public abstract string ApiUrl { get; }
-    private bool _needsRendering = false;
+    /// <summary>
+    /// If this component needs rendering
+    /// </summary>
+    private bool _needsRendering;
 
+    /// <summary>
+    /// Gets or sets if the list has loaded
+    /// </summary>
     protected bool Loaded { get; set; }
+    /// <summary>
+    /// Gets or sets if there is data
+    /// </summary>
     protected bool HasData { get; set; }
 
     /// <summary>
@@ -38,14 +64,15 @@ public abstract class ListPage<U, T> : ComponentBase where T : IUniqueObject<U>
     /// </summary>
     protected Profile Profile { get; private set; }
 
-    public List<T> _Data = new List<T>();
+    private List<T> _Data = new ();
+    
+    /// <summary>
+    /// Gets the data
+    /// </summary>
     public List<T> Data
     {
         get => _Data;
-        set
-        {
-            _Data = value ?? new List<T>();
-        }
+        set => _Data = value ?? new ();
     }
 
     protected override async Task OnInitializedAsync()
@@ -163,7 +190,7 @@ public abstract class ListPage<U, T> : ComponentBase where T : IUniqueObject<U>
 
     public async Task Edit()
     {
-        var items = Table?.GetSelected();
+        var items = Table?.GetSelected()?.ToList();
         if (items?.Any() != true)
             return;
         var selected = items.First();
@@ -176,7 +203,13 @@ public abstract class ListPage<U, T> : ComponentBase where T : IUniqueObject<U>
 
     public abstract Task<bool> Edit(T item);
 
-    public void ShowEditHttpError<U>(RequestResult<U> result, string defaultMessage = "ErrorMessage.NotFound")
+    /// <summary>
+    /// Shows an error in a toast
+    /// </summary>
+    /// <param name="result">The result with the error</param>
+    /// <param name="defaultMessage">the default message</param>
+    /// <typeparam name="V">The type of RequestResult</typeparam>
+    public void ShowEditHttpError<V>(RequestResult<V> result, string defaultMessage = "ErrorMessage.NotFound")
     {
         Toast.ShowError(
             result.Success || string.IsNullOrEmpty(result.Body) ? Translater.Instant(defaultMessage) : Translater.TranslateIfNeeded(result.Body),
@@ -253,13 +286,13 @@ public abstract class ListPage<U, T> : ComponentBase where T : IUniqueObject<U>
 
     protected async Task Revisions()
     {
-        var items = Table.GetSelected();
+        var items = Table.GetSelected()?.ToList();
         if (items?.Any() != true)
             return;
         var selected = items.First();
         if (selected == null)
             return;
-        Guid guid = Guid.Empty;
+        Guid guid;
         if (selected is RevisionedObject ro)
             guid = ro.RevisionUid;
         else if (selected.Uid is Guid sGuid)

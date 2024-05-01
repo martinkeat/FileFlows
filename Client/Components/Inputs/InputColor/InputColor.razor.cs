@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.JSInterop;
 
@@ -9,10 +8,6 @@ namespace FileFlows.Client.Components.Inputs;
 /// </summary>
 public partial class InputColor : Input<string>
 {
-    /// <summary>
-    /// Gets or sets the javascript runtime
-    /// </summary>
-    [Inject] private IJSRuntime jsRuntime { get; set; }
     /// <inheritdoc />
     public override bool Focus() => FocusUid();
 

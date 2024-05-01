@@ -22,8 +22,6 @@ public class MainWindow : Window
     readonly NativeMenu menu = new();
     internal static MainWindow? Instance;
 
-    public Grid TitleBar;
-
     public MainWindow()
     {
         Instance = this;

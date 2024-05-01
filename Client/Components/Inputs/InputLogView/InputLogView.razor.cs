@@ -49,8 +49,10 @@ namespace FileFlows.Client.Components.Inputs
             }
         }
 
-        public void Dispose()
+        /// <inheritdoc />
+        public virtual void Dispose()
         {
+            base.Dispose();
             if (this.RefreshTimer != null)
             {
                 this.RefreshTimer.Stop();

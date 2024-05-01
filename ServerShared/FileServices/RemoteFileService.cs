@@ -28,7 +28,6 @@ public class RemoteFileService : IFileService
     private readonly string serverUrl;
     private readonly string tempPath;
     private readonly ILogger logger;
-    private static HttpClient _Client;
     private readonly LocalFileService _localFileService;
     /// <summary>
     /// The access  token

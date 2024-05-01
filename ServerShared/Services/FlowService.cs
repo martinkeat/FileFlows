@@ -13,7 +13,7 @@ public interface IFlowService
     /// </summary>
     /// <param name="uid">The UID of the flow</param>
     /// <returns>An instance of the flow if found, otherwise null</returns>
-    Task<Flow> GetByUidAsync(Guid uid);
+    Task<Flow?> GetByUidAsync(Guid uid);
     
     /// <summary>
     /// Gets the Failure Flow for a specific library

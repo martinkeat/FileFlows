@@ -3,6 +3,7 @@ using FileFlows.DataLayer.Helpers;
 using FileFlows.Plugin;
 using Microsoft.Data.SqlClient;
 using NPoco;
+using NPoco.DatabaseTypes;
 
 namespace FileFlows.DataLayer.DatabaseCreators;
 
@@ -39,7 +40,7 @@ public class SqlServerDatabaseCreator : IDatabaseCreator
             connString = connString[1..];
         string dbName = GetDatabaseName(ConnectionString);
         
-        using var db = new Database(connString, null, SqlClientFactory.Instance);
+        using var db = new Database(connString, new SqlServerDatabaseType(), SqlClientFactory.Instance);
         bool exists = DatabaseExists(ConnectionString);
         if (exists)
         {
@@ -78,7 +79,7 @@ public class SqlServerDatabaseCreator : IDatabaseCreator
     {
         Logger.ILog("Creating Database Structure");
         
-        using var db = new NPoco.Database(ConnectionString, null, SqlClientFactory.Instance);
+        using var db = new NPoco.Database(ConnectionString, new SqlServerDatabaseType(), SqlClientFactory.Instance);
         string sqlTables = ScriptHelper.GetSqlScript("SqlServer", "Tables.sql", clean: true);
         //Logger.ILog("SQL Tables:\n" + sqlTables);
         db.Execute(sqlTables);
@@ -100,7 +101,7 @@ public class SqlServerDatabaseCreator : IDatabaseCreator
                 connString = connString[1..];
             string dbName = GetDatabaseName(connectionString);
 
-            using var db = new Database(connString, null, SqlClientFactory.Instance);
+            using var db = new Database(connString, new SqlServer2008DatabaseType(), SqlClientFactory.Instance);
             return db.ExecuteScalar<int>(
                     "SELECT CASE WHEN EXISTS (SELECT 1 FROM sys.databases WHERE name = @0) THEN 1 ELSE 0 END",
                     dbName) == 1;

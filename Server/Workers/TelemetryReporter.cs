@@ -116,7 +116,7 @@ public class TelemetryReporter : ServerWorker
 
 //#endif
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             // FF-410: silent fail, may not have an internet connection
         }

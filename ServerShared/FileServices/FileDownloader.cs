@@ -286,7 +286,7 @@ public class FileDownloader
             long.TryParse(str, out long result);
             return result;
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             return 0;
         }

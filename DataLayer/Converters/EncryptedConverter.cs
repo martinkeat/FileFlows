@@ -25,7 +25,7 @@ public class EncryptedConverter:DefaultMapper
             return base.GetToDbConverter(destType, sourceMemberInfo);
         return x =>
         {
-            var value = x.ToString();
+            var value = x.ToString() ?? string.Empty;
             return Helpers.Decrypter.Encrypt(value);
         };
     }
@@ -40,7 +40,7 @@ public class EncryptedConverter:DefaultMapper
         return x =>
         {
             var value = x.ToString();
-            return Helpers.Decrypter.Decrypt(value);
+            return Helpers.Decrypter.Decrypt(value ?? string.Empty);
         };
     }
 }

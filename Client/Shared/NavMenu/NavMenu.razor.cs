@@ -115,7 +115,7 @@ public partial class NavMenu : IDisposable
         StateHasChanged();
     }
 
-    private void NavigationManagerOnLocationChanged(object sender, LocationChangedEventArgs e)
+    private void NavigationManagerOnLocationChanged(object? sender, LocationChangedEventArgs e)
     {
         if (MenuItems?.Any() != true)
             return;
@@ -313,6 +313,7 @@ public partial class NavMenu : IDisposable
         }
         catch (Exception)
         {
+            // ignored
         }
 
         NavMenuCollapsedUpdated(App.Instance.NavMenuCollapsed);

@@ -13,7 +13,5 @@
   <ItemGroup>
     <None Remove="Jint.dll" />
     <EmbeddedResource Include="Jint.dll" />
-    <None Remove="Esprima.dll" />
-    <EmbeddedResource Include="Esprima.dll" />
   </ItemGroup>
 </Project>

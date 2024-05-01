@@ -5,6 +5,7 @@
     <Nullable>enable</Nullable>
     <AssemblyName>FileFlows.Managers</AssemblyName>
     <RootNamespace>FileFlows.Managers</RootNamespace>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\DataLayer\DataLayer.csproj" />

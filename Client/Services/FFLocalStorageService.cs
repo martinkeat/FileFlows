@@ -41,10 +41,7 @@ public class FFLocalStorageService
                 value = System.Text.Json.JsonSerializer.Serialize(value);
             await _jsRuntime.InvokeVoidAsync("localStorage.setItem", key, value);
         }
-        else
-        {
-            // Handle case where local storage is not enabled
-        }
+        // Handle case where local storage is not enabled
     }
 
     /// <summary>
@@ -68,13 +65,9 @@ public class FFLocalStorageService
             {
                 return default;
             }
-
         }
-        else
-        {
-            // Handle case where local storage is not enabled
-            return default;
-        }
+        // Handle case where local storage is not enabled
+        return default;
     }
 
     /// <summary>
@@ -87,8 +80,9 @@ public class FFLocalStorageService
         {
             _localStorageEnabled = await _jsRuntime.InvokeAsync<bool>("localStorageEnabled");
         }
-        catch (Exception ex)
+        catch (Exception)
         {
+            // Ignored
         }
     }
 

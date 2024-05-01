@@ -30,12 +30,12 @@ public class FileFlowsAuthorizeAttribute : Attribute, IAsyncAuthorizationFilter
     /// Handles the on on authorization
     /// </summary>
     /// <param name="context">the context</param>
-    public async Task OnAuthorizationAsync(AuthorizationFilterContext context)
+    public Task OnAuthorizationAsync(AuthorizationFilterContext context)
     {
         if (AuthenticationHelper.GetSecurityMode() == SecurityMode.Off)
         {
             context.HttpContext.Items["USER_ROLE"] = UserRole.Admin;
-            return;
+            return Task.CompletedTask;
         }
 
         UserRole roleToTest = Role;
@@ -51,7 +51,7 @@ public class FileFlowsAuthorizeAttribute : Attribute, IAsyncAuthorizationFilter
             {
                 // The action method has the AllowAnonymous attribute applied
                 // Skip the authorization check
-                return;
+                return Task.CompletedTask;;
             }
             var authorizeAttribute = actionDescriptor.MethodInfo.GetCustomAttributes(inherit: true)
                 .OfType<FileFlowsAuthorizeAttribute>()
@@ -64,24 +64,25 @@ public class FileFlowsAuthorizeAttribute : Attribute, IAsyncAuthorizationFilter
         if(user == null)
         {
             context.Result = new UnauthorizedResult();
-            return;
+            return Task.CompletedTask;;
         }
         context.HttpContext.Items["USER_ROLE"] = UserRole.Admin;
 
         if ((int)roleToTest == 0)
-            return; // any role
+            return Task.CompletedTask;; // any role
         
         if(roleToTest == UserRole.Admin)
         {
             if(user.Role != UserRole.Admin)
                 context.Result = new UnauthorizedResult();
-            return;
+            return Task.CompletedTask;;
         }
         
         if ((user.Role & roleToTest) == 0) // they require any of the enums
         {
             context.Result = new UnauthorizedResult();
-            return;
+            return Task.CompletedTask;
         }
+        return Task.CompletedTask;
     }
 }

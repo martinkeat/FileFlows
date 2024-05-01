@@ -79,7 +79,7 @@ public class NodeManager
                     var settings = nodeService.GetByAddressAsync(AppSettings.Instance.HostName).Result;
                     if (settings == null)
                     {
-                        Logger.Instance.ELog("Failed getting settings for node: " + AppSettings.Instance.HostName);
+                        Logger.Instance?.ELog("Failed getting settings for node: " + AppSettings.Instance.HostName);
                         return false;
                     }
 

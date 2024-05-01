@@ -1,4 +1,3 @@
-using System.Net;
 using FileFlows.Plugin;
 using FileFlows.Server.Authentication;
 using FileFlows.Server.Services;
@@ -126,7 +125,6 @@ public class RepositoryController : BaseController
                 };
                 return Ok(form);
             }
-            break;
         }
 
         return BadRequest("Invalid Type");
@@ -261,6 +259,7 @@ public class RepositoryController : BaseController
                 }
                 catch (Exception)
                 {
+                    // ignored
                 }
             }
 
@@ -392,21 +391,23 @@ public class RepositoryController : BaseController
     public async Task UpdateScripts()
     {
         var service = new RepositoryService();
-        var original = (await GetScripts(ScriptType.Flow, missing: false)).ToDictionary(x => x.Path, x => x.Revision);
+        var original = (await GetScripts(ScriptType.Flow, missing: false))
+            .Where(x => x.Path != null).ToDictionary(x => x.Path!, x => x.Revision);
         await service.Init();
         await service.Update();
-        var updated = (await GetScripts(ScriptType.Flow, missing: false)).ToDictionary(x => x.Path, x => x.Revision);
+        var updated = (await GetScripts(ScriptType.Flow, missing: false))
+            .Where(x => x.Path != null).ToDictionary(x => x.Path!, x => x.Revision);
         bool changes = false;
         foreach (var key in original.Keys)
         {
-            if (updated.ContainsKey(key) == false)
+            if (updated.TryGetValue(key, out var value) == false)
             {
                 // shouldn't happen, but if it does
                 changes = true;
                 break;
             }
 
-            if (updated[key] != original[key])
+            if (value != original[key])
             {
                 // revision changed, this means the config must update
                 changes = true;
@@ -435,7 +436,7 @@ public class RepositoryController : BaseController
             .Where(x => model.Uids.Contains(x.Path)).ToList();
         if (objects.Any() == false)
             return false; // nothing to update
-        await DownloadActual(objects.Select(x => x.Path).ToList());
+        await DownloadActual(objects.Where(x => x.Path != null).Select(x => x.Path!).ToList());
         // we always do an update here, its a user forcing an update
         await RevisionIncrement();
         return true;
@@ -449,6 +450,6 @@ public class RepositoryController : BaseController
         /// <summary>
         /// A list of plugin packages to download
         /// </summary>
-        public List<string> Scripts { get; set; }
+        public List<string> Scripts { get; init; }
     }
 }

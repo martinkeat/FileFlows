@@ -10,7 +10,7 @@ public class DbStatistic
     /// <summary>
     /// Gets or sets the name of the statistic
     /// </summary>
-    public string Name { get; set; }
+    public string Name { get; set; } = string.Empty;
     
     /// <summary>
     /// Gets or sets the type of statistic
@@ -20,5 +20,5 @@ public class DbStatistic
     /// <summary>
     /// Gets or sets the number value
     /// </summary>
-    public string Data { get; set; }
+    public string Data { get; set; } = string.Empty;
 }

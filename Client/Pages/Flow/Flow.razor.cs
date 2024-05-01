@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Components;
 using FileFlows.Client.Components;
 using ffPart = FileFlows.Shared.Models.FlowPart;
 using ffElement = FileFlows.Shared.Models.FlowElement;
-using ff = FileFlows.Shared.Models.Flow;
+using FFlow = FileFlows.Shared.Models.Flow;
 using Microsoft.JSInterop;
 using FileFlows.Client.Components.Dialogs;
 using System.Text.Json;
@@ -260,7 +260,7 @@ public partial class Flow : ComponentBase, IDisposable
                 return;
             }
 
-            ff flow = (modelResult.Success ? modelResult.Data : null) ?? new ff { Parts = new List<ffPart>() };
+            FFlow flow = (modelResult.Success ? modelResult.Data : null) ?? new FFlow { Parts = new List<ffPart>() };
 
             var fEditor = new FlowEditor(this, flow, ProfileService);
             await fEditor.Initialize();
@@ -301,7 +301,7 @@ public partial class Flow : ComponentBase, IDisposable
     
     private async Task InitializeFlowElements()
     {
-        ff flow = ActiveFlow?.Flow;
+        FFlow flow = ActiveFlow?.Flow;
         if (flow == null)
         {
             AvailablePlugins = new ffElement[] { };
@@ -354,8 +354,8 @@ public partial class Flow : ComponentBase, IDisposable
         await UpdateFlowElementLists();
     }
 
-    private async Task<RequestResult<ff>> GetModel(string url)
-        => await HttpHelper.Get<ff>(url);
+    private async Task<RequestResult<FFlow>> GetModel(string url)
+        => await HttpHelper.Get<FFlow>(url);
 
     private async Task<RequestResult<ffElement[]>> GetElements(string url)
         => await HttpHelper.Get<ffElement[]>(url);
@@ -549,7 +549,7 @@ public partial class Flow : ComponentBase, IDisposable
                             if (flowOptions == null)
                             {
                                 flowOptions = new List<ListOption>();
-                                var flowsResult = await HttpHelper.Get<ff[]>($"/api/flow");
+                                var flowsResult = await HttpHelper.Get<FFlow[]>($"/api/flow");
                                 if (flowsResult.Success)
                                 {
                                     flowOptions = flowsResult.Data?.Where(x => x.Uid != editor.Flow?.Uid)?.OrderBy(x => x.Name)?.Select(x => new ListOption
@@ -929,7 +929,7 @@ public partial class Flow : ComponentBase, IDisposable
         {
             var model = await editor.GetModel();
             bool isFirst = OpenedFlows.IndexOf(editor) == 0;
-            var result = await HttpHelper.Put<ff>(API_URL, model);
+            var result = await HttpHelper.Put<FFlow>(API_URL, model);
             if (result.Success)
             {
                 if (isFirst && Uid == Guid.Empty)
@@ -967,7 +967,7 @@ public partial class Flow : ComponentBase, IDisposable
     }
 
 
-    private async Task AddNewFlow(ff flow, bool isDirty)
+    private async Task AddNewFlow(FFlow flow, bool isDirty)
     {
         if (flow.Uid == Guid.Empty)
             flow.Uid = Guid.NewGuid();

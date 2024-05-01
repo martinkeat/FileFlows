@@ -24,6 +24,8 @@ class ScriptHelper
             var resourceName = $"FileFlows.DataLayer.Scripts.{dbType}.{script}";
 
             using Stream? stream = assembly.GetManifestResourceStream(resourceName);
+            if (stream == null)
+                return string.Empty;
             using StreamReader reader = new StreamReader(stream);
             string resource = reader.ReadToEnd();
 

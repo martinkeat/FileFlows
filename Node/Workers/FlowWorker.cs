@@ -46,7 +46,7 @@ public class FlowWorker : Worker
         if (string.IsNullOrWhiteSpace(key) == false)
             return key;
         
-        return _configKeyDefault;;
+        return _configKeyDefault;
     }
     
     /// <summary>
@@ -129,7 +129,7 @@ public class FlowWorker : Worker
     /// </summary>
     protected override void Execute()
     {
-        ExecuteActual(out ProcessingNode node);
+        ExecuteActual(out ProcessingNode? node);
         // check if the timer has changed
         if (node == null)
             return;
@@ -150,7 +150,7 @@ public class FlowWorker : Worker
     /// <summary>
     /// Actually executes this worker
     /// </summary>
-    private void ExecuteActual(out ProcessingNode node)
+    private void ExecuteActual(out ProcessingNode? node)
     {
         node = null;
         if (UpdaterWorker.UpdatePending)
@@ -229,7 +229,7 @@ public class FlowWorker : Worker
             }
         }
 
-        if (isLicensed && string.IsNullOrWhiteSpace(node.PreExecuteScript) == false)
+        if (isLicensed && string.IsNullOrWhiteSpace(node?.PreExecuteScript) == false)
         {
             if (PreExecuteScriptTest(node) == false)
                 return;
@@ -259,7 +259,7 @@ public class FlowWorker : Worker
             {
                 var runnerParameters = new RunnerParameters();
                 runnerParameters.Uid = processUid;
-                runnerParameters.NodeUid = node2.Uid;
+                runnerParameters.NodeUid = node2!.Uid;
                 runnerParameters.LibraryFile = libFile.Uid;
                 runnerParameters.TempPath = tempPath;
                 runnerParameters.ConfigPath = GetConfigurationDirectory();

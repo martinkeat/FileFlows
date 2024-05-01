@@ -10,16 +10,10 @@ namespace FileFlows.Client.Pages;
 public partial class Flows : ListPage<Guid, FlowListModel>
 {
     /// <summary>
-    /// Gets or sets the navigation manager
-    /// </summary>
-    [Inject] NavigationManager NavigationManager { get; set; }
-    /// <summary>
     /// Gets or sets the JavaScript runtime
     /// </summary>
-    [Inject] public IJSRuntime jsRuntime { get; set; }
-
-    // private FlowTemplatePicker TemplatePicker;
-    // private NewFlowEditor AddEditor;
+    [Inject] private IJSRuntime jsRuntime { get; set; }
+    
     private string TableIdentifier => "Flows-" + this.SelectedType;
 
     public override string ApiUrl => "/api/flow";
@@ -45,20 +39,8 @@ public partial class Flows : ListPage<Guid, FlowListModel>
 
     /// <inheritdoc />
     protected override string GetAuditTypeName()
-        => typeof(FileFlows.Shared.Models.Flow).FullName;
+        => typeof(ffFlow).FullName;
 
-    async Task Enable(bool enabled, ffFlow flowWrapper)
-    {
-        Blocker.Show();
-        try
-        {
-            await HttpHelper.Put<ffFlow>($"{ApiUrl}/state/{flowWrapper.Uid}?enable={enabled}");
-        }
-        finally
-        {
-            Blocker.Hide();
-        }
-    }
 
     private void Add()
         => NavigationManager.NavigateTo("flows/" + Guid.Empty);

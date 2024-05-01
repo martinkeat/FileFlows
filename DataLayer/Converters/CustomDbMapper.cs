@@ -34,7 +34,7 @@ class CustomDbMapper : FileFlowsMapper<CustomDbMapper>
     /// <param name="destType">the type of object to create</param>
     /// <param name="sourceType">the type of object to create a new object from</param>
     /// <returns>a function to do a conversion</returns>
-    public override Func<object, object> GetFromDbConverter(Type destType, Type sourceType)
+    public override Func<object, object?> GetFromDbConverter(Type destType, Type sourceType)
     {
         if (Enable)
         {
@@ -62,7 +62,7 @@ class CustomDbMapper : FileFlowsMapper<CustomDbMapper>
                         var result = JsonSerializer.Deserialize<List<ExecutedNode>>(strValue, JsonOptions);
                         return result;
                     }
-                    catch (Exception ex)
+                    catch (Exception)
                     {
                         // Logger.Instance.ELog("Error parsing ExecutedNodes: " + ex.Message + " , string value: " + strValue);
                         return new List<ExecutedNode>();
@@ -95,7 +95,7 @@ class CustomDbMapper : FileFlowsMapper<CustomDbMapper>
                     if (value is Guid guid && guid == Guid.Empty)
                         return string.Empty;
 
-                    return value.ToString();
+                    return value.ToString() ?? string.Empty;
                 };
             if (sourceMemberInfo.GetMemberInfoType() == typeof(string))
                 return (value) => value?.ToString() ?? string.Empty;

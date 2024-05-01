@@ -2,6 +2,7 @@ using System.Text.RegularExpressions;
 using FileFlows.DataLayer.Helpers;
 using FileFlows.Plugin;
 using NPoco;
+using NPoco.DatabaseTypes;
 using MySqlConnectorFactory = MySqlConnector.MySqlConnectorFactory;
 
 namespace FileFlows.DataLayer.DatabaseCreators;
@@ -45,7 +46,7 @@ public class MySqlDatabaseCreator : IDatabaseCreator
                 connString = connString[1..];
             string dbName = GetDatabaseName(connectionString);
 
-            using var db = new Database(connString, null, MySqlConnectorFactory.Instance);
+            using var db = new Database(connString, new MySqlDatabaseType(), MySqlConnectorFactory.Instance);
             bool exists =
                 string.IsNullOrEmpty(db.ExecuteScalar<string>(
                     "select schema_name from information_schema.schemata where schema_name = @0", dbName)) == false;
@@ -65,7 +66,7 @@ public class MySqlDatabaseCreator : IDatabaseCreator
             connString = connString[1..];
         string dbName = GetDatabaseName(ConnectionString);
         
-        using var db = new Database(connString, null, MySqlConnectorFactory.Instance);
+        using var db = new Database(connString, new MySqlDatabaseType(), MySqlConnectorFactory.Instance);
         bool exists = DatabaseExists(ConnectionString);
         if (exists)
         {
@@ -96,7 +97,7 @@ public class MySqlDatabaseCreator : IDatabaseCreator
     {
         Logger.ILog("Creating Database Structure");
         
-        using var db = new NPoco.Database(ConnectionString, null, MySqlConnector.MySqlConnectorFactory.Instance);
+        using var db = new NPoco.Database(ConnectionString, new MySqlDatabaseType(), MySqlConnector.MySqlConnectorFactory.Instance);
         string sqlTables = ScriptHelper.GetSqlScript("MySql", "Tables.sql", clean: true);
         db.Execute(sqlTables);
         

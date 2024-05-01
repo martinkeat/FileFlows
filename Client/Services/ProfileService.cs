@@ -53,7 +53,7 @@ public class ProfileService
             _profile = result.Data;
             return _profile;
         }
-        catch (Exception ex)
+        catch (Exception)
         {
 #if(DEBUG)
             NavigationManager.NavigateTo("http://localhost:6868/login", true);

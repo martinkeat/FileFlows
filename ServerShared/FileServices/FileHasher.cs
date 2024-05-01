@@ -20,43 +20,11 @@ public static class FileHasher
             if (!fileInfo.Exists)
                 return string.Empty;
 
-            using (var stream = new BufferedStream(FileOpenHelper.OpenRead_NoLocks(filePath), 1200000))
-            {
-                // The rest remains the same
-                var sha = SHA256.Create();
-                byte[] checksum = await sha.ComputeHashAsync(stream);
-                return BitConverter.ToString(checksum).Replace("-", string.Empty);
-            }
-
-            using var hasher = SHA256.Create();
-            byte[]? hash;
-
-            if (fileInfo.Length > 100_000_000)
-            {
-                using var stream = FileOpenHelper.OpenRead_NoLocks(filePath);
-                const int chunkSize = 100_000_000; // 100MB chunks
-                var buffer = new byte[chunkSize];
-
-                int bytesRead;
-                hasher.Initialize();
-
-                do
-                {
-                    bytesRead = stream.Read(buffer, 0, chunkSize);
-                    hasher.TransformBlock(buffer, 0, bytesRead, buffer, 0);
-                } while (bytesRead == chunkSize);
-
-                hasher.TransformFinalBlock(buffer, 0, bytesRead);
-                hash = hasher.Hash;
-            }
-            else
-            {
-                await using var stream = FileOpenHelper.OpenRead_NoLocks(filePath);
-                hash = await hasher.ComputeHashAsync(stream);
-            }
-
-            string hashStr = BitConverter.ToString(hash).Replace("-", string.Empty).ToLowerInvariant();
-            return hashStr;
+            using var stream = new BufferedStream(FileOpenHelper.OpenRead_NoLocks(filePath), 1200000);
+            // The rest remains the same
+            var sha = SHA256.Create();
+            byte[] checksum = await sha.ComputeHashAsync(stream);
+            return BitConverter.ToString(checksum).Replace("-", string.Empty);
         }
         catch (Exception ex)
         {

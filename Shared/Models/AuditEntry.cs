@@ -2,6 +2,9 @@ using NPoco;
 
 namespace FileFlows.Shared.Models;
 
+/// <summary>
+/// Audit Entry
+/// </summary>
 public class AuditEntry
 {
     /// <summary>

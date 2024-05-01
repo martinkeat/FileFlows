@@ -24,7 +24,7 @@ public partial class Libraries : ListPage<Guid, Library>
 
         var tabs = new Dictionary<string, List<ElementField>>();
         
-        ElementField efFolders = new ElementField
+        var efFolders = new ElementField
         {
             InputType = FormInputType.Switch,
             Name = nameof(library.Folders)
@@ -60,7 +60,7 @@ public partial class Libraries : ListPage<Guid, Library>
             try
             {
                 var templateResult = await HttpHelper.Get<Dictionary<string, List<Library>>>("/api/library/templates");
-                if (templateResult.Success == true || templateResult.Data?.Any() == true)
+                if (templateResult.Success || templateResult.Data?.Any() == true)
                 {
                     List<ListOption> templates = new();
                     foreach (var group in templateResult.Data)

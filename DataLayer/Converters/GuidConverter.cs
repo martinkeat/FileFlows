@@ -19,7 +19,7 @@ public class GuidConverter:FileFlowsMapper<GuidConverter>
     public override Func<object, object> GetToDbConverter(Type destType, MemberInfo sourceMemberInfo)
     {
         if (Enable && destType == typeof(Guid))
-            return x => x.ToString();
+            return x => x.ToString() ?? string.Empty;
         return base.GetToDbConverter(destType, sourceMemberInfo);
     }
 
@@ -32,7 +32,7 @@ public class GuidConverter:FileFlowsMapper<GuidConverter>
     public override Func<object, object> GetParameterConverter(DbCommand dbCommand, Type sourceType)
     {
         if (Enable && sourceType == typeof(Guid))
-            return x => x.ToString();
+            return x => x.ToString() ?? string.Empty;
         return base.GetParameterConverter(dbCommand, sourceType);
     }
 }

@@ -14,7 +14,9 @@ class ConfigDecrypter
         fileStream.Read( salt, 0, SaltSize );
 
         // initialize algorithm with salt
+#pragma warning disable SYSLIB0041
         var keyGenerator = new Rfc2898DeriveBytes( password, salt );
+#pragma warning restore SYSLIB0041
         var aes = Aes.Create();
         aes.Padding = PaddingMode.PKCS7;
         aes.KeySize = 128;

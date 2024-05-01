@@ -280,7 +280,7 @@ internal  class DbObjectManager : BaseManager
             return; // nothing to delete
 
         string strUids = string.Join(",", uids.Select(x => "'" + x.ToString() + "'"));
-        List<DbObject> deleted = null;
+        List<DbObject>? deleted = null;
 
         using (var db = await DbConnector.GetDb(write: true))
         {

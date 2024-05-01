@@ -49,7 +49,7 @@ public static class ServiceLoader
     /// </summary>
     /// <typeparam name="T">The type of service to load.</typeparam>
     /// <returns>The loaded service instance.</returns>
-    public static T Load<T>()
+    public static T Load<T>() where T : notnull
     {
         return Provider.GetRequiredService<T>(); // Get the required service instance
     }

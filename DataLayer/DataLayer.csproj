@@ -5,6 +5,7 @@
     <Nullable>enable</Nullable>
     <AssemblyName>FileFlows.DataLayer</AssemblyName>
     <RootNamespace>FileFlows.DataLayer</RootNamespace>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="MySqlBackup.NET" Version="2.3.8" />
@@ -24,7 +25,6 @@
     <EmbeddedResource Include="Scripts\MySql\Tables.sql" />
     <EmbeddedResource Include="Scripts\Postgres\Tables.sql" />
     <EmbeddedResource Include="Scripts\Sqlite\Tables.sql" />
-    <None Remove="Scripts\SqlServer\Tables.sql" />
     <EmbeddedResource Include="Scripts\SqlServer\Tables.sql" />
   </ItemGroup>
 </Project>

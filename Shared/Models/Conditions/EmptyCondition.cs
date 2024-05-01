@@ -20,7 +20,7 @@ public class EmptyCondition : Condition
     /// </summary>
     /// <param name="value">the value to test the condition against</param>
     /// <returns>true if the condition is matches</returns>
-    public override bool Matches(object value)
+    public override bool Matches(object? value)
     {
         if (value == null)
         {

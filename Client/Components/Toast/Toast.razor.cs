@@ -1,7 +1,4 @@
 ﻿using Microsoft.AspNetCore.Components;
-using System;
-using System.Timers;
-using Esprima;
 using Microsoft.JSInterop;
 
 namespace FileFlows.Client.Components;

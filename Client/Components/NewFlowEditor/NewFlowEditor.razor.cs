@@ -62,7 +62,7 @@ public partial class NewFlowEditor : Editor
                 oName is string sName && string.IsNullOrWhiteSpace(sName) == false)
             {
                 this.Model = new ExpandoObject();
-                ((IDictionary<string, object>)this.Model).Add("Name", sName);
+                ((IDictionary<string, object>)this.Model!).Add("Name", sName);
             }
             else
             {
@@ -142,7 +142,7 @@ public partial class NewFlowEditor : Editor
                         foreach (var condition in field.Conditions)
                         {
                             if (TemplateFields.TryGetValue(condition.Property.Dehumanize(),
-                                    out TemplateFieldModel efOther) == false)
+                                    out var efOther) == false)
                                 continue;
                             tfm.ElementField.Conditions ??= new();
                             var newCon = new Condition(efOther.ElementField, efOther.TemplateField.Default, condition.Value, condition.IsNot);
@@ -152,11 +152,11 @@ public partial class NewFlowEditor : Editor
                     }
 
                     fields.Add(tfm.ElementField);
-                    object defaultValue = tfm.TemplateField.Default;
+                    var defaultValue = tfm.TemplateField.Default;
                     if (defaultValue is JsonElement je)
                     {
                         if (je.ValueKind == JsonValueKind.String)
-                            defaultValue = je.GetString();
+                            defaultValue = je.GetString() ?? string.Empty;
                         else if (je.ValueKind == JsonValueKind.False)
                             defaultValue = false;
                         else if (je.ValueKind == JsonValueKind.True)
@@ -301,12 +301,12 @@ public partial class NewFlowEditor : Editor
     }
     
 
-    private async Task<bool> SaveCallback(ExpandoObject model)
+    private new async Task<bool> SaveCallback(ExpandoObject model)
     {
         Logger.Instance.ILog("NewFlowEditor.SaveCallback", model);
         var dict = model as IDictionary<string, object>;
         var flow = CurrentTemplate.Flow;
-        if (dict.TryGetValue("Name", out object oName) && oName is string sName)
+        if (dict.TryGetValue("Name", out var oName) && oName is string sName)
             flow.Name = sName;
 
         foreach (var tfm in TemplateFields.Values)
@@ -339,7 +339,7 @@ public partial class NewFlowEditor : Editor
             }
             
             part.Model ??= new ExpandoObject();
-            var dictPartModel = (IDictionary<string, object>)part.Model;
+            var dictPartModel = (IDictionary<string, object>)part.Model!;
             string key = tfm.TemplateField.Name;
             if (string.IsNullOrEmpty(key))
             {
@@ -429,7 +429,7 @@ public partial class NewFlowEditor : Editor
         }
         else
         {
-            flow.Type = _flowType.Value;
+            flow.Type = _flowType!.Value;
             ShowTask.TrySetResult(flow);
         }
         return true;
@@ -475,7 +475,7 @@ public partial class NewFlowEditor : Editor
                     continue;
                 if (variablesToRemove.Contains(varResult.Variable) == false)
                     variablesToRemove.Add(varResult.Variable);
-                var options = ((IDictionary<string, object>)part.Model)["Options"];
+                var options = ((IDictionary<string, object>)part.Model!)["Options"];
                 Logger.Instance.ILog("Options", options);
                 Logger.Instance.ILog("Options", options.GetType().FullName);
                 if (options is JsonElement je == false || je.ValueKind != JsonValueKind.Array)
@@ -593,17 +593,17 @@ public partial class NewFlowEditor : Editor
     private (bool Success, string Variable, T Value) GetVariableFromModel<T>(Flow flow, FlowPart part, string variableName = "Variable")
     {
         var dict = part.Model as IDictionary<string, object>;
-        if (dict?.TryGetValue(variableName, out object oVariable) != true || oVariable == null)
-            return (Success: false, Variable: string.Empty, Value: default);
+        if (dict?.TryGetValue(variableName, out var oVariable) != true || oVariable == null)
+            return (Success: false, Variable: string.Empty, Value: default)!;
 
         string varibleStr;
         if (oVariable is JsonElement jeVariable)
-            varibleStr = jeVariable.GetString();
+            varibleStr = jeVariable.GetString() ?? string.Empty;
         else
-            varibleStr = oVariable.ToString();
+            varibleStr = oVariable.ToString() ?? string.Empty;
 
-        if (flow.Properties.Variables.TryGetValue(varibleStr, out object oValue) != true || oValue == null)
-            return (Success: false, Variable: varibleStr, Value: default);
+        if (flow.Properties.Variables.TryGetValue(varibleStr, out var oValue) != true || oValue == null)
+            return (Success: false, Variable: varibleStr, Value: default)!;
         
         if(oValue is JsonElement je)
         {
@@ -634,7 +634,7 @@ public partial class NewFlowEditor : Editor
                 return (Success: true, varibleStr, Value: (T)(object)sValue);    
             return (Success: true, varibleStr, Value: (T)(object)oValue.ToString());
         }
-        return (Success: false, varibleStr, Value: default);
+        return (Success: false, varibleStr, Value: default)!;
     }
 
     private class SelectParameters

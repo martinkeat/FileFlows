@@ -146,7 +146,7 @@ public class SqlHelper
     /// <param name="jsonProperty">the json property eg "MyValue"</param>
     /// <param name="asColumn">the name of the result</param>
     /// <returns>the json select eg "JSON_EXTRACT('$.Data.MyValue')</returns>
-    public static string JsonValue(string column, string jsonProperty, string asColumn = null)
+    public static string JsonValue(string column, string jsonProperty, string? asColumn = null)
     {
         return $"JSON_EXTRACT({column}, '$.{jsonProperty}')" + (string.IsNullOrEmpty(asColumn) ? string.Empty : $" as {asColumn}");
     }

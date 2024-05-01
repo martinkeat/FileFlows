@@ -556,7 +556,6 @@ public class LibraryFileService
     /// <summary>
     /// Toggles a flag on files
     /// </summary>
-    /// <param name="flag">the flag to toggle</param>
     /// <param name="uids">the UIDs of the files</param>
     /// <returns>true if any rows were updated, otherwise false</returns>
     public Task<bool> ToggleForce(params Guid[] uids)

@@ -33,10 +33,10 @@ public class MessageAppModel
     /// <summary>
     /// Gets or sets the title of the message.
     /// </summary>
-    public string Title { get; set; }
+    public string Title { get; set; } = string.Empty;
 
     /// <summary>
     /// Gets or sets the content of the message.
     /// </summary>
-    public string Message { get; set; }
+    public string Message { get; set; } = string.Empty;
 }

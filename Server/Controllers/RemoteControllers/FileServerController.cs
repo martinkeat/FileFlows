@@ -456,15 +456,15 @@ public class FileServerController : Controller
                 var startIndex = range.From ?? 0;
                 var endIndex = range.To ?? totalLength - 1;
                 var contentRange = new ContentRangeHeaderValue(startIndex, endIndex, totalLength);
-                Response.Headers.Add("Accept-Ranges", "bytes");
-                Response.Headers.Add("Content-Range", contentRange.ToString());
+                Response.Headers.Append("Accept-Ranges", "bytes");
+                Response.Headers.Append("Content-Range", contentRange.ToString());
 
                 using (var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite,
                            BufferSize, FileOptions.Asynchronous))
                 {
                     stream.Seek(startIndex, SeekOrigin.Begin);
 
-                    Response.Headers.Add("Content-Length", (endIndex - startIndex + 1).ToString());
+                    Response.Headers.Append("Content-Length", (endIndex - startIndex + 1).ToString());
 
                     var partialStream = new StreamContent(stream, BufferSize);
                     return new FileStreamResult(await partialStream.ReadAsStreamAsync(), "application/octet-stream")
@@ -474,7 +474,7 @@ public class FileServerController : Controller
                 }
             }
 
-            Response.Headers.Add("Accept-Ranges", "bytes");
+            Response.Headers.Append("Accept-Ranges", "bytes");
 
             return PhysicalFile(path, "application/octet-stream", fileInfo.Name);
         }

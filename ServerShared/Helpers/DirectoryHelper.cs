@@ -8,11 +8,6 @@ namespace FileFlows.ServerShared.Helpers;
 public class DirectoryHelper
 {
     /// <summary>
-    /// Gets if this is a Docker instance or not
-    /// </summary>
-    public static bool IsDocker { get; private set; }
-    
-    /// <summary>
     /// Gets if this is a Node or Server
     /// </summary>
     public static bool IsNode { get; private set; }
@@ -20,11 +15,9 @@ public class DirectoryHelper
     /// <summary>
     /// Initializes the Directory Helper
     /// </summary>
-    /// <param name="isDocker">True if running inside a docker</param>
     /// <param name="isNode">True if running on a node</param>
-    public static void Init(bool isDocker, bool isNode)
+    public static void Init(bool isNode)
     {
-        IsDocker = isDocker;
         IsNode = isNode;
         
         InitLoggingDirectory();
@@ -167,11 +160,11 @@ public class DirectoryHelper
         
         ServerConfigFile = Path.Combine(dir, "server.config");
 
-        DatabaseDirectory = IsDocker == false ? dir : Path.Combine(dir, "Data");
+        DatabaseDirectory = Globals.IsDocker == false ? dir : Path.Combine(dir, "Data");
         if (Directory.Exists(DatabaseDirectory) == false)
             Directory.CreateDirectory(DatabaseDirectory);
         
-        ConfigDirectory = Path.Combine(IsDocker == false ? dir : Path.Combine(dir, "Data"), "Config");
+        ConfigDirectory = Path.Combine(Globals.IsDocker == false ? dir : Path.Combine(dir, "Data"), "Config");
         if (Directory.Exists(ConfigDirectory) == false)
             Directory.CreateDirectory(ConfigDirectory);
     }
@@ -218,7 +211,7 @@ public class DirectoryHelper
             #else
             // docker we expose this in the data directory so we
             // reduce how many things we have to map out
-            if (IsDocker) 
+            if (Globals.IsDocker) 
                 return Path.Combine(DataDirectory, "Plugins");
             return Path.Combine(BaseDirectory, "Plugins");
             #endif
@@ -233,7 +226,7 @@ public class DirectoryHelper
         {
             // docker we expose this in the data directory so we
             // reduce how many things we have to map out
-            if (IsDocker) 
+            if (Globals.IsDocker) 
                 return Path.Combine(DataDirectory, "Templates");
             return Path.Combine(BaseDirectory, "Templates");
         }
@@ -261,7 +254,7 @@ public class DirectoryHelper
         {
             // docker we expose this in the data directory so we
             // reduce how many things we have to map out
-            if (IsDocker) 
+            if (Globals.IsDocker) 
                 return Path.Combine(DataDirectory, "Scripts");
             return Path.Combine(BaseDirectory, "Scripts");
         }

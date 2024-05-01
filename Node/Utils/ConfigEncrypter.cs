@@ -8,7 +8,9 @@ class ConfigEncrypter
 
     internal static void Save(string json, string password, string outputFile)
     {
+#pragma warning disable SYSLIB0041
         var keyGenerator = new Rfc2898DeriveBytes(password, SaltSize);
+#pragma warning restore SYSLIB0041
         var aes = Aes.Create();
 
         // BlockSize, KeySize in bit --> divide by 8

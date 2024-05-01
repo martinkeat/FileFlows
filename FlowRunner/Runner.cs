@@ -281,7 +281,7 @@ public class Runner
                 await service.Finish(Info);
                 return;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 
             }
@@ -319,7 +319,7 @@ public class Runner
         {
             _ = SendUpdate(Info, waitMilliseconds: 1000);
         }
-        catch (Exception ex) 
+        catch (Exception) 
         { 
             // silently fail, not a big deal, just incremental progress update
             Program.Logger.WLog("Failed to record step change: " + ExecutedSteps + " : " + partName);

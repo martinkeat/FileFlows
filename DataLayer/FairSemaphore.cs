@@ -65,8 +65,7 @@ public class FairSemaphore
             StackTraces.Dequeue();
         queue.Enqueue(tcs);
         await semaphore.WaitAsync();
-        TaskCompletionSource<bool> popped;
-        if (queue.TryDequeue(out popped))
+        if (queue.TryDequeue(out var popped))
             popped.SetResult(true);
     }
 

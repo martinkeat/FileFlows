@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Components;
 
 namespace FileFlows.Client.Components.Common;
 
-public partial class FlowPager<TItem>
+public partial class FlowPager<TItem> where TItem : notnull
 {
     [CascadingParameter] private FlowTable<TItem> Table { get; set; }
     
@@ -28,10 +28,11 @@ public partial class FlowPager<TItem>
             return pages;
         }
     }
-    private async Task PageChange(int index)
+    private Task PageChange(int index)
     {
         PageIndex = index;
         Table.TriggerPageChange(index);
+        return Task.CompletedTask;
     }
 
     private async Task PageSizeChange(ChangeEventArgs e)
@@ -49,7 +50,7 @@ public partial class FlowPager<TItem>
         Table.Pager = this;
     }
 
-    private void TableOnPropertyChanged(object sender, PropertyChangedEventArgs e)
+    private void TableOnPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         if(e.PropertyName == nameof(Table.TotalItems))
             this.StateHasChanged();

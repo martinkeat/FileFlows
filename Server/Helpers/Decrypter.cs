@@ -26,7 +26,9 @@ public class Decrypter
             byte[] cipherBytes = Convert.FromBase64String(work);
             using (Aes encryptor = Aes.Create())
             {
-                Rfc2898DeriveBytes pdb = new Rfc2898DeriveBytes(encryptionKey, IV);
+#pragma warning disable SYSLIB0041
+                var pdb = new Rfc2898DeriveBytes(encryptionKey, IV);
+#pragma warning restore SYSLIB0041
                 encryptor.Key = pdb.GetBytes(32);
                 encryptor.IV = pdb.GetBytes(16);
                 using (MemoryStream ms = new MemoryStream())
@@ -58,13 +60,15 @@ public class Decrypter
     public static string Encrypt(string text)
     {
         var encryptionKey = ServiceLoader.Load<AppSettingsService>().Settings.EncryptionKey;
-        byte[] clearBytes = Encoding.Unicode.GetBytes(text);
-        Random rand= new Random(DateTime.UtcNow.Millisecond);
+        var clearBytes = Encoding.Unicode.GetBytes(text);
+        var rand= new Random(DateTime.UtcNow.Millisecond);
         using (Aes encryptor = Aes.Create())
         {
             byte[] IV = new byte[15];
             rand.NextBytes(IV);
-            Rfc2898DeriveBytes pdb = new Rfc2898DeriveBytes(encryptionKey, IV);
+#pragma warning disable SYSLIB0041
+            var pdb = new Rfc2898DeriveBytes(encryptionKey, IV);
+#pragma warning restore SYSLIB0041
             encryptor.Key = pdb.GetBytes(32);
             encryptor.IV = pdb.GetBytes(16);
             using (MemoryStream ms = new MemoryStream())

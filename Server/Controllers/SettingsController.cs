@@ -267,7 +267,7 @@ public class SettingsController : BaseController
     /// <param name="model">The database connection info</param>
     /// <returns>OK if successful, otherwise a failure message</returns>
     [HttpPost("test-db-connection")]
-    public async Task<IActionResult> TestDbConnection([FromBody] DbConnectionInfo model)
+    public IActionResult TestDbConnection([FromBody] DbConnectionInfo model)
     {
         if (model == null)
             throw new ArgumentException(nameof(model));

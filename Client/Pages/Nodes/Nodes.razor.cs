@@ -88,7 +88,7 @@ public partial class Nodes : ListPage<Guid, ProcessingNode>
     /// if currently enabling, this prevents double calls to this method during the updated list binding
     /// </summary>
     private bool enabling = false;
-    async Task Enable(bool enabled, ProcessingNode node)
+    new async Task Enable(bool enabled, ProcessingNode node)
     {
         if(enabling || node.Enabled == enabled)
             return;

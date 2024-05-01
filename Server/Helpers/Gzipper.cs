@@ -93,6 +93,7 @@ public class Gzipper
     /// </summary>
     /// <param name="inputFile">the file to decompress</param>
     /// <param name="lines">an optional number of lines to grab, 0 to grab all</param>
+    /// <param name="bytes">an optional number of bytes to grab, 0 to grab all</param>
     /// <returns>the decompresses file contents</returns>
     public static string DecompressFileToString(string inputFile, int lines = 0, int bytes = 0)
     {

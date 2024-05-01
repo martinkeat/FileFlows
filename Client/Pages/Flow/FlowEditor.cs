@@ -2,22 +2,17 @@ using System.Collections;
 using BlazorContextMenu;
 using FileFlows.Client.Components;
 using FileFlows.Client.Components.Dialogs;
-using FileFlows.Client.Helpers;
-using FileFlows.Client.Pages;
 using FileFlows.Plugin;
-using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
-using Flow = FileFlows.Client.Pages.Flow;
 using ffPart = FileFlows.Shared.Models.FlowPart;
-using ffElement = FileFlows.Shared.Models.FlowElement;
-using ff = FileFlows.Shared.Models.Flow;
+using FFlow = FileFlows.Shared.Models.Flow;
 
 namespace FileFlows.Client.Pages;
 
 public class FlowEditor : IDisposable
 {
     private Pages.Flow FlowPage { get; set; }
-    public ff Flow { get; set; }
+    public FFlow Flow { get; set; }
     private IJSRuntime jsRuntime => FlowPage.jsRuntime;
     private IBlazorContextMenuService ContextMenuService => FlowPage.ContextMenuService;
     
@@ -45,7 +40,7 @@ public class FlowEditor : IDisposable
     const string API_URL = "/api/flow";
     private DateTime LoadedAt;
 
-    public FlowEditor(Flow flowPage, ff flow, ProfileService profileService)
+    public FlowEditor(Flow flowPage, FFlow flow, ProfileService profileService)
     {
         this.FlowPage = flowPage;
         this.Flow = flow;
@@ -215,7 +210,7 @@ public class FlowEditor : IDisposable
                     ?.ToList();
             }
             //Model.Parts = parts;
-            var result = await HttpHelper.Put<ff>(API_URL, Flow);
+            var result = await HttpHelper.Put<FFlow>(API_URL, Flow);
             if (result.Success)
             {
                 if ((Profile.ConfigurationStatus & ConfigurationStatus.Flows) != ConfigurationStatus.Flows)
@@ -252,7 +247,7 @@ public class FlowEditor : IDisposable
     /// Gets the complete Flow model with the elements etc
     /// </summary>
     /// <returns>the complete Flow model</returns>
-    public async Task<ff> GetModel()
+    public async Task<FFlow> GetModel()
     {
         Flow.Parts  = await ffFlow.getModel();
         // ensure there are no duplicates and no rogue connections
@@ -272,7 +267,7 @@ public class FlowEditor : IDisposable
     /// </summary>
     /// <param name="updatedModel">the updated model</param>
     /// <param name="clean">if the editor should be marked as clean</param>
-    public void UpdateModel(ff updatedModel, bool clean = false)
+    public void UpdateModel(FFlow updatedModel, bool clean = false)
     {
         if (clean)
             this.IsDirty = false;

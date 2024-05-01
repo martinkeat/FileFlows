@@ -96,7 +96,7 @@ public class Application
                 }
             }
 
-            DirectoryHelper.Init(Docker, false);
+            DirectoryHelper.Init(false);
 
             if (File.Exists(Path.Combine(DirectoryHelper.BaseDirectory, "server-upgrade.bat")))
                 File.Delete(Path.Combine(DirectoryHelper.BaseDirectory, "server-upgrade.bat"));

@@ -27,10 +27,10 @@ public class FlowPartsConverter : IAuditValueConverter
         => type == typeof(List<FlowPart>);
     
     /// <inheritdoc />
-    public string? Convert(object newValue, object oldValue)
+    public string? Convert(object? newValue, object? oldValue)
     {
-        List<FlowPart>? newParts = newValue as List<FlowPart>;
-        List<FlowPart>? oldParts = oldValue as List<FlowPart>;
+        var newParts = newValue as List<FlowPart>;
+        var oldParts = oldValue as List<FlowPart>;
         if (newParts?.Any() != true && oldParts?.Any() != true)
             return null;
 
@@ -40,8 +40,8 @@ public class FlowPartsConverter : IAuditValueConverter
             var oldConnection = oldParts?.FirstOrDefault(y => y.Uid == x.Uid);
             if (oldConnection == null)
                 return false;
-            string jsonOld = JsonSerializer.Serialize(oldConnection);
-            string jsonNew = JsonSerializer.Serialize(x);
+            var jsonOld = JsonSerializer.Serialize(oldConnection);
+            var jsonNew = JsonSerializer.Serialize(x);
             return jsonOld != jsonNew;
         })?.ToList() ?? new ();
         var deletions = oldParts?.Where(x => newParts?.Any(y => y.Uid == x.Uid) != true)?.ToList() ??
@@ -55,7 +55,7 @@ public class FlowPartsConverter : IAuditValueConverter
             diff.Add($"'{FlowHelper.GetFlowPartName(part)}' deleted");
         foreach (var part in changes)
         {
-            var oldPart = oldParts.FirstOrDefault(x => x.Uid == part.Uid);
+            var oldPart = oldParts?.FirstOrDefault(x => x.Uid == part.Uid);
             if (oldPart == null) // shouldn't happen
                 continue;
             var converter = AuditValueHelper.GetConverter(typeof(FlowPart), newSource, oldSource);

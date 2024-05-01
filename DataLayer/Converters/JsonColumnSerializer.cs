@@ -21,7 +21,7 @@ public class JsonColumnSerializer: IColumnSerializer
         return System.Text.Json.JsonSerializer.Serialize(value, CustomDbMapper.JsonOptions);
     }
 
-    public object Deserialize(string value, Type targetType)
+    public object? Deserialize(string value, Type targetType)
     {
         if (value == null)
         {

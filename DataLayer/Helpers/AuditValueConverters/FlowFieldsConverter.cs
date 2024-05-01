@@ -1,5 +1,4 @@
 using System.Text.Json;
-using FileFlows.Shared.Helpers;
 using FileFlows.Shared.Models;
 
 namespace FileFlows.DataLayer.Helpers;
@@ -27,11 +26,11 @@ public class FlowFieldsConverter : IAuditValueConverter
         => type == typeof(List<FlowField>);
     
     /// <inheritdoc />
-    public string? Convert(object newValue, object oldValue)
+    public string? Convert(object? newValue, object? oldValue)
     {
-        List<FlowField>? newParts = newValue as List<FlowField>;
-        List<FlowField>? oldParts = oldValue as List<FlowField>;
-        if (newParts?.Any() != true && oldParts?.Any() != true)
+        var newParts = newValue as List<FlowField> ?? new ();
+        var oldParts = oldValue as List<FlowField> ?? new ();
+        if (newParts.Any() != true && oldParts.Any() != true)
             return null;
 
         var additions = newParts?.Where(x => oldParts?.Any(y => y.Name == x.Name) != true)?.ToList() ?? new ();
@@ -40,22 +39,19 @@ public class FlowFieldsConverter : IAuditValueConverter
             var oldConnection = oldParts?.FirstOrDefault(y => y.Name == x.Name);
             if (oldConnection == null)
                 return false;
-            string jsonOld = JsonSerializer.Serialize(oldConnection);
-            string jsonNew = JsonSerializer.Serialize(x);
+            var jsonOld = JsonSerializer.Serialize(oldConnection);
+            var jsonNew = JsonSerializer.Serialize(x);
             return jsonOld != jsonNew;
         })?.ToList() ?? new ();
         var deletions = oldParts?.Where(x => newParts?.Any(y => y.Name == x.Name) != true)?.ToList() ??
                         new();
         
-        List<string> diff = new();
-        
-        foreach (var part in additions)
-            diff.Add($"'{part.Name}' added");
-        foreach (var part in deletions)
-            diff.Add($"'{part.Name}' deleted");
+        List<string> diff = additions.Select(part => $"'{part.Name}' added").ToList();
+        diff.AddRange(deletions.Select(part => $"'{part.Name}' deleted"));
+
         foreach (var part in changes)
         {
-            var oldPart = oldParts.FirstOrDefault(x => x.Name == part.Name);
+            var oldPart = oldParts!.FirstOrDefault(x => x.Name == part.Name);
             if (oldPart == null) // shouldn't happen
                 continue;
             var converter = AuditValueHelper.GetConverter(typeof(FlowField), newSource, oldSource);

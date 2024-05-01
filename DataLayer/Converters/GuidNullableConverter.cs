@@ -20,7 +20,7 @@ public class GuidNullableConverter:FileFlowsMapper<GuidNullableConverter>
     public override Func<object, object> GetToDbConverter(Type destType, MemberInfo sourceMemberInfo)
     {
         if (Enable && destType == typeof(Guid?))
-            return x => x == null ? string.Empty : x.ToString();
+            return x => x?.ToString() ?? string.Empty;
         return base.GetToDbConverter(destType, sourceMemberInfo);
     }
 
@@ -30,7 +30,7 @@ public class GuidNullableConverter:FileFlowsMapper<GuidNullableConverter>
     /// <param name="sourceType">the type of the object being used</param>
     /// <param name="dbCommand">the command being executed</param>
     /// <returns>the converter function to use</returns>
-    public override Func<object, object> GetParameterConverter(DbCommand dbCommand, Type sourceType)
+    public override Func<object, object?> GetParameterConverter(DbCommand dbCommand, Type sourceType)
     {
         if (Enable && sourceType == typeof(Guid?))
             return x => Guid.TryParse(x?.ToString() ?? string.Empty, out Guid guid) ? guid : null;

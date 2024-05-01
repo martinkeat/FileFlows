@@ -1,10 +1,4 @@
-using System.ComponentModel.DataAnnotations;
-using System.Timers;
-using FileFlows.Client.Components.Dialogs;
-using FileFlows.Shared.Json;
-using Humanizer;
 using Microsoft.AspNetCore.Components;
-using Microsoft.Extensions.Logging;
 
 namespace FileFlows.Client.Components.Dashboard;
 
@@ -20,7 +14,7 @@ public partial class PauseResume: IDisposable
     
     private string lblPauseLabel;
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
         lblPauseLabel = PausedService.PausedLabel;
         PausedService.OnPausedLabelChanged += PausedServiceOnOnPausedLabelChanged;

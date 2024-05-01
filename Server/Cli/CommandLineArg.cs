@@ -22,7 +22,8 @@ internal class CommandLineArg : Attribute
     /// <summary>
     /// Initializes a new instance of the <see cref="CommandLineArg"/> class.
     /// </summary>
-    /// <param name="@switch">The switch of the argument.</param>
+    /// <param name="switch">The switch of the argument.</param>
+    /// <param name="description">the description of this command line argument.</param>
     /// <param name="optional">A boolean indicating whether the argument is optional. Default is false.</param>
     public CommandLineArg(string @switch, string description, bool optional = false)
     {

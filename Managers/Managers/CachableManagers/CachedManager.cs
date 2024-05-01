@@ -27,7 +27,7 @@ public abstract class CachedManager<T> where T : FileFlowObject, new()
 
     private FairSemaphore GetDataSemaphore = new(1);
     
-    protected static List<T> _Data;
+    protected static List<T>? _Data;
     
     /// <summary>
     /// Gets the data
@@ -41,7 +41,7 @@ public abstract class CachedManager<T> where T : FileFlowObject, new()
         {
             if (_Data == null)
                 await Refresh();
-            return _Data;
+            return _Data ?? new ();
         }
         finally
         {

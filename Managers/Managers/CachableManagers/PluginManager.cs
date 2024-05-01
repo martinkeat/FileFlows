@@ -1,9 +1,7 @@
-﻿using System.Dynamic;
-using FileFlows.DataLayer.Helpers;
+﻿using FileFlows.DataLayer.Helpers;
 using FileFlows.DataLayer.Models;
 using FileFlows.Plugin;
 using FileFlows.ServerShared.Models;
-using Jint.Native.Json;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace FileFlows.Managers;
@@ -34,13 +32,13 @@ public class PluginManager : CachedManager<PluginInfo>
     /// <returns>all plugin settings with and the plugin settings</returns>
     public Task<List<PluginSettingsModel>> GetAllPluginSettings()
         => DatabaseAccessManager.Instance.FileFlowsObjectManager.Select<PluginSettingsModel>();
-    
+
     /// <summary>
     /// Gets all plugin settings with and the plugin settings, does not decrypt the data
     /// </summary>
     /// <param name="name">the name of the plugin settings</param>
     /// <returns>all plugin settings with and the plugin settings</returns>
-    public Task<Result<PluginSettingsModel>> GetPluginSettings(string name)
+    public Task<Result<PluginSettingsModel?>> GetPluginSettings(string name)
         => DatabaseAccessManager.Instance.FileFlowsObjectManager.GetByName<PluginSettingsModel>(name);
 
     /// <summary>
@@ -65,8 +63,7 @@ public class PluginManager : CachedManager<PluginInfo>
     {
         var manager = DatabaseAccessManager.Instance.FileFlowsObjectManager;
         var existing = await GetPluginSettings(name);
-        string oldJson = null;
-        bool isNew = false;
+        string? oldJson = null;
         Result<(DbObject dbo, bool changed)> result;
         if (existing.IsFailed == false && existing.Value != null)
         {
@@ -76,7 +73,6 @@ public class PluginManager : CachedManager<PluginInfo>
         }
         else
         {
-            isNew = true;
             result = await manager.AddOrUpdateObject(new PluginSettingsModel()
             {
                 Name = name,

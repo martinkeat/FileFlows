@@ -39,7 +39,7 @@ internal class VersionManager: BaseManager
             var version = db.Db.ExecuteScalar<string?>($"select {Wrap("Version")} from {Wrap("FileFlows")}");
             if (string.IsNullOrEmpty(version))
                 return null;
-            if (Version.TryParse(version, out Version v))
+            if (Version.TryParse(version, out Version? v))
                 return v;
             return null;
         }

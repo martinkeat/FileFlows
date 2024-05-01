@@ -33,7 +33,7 @@ class CommandLineOptions
     /// Gets or sets if the GUI should be shown
     /// </summary>
     [CommandLineArg("The entry point of the application", "/home/user/FileFlows", "entry-point", hidden: true)]
-    public string EntryPoint { get; set; }
+    public string? EntryPoint { get; set; }
     
     /// <summary>
     /// Gets or sets the por the REST API will be exposed on

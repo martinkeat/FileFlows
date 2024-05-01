@@ -44,7 +44,7 @@ public class FileFlowsMapper<T>:FileFlowsMapper  where T : FileFlowsMapper<T>, n
     /// <returns>The static instance of the subclass.</returns>
     public static T UseInstance()
     {
-        if (instances.TryGetValue(typeof(T), out FileFlowsMapper instance) == false)
+        if (instances.TryGetValue(typeof(T), out var instance) == false)
         {
             instance = new T();
             instances[typeof(T)] = instance;

@@ -90,13 +90,13 @@ public partial class Dashboard : ComponentBase, IDisposable
             db.Value = Guid.Parse(db.Value.ToString());
         SortDashboards();
         var lsActiveDashboard = await LocalStorage.GetItemAsync<Guid?>("ACTIVE_DASHBOARD");
-        if (lsActiveDashboard != null &&  this.Dashboards.Any(x => ((Guid)x.Value) == lsActiveDashboard))
+        if (lsActiveDashboard != null &&  this.Dashboards.Any(x => x.Value != null && ((Guid)x.Value) == lsActiveDashboard))
         {
             this.ActiveDashboardUid = lsActiveDashboard.Value;
         }
         else
         {
-            this.ActiveDashboardUid = (Guid)this.Dashboards[0].Value;
+            this.ActiveDashboardUid = (Guid)this.Dashboards[0].Value!;
         }
     }
 
@@ -104,7 +104,7 @@ public partial class Dashboard : ComponentBase, IDisposable
     {
         this.Dashboards = this.Dashboards.OrderBy(x =>
         {
-            if ((Guid)x.Value == FileFlows.Shared.Models.Dashboard.DefaultDashboardUid)
+            if ((Guid)x.Value! == FileFlows.Shared.Models.Dashboard.DefaultDashboardUid)
                 return -2;
             if ((Guid)x.Value == Guid.Empty)
                 return -1;
@@ -125,7 +125,7 @@ public partial class Dashboard : ComponentBase, IDisposable
             var newDashboardResult = await HttpHelper.Put<FileFlows.Shared.Models.Dashboard>("/api/dashboard", new { Name = name });
             if (newDashboardResult.Success == false)
             {
-                string error = newDashboardResult.Body?.EmptyAsNull() ?? "Pages.Dashboard.ErrorMessages.FailedToCreate";
+                var error = newDashboardResult.Body?.EmptyAsNull() ?? "Pages.Dashboard.ErrorMessages.FailedToCreate";
                 Toast.ShowError(error);
                 return;
             }
@@ -156,8 +156,8 @@ public partial class Dashboard : ComponentBase, IDisposable
         try
         {
             await HttpHelper.Delete("/api/dashboard/" + ActiveDashboardUid);
-            this.Dashboards.RemoveAll(x => (Guid)x.Value == ActiveDashboardUid);
-            this.ActiveDashboardUid = (Guid)this.Dashboards[0].Value;
+            this.Dashboards.RemoveAll(x => x.Value != null && (Guid)x.Value == ActiveDashboardUid);
+            this.ActiveDashboardUid = (Guid)this.Dashboards[0].Value!;
         }
         finally
         {

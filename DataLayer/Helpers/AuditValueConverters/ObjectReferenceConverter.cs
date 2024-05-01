@@ -21,7 +21,7 @@ public class ObjectReferenceConverter : IAuditValueConverter
         if (orNew == null && orOld == null)
             return null;
         if (orNew == null)
-            return $"'{orOld.Name}' removed";
+            return $"'{orOld!.Name}' removed";
         if (orOld == null)
             return $"'{orNew.Name}' added";
 

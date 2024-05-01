@@ -36,8 +36,7 @@ namespace FileFlows.DataLayer.DatabaseConnectors;
         {
             if (connectionLifetime > TimeSpan.Zero)
             {
-                Timer timer = null;
-                timer = new Timer(_ =>
+                Timer timer = new Timer(_ =>
                 {
                     lock (disposalLock)
                     {
@@ -58,7 +57,7 @@ namespace FileFlows.DataLayer.DatabaseConnectors;
         {
             await semaphore.WaitAsync();
 
-            DatabaseConnection connection;
+            DatabaseConnection? connection;
             lock (disposalLock)
             {
                 while (pool.TryDequeue(out connection))

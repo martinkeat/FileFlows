@@ -30,7 +30,7 @@ internal  class FileFlowsObjectManager
     /// <returns>a list of objects</returns>
     public virtual async Task<List<T>> Select<T>() where T : FileFlowObject, new()
     {
-        var dbObjects = await dbom.GetAll(typeof(T).FullName);
+        var dbObjects = await dbom.GetAll(typeof(T).FullName!);
         return ConvertFromDbObject<T>(dbObjects);
     }
     
@@ -39,18 +39,18 @@ internal  class FileFlowsObjectManager
     /// </summary>
     /// <typeparam name="T">The type to select</typeparam>
     /// <returns>a single instance</returns>
-    public async Task<Result<T>> Single<T>() where T : FileFlowObject, new()
+    public async Task<Result<T?>> Single<T>() where T : FileFlowObject, new()
     {
         var fullName = typeof(T).FullName;
         if (fullName == null)
-            return Result<T>.Fail("Type FullName was null");
+            return Result<T?>.Fail("Type FullName was null");
         
         DbObject dbObject = await dbom.Single(fullName);
         if (dbObject == null)
             return default;
         
         if (string.IsNullOrEmpty(dbObject?.Data))
-            return Result<T>.Fail($"Object found with no data");
+            return Result<T?>.Fail($"Object found with no data");
         return Convert<T>(dbObject);
     }
     
@@ -86,21 +86,21 @@ internal  class FileFlowsObjectManager
     /// <param name="ignoreCase">if casing should be ignored</param>
     /// <typeparam name="T">The type to get</typeparam>
     /// <returns>the item</returns>
-    public async Task<Result<T>> GetByName<T>(string name, bool ignoreCase = false) where T : FileFlowObject, new()
+    public async Task<Result<T?>> GetByName<T>(string name, bool ignoreCase = false) where T : FileFlowObject, new()
     {
         var fullName = typeof(T).FullName;
         if (fullName == null)
-            return Result<T>.Fail("Type FullName was null");
+            return Result<T?>.Fail("Type FullName was null");
         
         var dbObject = await dbom.GetByName(fullName, name, ignoreCase);
         if (dbObject == null)
-            return Result<T>.Fail("Not found.");
+            return Result<T?>.Fail("Not found.");
         
         if (dbObject.Type != fullName)
-            return Result<T>.Fail($"Object found but was the wrong type '{dbObject.Type}' expected '{fullName}'");
+            return Result<T?>.Fail($"Object found but was the wrong type '{dbObject.Type}' expected '{fullName}'");
         
         if (string.IsNullOrEmpty(dbObject?.Data))
-            return Result<T>.Fail($"Object found with no data");
+            return Result<T?>.Fail($"Object found with no data");
         
         return Convert<T>(dbObject);
     }
@@ -127,7 +127,7 @@ internal  class FileFlowsObjectManager
     /// <param name="saveRevision">if the revision should be saved</param>
     /// <typeparam name="T">The type of object being added or updated</typeparam>
     /// <returns>The updated object</returns>
-    public async Task<Result<(DbObject dbo, bool changed)>> AddOrUpdateObject<T>(T obj, AuditDetails auditDetails, bool saveRevision = false) where T : FileFlowObject, new()
+    public async Task<Result<(DbObject dbo, bool changed)>> AddOrUpdateObject<T>(T obj, AuditDetails? auditDetails, bool saveRevision = false) where T : FileFlowObject, new()
     {
         try
         {
@@ -340,6 +340,8 @@ internal  class FileFlowsObjectManager
 #pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
         T result = JsonSerializer.Deserialize<T>(dbObject.Data, serializerOptions);
 #pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
+        if (result == null)
+            return default;
         foreach (var prop in result.GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public))
         {
             var dbencrypted = prop.GetCustomAttribute<EncryptedAttribute>();

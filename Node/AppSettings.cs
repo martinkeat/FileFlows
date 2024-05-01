@@ -29,7 +29,7 @@ public class AppSettings
     /// <summary>
     /// Gets or sets mappings passed in via enviromental values
     /// </summary>
-    public static List<RegisterModelMapping> EnvironmentalMappings { get; set; }
+    public static List<RegisterModelMapping>? EnvironmentalMappings { get; set; }
     
     /// <summary>
     /// Gets or sets the runner count defined by environmental settings

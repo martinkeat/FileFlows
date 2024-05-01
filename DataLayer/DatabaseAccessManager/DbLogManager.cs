@@ -64,7 +64,7 @@ internal class DbLogMessageManager : BaseManager
 
             db.Db.CompleteTransaction();
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             db.Db.AbortTransaction();
         }
@@ -107,9 +107,10 @@ WHERE {Wrap(nameof(DbLogMessage.LogDate))} < (
     /// <returns>the matching log messages</returns>
     public async Task<List<DbLogMessage>> Search(LogSearchModel filter)
     {
-        string sql = $@"
+        var filterType = (int)(filter.Type ?? LogType.Info);
+        var sql = $@"
 select * from {Wrap(nameof(DbLogMessage))}
-where {Wrap(nameof(DbLogMessage.Type))} {(filter.TypeIncludeHigherSeverity ? "<=" : "=")} {(int)filter.Type}
+where {Wrap(nameof(DbLogMessage.Type))} {(filter.TypeIncludeHigherSeverity ? "<=" : "=")} {filterType}
 and {Wrap(nameof(DbLogMessage.ClientUid))} = {SqlHelper.Escape(filter.Source)}
 and ( {Wrap(nameof(DbLogMessage.LogDate))} between {DbConnector.FormatDateQuoted(filter.FromDate)}
 and {DbConnector.FormatDateQuoted(filter.ToDate)} )

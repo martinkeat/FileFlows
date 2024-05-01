@@ -118,11 +118,11 @@ public class StatisticsController : Controller
     /// <param name="name">Optional. The name for which DbStatistics should be cleared.</param>
     /// <returns>the response</returns>
     [HttpPost("clear")]
-    public IActionResult Clear([FromQuery] string? name = null)
+    public async Task<IActionResult> Clear([FromQuery] string? name = null)
     {
         try
         {
-            new StatisticService().Clear(name);
+            await new StatisticService().Clear(name);
             return Ok();
         }
         catch (Exception)

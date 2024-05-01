@@ -69,7 +69,7 @@ public partial class MainLayout : LayoutComponentBase
     private void ToggleExpand()
     {
         App.Instance.NavMenuCollapsed = !App.Instance.NavMenuCollapsed;
-        LocalStorage.SetItemAsync("NavMenuCollapsed", App.Instance.NavMenuCollapsed);
+        _ = LocalStorage.SetItemAsync("NavMenuCollapsed", App.Instance.NavMenuCollapsed);
         Menu.NavMenuCollapsedUpdated(App.Instance.NavMenuCollapsed);
     }
 

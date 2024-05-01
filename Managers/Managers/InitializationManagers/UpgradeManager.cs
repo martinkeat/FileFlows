@@ -131,6 +131,6 @@ public class UpgradeManager
         /// <summary>
         /// Gets or sets the version number
         /// </summary>
-        public string Version { get; set; }
+        public string Version { get; set; } = string.Empty;
     }
 }

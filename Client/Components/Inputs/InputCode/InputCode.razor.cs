@@ -1,12 +1,7 @@
-using Microsoft.Extensions.Logging;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Components;
 using BlazorMonaco;
 using Microsoft.JSInterop;
-using System.Collections.Generic;
-using FileFlows.Plugin;
 using Microsoft.AspNetCore.Components.Web;
-using NPoco.Expressions;
 
 namespace FileFlows.Client.Components.Inputs;
 
@@ -152,8 +147,10 @@ public partial class InputCode : Input<string>, IDisposable
         }
     }
 
-    public void Dispose()
+    /// <inheritdoc />
+    public override void Dispose()
     {
+        base.Dispose();
         jsInputCode.InvokeVoidAsync("codeUncaptureSave");
         if (this.Editor != null)
         {

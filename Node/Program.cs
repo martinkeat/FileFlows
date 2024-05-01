@@ -26,8 +26,7 @@ public class Program
     /// </summary>
     public static string? EntryPoint { get; private set; }
 
-    private static bool Exiting = false;
-    private static Mutex appMutex;
+    private static Mutex? appMutex;
     const string appName = "FileFlowsNode";
     public static void Main(string[] args)
     {
@@ -59,7 +58,7 @@ public class Program
         // if (options.ApiPort > 0 && options.ApiPort < 65535)
         //     Workers.RestApiWorker.Port = options.ApiPort;
         
-        DirectoryHelper.Init(options.Docker, true);
+        DirectoryHelper.Init(true);
         
         Console.WriteLine("BaseDirectory: " + DirectoryHelper.BaseDirectory);
         
@@ -195,7 +194,7 @@ public class Program
         AppSettings.ForcedHostName = Environment.GetEnvironmentVariable("NodeName");
         AppSettings.ForcedAccessToken = Environment.GetEnvironmentVariable("AccessToken");
 
-        string mappings = Environment.GetEnvironmentVariable("NodeMappings");
+        var mappings = Environment.GetEnvironmentVariable("NodeMappings");
         if (string.IsNullOrWhiteSpace(mappings) == false)
         {
             try
@@ -230,7 +229,6 @@ public class Program
     /// <param name="exitCode">the exit code</param>
     internal static void Quit(int exitCode = 0)
     {
-        Exiting = true;
         MainWindow.Instance?.ForceQuit();
         Environment.Exit(exitCode);
     }

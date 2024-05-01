@@ -43,7 +43,7 @@ public class StatisticService : IStatisticService
     /// <returns>the matching statistics</returns>
     public Dictionary<string, long> GetRunningTotals(string name)
     {
-        if (CachedData.TryGetValue(name, out object o) == null)
+        if (CachedData.TryGetValue(name, out var o) == false)
             return new();
         if (o is not RunningTotals stat)
             return new ();
@@ -56,7 +56,7 @@ public class StatisticService : IStatisticService
     /// <returns>the matching average</returns>
     public Dictionary<int, int> GetAverage(string name)
     {
-        if (CachedData.TryGetValue(name, out object o) == null)
+        if (CachedData.TryGetValue(name, out var o) == false)
             return new();
         if (o is not Average stat)
             return new ();
@@ -69,7 +69,7 @@ public class StatisticService : IStatisticService
     /// <returns>the heatmap</returns>
     public List<HeatmapData> GetHeatMap(string name)
     {
-        if (CachedData.TryGetValue(name, out object o) == null)
+        if (CachedData.TryGetValue(name, out var o) == false)
             return new Heatmap().ConvertData();
         
         var data = o as Heatmap ?? new();
@@ -82,7 +82,7 @@ public class StatisticService : IStatisticService
     /// <returns>the storage saved</returns>
     public List<StorageSavedData> GetStorageSaved()
     {
-        if (CachedData.TryGetValue(Globals.STAT_STORAGE_SAVED, out object o) == null)
+        if (CachedData.TryGetValue(Globals.STAT_STORAGE_SAVED, out var o) == false)
             return new ();
         return (o as StorageSaved)?.Data ?? new();
     }

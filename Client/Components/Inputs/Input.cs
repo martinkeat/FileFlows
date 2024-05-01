@@ -36,6 +36,9 @@ public abstract class Input<T> : ComponentBase, IInput, IDisposable
     [CascadingParameter] protected InputRegister InputRegister { get; set; }
     [CascadingParameter] protected Editor Editor { get; set; }
 
+    /// <summary>
+    /// Gets or sets the JavaScript runtime
+    /// </summary>
     [Inject] protected IJSRuntime jsRuntime { get; set; }
     protected string Uid = System.Guid.NewGuid().ToString();
     private string _Label;
@@ -43,18 +46,35 @@ public abstract class Input<T> : ComponentBase, IInput, IDisposable
     private string _Help;
     public EventHandler<bool> ValidStateChanged { get; set; }
 
+    /// <summary>
+    /// Gets or sets the suffix
+    /// </summary>
     public string Suffix { get; set; }
+    /// <summary>
+    /// Gets or sets the prefix
+    /// </summary>
     public string Prefix { get; set; }
 
     protected string LabelOriginal => _LabelOriginal;
 
 
+    /// <summary>
+    /// Gets or sets the on submit event callback
+    /// </summary>
     [Parameter] public EventCallback OnSubmit { get; set; }
+    /// <summary>
+    /// Gets or sets the on close event callback
+    /// </summary>
     [Parameter] public EventCallback OnClose { get; set; }
 
-    [Parameter]
-    public bool HideLabel { get; set; }
+    /// <summary>
+    /// Gets or ses if the label should be hidden
+    /// </summary>
+    [Parameter] public bool HideLabel { get; set; }
 
+    /// <summary>
+    /// Gets or sets label for the Input
+    /// </summary>
     [Parameter]
     public string Label
     {
@@ -87,19 +107,28 @@ public abstract class Input<T> : ComponentBase, IInput, IDisposable
         }
     }
 
-    [Parameter]
-    public bool ReadOnly { get; set; }
+    /// <summary>
+    /// Gets or sets if this is read only
+    /// </summary>
+    [Parameter] public bool ReadOnly { get; set; }
 
-    [Parameter]
-    public bool Disabled { get; set; }
+    /// <summary>
+    /// Gets or sets if this is disabled
+    /// </summary>
+    [Parameter] public bool Disabled { get; set; }
 
-    //[Parameter] // dont not make this a parameter, it sets it to false unexpectedly
+    /// <summary>
+    /// Gets or sets if this is visible
+    /// Don't make this a Parameter, it breaks stuff
+    /// </summary>
     public bool Visible { get; set; }
 
     private ElementField _Field;
 
-    [Parameter]
-    public ElementField Field
+    /// <summary>
+    /// Gets or sets the element field bound to this
+    /// </summary>
+    [Parameter] public ElementField Field
     {
         get => _Field;
         set
@@ -112,22 +141,33 @@ public abstract class Input<T> : ComponentBase, IInput, IDisposable
         }
     }
 
-    [Parameter]
-    public string Help { get => _Help; set { if (string.IsNullOrEmpty(value) == false) _Help = value; } }
+    /// <summary>
+    /// Gets or sets the Help text for this 
+    /// </summary>
+    [Parameter] public string Help { get => _Help; set { if (string.IsNullOrEmpty(value) == false) _Help = value; } }
+    
     public string _Placeholder;
 
-    [Parameter]
-    public string Placeholder
+    /// <summary>
+    /// Gets or sets the placeholder text
+    /// </summary>
+    [Parameter] public string Placeholder
     {
         get => _Placeholder;
-        set { _Placeholder = value ?? ""; }
+        set => _Placeholder = value ?? "";
     }
 
 
+    /// <summary>
+    /// Gets or sets the validators text
+    /// </summary>
     [Parameter] public List<FileFlows.Shared.Validators.Validator> Validators { get; set; }
 
-
     private string _ErrorMessage = string.Empty;
+    
+    /// <summary>
+    /// Gets or sets the error message
+    /// </summary>
     public string ErrorMessage
     {
         get => _ErrorMessage;
@@ -156,6 +196,10 @@ public abstract class Input<T> : ComponentBase, IInput, IDisposable
     /// Gets if the value is currently updating
     /// </summary>
     protected bool ValueIsUpdating => _ValueUpdating;
+    
+    /// <summary>
+    /// Gets or sets the value
+    /// </summary>
     [Parameter]
     public T Value
     {

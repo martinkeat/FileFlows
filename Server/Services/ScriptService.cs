@@ -46,9 +46,9 @@ public class ScriptService:IScriptService
         scripts.AddRange(taskScriptsSystem.Result);
         scripts.AddRange(taskScriptsShared.Result);
 
-        var dictFlowScripts = repo.FlowScripts?.ToDictionary(x => x.Path, x => x.Revision) ?? new ();
-        var dictSystemScripts = repo.SystemScripts?.ToDictionary(x => x.Path, x => x.Revision) ?? new ();
-        var dictSharedScripts = repo.SharedScripts?.ToDictionary(x => x.Path, x => x.Revision) ?? new ();
+        var dictFlowScripts = repo.FlowScripts?.Where(x => x.Path != null).ToDictionary(x => x.Path!, x => x.Revision) ?? new ();
+        var dictSystemScripts = repo.SystemScripts?.Where(x => x.Path != null).ToDictionary(x => x.Path!, x => x.Revision) ?? new ();
+        var dictSharedScripts = repo.SharedScripts?.Where(x => x.Path != null).ToDictionary(x => x.Path!, x => x.Revision) ?? new ();
         foreach (var script in scripts)
         {
             if (string.IsNullOrEmpty(script.Path))

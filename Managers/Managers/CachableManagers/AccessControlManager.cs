@@ -25,66 +25,62 @@ public class AccessControlManager : CachedManager<AccessControlEntry>
         if (uids?.Any() != true)
             return; // nothing to do
 
-        try
+        var existing = (await GetData()).Where(x => x.Type == type).OrderBy(x => x.Order).ToList();
+
+        List<AccessControlEntry> updating = new();
+
+        // ensure these all have orders set and in the ascending order
+        for (int i = 0; i < existing.Count; i++)
         {
-            var existing = (await GetData()).Where(x => x.Type == type).OrderBy(x => x.Order).ToList();
+            int order = i + 1;
+            var item = existing[i];
+            if (item.Order == order)
+                continue;
+            item.Order = order;
+            updating.Add(item);
+        }
 
-            List<AccessControlEntry> updating = new();
+        var moving = uids.Select(x => existing.FirstOrDefault(y => y.Uid == x))
+            .Where(x => x != null)
+            .Distinct()
+            .Select(x => x!)
+            .ToList();
+        if (moving.Any() == false)
+            return;
 
-            // ensure these all have orders set and in the ascending order
-            for (int i = 0; i < existing.Count; i++)
-            {
-                int order = i + 1;
-                var item = existing[i];
-                if (item.Order == order)
-                    continue;
-                item.Order = order;
+        if (up == false)
+            moving.Reverse();
+
+        // up we move the first first
+        foreach (var item in moving)
+        {
+            int order = item.Order;
+            var index = existing.IndexOf(item);
+            if (up && index == 0)
+                continue; // can not move
+            if (up == false && index >= existing.Count - 1)
+                continue; // can not move down
+
+            var newIndex = up ? index - 1 : index + 1;
+            int newOrder = up ? order - 1 : order + 1;
+            var replacing = existing[newIndex];
+            if (moving.Contains(replacing))
+                continue; // we dont swap ones we are moving
+            replacing.Order = order;
+            item.Order = newOrder;
+            existing[index] = replacing;
+            existing[newIndex] = item;
+            if (updating.Contains(item) == false)
                 updating.Add(item);
-            }
-            var moving = uids.Select(x => existing.FirstOrDefault(y => y.Uid == x))
-                .Where(x => x != null)
-                .Distinct()
-                .ToList();
-            if (moving.Any() == false)
-                return;
-
-            if (up == false)
-                moving.Reverse();
-
-            // up we move the first first
-            foreach (var item in moving)
-            {
-                int order = item.Order;
-                var index = existing.IndexOf(item);
-                if (up && index == 0)
-                    continue; // can not move
-                if (up == false && index >= existing.Count - 1)
-                    continue; // can not move down
-
-                var newIndex = up ? index - 1 : index + 1;
-                int newOrder = up ? order - 1 : order + 1;
-                var replacing = existing[newIndex];
-                if (moving.Contains(replacing))
-                    continue; // we dont swap ones we are moving
-                replacing.Order = order;
-                item.Order = newOrder;
-                existing[index] = replacing;
-                existing[newIndex] = item;
-                if (updating.Contains(item) == false)
-                    updating.Add(item);
-                if (updating.Contains(replacing) == false)
-                    updating.Add(replacing);
-            }
-
-            foreach (var item in updating)
-                await DatabaseAccessManager.Instance.FileFlowsObjectManager.AddOrUpdateObject(item, auditDetails);
-
-            // refreshes the data if needed
-            await Refresh();
+            if (updating.Contains(replacing) == false)
+                updating.Add(replacing);
         }
-        catch (Exception ex)
-        {
-            throw ex;
-        }
+
+        foreach (var item in updating)
+            await DatabaseAccessManager.Instance.FileFlowsObjectManager.AddOrUpdateObject(item, auditDetails);
+
+        // refreshes the data if needed
+        await Refresh();
+
     }
 }

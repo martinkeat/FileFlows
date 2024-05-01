@@ -3,6 +3,7 @@ using FileFlows.DataLayer.Helpers;
 using FileFlows.Plugin;
 using Microsoft.Data.SqlClient;
 using NPoco;
+using NPoco.DatabaseTypes;
 
 namespace FileFlows.DataLayer.DatabaseCreators;
 
@@ -39,7 +40,7 @@ public class PostgresDatabaseCreator : IDatabaseCreator
             connString = connString[1..];
         string dbName = GetDatabaseName(ConnectionString);
         
-        using var db = new Database(connString, null, Npgsql.NpgsqlFactory.Instance);
+        using var db = new Database(connString, new PostgreSQLDatabaseType(), Npgsql.NpgsqlFactory.Instance);
         bool exists = DatabaseExists(ConnectionString);
         if (exists)
         {
@@ -79,7 +80,7 @@ public class PostgresDatabaseCreator : IDatabaseCreator
     {
         Logger.ILog("Creating Database Structure");
         
-        using var db = new NPoco.Database(ConnectionString, null, Npgsql.NpgsqlFactory.Instance);
+        using var db = new NPoco.Database(ConnectionString, new PostgreSQLDatabaseType(), Npgsql.NpgsqlFactory.Instance);
         string sqlTables = ScriptHelper.GetSqlScript("Postgres", "Tables.sql", clean: true);
         db.Execute(sqlTables);
         
@@ -100,7 +101,7 @@ public class PostgresDatabaseCreator : IDatabaseCreator
                 connString = connString[1..];
             string dbName = GetDatabaseName(connectionString);
 
-            using var db = new Database(connString, null, Npgsql.NpgsqlFactory.Instance);
+            using var db = new Database(connString, new PostgreSQLDatabaseType(), Npgsql.NpgsqlFactory.Instance);
             return db.ExecuteScalar<int>(
                     "SELECT CASE WHEN EXISTS (SELECT 1 FROM pg_database WHERE datname = @0) THEN 1 ELSE 0 END",
                     dbName) == 1;

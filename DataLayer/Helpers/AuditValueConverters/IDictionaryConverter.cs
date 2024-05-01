@@ -53,7 +53,7 @@ public class IDictionaryConverter : IAuditValueConverter
         var additions = newDict?.Where(x => oldDict?.ContainsKey(x.Key) != true).ToDictionary(x => x.Key, x=> x.Value) ?? new ();
         var changes = newDict?.Where(x =>
         {
-            if (oldDict?.TryGetValue(x.Key, out object odValue) != true)
+            if (oldDict?.TryGetValue(x.Key, out var odValue) != true)
                 return false; // hasnt chagned was added
             if (x.Value == odValue)
                 return false; // hasnt changed
@@ -75,7 +75,7 @@ public class IDictionaryConverter : IAuditValueConverter
             diff.Add($"{item.Key}: Removed");
         foreach (var item in changes)
         {
-            object oldItem = null;
+            object? oldItem = null;
             if(oldDict?.TryGetValue(item.Key, out oldItem) == false)
                 continue; // shouldn't happen
             if (item.Value == null && oldItem == null)

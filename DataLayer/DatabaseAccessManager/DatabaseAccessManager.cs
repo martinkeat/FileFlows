@@ -20,8 +20,8 @@ internal  class DatabaseAccessManager
     /// <summary>
     /// Gets or sets the singleton instance of the Database Access Manager
     /// </summary>
-    public static DatabaseAccessManager Instance { get; set; }
-    
+    public static DatabaseAccessManager Instance { get; set; } = null!;
+
     /// <summary>
     /// Gets the type of database this is
     /// </summary>

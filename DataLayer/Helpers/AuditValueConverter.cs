@@ -36,7 +36,7 @@ public class AuditValueHelper
         if (IDictionaryConverter.CanConvert(t) || newSource is IDictionary<string, object> || oldSource is IDictionary<string, object>)
             return new IDictionaryConverter(newSource, oldSource);
         if (EnumerableConverter.CanConvert(t))
-            return new EnumerableConverter(t);
+            return new EnumerableConverter();
         return new GenericObjectConverter(t, newSource, oldSource);
     }
     
@@ -47,7 +47,7 @@ public class AuditValueHelper
     /// <param name="newValue">the new value</param>
     /// <param name="oldValue">the old value</param>
     /// <returns>any changes in the object</returns>
-    public static Dictionary<string, string> Audit(Type type, object newValue, object oldValue)
+    public static Dictionary<string, string> Audit(Type type, object newValue, object? oldValue)
     {
         Dictionary<string, string>  changedProperties = new ();
 

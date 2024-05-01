@@ -1,6 +1,7 @@
 using System.Text.RegularExpressions;
 using FileFlows.Plugin;
 using FileFlows.ServerShared.Helpers;
+using NPoco.DatabaseTypes;
 using DatabaseType = FileFlows.Shared.Models.DatabaseType;
 
 namespace FileFlows.DataLayer.DatabaseConnectors;
@@ -61,7 +62,7 @@ public class SQLiteConnector : IDatabaseConnector
 
     private DatabaseConnection CreateConnection(string connectionString)
     {
-        var db = new NPoco.Database(connectionString, null,
+        var db = new NPoco.Database(connectionString, new SQLiteDatabaseType(),
             PlatformHelper.IsArm ? Microsoft.Data.Sqlite.SqliteFactory.Instance : System.Data.SQLite.SQLiteFactory.Instance);
 
         db.Mappers = new()

@@ -2,6 +2,7 @@ using System.Data.Common;
 using FileFlows.DataLayer.Converters;
 using FileFlows.Plugin;
 using NPoco;
+using NPoco.DatabaseTypes;
 using DatabaseType = FileFlows.Shared.Models.DatabaseType;
 
 namespace FileFlows.DataLayer.DatabaseConnectors;
@@ -66,7 +67,7 @@ public class PostgresConnector : IDatabaseConnector
     /// <returns>the new connection</returns>
     private DatabaseConnection CreateConnection()
     {
-        var db = new Database(ConnectionString, null,  Npgsql.NpgsqlFactory.Instance);
+        var db = new Database(ConnectionString, new PostgreSQLDatabaseType(),  Npgsql.NpgsqlFactory.Instance);
         db.Mappers = new()
         {
             GuidNullableConverter.UseInstance(),

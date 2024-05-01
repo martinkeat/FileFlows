@@ -46,10 +46,10 @@ public partial class InputKeyValueInt : Input<List<KeyValuePair<int, string>>>
 
         this.Data = Value.Select(x => new KeyValue {  Key = x.Key, Value = x.Value }).ToList();
         if(Field != null)
-            this.Field.ValueChanged += FieldOnValueChanged;
+            this.Field.ValueChanged += FieldOnValueChanged2;
     }
 
-    private void FieldOnValueChanged(object sender, object value)
+    private void FieldOnValueChanged2(object sender, object value)
     {
         if (value == null)
             return;
@@ -104,10 +104,10 @@ public partial class InputKeyValueInt : Input<List<KeyValuePair<int, string>>>
     /// </summary>
     void Add()
     {
-        int key = NewKey;
-        string value = NewValue ?? string.Empty;
+        var key = NewKey;
+        var value = NewValue ?? string.Empty;
 
-        this.Data.Add(new KeyValue {  Key = key, Value = value });
+        Data.Add(new KeyValue {  Key = key, Value = value });
 
         CheckForDuplicates();
 

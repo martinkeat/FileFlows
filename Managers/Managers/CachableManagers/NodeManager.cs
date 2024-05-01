@@ -23,7 +23,7 @@ public class NodeManager : CachedManager<ProcessingNode>
         var lastSeen = DateTime.UtcNow;
         if (UseCache)
         {
-            var node = _Data.FirstOrDefault(x => x.Uid == nodeUid);
+            var node = _Data?.FirstOrDefault(x => x.Uid == nodeUid);
             if(node != null)
                 node.LastSeen = lastSeen;
         }
@@ -71,7 +71,7 @@ public class NodeManager : CachedManager<ProcessingNode>
         if (node.Value == null)
         {
             string tempPath;
-            if (DirectoryHelper.IsDocker)
+            if (Globals.IsDocker)
                 tempPath = "/temp";
             else
                 tempPath = Path.Combine(DirectoryHelper.BaseDirectory, "Temp");

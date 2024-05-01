@@ -2,6 +2,7 @@ using System.Text.RegularExpressions;
 using FileFlows.DataLayer.Converters;
 using FileFlows.Plugin;
 using NPoco;
+using NPoco.DatabaseTypes;
 using DatabaseType = FileFlows.Shared.Models.DatabaseType;
 using MySqlConnectorFactory = MySqlConnector.MySqlConnectorFactory;
 
@@ -55,7 +56,7 @@ public class MySqlConnector : IDatabaseConnector
     /// <returns>the new connection</returns>
     private DatabaseConnection CreateConnection()
     {
-        var db = new NPoco.Database(ConnectionString, null, MySqlConnectorFactory.Instance);
+        var db = new NPoco.Database(ConnectionString, new MySqlDatabaseType(), MySqlConnectorFactory.Instance);
         db.Mappers = new()
         {
             GuidNullableConverter.UseInstance(),
