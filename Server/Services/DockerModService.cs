@@ -36,17 +36,27 @@ public class DockerModService
     public Task<List<DockerMod>> GetAll()
         => new DockerModManager().GetAll();
 
-    
+
     /// <summary>
     /// Saves a DockerMod
     /// </summary>
     /// <param name="mod">The DockerMod to save</param>
     /// <param name="auditDetails">The audit details</param>
     /// <returns>the saved DockerMod instance</returns>
-    public Task<Result<DockerMod>> Save(DockerMod mod, AuditDetails? auditDetails)
-        => new DockerModManager().Update(mod, auditDetails);
+    public async Task<Result<DockerMod>> Save(DockerMod mod, AuditDetails? auditDetails)
+    {
+        var result = await new DockerModManager().Update(mod, auditDetails);
+        if (Globals.IsDocker && result.Success(out DockerMod updated))
+        {
+            if(updated.Enabled)
+                WriteDockerMod(updated);
+            else
+                DeleteDockerModFromDisk(updated);
+        }
+        return result;
+    }
 
-    
+
     /// <summary>
     /// Exports a DockerMod
     /// </summary>
@@ -152,4 +162,55 @@ public class DockerModService
     /// <returns>a task to await</returns>
     public Task Delete(Guid[] uids, AuditDetails auditDetails)
         => new DockerModManager().Delete(uids, auditDetails);
+
+    /// <summary>
+    /// Writes the DockerMods to the DockerMods directory
+    /// </summary>
+    public async Task WriteDockerMods()
+    {
+        if (Globals.IsDocker == false)
+            return;
+        var mods = await GetAll();
+        foreach (var dm in mods)
+        {
+            if (dm.Enabled == false)
+                continue;
+            WriteDockerMod(dm);
+        }
+    }
+
+    /// <summary>
+    /// Writes a single DockerMod to the DockerMods directory
+    /// </summary>
+    /// <param name="mod">the DockerMod to write</param>
+    private void WriteDockerMod(DockerMod mod)
+    {
+        if (Globals.IsDocker == false)
+            return;
+        if (mod.Enabled == false)
+            return;
+        if (string.IsNullOrWhiteSpace(mod.Code))
+            return;
+
+        try
+        {
+            var file = Path.Combine(DirectoryHelper.DockerModsDirectory, mod.Name + ".sh");
+            File.WriteAllText(file, mod.Code);
+        }
+        catch (Exception ex)
+        {
+            Logger.Instance.WLog($"Failed writing DockerMod '{mod.Name}': {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// Deletes a DockerMod from disk
+    /// </summary>
+    /// <param name="mod">the DockerMod to delete</param>
+    private void DeleteDockerModFromDisk(DockerMod mod)
+    {
+        var file = Path.Combine(DirectoryHelper.DockerModsDirectory, mod.Name + ".sh");
+        if(File.Exists(file))
+            File.Delete(file);
+    }
 }

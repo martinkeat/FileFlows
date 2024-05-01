@@ -74,4 +74,9 @@ public class ConfigurationRevision
     /// Gets or sets a list of plugin names in use
     /// </summary>
     public List<string> PluginNames { get; set; }
+    
+    /// <summary>
+    /// Gets or sets a list of DockerMods in use
+    /// </summary>
+    public List<DockerMod> DockerMods { get; set; }
 }

@@ -62,6 +62,16 @@ public class SettingsService // : ISettingsService
         var plugins = new List<string>();
         var pluginNames = new List<string>();
         List<string> flowElementsInUse = cfg.Flows.SelectMany(x => x.Parts.Select(x => x.FlowElementUid)).ToList();
+
+        cfg.DockerMods = (await ServiceLoader.Load<DockerModService>().GetAll()).Where(x => x.Enabled).Select(x =>
+            new DockerMod()
+            {
+                // we only care about these, dont send Icons/extra stuff to reduce config size
+                Uid = x.Uid,
+                Name = x.Name,
+                Enabled = x.Enabled,
+                Code = x.Code
+            }).ToList();
         
         // Logger.Instance.DLog("Plugin, Flow Elements in Use: \n" + string.Join("\n", flowElementsInUse));
 

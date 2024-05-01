@@ -248,6 +248,11 @@ public class DirectoryHelper
     public static string TemplateDirectoryLibrary => Path.Combine(TemplateDirectory, "Library");
     
     /// <summary>
+    /// Gets the DockerMods directory
+    /// </summary>
+    public static readonly string DockerModsDirectory = Path.Combine(DataDirectory, "DockerMods");
+    
+    /// <summary>
     /// Gets the scripts directory
     /// </summary>
     public static string ScriptsDirectory

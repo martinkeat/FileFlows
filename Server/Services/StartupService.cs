@@ -74,6 +74,9 @@ public class StartupService
             UpdateStatus("Updating Templates...");
             UpdateTemplates();
 
+            if (Globals.IsDocker)
+                LogDockerModsFile();
+
             return true;
         }
         catch (Exception ex)
@@ -87,6 +90,20 @@ public class StartupService
             return Result<bool>.Fail(ex.Message);
         }
     }
+
+    /// <summary>
+    /// Looks for a DockerMods output file and if found, logs its contents
+    /// </summary>
+    private void LogDockerModsFile()
+    {
+        var output = Path.Combine(DirectoryHelper.DockerModsDirectory, "output.log");
+        if (File.Exists(output) == false)
+            return;
+        var content = File.ReadAllText(output);
+        Logger.Instance.ILog("Docker Mods: " + content);
+        File.Delete(output);
+    }
+
     /// <summary>
     /// Tests a connection to a database
     /// </summary>
