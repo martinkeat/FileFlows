@@ -780,11 +780,11 @@ public class FlowWorker : Worker
                     var output = process.StandardOutput.ReadToEnd();
                     process.WaitForExit();
                     
-                    var totalLength = 140;
+                    var totalLength = 120;
                     var modNameLength = mod.Name.Length;
                     var sideLength = (totalLength - modNameLength - 14) / 2; // Subtracting 14 for the length of " Docker Mod: "
                     var header = new string('-', sideLength) + " Docker Mod: " + mod.Name + new string('-', sideLength + (modNameLength % 2));
-                    Logger.Instance.ILog("\n" + header + output + "\n" +
+                    Logger.Instance.ILog("\n" + header + "\n" + output + "\n" +
                                          new string('-', totalLength));
                     
                     ExecutedDockerMods[mod.Uid] = mod.Revision;
