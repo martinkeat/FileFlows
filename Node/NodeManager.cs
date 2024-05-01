@@ -157,7 +157,7 @@ public class NodeManager
         
         RemoteService.AccessToken = settings.AccessToken;
         var nodeService = ServiceLoader.Load<INodeService>();
-        Shared.Models.ProcessingNode result;
+        Shared.Models.ProcessingNode? result;
         try
         {
             result = await nodeService.Register(settings.ServerUrl, settings.HostName, tempPath, mappings);

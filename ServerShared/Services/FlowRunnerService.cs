@@ -24,7 +24,7 @@ public interface IFlowRunnerService
     /// </summary>
     /// <param name="info">The information about the flow execution</param>
     /// <returns>The updated information</returns>
-    Task<FlowExecutorInfo> Start(FlowExecutorInfo info);
+    Task<FlowExecutorInfo?> Start(FlowExecutorInfo info);
     /// <summary>
     /// Called when the flow execution has completed
     /// </summary>

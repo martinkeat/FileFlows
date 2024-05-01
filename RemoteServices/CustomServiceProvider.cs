@@ -61,7 +61,7 @@ public class CustomServiceProvider
     /// </summary>
     /// <typeparam name="TService">The type of the service interface.</typeparam>
     /// <returns>The service instance.</returns>
-    public TService GetService<TService>() where TService : class
+    public TService? GetService<TService>() where TService : class
     {
         if (!_isBuilt)
         {

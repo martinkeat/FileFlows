@@ -96,7 +96,7 @@ public class Application
                 }
             }
 
-            DirectoryHelper.Init(false);
+            DirectoryHelper.Init();
 
             if (File.Exists(Path.Combine(DirectoryHelper.BaseDirectory, "server-upgrade.bat")))
                 File.Delete(Path.Combine(DirectoryHelper.BaseDirectory, "server-upgrade.bat"));

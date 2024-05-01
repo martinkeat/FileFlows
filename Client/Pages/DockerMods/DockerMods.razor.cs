@@ -120,6 +120,6 @@ public partial class DockerMods : ListPage<Guid, DockerMod>
 #if (DEBUG)
         url = "http://localhost:6868" + url;
 #endif
-        await jsRuntime.InvokeVoidAsync("ff.downloadFile", new object[] { url, item.Name + ".yaml" });
+        await jsRuntime.InvokeVoidAsync("ff.downloadFile", new object[] { url, item.Name + ".sh" });
     }
 }

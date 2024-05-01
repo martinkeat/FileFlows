@@ -41,7 +41,7 @@ class HttpHelper
     /// <param name="url">the URL to call</param>
     /// <param name="data">any data to send with the request</param>
     /// <returns>the request result</returns>
-    public static async Task<RequestResult<string>> Post(string url, object data = null)
+    public static async Task<RequestResult<string>> Post(string url, object? data = null)
     {
         return await MakeRequest<string>(System.Net.Http.HttpMethod.Post, url, data);
     }
@@ -54,7 +54,7 @@ class HttpHelper
     /// <param name="data">any data to send with the request</param>
     /// <param name="timeoutSeconds">the number of seconds before a timeout occurs</param>
     /// <returns>the request result</returns>
-    public static async Task<RequestResult<T>> Post<T>(string url, object data = null, int timeoutSeconds = 0)
+    public static async Task<RequestResult<T>> Post<T>(string url, object? data = null, int timeoutSeconds = 0)
     {
         return await MakeRequest<T>(System.Net.Http.HttpMethod.Post, url, data, timeoutSeconds: timeoutSeconds);
     }
@@ -66,7 +66,7 @@ class HttpHelper
     /// <param name="url">the URL to call</param>
     /// <param name="data">any data to send with the request</param>
     /// <returns>the request result</returns>
-    public static async Task<RequestResult<T>> Put<T>(string url, object data = null)
+    public static async Task<RequestResult<T>> Put<T>(string url, object? data = null)
     {
         return await MakeRequest<T>(System.Net.Http.HttpMethod.Put, url, data);
     }
@@ -77,7 +77,7 @@ class HttpHelper
     /// <param name="url">the URL to call</param>
     /// <param name="data">any data to send with the request</param>
     /// <returns>the request result</returns>
-    public static async Task<RequestResult<string>> Delete(string url, object data = null)
+    public static async Task<RequestResult<string>> Delete(string url, object? data = null)
     {
         return await MakeRequest<string>(System.Net.Http.HttpMethod.Delete, url, data);
     }
@@ -103,7 +103,7 @@ class HttpHelper
     /// <param name="timeoutSeconds">the number of seconds to wait before a timeout</param>
     /// <typeparam name="T">The request object returned</typeparam>
     /// <returns>a processing result of the request</returns>
-    private static async Task<RequestResult<T>> MakeRequest<T>(System.Net.Http.HttpMethod method, string url, object data = null, int timeoutSeconds = 0)
+    private static async Task<RequestResult<T>> MakeRequest<T>(System.Net.Http.HttpMethod method, string url, object? data = null, int timeoutSeconds = 0)
     {
 #if (DEBUG)
         if (url.Contains("i18n") == false && url.StartsWith("http") == false)

@@ -7,6 +7,6 @@ public abstract class CacheControllerTestBase
 {
     static CacheControllerTestBase()
     {
-        DirectoryHelper.Init(false);
+        DirectoryHelper.Init();
     }
 }

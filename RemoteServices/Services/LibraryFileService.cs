@@ -67,7 +67,7 @@ public class LibraryFileService : RemoteService, ILibraryFileService
     /// <param name="nodeVersion">the version of the node</param>
     /// <param name="workerUid">The UID of the worker on the node</param>
     /// <returns>If found, the next library file to process, otherwise null</returns>
-    public async Task<NextLibraryFileResult> GetNext(string nodeName, Guid nodeUid, string nodeVersion, Guid workerUid)
+    public async Task<NextLibraryFileResult?> GetNext(string nodeName, Guid nodeUid, string nodeVersion, Guid workerUid)
     {
         // can throw exception if nothing to process
         try

@@ -54,6 +54,11 @@ public class Globals
     public static bool IsDocker { get; set; }
 
     /// <summary>
+    /// Gets or sets if this is running on the node or the server
+    /// </summary>
+    public static bool IsNode { get; set; }
+
+    /// <summary>
     /// Gets or sets if this node is running as a systemd service
     /// </summary>
     public static bool IsSystemd { get; set; }

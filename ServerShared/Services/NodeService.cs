@@ -13,20 +13,20 @@ public interface INodeService
     /// </summary>
     /// <param name="address">The address (hostname or IP address) of the node</param>
     /// <returns>An instance of the processing node</returns>
-    Task<ProcessingNode> GetByAddressAsync(string address);
+    Task<ProcessingNode?> GetByAddressAsync(string address);
     
     /// <summary>
     /// Gets a processing node by UID
     /// </summary>
     /// <param name="uid">The UID of the node</param>
     /// <returns>An instance of the processing node</returns>
-    Task<ProcessingNode> GetByUidAsync(Guid uid);
+    Task<ProcessingNode?> GetByUidAsync(Guid uid);
 
     /// <summary>
     /// Gets an instance of the internal processing node
     /// </summary>
     /// <returns>an instance of the internal processing node</returns>
-    Task<ProcessingNode> GetServerNodeAsync();
+    Task<ProcessingNode?> GetServerNodeAsync();
     
     /// <summary>
     /// Clears all workers on the node.
@@ -45,7 +45,7 @@ public interface INodeService
     /// <param name="mappings">Any mappings for the node</param>
     /// <returns>An instance of the registered node</returns>
     /// <exception cref="Exception">If fails to register, an exception will be thrown</exception>
-    Task<ProcessingNode> Register(string serverUrl, string address, string tempPath,
+    Task<ProcessingNode?> Register(string serverUrl, string address, string tempPath,
         List<RegisterModelMapping> mappings);
 
     /// <summary>

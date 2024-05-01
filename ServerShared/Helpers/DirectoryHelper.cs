@@ -8,17 +8,10 @@ namespace FileFlows.ServerShared.Helpers;
 public class DirectoryHelper
 {
     /// <summary>
-    /// Gets if this is a Node or Server
-    /// </summary>
-    public static bool IsNode { get; private set; }
-
-    /// <summary>
     /// Initializes the Directory Helper
     /// </summary>
-    /// <param name="isNode">True if running on a node</param>
-    public static void Init(bool isNode)
+    public static void Init()
     {
-        IsNode = isNode;
         
         InitLoggingDirectory();
         InitDataDirectory();
@@ -38,7 +31,7 @@ public class DirectoryHelper
         if (Directory.Exists(dir) == false)
             Directory.CreateDirectory(dir);
 
-        string oldDir = Path.Combine(BaseDirectory, IsNode ? "Node" : "Server", "Plugins");
+        string oldDir = Path.Combine(BaseDirectory, Globals.IsNode ? "Node" : "Server", "Plugins");
         if (Directory.Exists(oldDir) == false)
             return;
         MoveDirectoryContent(oldDir, dir);
@@ -243,7 +236,7 @@ public class DirectoryHelper
     /// <summary>
     /// Gets the DockerMods directory
     /// </summary>
-    public static readonly string DockerModsDirectory = Path.Combine(DataDirectory, "DockerMods");
+    public static string DockerModsDirectory => Path.Combine(DataDirectory, "DockerMods");
     
     /// <summary>
     /// Gets the scripts directory

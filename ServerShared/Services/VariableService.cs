@@ -12,5 +12,5 @@ public interface IVariableService
     /// Gets all variables in the system
     /// </summary>
     /// <returns>all variables in the system</returns>
-    Task<List<Variable>> GetAllAsync();
+    Task<List<Variable>?> GetAllAsync();
 }

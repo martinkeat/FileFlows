@@ -24,7 +24,7 @@ public interface ISettingsService
     /// Gets the current configuration revision
     /// </summary>
     /// <returns>the current configuration revision</returns>
-    Task<ConfigurationRevision> GetCurrentConfiguration();
+    Task<ConfigurationRevision?> GetCurrentConfiguration();
 
     /// <summary>
     /// Downloads a plugin to the destination

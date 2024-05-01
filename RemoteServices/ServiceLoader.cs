@@ -34,6 +34,9 @@ public static class ServiceLoader
     /// <returns>The loaded service instance.</returns>
     public static T Load<T>() where T : class
     {
-        return Provider.GetService<T>(); // Get the required service instance
+        var service = Provider.GetService<T>(); // Get the required service instance
+        if (service == null)
+            throw new Exception($"Service '{typeof(T).Name}' not registered.");
+        return service;
     }   
 }

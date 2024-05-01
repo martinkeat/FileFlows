@@ -5,13 +5,13 @@ namespace FileFlows.RemoteServices;
 /// </summary>
 public abstract class RemoteService 
 {
-    private static string _ServiceBaseUrl;
+    private static string? _ServiceBaseUrl;
     /// <summary>
     /// Gets or sets the Base URL of the FileFlows server
     /// </summary>
     public static string ServiceBaseUrl 
     { 
-        get => _ServiceBaseUrl;
+        get => _ServiceBaseUrl!;
         set
         {
             if(value == null)
@@ -29,7 +29,7 @@ public abstract class RemoteService
     /// <summary>
     /// Gets or sets the Access Token
     /// </summary>
-    public static string AccessToken { get; set; }
+    public static string AccessToken { get; set; } = string.Empty;
 
     /// <summary>
     /// Gets or sets the Node UID whose making these requests

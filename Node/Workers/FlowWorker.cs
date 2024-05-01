@@ -739,6 +739,8 @@ public class FlowWorker : Worker
     {
         var directory = DirectoryHelper.DockerModsDirectory;
         Logger.Instance.ILog("DockerMods Directory: " + directory);
+        if (Directory.Exists(directory) == false)
+            Directory.CreateDirectory(directory);
         
         // Delete all .sh files in the directory
         var files = Directory.GetFiles(directory, "*.sh");

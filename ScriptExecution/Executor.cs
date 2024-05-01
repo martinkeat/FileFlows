@@ -84,8 +84,8 @@ public class Executor
     /// <summary>
     /// Executes javascript
     /// </summary>
-    /// <returns>the output to be called next</returns>
-    public object Execute()
+    /// <returns>the result of the execution</returns>
+    public object? Execute()
     {
         if (string.IsNullOrEmpty(Code))
             return false; // no code, flow cannot continue doesnt know what to do

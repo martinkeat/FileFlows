@@ -54,11 +54,12 @@ public class Program
 
         Program.EntryPoint = options.EntryPoint;
         Globals.IsDocker = options.Docker;
+        Globals.IsNode = true;
         Globals.IsSystemd = options.IsSystemd;
         // if (options.ApiPort > 0 && options.ApiPort < 65535)
         //     Workers.RestApiWorker.Port = options.ApiPort;
         
-        DirectoryHelper.Init(true);
+        DirectoryHelper.Init();
         
         Console.WriteLine("BaseDirectory: " + DirectoryHelper.BaseDirectory);
         

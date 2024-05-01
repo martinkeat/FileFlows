@@ -13,7 +13,7 @@ public class SettingsService : RemoteService, ISettingsService
         try
         {
             var result = await HttpHelper.Get<string>($"{ServiceBaseUrl}/remote/system/version");
-            if (result.Success == false)
+            if (result.Success == false || result.Data == null)
                 throw new Exception(result.Body);
             return new Version(result.Data);
         }
@@ -52,7 +52,7 @@ public class SettingsService : RemoteService, ISettingsService
     /// Gets the current configuration revision
     /// </summary>
     /// <returns>the current configuration revision</returns>
-    public async Task<ConfigurationRevision> GetCurrentConfiguration()
+    public async Task<ConfigurationRevision?> GetCurrentConfiguration()
     {
         try
         {
@@ -78,7 +78,7 @@ public class SettingsService : RemoteService, ISettingsService
             if (result.Success == false)
                 return Result<string>.Fail($"Failed to download plugin '{name}': " + result.Body);
             string output = Path.Combine(destinationPath, name);
-            await File.WriteAllBytesAsync(output, result.Data);
+            await File.WriteAllBytesAsync(output, result.Data!);
             return output;
         }
         catch (Exception ex)

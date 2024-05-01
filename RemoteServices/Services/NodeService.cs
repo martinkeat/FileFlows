@@ -22,7 +22,7 @@ public class NodeService : RemoteService, INodeService
     }
 
     /// <inheritdoc />
-    public async Task<ProcessingNode> GetServerNodeAsync()
+    public async Task<ProcessingNode?> GetServerNodeAsync()
     {
         try
         {
@@ -37,7 +37,7 @@ public class NodeService : RemoteService, INodeService
     }
     
     /// <inheritdoc />
-    public async Task<ProcessingNode> GetByAddressAsync(string address)
+    public async Task<ProcessingNode?> GetByAddressAsync(string address)
     {
         try
         {
@@ -61,7 +61,7 @@ public class NodeService : RemoteService, INodeService
     }
     
     /// <inheritdoc />
-    public async Task<ProcessingNode> GetByUidAsync(Guid uid)
+    public async Task<ProcessingNode?> GetByUidAsync(Guid uid)
     {
         try
         {
@@ -92,7 +92,7 @@ public class NodeService : RemoteService, INodeService
     /// <param name="mappings">Any mappings for the node</param>
     /// <returns>An instance of the registered node</returns>
     /// <exception cref="Exception">If fails to register, an exception will be thrown</exception>
-    public async Task<ProcessingNode> Register(string serverUrl, string address, string tempPath, List<RegisterModelMapping> mappings)// int runners, bool enabled, List<RegisterModelMapping> mappings)
+    public async Task<ProcessingNode?> Register(string serverUrl, string address, string tempPath, List<RegisterModelMapping> mappings)// int runners, bool enabled, List<RegisterModelMapping> mappings)
     {
         if(serverUrl.EndsWith("/"))
             serverUrl = serverUrl.Substring(0, serverUrl.Length - 1);
@@ -175,14 +175,14 @@ public class NodeService : RemoteService, INodeService
         try
         {
             var result = await HttpHelper.Get<byte[]>($"{ServiceBaseUrl}/remote/node/updater?version={Globals.Version}&system={GetSystem()}");
-            if (result.Success == false)
+            if (result.Success == false || result.Data == null)
                 throw new Exception("Failed to get update: " + result.Body);
             return result.Data;
         }
         catch (Exception ex)
         {
             Logger.Instance?.WLog("Failed to get update: " + ex.Message);
-            return new byte[] { };
+            return [];
         }
     }
 
