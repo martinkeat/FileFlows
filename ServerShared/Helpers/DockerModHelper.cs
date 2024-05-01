@@ -37,6 +37,9 @@ public static class DockerModHelper
 
             if (forceExecution == false && ExecutedDockerMods.TryGetValue(mod.Uid, out int value) && value == mod.Revision)
                 return; // already executed
+            
+            // Run dpkg to configure any pending package installations
+            Process.Start("dpkg", "--configure -a").WaitForExit();
                 
             // Run the file and capture output to string
             var process = Process.Start(new ProcessStartInfo

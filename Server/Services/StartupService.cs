@@ -100,7 +100,7 @@ public class StartupService
         if (File.Exists(output) == false)
             return;
         var content = File.ReadAllText(output);
-        Logger.Instance.ILog("DockerMods: " + content);
+        Logger.Instance.ILog("DockerMods: \n" + content);
         File.Delete(output);
     }
 
