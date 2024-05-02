@@ -120,6 +120,14 @@ public partial class DockerMods : ListPage<Guid, DockerMod>
 #if (DEBUG)
         url = "http://localhost:6868" + url;
 #endif
-        await jsRuntime.InvokeVoidAsync("ff.downloadFile", new object[] { url, item.Name + ".sh" });
+        
+        var result = await HttpHelper.Get<string>(url);
+        if (result.Success == false)
+        {
+            Toast.ShowError(Translater.Instant("Pages.DockerMod.Messages.FailedToExport"));
+            return;
+        }
+
+        await jsRuntime.InvokeVoidAsync("ff.saveTextAsFile", item.Name  + ".sh", result.Body);
     }
 }

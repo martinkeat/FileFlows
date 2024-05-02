@@ -752,7 +752,7 @@ public class FlowWorker : Worker
         
         foreach (var mod in mods)
         {
-            DockerModHelper.Execute(mod);
+            DockerModHelper.Execute(mod).Wait();
         }
     }
 

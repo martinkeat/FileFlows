@@ -1,6 +1,7 @@
 using System.Text.RegularExpressions;
 using FileFlows.Plugin;
 using FileFlows.ServerShared.Helpers;
+using FileFlows.Shared;
 using NPoco.DatabaseTypes;
 using DatabaseType = FileFlows.Shared.Models.DatabaseType;
 

@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Text;
 using FileFlows.Shared.Models;
 
 namespace FileFlows.ServerShared.Helpers;
@@ -12,59 +13,99 @@ public static class DockerModHelper
     /// A collection of executed docker mods
     /// </summary>
     private static Dictionary<Guid, int> ExecutedDockerMods = new();
+
+    private static FairSemaphore _semaphore = new(1);
     
     /// <summary>
     /// Executes a DockerMod, if does file does not exist on disk, this will write it
     /// </summary>
     /// <param name="mod">the DockerMod to execute</param>
     /// <param name="forceExecution">If this should run even if it has already been run</param>
-    public static void Execute(DockerMod mod, bool forceExecution = false)
+    public static async Task Execute(DockerMod mod, bool forceExecution = false)
     {
         if (Globals.IsDocker == false)
             return; // Only run on Docker instances
-        
-        var directory = DirectoryHelper.DockerModsDirectory;
-        var file = Path.Combine(directory, mod.Name + ".sh");
-        if (Directory.Exists(directory) == false)
-            Directory.CreateDirectory(directory);
-        
+
+        await _semaphore.WaitAsync();
+
         try
         {
-            File.WriteAllText(file, mod.Code);
-                
-            // Set execute permission for the file
-            Process.Start("chmod", $"+x {file}").WaitForExit();
 
-            if (forceExecution == false && ExecutedDockerMods.TryGetValue(mod.Uid, out int value) && value == mod.Revision)
+            var directory = DirectoryHelper.DockerModsDirectory;
+            var file = Path.Combine(directory, mod.Name + ".sh");
+            if (Directory.Exists(directory) == false)
+                Directory.CreateDirectory(directory);
+            await File.WriteAllTextAsync(file, mod.Code);
+
+            // Set execute permission for the file
+            await Process.Start("chmod", $"+x {file}").WaitForExitAsync();
+
+            if (forceExecution == false && ExecutedDockerMods.TryGetValue(mod.Uid, out int value) &&
+                value == mod.Revision)
                 return; // already executed
-            
+
             // Run dpkg to configure any pending package installations
-            Process.Start("dpkg", "--configure -a").WaitForExit();
-                
+            await Process.Start("dpkg", "--configure -a").WaitForExitAsync();
+
             // Run the file and capture output to string
             var process = Process.Start(new ProcessStartInfo
             {
-                FileName = file,
+                //FileName = "/bin/bash",
+                FileName = "/bin/su",
+                ArgumentList = { "-c", file },
                 RedirectStandardOutput = true,
-                UseShellExecute = false
+                RedirectStandardError = true, // Redirect standard error stream
+                UseShellExecute = false,
+                WorkingDirectory = DirectoryHelper.DockerModsDirectory
             });
-            if (process == null) return;
-            
-            var output = process.StandardOutput.ReadToEnd();
-            process.WaitForExit();
-                    
+
+            if (process == null)
+            {
+                Logger.Instance.WLog($"Failed Running DockerMod '{mod.Name}': Failed to start the process.");
+                return;
+            }
+
+            StringBuilder outputBuilder = new StringBuilder();
+
+            process.OutputDataReceived += (sender, e) =>
+            {
+                if (!string.IsNullOrEmpty(e.Data))
+                {
+                    outputBuilder.AppendLine(e.Data);
+                }
+            };
+
+            process.ErrorDataReceived += (sender, e) =>
+            {
+                if (!string.IsNullOrEmpty(e.Data))
+                {
+                    outputBuilder.AppendLine(e.Data);
+                }
+            };
+
+            process.BeginOutputReadLine();
+            process.BeginErrorReadLine(); // Begin reading standard error stream asynchronously
+
+            await process.WaitForExitAsync();
+            string output = outputBuilder.ToString();
+
             var totalLength = 120;
             var modNameLength = mod.Name.Length;
             var sideLength = (totalLength - modNameLength - 14) / 2; // Subtracting 14 for the length of " Docker Mod: "
-            var header = new string('-', sideLength) + " Docker Mod: " + mod.Name + new string('-', sideLength + (modNameLength % 2));
+            var header = new string('-', sideLength) + " Docker Mod: " + mod.Name + " " +
+                         new string('-', sideLength + (modNameLength % 2));
             Logger.Instance.ILog("\n" + header + "\n" + output + "\n" +
                                  new string('-', totalLength));
-                    
+
             ExecutedDockerMods[mod.Uid] = mod.Revision;
         }
         catch (Exception ex)
         {
             Logger.Instance.WLog("Failed Running DockerMod: " + ex.Message);
+        }
+        finally
+        {
+            _semaphore.Release();
         }
     }
     

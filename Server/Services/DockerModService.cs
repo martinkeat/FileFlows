@@ -46,10 +46,11 @@ public class DockerModService
     public async Task<Result<DockerMod>> Save(DockerMod mod, AuditDetails? auditDetails)
     {
         var result = await new DockerModManager().Update(mod, auditDetails);
-        if (Globals.IsDocker && result.Success(out DockerMod updated))
+        bool isDocker = Globals.IsDocker;
+        if (isDocker && result.Success(out DockerMod updated))
         {
             if(updated.Enabled)
-                DockerModHelper.Execute(updated);
+                _ = DockerModHelper.Execute(updated); // dont wait this, it can take a while to install the DockerMod
             else
                 DockerModHelper.DeleteFromDisk(updated);
         }
