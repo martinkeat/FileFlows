@@ -142,6 +142,7 @@ public class DockerModService
             // Deserialize YAML to DockerMod object
             var deserializer = new DeserializerBuilder()
                 .WithNamingConvention(PascalCaseNamingConvention.Instance)
+                .IgnoreUnmatchedProperties()
                 .Build();
 
             var mod = deserializer.Deserialize<DockerMod>(yaml);
