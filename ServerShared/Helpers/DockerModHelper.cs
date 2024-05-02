@@ -30,9 +30,8 @@ public static class DockerModHelper
 
         try
         {
-
             var directory = DirectoryHelper.DockerModsDirectory;
-            var file = Path.Combine(directory, mod.Name + ".sh");
+            var file = Path.Combine(directory, mod.Name.Replace(" ","-").TrimStart('.').Replace("/", "-") + ".sh");
             if (Directory.Exists(directory) == false)
                 Directory.CreateDirectory(directory);
             await File.WriteAllTextAsync(file, mod.Code);

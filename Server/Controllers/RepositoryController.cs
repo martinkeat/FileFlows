@@ -80,7 +80,7 @@ public class RepositoryController : BaseController
         foreach (var ro in objects)
         {
             var result = await service.GetContent(ro.Path);
-            if (result.Failed(out string error))
+             if (result.Failed(out string error))
                 return BadRequest(error);
             var rr = await processor(result.Value, auditDetails);
             if (rr.Failed(out error))
