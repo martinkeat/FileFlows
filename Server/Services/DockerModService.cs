@@ -112,6 +112,8 @@ public class DockerModService
             mod = existing;
         }
 
+        mod.Enabled = true;
+
         var result = await Save(mod, auditDetails);
         if (result.Failed(out error))
             return Result<bool>.Fail(error);

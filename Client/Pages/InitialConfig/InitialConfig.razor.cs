@@ -140,7 +140,10 @@ public partial class InitialConfig : ComponentBase
         if (request.Success == false)
             return;
 
-        AvailableDockerMods = request.Data.OrderBy(x => x.Default == true ? 0 : 1).ThenBy(x => x.Name.ToLowerInvariant()).ToList();
+        AvailableDockerMods = request.Data
+            .OrderBy(x => x.Default == true ? 0 : 1)
+            .ThenBy(x => x.Name.ToLowerInvariant()?.StartsWith("ffmpeg") == true ? 0 : 1)
+            .ThenBy(x => x.Name.ToLowerInvariant()).ToList();
     }
 
     /// <summary>

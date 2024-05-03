@@ -402,6 +402,19 @@ public class SettingsController : BaseController
         settings.EulaAccepted = model.EulaAccepted;
         settings.InitialConfigDone = true;
         await service.Save(settings, await GetAuditDetails());
+
+        if (model.DockerMods?.Any() == true)
+        {
+            var dmService = ServiceLoader.Load<DockerModService>();
+            var repoService = ServiceLoader.Load<RepositoryService>();
+            foreach (var dm in model.DockerMods)
+            {
+                var content = await repoService.GetContent(dm.Path);
+                if (content.IsFailed == false)
+                    await dmService.ImportFromRepository(content.Value, null);
+            }
+        }
+
         return Ok();
     }
 
@@ -418,5 +431,9 @@ public class SettingsController : BaseController
         /// Gets or sets if the EULA was accepted
         /// </summary>
         public bool EulaAccepted { get; set; }
+        /// <summary>
+        /// Gets or sets the DockerMods to install
+        /// </summary>
+        public List<RepositoryObject> DockerMods { get; set; }
     }
 }
