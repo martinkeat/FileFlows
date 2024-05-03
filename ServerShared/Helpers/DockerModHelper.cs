@@ -44,7 +44,14 @@ public static class DockerModHelper
                 return; // already executed
 
             // Run dpkg to configure any pending package installations
-            await Process.Start("dpkg", "--configure -a").WaitForExitAsync();
+            //await Process.Start("dpkg", "--configure -a").WaitForExitAsync();
+            await Process.Start(new ProcessStartInfo
+            {
+                //FileName = "/bin/bash",
+                FileName = "/bin/su",
+                ArgumentList = { "dpkg", "--configure", "-a" },
+                UseShellExecute = false
+            }).WaitForExitAsync();
 
             // Run the file and capture output to string
             var process = Process.Start(new ProcessStartInfo

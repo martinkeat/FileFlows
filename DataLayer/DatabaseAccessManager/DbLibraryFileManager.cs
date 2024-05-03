@@ -1375,7 +1375,7 @@ where {Wrap(nameof(LibraryFile.Status))} = 1 and {Wrap(nameof(LibraryFile.Proces
                      $" {Wrap(nameof(LibraryFile.RelativePath))} = @1, " +
                      $" {Wrap(nameof(LibraryFile.OutputPath))} = @2, " +
                      $" {Wrap(nameof(LibraryFile.CreationTime))} = {DbConnector.FormatDateQuoted(file.CreationTime)}, " +
-                     $" {Wrap(nameof(LibraryFile.LastWriteTime))} = {DbConnector.FormatDateQuoted(file.LastWriteTime)}, " +
+                     $" {Wrap(nameof(LibraryFile.LastWriteTime))} = {DbConnector.FormatDateQuoted(file.LastWriteTime)} " +
                      $" where {Wrap(nameof(LibraryFile.Uid))} = '{file.Uid}'";
         using var db = await DbConnector.GetDb();
         return await db.Db.ExecuteAsync(sql, file.Name, file.RelativePath, file.OutputPath) > 0;
