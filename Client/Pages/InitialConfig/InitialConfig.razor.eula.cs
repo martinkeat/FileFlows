@@ -54,6 +54,7 @@ FileFlows collects telemetry data from your use of the Software. This data is an
 - Storage saved
 - Flow templates being used
 - Library templates being used
+- DockerMods being used
 
 This data is collected to improve the performance, features, and usability of the Software. By accepting this EULA, you consent to the collection of such telemetry data.
 

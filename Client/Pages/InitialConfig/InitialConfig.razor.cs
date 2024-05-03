@@ -45,7 +45,6 @@ public partial class InitialConfig : ComponentBase
     /// Gets or sets a list of available plugins
     /// </summary>
     private List<PluginPackageInfo> AvailablePlugins { get; set; }
-
     /// <summary>
     /// The plugins that are forced checked and cannot be unchecked
     /// These are plugins that are already installed
@@ -53,9 +52,19 @@ public partial class InitialConfig : ComponentBase
     private List<PluginPackageInfo> ForcedPlugins;
 
     /// <summary>
-    /// The Plugin flowtable
+    /// Gets or sets a list of available DockerMods
+    /// </summary>
+    private List<RepositoryObject> AvailableDockerMods { get; set; }
+
+    /// <summary>
+    /// The Plugin flow table
     /// </summary>
     private FlowTable<PluginPackageInfo> PluginTable;
+
+    /// <summary>
+    /// The DockerMod flow table
+    /// </summary>
+    private FlowTable<RepositoryObject> DockerModTable;
     /// <summary>
     /// Label for "Installed" shown next to installed plugins
     /// </summary>
@@ -76,6 +85,9 @@ public partial class InitialConfig : ComponentBase
     {
         Blocker.Show("Labels.Loading");
         Profile = await ProfileService.Get();
+        #if(DEBUG)
+        Profile.ServerOS = OperatingSystemType.Docker;
+        #endif
         if (Profile.IsAdmin == false)
         {
             await ProfileService.Logout("Labels.AdminRequired");
@@ -94,10 +106,13 @@ public partial class InitialConfig : ComponentBase
 
         // only show plugins if they haven't configured the system yet
         onlyEula = (Profile.ConfigurationStatus & ConfigurationStatus.InitialConfig) ==
-                   ConfigurationStatus.InitialConfig; 
-        if(onlyEula == false)
+                   ConfigurationStatus.InitialConfig;
+        if (onlyEula == false)
+        {
             await GetPlugins();
-        
+            await GetDockerMOds();
+        }
+
         Blocker.Hide();
         loaded = true;
     }
@@ -117,6 +132,18 @@ public partial class InitialConfig : ComponentBase
     }
 
     /// <summary>
+    /// Gets the DockerMods from the backend
+    /// </summary>
+    private async Task GetDockerMOds()
+    {
+        var request = await HttpHelper.Get<List<RepositoryObject>>("/api/repository/by-type/DockerMod");
+        if (request.Success == false)
+            return;
+
+        AvailableDockerMods = request.Data.OrderBy(x => x.Default == true ? 0 : 1).ThenBy(x => x.Name.ToLowerInvariant()).ToList();
+    }
+
+    /// <summary>
     /// Savss the initial configuration
     /// </summary>
     private async Task Save()
@@ -128,6 +155,7 @@ public partial class InitialConfig : ComponentBase
         }
 
         var plugins = onlyEula ? null : PluginTable?.GetSelected()?.ToList();
+        var dockerMods = onlyEula ? null : DockerModTable?.GetSelected()?.ToList();
         
         Blocker.Show("Labels.Saving");
         try
@@ -135,7 +163,8 @@ public partial class InitialConfig : ComponentBase
             var result = await HttpHelper.Post("/api/settings/initial-config", new
             {
                 EulaAccepted,
-                Plugins = plugins
+                Plugins = plugins,
+                DockerMods = dockerMods
             });
             if (result.Success)
             {

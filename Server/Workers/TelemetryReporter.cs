@@ -65,12 +65,24 @@ public class TelemetryReporter : ServerWorker
             
             data.FilesFailed = filesFailed;
             data.FilesProcessed = filesProcessed;
+            var repo = ServiceLoader.Load<RepositoryService>().GetRepository().Result ?? new ();
+            var repoScripts = repo.FlowScripts.Union(repo.SharedScripts).Union(repo.SystemScripts)
+                .Select(x => x.Name).Distinct().ToList();
+            
             var flows = ServiceLoader.Load<FlowService>().GetAllAsync().Result;
             var dictNodes = new Dictionary<string, int>();
             foreach (var fp in flows?.SelectMany(x => x.Parts)?.ToArray() ?? new FlowPart[] { })
             {
                 if (fp == null)
                     continue;
+                if (fp.FlowElementUid.StartsWith("SubFlow:"))
+                    continue;
+                if (fp.FlowElementUid.StartsWith("Script:"))
+                {
+                    string name = fp.FlowElementUid[7..];
+                    if (repoScripts.Contains(name) == false)
+                        continue;
+                }
                 if (!dictNodes.TryAdd(fp.FlowElementUid, 1))
                     dictNodes[fp.FlowElementUid] += 1;
             }

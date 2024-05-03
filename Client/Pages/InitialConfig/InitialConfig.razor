@@ -59,28 +59,7 @@ else
                             </Header>
                             <Cell Context="item">
                                 <div class="table-item">
-                                    <span class="icon">
-                                        @if (string.IsNullOrWhiteSpace(item.Icon))
-                                        {
-                                            <i class="icon fas fa-puzzle-piece"></i>
-                                        }
-                                        else if (item.Icon.StartsWith("svg:"))
-                                        {
-                                            <img src="/icons/@(item.Icon[4..]).svg"/>
-                                        }
-                                        else
-                                        {
-                                            var parts = item.Icon.Split(':');
-                                            if (parts.Length == 2)
-                                            {
-                                                <i class="icon @parts[0]" style="color:@parts[1]"></i>
-                                            }
-                                            else
-                                            {
-                                                <i class="icon @item.Icon"></i>
-                                            }
-                                        }
-                                    </span>
+                                    <TableItemIcon Icon="@item.Icon" DefaultIcon="fas fa-puzzle-piece" />
                                     <div class="center">
                                         <span class="name"><span>@item.Name</span></span>
                                         <span class="description"><span>@item.Description</span></span>
@@ -102,6 +81,36 @@ else
 
 
             </FlowWizardPage>
+
+            @if (Profile.ServerOS == OperatingSystemType.Docker)
+            {
+                <FlowWizardPage Title="DockerMods" Disabled="@(EulaAccepted == false)"
+                                Visible="(AvailableDockerMods?.Any() == true)"
+                                Description="Choose which DockerMods to install, this adds additional packages to any FileFlows Docker instances.">
+                    <FlowTable @ref="DockerModTable" Data="AvailableDockerMods" TItem="RepositoryObject"
+                               HideHead="true" HideToolbar="true" Selection="SelectionMode.Multiple"
+                               TableIdentifier="InitialConfigDockerMods" DontClearOnClick="true">
+                        <Columns>
+                            <FlowTableColumn TItem="RepositoryObject" NoHeight="true">
+                                <Header>
+                                    @Globals.lblName
+                                </Header>
+                                <Cell Context="item">
+                                    <div class="table-item">
+                                        <TableItemIcon Icon="@item.Icon" DefaultIcon="fab fa-docker"/>
+                                        <div class="center">
+                                            <span class="name"><span>@item.Name</span></span>
+                                            <span class="description"><span>@item.Description</span></span>
+                                        </div>
+                                    </div>
+
+                                </Cell>
+                            </FlowTableColumn>
+                        </Columns>
+                    </FlowTable>
+                </FlowWizardPage>
+            }
+
             <FlowWizardPage Title="Finish" Disabled="@(EulaAccepted == false)" Visible="(onlyEula == false)" Description="Initial Configuration Complete">
 
                 You've successfully configured FileFlows to suit your needs. Now it's time to put it to work!

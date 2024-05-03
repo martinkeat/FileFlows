@@ -49,7 +49,7 @@ public static class DockerModHelper
             {
                 //FileName = "/bin/bash",
                 FileName = "/bin/su",
-                ArgumentList = { "dpkg", "--configure", "-a" },
+                ArgumentList = { "c", "dpkg --configure -a" },
                 UseShellExecute = false
             }).WaitForExitAsync();
 

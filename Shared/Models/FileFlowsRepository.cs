@@ -96,4 +96,9 @@ public class RepositoryObject
     /// Gets or sets an optional Icon
     /// </summary>
     public string? Icon { get; set; }
+
+    /// <summary>
+    /// Gets or sets if this is a default item
+    /// </summary>
+    public bool? Default { get; set; }
 }
