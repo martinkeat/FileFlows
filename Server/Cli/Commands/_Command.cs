@@ -98,7 +98,10 @@ public abstract class Command
             foreach (var m in missing)
             {
                 var att = m.GetCustomAttribute<CommandLineArg>();
-                logger.ILog($"--{att.Switch.PadRight(maxSwitchLength)}: Is Required");
+                if(string.IsNullOrEmpty(att.MissingErrorOverride) == false)
+                    logger.ILog(att.MissingErrorOverride);
+                else
+                    logger.ILog($"--{att.Switch.PadRight(maxSwitchLength)}: Is Required");
             }
 
             throw new Exception("Missing arguments");

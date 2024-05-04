@@ -17,7 +17,9 @@ public class Systemd : Command
     /// <summary>
     /// Gets or sets the mode
     /// </summary>
-    [CommandLineArg("", "install to install the service on uninstall to remove it")]
+    [CommandLineArg("", 
+        "install to install the service on uninstall to remove it",
+        missingErrorOverride: "'install' or 'uninstall' required.")]
     public string Mode { get; set; }
     
     /// <inheritdoc />
