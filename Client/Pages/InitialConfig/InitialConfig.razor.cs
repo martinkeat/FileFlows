@@ -110,7 +110,7 @@ public partial class InitialConfig : ComponentBase
         if (onlyEula == false)
         {
             await GetPlugins();
-            await GetDockerMOds();
+            await GetDockerMods();
         }
 
         Blocker.Hide();
@@ -134,7 +134,7 @@ public partial class InitialConfig : ComponentBase
     /// <summary>
     /// Gets the DockerMods from the backend
     /// </summary>
-    private async Task GetDockerMOds()
+    private async Task GetDockerMods()
     {
         var request = await HttpHelper.Get<List<RepositoryObject>>("/api/repository/by-type/DockerMod");
         if (request.Success == false)
@@ -190,5 +190,22 @@ public partial class InitialConfig : ComponentBase
 
         Toast.ShowError("Failed to save initial configuration.");
         Blocker.Hide();
+    }
+
+    private bool InitDone = false;
+
+    /// <summary>
+    /// Toggles the EULA has been accepted
+    /// </summary>
+    private void ToggleEulaAccepted()
+    {
+        EulaAccepted = !EulaAccepted;
+        if (InitDone == false)
+        {
+            InitDone = true;
+            
+            DockerModTable.SetData(AvailableDockerMods);
+            DockerModTable.SetSelected(AvailableDockerMods.Where(x => x.Default == true).ToArray());
+        }
     }
 }

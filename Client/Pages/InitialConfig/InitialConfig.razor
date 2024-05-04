@@ -42,7 +42,7 @@ else
 
                     <div class="switch">
                         <FlowSwitch @bind-Value=@EulaAccepted/>
-                        <span @onclick="() => { EulaAccepted = !EulaAccepted; }">I have read and agree to the terms of the End User License Agreement</span>
+                        <span @onclick="ToggleEulaAccepted">I have read and agree to the terms of the End User License Agreement</span>
                     </div>
                 </div>
             </FlowWizardPage>
@@ -86,8 +86,8 @@ else
             {
                 <FlowWizardPage Title="DockerMods" Disabled="@(EulaAccepted == false)"
                                 Visible="(AvailableDockerMods?.Any() == true)"
-                                Description="Choose which DockerMods to install, this adds additional packages to any FileFlows Docker instances.">
-                    <FlowTable @ref="DockerModTable" Data="AvailableDockerMods" TItem="RepositoryObject"
+                                Description="Choose which DockerMods to install">
+                    <FlowTable @ref="DockerModTable" TItem="RepositoryObject"
                                HideHead="true" HideToolbar="true" Selection="SelectionMode.Multiple"
                                TableIdentifier="InitialConfigDockerMods" DontClearOnClick="true">
                         <Columns>
