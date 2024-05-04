@@ -334,7 +334,7 @@ public partial class Settings : InputRegister
 
     private void OpenHelp()
     {
-        App.Instance.OpenHelp("https://fileflows.com/docs/webconsole/settings");
+        App.Instance.OpenHelp("https://fileflows.com/docs/webconsole/admin/settings");
     }
 
     private async Task TestDbConnection()

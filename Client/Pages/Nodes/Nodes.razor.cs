@@ -82,7 +82,7 @@ public partial class Nodes : ListPage<Guid, ProcessingNode>
     /// Opens the help page
     /// </summary>
     void OpenHelp()
-        => App.Instance.OpenHelp("https://fileflows.com/docs/webconsole/nodes");
+        => App.Instance.OpenHelp("https://fileflows.com/docs/webconsole/configuration/nodes");
 
     /// <summary>
     /// if currently enabling, this prevents double calls to this method during the updated list binding

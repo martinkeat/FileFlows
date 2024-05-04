@@ -120,7 +120,7 @@ public partial class FlowPropertiesEditor
 
     // Opens the helper
     void OpenHelp()
-        => _ = jsRuntime.InvokeVoidAsync("ff.open", "https://fileflows.com/docs/webconsole/flows/properties", "_blank");
+        => _ = jsRuntime.InvokeVoidAsync("ff.open", "https://fileflows.com/docs/webconsole/configuration/flows/properties", "_blank");
 
     /// <summary>
     /// Adds a new property variable

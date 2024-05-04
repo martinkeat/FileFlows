@@ -822,7 +822,7 @@ public partial class Flow : ComponentBase, IDisposable
     
     private async Task OpenHelp()
     {
-        await jsRuntime.InvokeVoidAsync("ff.open", "https://fileflows.com/docs/webconsole/flows/editor");
+        await jsRuntime.InvokeVoidAsync("ff.open", "https://fileflows.com/docs/webconsole/configuration/flows/editor");
     }
 
     private class CodeTemplate

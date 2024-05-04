@@ -218,6 +218,7 @@ public partial class NavMenu : IDisposable
                 Profile.HasRole(UserRole.Plugins) ? new("Pages.Plugins.Title", "fas fa-puzzle-piece", "plugins") : null,
                 Profile.HasRole(UserRole.Scripts) ? new("Pages.Scripts.Title", "fas fa-scroll", "scripts") : null,
                 Profile.HasRole(UserRole.Variables) ? new("Pages.Variables.Title", "fas fa-at", "variables") : null,
+                Profile.HasRole(UserRole.DockerMods) ? new ("Pages.DockerMod.Plural", "fab fa-docker", "dockermods") : null,
             }
         });
         MenuItems.Add(new NavMenuGroup
@@ -227,7 +228,6 @@ public partial class NavMenu : IDisposable
             Items = new List<NavMenuItem>
             {
                 Profile.HasRole(UserRole.Log) ? new ("Pages.Log.Title", "fas fa-file-alt", "log") : null,
-                Profile.HasRole(UserRole.DockerMods) ? new ("Pages.DockerMod.Plural", "fab fa-docker", "dockermods") : null,
                 Profile.HasRole(UserRole.Revisions) && Profile.LicensedFor(LicenseFlags.Revisions) ? new ("Pages.Revisions.Title", "fas fa-history", "revisions") : null,
                 Profile.HasRole(UserRole.Tasks) && Profile.LicensedFor(LicenseFlags.Tasks) ? new ("Pages.Tasks.Title", "fas fa-clock", "tasks") : null,
                 Profile.HasRole(UserRole.Webhooks) && Profile.LicensedFor(LicenseFlags.Webhooks) ? new ("Pages.Webhooks.Title", "fas fa-handshake", "webhooks") : null,

@@ -60,7 +60,7 @@ public partial class DockerMods
         {
             TypeName = "Pages.DockerMod", Title = "Pages.DockerMod.Title", Model = item,
             SaveCallback = Save, ReadOnly = item.Repository, Fields = fields,
-            HelpUrl = "https://fileflows.com/docs/webconsole/dockermods"
+            HelpUrl = "https://fileflows.com/docs/webconsole/extensions/dockermods"
         });
         return true;
     }
