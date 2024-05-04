@@ -20,6 +20,16 @@ public class HomeController : Controller
     {
         return File("~/index.html", "text/html");
     }
+
+    /// <summary>
+    /// Endpoints that just responds that the server is listening
+    /// </summary>
+    /// <returns>the response</returns>
+    [HttpGet("fraser")]
+    [ApiExplorerSettings(IgnoreApi = true)]
+    [ResponseCache(NoStore = true, Duration = 0)]
+    public IActionResult Fraser()
+        => Ok("I'm listening");
     
     /// <summary>
     /// Database is offline error message
