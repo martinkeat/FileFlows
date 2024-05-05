@@ -66,6 +66,18 @@ public class ProfileController : Controller
         if (profile.IsAdmin)
             profile.UnreadNotifications = await ServiceLoader.Load<NotificationService>().GetUnreadNotificationsCount();
 
+        if (Globals.IsDocker)
+            profile.HasDockerInstances = true;
+        else
+        {
+            // check the nodes
+            var nodes = await ServiceLoader.Load<NodeService>().GetAllAsync();
+            profile.HasDockerInstances = nodes.Any(x => x.OperatingSystem == OperatingSystemType.Docker);
+        }
+        #if(DEBUG)
+        profile.HasDockerInstances = true;
+        #endif
+
         return Ok(profile);
     }
 }

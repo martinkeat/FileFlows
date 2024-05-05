@@ -81,6 +81,11 @@ public class Profile
     /// Gets or sets if users are enabled and in use
     /// </summary>
     public bool UsersEnabled { get; set; }
+    
+    /// <summary>
+    /// Gets or sets if there are any Docker instances in this setup
+    /// </summary>
+    public bool HasDockerInstances { get; set; }
 }
 /// <summary>
 /// Represents the unread notifications containing critical, error, and warning counts.

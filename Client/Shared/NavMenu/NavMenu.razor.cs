@@ -218,7 +218,7 @@ public partial class NavMenu : IDisposable
                 Profile.HasRole(UserRole.Plugins) ? new("Pages.Plugins.Title", "fas fa-puzzle-piece", "plugins") : null,
                 Profile.HasRole(UserRole.Scripts) ? new("Pages.Scripts.Title", "fas fa-scroll", "scripts") : null,
                 Profile.HasRole(UserRole.Variables) ? new("Pages.Variables.Title", "fas fa-at", "variables") : null,
-                Profile.HasRole(UserRole.DockerMods) ? new ("Pages.DockerMod.Plural", "fab fa-docker", "dockermods") : null,
+                Profile.HasDockerInstances && Profile.HasRole(UserRole.DockerMods) ? new ("Pages.DockerMod.Plural", "fab fa-docker", "dockermods") : null,
             }
         });
         MenuItems.Add(new NavMenuGroup

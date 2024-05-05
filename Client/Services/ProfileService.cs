@@ -104,6 +104,7 @@ public class ProfileService
             _profile.IsWebView = newProfile.IsWebView;
             _profile.UsersEnabled = newProfile.UsersEnabled;
             _profile.UnreadNotifications = newProfile.UnreadNotifications;
+            _profile.HasDockerInstances = newProfile.HasDockerInstances;
         }
         finally
         {
