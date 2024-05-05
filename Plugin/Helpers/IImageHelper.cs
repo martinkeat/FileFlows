@@ -27,8 +27,18 @@ public interface IImageHelper
     /// </summary>
     /// <param name="imagePath">The path to the input image.</param>
     /// <param name="destination">The destination where to save the new image to</param>
+    /// <param name="options">The image options</param>
     /// <returns>true if successful, otherwise false</returns>
-    Result<bool> ConvertToJpeg(string imagePath, string destination);
+    Result<bool> ConvertToJpeg(string imagePath, string destination, ImageOptions? options);
+
+    /// <summary>
+    /// Converts an image to webp
+    /// </summary>
+    /// <param name="imagePath">The path to the input image.</param>
+    /// <param name="destination">The destination where to save the new image to</param>
+    /// <param name="options">The image options</param>
+    /// <returns>true if successful, otherwise false</returns>
+    Result<bool> ConvertToWebp(string imagePath, string destination, ImageOptions? options);
     
     /// <summary>
     /// Resizes the image to the specified dimensions while maintaining the aspect ratio.
@@ -39,4 +49,31 @@ public interface IImageHelper
     /// <returns>A result indicating whether the resizing operation was successful or not.</returns>
     Result<bool> Resize(string imagePath, int width, int height, string destination);
 
+}
+
+/// <summary>
+/// Image Options
+/// </summary>
+public class ImageOptions
+{
+    /// <summary>
+    /// Gets or sets the height, 0 to maintain aspect ratio with width or no adjustment
+    /// </summary>
+    public int Height { get; set; }
+    /// <summary>
+    /// Gets or sets the width, 0 to maintain aspect ratio with height or no adjustment
+    /// </summary>
+    public int Width { get; set; }
+    /// <summary>
+    /// Gets or sets the maximum height, 0 to maintain aspect ratio with width or no adjustment
+    /// </summary>
+    public int MaxHeight { get; set; }
+    /// <summary>
+    /// Gets or sets the maximum width, 0 to maintain aspect ratio with height or no adjustment
+    /// </summary>
+    public int MaxWidth { get; set; }
+    /// <summary>
+    /// Gets or sets the quality 0 being lowest, 100 being highest
+    /// </summary>
+    public int? Quality { get; set; }
 }

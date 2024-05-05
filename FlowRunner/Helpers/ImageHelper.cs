@@ -2,7 +2,9 @@ using FileFlows.Plugin;
 using FileFlows.Plugin.Helpers;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Drawing.Processing;
+using SixLabors.ImageSharp.Formats;
 using SixLabors.ImageSharp.Formats.Jpeg;
+using SixLabors.ImageSharp.Formats.Webp;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 
@@ -69,14 +71,101 @@ public class ImageHelper : IImageHelper
     }
 
     /// <inheritdoc />
-    public Result<bool> ConvertToJpeg(string imagePath, string destination)
+    public Result<bool> ConvertToJpeg(string imagePath, string destination, ImageOptions? options)
+        => DoConvert(imagePath, destination, ImageType.Jpeg, options);
+
+    /// <inheritdoc />
+    public Result<bool> ConvertToWebp(string imagePath, string destination, ImageOptions? options)
+        => DoConvert(imagePath, destination, ImageType.Webp, options);
+    
+    private Result<bool> DoConvert(string imagePath, string destination, ImageType type, ImageOptions? options)
     {
         if (File.Exists(imagePath) == false)
             return Result<bool>.Fail("Image does not exist");
         try
         {
             using var image = Image.Load(imagePath);
-            image.Save(destination, new JpegEncoder());
+            
+            if (options != null)
+            {
+                // resize, should maintain aspect ratio
+                int newWidth = image.Width;
+                int newHeight = image.Height;
+
+                // If both Width and Height are specified, use them directly
+                if (options.Width > 0 && options.Height > 0)
+                {
+                    newWidth = options.Width;
+                    newHeight = options.Height;
+                }
+                // If only Width is specified, scale Height proportionally
+                else if (options.Width > 0)
+                {
+                    newWidth = options.Width;
+                    newHeight = (int)((float)image.Height / image.Width * options.Width);
+                }
+                // If only Height is specified, scale Width proportionally
+                else if (options.Height > 0)
+                {
+                    newHeight = options.Height;
+                    newWidth = (int)((float)image.Width / image.Height * options.Height);
+                }
+                else if (options.MaxWidth > 0 && options.MaxHeight == 0)
+                {
+                    // Only MaxWidth is specified
+                    newWidth = options.MaxWidth;
+                    newHeight = (int)(image.Height * ((float)options.MaxWidth / image.Width));
+                }
+                else if (options.MaxHeight > 0 && options.MaxWidth == 0)
+                {
+                    // Only MaxHeight is specified
+                    newWidth = (int)(image.Width * ((float)options.MaxHeight / image.Height));
+                    newHeight = options.MaxHeight;
+                }
+                else if (options.MaxHeight > 0 && options.MaxWidth > 0)
+                {
+                    // Both MaxHeight and MaxWidth are specified
+                    float widthRatio = (float)options.MaxWidth / image.Width;
+                    float heightRatio = (float)options.MaxHeight / image.Height;
+                    float ratio = Math.Min(widthRatio, heightRatio);
+
+                    newWidth = (int)(image.Width * ratio);
+                    newHeight = (int)(image.Height * ratio);
+                }
+
+
+                if (newWidth != image.Width || newHeight != image.Height)
+                {
+                    // Resize the image
+                    image.Mutate(x => x.Resize(new ResizeOptions
+                    {
+                        Size = new Size(newWidth, newHeight),
+                        Mode = ResizeMode.Max
+                    }));
+                }
+            }
+
+            IImageEncoder encoder;
+            switch (type)
+            {
+                case ImageType.Jpeg:
+                    encoder = new JpegEncoder()
+                    {
+                        Quality = options?.Quality ?? 75
+                    };
+                    break;
+                case ImageType.Webp:
+                    encoder = new WebpEncoder()
+                    {
+                        Quality = options?.Quality ?? 75
+                    };
+                    break;
+                default:
+                    throw new ArgumentException("Unsupported image type");
+            }
+            
+            image.Save(destination, encoder);
+
             return Result<bool>.Success(true);
         }
         catch (Exception ex)
@@ -109,5 +198,20 @@ public class ImageHelper : IImageHelper
             // Return failure with the error message
             return Result<bool>.Fail(ex.Message);
         }
+    }
+
+    /// <summary>
+    /// Image types
+    /// </summary>
+    private enum ImageType
+    {
+        /// <summary>
+        /// JPEG image
+        /// </summary>
+        Jpeg,
+        /// <summary>
+        /// WEBP image
+        /// </summary>
+        Webp
     }
 }
