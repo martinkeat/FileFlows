@@ -193,8 +193,8 @@ public class Executor
             
             if(DontLogCode == false)
                 Logger.DLog("Executing code: \n\n" + tcode + "\n\n" + new string('-', 30));
-            engine.AddModule("Script", tcode);
-            var ns = engine.ImportModule("Script");
+            engine.Modules.Add("Script", tcode);
+            var ns = engine.Modules.Import("Script");
             var result = ns.Get("result");
             try
             {

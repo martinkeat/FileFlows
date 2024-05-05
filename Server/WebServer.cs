@@ -293,6 +293,12 @@ public class WebServer
         app.MapBlazorHub(); // This is necessary for Blazor Server-Side
         
         Task task = app.RunAsync(serverUrl);
+
+        _ = Task.Run(async () =>
+        {
+            await Task.Delay(750);
+            OnStatusUpdate?.Invoke(WebServerState.Listening, "Web server listening", serverUrl);
+        });
         
         if (RunStartupCode(serverUrl).Failed(out string error))
         {
@@ -303,17 +309,17 @@ public class WebServer
             return;
         }
         
-        Started = CheckServerListening(serverUrl.Replace("0.0.0.0", "localhost").TrimEnd('/') + "/remote/system/version").Result;
-        if (Started == false)
-        {
-            StartError = "Failed to start on: " + serverUrl;
-            Task.Run(() => OnStatusUpdate?.Invoke(WebServerState.Error, "Failed to start", serverUrl));
-        }
-        else
-        {
-            Task.Run(() => OnStatusUpdate?.Invoke(WebServerState.Listening, "Web server listening", serverUrl));
-            _ = ServiceLoader.Load<NotificationService>().Record(NotificationSeverity.Information, "Server Started");
-        }
+        // Started = CheckServerListening(serverUrl.Replace("0.0.0.0", "localhost").TrimEnd('/') + "/remote/system/version").Result;
+        // if (Started == false)
+        // {
+        //     StartError = "Failed to start on: " + serverUrl;
+        //     Task.Run(() => OnStatusUpdate?.Invoke(WebServerState.Error, "Failed to start", serverUrl));
+        // }
+        // else
+        // {
+        //     Task.Run(() => OnStatusUpdate?.Invoke(WebServerState.Listening, "Web server listening", serverUrl));
+        //     _ = ServiceLoader.Load<NotificationService>().Record(NotificationSeverity.Information, "Server Started");
+        // }
 
         task.Wait();
         Logger.Instance.ILog("Finished running FileFlows Server");
