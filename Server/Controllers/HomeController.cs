@@ -25,12 +25,24 @@ public class HomeController : Controller
     /// Endpoints that just responds that the server is listening
     /// </summary>
     /// <returns>the response</returns>
-    [HttpGet("fraser")]
+    [HttpGet("frasier")]
     [ApiExplorerSettings(IgnoreApi = true)]
     [ResponseCache(NoStore = true, Duration = 0)]
-    public IActionResult Fraser()
+    public IActionResult Frasier()
         => Ok("I'm listening");
-    
+
+    /// <summary>
+    /// Loading page
+    /// </summary>
+    /// <returns></returns>
+    [HttpGet("loading")]
+    public IActionResult Loading()
+    {
+        if(WebServer.FullyStarted)
+            return Redirect("/");
+        return View();
+    }
+
     /// <summary>
     /// Database is offline error message
     /// </summary>

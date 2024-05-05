@@ -58,7 +58,7 @@ public class LoggingMiddleware
         {
             try
             {
-                if (SettingsService.Get().Result.LogEveryRequest)
+                if (WebServer.FullyStarted && SettingsService.Get().Result.LogEveryRequest)
                 {
                     _ = RequestLogger.Log((LogType) 999,
                         $"REQUEST [{context.Request?.Method}] [{context.Response?.StatusCode}]: {context.Request?.Path.Value}");

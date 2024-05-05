@@ -21,7 +21,15 @@ public class FileDisplayNameService
     /// <summary>
     /// Initializes the service
     /// </summary>
-    public static void Initialize()
+    public FileDisplayNameService()
+    {
+        Reinitialize();
+    }
+
+    /// <summary>
+    /// Reinitializes the service with a modified script
+    /// </summary>
+    public void Reinitialize()
     {
         string code = null;
         try
@@ -65,7 +73,7 @@ public class FileDisplayNameService
     /// </summary>
     /// <param name="libFile">the library file</param>
     /// <returns>the display name</returns>
-    public static string GetDisplayName(LibraryFile libFile)
+    public string GetDisplayName(LibraryFile libFile)
     {
         return GetDisplayName(libFile.Name, libFile.RelativePath, libFile.LibraryName);
     }
@@ -77,7 +85,7 @@ public class FileDisplayNameService
     /// <param name="relativePath">the relative path</param>
     /// <param name="libraryName">the name of the library</param>
     /// <returns>the display name</returns>
-    public static string GetDisplayName(string name, string relativePath, string libraryName)
+    public string GetDisplayName(string name, string relativePath, string libraryName)
     {
         if (NoScript || jsGetDisplayName == null)
             return relativePath?.EmptyAsNull() ?? name;

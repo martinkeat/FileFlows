@@ -123,7 +123,7 @@ public class LibraryFileController : Controller //ControllerStore<LibraryFile>
         {
             x.Uid,
             x.Name,
-            DisplayName = FileDisplayNameService.GetDisplayName(x.Name, x.RelativePath, x.LibraryName)
+            DisplayName = ServiceLoader.Load<FileDisplayNameService>().GetDisplayName(x.Name, x.RelativePath, x.LibraryName)
         });
         return Ok(results);
     }
@@ -154,7 +154,7 @@ public class LibraryFileController : Controller //ControllerStore<LibraryFile>
             return new
             {
                 x.Uid,
-                DisplayName = FileDisplayNameService.GetDisplayName(x.Name, x.RelativePath, x.LibraryName),
+                DisplayName = ServiceLoader.Load<FileDisplayNameService>().GetDisplayName(x.Name, x.RelativePath, x.LibraryName),
                 x.RelativePath,
                 x.ProcessingEnded,
                 When = when,

@@ -266,7 +266,7 @@ public class ScriptService:IScriptService
         }
 
         if(script.Name == Globals.FileDisplayNameScript)
-            FileDisplayNameService.Initialize();
+            ServiceLoader.Load<FileDisplayNameService>().Reinitialize();
         else
             IncrementConfigurationRevision();
 

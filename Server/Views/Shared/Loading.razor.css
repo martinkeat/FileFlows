@@ -1,0 +1,24 @@
+
+body {
+    background-color: black;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+svg {
+    width: 20rem;
+}
+#loading-container {
+    text-align:center;
+    font-family: sans-serif;
+    margin-top: 2rem;
+}
+#loadingText{
+    display: inline-block;
+    text-align: left;
+    width: 11rem;
+    white-space: nowrap;
+    color:white;
+}

@@ -80,6 +80,11 @@ public class WebServer
     public static int Port { get; private set; }
 
     /// <summary>
+    /// Gets or sets if the web server has fully started and no longer in a starting state
+    /// </summary>
+    public static bool FullyStarted { get; set; }
+
+    /// <summary>
     /// Stops the server
     /// </summary>
     public static async Task Stop()
@@ -130,15 +135,6 @@ public class WebServer
     /// <param name="args">command line arguments</param>
     public static void Start(string[] args)
     {
-        if (RunStartupCode().Failed(out string error))
-        {
-            Logger.Instance.ELog("Startup failed: " + error);
-            if (Application.UsingWebView)
-                Thread.Sleep(10_000);
-
-            return;
-        }
-
         var builder = WebApplication.CreateBuilder(args);
 
         builder.WebHost.ConfigureKestrel((context, options) =>
@@ -148,7 +144,6 @@ public class WebServer
         });
 
         string serverUrl = GetServerUrl(args);
-        string protocol = serverUrl[..serverUrl.IndexOf(":", StringComparison.Ordinal)];
 
         Logger.Instance.ILog("Started web server: " + serverUrl);
         Task.Run(() => OnStatusUpdate?.Invoke(WebServerState.Starting, "Starting web server", serverUrl));
@@ -158,21 +153,10 @@ public class WebServer
         // Dynamically register services from the console application's service provider
         builder.Services.AddSingleton<AppSettingsService>(x => ServiceLoader.Load<AppSettingsService>());
         builder.Services.AddSingleton<SettingsService>(x => ServiceLoader.Load<SettingsService>());
-        builder.Services.AddSingleton<StatisticService>(x => ServiceLoader.Load<StatisticService>());
-        builder.Services.AddSingleton<DashboardService>(x => ServiceLoader.Load<DashboardService>());
-        builder.Services.AddSingleton<FlowService>(x => ServiceLoader.Load<FlowService>());
-        builder.Services.AddSingleton<LibraryService>(x => ServiceLoader.Load<LibraryService>());
-        builder.Services.AddSingleton<LibraryFileService>(x => ServiceLoader.Load<LibraryFileService>());
-        builder.Services.AddSingleton<NodeService>(x => ServiceLoader.Load<NodeService>());
-        builder.Services.AddSingleton<PluginService>(x => ServiceLoader.Load<PluginService>());
-        builder.Services.AddSingleton<TaskService>(x => ServiceLoader.Load<TaskService>());
-        builder.Services.AddSingleton<VariableService>(x => ServiceLoader.Load<VariableService>());
-        builder.Services.AddSingleton<RevisionService>(x => ServiceLoader.Load<RevisionService>());
-        builder.Services.AddSingleton<FlowRunnerService>(x => ServiceLoader.Load<FlowRunnerService>());
 
-        // do this so the settings object is loaded
-        var settings = ServiceLoader.Load<SettingsService>().Get().Result;
         var appSettings = ServiceLoader.Load<AppSettingsService>().Settings;
+
+        builder.Services.AddServerSideBlazor();
         
         builder.Services.AddControllersWithViews(options =>
         {
@@ -232,27 +216,6 @@ public class WebServer
             }
         });
 
-        // if (File.Exists("/https/certificate.crt"))
-        // {
-        //     Console.WriteLine("Using certificate: /https/certificate.crt");
-        //     Logger.Instance.ILog("Using certificate: /https/certificate.crt");
-        //     builder.WebHost.ConfigureKestrel((context, options) =>
-        //     {
-        //         var cert = File.ReadAllText("/https/certificate.crt");
-        //         var key = File.ReadAllText("/https/privatekey.key");
-        //         var x509 = X509Certificate2.CreateFromPem(cert, key);
-        //         X509Certificate2 miCertificado2 = new X509Certificate2(x509.Export(X509ContentType.Pkcs12));
-        //
-        //         x509.Dispose();
-        //
-        //         options.ListenAnyIP(5001, listenOptions =>
-        //         {
-        //             listenOptions.Protocols = HttpProtocols.Http1AndHttp2;
-        //             listenOptions.UseHttps(miCertificado2);
-        //         });
-        //     });
-        // }
-
         app = builder.Build();
 
         app.UseSwagger();
@@ -287,6 +250,7 @@ public class WebServer
             }
         });
 
+        app.UseMiddleware<LoadingMiddleware>(); // must be first, it will prevent any others
         app.UseMiddleware<ExceptionMiddleware>();
         app.UseMiddleware<LoggingMiddleware>();
         app.UseMiddleware<FileFlowsIPAddressAuthorizeFilter>();
@@ -300,37 +264,22 @@ public class WebServer
         if (Globals.IsDevelopment)
             app.UseCors(builder => builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader().WithExposedHeaders("*"));
 
-        app.MapControllerRoute(
-            name: "default",
-            pattern: "{controller=Home}/{action=Index}/{id?}");
-
         // this will allow refreshing from a SPA url to load the index.html file
-        app.MapControllerRoute(
-            name: "Spa",
-            pattern: "{*url}",
-            defaults: new { controller = "Home", action = "Index" }
-        );
+        // app.MapWhen(context => FullyStarted, builder =>
+        // {
+            app.MapControllerRoute(
+                name: "default",
+                pattern: "{controller=Home}/{action=Index}/{id?}");
 
+            app.MapControllerRoute(
+                name: "Spa",
+                pattern: "{*url}",
+                defaults: new { controller = "Home", action = "Index" }
+            );
+        //});
 
-        InitServices.Init();
-
-#if(DEBUG)
-        //Helpers.DbHelper.CleanDatabase().Wait();
-#endif
-
-
-        Application.ServerUrl = $"{protocol}://localhost:{Port}";
-        // update the client with the proper ServiceBaseUrl
-        Shared.Helpers.HttpHelper.Client =
-            Shared.Helpers.HttpHelper.GetDefaultHttpClient(Application.ServerUrl);
-
-        RemoteService.ServiceBaseUrl = Application.ServerUrl;
-        RemoteService.AccessToken = settings.AccessToken;
-        RemoteService.NodeUid = Application.RunningUid;
-
-        app.MapHub<Hubs.FlowHub>("/flow");
-
-        app.MapHub<Hubs.ClientServiceHub>("/client-service");
+        app.MapHub<FlowHub>("/flow");
+        app.MapHub<ClientServiceHub>("/client-service");
 
         app.UseResponseCompression();
 
@@ -340,37 +289,19 @@ public class WebServer
         var _clientServiceHub = app.Services.GetRequiredService<IHubContext<ClientServiceHub>>();
         _ = new ClientServiceManager(_clientServiceHub);
 
+        app.MapBlazorHub(); // This is necessary for Blazor Server-Side
+        
         Task task = app.RunAsync(serverUrl);
         
+        if (RunStartupCode(serverUrl).Failed(out string error))
+        {
+            Logger.Instance.ELog("Startup failed: " + error);
+            if (Application.UsingWebView)
+                Thread.Sleep(10_000);
+
+            return;
+        }
         
-        // need to scan for plugins before initing the translater as that depends on the plugins directory
-        Helpers.PluginScanner.Scan();
-
-        TranslaterHelper.InitTranslater(settings.Language?.EmptyAsNull() ?? "en");
-
-        LibraryWorker.ResetProcessing(internalOnly: true);
-        WorkerManager.StartWorkers(
-            new StartupWorker(),
-            new LicenseValidatorWorker(),
-            new SystemMonitor(),
-            new LibraryWorker(),
-            new LogFileCleaner(),
-            new DbLogPruner(),
-            new FlowWorker(string.Empty, isServer: true),
-            new ConfigCleaner(),
-            new PluginUpdaterWorker(),
-            new LibraryFileLogPruner(),
-            new LogConverter(),
-            new TelemetryReporter(),
-            new ServerUpdater(),
-            new TempFileCleaner(string.Empty),
-            new FlowRunnerMonitor(),
-            new ObjectReferenceUpdater(),
-            new FileFlowsTasksWorker(),
-            new RepositoryUpdaterWorker()
-            //new LibraryFileServiceUpdater()
-        );
-
         Started = CheckServerListening(serverUrl.Replace("0.0.0.0", "localhost").TrimEnd('/') + "/remote/system/version").Result;
         if (Started == false)
         {
@@ -392,14 +323,14 @@ public class WebServer
     /// Runs the startup code
     /// </summary>
     /// <returns>the result</returns>
-    private static Result<bool> RunStartupCode()
+    private static Result<bool> RunStartupCode(string serverUrl)
     {
         var service = ServiceLoader.Load<StartupService>();
-        service.OnStatusUpdate = (string message) =>
+        service.OnStatusUpdate += (string message) =>
         {
             Task.Run(() => OnStatusUpdate?.Invoke(WebServerState.Starting, message, string.Empty));
         };
-        return service.Run();
+        return service.Run(serverUrl);
     }
 
 
@@ -436,11 +367,8 @@ public class WebServer
                     // If successful, the server is actively listening
                     return true;
                 }
-                else
-                {
-                    // If the status code is not success, wait for 2 seconds before retrying
-                    await Task.Delay(2000);
-                }
+                // If the status code is not success, wait for 2 seconds before retrying
+                await Task.Delay(2000);
             }
             catch (Exception)
             {

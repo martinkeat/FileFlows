@@ -33,15 +33,19 @@ public class ExceptionMiddleware
         {
             context.Response.ContentType = "text/plain";
             context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-            
+
             string exceptionMessage = ex.StackTrace ?? string.Empty;
             // Check if the exception message contains "at Npgsql.NpgsqlConnection.Open"
             if (exceptionMessage.Contains("at Npgsql.NpgsqlConnection.Open") ||
                 exceptionMessage.Contains("at Npgsql.Internal.NpgsqlConnector.Open") ||
                 exceptionMessage.Contains("NpgsqlConnector.Connect"))
             {
-                _ = ServiceLoader.Load<NotificationService>().RecordDatabaseOffline();
-                Logger.Instance.ELog("ExceptionMiddleware: Database is offline");
+                if (WebServer.FullyStarted)
+                {
+                    _ = ServiceLoader.Load<NotificationService>().RecordDatabaseOffline();
+                    Logger.Instance.ELog("ExceptionMiddleware: Database is offline");
+                }
+
                 await context.Response.WriteAsync("Database is offline");
             }
             else
@@ -52,6 +56,7 @@ public class ExceptionMiddleware
                                      Environment.NewLine + ex.StackTrace);
                 await context.Response.WriteAsync(ex.Message);
             }
+
         }
     }
 }

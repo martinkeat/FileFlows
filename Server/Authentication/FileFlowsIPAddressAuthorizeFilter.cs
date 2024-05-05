@@ -29,7 +29,7 @@ public class FileFlowsIPAddressAuthorizeFilter
     /// <param name="context">the HttpContext executing this middleware</param>
     public async Task Invoke(HttpContext context)
     {
-        if (IsAuthorizedPath(context.Request.Path) == false)
+        if (WebServer.FullyStarted == false || IsAuthorizedPath(context.Request.Path) == false)
         {
             await _next(context);
             return;

@@ -1,7 +1,11 @@
 using FileFlows.Managers.InitializationManagers;
+using FileFlows.Node.Workers;
 using FileFlows.Plugin;
+using FileFlows.RemoteServices;
 using FileFlows.Server.DefaultTemplates;
 using FileFlows.Server.Helpers;
+using FileFlows.Server.Workers;
+using FileFlows.ServerShared.Workers;
 using FileFlows.Shared.Models;
 
 namespace FileFlows.Server.Services;
@@ -14,9 +18,19 @@ namespace FileFlows.Server.Services;
 public class StartupService
 {
     /// <summary>
-    /// Callback for notifying a status update
+    /// A delegate that is used when there is a status update
     /// </summary>
-    public Action<string> OnStatusUpdate { get; set; }
+    public delegate void StartupStatusEvent(string output);
+    
+    /// <summary>
+    /// An event that is called when there is status update
+    /// </summary>
+    public event StartupStatusEvent OnStatusUpdate;
+    
+    /// <summary>
+    /// Gets the current status
+    /// </summary>
+    public string CurrentStatus { get; private set; }
 
 
     private AppSettingsService appSettingsService;
@@ -24,7 +38,7 @@ public class StartupService
     /// <summary>
     /// Run the startup commands
     /// </summary>
-    public Result<bool> Run()
+    public Result<bool> Run(string serverUrl)
     {
         UpdateStatus("Starting...");
         try
@@ -75,7 +89,21 @@ public class StartupService
             UpdateTemplates();
 
             if (Globals.IsDocker)
-                LogDockerModsFile();
+                RunnerDockerMods();
+            
+            // do this so the settings object is loaded
+            var settings = ServiceLoader.Load<SettingsService>().Get().Result;
+            var appSettings = ServiceLoader.Load<AppSettingsService>().Settings;
+
+            ScanForPlugins();
+
+            TranslaterHelper.InitTranslater(settings.Language?.EmptyAsNull() ?? "en");
+
+            LibraryWorker.ResetProcessing(internalOnly: true);
+
+            StartupWorkers();
+
+            Complete(settings, serverUrl);
 
             return true;
         }
@@ -92,16 +120,84 @@ public class StartupService
     }
 
     /// <summary>
+    /// Final startup code
+    /// </summary>
+    /// <param name="settings">the settings</param>
+    /// <param name="serverUrl">the server URL</param>
+    private void Complete(Settings settings, string serverUrl)
+    {
+        string protocol = serverUrl[..serverUrl.IndexOf(":", StringComparison.Ordinal)];
+
+        Application.ServerUrl = $"{protocol}://localhost:{WebServer.Port}";
+        // update the client with the proper ServiceBaseUrl
+        Shared.Helpers.HttpHelper.Client =
+            Shared.Helpers.HttpHelper.GetDefaultHttpClient(Application.ServerUrl);
+
+        RemoteService.ServiceBaseUrl = Application.ServerUrl;
+        RemoteService.AccessToken = settings.AccessToken;
+        RemoteService.NodeUid = Application.RunningUid;
+
+        WebServer.FullyStarted = true;
+    }
+
+    /// <summary>
+    /// Scans for plugins
+    /// </summary>
+    private void ScanForPlugins()
+    {
+        UpdateStatus("Scanning for Plugins");
+        // need to scan for plugins before initing the translater as that depends on the plugins directory
+        PluginScanner.Scan();
+    }
+
+    /// <summary>
+    /// Starts the workers
+    /// </summary>
+    private void StartupWorkers()
+    {
+        UpdateStatus("Starting Workers");
+        WorkerManager.StartWorkers(
+            new StartupWorker(),
+            new LicenseValidatorWorker(),
+            new SystemMonitor(),
+            new LibraryWorker(),
+            new LogFileCleaner(),
+            new DbLogPruner(),
+            new FlowWorker(string.Empty, isServer: true),
+            new ConfigCleaner(),
+            new PluginUpdaterWorker(),
+            new LibraryFileLogPruner(),
+            new LogConverter(),
+            new TelemetryReporter(),
+            new ServerUpdater(),
+            new TempFileCleaner(string.Empty),
+            new FlowRunnerMonitor(),
+            new ObjectReferenceUpdater(),
+            new FileFlowsTasksWorker(),
+            new RepositoryUpdaterWorker()
+            //new LibraryFileServiceUpdater()
+        );
+    }
+
+    /// <summary>
     /// Looks for a DockerMods output file and if found, logs its contents
     /// </summary>
-    private void LogDockerModsFile()
+    private void RunnerDockerMods()
     {
-        var output = Path.Combine(DirectoryHelper.DockerModsDirectory, "output.log");
-        if (File.Exists(output) == false)
-            return;
-        var content = File.ReadAllText(output);
-        Logger.Instance.ILog("DockerMods: \n" + content);
-        File.Delete(output);
+        UpdateStatus("Running DockerMods");
+        var mods = ServiceLoader.Load<DockerModService>().GetAll().Result.Where(x => x.Enabled).ToList();
+        foreach (var mod in mods)
+        {
+            UpdateStatus("Running DockerMod: " + mod.Name);
+            DockerModHelper.Execute(mod).Wait();
+        }
+
+        // var output = Path.Combine(DirectoryHelper.DockerModsDirectory, "output.log");
+        // if (File.Exists(output) == false)
+        //     return;
+        // var content = File.ReadAllText(output);
+        // Logger.Instance.ILog("DockerMods: \n" + content);
+        // File.Delete(output);
     }
 
     /// <summary>
@@ -155,7 +251,9 @@ public class StartupService
     void UpdateStatus(string message)
     {
         Logger.Instance.ILog(message);
+        CurrentStatus = message;
         OnStatusUpdate?.Invoke(message);
+        Thread.Sleep(1000);
     }
     
 

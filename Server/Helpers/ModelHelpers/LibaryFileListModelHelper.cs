@@ -25,7 +25,7 @@ public class LibaryFileListModelHelper
             var item = new LibaryFileListModel
             {
                 Uid = x.Uid,
-                DisplayName = FileDisplayNameService.GetDisplayName(x.Name, x.RelativePath, x.LibraryName),
+                DisplayName = ServiceLoader.Load<FileDisplayNameService>().GetDisplayName(x.Name, x.RelativePath, x.LibraryName),
                 Flow = x.Flow?.Name,
                 Library = x.Library?.Name,
                 RelativePath = x.RelativePath,
