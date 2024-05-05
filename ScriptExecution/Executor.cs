@@ -228,12 +228,11 @@ public class Executor
                 return null;
             if (int.TryParse(ex.Message, out int code))
                 return code;
-            if (DontLogCode == false)
+            //if (DontLogCode == false)
             {
                 // print out the code block for debugging
                 int lineNumber = 0;
                 var lines = Code.Split('\n');
-                string pad = "D" + (lines.ToString()!.Length);
                 Logger.DLog("Code: " + Environment.NewLine +
                             string.Join("\n", lines.Select(x => (++lineNumber).ToString("D3") + ": " + x)));
             }
