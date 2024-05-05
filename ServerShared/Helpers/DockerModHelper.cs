@@ -21,7 +21,8 @@ public static class DockerModHelper
     /// </summary>
     /// <param name="mod">the DockerMod to execute</param>
     /// <param name="forceExecution">If this should run even if it has already been run</param>
-    public static async Task Execute(DockerMod mod, bool forceExecution = false)
+    /// <param name="outputCallback">Callback to log the output to</param>
+    public static async Task Execute(DockerMod mod, bool forceExecution = false, Action<string>? outputCallback = null)
     {
         if (Globals.IsDocker == false)
             return; // Only run on Docker instances
@@ -78,6 +79,7 @@ public static class DockerModHelper
                 if (!string.IsNullOrEmpty(e.Data))
                 {
                     outputBuilder.AppendLine(e.Data);
+                    outputCallback?.Invoke(outputBuilder.ToString());
                 }
             };
 
@@ -86,6 +88,7 @@ public static class DockerModHelper
                 if (!string.IsNullOrEmpty(e.Data))
                 {
                     outputBuilder.AppendLine(e.Data);
+                    outputCallback?.Invoke(outputBuilder.ToString());
                 }
             };
 

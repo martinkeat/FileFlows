@@ -32,8 +32,9 @@ internal class DbMigrator
     /// <param name="sourceInfo">the source database</param>
     /// <param name="destinationInfo">the destination database</param>
     /// <param name="backingUp">true if performing a backup, otherwise false</param>
+    /// <param name="updateStatusCallback">callback to update additional status information</param>
     /// <returns>if the migration was successful</returns>
-    public Result<bool> Migrate(DatabaseInfo sourceInfo, DatabaseInfo destinationInfo, bool backingUp = false)
+    public Result<bool> Migrate(DatabaseInfo sourceInfo, DatabaseInfo destinationInfo, bool backingUp = false, Action<string>? updateStatusCallback = null)
     {
         try
         {
@@ -49,6 +50,7 @@ internal class DbMigrator
             }
 
             var destCreator = DatabaseCreator.Get(Logger!, dest.Type, destinationInfo.ConnectionString);
+            updateStatusCallback?.Invoke("Creating Database");
             var result = destCreator.CreateDatabase(recreate: true);
             if (result.Failed(out string error))
                 return Result<bool>.Fail("Failed creating destination database: " + error);
@@ -60,15 +62,19 @@ internal class DbMigrator
                 return Result<bool>.Fail("Failed creating destination database structure");
             
             Logger?.ILog((backingUp ? "Backing up" : "Migrating") + " database objects");
+            updateStatusCallback?.Invoke((backingUp ? "Backing up" : "Migrating") + " database objects");
             MigrateDbObjects(source, dest);
             
             Logger?.ILog((backingUp ? "Backing up" : "Migrating") + " library files");
+            updateStatusCallback?.Invoke((backingUp ? "Backing up" : "Migrating") + " library files");
             MigrateLibraryFiles(source, dest);
             
             Logger?.ILog((backingUp ? "Backing up" : "Migrating") + " statistics");
+            updateStatusCallback?.Invoke((backingUp ? "Backing up" : "Migrating") + " statistics");
             MigrateDbStatistics(source, dest);
             
             Logger?.ILog((backingUp ? "Backing up" : "Migrating") + " revisions");
+            updateStatusCallback?.Invoke((backingUp ? "Backing up" : "Migrating") + " revisions");
             MigrateRevisions(source, dest);
 
             Logger?.ILog($"Database {(backingUp ? "backup" : "migration")} complete");

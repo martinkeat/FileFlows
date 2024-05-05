@@ -1,3 +1,14 @@
 <div class="inner">
     @Status
+    @if (string.IsNullOrWhiteSpace(SubStatus) == false && string.IsNullOrWhiteSpace(Details) == false)
+    {
+        <div class="sub-status expander" @onclick="ToggleExpanded">@SubStatus</div>
+        <div class="details-wrapper @(Expanded ? "expanded": "collapsed")">
+            <div class="details">@Details</div>
+        </div>
+    } 
+    else if (string.IsNullOrWhiteSpace(SubStatus) == false)
+    {
+        <div class="sub-status">@SubStatus</div>
+    }
 </div>

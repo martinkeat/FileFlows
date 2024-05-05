@@ -20,7 +20,8 @@ public class StartupService
     /// <summary>
     /// A delegate that is used when there is a status update
     /// </summary>
-    public delegate void StartupStatusEvent(string output);
+    /// <param name="status">the status</param>    
+    public delegate void StartupStatusEvent(string status, string subStatus, string details);
     
     /// <summary>
     /// An event that is called when there is status update
@@ -188,8 +189,11 @@ public class StartupService
         var mods = ServiceLoader.Load<DockerModService>().GetAll().Result.Where(x => x.Enabled).ToList();
         foreach (var mod in mods)
         {
-            UpdateStatus("Running DockerMod: " + mod.Name);
-            DockerModHelper.Execute(mod).Wait();
+            UpdateStatus("Running DockerMods", mod.Name);
+            DockerModHelper.Execute(mod, outputCallback: (output) =>
+            {
+                UpdateStatus("Running DockerMods", mod.Name, output);
+            }).Wait();
         }
 
         // var output = Path.Combine(DirectoryHelper.DockerModsDirectory, "output.log");
@@ -248,12 +252,13 @@ public class StartupService
     /// Sends a message update
     /// </summary>
     /// <param name="message">the message</param>
-    void UpdateStatus(string message)
+    /// <param name="subStatus">sub status</param>
+    /// <param name="details">additional details</param>
+    void UpdateStatus(string message, string subStatus = null, string details = null)
     {
         Logger.Instance.ILog(message);
         CurrentStatus = message;
-        OnStatusUpdate?.Invoke(message);
-        Thread.Sleep(1000);
+        OnStatusUpdate?.Invoke(message, subStatus, details);
     }
     
 
@@ -297,10 +302,16 @@ public class StartupService
         
         
         UpdateStatus("Backing up old database...");
-        upgrader.Backup(upgradeRequired.Value.Current, appSettingsService.Settings);
+        upgrader.Backup(upgradeRequired.Value.Current, appSettingsService.Settings, (details) =>
+        {
+            UpdateStatus("Backing up old database...", details);
+        });
         
         UpdateStatus("Upgrading Please Wait...");
-        var upgradeResult = upgrader.Run(upgradeRequired.Value.Current, appSettingsService);
+        var upgradeResult = upgrader.Run(upgradeRequired.Value.Current, appSettingsService,(details) =>
+        {
+            UpdateStatus("Upgrading Please Wait...", details);
+        });
         if(upgradeResult.Failed(out error))
             return Result<bool>.Fail(error);
         

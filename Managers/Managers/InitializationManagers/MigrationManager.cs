@@ -39,11 +39,12 @@ public class MigrationManager
     /// Migrates a database
     /// </summary>
     /// <param name="backingUp">true if performing a backup, otherwise false</param>
+    /// <param name="updateStatusCallback">callback to update additional status information</param>
     /// <returns>the result of the migration</returns>
-    public Result<bool> Migrate(bool backingUp = false)
+    public Result<bool> Migrate(bool backingUp = false, Action<string>? updateStatusCallback = null)
     {
         DbMigrator migrator = new(Logger);
-        return migrator.Migrate(Source, Destination, backingUp);
+        return migrator.Migrate(Source, Destination, backingUp, updateStatusCallback);
     }
 
     /// <summary>

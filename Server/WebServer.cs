@@ -11,6 +11,7 @@ using FileFlows.Server.Helpers;
 using FileFlows.Server.Hubs;
 using FileFlows.Server.Middleware;
 using FileFlows.Server.Services;
+using FileFlows.Server.Views.Shared;
 using FileFlows.ServerShared.Workers;
 using FileFlows.Shared.Models;
 using Microsoft.AspNetCore.SignalR;
@@ -326,7 +327,7 @@ public class WebServer
     private static Result<bool> RunStartupCode(string serverUrl)
     {
         var service = ServiceLoader.Load<StartupService>();
-        service.OnStatusUpdate += (string message) =>
+        service.OnStatusUpdate += (message, _, _) =>
         {
             Task.Run(() => OnStatusUpdate?.Invoke(WebServerState.Starting, message, string.Empty));
         };

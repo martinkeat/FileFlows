@@ -31,6 +31,12 @@ public class LoadingMiddleware
             context.Response.StatusCode = 500;
             return;
         }
+        if (context.Request.Path.StartsWithSegments("/frasier"))
+        {
+            // no body, this avoids error in js console, but doesn't trigger the reset
+            context.Response.StatusCode = 200;
+            return;
+        }
 
         if (context.Request.Path.StartsWithSegments("/_framework") || context.Request.Path.StartsWithSegments("/_blazor"))
         {

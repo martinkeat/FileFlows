@@ -48,7 +48,8 @@ public class Upgrader
     /// </summary>
     /// <param name="currentVersion">the current version in the database</param>
     /// <param name="settings">the application settings</param>
-    internal void Backup(Version currentVersion, AppSettings settings)
+    /// <param name="updateStatusCallback">callback to update additional status information</param>
+    internal void Backup(Version currentVersion, AppSettings settings, Action<string> updateStatusCallback)
     {
         // backup server.config
         string serverConfig = Path.Combine(DirectoryHelper.DataDirectory, "server.config");
@@ -87,7 +88,7 @@ public class Upgrader
                     new() { Type = settings.DatabaseType, ConnectionString = settings.DatabaseConnection },
                     new () { Type = DatabaseType.Sqlite, ConnectionString = SqliteHelper.GetConnectionString(dbBackup) }
                 );
-                var result = manager.Migrate(backingUp: true);
+                var result = manager.Migrate(backingUp: true, updateStatusCallback);
                 if(result.Failed(out string error))
                     Logger.Instance.ILog("Failed to backup database: " + error);
                 else
@@ -105,7 +106,8 @@ public class Upgrader
     /// </summary>
     /// <param name="currentVersion">the current version in the database</param>
     /// <param name="appSettingsService">the application settings service</param>
-    internal Result<bool> Run(Version currentVersion, AppSettingsService appSettingsService)
+    /// <param name="statusCallback">Callback to update the status</param>
+    internal Result<bool> Run(Version currentVersion, AppSettingsService appSettingsService, Action<string> statusCallback)
     {
         Logger.Instance.ILog("Current version: " + currentVersion);
         // check if current version is even set, and only then do we run the upgrades
@@ -117,30 +119,35 @@ public class Upgrader
         DataLayer.Helpers.Decrypter.EncryptionKey = appSettingsService.Settings.EncryptionKey;
         if (currentVersion < new Version(24, 2))
         {
+            statusCallback("Running 24.2 upgrade");
             Logger.Instance.ILog("Running 24.2 upgrade");
             new Upgrade_24_02(Logger.Instance, appSettingsService, manager).Run();
         }
 
         if (currentVersion < new Version(24, 3, 2))
         {
+            statusCallback("Running 24.3.2 upgrade");
             Logger.Instance.ILog("Running 24.3.2 upgrade");
             new Upgrade_24_03_2(Logger.Instance, appSettingsService, manager).Run();
         }
 
         if (currentVersion < new Version(24, 3, 5))
         {
+            statusCallback("Running 24.3.5 upgrade");
             Logger.Instance.ILog("Running 24.3.5 upgrade");
             new Upgrade_24_03_5(Logger.Instance, appSettingsService, manager).Run();
         }
 
         if (currentVersion < new Version(24, 4, 1))
         {
+            statusCallback("Running 24.4.1 upgrade");
             Logger.Instance.ILog("Running 24.4.1 upgrade");
             new Upgrade_24_04_1(Logger.Instance, appSettingsService, manager).Run();
         }
 
         if (currentVersion < new Version(24, 5, 1, 3143))
         {
+            statusCallback("Running 24.5.1 upgrade");
             Logger.Instance.ILog("Running 24.5.1 upgrade");
             new Upgrade_24_05_1(Logger.Instance, appSettingsService, manager).Run();
         }

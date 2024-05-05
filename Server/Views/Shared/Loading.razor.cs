@@ -12,23 +12,47 @@ public partial class Loading : ComponentBase
     /// The current status message
     /// </summary>
     private string Status = "Initializing";
+
+    /// <summary>
+    /// Additional details
+    /// </summary>
+    private string Details = string.Empty;
+
+    /// <summary>
+    /// The sub status text
+    /// </summary>
+    private string SubStatus = string.Empty;
+
+    /// <summary>
+    /// If the details are expanded or collapsed
+    /// </summary>
+    private bool Expanded = false;
     
     /// <inheritdoc />
     protected override void OnInitialized()
     {
         var service = ServiceLoader.Load<StartupService>();
         Status = service.CurrentStatus;
-        service.OnStatusUpdate += (message) =>
+        service.OnStatusUpdate += (message, substatus,  details) =>
         {
             _ = InvokeAsync(() =>
             {
                 if (string.IsNullOrWhiteSpace(message))
                     return;
                 
-                Status = message; 
+                Status = message;
+                SubStatus = substatus ?? string.Empty;
+                Details = details ?? string.Empty;
                 StateHasChanged();
             });
         };
     }
 
+    /// <summary>
+    /// Toggles the expanded state
+    /// </summary>
+    void ToggleExpanded()
+    {
+        Expanded = !Expanded;
+    }
 }
