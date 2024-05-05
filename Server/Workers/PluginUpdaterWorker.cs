@@ -20,7 +20,7 @@ public class PluginUpdaterWorker : ServerWorker
     }
 
     /// <inheritdoc />
-    protected override void ExecuteActual(Settings settings)
+    protected override void ExecuteActual(Settings? settings)
     {
 #if (DEBUG)
         settings = null;

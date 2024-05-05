@@ -199,7 +199,7 @@ public class Program
     /// <exception cref="Exception">error was thrown</exception>
     static (bool Success, bool KeepFiles) Execute(ExecuteArgs args)
     {
-        ProcessingNode node;
+        ProcessingNode? node;
         var nodeService = ServiceLoader.Load<INodeService>();
         try
         {

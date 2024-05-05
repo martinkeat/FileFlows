@@ -30,8 +30,9 @@ public class AuthorizeController : Controller
         {
             #if(DEBUG)
             return Redirect("http://localhost:5276");
-            #endif
+            #else
             return Redirect("/");
+            #endif
         }
 
         var service = ServiceLoader.Load<SettingsService>();

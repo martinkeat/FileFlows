@@ -154,7 +154,7 @@ public class FlowTemplateController : Controller
     [HttpPost]
     public async Task<IActionResult> FetchTemplate([FromBody] FlowTemplateModel model)
     {
-        Flow flow;
+        Flow? flow;
         if (model.Path == "subflow")
         {
             string json = @"{

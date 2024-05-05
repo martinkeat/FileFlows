@@ -98,7 +98,7 @@ public class PluginService
         var result = await new PluginManager().GetPluginSettings(pluginSettingsType);
         if (result.IsFailed)
             return string.Empty;
-        PluginSettingsModel model = result.Value;
+        PluginSettingsModel? model = result.Value;
         if (string.IsNullOrEmpty(model.Json))
             return string.Empty;
         

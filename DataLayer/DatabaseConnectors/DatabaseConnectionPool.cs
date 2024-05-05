@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using FileFlows.Plugin;
 using FileFlows.Shared;
 
 namespace FileFlows.DataLayer.DatabaseConnectors;

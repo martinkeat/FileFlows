@@ -38,7 +38,7 @@ public class WebSocketController : ControllerBase
     /// </summary>
     /// <param name="webSocket">The WebSocket to receive messages from.</param>
     /// <returns>A task representing the receive loop.</returns>
-    private async Task ReceiveLoop(WebSocket webSocket)
+    private async Task ReceiveLoop(WebSocket? webSocket)
     {
         var buffer = new byte[4096];
 

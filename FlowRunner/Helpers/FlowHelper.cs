@@ -154,7 +154,7 @@ public class FlowHelper
             if (part.Model is IDictionary<string, object> dictModel == false)
                 return Result<Node>.Fail("Failed to load model for GotoFlow flow element.");
 
-            if (dictModel.TryGetValue("Flow", out object oFlow) == false || oFlow == null)
+            if (dictModel.TryGetValue("Flow", out object? oFlow) == false || oFlow == null)
                 return Result<Node>.Fail("Failed to get flow from GotoFlow model.");
             ObjectReference? orFlow;
             string json = JsonSerializer.Serialize(oFlow);
@@ -177,7 +177,7 @@ public class FlowHelper
             if(gotoFlow == null)
                 return Result<Node>.Fail("Failed to locate Flow defined in the GotoFlow flow element.");
 
-            if (dictModel.TryGetValue("UpdateFlowUsed", out object oUpdateFlowUsed) && oUpdateFlowUsed?.ToString()?.ToLowerInvariant() == "true")
+            if (dictModel.TryGetValue("UpdateFlowUsed", out object? oUpdateFlowUsed) && oUpdateFlowUsed?.ToString()?.ToLowerInvariant() == "true")
             {
                 runner.Info.LibraryFile.Flow = new()
                 {

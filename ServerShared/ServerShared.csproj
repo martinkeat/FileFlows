@@ -7,6 +7,7 @@
     <AssemblyName>FileFlows.$(MSBuildProjectName)</AssemblyName>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+    <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <NoWarn>1701;1702;CS8618;CS8601;CS8602;CS8603;CS8604;CS8618;CS8625;CS1591;</NoWarn>

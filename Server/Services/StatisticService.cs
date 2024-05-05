@@ -1,5 +1,6 @@
 ﻿using FileFlows.DataLayer;
 using FileFlows.Managers;
+using FileFlows.Plugin;
 using FileFlows.ServerShared.Models.StatisticModels;
 using FileFlows.ServerShared.Services;
 using FileFlows.Shared.Models;

@@ -738,7 +738,7 @@ public class WatchedLibrary:IDisposable
                     if (MatchesDetection(file.FullName) == false)
                         continue;
 
-                    if (knownFiles.TryGetValue(file.FullName.ToLowerInvariant(), out KnownFileInfo info))
+                    if (knownFiles.TryGetValue(file.FullName.ToLowerInvariant(), out KnownFileInfo? info) && info != null)
                     {
                         if (Library.DownloadsDirectory && info.Status == FileStatus.Processed)
                         {

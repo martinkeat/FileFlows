@@ -57,7 +57,7 @@ public class CommentBlock
     /// <returns>The value of the parameter</returns>
     public string GetValue(string name)
     {
-        if (_commentDict.TryGetValue(name, out string value))
+        if (_commentDict.TryGetValue(name, out string? value))
             return value;
         return string.Empty;
     }

@@ -19,7 +19,7 @@ public class WorkController : Controller
     /// <param name="info">The info about the work starting</param>
     /// <returns>the updated info</returns>
     [HttpPost("start")]
-    public Task<FlowExecutorInfo> StartWork([FromBody] FlowExecutorInfo info)
+    public Task<FlowExecutorInfo?> StartWork([FromBody] FlowExecutorInfo info)
         => ServiceLoader.Load<FlowRunnerService>().Start(info);
 
     /// <summary>

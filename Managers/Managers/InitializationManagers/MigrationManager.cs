@@ -93,6 +93,6 @@ public class MigrationManager
         if (creator.CreateDatabaseStructure().Failed(out error))
             return Result<bool>.Fail(error);
         
-        return true;;
+        return true;
     }
 }

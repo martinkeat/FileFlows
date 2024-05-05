@@ -181,7 +181,7 @@ public class PluginScanner
                 Logger.Instance.DLog("Plugin.Url: " + plugin.Url);
                 Logger.Instance.DLog("Plugin.Authors: " + plugin.Authors);
 
-                if (Version.TryParse(pi.Version, out Version piVersion) && piVersion != null)
+                if (Version.TryParse(pi.Version, out Version? piVersion) && piVersion != null)
                 {
                     if (piVersion.Major < 23)
                     {

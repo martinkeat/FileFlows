@@ -112,7 +112,7 @@ public class ExecuteFlow : Node
 
             DateTime nodeStartTime = DateTime.UtcNow;
             Node? currentFlowElement = null;
-            TemporaryLogger loadFELogger = new(); // log this to a string, so we can include it in the flow element start
+            TemporaryLogger? loadFELogger = new(); // log this to a string, so we can include it in the flow element start
             try
             {
                 var lfeResult = FlowHelper.LoadFlowElement(loadFELogger, part, args.Variables, Runner);

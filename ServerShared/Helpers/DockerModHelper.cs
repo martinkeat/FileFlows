@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Text;
+using FileFlows.Plugin;
 using FileFlows.Shared.Models;
 
 namespace FileFlows.ServerShared.Helpers;

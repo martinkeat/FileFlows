@@ -42,7 +42,7 @@ public abstract class Command
         {
             string arg;
             object value;
-            PropertyInfo p;
+            PropertyInfo? p;
             
             if (i == 0 && commandLineArgs.TryGetValue("", out p))
             {

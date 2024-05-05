@@ -31,7 +31,7 @@ public class PluginDownloader
             string url = Globals.PluginBaseUrl + "/download/" + packageName + $"?version={version}&rand=" + DateTime.UtcNow.ToFileTime();
             var dlResult = await HttpHelper.Get<byte[]>(url);
             if (dlResult.Success)
-                return (true, dlResult.Data);
+                return (true, dlResult.Data ?? new byte[] { });
             throw new Exception(dlResult.Body?.EmptyAsNull() ?? "Unexpected error");
         }
         catch (Exception ex)

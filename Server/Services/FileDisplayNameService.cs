@@ -31,7 +31,7 @@ public class FileDisplayNameService
     /// </summary>
     public void Reinitialize()
     {
-        string code = null;
+        string? code = null;
         try
         {
             var service = new ScriptService();

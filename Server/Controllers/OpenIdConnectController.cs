@@ -54,7 +54,7 @@ public class OpenIDController : Controller
 
     private string GetRedirectUrl()
     {
-        string redirectUri = Url.Action("Callback", "OpenID", null, Request.Scheme); // Callback URL
+        var redirectUri = Url.Action("Callback", "OpenID", null, Request.Scheme); // Callback URL
         if (string.IsNullOrWhiteSpace(_settings.OidcCallbackAddress) == false)
             redirectUri = _settings.OidcCallbackAddress.TrimEnd('/') + redirectUri[redirectUri.IndexOf("/oidc")..];
         return redirectUri;
@@ -140,7 +140,7 @@ public class OpenIDController : Controller
     {
 #if(DEBUG)
         return Redirect($"http://localhost:5276/auth-redirect.html?jwt={jwt}");
-#endif
+#else
         var htmlContent = $@"
     <!DOCTYPE html>
     <html lang='en'>
@@ -159,6 +159,7 @@ public class OpenIDController : Controller
     <body></body>
     </html>";
         return Content(htmlContent, "text/html");
+#endif
     }
 
     /// <summary>

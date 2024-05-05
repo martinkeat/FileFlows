@@ -81,7 +81,7 @@ public class ScriptExecutor:IScriptExecutor
         executor.SharedDirectory = SharedDirectory;
         try
         {
-            object result = executor.Execute();
+            object? result = executor.Execute();
             if (result is int iOutput)
                 return iOutput;
             return -1;
@@ -118,7 +118,7 @@ public class ScriptExecutor:IScriptExecutor
         executor.Variables = variables;
         try
         {
-            object returnValue = executor.Execute();
+            object? returnValue = executor.Execute();
             return new FileFlowsTaskRun()
             {
                 Log = FixLog(sbLog),

@@ -54,7 +54,7 @@ public class TemplateHelper
         {
           string itemValue = itemMatch.Value;
           if (itemValue.StartsWith("\"") && itemValue.EndsWith("\""))
-            itemValue = JsonSerializer.Deserialize<string>(itemValue);
+            itemValue = JsonSerializer.Deserialize<string>(itemValue) ?? string.Empty;
           matches.Add(itemValue);
         }
       }
@@ -186,7 +186,7 @@ public class TemplateHelper
             
             int xPos = xPosElement.GetInt32();
             int yPos = yPosElement.GetInt32();
-            string uid = uidElement.GetString();
+            var uid = uidElement.GetString();
             
             json = json.Replace(part, $@"        
 {{

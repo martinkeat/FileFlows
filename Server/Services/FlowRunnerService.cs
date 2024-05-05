@@ -43,7 +43,7 @@ public class FlowRunnerService : IFlowRunnerService
     /// </summary>
     /// <param name="info">The information about the flow execution</param>
     /// <returns>a completed task</returns>
-    public async Task<FlowExecutorInfo> Start(FlowExecutorInfo info)
+    public async Task<FlowExecutorInfo?> Start(FlowExecutorInfo info)
     {
         await ServiceLoader.Load<NodeService>().UpdateLastSeen(info.NodeUid);
 

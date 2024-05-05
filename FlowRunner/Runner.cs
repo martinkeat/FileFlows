@@ -207,7 +207,7 @@ public class Runner
     /// </summary>
     public async Task Finish()
     {
-        string log = null;
+        string? log = null;
         if (nodeParameters?.Logger is FlowLogger fl)
         {
             log = fl.ToString();

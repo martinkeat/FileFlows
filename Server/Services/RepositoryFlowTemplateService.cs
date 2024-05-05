@@ -37,7 +37,7 @@ public class RepositoryFlowTemplateService
     /// </summary>
     async Task RefreshTemplates()
     {
-        RequestResult<List<FlowTemplateModel>> result = null;
+        RequestResult<List<FlowTemplateModel>>? result = null;
         try
         {
             result = await HttpHelper.Get<List<FlowTemplateModel>>(
@@ -119,7 +119,7 @@ public class RepositoryFlowTemplateService
             return Result<Flow>.Fail("Bad file: " + path);
         
         string fileName = Path.Combine(DirectoryHelper.TemplateDirectoryFlow, path[15..].Replace('/', Path.DirectorySeparatorChar));
-        string json;
+        string? json;
         if (File.Exists(fileName) == false)
         {
             // need to download the flow template from github

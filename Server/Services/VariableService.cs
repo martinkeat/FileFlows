@@ -12,8 +12,8 @@ namespace FileFlows.Server.Services;
 public class VariableService : IVariableService
 {
     /// <inheritdoc />
-    public Task<List<Variable>> GetAllAsync()
-        => new VariableManager().GetAll();
+    public async Task<List<Variable>?> GetAllAsync()
+        => await new VariableManager().GetAll();
 
     /// <summary>
     /// Deletes the given variables

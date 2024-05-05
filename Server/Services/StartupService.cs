@@ -20,7 +20,9 @@ public class StartupService
     /// <summary>
     /// A delegate that is used when there is a status update
     /// </summary>
-    /// <param name="status">the status</param>    
+    /// <param name="status">the status</param>
+    /// <param name="subStatus">the sub status</param>
+    /// <param name="details">any extra details for this statue, ie a log</param>
     public delegate void StartupStatusEvent(string status, string subStatus, string details);
     
     /// <summary>
