@@ -61,6 +61,13 @@ public class ImageHelper : IImageHelper
             return Result<(int Width, int Height)>.Fail("Image does not exist");
         try
         {
+            if (ImageMagickHelper.CanUseImageMagick())
+            {
+                var result = ImageMagickHelper.GetImageDimensions(imagePath);
+                if (result.IsFailed == false)
+                    return result.Value;
+            }
+
             using var image = Image.Load<Rgb24>(imagePath);
             return (image.Width, image.Height);
         }
@@ -84,55 +91,18 @@ public class ImageHelper : IImageHelper
             return Result<bool>.Fail("Image does not exist");
         try
         {
+            if (ImageMagickHelper.CanUseImageMagick())
+            {
+                var result = ImageMagickHelper.ConvertImage(imagePath, destination, type, options);
+                if (result.IsFailed == false)
+                    return true;
+            }
+
             using var image = Image.Load(imagePath);
             
             if (options != null)
             {
-                // resize, should maintain aspect ratio
-                int newWidth = image.Width;
-                int newHeight = image.Height;
-
-                // If both Width and Height are specified, use them directly
-                if (options.Width > 0 && options.Height > 0)
-                {
-                    newWidth = options.Width;
-                    newHeight = options.Height;
-                }
-                // If only Width is specified, scale Height proportionally
-                else if (options.Width > 0)
-                {
-                    newWidth = options.Width;
-                    newHeight = (int)((float)image.Height / image.Width * options.Width);
-                }
-                // If only Height is specified, scale Width proportionally
-                else if (options.Height > 0)
-                {
-                    newHeight = options.Height;
-                    newWidth = (int)((float)image.Width / image.Height * options.Height);
-                }
-                else if (options.MaxWidth > 0 && options.MaxHeight == 0)
-                {
-                    // Only MaxWidth is specified
-                    newWidth = options.MaxWidth;
-                    newHeight = (int)(image.Height * ((float)options.MaxWidth / image.Width));
-                }
-                else if (options.MaxHeight > 0 && options.MaxWidth == 0)
-                {
-                    // Only MaxHeight is specified
-                    newWidth = (int)(image.Width * ((float)options.MaxHeight / image.Height));
-                    newHeight = options.MaxHeight;
-                }
-                else if (options.MaxHeight > 0 && options.MaxWidth > 0)
-                {
-                    // Both MaxHeight and MaxWidth are specified
-                    float widthRatio = (float)options.MaxWidth / image.Width;
-                    float heightRatio = (float)options.MaxHeight / image.Height;
-                    float ratio = Math.Min(widthRatio, heightRatio);
-
-                    newWidth = (int)(image.Width * ratio);
-                    newHeight = (int)(image.Height * ratio);
-                }
-
+                (int newWidth, int newHeight) = CalculateNewDimensions(image.Width, image.Height, options);
 
                 if (newWidth != image.Width || newHeight != image.Height)
                 {
@@ -200,10 +170,73 @@ public class ImageHelper : IImageHelper
         }
     }
 
+
+    /// <summary>
+    /// Calculates the new dimensions for resizing an image based on the provided options.
+    /// </summary>
+    /// <param name="width">The original width of the image.</param>
+    /// <param name="height">The original height of the image.</param>
+    /// <param name="options">The options specifying the desired dimensions or constraints for resizing.</param>
+    /// <returns>A tuple containing the new width and height for the resized image.</returns>
+    internal static (int Width, int Height) CalculateNewDimensions(int width, int height, ImageOptions? options)
+    {
+        int newWidth = width;
+        int newHeight = height;
+
+        if (options != null)
+        {
+            // Calculate new dimensions based on options
+            if (options.Width > 0 && options.Height > 0)
+            {
+                // Both width and height are specified, use them directly
+                newWidth = options.Width;
+                newHeight = options.Height;
+            }
+            else if (options.Width > 0)
+            {
+                // Only width is specified, scale height proportionally
+                newWidth = options.Width;
+                newHeight = (int)Math.Round((double)height / width * options.Width);
+            }
+            else if (options.Height > 0)
+            {
+                // Only height is specified, scale width proportionally
+                newWidth = (int)Math.Round((double)width / height * options.Height);
+                newHeight = options.Height;
+            }
+            else if (options.MaxWidth > 0 && options.MaxHeight > 0)
+            {
+                // Both max width and max height are specified, scale the image down to fit within the bounds
+                double widthRatio = (double)width / options.MaxWidth;
+                double heightRatio = (double)height / options.MaxHeight;
+                double maxRatio = Math.Max(widthRatio, heightRatio);
+
+                newWidth = (int)Math.Round(width / maxRatio);
+                newHeight = (int)Math.Round(height / maxRatio);
+            }
+            else if (options.MaxWidth > 0)
+            {
+                // Only max width is specified, scale the image down to fit within the width
+                double ratio = (double)width / options.MaxWidth;
+                newWidth = options.MaxWidth;
+                newHeight = (int)Math.Round(height / ratio);
+            }
+            else if (options.MaxHeight > 0)
+            {
+                // Only max height is specified, scale the image down to fit within the height
+                double ratio = (double)height / options.MaxHeight;
+                newWidth = (int)Math.Round(width / ratio);
+                newHeight = options.MaxHeight;
+            }
+        }
+
+        return (newWidth, newHeight);
+    }
+
     /// <summary>
     /// Image types
     /// </summary>
-    private enum ImageType
+    internal enum ImageType
     {
         /// <summary>
         /// JPEG image
