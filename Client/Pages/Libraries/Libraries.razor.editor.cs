@@ -85,7 +85,7 @@ public partial class Libraries : ListPage<Guid, Library>
                         Value = null
                     };
                     
-                    if(templates.Any() && templates[0].Value == Globals.LIST_OPTION_GROUP)
+                    if(templates.Any() && (string)templates[0].Value! == Globals.LIST_OPTION_GROUP)
                         templates.Insert(1, loCustom);
                     else
                         templates.Insert(0, loCustom);
@@ -136,7 +136,7 @@ public partial class Libraries : ListPage<Guid, Library>
             InputType = FormInputType.Select,
             Name = nameof(library.Flow),
             Parameters = new Dictionary<string, object>{
-                { "Options", flowOptions.ToList() }
+                { "Options", flowOptions.OrderBy(x => x.Label.ToLowerInvariant()).ToList() }
             },
             Validators = new List<FileFlows.Shared.Validators.Validator>
             {

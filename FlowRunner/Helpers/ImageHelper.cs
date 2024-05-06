@@ -3,7 +3,11 @@ using FileFlows.Plugin.Helpers;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Drawing.Processing;
 using SixLabors.ImageSharp.Formats;
+using SixLabors.ImageSharp.Formats.Bmp;
+using SixLabors.ImageSharp.Formats.Gif;
 using SixLabors.ImageSharp.Formats.Jpeg;
+using SixLabors.ImageSharp.Formats.Png;
+using SixLabors.ImageSharp.Formats.Tiff;
 using SixLabors.ImageSharp.Formats.Webp;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
@@ -170,6 +174,81 @@ public class ImageHelper : IImageHelper
         }
     }
 
+    /// <inheritdoc />
+    public Result<string> SaveImage(byte[] imageBytes, string fileNameNoExtension)
+    {
+        if (imageBytes?.Any() != true)
+            return Result<string>.Fail("No image bytes");
+        if (string.IsNullOrWhiteSpace(fileNameNoExtension))
+            return Result<string>.Fail("No file name");
+        try
+        {
+            using var image = Image.Load(imageBytes);
+
+            // Infer the image format
+            (IImageFormat? imageFormat, string? fileExtension) = InferImageFormat(imageBytes);
+            if (imageFormat == null)
+            {
+                Logger?.WLog("Failed to inter image type from PDF, failing back to JPG");
+                imageFormat = JpegFormat.Instance;
+                fileExtension = "jpg";
+            }
+            else
+            {
+                Logger?.ILog("File Extension of image: " + fileExtension);
+            }
+
+            var file = fileNameNoExtension.TrimEnd('.') + "." + fileExtension;
+            var fileInfo = new FileInfo(file);
+            
+            if (fileInfo.Directory.Exists == false)
+                fileInfo.Directory.Create();
+
+            using var outputStream = File.Create(file);
+            image.Save(outputStream, imageFormat);
+            return file;
+        }
+        catch (Exception ex)
+        {
+            return Result<string>.Fail(ex.Message);
+        }
+    }
+
+
+    /// <summary>
+    /// Infers the image format based on the first few bytes of the image data.
+    /// </summary>
+    /// <param name="bytes">The image data bytes.</param>
+    /// <returns>The inferred image format and file extension.</returns>
+    private static (IImageFormat? Format, string? Extension) InferImageFormat(byte[] bytes)
+    {
+        // Try to infer image format based on magic numbers
+        if (bytes.Length >= 2 && bytes[0] == 0xFF && bytes[1] == 0xD8) // JPEG
+            return (JpegFormat.Instance, "jpg");
+        if (bytes.Length >= 8 && BitConverter.ToUInt64(bytes, 0) == 0x89504E470D0A1A0A) // PNG
+            return (PngFormat.Instance, "png");
+        if (bytes.Length >= 4 && bytes[0] == 0x47 && bytes[1] == 0x49 && bytes[2] == 0x46 && bytes[3] == 0x38) // GIF
+            return (GifFormat.Instance, "gif");
+        if (bytes.Length >= 4 && bytes[0] == 0x52 && bytes[1] == 0x49 && bytes[2] == 0x46 && bytes[3] == 0x46 &&
+            bytes[8] == 0x57 && bytes[9] == 0x45 && bytes[10] == 0x42 && bytes[11] == 0x50) // WebP
+            return (WebpFormat.Instance, "webp");
+        if (bytes.Length >= 4 && BitConverter.ToUInt32(bytes, 0) == 0x49492A00) // TIFF
+            return (TiffFormat.Instance, "tiff");
+        if (bytes.Length >= 2 && bytes[0] == 0x42 && bytes[1] == 0x4D) // BMP
+            return (BmpFormat.Instance, "bmp");
+
+        // If none of the known formats are detected, fall back to Image.DetectFormat()
+        try
+        {
+            IImageFormat format = Image.DetectFormat(bytes);
+            string extension = format?.DefaultMimeType?.Split('/')[1] ?? "png";
+            return (format, extension);
+        }
+        catch (Exception)
+        {
+            return (null, null);
+        }
+    }
 
     /// <summary>
     /// Calculates the new dimensions for resizing an image based on the provided options.

@@ -393,9 +393,14 @@ public class NodeParameters
         => LogImageActual?.Invoke(path);
     
     /// <summary>
-    /// Gets the imgae helper
+    /// Gets the archive helper
     /// </summary>
     public IImageHelper ImageHelper { get; init; }
+    
+    /// <summary>
+    /// Gets the archive  helper
+    /// </summary>
+    public IArchiveHelper ArchiveHelper { get; set; }
 
     private bool initDone = false;
     

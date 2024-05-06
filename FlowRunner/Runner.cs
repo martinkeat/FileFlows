@@ -436,8 +436,9 @@ public class Runner
             LibraryFileName = Info.LibraryFile.Name,
             IsRemote = Info.IsRemote,
             LogImageActual = logger.Image,
-            ImageHelper = new ImageHelper(logger)
+            ImageHelper = new ImageHelper(logger),
         };
+        nodeParameters.ArchiveHelper = new ArchiveHelper(nodeParameters);
         
         nodeParameters.Variables["library.Name"] = Info.Library.Name;
         nodeParameters.Variables["library.Path"] = Info.LibraryPath;

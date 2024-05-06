@@ -29,7 +29,7 @@ public interface IImageHelper
     /// <param name="destination">The destination where to save the new image to</param>
     /// <param name="options">The image options</param>
     /// <returns>true if successful, otherwise false</returns>
-    Result<bool> ConvertToJpeg(string imagePath, string destination, ImageOptions? options);
+    Result<bool> ConvertToJpeg(string imagePath, string destination, ImageOptions? options = null);
 
     /// <summary>
     /// Converts an image to webp
@@ -38,16 +38,25 @@ public interface IImageHelper
     /// <param name="destination">The destination where to save the new image to</param>
     /// <param name="options">The image options</param>
     /// <returns>true if successful, otherwise false</returns>
-    Result<bool> ConvertToWebp(string imagePath, string destination, ImageOptions? options);
+    Result<bool> ConvertToWebp(string imagePath, string destination, ImageOptions? options = null);
     
     /// <summary>
     /// Resizes the image to the specified dimensions while maintaining the aspect ratio.
     /// </summary>
+    /// <param name="imagePath">The path to the input image.</param>
     /// <param name="width">The new width of the image. Pass in 0 to maintain the aspect ratio.</param>
     /// <param name="height">The new height of the image. Pass in 0 to maintain the aspect ratio.</param>
     /// <param name="destination">The file path where the resized image will be saved.</param>
     /// <returns>A result indicating whether the resizing operation was successful or not.</returns>
     Result<bool> Resize(string imagePath, int width, int height, string destination);
+
+    /// <summary>
+    /// Saves an image from the image bytes
+    /// </summary>
+    /// <param name="imageBytes">the binary bytes of the image</param>
+    /// <param name="fileNameNoExtension">the filename without the extension, the extension will be gained from the image bytes</param>
+    /// <returns>the file name of the saved image</returns>
+    Result<string> SaveImage(byte[] imageBytes, string fileNameNoExtension);
 
 }
 

@@ -72,7 +72,7 @@ public class Node
     /// <summary>
     /// Gets the group this node belongs to
     /// </summary>
-    public string Group
+    public virtual string Group
     {
         get
         {
