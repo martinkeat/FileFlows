@@ -126,6 +126,11 @@ public class Executor
 
             tcode = tcode.Replace("Flow.Execute(", "Execute(");
 
+            if (tcode.StartsWith("function") == false && tcode.IndexOf("export const result", StringComparison.Ordinal) < 0)
+            {
+                tcode = "function Script() {\n" + tcode + "\n}\n";
+                tcode += $"var scriptResult = Script();\nexport const result = scriptResult;";
+            }
 
             if (SharedDirectory != null) // can be null in unit tests
             {
@@ -138,8 +143,11 @@ public class Executor
             foreach(Match match in Regex.Matches(tcode, @"import[\s]+{[^}]+}[\s]+from[\s]+['""]([^'""]+)['""]"))
             {
                 var importFile = match.Groups[1].Value;
-                if(importFile.EndsWith(".js") == false)
-                    tcode = tcode.Replace(importFile, importFile + ".js");
+                tcode = tcode.Replace(match.Value, "");
+                if (importFile.EndsWith(".js") == false)
+                    tcode = match.Value.Replace(importFile, importFile + ".js") + "\n" + tcode;
+                else
+                    tcode = match.Value + "\n" + tcode;
             }
 
             var processExecutor = this.ProcessExecutor ?? new BasicProcessExecutor(Logger);
