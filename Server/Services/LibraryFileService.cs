@@ -373,8 +373,8 @@ public class LibraryFileService
                 continue; // version mismatch
             
             // check if other can process this library
-            var nodeLibraries = node.Libraries?.Select(x => x.Uid)?.ToList() ?? new();
-            List<Guid> allowedLibraries = node.AllLibraries switch
+            var nodeLibraries = other.Libraries?.Select(x => x.Uid)?.ToList() ?? new();
+            List<Guid> allowedLibraries = other.AllLibraries switch
             {
                 ProcessingLibraries.Only => nodeLibraries,
                 ProcessingLibraries.AllExcept => allLibrariesUids.Where(x => nodeLibraries.Contains(x) == false).ToList(),
