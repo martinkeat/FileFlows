@@ -5,6 +5,8 @@ using FileFlows.Plugin;
 using FileFlows.Plugin.Helpers;
 using SharpCompress;
 using SharpCompress.Archives;
+using SharpCompress.Common;
+using SharpCompress.Readers;
 
 namespace FileFlows.FlowRunner.Helpers;
 
@@ -170,7 +172,25 @@ public partial class ArchiveHelper : IArchiveHelper
         
         try
         {
-            ZipFile.ExtractToDirectory(archivePath, destinationPath);
+            using Stream stream = File.OpenRead(archivePath);
+            using var reader = ReaderFactory.Open(stream);
+            while (reader.MoveToNextEntry())
+            {
+                // Determine the type of the archive entry
+                if (reader.Entry.IsDirectory)
+                {
+                    // Skip directories, as we're interested in files
+                    continue;
+                }
+
+                // Extract the file
+                reader.WriteEntryToDirectory(destinationPath, new ExtractionOptions()
+                {
+                    ExtractFullPath = true,     // Extract files with full path
+                    Overwrite = true            // Overwrite existing files
+                });
+            }
+
             return true;
         }
         catch (Exception ex)

@@ -18,7 +18,7 @@ public class RemoteFileService : IFileService
     /// <summary>
     /// Gets or sets the replace variables delegate
     /// </summary>
-    public ReplaceVariablesDelegate ReplaceVariables { get; set; }
+    public ReplaceVariablesDelegate? ReplaceVariables { get; set; }
     /// <summary>
     /// Gets or sets the logger
     /// </summary>

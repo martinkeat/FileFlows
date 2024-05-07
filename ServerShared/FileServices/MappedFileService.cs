@@ -22,7 +22,7 @@ public class MappedFileService : IFileService
     /// The function takes a string input, a boolean indicating whether to strip missing variables,
     /// and a boolean indicating whether to clean special characters.
     /// </remarks>
-    public ReplaceVariablesDelegate ReplaceVariables { get; set; }
+    public ReplaceVariablesDelegate? ReplaceVariables { get; set; }
 
     /// <summary>
     /// Gets or sets the logger used for logging
