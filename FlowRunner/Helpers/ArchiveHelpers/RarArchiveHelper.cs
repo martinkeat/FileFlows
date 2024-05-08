@@ -28,8 +28,8 @@ public class RarArchiveHelper : IArchiveHelper
     /// <param name="args">The Node parameters</param>
     public RarArchiveHelper(NodeParameters args)
     {
-        RarExecutable = args.GetToolPath("rar") ?? "rar";
-        UnrarExecutable = args.GetToolPath("unrar") ?? "unrar";
+        RarExecutable = args.GetToolPath("rar")?.EmptyAsNull() ?? "rar";
+        UnrarExecutable = args.GetToolPath("unrar")?.EmptyAsNull() ?? "unrar";
         Logger = args.Logger;
     }
     
