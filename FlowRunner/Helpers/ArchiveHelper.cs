@@ -183,10 +183,11 @@ public partial class ArchiveHelper : IArchiveHelper
                 }
 
                 // Extract the file
-                Logger?.ILog("Extracting file: " + reader.Entry.Key);
+                var entryPath = Path.Combine(destinationPath, reader.Entry.Key);
+                Logger?.ILog("Extracting file: " + entryPath);
                 reader.WriteEntryToDirectory(destinationPath, new ExtractionOptions()
                 {
-                    ExtractFullPath = true,     // Extract files with full path
+                    ExtractFullPath = false,     // Extract files without full path
                     Overwrite = true            // Overwrite existing files
                 });
             }
