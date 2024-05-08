@@ -3,7 +3,6 @@ using System.Text.RegularExpressions;
 using FileFlows.FlowRunner.Helpers.ArchiveHelpers;
 using FileFlows.Plugin;
 using FileFlows.Plugin.Helpers;
-using SharpCompress;
 using SharpCompress.Archives;
 using SharpCompress.Common;
 using SharpCompress.Readers;
@@ -184,6 +183,7 @@ public partial class ArchiveHelper : IArchiveHelper
                 }
 
                 // Extract the file
+                Logger?.ILog("Extracting file: " + reader.Entry.Key);
                 reader.WriteEntryToDirectory(destinationPath, new ExtractionOptions()
                 {
                     ExtractFullPath = true,     // Extract files with full path
