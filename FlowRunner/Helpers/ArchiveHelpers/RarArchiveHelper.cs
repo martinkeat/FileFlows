@@ -91,6 +91,7 @@ public class RarArchiveHelper : IArchiveHelper
         // Check if the archive file exists
         if (File.Exists(archivePath) == false)
             return Result<int>.Fail("Archive file not found: " + archivePath);
+        Logger?.ILog("Getting file count from: " + archivePath);
         
         var process = new Process();
         process.StartInfo.FileName = UnrarExecutable;
@@ -108,9 +109,23 @@ public class RarArchiveHelper : IArchiveHelper
         if (process.ExitCode != 0)
             throw new Exception(error?.EmptyAsNull() ?? "Failed to open rar file");
 
-        var lines = output.Split('\n', StringSplitOptions.RemoveEmptyEntries);
+        var rgxFile = new Regex("(?<=\\d{2}:\\d{2}\\s+)(.+)$");
+        
+        var files = output.Split('\n', StringSplitOptions.RemoveEmptyEntries).Select(x =>
+        {
+            var match = rgxFile.Match(x);
+            if (match.Success)
+                return match.Value.Trim();
+            return null;
+        }).Where(x => x != null).Select(x => x!).ToList();
+        
+        Logger?.ILog("Files found in rar file: \n" + string.Join("\n", files));
+
+        if (string.IsNullOrWhiteSpace(pattern) || pattern == "*" || pattern == "*.*")
+            return files.Count;
+        
         var rgxFiles = new Regex(pattern, RegexOptions.IgnoreCase);
-        return lines.Count(x => rgxFiles.IsMatch(x.Trim()));
+        return files.Count(x => rgxFiles.IsMatch(x.Trim()));
     }
 
     /// <inheritdoc />
