@@ -8,10 +8,7 @@ using System.Runtime.InteropServices;
 using System.Text.Json.Serialization;
 using FileFlows.ScriptExecution;
 using FileFlows.Server.Authentication;
-using FileFlows.Server.Helpers;
 using FileFlows.Server.Services;
-using Humanizer;
-using NPoco.Expressions;
 using Logger = FileFlows.Shared.Logger;
 using Range = FileFlows.Shared.Validators.Range;
 
@@ -933,6 +930,7 @@ public class FlowController : BaseController
         }
         variables["library.Name"] = "My Library";
         variables["library.Path"] = "/library/path";
+        variables["temp"] = "/node-temp";
 
         //p.FlowElementUid == FileFlows.VideoNodes.DetectBlackBars
         var flowElements = await GetElements(Guid.Empty, (FlowType)(-1));

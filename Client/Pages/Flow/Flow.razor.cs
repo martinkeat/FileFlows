@@ -544,26 +544,26 @@ public partial class Flow : ComponentBase, IDisposable
                     {
                         string optp = optProperty.GetString();
                         Logger.Instance.DLog("OptionsProperty = " + optp);
-                        if (optp == "FLOW_LIST")
+                        if (optp is "FLOW_LIST" or "SUB_FLOW_LIST")
                         {
                             if (flowOptions == null)
                             {
                                 flowOptions = new List<ListOption>();
-                                var flowsResult = await HttpHelper.Get<FFlow[]>($"/api/flow");
+                                var flowsResult = await HttpHelper.Get<Dictionary<Guid, string>>($"/api/flow/basic-list?type=" + (optp == "FLOW_LIST" ? "Standard": "SubFlow"));
                                 if (flowsResult.Success)
                                 {
-                                    flowOptions = flowsResult.Data?.Where(x => x.Uid != editor.Flow?.Uid)?.OrderBy(x => x.Name)?.Select(x => new ListOption
-                                    {
-                                        Label = x.Name,
-                                        Value = new ObjectReference
+                                    flowOptions = flowsResult.Data?.Where(x => x.Key != editor.Flow?.Uid)
+                                        ?.OrderBy(x => x.Value)?.Select(x => new ListOption
                                         {
-                                            Name = x.Name,
-                                            Uid = x.Uid,
-                                            Type = x.GetType().FullName
-                                        }
-                                    })?.ToList() ?? new List<ListOption>();
+                                            Label = x.Value,
+                                            Value = new ObjectReference
+                                            {
+                                                Name = x.Value,
+                                                Uid = x.Key,
+                                                Type = typeof(FFlow).FullName
+                                            }
+                                        })?.ToList() ?? new List<ListOption>();
                                 }
-
                             }
 
                             field.Parameters["Options"] = flowOptions;

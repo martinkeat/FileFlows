@@ -119,10 +119,10 @@ public class FlowLogger : ILogger
         Debug
     }
 
-    IFlowRunnerCommunicator Communicator;
+    IFlowRunnerCommunicator? Communicator;
     
     /// <summary>
-    /// Creates an instance of the a flow logger
+    /// Creates an instance of the flow logger
     /// </summary>
     /// <param name="communicator">a communicator to report messages to the FileFlows server</param>
     public FlowLogger(IFlowRunnerCommunicator communicator)

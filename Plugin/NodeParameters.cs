@@ -395,7 +395,7 @@ public class NodeParameters
     /// <summary>
     /// Gets the archive helper
     /// </summary>
-    public IImageHelper ImageHelper { get; init; }
+    public IImageHelper ImageHelper { get; set; }
     
     /// <summary>
     /// Gets the archive  helper

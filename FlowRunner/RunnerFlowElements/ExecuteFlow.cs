@@ -116,7 +116,7 @@ public class ExecuteFlow : Node
             try
             {
                 var lfeResult = FlowHelper.LoadFlowElement(loadFELogger, part, args.Variables, Runner);
-                if(lfeResult.Failed(out string lfeError) || lfeResult.Value == null)
+                if(lfeResult.Failed(out var lfeError) || lfeResult.Value == null)
                 {
                     if(string.IsNullOrWhiteSpace(lfeError) == false)
                         args.Logger?.ELog(lfeError);
@@ -212,7 +212,7 @@ public class ExecuteFlow : Node
                 if (newPart == null)
                 {
                     // couldn't find the connection, maybe bad data, but flow has now finished
-                    args.Logger?.WLog("Couldn't find output node, flow completed: " + outputNode?.Output);
+                    args.Logger?.WLog("Couldn't find output, flow completed: " + outputNode?.Output);
                     return outputNode?.Output == -1 ? RunnerCodes.Failure : RunnerCodes.Completed;
                 }
                 

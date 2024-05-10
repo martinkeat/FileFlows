@@ -436,9 +436,9 @@ public class Runner
             LibraryFileName = Info.LibraryFile.Name,
             IsRemote = Info.IsRemote,
             LogImageActual = logger.Image,
-            ImageHelper = new ImageHelper(logger),
         };
         nodeParameters.ArchiveHelper = new ArchiveHelper(nodeParameters);
+        nodeParameters.ImageHelper = new ImageHelper(logger, nodeParameters);
         
         nodeParameters.Variables["library.Name"] = Info.Library.Name;
         nodeParameters.Variables["library.Path"] = Info.LibraryPath;
@@ -513,6 +513,7 @@ public class Runner
 
         nodeParameters.RunnerUid = Info.Uid;
         nodeParameters.TempPath = WorkingDir;
+        nodeParameters.Variables["temp"] = WorkingDir;
         nodeParameters.TempPathName = new DirectoryInfo(WorkingDir).Name;
         nodeParameters.RelativeFile = Info.LibraryFile.RelativePath;
         nodeParameters.PartPercentageUpdate = UpdatePartPercentage;

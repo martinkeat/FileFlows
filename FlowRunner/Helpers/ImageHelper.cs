@@ -6,11 +6,16 @@ using SixLabors.ImageSharp.Formats;
 using SixLabors.ImageSharp.Formats.Bmp;
 using SixLabors.ImageSharp.Formats.Gif;
 using SixLabors.ImageSharp.Formats.Jpeg;
+using SixLabors.ImageSharp.Formats.Pbm;
 using SixLabors.ImageSharp.Formats.Png;
+using SixLabors.ImageSharp.Formats.Tga;
 using SixLabors.ImageSharp.Formats.Tiff;
 using SixLabors.ImageSharp.Formats.Webp;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
+using ImageInfo = FileFlows.Plugin.Helpers.ImageInfo;
+using isResizeMode = SixLabors.ImageSharp.Processing.ResizeMode;
+using ResizeMode = FileFlows.Plugin.Helpers.ResizeMode;
 
 namespace FileFlows.FlowRunner.Helpers;
 
@@ -20,15 +25,94 @@ namespace FileFlows.FlowRunner.Helpers;
 public class ImageHelper : IImageHelper
 {
     private readonly ILogger Logger;
+    private readonly NodeParameters NodeParameters;
+    private readonly ImageMagickHelper ImageMagick;
     /// <summary>
     /// Initialises a new instance of the image helper
     /// </summary>
     /// <param name="logger">the logger</param>
-    public ImageHelper(ILogger logger)
+    /// <param name="args">the node parameters</param>
+    public ImageHelper(ILogger logger, NodeParameters args)
     {
         Logger = logger;
+        NodeParameters = args;
+        ImageMagick = new(args);
     }
-    
+
+    /// <inheritdoc />
+    public Result<ImageInfo> GetInfo(string imagePath)
+    {
+        if (string.IsNullOrWhiteSpace(imagePath))
+            return Result<ImageInfo>.Fail("No image given");
+        if(File.Exists(imagePath) == false)
+            return Result<ImageInfo>.Fail($"Image '{imagePath}' does not exist");
+        try
+        {
+            var dimensions = GetDimensions(imagePath);
+            if (dimensions.Failed(out string error))
+                return Result<ImageInfo>.Fail(error);
+
+            var dateTakenResult = GetDateTaken(imagePath);
+
+            var format = FileHelper.GetExtension(imagePath)?.TrimStart('.');
+            ImageType? type = null;
+            if (Enum.TryParse<ImageType>(format ?? string.Empty, out ImageType typeResult))
+                type = typeResult;
+
+            return new ImageInfo()
+            {
+                Width = dimensions.Value.Width,
+                Height = dimensions.Value.Height,
+                Format = format.ToUpperInvariant(),
+                Type = type,
+                DateTaken = dateTakenResult.IsFailed ? null : dateTakenResult.Value
+            };
+        }
+        catch (Exception ex)
+        {
+            return Result<ImageInfo>.Fail("Failed to read image information: " + ex.Message);
+        }
+    }
+
+    /// <summary>
+    /// Gets the date the image was taken
+    /// </summary>
+    /// <param name="imagePath">the path to the image</param>
+    /// <returns>the datetime the image was taken, or a failure result if could not be obtained</returns>
+    private Result<DateTime> GetDateTaken(string imagePath)
+    {
+        try
+        {
+            string? strDateTaken = null;
+            if (ImageMagick.CanUseImageMagick())
+                strDateTaken = ImageMagick.GetDateTaken(imagePath);
+
+            if (string.IsNullOrEmpty(strDateTaken))
+            {
+                using var image = Image.Load(imagePath);
+                if (image.Metadata.ExifProfile == null)
+                    return Result<DateTime>.Fail("No EXIF Profile found");
+                
+                if (image.Metadata.ExifProfile.TryGetValue(
+                        SixLabors.ImageSharp.Metadata.Profiles.Exif.ExifTag.DateTimeOriginal,
+                        out var dateTimeOriginalString) == false
+                    || string.IsNullOrWhiteSpace(dateTimeOriginalString?.Value))
+                    return Result<DateTime>.Fail("No DateTimeOriginal found");
+                Logger?.ILog("No DateTimeOriginal found");
+                strDateTaken = dateTimeOriginalString.Value;
+            }
+
+            if (TryParseDateTime(strDateTaken, out DateTime? dateTimeOriginal) == false || dateTimeOriginal == null)
+                return Result<DateTime>.Fail("Failed to get date taken from: " + strDateTaken);
+            return dateTimeOriginal.Value;
+
+        }
+        catch (Exception)
+        {
+            return Result<DateTime>.Fail("Could not get date taken");
+        }
+    }
+
     /// <inheritdoc />
     public void DrawRectangleOnImage(string imagePath, int x, int y, int width, int height)
     {
@@ -65,9 +149,9 @@ public class ImageHelper : IImageHelper
             return Result<(int Width, int Height)>.Fail("Image does not exist");
         try
         {
-            if (ImageMagickHelper.CanUseImageMagick())
+            if (ImageMagick.CanUseImageMagick())
             {
-                var result = ImageMagickHelper.GetImageDimensions(imagePath);
+                var result = ImageMagick.GetImageDimensions(imagePath);
                 if (result.IsFailed == false)
                     return result.Value;
             }
@@ -88,16 +172,16 @@ public class ImageHelper : IImageHelper
     /// <inheritdoc />
     public Result<bool> ConvertToWebp(string imagePath, string destination, ImageOptions? options)
         => DoConvert(imagePath, destination, ImageType.Webp, options);
-    
+
     private Result<bool> DoConvert(string imagePath, string destination, ImageType type, ImageOptions? options)
     {
-        if (File.Exists(imagePath) == false)
-            return Result<bool>.Fail("Image does not exist");
+        if (ValidatePaths(imagePath, destination).Failed(out string error))
+            return Result<bool>.Fail(error);
         try
         {
-            if (ImageMagickHelper.CanUseImageMagick())
+            if (ImageMagick.CanUseImageMagick())
             {
-                var result = ImageMagickHelper.ConvertImage(imagePath, destination, type, options);
+                var result = ImageMagick.ConvertImage(imagePath, destination, options);
                 if (result.IsFailed == false)
                     return true;
             }
@@ -114,7 +198,7 @@ public class ImageHelper : IImageHelper
                     image.Mutate(x => x.Resize(new ResizeOptions
                     {
                         Size = new Size(newWidth, newHeight),
-                        Mode = ResizeMode.Max
+                        Mode = isResizeMode.Max
                     }));
                 }
             }
@@ -149,22 +233,93 @@ public class ImageHelper : IImageHelper
     }
 
     /// <inheritdoc />
-    public Result<bool> Resize(string imagePath, int width, int height, string destination)
+    public Result<bool> ConvertImage(string imagePath, string destination, ImageType type, int quality = 100)
     {
+        if (ValidatePaths(imagePath, destination).Failed(out string error))
+            return Result<bool>.Fail(error);
+        try
+        {
+            if (ImageMagick.CanUseImageMagick())
+            {
+                var result = ImageMagick.ConvertImage(imagePath, destination, new ImageOptions()
+                {
+                    Quality = quality
+                });
+                if (result.IsFailed == false)
+                    return true;
+            }
+
+            var encoderResult = GetImageEncoder(type, quality);
+            if (encoderResult.Failed(out error))
+                return Result<bool>.Fail(error);
+            
+            using var image = Image.Load(imagePath);
+            image.Save(destination, encoderResult.Value);
+
+            return Result<bool>.Success(true);
+        }
+        catch (Exception ex)
+        {
+            return Result<bool>.Fail(ex.Message);
+        }
+    }
+
+    /// <summary>
+    /// Validatest he paths are valid
+    /// </summary>
+    /// <param name="imagePath">the image path</param>
+    /// <param name="destination">the file to save the new image to</param>
+    /// <returns>true if valid,otherwise a failure result</returns>
+    private Result<bool> ValidatePaths(string imagePath, string destination)
+    {
+        if (File.Exists(imagePath) == false)
+            return Result<bool>.Fail("Image does not exist");
+        var destFileInfo = new FileInfo(destination);
+        if (destFileInfo.Directory.Exists == false)
+            NodeParameters.CreateDirectoryIfNotExists(destFileInfo.Directory.FullName);
+        return true;
+    }
+
+    /// <inheritdoc />
+    public Result<bool> Resize(string imagePath, string destination, int width, int height, ResizeMode mode, ImageType? type = null, int quality = 100)
+    {
+        if (ValidatePaths(imagePath, destination).Failed(out string error))
+            return Result<bool>.Fail(error);
+        
         // Validate input size
         if ((width == 0 && height == 0) || width < 0 || height < 0)
             return Result<bool>.Fail("Width and height must be positive values, or one dimension must be 0 to maintain aspect ratio.");
-
-        if (File.Exists(imagePath) == false)
-            return Result<bool>.Fail("Image does not exist");
         
         try
         {
+            if (ImageMagick.CanUseImageMagick())
+            {
+                var result = ImageMagick.ConvertImage(imagePath,destination, new ()
+                {
+                    Width = width,
+                    Height = height,
+                    Mode = mode,
+                    Quality = quality
+                });
+                if (result.IsFailed == false)
+                    return true;
+            }
+            
             using var image = Image.Load(imagePath);
             
             image.Mutate(x => x.Resize(width, height));
-            image.Save(destination);
-            
+            if (type != null)
+            {
+                var encoderResult = GetImageEncoder(type.Value, quality);
+                if (encoderResult.Failed(out error))
+                    return Result<bool>.Fail(error);
+                image.Save(destination, encoderResult.Value);
+            }
+            else
+            {
+                image.Save(destination);
+            }
+
             return Result<bool>.Success(true);
         }
         catch (Exception ex)
@@ -174,6 +329,126 @@ public class ImageHelper : IImageHelper
         }
     }
 
+    /// <inheritdoc />
+    public Result<bool> FlipVertically(string imagePath, string destination, ImageType? type = null, int quality = 100)
+        => DoFlip(imagePath, destination, type, quality, vertically: true);
+
+    /// <inheritdoc />
+    public Result<bool> FlipHorizontally(string imagePath, string destination, ImageType? type = null, int quality = 100)
+        => DoFlip(imagePath, destination, type, quality, vertically: false);
+
+    /// <summary>
+    /// Flips an image
+    /// </summary>
+    /// <param name="imagePath">The path to the input image.</param>
+    /// <param name="destination">The file path where the resized image will be saved.</param>
+    /// <param name="type">the image type of the destination file</param>
+    /// <param name="quality">the image quality, only used by some image types</param>
+    /// <param name="vertically">true for vertically, otherwise false for horizontally</param>
+    /// <returns>A result indicating whether the operation was successful or not.</returns>
+    private Result<bool> DoFlip(string imagePath, string destination, ImageType? type, int quality, bool vertically)
+    {
+        if (ValidatePaths(imagePath, destination).Failed(out string error))
+            return Result<bool>.Fail(error);
+        
+        try
+        {
+            if (ImageMagick.CanUseImageMagick())
+            {
+                var result = ImageMagick.FlipImage(imagePath, destination, quality, vertically: vertically);
+                if (result.IsFailed == false)
+                    return true;
+            }
+            
+            using var image = Image.Load(imagePath);
+            
+            image.Mutate(x => x.Flip(vertically ? FlipMode.Vertical : FlipMode.Horizontal));
+            if (type != null)
+            {
+                var encoderResult = GetImageEncoder(type.Value, quality);
+                if (encoderResult.Failed(out error))
+                    return Result<bool>.Fail(error);
+                image.Save(destination, encoderResult.Value);
+            }
+            else
+            {
+                image.Save(destination);
+            }
+
+            return Result<bool>.Success(true);
+        }
+        catch (Exception ex)
+        {
+            // Return failure with the error message
+            return Result<bool>.Fail(ex.Message);
+        }
+        
+    }
+
+    /// <inheritdoc />
+    public Result<bool> Rotate(string imagePath, string destination, int degrees, ImageType? type = null, int quality = 100)
+    {
+        if (ValidatePaths(imagePath, destination).Failed(out string error))
+            return Result<bool>.Fail(error);
+        
+        try
+        {
+            if (ImageMagick.CanUseImageMagick())
+            {
+                var result = ImageMagick.Rotate(imagePath, destination, degrees, quality);
+                if (result.IsFailed == false)
+                    return true;
+            }
+            
+            using var image = Image.Load(imagePath);
+            
+            image.Mutate(x => x.Rotate(degrees));
+            if (type != null)
+            {
+                var encoderResult = GetImageEncoder(type.Value, quality);
+                if (encoderResult.Failed(out error))
+                    return Result<bool>.Fail(error);
+                image.Save(destination, encoderResult.Value);
+            }
+            else
+            {
+                image.Save(destination);
+            }
+
+            return Result<bool>.Success(true);
+        }
+        catch (Exception ex)
+        {
+            // Return failure with the error message
+            return Result<bool>.Fail(ex.Message);
+        }
+    }
+
+    /// <inheritdoc />
+    public Result<bool> Trim(string imagePath, string destination, int fuzzPercent, ImageType? type = null, int quality = 100)
+    {
+        if (ValidatePaths(imagePath, destination).Failed(out string error))
+            return Result<bool>.Fail(error);
+        
+        try
+        {
+            if (ImageMagick.CanUseImageMagick())
+            {
+                var result = ImageMagick.Trim(imagePath, destination, fuzzPercent, quality);
+                if (result.IsFailed == false)
+                    return true;
+            }
+            
+            Logger?.WLog("ImageMagick required for trimming images");
+            return false;
+        }
+        catch (Exception ex)
+        {
+            // Return failure with the error message
+            return Result<bool>.Fail(ex.Message);
+        }
+    }
+    
     /// <inheritdoc />
     public Result<string> SaveImage(byte[] imageBytes, string fileNameNoExtension)
     {
@@ -261,69 +536,137 @@ public class ImageHelper : IImageHelper
     {
         int newWidth = width;
         int newHeight = height;
+        
+        if (options == null)
+            return (width, height);
 
-        if (options != null)
+        // Calculate new dimensions based on options
+        if (options is { Width: > 0, Height: > 0 })
         {
-            // Calculate new dimensions based on options
-            if (options.Width > 0 && options.Height > 0)
-            {
-                // Both width and height are specified, use them directly
-                newWidth = options.Width;
-                newHeight = options.Height;
-            }
-            else if (options.Width > 0)
-            {
-                // Only width is specified, scale height proportionally
-                newWidth = options.Width;
-                newHeight = (int)Math.Round((double)height / width * options.Width);
-            }
-            else if (options.Height > 0)
-            {
-                // Only height is specified, scale width proportionally
-                newWidth = (int)Math.Round((double)width / height * options.Height);
-                newHeight = options.Height;
-            }
-            else if (options.MaxWidth > 0 && options.MaxHeight > 0)
-            {
-                // Both max width and max height are specified, scale the image down to fit within the bounds
-                double widthRatio = (double)width / options.MaxWidth;
-                double heightRatio = (double)height / options.MaxHeight;
-                double maxRatio = Math.Max(widthRatio, heightRatio);
+            // Both width and height are specified, use them directly
+            newWidth = options.Width;
+            newHeight = options.Height;
+        }
+        else if (options.Width > 0)
+        {
+            // Only width is specified, scale height proportionally
+            newWidth = options.Width;
+            newHeight = (int)Math.Round((double)height / width * options.Width);
+        }
+        else if (options.Height > 0)
+        {
+            // Only height is specified, scale width proportionally
+            newWidth = (int)Math.Round((double)width / height * options.Height);
+            newHeight = options.Height;
+        }
+        else if (options.MaxWidth > 0 && options.MaxHeight > 0)
+        {
+            // Both max width and max height are specified, scale the image down to fit within the bounds
+            double widthRatio = (double)width / options.MaxWidth;
+            double heightRatio = (double)height / options.MaxHeight;
+            double maxRatio = Math.Max(widthRatio, heightRatio);
 
-                newWidth = (int)Math.Round(width / maxRatio);
-                newHeight = (int)Math.Round(height / maxRatio);
-            }
-            else if (options.MaxWidth > 0)
-            {
-                // Only max width is specified, scale the image down to fit within the width
-                double ratio = (double)width / options.MaxWidth;
-                newWidth = options.MaxWidth;
-                newHeight = (int)Math.Round(height / ratio);
-            }
-            else if (options.MaxHeight > 0)
-            {
-                // Only max height is specified, scale the image down to fit within the height
-                double ratio = (double)height / options.MaxHeight;
-                newWidth = (int)Math.Round(width / ratio);
-                newHeight = options.MaxHeight;
-            }
+            newWidth = (int)Math.Round(width / maxRatio);
+            newHeight = (int)Math.Round(height / maxRatio);
+        }
+        else if (options.MaxWidth > 0)
+        {
+            // Only max width is specified, scale the image down to fit within the width
+            double ratio = (double)width / options.MaxWidth;
+            newWidth = options.MaxWidth;
+            newHeight = (int)Math.Round(height / ratio);
+        }
+        else if (options.MaxHeight > 0)
+        {
+            // Only max height is specified, scale the image down to fit within the height
+            double ratio = (double)height / options.MaxHeight;
+            newWidth = (int)Math.Round(width / ratio);
+            newHeight = options.MaxHeight;
         }
 
         return (newWidth, newHeight);
     }
 
+
     /// <summary>
-    /// Image types
+    /// Gets the image format from its type
     /// </summary>
-    internal enum ImageType
+    /// <param name="type">the type</param>
+    /// <returns>the image format</returns>
+    private Result<IImageFormat> GetImageFormat(ImageType type)
     {
-        /// <summary>
-        /// JPEG image
-        /// </summary>
-        Jpeg,
-        /// <summary>
-        /// WEBP image
-        /// </summary>
-        Webp
+        switch (type)
+        {
+            case ImageType.Jpeg: return JpegFormat.Instance;
+            case ImageType.Webp: return WebpFormat.Instance;
+            case ImageType.Gif: return GifFormat.Instance;
+            case ImageType.Bmp: return BmpFormat.Instance;
+            case ImageType.Png: return PngFormat.Instance;
+            case ImageType.Tiff: return TiffFormat.Instance;
+        }
+
+        return Result<IImageFormat>.Fail("Not supported");
+    }
+
+    /// <summary>
+    /// Gets the image encoder from its type
+    /// </summary>
+    /// <param name="type">the type</param>
+    /// <param name="quality">the image quality</param>
+    /// <returns>the image encoder</returns>
+    private Result<IImageEncoder> GetImageEncoder(ImageType type, int quality)
+    {
+        switch (type)
+        {
+            case ImageType.Jpeg: return new JpegEncoder { Quality = quality };
+            case ImageType.Webp: return new WebpEncoder { Quality = quality };
+            case ImageType.Gif: return new GifEncoder();
+            case ImageType.Bmp: return new GifEncoder();
+            case ImageType.Png: return new GifEncoder();
+            case ImageType.Tiff: return new TiffEncoder();
+            case ImageType.Pbm: return new PbmEncoder();
+            case ImageType.Tga: return new TgaEncoder();
+        }
+
+        return Result<IImageEncoder>.Fail("Not supported");
+    }
+
+
+    /// <summary>
+    /// Tries to parse a DateTime from a string, attempting different formats.
+    /// </summary>
+    /// <param name="dateTimeString">The string representation of the DateTime.</param>
+    /// <param name="dateTime">When this method returns, contains the parsed DateTime if successful; otherwise, null.</param>
+    /// <returns>
+    /// True if the parsing was successful; otherwise, false.
+    /// </returns>
+    static bool TryParseDateTime(string dateTimeString, out DateTime? dateTime)
+    {
+        DateTime parsedDateTime;
+
+        // Try parsing using DateTime.TryParse
+        if (DateTime.TryParse(dateTimeString, out parsedDateTime))
+        {
+            dateTime = parsedDateTime;
+            return true;
+        }
+
+        // Define an array of possible date formats for additional attempts
+        string[] dateFormats = { "yyyy:MM:dd HH:mm:ss", "yyyy-MM-dd HH:mm:ss" /* Add more formats if needed */ };
+
+        // Attempt to parse using different formats
+        foreach (var format in dateFormats)
+        {
+            if (DateTime.TryParseExact(dateTimeString, format, null, System.Globalization.DateTimeStyles.None,
+                    out parsedDateTime))
+            {
+                dateTime = parsedDateTime;
+                return true;
+            }
+        }
+
+        // Set dateTime to null if parsing fails with all formats
+        dateTime = null;
+        return false;
     }
 }

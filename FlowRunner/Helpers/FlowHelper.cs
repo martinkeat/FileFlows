@@ -220,6 +220,9 @@ public class FlowHelper
                 Properties = part.Model as IDictionary<string, object>,
             };
         }
+
+        if (part.FlowElementUid.EndsWith(".DirectoryIterator"))
+            return DirectoryIterator.Load(part, runner);
         
         var nt = GetFlowElementType(part.FlowElementUid);
         if (nt == null)
