@@ -69,7 +69,7 @@ public class DirectoryIterator : Node
         var files = System.IO.Directory.GetFiles(localPath, Pattern?.StartsWith('*') == true? Pattern : "*.*",
             AllFiles ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly).ToList();
         
-        if (string.IsNullOrWhiteSpace(Pattern) && Pattern.StartsWith('*') == false)
+        if (string.IsNullOrWhiteSpace(Pattern) == false && Pattern.StartsWith('*') == false)
         {
             string pattern = Pattern.ToLowerInvariant() switch
             {
