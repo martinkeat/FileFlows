@@ -37,7 +37,7 @@ public class DirectoryIterator : Node
     /// <summary>
     /// Gets or sets if all files or just the top directory files should be iterated over
     /// </summary>
-    public bool AllFiles { get; set; }
+    public bool Recursive { get; set; }
 
     /// <inheritdoc />
     public override int Execute(NodeParameters args)
@@ -67,7 +67,7 @@ public class DirectoryIterator : Node
         }
         
         var files = System.IO.Directory.GetFiles(localPath, Pattern?.StartsWith('*') == true? Pattern : "*.*",
-            AllFiles ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly).ToList();
+            Recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly).ToList();
         
         if (string.IsNullOrWhiteSpace(Pattern) == false && Pattern.StartsWith('*') == false)
         {
@@ -220,12 +220,12 @@ public class DirectoryIterator : Node
             Flow = flow,
             Runner = runner
         };
-        if (dictModel.TryGetValue(nameof(DirectoryIterator.Directory), out var oDirectory) && oDirectory != null)
+        if (dictModel.TryGetValue(nameof(Directory), out var oDirectory) && oDirectory != null)
             directoryIterator.Directory = oDirectory.ToString();
-        if (dictModel.TryGetValue(nameof(DirectoryIterator.Pattern), out var oPattern) && oPattern != null)
+        if (dictModel.TryGetValue(nameof(Pattern), out var oPattern) && oPattern != null)
             directoryIterator.Pattern = oPattern.ToString();
-        if (dictModel.TryGetValue(nameof(DirectoryIterator.AllFiles), out var oAllFiles) && oAllFiles != null)
-            directoryIterator.AllFiles = oAllFiles.ToString().Equals("true", StringComparison.InvariantCultureIgnoreCase);
+        if (dictModel.TryGetValue(nameof(Recursive), out var oAllFiles) && oAllFiles != null)
+            directoryIterator.Recursive = oAllFiles.ToString().Equals("true", StringComparison.InvariantCultureIgnoreCase);
 
         return directoryIterator;
     }
