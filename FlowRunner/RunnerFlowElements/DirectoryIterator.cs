@@ -245,7 +245,7 @@ public class DirectoryIterator : Node
         var newArgs = NewNodeParameters(args, file);
         
         int count = 0;
-        while (++count < Math.Min(Program.Config.MaxNodes * 2, 300))
+        while (++count < Math.Min(Program.Config.MaxNodes, 250))
         {
             if (Runner.CancellationToken.IsCancellationRequested || Runner.Canceled)
                 return Result<int>.Fail("Flow was canceled");

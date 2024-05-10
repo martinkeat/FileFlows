@@ -1009,7 +1009,6 @@ public partial class Flow : ComponentBase, IDisposable
             return;
         }
         
-        Logger.Instance.ILog("flowTemplateModel: " , flowTemplateModel);
         var newFlow = await AddEditor.Show(flowTemplateModel);
         if (newFlow == null)
             return; // was canceled
