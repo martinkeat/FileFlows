@@ -91,7 +91,7 @@ public class TemplateField
     /// <summary>
     /// Gets or sets the type of the field
     /// </summary>
-    public string Type { get; set; }
+    public string? Type { get; set; }
     
     /// <summary>
     /// Gets or sets if this field is required
@@ -101,37 +101,42 @@ public class TemplateField
     /// <summary>
     /// Gets or sets the name of this field
     /// </summary>
-    public string Name { get; set; }
+    public string? Name { get; set; }
     
     /// <summary>
     /// Gets or sets the label for this field
     /// </summary>
-    public string Label { get; set; }
+    public string? Label { get; set; }
     
     /// <summary>
     /// Gets or sets the help text for this field
     /// </summary>
-    public string Help { get; set; }
+    public string? Help { get; set; }
+    
+    /// <summary>
+    /// Gets or sets an optional suffix
+    /// </summary>
+    public string? Suffix { get; set; }
     
     /// <summary>
     /// Gets or sets the default value for this field
     /// </summary>
-    public object Default { get; set; }
+    public object? Default { get; set; }
     
     /// <summary>
     /// Gets or sets the value of this field
     /// </summary>
-    public object Value { get; set; }
+    public object? Value { get; set; }
     
     /// <summary>
     /// Gets or sets the parameters for this field
     /// </summary>
-    public object Parameters { get; set; }
+    public object? Parameters { get; set; }
 
     /// <summary>
     /// Gets or sets thw conditions of the field
     /// </summary>
-    public List<Condition> Conditions { get; set; }
+    public List<Condition>? Conditions { get; set; }
 }
 
 /// <summary>

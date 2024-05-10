@@ -363,6 +363,10 @@ public enum FlowFieldType
     /// A slider, integer
     /// </summary>
     Slider = 6,
+    /// <summary>
+    /// Number Percent input
+    /// </summary>
+    NumberPercent = 31
 }
 
 /// <summary>

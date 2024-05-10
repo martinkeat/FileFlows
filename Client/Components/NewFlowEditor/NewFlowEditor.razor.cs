@@ -4,7 +4,9 @@ using System.Text.Json;
 using System.Text.RegularExpressions;
 using FileFlows.Client.Components.Inputs;
 using FileFlows.Plugin;
+using FileFlows.Plugin.Types;
 using Humanizer;
+using Markdig.Syntax;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Logging;
 
@@ -107,6 +109,7 @@ public partial class NewFlowEditor : Editor
                             "Switch" => FormInputType.Switch,
                             "Select" => FormInputType.Select,
                             "Int" => FormInputType.Int,
+                            "NumberPercent" => FormInputType.NumberPercent,
                             _ => FormInputType.Text
                         }
                     };
@@ -130,6 +133,16 @@ public partial class NewFlowEditor : Editor
                             ef.Parameters.Add("Min", parameters.Minimum);
                         if(parameters.Maximum != 0)
                             ef.Parameters.Add("Max", parameters.Maximum);
+                    }
+                    else if (ef.InputType == FormInputType.NumberPercent)
+                    {
+                        ef.Parameters.Add(nameof(InputNumberPercent.Unit), field.Suffix);
+                        if (field.Default != null)
+                        {
+                            var json = JsonSerializer.Serialize(field.Default);
+                            var np = JsonSerializer.Deserialize<NumberPercent>(json);
+                            field.Default = np;
+                        }
                     }
                     TemplateFields.Add(efName, new (field, ef));
                 }
@@ -303,136 +316,148 @@ public partial class NewFlowEditor : Editor
 
     private new async Task<bool> SaveCallback(ExpandoObject model)
     {
-        Logger.Instance.ILog("NewFlowEditor.SaveCallback", model);
-        var dict = model as IDictionary<string, object>;
-        var flow = CurrentTemplate.Flow;
-        if (dict.TryGetValue("Name", out var oName) && oName is string sName)
-            flow.Name = sName;
-
-        foreach (var tfm in TemplateFields.Values)
+        Blocker.Show();
+        try
         {
-            var value = dict[tfm.ElementField.Name];
-            if (value == null || value.Equals(string.Empty))
-                continue;
-            
-            var part = flow.Parts.FirstOrDefault(x => x.Uid == tfm.TemplateField.Uid);
-            if (part == null)
+            Logger.Instance.ILog("NewFlowEditor.SaveCallback", model);
+            var dict = model as IDictionary<string, object>;
+            var flow = CurrentTemplate.Flow;
+            if (dict.TryGetValue("Name", out var oName) && oName is string sName)
+                flow.Name = sName;
+
+            foreach (var tfm in TemplateFields.Values)
             {
-                // flow variable
-                if(string.IsNullOrEmpty(tfm.TemplateField.Name))
+                var value = dict[tfm.ElementField.Name];
+                if (value == null || value.Equals(string.Empty))
                     continue;
-                if (int.TryParse(value?.ToString() ?? string.Empty, out int iValue))
-                    flow.Properties.Variables[tfm.TemplateField.Name] = iValue;
-                else if (bool.TryParse(value?.ToString() ?? string.Empty, out bool bValue))
-                    flow.Properties.Variables[tfm.TemplateField.Name] = bValue;
-                else
-                    flow.Properties.Variables[tfm.TemplateField.Name] = value;
-                continue;
-            }
 
-            if (dict.ContainsKey(tfm.ElementField.Name) == false)
-            {
-                if (tfm.ElementField.InputType == FormInputType.Switch)
-                    dict.Add(tfm.ElementField.Name, false); // special case, switches sometimes dont have their false values set
-                else
-                    continue;
-            }
-            
-            part.Model ??= new ExpandoObject();
-            var dictPartModel = (IDictionary<string, object>)part.Model!;
-            string key = tfm.TemplateField.Name;
-            if (string.IsNullOrEmpty(key))
-            {
-                // no name, means we are setting the entire model
-                if (value is JsonElement jEle)
-                    part.Model = jEle.Deserialize<ExpandoObject>();
-                else if (value != null)
-                    part.Model = JsonSerializer.Deserialize<ExpandoObject>(JsonSerializer.Serialize(value));
-                else
-                    part.Model = null;
-                continue;
-            }
-
-
-            if (key == "Node")
-            {
-                // replace the node type
-                part.FlowElementUid = value.ToString();
-                continue;
-            }
-
-            if(tfm.TemplateField.Value is JsonElement jElement)
-            {
-                if(jElement.ValueKind == JsonValueKind.Object)
+                var part = flow.Parts.FirstOrDefault(x => x.Uid == tfm.TemplateField.Uid);
+                if (part == null)
                 {
-                    var tv = jElement.Deserialize<Dictionary<string, object>>();
-                    if (tv.ContainsKey("true") && value?.ToString()?.ToLower() == "true")
-                        value = tv["true"];
-                    else if(tv.ContainsKey("false") && value?.ToString()?.ToLower() == "false")
-                        value = tv["false"];
-                    else
-                    {
-                        // complex object, meaning we are setting properties
-                        if (dictPartModel.ContainsKey(key) == false)
-                        {
-                            dictPartModel.Add(key, new ExpandoObject());
-                        }
-                        else if (dictPartModel[key] is IDictionary<string, object> == false)
-                        {
-                            dictPartModel[key] = new ExpandoObject();
-                        }
-                        dict = dictPartModel[key] as IDictionary<string, object>;
-                    
-                        foreach (var kv in tv.Keys)
-                            dict[kv] = tv[kv];
+                    // flow variable
+                    if (string.IsNullOrEmpty(tfm.TemplateField.Name))
                         continue;
+                    if (int.TryParse(value?.ToString() ?? string.Empty, out int iValue))
+                        flow.Properties.Variables[tfm.TemplateField.Name] = iValue;
+                    else if (bool.TryParse(value?.ToString() ?? string.Empty, out bool bValue))
+                        flow.Properties.Variables[tfm.TemplateField.Name] = bValue;
+                    else
+                        flow.Properties.Variables[tfm.TemplateField.Name] = value;
+                    continue;
+                }
+
+                if (dict.ContainsKey(tfm.ElementField.Name) == false)
+                {
+                    if (tfm.ElementField.InputType == FormInputType.Switch)
+                        dict.Add(tfm.ElementField.Name,
+                            false); // special case, switches sometimes dont have their false values set
+                    else
+                        continue;
+                }
+
+                part.Model ??= new ExpandoObject();
+                var dictPartModel = (IDictionary<string, object>)part.Model!;
+                string key = tfm.TemplateField.Name;
+                if (string.IsNullOrEmpty(key))
+                {
+                    // no name, means we are setting the entire model
+                    if (value is JsonElement jEle)
+                        part.Model = jEle.Deserialize<ExpandoObject>();
+                    else if (value != null)
+                        part.Model = JsonSerializer.Deserialize<ExpandoObject>(JsonSerializer.Serialize(value));
+                    else
+                        part.Model = null;
+                    continue;
+                }
+
+
+                if (key == "Node")
+                {
+                    // replace the node type
+                    part.FlowElementUid = value.ToString();
+                    continue;
+                }
+
+                if (tfm.TemplateField.Value is JsonElement jElement)
+                {
+                    if (jElement.ValueKind == JsonValueKind.Object)
+                    {
+                        var tv = jElement.Deserialize<Dictionary<string, object>>();
+                        if (tv.ContainsKey("true") && value?.ToString()?.ToLower() == "true")
+                            value = tv["true"];
+                        else if (tv.ContainsKey("false") && value?.ToString()?.ToLower() == "false")
+                            value = tv["false"];
+                        else
+                        {
+                            // complex object, meaning we are setting properties
+                            if (dictPartModel.ContainsKey(key) == false)
+                            {
+                                dictPartModel.Add(key, new ExpandoObject());
+                            }
+                            else if (dictPartModel[key] is IDictionary<string, object> == false)
+                            {
+                                dictPartModel[key] = new ExpandoObject();
+                            }
+
+                            dict = dictPartModel[key] as IDictionary<string, object>;
+
+                            foreach (var kv in tv.Keys)
+                                dict[kv] = tv[kv];
+                            continue;
+                        }
+                    }
+                    else if (jElement.ValueKind == JsonValueKind.String)
+                    {
+                        value = jElement.GetString();
+                    }
+                    else if (jElement.ValueKind == JsonValueKind.Number)
+                    {
+                        value = jElement.GetDouble();
                     }
                 }
-                else if(jElement.ValueKind == JsonValueKind.String)
+
+                if (value is string sValue)
                 {
-                    value = jElement.GetString();
+                    if (Regex.IsMatch(sValue, "^[\\d]+$"))
+                        value = int.Parse(sValue); // convert to int
+                    else if (Regex.IsMatch(sValue, "^(true|false)$", RegexOptions.IgnoreCase))
+                        value = bool.Parse(sValue); // convert to boolean
+                    else if (sValue == " ")
+                        value = string.Empty; // special case, allows users to enter a empty in a option
                 }
-                else if (jElement.ValueKind == JsonValueKind.Number)
+
+                dictPartModel[key] = value;
+            }
+
+            // shake lose any nodes that have no connections
+            // stop at one to skip the input node
+            TreeShake(flow);
+
+            Logger.Instance.ILog("Flow", flow);
+
+            if (CurrentTemplate.Fields?.Any() == true)
+            {
+                var newFlowResult = await HttpHelper.Put<Flow>("/api/flow", flow);
+                if (newFlowResult.Success == false)
                 {
-                    value = jElement.GetDouble();
+                    Toast.ShowError(newFlowResult.Body?.EmptyAsNull() ?? "Failed to create new flow");
+                    return false;
                 }
-            }
 
-            if (value is string sValue)
+                ShowTask.TrySetResult(newFlowResult.Data);
+            }
+            else
             {
-                if (Regex.IsMatch(sValue, "^[\\d]+$"))
-                    value = int.Parse(sValue); // convert to int
-                else if (Regex.IsMatch(sValue, "^(true|false)$", RegexOptions.IgnoreCase))
-                    value = bool.Parse(sValue); // convert to boolean
-                else if (sValue == " ")
-                    value = string.Empty; // special case, allows users to enter a empty in a option
+                flow.Type = _flowType!.Value;
+                ShowTask.TrySetResult(flow);
             }
 
-            dictPartModel[key] = value;
+            return true;
         }
-
-        // shake lose any nodes that have no connections
-        // stop at one to skip the input node
-        TreeShake(flow);
-
-        Logger.Instance.ILog("Flow", flow);
-
-        if (CurrentTemplate.Fields?.Any() == true)
+        finally
         {
-            var newFlowResult = await HttpHelper.Put<Flow>("/api/flow", flow);
-            if (newFlowResult.Success == false)
-            {
-                Toast.ShowError(newFlowResult.Body?.EmptyAsNull() ?? "Failed to create new flow");
-                return false;
-            }
-            ShowTask.TrySetResult(newFlowResult.Data);
+            Blocker.Hide();
         }
-        else
-        {
-            flow.Type = _flowType!.Value;
-            ShowTask.TrySetResult(flow);
-        }
-        return true;
     }
 
     /// <summary>

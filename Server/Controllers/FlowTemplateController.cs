@@ -254,6 +254,7 @@ public class FlowTemplateController : Controller
             tf.Label = field.Name.Replace("_" , " ");
             tf.Default = field.DefaultValue;
             tf.Help = field.Description;
+            tf.Suffix = field.Suffix;
             if (string.IsNullOrWhiteSpace(field.FlowElementField) == false && Regex.IsMatch(field.FlowElementField,
                     @"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\.[a-zA-Z_][a-zA-Z0-9_]*$"))
             {
@@ -268,6 +269,7 @@ public class FlowTemplateController : Controller
                 FlowFieldType.Boolean => "Switch",
                 FlowFieldType.Number => "Int",
                 FlowFieldType.Select => "Select",
+                FlowFieldType.NumberPercent => "NumberPercent",
                 _ => "Text"
             };
 

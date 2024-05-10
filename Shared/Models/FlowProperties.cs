@@ -87,7 +87,10 @@ public class FlowField
     /// Gets or sets the default value
     /// </summary>
     public object DefaultValue { get; set; }
-    
+    /// <summary>
+    /// Gets or sets an optional suffix
+    /// </summary>
+    public string Suffix { get; set; }
     /// <summary>
     /// Gets or sets the minimum value for int values
     /// </summary>
