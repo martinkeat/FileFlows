@@ -154,10 +154,7 @@ public class LocalFileService : IFileService
             return Result<bool>.Fail("Cannot access protected path: " + path);
         try
         {
-            var dirInfo = new DirectoryInfo(path);
-            if (dirInfo.Exists == false)
-                dirInfo.Create();
-            SetPermissions(path);
+            CreateDirectoryIfNotExists(path);
             return true;
         }
         catch (Exception ex)
@@ -287,11 +284,7 @@ public class LocalFileService : IFileService
             if (fileInfo.Exists == false)
                 return Result<bool>.Fail("File does not exist");
             var destDir = new FileInfo(destination).Directory;
-            if (destDir.Exists == false)
-            {
-                destDir.Create();
-                SetPermissions(destDir.FullName);
-            }
+            CreateDirectoryIfNotExists(destDir.FullName);
 
             fileInfo.MoveTo(destination, overwrite);
             SetPermissions(destination);
@@ -300,6 +293,37 @@ public class LocalFileService : IFileService
         catch (Exception ex)
         {
             return Result<bool>.Fail(ex.Message);
+        }
+    }
+    /// <summary>
+    /// Creates a directory at the specified path if it does not already exist.
+    /// </summary>
+    /// <param name="path">The path of the directory to create.</param>
+    /// <remarks>
+    /// If the directory already exists, this method does nothing.
+    /// </remarks>
+    private void CreateDirectoryIfNotExists(string path)
+    {
+        Stack<string> directoryStack = new Stack<string>();
+        string? currentPath = path;
+
+        // Push all parent directories onto the stack until we reach the root directory
+        while (Directory.Exists(currentPath) == false)
+        {
+            directoryStack.Push(currentPath);
+            currentPath = Path.GetDirectoryName(currentPath);
+            if (string.IsNullOrEmpty(currentPath))
+            {
+                throw new DirectoryNotFoundException("Parent directory not found.");
+            }
+        }
+
+        // Create directories and set permissions for each directory in the stack
+        while (directoryStack.Count > 0)
+        {
+            currentPath = directoryStack.Pop();
+            Directory.CreateDirectory(currentPath);
+            SetPermissions(currentPath);
         }
     }
 
@@ -316,11 +340,7 @@ public class LocalFileService : IFileService
                 return Result<bool>.Fail("File does not exist");
             
             var destDir = new FileInfo(destination).Directory;
-            if (destDir.Exists == false)
-            {
-                destDir.Create();
-                SetPermissions(destDir.FullName);
-            }
+            CreateDirectoryIfNotExists(destDir.FullName);
 
             fileInfo.CopyTo(destination, overwrite);
             SetPermissions(destination);
