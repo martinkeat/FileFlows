@@ -304,6 +304,15 @@ public class LocalFileService : IFileService
     /// </remarks>
     private void CreateDirectoryIfNotExists(string path)
     {
+        if (Directory.Exists(path))
+            return;
+        if (OperatingSystem.IsWindows() || OperatingSystem.IsMacOS())
+        {
+            Directory.CreateDirectory(path);
+            return;
+        }
+        
+        Logger?.ILog("Recursively creating directory: " + path);
         Stack<string> directoryStack = new Stack<string>();
         string? currentPath = path;
 
@@ -321,9 +330,10 @@ public class LocalFileService : IFileService
         // Create directories and set permissions for each directory in the stack
         while (directoryStack.Count > 0)
         {
-            currentPath = directoryStack.Pop();
-            Directory.CreateDirectory(currentPath);
-            SetPermissions(currentPath);
+            string dir = directoryStack.Pop();
+            Logger?.ILog("Creating path: " + dir);
+            Directory.CreateDirectory(dir);
+            SetPermissions(dir);
         }
     }
 
@@ -500,7 +510,7 @@ public class LocalFileService : IFileService
         bool isFolder = Directory.Exists(path);
         if(isFile == false && isFolder == false)
         {
-            logMethod("SetPermissions: File doesnt existing, skipping");
+            logMethod($"SetPermissions: '{path}' doesnt existing, skipping");
             return;
         }
 

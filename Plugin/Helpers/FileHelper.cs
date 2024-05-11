@@ -226,8 +226,6 @@ public class FileHelper
             }
             if (filePath.EndsWith(Path.DirectorySeparatorChar) == false)
                 filePath += Path.DirectorySeparatorChar;
-            if(log)
-                logger?.ILog("Setting permissions on folder: " + filePath);
         }
         else
         {
