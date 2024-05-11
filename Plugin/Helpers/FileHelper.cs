@@ -234,8 +234,6 @@ public class FileHelper
                 logger?.WLog("File does not exist, cannot set permissions: " + filePath);
                 return false;
             }
-            if (log)
-                logger?.ILog("Setting permissions on file: " + filePath);
             recursive = false;
         }
 

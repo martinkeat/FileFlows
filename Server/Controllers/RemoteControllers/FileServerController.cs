@@ -521,17 +521,13 @@ public class FileServerController : Controller
                 return StatusCode(503, log.ToString());
             
             var fileInfo = new FileInfo(path);
-            if (fileInfo.Directory.Exists == false)
-            {
-                log.AppendLine("Creating directory: " + fileInfo.Directory.FullName);
-                fileInfo.Directory.Create();
-                _localFileService.SetPermissions(fileInfo.Directory.FullName, 
-                    logMethod: m => log.AppendLine(m));
-            }
 
             log.AppendLine("Moving temp directory to final location: " + fileInfo.DirectoryName);
-            tempFileInfo.MoveTo(path, true);
-            _localFileService.SetPermissions(path, logMethod: m => log.AppendLine(m));
+            if (_localFileService.FileMove(tempFile, path, true).Failed(out string error))
+            {
+                log.AppendLine("Failed to move file: " + error);
+                return StatusCode(500, log.ToString());
+            }
 
             var tempDir = FileHelper.GetDirectory(tempFile);
             if (Directory.Exists(tempDir))
