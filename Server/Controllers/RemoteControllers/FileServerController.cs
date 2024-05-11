@@ -574,7 +574,7 @@ public class FileServerController : Controller
         log.AppendLine("tempDirLocation: " + tempDirLocation);
 
         string dirPath = tempDirLocation.FullName;
-        tempDirLocation.Create();
+        _localFileService.DirectoryCreate(tempDirLocation.FullName);
 
         string outFile = Path.Combine(dirPath, fileInfo.Name + ".FFTEMP");
         log.AppendLine("Writing file to temporary filename: " + outFile);
