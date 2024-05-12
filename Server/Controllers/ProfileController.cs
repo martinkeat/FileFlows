@@ -17,6 +17,7 @@ public class ProfileController : Controller
     /// Gets the profile
     /// </summary>
     /// <returns>the profile</returns>
+    [HttpGet]
     public async Task<IActionResult> Get()
     {
         var profile = new Profile();
