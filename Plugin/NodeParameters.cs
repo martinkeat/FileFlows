@@ -159,6 +159,11 @@ public class NodeParameters
     /// Gets or sets the function responsible for deleting a remote directory
     /// </summary>
     public Func<string, bool, string[], bool>? DeleteRemote { get; set; }
+    
+    /// <summary>
+    /// Gets or sets the function responsible for deleting a remote directory
+    /// </summary>
+    public Func<string[], string, string, Result<bool>>? SendEmail { get; set; }
 
     /// <summary>
     /// Gets or sets a goto flow 
@@ -622,9 +627,7 @@ public class NodeParameters
     /// <param name="value">The value to set</param>
     public void SetParameter(string name, object value)
     {
-        if (Parameters.ContainsKey(name) == false)
-            Parameters[name] = value;
-        else
+        if (Parameters.TryAdd(name, value) == false)
             Parameters.Add(name, value);
     }
 
@@ -656,92 +659,6 @@ public class NodeParameters
             InitFile(destination);
         }
         catch (Exception) { }
-        
-        // FileInfo file = new FileInfo(destination);
-        // // turning this of as per https://github.com/revenz/FileFlows/issues/79
-        // // if (string.IsNullOrEmpty(file.Extension) == false)
-        // // {
-        // //     // just ensures extensions are lowercased
-        // //     destination = new FileInfo(file.FullName.Substring(0, file.FullName.LastIndexOf(file.Extension)) + file.Extension.ToLower()).FullName;
-        // // }
-        //
-        // Logger?.ILog("About to move file to: " + destination);
-        // destination = MapPath(destination);
-        // Logger?.ILog("Mapped destination path: " + destination);
-        //
-        // bool isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
-        // if (isWindows)
-        // {
-        //     if (destination.ToLower() == WorkingFile?.ToLower())
-        //     {
-        //         Logger?.ILog("Source and destination are the same, skipping move");
-        //         return true;
-        //     }
-        // }
-        // else
-        // {
-        //     // linux, is case sensitive
-        //     if(destination == WorkingFile)
-        //     {
-        //         Logger?.ILog("Source and destination are the same, skipping move");
-        //         return true;
-        //     }
-        // }
-        //
-        //
-        // bool moved = false;
-        // long fileSize = new FileInfo(WorkingFile).Length;
-        // Task task = Task.Run(() =>
-        // {
-        //     try
-        //     {
-        //
-        //         var fileInfo = new FileInfo(destination);
-        //         if (fileInfo.Exists)
-        //             fileInfo.Delete();
-        //         else
-        //             CreateDirectoryIfNotExists(fileInfo?.DirectoryName);
-        //
-        //         Logger?.ILog($"Moving file: \"{WorkingFile}\" to \"{destination}\"");                    
-        //         File.Move(WorkingFile, destination, true);
-        //         Logger?.ILog("File moved successfully");
-        //
-        //         Helpers.FileHelper.ChangeOwner(Logger, destination, file: true);
-        //
-        //         this.WorkingFile = destination;
-        //         try
-        //         {
-        //             // this can fail if the file is then moved really quickly by another process, radarr/sonarr etc
-        //             Logger?.ILog("Initing new moved file");
-        //             InitFile(destination);
-        //         }
-        //         catch (Exception) { }
-        //
-        //         moved = true;
-        //     }
-        //     catch (Exception ex)
-        //     {
-        //         Logger?.ELog("Failed to move file: " + ex.Message);
-        //     }
-        // });
-        //
-        // while (task.IsCompleted == false)
-        // {
-        //     long currentSize = 0;
-        //     var destFileInfo = new FileInfo(destination);
-        //     if (destFileInfo.Exists)
-        //         currentSize = destFileInfo.Length;
-        //
-        //     if (PartPercentageUpdate != null && fileSize > 0)
-        //         PartPercentageUpdate(currentSize / fileSize * 100);
-        //     Thread.Sleep(50);
-        // }
-        //
-        // if (moved == false)
-        //     return false;
-        //
-        // if (PartPercentageUpdate != null)
-        //     PartPercentageUpdate(100);
         return true;
     }
 

@@ -148,6 +148,7 @@ public class DirectoryIterator : Node
         newArgs.HasPluginActual = args.HasPluginActual;
         newArgs.UploadFile = args.UploadFile;
         newArgs.DeleteRemote = args.DeleteRemote;
+        newArgs.SendEmail = args.SendEmail;
         newArgs.RenderTemplate = args.RenderTemplate;
         newArgs.IsDocker = args.IsDocker;
         newArgs.IsWindows = args.IsWindows;

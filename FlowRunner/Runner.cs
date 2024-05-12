@@ -10,6 +10,7 @@ using FileFlows.FlowRunner.TemplateRenders;
 using FileFlows.Plugin.Services;
 using FileFlows.RemoteServices;
 using FileFlows.ServerShared.FileServices;
+using Humanizer;
 
 namespace FileFlows.FlowRunner;
 
@@ -468,6 +469,7 @@ public class Runner
             task.Wait();
             return task.Result.Success;
         };
+        nodeParameters.SendEmail = (to, subject, body) => ServiceLoader.Load<EmailService>().Send(to, subject, body).Result;
         
         var renderer = new ScribanRenderer();
         nodeParameters.RenderTemplate = (template) =>

@@ -24,6 +24,7 @@ public static class ServiceLoader
             .AddSingleton<ISettingsService>(() => new SettingsService())
             .AddSingleton<IStatisticService>(() => new StatisticService())
             .AddSingleton<IVariableService>(() => new VariableService())
+            .AddSingleton<EmailService>(() => new EmailService())
             .BuildServiceProvider(); // Build the service provider
     }
     

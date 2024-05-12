@@ -129,7 +129,8 @@
                             <InputNumber @bind-Value="@Model.LoginLockoutMinutes" Label="Pages.Settings.Fields.Security.LockoutMinutes" />
                         }
                     </FlowTab>
-                    <FlowTab Title="@lblEmail" Visible="@(Model.Security == SecurityMode.Local)">
+                    <FlowTab Title="@lblEmail">
+                        <p class="box info">These settings are optional, and only needed if you are using the Email plugin or you are using Local user security.</p>
                         <InputText @bind-Value="@Model.SmtpServer" Label="Pages.Settings.Fields.Smtp.Server" />
                         <InputNumber @bind-Value="@Model.SmtpPort" Label="Pages.Settings.Fields.Smtp.Port" Min="1" Max="65535" />
                         <InputSelect @bind-Value="@SmtpSecurity" Options=@SmtpSecurityTypes Label="Pages.Settings.Fields.Smtp.Security" AllowClear="false" />
