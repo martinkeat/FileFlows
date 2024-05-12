@@ -8,7 +8,7 @@ namespace FileFlows.FlowRunner.Helpers;
 /// <summary>
 /// Helper for ImageMagick
 /// </summary>
-internal class ImageMagickHelper
+public class ImageMagickHelper
 {
     private bool? _CanUseImageMagick = null;
     /// <summary>
@@ -21,10 +21,28 @@ internal class ImageMagickHelper
     /// </summary>
     private readonly string EXE_CONVERT, EXE_IDENTIFY;
 
+    /// <summary>
+    /// Constructs a new instance of the ImageMagickHelper
+    /// </summary>
+    /// <param name="args">The NodeParameters</param>
     public ImageMagickHelper(NodeParameters args)
     {
-        EXE_CONVERT = args.GetToolPath("convert")?.EmptyAsNull() ?? "convert";
-        EXE_IDENTIFY = args.GetToolPath("identify")?.EmptyAsNull() ?? "identify";
+        EXE_CONVERT = args.GetToolPath("convert")?.EmptyAsNull() ??
+                      (OperatingSystem.IsWindows() ? "convert.exe" : "convert");
+        EXE_IDENTIFY = args.GetToolPath("identify")?.EmptyAsNull() ??
+                       (OperatingSystem.IsWindows() ? "identify.exe" : "identify");
+    }
+
+
+    /// <summary>
+    /// Constructs a new instance of the ImageMagickHelper
+    /// </summary>
+    /// <param name="convert">The convert executable file</param>
+    /// <param name="identify">The identify executable file</param>
+    public ImageMagickHelper(string convert, string identify)
+    {
+        EXE_CONVERT = convert;
+        EXE_IDENTIFY = identify;
     }
     
     /// <summary>
@@ -385,6 +403,110 @@ internal class ImageMagickHelper
         catch (Exception)
         {
             return null;
+        }
+    }
+
+    /// <summary>
+    /// Extracts all images from a PDF file
+    /// </summary>
+    /// <param name="pdf">the PDF file</param>
+    /// <param name="destination">the destination to extract the images to</param>
+    /// <returns>True if the operation was successful, otherwise false</returns>
+    public Result<bool> ExtractPdfImages(string pdf, string destination)
+    {
+        try
+        {
+            // Execute ImageMagick command for resizing
+            ProcessStartInfo startInfo = new ProcessStartInfo
+            {
+                FileName = EXE_CONVERT, // ImageMagick's convert command
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            };
+            startInfo.ArgumentList.Add(pdf);
+            startInfo.ArgumentList.Add(Path.Combine(destination, "output-%04d.png"));
+            
+            using Process? process = Process.Start(startInfo);
+            string output = process.StandardOutput.ReadToEnd();
+            string error = process.StandardError.ReadToEnd();
+            process.WaitForExit();
+            if (process.ExitCode != 0)
+                return Result<bool>.Fail("Failed to extract images from PDF using ImageMagick: " + (error?.EmptyAsNull() ?? output));
+            
+            // // Use identify command to determine original formats and rename files
+            // ProcessStartInfo identifyStartInfo = new ProcessStartInfo
+            // {
+            //     FileName = EXE_IDENTIFY,
+            //     RedirectStandardOutput = true,
+            //     RedirectStandardError = true,
+            //     UseShellExecute = false,
+            //     CreateNoWindow = true
+            // };
+            // identifyStartInfo.ArgumentList.Add(Path.Combine(destination, "*"));
+            //
+            // using Process? identifyProcess = Process.Start(identifyStartInfo);
+            // string identifyOutput = identifyProcess.StandardOutput.ReadToEnd();
+            // string identifyError = identifyProcess.StandardError.ReadToEnd();
+            // identifyProcess.WaitForExit();
+            // if (identifyProcess.ExitCode != 0)
+            //     return Result<bool>.Fail("Failed to identify image formats using ImageMagick: " + (identifyError?.EmptyAsNull() ?? identifyOutput));
+            //
+            // string[] lines = identifyOutput.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            // foreach (string line in lines)
+            // {
+            //     string[] parts = line.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            //     string filename = parts[0];
+            //     string format = parts[1];
+            //     string newFilename = Path.ChangeExtension(filename, format.ToLower());
+            //     File.Move(filename, newFilename);
+            // }
+
+            return Result<bool>.Success(true);
+        }
+        catch (Exception ex)
+        {
+            return Result<bool>.Fail(ex.Message);
+        }
+    }
+
+    /// <summary>
+    /// Creates a PDF from image files
+    /// </summary>
+    /// <param name="pdf">the PDF file</param>
+    /// <param name="images">an array of image file names to add to the PDF</param>
+    /// <returns>True if the operation was successful, otherwise false</returns>
+    public Result<bool> CreatePdfFromImages(string pdf, string[] images)
+    {
+        try
+        {
+            // Execute ImageMagick command for resizing
+            ProcessStartInfo startInfo = new ProcessStartInfo
+            {
+                FileName = EXE_CONVERT, // ImageMagick's convert command
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            };
+            foreach(var image in images)
+                startInfo.ArgumentList.Add(image);
+            
+            startInfo.ArgumentList.Add(pdf);
+            
+            using Process? process = Process.Start(startInfo);
+            string output = process.StandardOutput.ReadToEnd();
+            string error = process.StandardError.ReadToEnd();
+            process.WaitForExit();
+            if (process.ExitCode != 0)
+                return Result<bool>.Fail("Failed to create PDF using ImageMagick: " + (error?.EmptyAsNull() ?? output));
+
+            return Result<bool>.Success(true);
+        }
+        catch (Exception ex)
+        {
+            return Result<bool>.Fail(ex.Message);
         }
     }
 }

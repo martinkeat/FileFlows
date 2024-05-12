@@ -489,6 +489,50 @@ public class ImageHelper : IImageHelper
         }
     }
 
+    /// <inheritdoc />
+    public Result<bool> ExtractPdfImages(string pdf, string destination)
+    {
+        if (File.Exists(pdf) == false)
+            return Result<bool>.Fail("PDF does not exist");
+        
+        if (Directory.Exists(destination) == false)
+            NodeParameters.CreateDirectoryIfNotExists(destination);
+
+        try
+        {
+            if (ImageMagick.CanUseImageMagick() == false)
+                return Result<bool>.Fail("ImageMagick required for extract PDF images");
+            
+            return ImageMagick.ExtractPdfImages(pdf, destination);
+        }
+        catch (Exception ex)
+        {
+            // Return failure with the error message
+            return Result<bool>.Fail(ex.Message);
+        }
+    }
+
+    /// <inheritdoc />
+    public Result<bool> CreatePdfFromImages(string pdf, string[] images)
+    {
+        var pdfFile = new FileInfo(pdf);
+        if(pdfFile.Directory.Exists == false)
+            NodeParameters.CreateDirectoryIfNotExists(pdfFile.Directory.FullName);
+
+        try
+        {
+            if (ImageMagick.CanUseImageMagick() == false)
+                return Result<bool>.Fail("ImageMagick required for creating a PDF from images");
+            
+            return ImageMagick.CreatePdfFromImages(pdf, images);
+        }
+        catch (Exception ex)
+        {
+            // Return failure with the error message
+            return Result<bool>.Fail(ex.Message);
+        }
+    }
+
 
     /// <summary>
     /// Infers the image format based on the first few bytes of the image data.

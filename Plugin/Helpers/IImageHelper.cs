@@ -120,6 +120,21 @@ public interface IImageHelper
     /// <returns>the file name of the saved image</returns>
     Result<string> SaveImage(byte[] imageBytes, string fileNameNoExtension);
 
+    /// <summary>
+    /// Extracts all images from a PDF file
+    /// </summary>
+    /// <param name="pdf">the PDF file</param>
+    /// <param name="destination">the destination to extract the images to</param>
+    /// <returns>True if the operation was successful, otherwise false</returns>
+    Result<bool> ExtractPdfImages(string pdf, string destination);
+
+    /// <summary>
+    /// Creates a PDF from image files
+    /// </summary>
+    /// <param name="pdf">the PDF file</param>
+    /// <param name="images">an array of image file names to add to the PDF</param>
+    /// <returns>True if the operation was successful, otherwise false</returns>
+    Result<bool> CreatePdfFromImages(string pdf, string[] images);
 }
 
 /// <summary>
