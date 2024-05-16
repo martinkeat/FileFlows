@@ -61,10 +61,10 @@
                             <div class="center">
                                 <span class="name"><span>@item.Name</span></span>
                                 <div class="info">
-                                    <IconValue Color="IconValueColor.Blue" OnClick="() => About(item)" Icon="fas fa-sitemap" Value="@(item.Elements.Count + " " + (item.Elements.Count == 1 ? lblFlowElement : lblFlowElements))" />
+                                    <IconValue Color="IconValueColor.Blue" OnClick="() => _ = About(item)" Icon="fas fa-sitemap" Value="@(item.Elements.Count + " " + (item.Elements.Count == 1 ? lblFlowElement : lblFlowElements))" />
                                     @if (item.HasSettings)
                                     {
-                                        <IconValue Color="IconValueColor.Orange" OnClick="() => Edit(item)" Icon="fas fa-cog" Value="@lblSettings" />
+                                        <IconValue Color="IconValueColor.Orange" OnClick="() => _ = Edit(item)" Icon="fas fa-cog" Value="@lblSettings" />
                                     }
                                     @if (item.UsedBy?.Any() == true)
                                     {
@@ -72,13 +72,13 @@
                                     }
                                     @if (item.UpdateAvailable)
                                     {
-                                        <IconValue Color="IconValueColor.Pink" OnClick="() => Update(item.Uid)" Icon="fas fa-cloud-download-alt" Value="@item.LatestVersion" />
+                                        <IconValue Color="IconValueColor.Pink" OnClick="() => _ = Update(item.Uid)" Icon="fas fa-cloud-download-alt" Value="@item.LatestVersion" />
                                     }
                                 </div>
                             </div>
                             <div class="right">
                                 <span class="top-right @(item.UpdateAvailable ? "warning" :"")">@item.Version</span>
-                                <FlowSwitch Value="@item.Enabled" ValueChanged="@(args => { item.Enabled= args; _ = Enable(args, item); })"  />
+                                <FlowSwitch Value="@item.Enabled" ValueChanged="@(args => { item.Enabled= args; Enable(args, item); })"  />
                             </div>
                         </div>
                             

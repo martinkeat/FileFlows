@@ -53,7 +53,7 @@ public partial class InputNumberPercent
     /// Called when the select value changes
     /// </summary>
     /// <param name="e">the event arguments</param>
-    private async Task SelectChange(ChangeEventArgs e)
+    private void SelectChange(ChangeEventArgs e)
     {
         Percentage = e.Value?.ToString()?.ToLowerInvariant() == "true";
     }

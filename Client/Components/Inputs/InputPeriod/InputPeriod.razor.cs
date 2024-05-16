@@ -12,11 +12,6 @@ public partial class InputPeriod : Input<int>
     public override bool Focus() => FocusUid();
 
     /// <summary>
-    /// If updating the value
-    /// </summary>
-    private bool UpdatingValue = false;
-
-    /// <summary>
     /// Gets or sets the selected period
     /// </summary>
     private int Period { get; set; }
@@ -66,7 +61,7 @@ public partial class InputPeriod : Input<int>
     /// Changes the value
     /// </summary>
     /// <param name="e">the change event</param>
-    private async Task ChangeValue(ChangeEventArgs e)
+    private void ChangeValue(ChangeEventArgs e)
     {
         if (int.TryParse(e.Value?.ToString() ?? "", out int value) == false)
             return;
@@ -83,7 +78,6 @@ public partial class InputPeriod : Input<int>
         else if (value < 1)
             value = 1;
         this.Number = value;
-        UpdatingValue = true;
         this.Value = this.Number * this.Period;
         this.ClearError();
     }
@@ -106,21 +100,13 @@ public partial class InputPeriod : Input<int>
     /// <param name="args">the change event</param>
     private void PeriodSelectionChanged(ChangeEventArgs args)
     {
-        UpdatingValue = true;
-        try
+        if (int.TryParse(args?.Value?.ToString(), out int index))
         {
-            if (int.TryParse(args?.Value?.ToString(), out int index))
-            {
-                Period = index;
-                Value = Number * Period;
-            }
-            else
-                Logger.Instance.DLog("Unable to find index of: ",  args?.Value);
+            Period = index;
+            Value = Number * Period;
         }
-        finally
-        {
-            UpdatingValue = false;
-        }
+        else
+            Logger.Instance.DLog("Unable to find index of: ",  args?.Value);
     }
 
 }

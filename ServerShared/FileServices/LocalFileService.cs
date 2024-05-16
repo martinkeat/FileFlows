@@ -5,6 +5,9 @@ using FileHelper = FileFlows.Plugin.Helpers.FileHelper;
 
 namespace FileFlows.ServerShared.FileServices;
 
+/// <summary>
+/// Local file service
+/// </summary>
 public class LocalFileService : IFileService
 {
     /// <summary>
@@ -72,6 +75,7 @@ public class LocalFileService : IFileService
     /// </summary>
     public bool CheckProtectivePaths { get; set; }
 
+    /// <inheritdoc />
     public Result<string[]> GetFiles(string path, string searchPattern = "", bool recursive = false)
     {
         if (IsProtectedPath(ref path))
@@ -87,6 +91,7 @@ public class LocalFileService : IFileService
         }
     }
 
+    /// <inheritdoc />
     public Result<string[]> GetDirectories(string path)
     {
         if (IsProtectedPath(ref path))
@@ -101,6 +106,7 @@ public class LocalFileService : IFileService
         }
     }
 
+    /// <inheritdoc />
     public Result<bool> DirectoryExists(string path)
     {
         if (IsProtectedPath(ref path))
@@ -115,6 +121,7 @@ public class LocalFileService : IFileService
         }
     }
 
+    /// <inheritdoc />
     public Result<bool> DirectoryDelete(string path, bool recursive = false)
     {
         if (IsProtectedPath(ref path))
@@ -130,6 +137,7 @@ public class LocalFileService : IFileService
         }
     }
 
+    /// <inheritdoc />
     public Result<bool> DirectoryMove(string path, string destination)
     {
         if (IsProtectedPath(ref path))
@@ -148,6 +156,7 @@ public class LocalFileService : IFileService
         }
     }
 
+    /// <inheritdoc />
     public Result<bool> DirectoryCreate(string path)
     {
         if (IsProtectedPath(ref path))
@@ -163,6 +172,7 @@ public class LocalFileService : IFileService
         }
     }
 
+    /// <inheritdoc />
     public Result<bool> FileExists(string path)
     {
         if (IsProtectedPath(ref path))
@@ -177,6 +187,7 @@ public class LocalFileService : IFileService
         }
     }
 
+    /// <inheritdoc />
     public Result<FileInformation> FileInfo(string path)
     {
         if (IsProtectedPath(ref path))
@@ -204,6 +215,7 @@ public class LocalFileService : IFileService
         }
     }
 
+    /// <inheritdoc />
     public Result<bool> FileDelete(string path)
     {
         if (IsProtectedPath(ref path))
@@ -221,6 +233,7 @@ public class LocalFileService : IFileService
         }
     }
 
+    /// <inheritdoc />
     public Result<long> FileSize(string path)
     {
         if (IsProtectedPath(ref path))
@@ -238,6 +251,7 @@ public class LocalFileService : IFileService
         }
     }
 
+    /// <inheritdoc />
     public Result<DateTime> FileCreationTimeUtc(string path)
     {
         if (IsProtectedPath(ref path))
@@ -255,6 +269,7 @@ public class LocalFileService : IFileService
         }
     }
 
+    /// <inheritdoc />
     public Result<DateTime> FileLastWriteTimeUtc(string path)
     {
         if (IsProtectedPath(ref path))
@@ -272,6 +287,7 @@ public class LocalFileService : IFileService
         }
     }
 
+    /// <inheritdoc />
     public Result<bool> FileMove(string path, string destination, bool overwrite = true)
     {
         if (IsProtectedPath(ref path))
@@ -337,6 +353,7 @@ public class LocalFileService : IFileService
         }
     }
 
+    /// <inheritdoc />
     public Result<bool> FileCopy(string path, string destination, bool overwrite = true)
     {
         if (IsProtectedPath(ref path))
@@ -361,7 +378,8 @@ public class LocalFileService : IFileService
             return Result<bool>.Fail(ex.Message);
         }
     }
-
+    
+    /// <inheritdoc />
     public Result<bool> FileAppendAllText(string path, string text)
     {
         if (IsProtectedPath(ref path))
@@ -378,6 +396,7 @@ public class LocalFileService : IFileService
         }
     }
 
+    /// <inheritdoc />
     public bool FileIsLocal(string path) => true;
 
     /// <summary>
@@ -388,6 +407,7 @@ public class LocalFileService : IFileService
     public Result<string> GetLocalPath(string path)
         => Result<string>.Success(path);
 
+    /// <inheritdoc />
     public Result<bool> Touch(string path)
     {
         if (IsProtectedPath(ref path))
@@ -424,6 +444,7 @@ public class LocalFileService : IFileService
         }
     }
 
+    /// <inheritdoc />
     public Result<bool> SetCreationTimeUtc(string path, DateTime date)
     {
         if (IsProtectedPath(ref path))
@@ -442,6 +463,7 @@ public class LocalFileService : IFileService
         }
     }
 
+    /// <inheritdoc />
     public Result<bool> SetLastWriteTimeUtc(string path, DateTime date)
     {
         if (IsProtectedPath(ref path))

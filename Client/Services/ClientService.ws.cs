@@ -17,11 +17,6 @@ public partial class ClientService
     private HubConnection _hubConnection;
 
     /// <summary>
-    /// Indicates whether the client is connected to the SignalR server.
-    /// </summary>
-    private bool _isConnected;
-
-    /// <summary>
     /// Event raised when the client is connected to the SignalR server.
     /// </summary>
     public event Action Connected;
@@ -72,7 +67,6 @@ public partial class ClientService
 
                 _hubConnection.Closed += async (exception) =>
                 {
-                    _isConnected = false;
                     Disconnected?.Invoke();
                     await Task.Delay(TimeSpan.FromSeconds(5)); // Delay before reconnecting
                     await ConnectAsync();
@@ -87,7 +81,6 @@ public partial class ClientService
 
                 await _hubConnection.StartAsync();
 
-                _isConnected = true;
                 Connected?.Invoke();
 
                 return; // Connected successfully, exit the method

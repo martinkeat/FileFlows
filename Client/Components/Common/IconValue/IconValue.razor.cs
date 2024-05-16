@@ -17,6 +17,7 @@ public partial class IconValue : ComponentBase
     [Parameter] public string Value { get; set; }
 
     private string _Tooltip;
+#pragma warning disable BL0007
     /// <summary>
     /// Gets or sets the tootlip
     /// </summary>
@@ -26,9 +27,10 @@ public partial class IconValue : ComponentBase
         get => _Tooltip;
         set => _Tooltip = Translater.TranslateIfNeeded(value);
     }
+#pragma warning restore BL0007
 
     /// <summary>
-    /// Gets or sets the the color 
+    /// Gets or sets the color 
     /// </summary>
     [Parameter] public IconValueColor Color { get; set; }
 

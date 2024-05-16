@@ -31,10 +31,10 @@
             string hashcode = ".col-" + col.GetHashCode();
             <text>
                 .flowtable-header @hashcode { 
-                    text-align:@col.HeaderAlign.ToString().ToLower();
+                    text-align:@(col.Align ?? col.HeaderAlign).ToString().ToLower();
                 }
                 .flowtable-body @hashcode { 
-                    text-align:@col.ColumnAlign.ToString().ToLower();
+                    text-align:@(col.Align ?? col.ColumnAlign).ToString().ToLower();
                 }
             </text>
             <text>

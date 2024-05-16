@@ -13,7 +13,6 @@ public partial class InputIconPicker : Input<string>
     /// <inheritdoc />
     public override bool Focus() => FocusUid();
     Microsoft.AspNetCore.Components.Forms.InputFile fileInput;
-    [Inject] IJSRuntime jsRuntime { get; set; }
     private bool ModalOpened = false;
     private string SelectedIcon;
     private string Filter = string.Empty;
@@ -46,9 +45,10 @@ public partial class InputIconPicker : Input<string>
     /// <summary>
     /// Shows a dialog to choose a built-in font
     /// </summary>
-    async Task Choose()
+    void Choose()
     {
-        if (ReadOnly) return;
+        if (ReadOnly) 
+            return;
     
         Filter = string.Empty;
         SelectedIcon = string.Empty;

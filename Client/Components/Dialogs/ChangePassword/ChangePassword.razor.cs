@@ -15,10 +15,6 @@ public partial class ChangePassword: ComponentBase, IDisposable
     [Inject] public IJSRuntime jsRuntime { get; set; }
     
     private string lblTitle, lblSave, lblCancel, lblOldPassword, lblNewPassword, lblNewPasswordConfirm;
-    /// <summary>
-    /// The default value of the button to focus when shown, true for yes, false for no
-    /// </summary>
-    private bool DefaultValue;
     TaskCompletionSource ShowTask;
 
     private string txtOldPasswordUid;

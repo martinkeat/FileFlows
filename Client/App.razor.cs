@@ -94,7 +94,7 @@ public partial class App : ComponentBase
     /// </summary>
     public async Task Reinitialize(bool forced = false)
     {
-        string token = await LocalStorage.GetAccessToken();
+        var token = await LocalStorage.GetAccessToken();
         if (string.IsNullOrWhiteSpace(token) == false)
         {
             HttpHelper.Client.DefaultRequestHeaders.Authorization
@@ -167,7 +167,7 @@ public partial class App : ComponentBase
     /// Escape was pushed
     /// </summary>
     [JSInvokable]
-    public async Task OnEscape(OnEscapeArgs args)
+    public void OnEscape(OnEscapeArgs args)
     {
         OnEscapePushed?.Invoke(args);
     }

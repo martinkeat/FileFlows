@@ -27,8 +27,6 @@ public partial class ScriptBrowser: ComponentBase
 
     private bool _needsRendering = false;
 
-    private bool Loading = false;
-
     private string Icon = "fas fa-code";
 
     private ScriptType ScriptType;
@@ -46,8 +44,7 @@ public partial class ScriptBrowser: ComponentBase
         Icon = "fas fa-code";
 
         this.Visible = true;
-        this.Loading = true;
-        this.Table.Data = new List<RepositoryObject>();
+        this.Table.SetData(new List<RepositoryObject>());
         OpenTask = new TaskCompletionSource<bool>();
         App.Instance.OnEscapePushed += InstanceOnOnEscapePushed;
         _ = LoadData();
@@ -65,7 +62,6 @@ public partial class ScriptBrowser: ComponentBase
 
     private async Task LoadData()
     {
-        this.Loading = true;
         Blocker.Show();
         this.StateHasChanged();
         try
@@ -77,8 +73,8 @@ public partial class ScriptBrowser: ComponentBase
                 this.Close();
                 return;
             }
-            this.Table.Data = result.Data.OrderBy(x => x.Name).ToList();
-            this.Loading = false;
+
+            this.Table.SetData(result.Data.OrderBy(x => x.Name).ToList());
         }
         finally
         {
@@ -153,7 +149,7 @@ public partial class ScriptBrowser: ComponentBase
                 await HttpHelper.Get<string>(ApiUrl + "/content?path=" + UrlEncoder.Create().Encode(@object.Path));
             if (response.Success == false)
                 return;
-            code = response.Data;
+            code = response.Data!;
         }
         finally
         {

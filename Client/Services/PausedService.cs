@@ -151,7 +151,6 @@ public class PausedService : IPausedService
         Refreshing = true;
         try
         {
-            RequestResult<List<FlowExecutorInfo>> result = null;
             RequestResult<SystemInfo> systemInfoResult = await GetSystemInfo();
             
             if (systemInfoResult.Success)
@@ -164,6 +163,7 @@ public class PausedService : IPausedService
         }
         catch (Exception)
         {
+            // Ignore
         }
         finally
         {

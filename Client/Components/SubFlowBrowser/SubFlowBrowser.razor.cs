@@ -27,8 +27,6 @@ public partial class SubFlowBrowser: ComponentBase
 
     private bool _needsRendering = false;
 
-    private bool Loading = false;
-
     private string Icon = "fas fa-subway";
 
     protected override void OnInitialized()
@@ -43,8 +41,7 @@ public partial class SubFlowBrowser: ComponentBase
         Icon = "fas fa-subway";
 
         this.Visible = true;
-        this.Loading = true;
-        this.Table.Data = new List<RepositoryObject>();
+        this.Table.SetData(new List<RepositoryObject>());
         OpenTask = new TaskCompletionSource<bool>();
         App.Instance.OnEscapePushed += InstanceOnOnEscapePushed;
         _ = LoadData();
@@ -62,7 +59,6 @@ public partial class SubFlowBrowser: ComponentBase
 
     private async Task LoadData()
     {
-        this.Loading = true;
         Blocker.Show();
         this.StateHasChanged();
         try
@@ -74,8 +70,8 @@ public partial class SubFlowBrowser: ComponentBase
                 this.Close();
                 return;
             }
-            this.Table.Data = result.Data.OrderBy(x => x.Name).ToList();
-            this.Loading = false;
+
+            this.Table.SetData(result.Data.OrderBy(x => x.Name).ToList());
         }
         finally
         {

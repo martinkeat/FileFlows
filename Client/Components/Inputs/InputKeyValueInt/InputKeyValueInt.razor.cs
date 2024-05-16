@@ -14,8 +14,6 @@ namespace FileFlows.Client.Components.Inputs;
 /// </summary>
 public partial class InputKeyValueInt : Input<List<KeyValuePair<int, string>>>
 {
-    private string InputText = "";
-    private string PreviousInputText = "";
     private int NewKey;
     private string NewValue = string.Empty;
     /// <summary>
@@ -175,7 +173,7 @@ public partial class InputKeyValueInt : Input<List<KeyValuePair<int, string>>>
         return true;
     }
     
-    private async Task OnKeyDown(KeyboardEventArgs e)
+    private void OnKeyDown(KeyboardEventArgs e)
     {
         if (e.Code == "Enter" || e.Code == "Tab")
         {

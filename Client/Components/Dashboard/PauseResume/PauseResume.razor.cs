@@ -9,8 +9,7 @@ public partial class PauseResume: IDisposable
     /// </summary>
     [Inject] private IPausedService PausedService { get; set; }
     
-    private SystemInfo SystemInfo = new SystemInfo();
-    private bool Refreshing = false;
+    private SystemInfo SystemInfo = new ();
     
     private string lblPauseLabel;
 

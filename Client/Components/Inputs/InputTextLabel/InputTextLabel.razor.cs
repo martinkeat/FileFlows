@@ -79,7 +79,7 @@ public partial class InputTextLabel : Input<object>
             else if (Value is DateTime dt)
                 sValue = dt.ToLocalTime().ToString("d MMMM yyyy, h:mm:ss tt");
             else
-                sValue = Value.ToString();
+                sValue = Value.ToString() ?? string.Empty;
         }
         StringValue = sValue;
     }

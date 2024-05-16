@@ -51,7 +51,7 @@ public class FileFlowsAuthorizeAttribute : Attribute, IAsyncAuthorizationFilter
             {
                 // The action method has the AllowAnonymous attribute applied
                 // Skip the authorization check
-                return Task.CompletedTask;;
+                return Task.CompletedTask;
             }
             var authorizeAttribute = actionDescriptor.MethodInfo.GetCustomAttributes(inherit: true)
                 .OfType<FileFlowsAuthorizeAttribute>()
@@ -64,18 +64,18 @@ public class FileFlowsAuthorizeAttribute : Attribute, IAsyncAuthorizationFilter
         if(user == null)
         {
             context.Result = new UnauthorizedResult();
-            return Task.CompletedTask;;
+            return Task.CompletedTask;
         }
         context.HttpContext.Items["USER_ROLE"] = UserRole.Admin;
 
         if ((int)roleToTest == 0)
-            return Task.CompletedTask;; // any role
+            return Task.CompletedTask; // any role
         
         if(roleToTest == UserRole.Admin)
         {
             if(user.Role != UserRole.Admin)
                 context.Result = new UnauthorizedResult();
-            return Task.CompletedTask;;
+            return Task.CompletedTask;
         }
         
         if ((user.Role & roleToTest) == 0) // they require any of the enums

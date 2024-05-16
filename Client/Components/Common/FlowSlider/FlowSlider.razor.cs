@@ -35,7 +35,8 @@ public partial class FlowSlider:ComponentBase
     /// Gets or sets a suffix to show on the right side of the slider
     /// </summary>
     [Parameter] public string Suffix { get; set; } = string.Empty;
-
+    
+#pragma warning disable BL0007
     /// <summary>
     /// Gets or sets the value of slider
     /// </summary>
@@ -52,6 +53,7 @@ public partial class FlowSlider:ComponentBase
             }
         }
     }
+#pragma warning restore BL0007
 
     /// <summary>
     /// Gets or sets an event that is called when the value changes

@@ -14,6 +14,7 @@ public partial class FlowSkyBox<TItem>
 {
     private readonly List<FlowSkyBoxItem<TItem>> _Items = new ();
 
+#pragma warning disable BL0007
     /// <summary>
     /// Gets or set the items to display in the skybox
     /// </summary>
@@ -29,6 +30,7 @@ public partial class FlowSkyBox<TItem>
             this.StateHasChanged();
         }
     }
+#pragma warning restore BL0007
 
     /// <summary>
     /// Gets or sets event that is called when a skybox item is selected

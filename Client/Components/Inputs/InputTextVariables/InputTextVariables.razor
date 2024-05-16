@@ -1,18 +1,18 @@
 @namespace FileFlows.Client.Components.Inputs
 @inherits Input<string>
 
-@if (this.Visible == false) {
+@if (Visible == false) {
     return;
 }
 
 <div class="input-text-variables">
     <InputWrapper Input="@this">
         <VariableInput Uid="@Uid" Variables=@Variables @bind-Value="Value" Placeholder=@Placeholder SubmitEvent="OnSubmit" CloseEvent="OnClose" />
-        @if (false)
-        { // remove this, not sure if its useful, takes up a lot of space
-            <div class="preview">
-                <input @bind-value="@Preview" readonly="readonly" disabled="disabled"/>
-            </div>
-        }
+        @* @if (false) *@
+        @* { // remove this, not sure if its useful, takes up a lot of space *@
+        @*     <div class="preview"> *@
+        @*         <input @bind-value="@Preview" readonly="readonly" disabled="disabled"/> *@
+        @*     </div> *@
+        @* } *@
     </InputWrapper>
 </div>

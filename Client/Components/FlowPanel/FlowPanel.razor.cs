@@ -12,7 +12,8 @@ using System.Collections.Generic;
 public partial class FlowPanel:ComponentBase
 {
     private List<ElementField> _Fields;
-
+    
+#pragma warning disable BL0007
     /// <summary>
     /// Gets or sets the fields in the flow panel
     /// </summary>
@@ -26,6 +27,7 @@ public partial class FlowPanel:ComponentBase
             this.StateHasChanged();
         }
     }
+#pragma warning restore BL0007
 
     /// <summary>
     /// Gets or sets the Editor this flow panel is used in

@@ -11,27 +11,16 @@ namespace FileFlows.Client.Components.Inputs;
 public partial class InputTextArea : Input<string>
 {  
     /// <summary>
-    /// Gets or sets the JavaScript runtime
-    /// </summary>
-    [Inject] private IJSRuntime jsRuntime { get; set; }
-    
-    /// <summary>
     /// Overrides the Focus method to focus on the element with the specified UID.
     /// </summary>
     /// <returns>Returns true if the focus operation is successful.</returns>
     public override bool Focus() => FocusUid();
 
-    private int _Rows = 8;
-
     /// <summary>
     /// Gets or sets the number of rows to show in the text area
     /// </summary>
     [Parameter]
-    public int Rows
-    {
-        get => _Rows < 1 ? 8 : _Rows;
-        set => _Rows = value;
-    }
+    public int Rows { get; set; } = 8;
 
     /// <summary>
     /// Gets or sets the variables available

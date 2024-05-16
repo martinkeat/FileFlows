@@ -77,7 +77,7 @@ public partial class Flow : ComponentBase, IDisposable
             if(_Zoom != value)
             {
                 _Zoom = value;
-                _ = ZoomChanged(value);
+                ZoomChanged(value);
             }
         }
     }
@@ -213,10 +213,6 @@ public partial class Flow : ComponentBase, IDisposable
             await OpenFlowInNewTab(Uid);
 
         }
-        catch (Exception ex)
-        {
-            throw;
-        }
         finally
         {
             Blocker.Hide();
@@ -301,7 +297,7 @@ public partial class Flow : ComponentBase, IDisposable
     
     private async Task InitializeFlowElements()
     {
-        FFlow flow = ActiveFlow?.Flow;
+        FFlow? flow = ActiveFlow?.Flow;
         if (flow == null)
         {
             AvailablePlugins = new ffElement[] { };
@@ -391,7 +387,7 @@ public partial class Flow : ComponentBase, IDisposable
         _needsRendering = false;
     }
 
-    private async Task ZoomChanged(int zoom)
+    private void ZoomChanged(int zoom)
     {
         foreach (var editor in OpenedFlows)
             _ = editor.ffFlow.zoom(zoom);
@@ -412,7 +408,7 @@ public partial class Flow : ComponentBase, IDisposable
         {
             var variablesResult = await GetVariables(API_URL + "/" + part.Uid + "/variables?isNew=" + isNew, parts);
             if (variablesResult.Success)
-                variables = variablesResult.Data;
+                variables = variablesResult.Data!;
         }
         finally { Blocker.Hide(); }
 
@@ -431,9 +427,9 @@ public partial class Flow : ComponentBase, IDisposable
             return null;
         }
 
-        string typeName;
-        string typeDisplayName;
-        string typeDescription = null; // should leave blank for most things, editor will look it up, for for sub flows etc, use description from that
+        string? typeName;
+        string? typeDisplayName;
+        string? typeDescription = null; // should leave blank for most things, editor will look it up, for for sub flows etc, use description from that
         if (part.Type == FlowElementType.Script)
         {
             typeName = "Script";
@@ -510,9 +506,9 @@ public partial class Flow : ComponentBase, IDisposable
             dict["Color"] = part.Color ?? string.Empty;
         }
 
-        List<ListOption> flowOptions = null;
-        List<ListOption> nodeOptions = null;
-        List<ListOption> variableOptions = null;
+        List<ListOption>? flowOptions = null;
+        List<ListOption>? nodeOptions = null;
+        List<ListOption>? variableOptions = null;
 
         foreach (var field in fields)
         {
@@ -528,7 +524,7 @@ public partial class Flow : ComponentBase, IDisposable
                         var other = fields.FirstOrDefault(x => x.Name == condition.Property);
                         if (other != null && model is IDictionary<string, object> mdict) 
                         {
-                            object otherValue = mdict.ContainsKey(other.Name) ? mdict[other.Name] : null;
+                            var otherValue = mdict.ContainsKey(other.Name) ? mdict[other.Name] : null;
                             condition.SetField(other, otherValue);
                         }
                     }
@@ -542,7 +538,7 @@ public partial class Flow : ComponentBase, IDisposable
                 {
                     if (optProperty.ValueKind == JsonValueKind.String)
                     {
-                        string optp = optProperty.GetString();
+                        var optp = optProperty.GetString();
                         Logger.Instance.DLog("OptionsProperty = " + optp);
                         if (optp is "FLOW_LIST" or "SUB_FLOW_LIST")
                         {
@@ -654,11 +650,11 @@ public partial class Flow : ComponentBase, IDisposable
             int outputs = -1;
             if (part.Model is IDictionary<string, object> dictNew && dictNew != null)
             {
-                if (dictNew.TryGetValue("Outputs", out object oOutputs) && int.TryParse(oOutputs?.ToString(), out outputs)) { }
+                if (dictNew.TryGetValue("Outputs", out var oOutputs) && int.TryParse(oOutputs?.ToString(), out outputs)) { }
                 else if (part.FlowElementUid == "FileFlows.BasicNodes.Functions.Matches")
                 {
                     // special case, outputs is determine by the "Matches" count
-                    if (dictNew?.TryGetValue("MatchConditions", out object oMatches) == true)
+                    if (dictNew?.TryGetValue("MatchConditions", out var oMatches) == true)
                     {
                         outputs = ObjectHelper.GetArrayLength(oMatches) + 1; // add +1 for not matching
                     }
@@ -684,7 +680,7 @@ public partial class Flow : ComponentBase, IDisposable
         var dict = model as IDictionary<string, object>;
         string code  = (dict?.ContainsKey("Code") == true ? dict["Code"] as string : null) ?? string.Empty;
         var codeResult = await HttpHelper.Post<string>("/api/script/validate", new { Code = code, Variables = EditorVariables, IsFunction = true });
-        string error = null;
+        string? error = null;
         if (codeResult.Success)
         {
             if (string.IsNullOrEmpty(codeResult.Data))
@@ -724,15 +720,15 @@ public partial class Flow : ComponentBase, IDisposable
         {
             if (value == null)
                 return;
-            CodeTemplate template = value as CodeTemplate;
+            var template = value as CodeTemplate;
             if (template == null || string.IsNullOrEmpty(template.Code))
                 return;
-            Editor editor = sender as Editor;
+            var editor = sender as Editor;
             if (editor == null)
                 return;
             if (editor.Model == null)
                 editor.Model = new ExpandoObject();
-            IDictionary<string, object> model = editor.Model;
+            IDictionary<string, object> model = editor.Model!;
 
             SetModelProperty(nameof(template.Outputs), template.Outputs);
             SetModelProperty(nameof(template.Code), template.Code);

@@ -43,7 +43,7 @@
                                 <div class="info">
                                     @if (item.LatestRevision > item.Revision)
                                     {
-                                        <IconValue Color="IconValueColor.Pink" OnClick="() => Update(item.Uid)" 
+                                        <IconValue Color="IconValueColor.Pink" OnClick="() => _ = Update(item.Uid)" 
                                                    Icon="fas fa-cloud-download-alt" Value="@item.LatestRevision.ToString()" />
                                     }
                                 </div>
@@ -57,7 +57,7 @@
                                 {
                                     <span class="top-right">@lblRevision: @item.Revision</span>
                                 }
-                                <FlowSwitch Value="@item.Enabled" ValueChanged="@(args => { item.Enabled = args; _ = Enable(args, item); })"/>
+                                <FlowSwitch Value="@item.Enabled" ValueChanged="@(args => { item.Enabled = args; Enable(args, item); })"/>
                             </div>
                         </div>
                             

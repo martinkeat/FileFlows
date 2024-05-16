@@ -56,7 +56,6 @@ public partial class ClientService
         _jsRuntime = jsRuntime; 
         _navigationManager = navigationManager; 
         _cache = memoryCache;
-        _isConnected = false;
         _ = InitializeSystemInfo();
         #if(DEBUG)
         //ServerUri = "ws://localhost:6868/client-service";
@@ -96,14 +95,14 @@ public partial class ClientService
             var response = await HttpHelper.Get<List<FlowExecutorInfo>>("/api/worker");
             if (response.Success == false)
                 return new List<FlowExecutorInfo>();
-            return response.Data;
+            return response.Data!;
         }, absExpiration: 10);
 
 
     private TItem GetOrCreate<TItem>(object key, Func<TItem> createItem, int slidingExpiration = 5,
         int absExpiration = 30, bool force = false)
     {
-        TItem cacheEntry;
+        TItem? cacheEntry;
         if (force || _cache.TryGetValue(key, out cacheEntry) == false) // Look for cache key.
         {
             // Key not in cache, so get data.
@@ -138,7 +137,7 @@ public partial class ClientService
         if (PausedTimer?.Enabled == true)
         {
             PausedTimer.Stop();
-            PausedTimer.Elapsed -= PausedTimerOnElapsed;
+            PausedTimer.Elapsed -= PausedTimerOnElapsed!;
             PausedTimer.Dispose();
             PausedTimer = null;
         }
@@ -156,7 +155,7 @@ public partial class ClientService
             PausedUntil = DateTime.UtcNow.AddMinutes(minutes);
             PausedTimer = new Timer();
             PausedTimer.Interval = minutes * 1000;
-            PausedTimer.Elapsed += PausedTimerOnElapsed;
+            PausedTimer.Elapsed += PausedTimerOnElapsed!;
             PausedTimer.Start();
         }
 

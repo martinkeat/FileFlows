@@ -129,20 +129,20 @@ public partial class AccessControl: ListPage<Guid, AccessControlEntry>
         try
         {
             var dict = model as IDictionary<string, object>;
-            string start = dict[nameof(AccessControlEntry.Start)] as string;
+            var start = dict[nameof(AccessControlEntry.Start)] as string;
             if (string.IsNullOrWhiteSpace(start))
                 return false;
 
-            if (IPAddress.TryParse(start, out IPAddress ipStart) == false)
+            if (IPAddress.TryParse(start, out IPAddress? ipStart) == false)
             {
                 Toast.ShowError(Translater.Instant("Pages.AccessControl.Messages.InvalidIPAddress", new { address = start }));
                 return false;
             }
 
-            string end = dict[nameof(AccessControlEntry.End)] as string;
+            var end = dict[nameof(AccessControlEntry.End)] as string;
             if (string.IsNullOrWhiteSpace(end) == false)
             {
-                if (IPAddress.TryParse(end, out IPAddress ipEnd) == false)
+                if (IPAddress.TryParse(end, out IPAddress? ipEnd) == false)
                 {
                     Toast.ShowError(Translater.Instant("Pages.AccessControl.Messages.InvalidIPAddress", new { address = end }));
                     return false;

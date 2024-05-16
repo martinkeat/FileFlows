@@ -11,21 +11,14 @@ public partial class InputCode : Input<string>, IDisposable
     private string InitialValue;
     
     private MonacoEditor CodeEditor { get; set; }
-
-    private Dictionary<string, object> _Variables = new ();
     
     /// <summary>
     /// Gets or sets the language the editor is editing
     /// </summary>
     [Parameter] public string Language { get; set; }
-    
-    [Parameter]
-    public Dictionary<string, object> Variables
-    {
-        get => _Variables;
-        set { _Variables = value ?? new Dictionary<string, object>(); }
-    }
 
+    [Parameter] public Dictionary<string, object> Variables { get; set; } = new();
+    
     private IJSObjectReference jsInputCode;
     
     private StandaloneEditorConstructionOptions EditorConstructionOptions(MonacoEditor editor)

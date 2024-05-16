@@ -28,7 +28,6 @@ public partial class ImportDialog : ComponentBase, IDisposable
 
     private string Uid = System.Guid.NewGuid().ToString();
 
-    private bool Focus;
 
     [Inject] private IJSRuntime jsRuntime { get; set; }
 
@@ -66,7 +65,6 @@ public partial class ImportDialog : ComponentBase, IDisposable
         this.Value = string.Empty;
         this.FileName = string.Empty;
         this.Visible = true;
-        this.Focus = true;
         this.Extensions = extensions?.Any() == true ? extensions : new[] { "json" };
         this.AcceptedTypes = string.Join(", ", this.Extensions.Select(x => "." + x));
         this.StateHasChanged();

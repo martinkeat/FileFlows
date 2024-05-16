@@ -224,7 +224,7 @@
     margin-left: 1rem;
   }
   .nav-item {
-    height: 5.5rem;
+    height: 6.5rem;
   }
   .nav-menu-container:not(.collapsed) {
     position: fixed;
@@ -236,7 +236,7 @@
     margin: 0 !important;
     background: var(--base);
   }
-  .nav-menu-container:not(.collapsed) ul {
+  .nav-menu-container:not(.collapsed) ul:not(.bubbles) {
     grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr));
     display: grid;
     flex-direction: unset !important;
@@ -258,13 +258,15 @@
     display: flex;
     flex-direction: column;
     text-align: center;
-    padding: 0;
     border: none;
     place-content: center;
+    padding: 0 0 1rem;
   }
   .nav-menu-container:not(.collapsed) li a.active {
-    color: var(--accent) !important;
     background: unset;
+  }
+  .nav-menu-container:not(.collapsed) li a.active .icon {
+    color: var(--accent) !important;
   }
   .nav-menu-container:not(.collapsed) li a:hover, .nav-menu-container:not(.collapsed) li a:focus {
     background: none !important;
@@ -282,6 +284,7 @@
   margin: 0;
   position: absolute;
   right: 0.5rem;
+  color: var(--color);
 }
 @media (max-width: 849.99px) {
   .bubbles {
@@ -290,7 +293,7 @@
     flex-direction: row;
     place-content: center;
     position: absolute;
-    bottom: -1rem;
+    bottom: 0;
     left: 0;
     right: 0;
   }
@@ -338,7 +341,7 @@
   min-width: 3rem;
 }
 .bubbles .bubble + .bubble {
-  margin-left: 0.25rem;
+  margin-left: 0.25rem !important;
 }
 
 .navbar-brand i {

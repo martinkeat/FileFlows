@@ -47,9 +47,9 @@
                @{
                    
                    var match = Regex.Match(item.CommentBlock, @"@description\s+(.*?)\s*[@\*/]", RegexOptions.Singleline);
-                   string description = match.Success ? match.Groups[1].Value : null;
+                   var description = match.Success ? match.Groups[1].Value : null;
                    match = Regex.Match(item.CommentBlock, @"@author\s+(.*?)\s*[@\*/]", RegexOptions.Singleline);
-                   string author = match.Success ? match.Groups[1].Value : null;
+                   var author = match.Success ? match.Groups[1].Value : null;
                }
                    <div class="table-item">
                        <span class="icon">

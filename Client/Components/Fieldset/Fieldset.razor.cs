@@ -7,6 +7,7 @@ namespace FileFlows.Client.Components
     {
         private string _Title;
         private string _OriginalTitle;
+#pragma warning disable BL0007 
         [Parameter]
         public string Title
         {
@@ -19,6 +20,7 @@ namespace FileFlows.Client.Components
                 _Title = Translater.TranslateIfNeeded(value);
             }
         }
+#pragma warning restore BL0007 
 
         [Parameter]
         public RenderFragment ChildContent { get; set; }

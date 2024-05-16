@@ -151,7 +151,7 @@ public partial class LibraryFiles : ListPage<Guid, LibaryFileListModel>, IDispos
         }
 
         AutoRefreshTimer = new Timer();
-        AutoRefreshTimer.Elapsed += AutoRefreshTimerElapsed;
+        AutoRefreshTimer.Elapsed += AutoRefreshTimerElapsed!;
         AutoRefreshTimer.Interval = 10_000;
         AutoRefreshTimer.AutoReset = false;
         AutoRefreshTimer.Start();
@@ -194,7 +194,7 @@ public partial class LibraryFiles : ListPage<Guid, LibaryFileListModel>, IDispos
         if (AutoRefreshTimer != null)
         {
             AutoRefreshTimer.Stop();
-            AutoRefreshTimer.Elapsed -= AutoRefreshTimerElapsed;
+            AutoRefreshTimer.Elapsed -= AutoRefreshTimerElapsed!;
             AutoRefreshTimer.Dispose();
             AutoRefreshTimer = null;
         }
@@ -619,7 +619,7 @@ public partial class LibraryFiles : ListPage<Guid, LibaryFileListModel>, IDispos
     /// <returns>the node icon</returns>
     private string GetNodeIcon(string node)
     {
-        if(Nodes.TryGetValue(node.ToLowerInvariant(), out NodeInfo n) == false)
+        if(Nodes.TryGetValue(node.ToLowerInvariant(), out var n) == false)
             return "fas fa-desktop";
         if (n.OperatingSystem == OperatingSystemType.Docker)
             return "fab fa-docker";
@@ -636,7 +636,7 @@ public partial class LibraryFiles : ListPage<Guid, LibaryFileListModel>, IDispos
     /// Sets the selected node
     /// </summary>
     /// <param name="node">the node</param>
-    private void SelectNode(object node)
+    private void SelectNode(object? node)
     {
         if (node is string str)
         {
@@ -654,7 +654,7 @@ public partial class LibraryFiles : ListPage<Guid, LibaryFileListModel>, IDispos
     /// Sets the sort by
     /// </summary>
     /// <param name="sortBy">the sort by</param>
-    private void SelectSortBy(object sortBy)
+    private void SelectSortBy(object? sortBy)
     {
         SelectedSortBy = sortBy as FilesSortBy?;
         _ = Refresh();
@@ -663,7 +663,7 @@ public partial class LibraryFiles : ListPage<Guid, LibaryFileListModel>, IDispos
     /// Sets the selected library
     /// </summary>
     /// <param name="library">the library</param>
-    private void SelectLibrary(object library)
+    private void SelectLibrary(object? library)
     {
         if (library is string str)
         {
@@ -681,7 +681,7 @@ public partial class LibraryFiles : ListPage<Guid, LibaryFileListModel>, IDispos
     /// Sets the selected flow
     /// </summary>
     /// <param name="flow">the flow</param>
-    private void SelectFlow(object flow)
+    private void SelectFlow(object? flow)
     {
         if (flow is string str)
         {

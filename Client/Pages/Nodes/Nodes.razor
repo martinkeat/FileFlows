@@ -60,20 +60,17 @@
                                 int blue = 0; // Assuming no blue component for simplicity
                                 color = $"#{red:X2}{green:X2}{blue:X2}";
                             }
-                            string statusIcon = "status-ok";
                             string statusTitle = lblRunning;
                             bool offline = false;
                             bool possiblyDisconnected = false;
 
                             if (internalNode == false && item.LastSeen < DateTime.UtcNow.AddMinutes(-10))
                             {
-                                statusIcon = "status-error";
                                 statusTitle = lblDisconnected;
                                 offline = true;
                             }
                             else if (internalNode == false && item.LastSeen < DateTime.UtcNow.AddMinutes(-5))
                             {
-                                statusIcon = "status-warning";
                                 statusTitle = lblPossiblyDisconnected;
                                 possiblyDisconnected = true;
                             }

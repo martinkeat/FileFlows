@@ -25,7 +25,7 @@ public partial class InputMetadata : Input<Dictionary<string, object>>
             if (kv.Value == null)
                 continue;
             var match = rgxVAS.Match(kv.Key);
-            string strValue = kv.Key.Contains("Bitrate") ? FormatBitrate(kv.Value) : kv.Value.ToString();
+            var strValue = kv.Key.Contains("Bitrate") ? FormatBitrate(kv.Value) : kv.Value.ToString();
             if (match.Success == false)
             {
                 mdGeneral.Values.Add(kv.Key, strValue);

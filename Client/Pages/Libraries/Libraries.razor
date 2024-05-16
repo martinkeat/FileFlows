@@ -67,7 +67,7 @@
                         @Globals.lblEnabled
                     </Header>
                     <Cell Context="item">
-                        <FlowSwitch Value="@item.Enabled" ValueChanged="@(args => { item.Enabled = args; _ = Enable(args, item); })"  />
+                        <FlowSwitch Value="@item.Enabled" ValueChanged="@(args => { item.Enabled = args; Enable(args, item); })"  />
                     </Cell>
                 </FlowTableColumn>
                 <FlowTableColumn TItem="Library" Width="16rem" MobileWidth="0" NoHeight="true">

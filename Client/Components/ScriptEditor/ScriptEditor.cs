@@ -108,7 +108,7 @@ let ffApi = new FileFlowsApi();
                 new ()
                 {
                     Label = "Labels.Import", 
-                    Clicked = (sender, e) => OpenImport(sender, e)
+                    Clicked = (sender, e) => _ = OpenImport(sender, e)
                 }
             }
         });

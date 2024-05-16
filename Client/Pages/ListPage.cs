@@ -224,20 +224,30 @@ public abstract class ListPage<U, T> : ComponentBase where T : IUniqueObject<U>
     protected virtual bool Licensed() => true;
 
 
-    public async Task Enable(bool enabled, T item)
+    /// <summary>
+    /// Enables or disabled the item
+    /// </summary>
+    /// <param name="enabled"></param>
+    /// <param name="item"></param>
+    /// <returns></returns>
+    public EventCallback Enable(bool enabled, T item)
     {
-        Blocker.Show();
-        this.StateHasChanged();
-        Data.Clear();
-        try
+        Task.Run(async () =>
         {
-            await HttpHelper.Put<T>($"{ApiUrl}/state/{item.Uid}?enable={enabled}");
-        }
-        finally
-        {
-            Blocker.Hide();
-            this.StateHasChanged();
-        }
+            Blocker.Show();
+            StateHasChanged();
+            Data.Clear();
+            try
+            {
+                await HttpHelper.Put<T>($"{ApiUrl}/state/{item.Uid}?enable={enabled}");
+            }
+            finally
+            {
+                Blocker.Hide();
+                this.StateHasChanged();
+            }
+        });
+        return EventCallback.Empty;
     }
 
     protected virtual string DeleteMessage => "Labels.DeleteItems";

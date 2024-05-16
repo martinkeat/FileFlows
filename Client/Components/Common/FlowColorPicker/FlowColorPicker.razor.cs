@@ -29,7 +29,8 @@ public partial class FlowColorPicker : ComponentBase
 
     private string _Value;
     private bool IsPickerOpened = false;
-
+    
+#pragma warning disable BL0007
     /// <summary>
     /// Gets or sets the value
     /// </summary>
@@ -46,6 +47,7 @@ public partial class FlowColorPicker : ComponentBase
                 ValueChanged.InvokeAsync(value);
         }
     }
+#pragma warning restore BL0007
 
     /// <summary>
     /// Gets or sets the callback when the value changes

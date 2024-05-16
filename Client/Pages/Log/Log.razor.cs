@@ -76,9 +76,9 @@ public partial class Log : ComponentBase
 #else
         this.DownloadUrl = "/api/fileflows-log/download";
 #endif
-        NavigationManager.LocationChanged += NavigationManager_LocationChanged;
+        NavigationManager.LocationChanged += NavigationManager_LocationChanged!;
         AutoRefreshTimer = new Timer();
-        AutoRefreshTimer.Elapsed += AutoRefreshTimerElapsed;
+        AutoRefreshTimer.Elapsed += AutoRefreshTimerElapsed!;
         AutoRefreshTimer.Interval = 5_000;
         AutoRefreshTimer.AutoReset = true;
         AutoRefreshTimer.Start();
@@ -118,7 +118,7 @@ public partial class Log : ComponentBase
         if (AutoRefreshTimer != null)
         {
             AutoRefreshTimer.Stop();
-            AutoRefreshTimer.Elapsed -= AutoRefreshTimerElapsed;
+            AutoRefreshTimer.Elapsed -= AutoRefreshTimerElapsed!;
             AutoRefreshTimer.Dispose();
             AutoRefreshTimer = null;
         }

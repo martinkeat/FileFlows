@@ -21,11 +21,6 @@ public partial class Webhooks : ListPage<string, Webhook>
     private Webhook EditingItem = null;
     private string lblRoute, lblMethod;
     private string BaseRoute;
-    
-    /// <summary>
-    /// Gets or sets the navigation manager
-    /// </summary>
-    [Inject] private NavigationManager NavigationManager { get; set; }
     /// <summary>
     /// Gets or sets the clipboard service
     /// </summary>

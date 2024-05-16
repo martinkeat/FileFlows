@@ -155,7 +155,7 @@ public partial class Users: ListPage<Guid, User>
             user.Uid = (Guid)dict[nameof(UserEditModel.Uid)];
             user.Name = dict[nameof(UserEditModel.Name)].ToString() ?? string.Empty;
             user.Email = dict[nameof(UserEditModel.Email)].ToString() ?? string.Empty;
-            if (dict.TryGetValue(nameof(UserEditModel.Password), out object oPassword) && oPassword is string password)
+            if (dict.TryGetValue(nameof(UserEditModel.Password), out var oPassword) && oPassword is string password)
                 user.Password = password;
             var isAdmin = dict[nameof(UserEditModel.IsAdmin)] as bool? == true;
             if (isAdmin)

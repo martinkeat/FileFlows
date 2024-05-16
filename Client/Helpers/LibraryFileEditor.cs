@@ -32,7 +32,7 @@ public class LibraryFileEditor
 
     public static async Task Open(Blocker blocker, Editor editor, Guid libraryItemUid)
     {
-        LibraryFileModel model = null;
+        LibraryFileModel? model = null;
         string logUrl = ApIUrl + "/" + libraryItemUid + "/log";
         blocker.Show();
         try

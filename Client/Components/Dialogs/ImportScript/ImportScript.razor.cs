@@ -14,8 +14,6 @@ public partial class ImportScript : ComponentBase, IDisposable
     private List<object> CheckedItems = new();
     private bool Visible { get; set; }
 
-    private bool Focus;
-
     [Inject] private IJSRuntime jsRuntime { get; set; }
 
     protected override void OnInitialized()
@@ -39,7 +37,6 @@ public partial class ImportScript : ComponentBase, IDisposable
     public Task<List<string>> Show(List<string> availableScripts)
     {
         this.Visible = true;
-        this.Focus = true;
         this.CheckedItems.Clear();
         this.AvailableScript = availableScripts?.Select(x => new ListOption()
         {
@@ -64,7 +61,7 @@ public partial class ImportScript : ComponentBase, IDisposable
     private async void Accept()
     {
         this.Visible = false;
-        ShowTask.TrySetResult(CheckedItems.Select(x => x.ToString()).ToList());
+        ShowTask.TrySetResult(CheckedItems.Select(x => x.ToString()!).ToList());
         await Task.CompletedTask;
     }
 

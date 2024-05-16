@@ -1,6 +1,7 @@
 using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Text;
+using FileFlows.Plugin;
 using FileFlows.Server.Authentication;
 using FileFlows.Server.Helpers;
 using FileFlows.Server.Services;
@@ -511,7 +512,14 @@ public class FileServerController : Controller
                 return StatusCode(503, "No File specified for upload.");
             }
 
-            string tempFile = await SaveToTempLocation(path, log, stream);
+            var tempFileResult = await SaveToTempLocation(path, log, stream);
+            if (tempFileResult.Failed(out string error))
+            {
+                log.AppendLine(error);
+                return StatusCode(500, log.ToString());
+            }
+
+            var tempFile = tempFileResult.Value;
 
             // move from temp after its uploaded
             log.AppendLine("Renaming temporary filename: " + tempFile);
@@ -523,7 +531,7 @@ public class FileServerController : Controller
             var fileInfo = new FileInfo(path);
 
             log.AppendLine("Moving temp directory to final location: " + fileInfo.DirectoryName);
-            if (_localFileService.FileMove(tempFile, path, true).Failed(out string error))
+            if (_localFileService.FileMove(tempFile, path, true).Failed(out error))
             {
                 log.AppendLine("Failed to move file: " + error);
                 return StatusCode(500, log.ToString());
@@ -554,7 +562,7 @@ public class FileServerController : Controller
     /// <param name="log">the logger</param>
     /// <param name="stream">the file stream</param>
     /// <returns>the temp path</returns>
-    private async Task<string> SaveToTempLocation(string path, StringBuilder log, Stream stream)
+    private async Task<Result<string>> SaveToTempLocation(string path, StringBuilder log, Stream stream)
     {
         log.AppendLine("Path: " + path);
         var directory = FileHelper.GetDirectory(path);
@@ -574,7 +582,9 @@ public class FileServerController : Controller
         log.AppendLine("tempDirLocation: " + tempDirLocation);
 
         string dirPath = tempDirLocation.FullName;
-        _localFileService.DirectoryCreate(tempDirLocation.FullName);
+        var result = _localFileService.DirectoryCreate(tempDirLocation.FullName);
+        if (result.Failed(out string error))
+            return Result<string>.Fail("Failed creating directory: " + error);
 
         string outFile = Path.Combine(dirPath, fileInfo.Name + ".FFTEMP");
         log.AppendLine("Writing file to temporary filename: " + outFile);

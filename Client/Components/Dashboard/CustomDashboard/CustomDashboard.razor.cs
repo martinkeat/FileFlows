@@ -39,6 +39,7 @@ public partial class CustomDashboard : IDisposable
     private Guid _ActiveDashboardUid;
     private bool needsLoading = false;
 
+#pragma warning disable BL0007
     [Parameter]
     public Guid ActiveDashboardUid
     {
@@ -62,6 +63,7 @@ public partial class CustomDashboard : IDisposable
             });
         }
     }
+#pragma warning restore BL0007
 
     /// <summary>
     /// Gets if the active dashboard is the default dashboard
@@ -98,7 +100,7 @@ public partial class CustomDashboard : IDisposable
     /// <param name="data">the update data</param>
     private void ClientServiceOnExecutorsUpdated(List<FlowExecutorInfoMinified> data)
     {
-        if(JsCallbacks.TryGetValue("FlowExecutorInfo", out Action<object> callback))
+        if(JsCallbacks.TryGetValue("FlowExecutorInfo", out var callback))
             callback.Invoke(data);
     }
 

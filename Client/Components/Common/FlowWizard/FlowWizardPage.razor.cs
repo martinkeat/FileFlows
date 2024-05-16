@@ -13,8 +13,20 @@ public partial class FlowWizardPage : ComponentBase
     [CascadingParameter]
     FlowWizard Wizard { get; set; }
 
-    private bool _Visible = true;
+    /// <summary>
+    /// Gets or sets the icon associated with the page.
+    /// </summary>
+    [Parameter] public string Icon { get; set; }
 
+    /// <summary>
+    /// Gets or sets the content of the page.
+    /// </summary>
+    [Parameter] public RenderFragment ChildContent { get; set; }
+
+
+#pragma warning disable BL0007
+    private bool _Visible = true;
+    
     /// <summary>
     /// Gets or sets a value indicating whether the page is visible.
     /// </summary>
@@ -43,6 +55,7 @@ public partial class FlowWizardPage : ComponentBase
         set { _Title = Translater.TranslateIfNeeded(value); }
     }
 
+    
     private string _Description;
 
     /// <summary>
@@ -53,16 +66,6 @@ public partial class FlowWizardPage : ComponentBase
         get => _Description;
         set { _Description = Translater.TranslateIfNeeded(value); }
     }
-
-    /// <summary>
-    /// Gets or sets the icon associated with the page.
-    /// </summary>
-    [Parameter] public string Icon { get; set; }
-
-    /// <summary>
-    /// Gets or sets the content of the page.
-    /// </summary>
-    [Parameter] public RenderFragment ChildContent { get; set; }
 
     private bool _Disabled;
 
@@ -120,6 +123,7 @@ public partial class FlowWizardPage : ComponentBase
             Wizard?.TriggerStateHasChanged();
         }
     }
+#pragma warning restore BL0007
 
 
     /// <summary>

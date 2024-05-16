@@ -36,7 +36,6 @@ public class FlowEditor : IDisposable
     public ffFlowWrapper ffFlow { get; private set; }
 
     private string lblObsoleteMessage;
-    private bool _needsRendering = false;
     const string API_URL = "/api/flow";
     private DateTime LoadedAt;
 
@@ -107,7 +106,7 @@ public class FlowEditor : IDisposable
             if (p.FlowElementUid == "FileFlows.BasicNodes.Functions.Matches" && p.Model is IDictionary<string, object> dict)
             {
                 // special case, outputs is determine by the "Matches" count
-                if (dict.TryGetValue("MatchConditions", out object oMatches))
+                if (dict.TryGetValue("MatchConditions", out var oMatches))
                 {
                     p.Outputs = ObjectHelper.GetArrayLength(oMatches) + 1; // add +1 for not matching
                 }

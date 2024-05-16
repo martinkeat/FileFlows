@@ -16,9 +16,8 @@ public partial class Plugins : ListPage<Guid, PluginInfoModel>
     private string lblSettings, lblInUse, lblFlowElement, lblFlowElements;
 
     /// <inheritdoc />
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
-        base.OnInitializedAsync();
         lblSettings = Translater.Instant("Labels.Settings");
         lblInUse = Translater.Instant("Labels.InUse");
         lblFlowElement = Translater.Instant("Labels.FlowElement");
@@ -106,7 +105,7 @@ public partial class Plugins : ListPage<Guid, PluginInfoModel>
             if (pluginResult.Success == false)
                 return false;
             if (string.IsNullOrWhiteSpace(pluginResult.Data) == false)
-                model = JsonSerializer.Deserialize<ExpandoObject>(pluginResult.Data);
+                model = JsonSerializer.Deserialize<ExpandoObject>(pluginResult.Data) ?? new ExpandoObject();
         }
         finally
         {

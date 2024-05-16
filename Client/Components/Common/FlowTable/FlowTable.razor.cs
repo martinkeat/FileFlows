@@ -76,6 +76,7 @@ public partial class FlowTable<TItem>: FlowTableBase,IDisposable, INotifyPropert
     private int _TotalItems;
 
 
+#pragma warning disable BL0007
     /// <summary>
     /// Gets or sets the total items, needed for the pager to know how many pages to show
     /// </summary>
@@ -92,6 +93,7 @@ public partial class FlowTable<TItem>: FlowTableBase,IDisposable, INotifyPropert
             }
         }
     }
+#pragma warning restore BL0007
 
     /// <summary>
     /// Gets or sets callback when the page size is changed
@@ -103,6 +105,7 @@ public partial class FlowTable<TItem>: FlowTableBase,IDisposable, INotifyPropert
     /// </summary>
     [Parameter] public EventCallback<int> OnPageChange { get; set; }
 
+#pragma warning disable BL0007
     /// <summary>
     /// Gets or sets the data
     /// </summary>
@@ -117,6 +120,7 @@ public partial class FlowTable<TItem>: FlowTableBase,IDisposable, INotifyPropert
             SetData(value, clearSelected: false);
         }
     }
+#pragma warning restore BL0007
 
     /// <summary>
     /// Gets or sets a table identifier for saving/loading the column information
@@ -599,7 +603,7 @@ public partial class FlowTable<TItem>: FlowTableBase,IDisposable, INotifyPropert
             {
                 Icon = "icon fas fa-table",
                 Label = lblResetLayout,
-                OnClick = () => ResetLayout()
+                OnClick = () => _ = ResetLayout()
             };
             if (items.Last().IsHelpButton)
                 items.Insert(items.Count - 1, reset);

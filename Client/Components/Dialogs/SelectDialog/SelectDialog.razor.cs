@@ -105,7 +105,7 @@ public partial class SelectDialog: ComponentBase, IDisposable
         this.Title = Translater.TranslateIfNeeded(title?.EmptyAsNull() ?? "Labels.Prompt");
         this.Message = Translater.TranslateIfNeeded(message ?? "");
         this.Options = options;
-        this.SelectedIndex = Math.Max(0, options.FindIndex(x => x.Value == (object)value));
+        this.SelectedIndex = Math.Max(0, options.FindIndex(x => x.Value == (object?)value));
         this.Visible = true;
         this.Focus = true;
         this.StateHasChanged();

@@ -44,10 +44,6 @@ public partial class RepositoryBrowser : ComponentBase
     /// If the components needs rendering
     /// </summary>
     private bool _needsRendering = false;
-    /// <summary>
-    /// If this component is loading
-    /// </summary>
-    private bool Loading = false;
 
     /// <summary>
     /// Gets or sets the type
@@ -84,8 +80,7 @@ public partial class RepositoryBrowser : ComponentBase
     internal Task<bool> Open()
     {
         this.Visible = true;
-        this.Loading = true;
-        this.Table.Data = new List<RepositoryObject>();
+        this.Table.SetData(new List<RepositoryObject>());
         OpenTask = new TaskCompletionSource<bool>();
         _ = LoadData();
         this.StateHasChanged();
@@ -97,7 +92,6 @@ public partial class RepositoryBrowser : ComponentBase
     /// </summary>
     private async Task LoadData()
     {
-        this.Loading = true;
         Blocker.Show();
         this.StateHasChanged();
         try
@@ -110,8 +104,8 @@ public partial class RepositoryBrowser : ComponentBase
                 this.Close();
                 return;
             }
-            this.Table.Data = result.Data;
-            this.Loading = false;
+
+            this.Table.SetData(result.Data);
         }
         finally
         {

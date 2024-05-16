@@ -31,7 +31,7 @@ public class FlowTableHelpButton : FlowTableButton
     /// When the button is clicked
     /// </summary>
     /// <returns>a task to await</returns>
-    public override Task OnClick()
+    public override async Task OnClick()
     {
         string url = this.HelpUrl;            
         if (string.IsNullOrEmpty(HelpUrl))
@@ -39,7 +39,6 @@ public class FlowTableHelpButton : FlowTableButton
         else if (url.ToLower().StartsWith("http") == false)
             url = "https://fileflows.com/docs/webconsole/" + url;
 
-        App.Instance.OpenHelp(url.ToLowerInvariant());
-        return Task.CompletedTask;
+        await App.Instance.OpenHelp(url.ToLowerInvariant());
     }
 }

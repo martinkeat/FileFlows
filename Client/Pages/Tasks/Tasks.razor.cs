@@ -433,7 +433,7 @@ public partial class Tasks : ListPage<Guid, FileFlowsTask>
                 return;
             }
 
-            script = response.Data;
+            script = response.Data!;
         }
         finally
         {

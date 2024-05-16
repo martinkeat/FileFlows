@@ -13,15 +13,7 @@ public partial class InputFile : Input<string>
     [Parameter]
     public bool Directory { get; set; }
 
-    private Dictionary<string, object> _Variables = new Dictionary<string, object>();
-
-    [Parameter]
-    public Dictionary<string, object> Variables
-    {
-        get => _Variables;
-        set { _Variables = value ?? new Dictionary<string, object>(); }
-    }
-
+    [Parameter] public Dictionary<string, object> Variables { get; set; } = new();
     public override bool Focus() => FocusUid();
     async Task Browse()
     {

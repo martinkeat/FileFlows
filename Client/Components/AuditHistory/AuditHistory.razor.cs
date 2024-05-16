@@ -148,7 +148,7 @@ public partial class AuditHistory
                 return;
             }
 
-            if (response.Data.First().Parameters.TryGetValue("Name", out object oName))
+            if (response.Data.First().Parameters.TryGetValue("Name", out var oName))
                 this.Title = oName.ToString();
 
             foreach (var d in response.Data)

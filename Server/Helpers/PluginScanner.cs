@@ -90,9 +90,7 @@ public class PluginScanner
                     ExtractLanguageFilesFromZip(zf, langFiles);
                 }
 
-#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
-                PluginInfo pi = JsonSerializer.Deserialize<PluginInfo>(json, options);
-#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
+                PluginInfo? pi = JsonSerializer.Deserialize<PluginInfo>(json, options);
                 if (pi == null)
                 {
                     Logger.Instance?.WLog("Unable to parse plugininfo from file: " + ffplugin);

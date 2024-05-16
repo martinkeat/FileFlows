@@ -13,22 +13,12 @@ public partial class InputTextVariables : Input<string>
     private string Preview = string.Empty;
     
     /// <summary>
-    /// The variables dictionary
-    /// </summary>
-    private Dictionary<string, object> _Variables = new ();
-
-    /// <summary>
     /// Gets or sets the variables available
     /// </summary>
-    [Parameter]
-    public Dictionary<string, object> Variables
-    {
-        get => _Variables;
-        set { _Variables = value ?? new Dictionary<string, object>(); }
-    }
+    [Parameter] public Dictionary<string, object> Variables { get; set; } = new();
 
     /// <summary>
-    /// Gets or stes the value
+    /// Gets or sets the value
     /// </summary>
     public new string Value
     {
@@ -42,8 +32,6 @@ public partial class InputTextVariables : Input<string>
             UpdatePreview();
         }
     }
-
-    
     /// <inheritdoc />
     public override bool Focus() => FocusUid();
         
@@ -58,16 +46,13 @@ public partial class InputTextVariables : Input<string>
     /// Updates the preview text
     /// </summary>
     private void UpdatePreview()
-    {
-        string preview = Plugin.VariablesHelper.ReplaceVariables(this.Value, Variables, false);
-        this.Preview = preview;             
-    }
+        => Preview = Plugin.VariablesHelper.ReplaceVariables(this.Value, Variables, false);
 
     /// <summary>
     /// When the user submits in this field
     /// </summary>
     private void VariableOnSubmit()
     {
-        _ = base.OnSubmit.InvokeAsync();
+        _ = OnSubmit.InvokeAsync();
     }
 }

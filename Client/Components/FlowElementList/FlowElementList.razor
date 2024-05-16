@@ -27,10 +27,10 @@
                                   .ThenBy(x => x.Key))
                     {
                         bool expanded = grp.Key == SelectedGroup;
-                        string mostCommonFlowType = grp.GroupBy(x => x.Type)
+                        var mostCommonFlowType = grp.GroupBy(x => x.Type)
                             .OrderByDescending(g => g.Count())
                             .Select(g => g.Key.ToString().ToLower())
-                            .FirstOrDefault();
+                            .FirstOrDefault() ?? string.Empty;
                         
                         <div class="group @(expanded || Filtering ? "expanded" : "collapsed")">
                             <div class="group-title" @onclick="() => SelectGroup(grp.Key)">

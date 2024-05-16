@@ -334,15 +334,15 @@ public partial class Settings : InputRegister
 
     private void OpenHelp()
     {
-        App.Instance.OpenHelp("https://fileflows.com/docs/webconsole/admin/settings");
+        _ = App.Instance.OpenHelp("https://fileflows.com/docs/webconsole/admin/settings");
     }
 
     private async Task TestDbConnection()
     {
-        string server = Model?.DbServer?.Trim();
-        string name = Model?.DbName?.Trim();
-        string user = Model?.DbUser?.Trim();
-        string password = Model?.DbPassword?.Trim();
+        var server = Model?.DbServer?.Trim();
+        var name = Model?.DbName?.Trim();
+        var user = Model?.DbUser?.Trim();
+        var password = Model?.DbPassword?.Trim();
         int port = Model?.DbPort ?? 0;
         if (string.IsNullOrWhiteSpace(server))
         {

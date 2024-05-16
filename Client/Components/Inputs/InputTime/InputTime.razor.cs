@@ -49,7 +49,7 @@ public partial class InputTime: Input<TimeSpan>
     }
     
     [JSInvokable]
-    public async Task OnTimeSpanChange(string timeSpanString)
+    public void OnTimeSpanChange(string timeSpanString)
     {
         if (TimeSpan.TryParse(timeSpanString, out TimeSpan newValue))
             Value = newValue;

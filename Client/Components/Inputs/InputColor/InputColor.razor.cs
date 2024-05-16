@@ -52,7 +52,7 @@ public partial class InputColor : Input<string>
     private void Toggle()
         => PickerVisible = !PickerVisible;
 
-    private async Task MoveSlider(MouseEventArgs e)
+    private void MoveSlider(MouseEventArgs e)
     {
         SliderY = e.OffsetY;
         double percent = e.OffsetY / 150.3d;

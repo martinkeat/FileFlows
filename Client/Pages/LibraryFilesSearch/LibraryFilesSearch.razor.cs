@@ -32,7 +32,7 @@ public partial class LibraryFilesSearch : ListPage<Guid, LibraryFile>
         LibraryName = string.Empty
     };
     
-    protected async override Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
         base.OnInitialized();
         this.lblSearch = Translater.Instant("Labels.Search");

@@ -47,10 +47,6 @@ public partial class PluginBrowser : ComponentBase
     /// If the components needs rendering
     /// </summary>
     private bool _needsRendering = false;
-    /// <summary>
-    /// If this component is loading
-    /// </summary>
-    private bool Loading = false;
 
     /// <inheritdoc />
     protected override void OnInitialized()
@@ -66,8 +62,7 @@ public partial class PluginBrowser : ComponentBase
     internal Task<bool> Open()
     {
         this.Visible = true;
-        this.Loading = true;
-        this.Table.Data = new List<PluginPackageInfo>();
+        this.Table.SetData(new List<PluginPackageInfo>());
         OpenTask = new TaskCompletionSource<bool>();
         _ = LoadData();
         this.StateHasChanged();
@@ -79,7 +74,6 @@ public partial class PluginBrowser : ComponentBase
     /// </summary>
     private async Task LoadData()
     {
-        this.Loading = true;
         Blocker.Show();
         this.StateHasChanged();
         try
@@ -92,8 +86,8 @@ public partial class PluginBrowser : ComponentBase
                 this.Close();
                 return;
             }
-            this.Table.Data = result.Data;
-            this.Loading = false;
+
+            this.Table.SetData(result.Data);
         }
         finally
         {

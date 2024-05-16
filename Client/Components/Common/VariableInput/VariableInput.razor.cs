@@ -21,18 +21,12 @@ public partial class VariableInput:ComponentBase
         set => _Uid = value;    
     }
 
-
-    private Dictionary<string, object> _Variables = new Dictionary<string, object>();
-
     /// <summary>
     /// Gets or sets the variables available to show
     /// </summary>
     [Parameter]
-    public Dictionary<string, object> Variables
-    {
-        get => _Variables;
-        set => _Variables = value ?? new Dictionary<string, object>();
-    }
+    public Dictionary<string, object> Variables { get; set; } = new();
+    
     /// <summary>
     /// Gets or sets the filtered list of variables to show
     /// </summary>
@@ -44,6 +38,7 @@ public partial class VariableInput:ComponentBase
     private ElementReference eleInput;
 
     private string _Value;
+#pragma warning disable BL0007
     /// <summary>
     /// Gets or sets the value 
     /// </summary>
@@ -60,6 +55,7 @@ public partial class VariableInput:ComponentBase
             ValueChanged.InvokeAsync(_Value);
         }
     }
+#pragma warning restore BL0007
     /// <summary>
     /// Gets or sets the placeholder text
     /// </summary>

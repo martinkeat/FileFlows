@@ -31,12 +31,9 @@ public partial class NewFlowEditor : Editor
     private const string FIELD_NAME = "Name";
     private const string FIELD_TEMPLATE = "Template";
 
-    private List<ListOption> TemplateOptions;
     private string lblDescription;
     
-    private ElementField efTemplate;
     private readonly Dictionary<string, TemplateFieldModel> TemplateFields = new ();
-    private bool InitializingTemplate = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -48,19 +45,18 @@ public partial class NewFlowEditor : Editor
         base.SaveCallback = SaveCallback;
     }
 
-    private async Task InitTemplate(FlowTemplateModel template)
+    private void InitTemplate(FlowTemplateModel template)
     {
         if (Fields?.Any() == true)
             return;
 
         this._flowType = template.Flow.Type;
         
-        this.InitializingTemplate = true;
         try
         {
             DisposeCurrentTemplate();
             
-            if (this.Model is IDictionary<string, object> oldDict && oldDict.TryGetValue("Name", out object oName) &&
+            if (this.Model is IDictionary<string, object> oldDict && oldDict.TryGetValue("Name", out var oName) &&
                 oName is string sName && string.IsNullOrWhiteSpace(sName) == false)
             {
                 this.Model = new ExpandoObject();
@@ -193,10 +189,6 @@ public partial class NewFlowEditor : Editor
         {
             Logger.Instance.ELog("Error initializing template: " + ex.Message + "\n" + ex.StackTrace);
         } 
-        finally
-        {
-            InitializingTemplate = false;
-        }
     }
 
     /// <summary>
@@ -280,12 +272,12 @@ public partial class NewFlowEditor : Editor
     public Task<Flow> Show(FlowTemplateModel flowTemplateModel)
     {
         ShowTask = new TaskCompletionSource<Flow>();
-        Task.Run(async () =>
+        Task.Run(() =>
         {
             this.Model = null;
             this.CurrentTemplate = flowTemplateModel;
             this.Visible = true;
-            await this.InitTemplate(flowTemplateModel);
+            this.InitTemplate(flowTemplateModel);
             this.StateHasChanged();
         });
         return ShowTask.Task;
@@ -357,7 +349,7 @@ public partial class NewFlowEditor : Editor
 
                 part.Model ??= new ExpandoObject();
                 var dictPartModel = (IDictionary<string, object>)part.Model!;
-                string key = tfm.TemplateField.Name;
+                var key = tfm.TemplateField.Name;
                 if (string.IsNullOrEmpty(key))
                 {
                     // no name, means we are setting the entire model
@@ -657,7 +649,7 @@ public partial class NewFlowEditor : Editor
         {
             if(oValue is string sValue)
                 return (Success: true, varibleStr, Value: (T)(object)sValue);    
-            return (Success: true, varibleStr, Value: (T)(object)oValue.ToString());
+            return (Success: true, varibleStr, Value: (T)(object)oValue.ToString()!);
         }
         return (Success: false, varibleStr, Value: default)!;
     }

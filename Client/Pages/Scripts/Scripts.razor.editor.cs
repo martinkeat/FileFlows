@@ -48,6 +48,6 @@ public partial class Scripts
         Logger.Instance.ILog("open import!");
         List<string> import = await ScriptImporter.Show(available);
         Logger.Instance.ILog("Import", import);
-        codeInput.AddImports(import);
+        await codeInput.AddImports(import);
     }
 }

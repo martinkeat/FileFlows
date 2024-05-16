@@ -1,6 +1,7 @@
 using BlazorContextMenu;
 using FileFlows.Client.Components.Dialogs;
 using FileFlows.Client.Components;
+using Microsoft.AspNetCore.Components;
 
 namespace FileFlows.Client.Pages;
 
@@ -13,8 +14,6 @@ public partial class Nodes : ListPage<Guid, ProcessingNode>
     const string FileFlowsServer = "FileFlowsServer";
 
     private ProcessingNode EditingItem = null;
-
-    private ProcessingNode SelectedItem = null;
 
     private string lblInternal, lblAddress, lblRunners, lblVersion, lblDownloadNode, lblUpgradeRequired, 
         lblUpgradeRequiredHint, lblRunning, lblDisconnected, lblPossiblyDisconnected, lblPriority;
@@ -82,28 +81,32 @@ public partial class Nodes : ListPage<Guid, ProcessingNode>
     /// Opens the help page
     /// </summary>
     void OpenHelp()
-        => App.Instance.OpenHelp("https://fileflows.com/docs/webconsole/configuration/nodes");
+        => _ = App.Instance.OpenHelp("https://fileflows.com/docs/webconsole/configuration/nodes");
 
     /// <summary>
     /// if currently enabling, this prevents double calls to this method during the updated list binding
     /// </summary>
     private bool enabling = false;
-    new async Task Enable(bool enabled, ProcessingNode node)
+    new EventCallback Enable(bool enabled, ProcessingNode node)
     {
         if(enabling || node.Enabled == enabled)
-            return;
-        Blocker.Show();
-        enabling = true;
-        try
+            return EventCallback.Empty;
+        _ = Task.Run(async () =>
         {
-            await HttpHelper.Put<ProcessingNode>($"{ApiUrl}/state/{node.Uid}?enable={enabled}");
-            await Refresh();
-        }
-        finally
-        {
-            enabling = false;
-            Blocker.Hide();
-        }
+            Blocker.Show();
+            enabling = true;
+            try
+            {
+                await HttpHelper.Put<ProcessingNode>($"{ApiUrl}/state/{node.Uid}?enable={enabled}");
+                await Refresh();
+            }
+            finally
+            {
+                enabling = false;
+                Blocker.Hide();
+            }
+        });
+        return EventCallback.Empty;
     }
 
     async Task<bool> Save(ExpandoObject model)
@@ -179,9 +182,9 @@ public partial class Nodes : ListPage<Guid, ProcessingNode>
             return false;
         if (string.Equals(versionA, versionB, StringComparison.InvariantCultureIgnoreCase))
             return true;
-        if (Version.TryParse(versionA, out Version va) == false)
+        if (Version.TryParse(versionA, out var va) == false)
             return false;
-        if (Version.TryParse(versionB, out Version vb) == false)
+        if (Version.TryParse(versionB, out var vb) == false)
             return false;
         return va == vb;
     }

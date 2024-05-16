@@ -11,19 +11,11 @@ namespace FileFlows.Client.Components.Common;
 /// </summary>
 public partial class FlowContextMenu : IDisposable
 {
-    private List<FlowContextMenuItem> _Items = new();
-    
-    
-    
     /// <summary>
     /// Gets or sets the items in the context menu
     /// </summary>
     [Parameter]
-    public List<FlowContextMenuItem> Items
-    {
-        get => _Items;
-        set => _Items = value ?? new ();
-    }
+    public List<FlowContextMenuItem> Items { get; set; } = new();
     
     /// <summary>
     /// Gets or sets the child content
@@ -55,7 +47,7 @@ public partial class FlowContextMenu : IDisposable
 
     public void SetItems(List<FlowContextMenuItem> items)
     {
-        _Items = items ?? new();
+        Items = items ?? new();
     }
 
     public void ShowAt(int xPos, int yPos)

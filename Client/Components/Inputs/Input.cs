@@ -72,6 +72,7 @@ public abstract class Input<T> : ComponentBase, IInput, IDisposable
     /// </summary>
     [Parameter] public bool HideLabel { get; set; }
 
+#pragma warning disable BL0007
     /// <summary>
     /// Gets or sets label for the Input
     /// </summary>
@@ -106,6 +107,7 @@ public abstract class Input<T> : ComponentBase, IInput, IDisposable
             }
         }
     }
+#pragma warning restore BL0007
 
     /// <summary>
     /// Gets or sets if this is read only
@@ -124,6 +126,8 @@ public abstract class Input<T> : ComponentBase, IInput, IDisposable
     public bool Visible { get; set; }
 
     private ElementField _Field;
+    
+#pragma warning disable BL0007
 
     /// <summary>
     /// Gets or sets the element field bound to this
@@ -146,16 +150,13 @@ public abstract class Input<T> : ComponentBase, IInput, IDisposable
     /// </summary>
     [Parameter] public string Help { get => _Help; set { if (string.IsNullOrEmpty(value) == false) _Help = value; } }
     
-    public string _Placeholder;
-
+#pragma warning restore BL0007
+    
     /// <summary>
     /// Gets or sets the placeholder text
     /// </summary>
-    [Parameter] public string Placeholder
-    {
-        get => _Placeholder;
-        set => _Placeholder = value ?? "";
-    }
+    [Parameter]
+    public string Placeholder { get; set; } = string.Empty;
 
 
     /// <summary>
@@ -163,19 +164,10 @@ public abstract class Input<T> : ComponentBase, IInput, IDisposable
     /// </summary>
     [Parameter] public List<FileFlows.Shared.Validators.Validator> Validators { get; set; }
 
-    private string _ErrorMessage = string.Empty;
-    
     /// <summary>
     /// Gets or sets the error message
     /// </summary>
-    public string ErrorMessage
-    {
-        get => _ErrorMessage;
-        set
-        {
-            _ErrorMessage = value;
-        }
-    }
+    public string ErrorMessage { get; set; } = string.Empty;
 
     /// <summary>
     /// Gets the text to show as the placeholder
@@ -197,6 +189,7 @@ public abstract class Input<T> : ComponentBase, IInput, IDisposable
     /// </summary>
     protected bool ValueIsUpdating => _ValueUpdating;
     
+#pragma warning disable BL0007
     /// <summary>
     /// Gets or sets the value
     /// </summary>
@@ -259,6 +252,7 @@ public abstract class Input<T> : ComponentBase, IInput, IDisposable
             }
         }
     }
+#pragma warning restore BL0007
 
     protected virtual void ValueUpdated() { }
 
@@ -320,7 +314,7 @@ public abstract class Input<T> : ComponentBase, IInput, IDisposable
             if (typeof(T) == typeof(int))
                 value = je.GetInt32();
             else if (typeof(T) == typeof(string))
-                value = je.GetString();
+                value = je.GetString() ?? string.Empty;
             else if (typeof(T) == typeof(bool))
                 value = je.GetBoolean();
         }
@@ -329,7 +323,7 @@ public abstract class Input<T> : ComponentBase, IInput, IDisposable
         {
             this.Value = (T)value;
         }
-        catch (InvalidCastException ex)
+        catch (InvalidCastException)
         {
             Logger.Instance.ILog($"Could not cast '{value.GetType().FullName}' to '{typeof(T).FullName}'");
         }

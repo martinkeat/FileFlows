@@ -57,15 +57,15 @@ public partial class Libraries : ListPage<Guid, Library>
     {
         if (value == null)
             return;
-        Library template = value as Library;
+        var template = value as Library;
         if (template == null)
             return;
-        Editor editor = sender as Editor;
+        var editor = sender as Editor;
         if (editor == null)
             return;
         if (editor.Model == null)
             editor.Model = new ExpandoObject();
-        IDictionary<string, object> model = editor.Model;
+        IDictionary<string, object> model = editor.Model!;
         
         SetModelProperty(nameof(template.Name), template.Name);
         SetModelProperty(nameof(template.Template), template.Name);

@@ -45,7 +45,7 @@ public partial class VersionUpdateChecker : IDisposable
     {
         this.LatestVersion = new Version(Globals.Version);
         AutoRefreshTimer = new Timer();
-        AutoRefreshTimer.Elapsed += AutoRefreshTimerElapsed;
+        AutoRefreshTimer.Elapsed += AutoRefreshTimerElapsed!;
         AutoRefreshTimer.Interval = 3600 * 1000; // once an hour, dont need to hammer it
         AutoRefreshTimer.AutoReset = true;
         AutoRefreshTimer.Start();
@@ -60,7 +60,7 @@ public partial class VersionUpdateChecker : IDisposable
         if (AutoRefreshTimer != null)
         {
             AutoRefreshTimer.Stop();
-            AutoRefreshTimer.Elapsed -= AutoRefreshTimerElapsed;
+            AutoRefreshTimer.Elapsed -= AutoRefreshTimerElapsed!;
             AutoRefreshTimer.Dispose();
             AutoRefreshTimer = null;
         }

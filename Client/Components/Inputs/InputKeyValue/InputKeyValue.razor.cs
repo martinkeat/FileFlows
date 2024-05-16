@@ -14,8 +14,6 @@ namespace FileFlows.Client.Components.Inputs;
 /// </summary>
 public partial class InputKeyValue : Input<List<KeyValuePair<string, string>>>
 {
-    private string InputText = "";
-    private string PreviousInputText = "";
     private string NewKey = string.Empty;
     private string NewValue = string.Empty;
     /// <summary>
@@ -45,21 +43,11 @@ public partial class InputKeyValue : Input<List<KeyValuePair<string, string>>>
     /// </summary>
     private Dictionary<Guid, KeyValue> Data = new ();
     
-    
-    /// <summary>
-    /// The variables dictionary
-    /// </summary>
-    private Dictionary<string, object> _Variables = new ();
 
     /// <summary>
     /// Gets or sets the variables available
     /// </summary>
-    [Parameter]
-    public Dictionary<string, object> Variables
-    {
-        get => _Variables;
-        set { _Variables = value ?? new Dictionary<string, object>(); }
-    }
+    [Parameter] public Dictionary<string, object> Variables { get; set; } = new();
 
     private string DuplicateKey = null; // one time we do want null....
 
@@ -84,7 +72,7 @@ public partial class InputKeyValue : Input<List<KeyValuePair<string, string>>>
         HasOptions = Options?.Any() == true;
     }
 
-    private void FieldOnValueChanged(object sender, object value)
+    protected override void FieldOnValueChanged(object sender, object value)
     {
         if (ValueIsUpdating)
             return;

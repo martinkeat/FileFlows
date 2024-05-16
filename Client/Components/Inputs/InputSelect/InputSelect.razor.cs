@@ -23,6 +23,7 @@ namespace FileFlows.Client.Components.Inputs
         private string Description { get; set; }
         private bool UpdatingValue = false;
 
+#pragma warning disable BL0007
         [Parameter]
         public IEnumerable<ListOption> Options
         {
@@ -42,7 +43,7 @@ namespace FileFlows.Client.Components.Inputs
 
                     if(lo.Value is string && (string)lo.Value == Globals.LIST_OPTION_GROUP)
                     {
-                        group = lo.Label;
+                        group = lo.Label!;
                         Groups.Add(group, new List<ListOption>());
                         continue;
                     }
@@ -53,14 +54,12 @@ namespace FileFlows.Client.Components.Inputs
                 }
             }
         }
+#pragma warning restore BL0007
 
         public override bool Focus() => FocusUid();
 
-        private bool _AllowClear = true;
-
         private string lblSelectOne;
-        [Parameter]
-        public bool AllowClear { get => _AllowClear; set { _AllowClear = value; } }
+        [Parameter] public bool AllowClear { get; set; }
 
         private int _SelectedIndex = -1;
         public int SelectedIndex
@@ -183,20 +182,24 @@ namespace FileFlows.Client.Components.Inputs
             if (this.ShowDescription == false)
                 return;
 
-            IDictionary<string, object> dict = Value as IDictionary<string, object>;
+            var dict = Value as IDictionary<string, object>;
 
             if (dict == null)
             {
                 try
                 {
                     string json = JsonSerializer.Serialize(Value);
-                    dict = (IDictionary<string, object>)JsonSerializer.Deserialize<System.Dynamic.ExpandoObject>(json);
+                    ExpandoObject? eo = JsonSerializer.Deserialize<System.Dynamic.ExpandoObject>(json);
+                    dict = eo == null ? new Dictionary<string, object>() : (IDictionary<string, object>)eo!;
                 }
-                catch (Exception) { }
+                catch (Exception)
+                {
+                    // ingored
+                }
             }
 
-            if (dict?.ContainsKey("Description") == true)
-                Description = dict["Description"]?.ToString() ?? string.Empty;
+            if (dict?.TryGetValue("Description", out var value) is true)
+                Description = value?.ToString() ?? string.Empty;
 
             this.Help = Description;
             this.StateHasChanged();

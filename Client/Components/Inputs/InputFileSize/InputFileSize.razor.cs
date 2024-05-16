@@ -12,11 +12,6 @@ public partial class InputFileSize : Input<long>
     public override bool Focus() => FocusUid();
 
     /// <summary>
-    /// If the value is currently being updated, so events like value changes should be ingored
-    /// </summary>
-    private bool UpdatingValue = false;
-
-    /// <summary>
     /// Gets or sets the unit for the number
     /// </summary>
     private long Unit { get; set; }
@@ -76,7 +71,6 @@ public partial class InputFileSize : Input<long>
         else if (value < 1)
             value = 1;
         this.Number = value;
-        UpdatingValue = true;
         this.Value = this.Number * this.Unit;
         this.ClearError();
     }
@@ -100,20 +94,12 @@ public partial class InputFileSize : Input<long>
     /// <param name="args">the event arguments</param>
     private void UnitSelectionChanged(ChangeEventArgs args)
     {
-        UpdatingValue = true;
-        try
+        if (int.TryParse(args?.Value?.ToString(), out int index))
         {
-            if (int.TryParse(args?.Value?.ToString(), out int index))
-            {
-                Unit = index;
-                Value = Number * Unit;
-            }
-            else
-                Logger.Instance.DLog("Unable to find index of: ",  args?.Value);
+            Unit = index;
+            Value = Number * Unit;
         }
-        finally
-        {
-            UpdatingValue = false;
-        }
+        else
+            Logger.Instance.DLog("Unable to find index of: ",  args?.Value);
     }
 }

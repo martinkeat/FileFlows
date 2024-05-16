@@ -91,7 +91,7 @@ public partial class InputRenderer
     /// <param name="elementField">the template element to update</param>
     private void UpdateTemplateCode(object template, ElementField elementField)
     {
-        string strTemplate = template as string;
+        var strTemplate = template as string;
         if (string.IsNullOrEmpty(strTemplate))
             return;
         UpdateValue(elementField, strTemplate);

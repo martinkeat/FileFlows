@@ -123,7 +123,7 @@ public partial class InputExecutedNodes: Input<IEnumerable<ExecutedNode>>
         PartialLog = null;
     }
 
-    private async Task OpenLog(ExecutedNode node)
+    private void  OpenLog(ExecutedNode node)
     {
         int index = Value.ToList().IndexOf(node);
         if (index < 0)

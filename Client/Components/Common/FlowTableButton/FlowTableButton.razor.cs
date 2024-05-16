@@ -21,23 +21,15 @@ public partial class FlowTableButton : ComponentBase, IDisposable
     /// <summary>
     /// Gets or sets the label for this button
     /// </summary>
-    [Parameter] public string Label
-    {
-        get => _Label;
-        set => _Label = Translater.TranslateIfNeeded(value ?? string.Empty);
-    }
+    [Parameter] public string Label { get; set; }
 
-    protected string _Icon;
+    protected string _Icon = string.Empty;
 
     /// <summary>
     /// Gets or sets the icon for this button
     /// </summary>
-    [Parameter] public string Icon
-    {
-        get => _Icon;
-        set => _Icon = value ?? string.Empty;
-    }
-
+    [Parameter]
+    public string Icon { get => _Icon; set => _Icon = value; }
     
     /// <summary>
     /// Gets or sets if this button is disabled
@@ -97,7 +89,7 @@ public partial class FlowTableButton : ComponentBase, IDisposable
             this.Table.AddButton(this);
             this.Table.SelectionChanged += Table_SelectionChanged;
         }
-
+        _Label = Translater.TranslateIfNeeded(Label ?? string.Empty); 
         Table_SelectionChanged(null);
     }
 

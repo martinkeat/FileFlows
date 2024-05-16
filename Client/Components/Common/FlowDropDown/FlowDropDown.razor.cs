@@ -51,7 +51,8 @@ public partial class FlowDropDown : ComponentBase, IDisposable
     [Parameter] public EventCallback<object?> OnSelected { get; set; }
 
     private object _SelectedValue;
-
+    
+#pragma warning disable BL0007
     [Parameter]
     public object SelectedValue
     {
@@ -69,6 +70,7 @@ public partial class FlowDropDown : ComponentBase, IDisposable
             StateHasChanged();
         }
     }
+#pragma warning restore BL0007
 
     /// <inheritdoc />
     protected override async Task OnAfterRenderAsync(bool firstRender)

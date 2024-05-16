@@ -167,7 +167,7 @@ public partial class Editor : InputRegister, IDisposable
             return eo;
 
         var expando = new ExpandoObject();
-        var dictionary = (IDictionary<string, object>)expando;
+        var dictionary = (IDictionary<string, object>)expando!;
 
         foreach (var property in model.GetType().GetProperties())
             dictionary.Add(property.Name, property.GetValue(model));
@@ -246,7 +246,7 @@ public partial class Editor : InputRegister, IDisposable
     private void BuildFieldsRenderFragment()
     {
         FieldsFragment = (builder) => { };
-        this.WaitForRender();
+        _ = this.WaitForRender();
         FieldsFragment = (builder) =>
         {
             int count = -1;
@@ -314,7 +314,7 @@ public partial class Editor : InputRegister, IDisposable
         await this.Save();
     }
 
-    protected async Task OnClose()
+    protected void OnClose()
     {
         this.Cancel();
     }
@@ -426,9 +426,12 @@ public partial class Editor : InputRegister, IDisposable
     /// <param name="name">the element field of the input</param>
     /// <typeparam name="T">the type of field</typeparam>
     /// <returns>the input if found</returns>
-    internal T FindInput<T>(string name)
-        => (T)this.RegisteredInputs.Values.FirstOrDefault(x => x.Field?.Name == name && x is T);
-    
+    internal T? FindInput<T>(string name)
+    {
+        var input = this.RegisteredInputs.Values.FirstOrDefault(x => x.Field?.Name == name && x is T);
+        return input == null ? default : (T)input;
+    }
+
     /// <summary>
     /// Updates a value
     /// </summary>
@@ -440,7 +443,7 @@ public partial class Editor : InputRegister, IDisposable
             return;
         if (Model == null)
             return;
-        var dict = (IDictionary<string, object>)Model;
+        var dict = (IDictionary<string, object>)Model!;
         if (dict.ContainsKey(field.Name))
             dict[field.Name] = value;
         else
@@ -483,7 +486,7 @@ public partial class Editor : InputRegister, IDisposable
 
             return result;
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             Logger.Instance.ELog("Failed converted: " + parameter, val);
             return @default;
@@ -529,7 +532,7 @@ public partial class Editor : InputRegister, IDisposable
             return GetDefault(type);
         }
 
-        var dict = (IDictionary<string, object>)Model;
+        var dict = (IDictionary<string, object>)Model!;
         if (dict.ContainsKey(field) == false)
         {
             Logger.Instance.ILog("GetValue: Model does not contain key: " + field);
@@ -581,11 +584,11 @@ public partial class Editor : InputRegister, IDisposable
     /// <param name="default">the default value if none is found</param>
     /// <typeparam name="T">the type of value to get</typeparam>
     /// <returns>the value</returns>
-    internal T GetValue<T>(string field, T @default = default(T))
+    internal T GetValue<T>(string field, T @default = default)
     {
         if (Model == null)
             return @default;
-        var dict = (IDictionary<string, object>)Model;
+        var dict = (IDictionary<string, object>)Model!;
         if (dict.ContainsKey(field) == false)
         {
             return @default;
@@ -599,7 +602,7 @@ public partial class Editor : InputRegister, IDisposable
         if (value is JsonElement je)
         {
             if (typeof(T) == typeof(string))
-                return (T)(object)je.GetString();
+                return (T)(object)je.GetString()!;
             if (typeof(T) == typeof(int))
                 return (T)(object)je.GetInt32();
             if (typeof(T) == typeof(bool))

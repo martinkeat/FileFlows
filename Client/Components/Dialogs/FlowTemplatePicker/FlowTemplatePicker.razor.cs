@@ -62,7 +62,7 @@ public partial class FlowTemplatePicker : ComponentBase
         SelectedTag = string.Empty;
         SelectedSubTag = string.Empty;
         Visible = true;
-        ShowTask = new TaskCompletionSource<FlowTemplatePickerResult?>();
+        ShowTask = new TaskCompletionSource<FlowTemplatePickerResult?>()!;
         Blocker.Show();
         Task.Run(async () =>
         {
@@ -100,11 +100,11 @@ public partial class FlowTemplatePicker : ComponentBase
     /// <summary>
     /// Opens a local flow
     /// </summary>
-    async Task Open()
+    Task Open()
     {
         string sUid = Selected.Path[6..];
         if (Guid.TryParse(sUid, out Guid uid) == false)
-            return;
+            return Task.CompletedTask;
         
         ShowTask.SetResult(new()
         {
@@ -112,7 +112,7 @@ public partial class FlowTemplatePicker : ComponentBase
             Uid = uid
         });
         Visible = false;
-        
+        return Task.CompletedTask;
     }
 
     async Task New()
@@ -184,7 +184,7 @@ public partial class FlowTemplatePicker : ComponentBase
             Selected = null; // clear it
     }
 
-    private async Task FilterKeyDown(KeyboardEventArgs args)
+    private void FilterKeyDown(KeyboardEventArgs args)
     {
         if (args.Key == "Escape")
         {

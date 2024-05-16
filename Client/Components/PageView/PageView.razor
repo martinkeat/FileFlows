@@ -1,7 +1,7 @@
 @namespace FileFlows.Client.Components
 
 @{
-    string title = string.IsNullOrEmpty(Title) == false ? Title : Menu?.Active?.Title;
+    string? title = string.IsNullOrEmpty(Title) == false ? Title : Menu?.Active?.Title;
 }
 <ViContainer Title="@title" Icon="@Menu?.Active?.Icon" FullWidth=@FullWidth Flex="Flex" ClassName=@ClassName>
     <HeadLeft>

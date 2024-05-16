@@ -14,6 +14,7 @@ public partial class FlowTab:ComponentBase
 
     private bool _Visible = true;
 
+#pragma warning disable BL0007
     /// <summary>
     /// Gets or sets a value indicating whether the tab is visible.
     /// </summary>
@@ -29,20 +30,20 @@ public partial class FlowTab:ComponentBase
             this.StateHasChanged();
         }
     }
+#pragma warning restore BL0007
 
     private string _Title;
 
+#pragma warning disable BL0007
     /// <summary>
     /// Gets or sets the title of the tab.
     /// </summary>
     [Parameter] public string Title
     {
         get => _Title;
-        set
-        {
-            _Title = Translater.TranslateIfNeeded(value);
-        }
+        set => _Title = Translater.TranslateIfNeeded(value);
     }
+#pragma warning restore BL0007
     
     /// <summary>
     /// Gets or sets the icon associated with the tab.

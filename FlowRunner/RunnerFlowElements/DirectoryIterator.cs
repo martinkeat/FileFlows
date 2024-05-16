@@ -73,7 +73,7 @@ public class DirectoryIterator : Node
         {
             string pattern = Pattern.ToLowerInvariant() switch
             {
-                "images" => @"\.(jpg|jpeg|jpe|png|gif|bmp|webp)$",
+                "images" => @"\.(jpg|jpeg|jpe|jp2|png|gif|bmp|webp)$",
                 "videos" => @"\.(ts|mp4|mkv|avi|mpe|mpeg|mov|mpv|flv|wmv|webm|avchd|h264|h265)$",
                 "audio" or "music" => @"\.(mp3|wav|ogg|aac|wma|flac|alac|m4a|m4p)$",
                 _ => Pattern

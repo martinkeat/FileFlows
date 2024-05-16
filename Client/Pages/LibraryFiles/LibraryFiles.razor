@@ -176,18 +176,18 @@
                             {
                                 <span class="top-right">@worker.CurrentPartName</span>
                                 <FlowProgress Info="@worker" />
-                                @if (false)
-                                {
-                                    var overall = worker.TotalParts == 0 ? 100 : ((worker.CurrentPart / (double)worker.TotalParts)) * 100;
-                                    var current = worker.CurrentPartPercent;
-                                    <div class="flow-bar worker-progress @(current > 0 ? "has-current" : "")">
-                                        @if (current > 0)
-                                        {
-                                            <div class="current-progress bar-value" style="width:@current%"></div>
-                                        }
-                                        <div class="overall-progress  bar-value" style="width:@overall%"></div>
-                                    </div>
-                                }
+                                @* @if (false) *@
+                                @* { *@
+                                @*     var overall = worker.TotalParts == 0 ? 100 : ((worker.CurrentPart / (double)worker.TotalParts)) * 100; *@
+                                @*     var current = worker.CurrentPartPercent; *@
+                                @*     <div class="flow-bar worker-progress @(current > 0 ? "has-current" : "")"> *@
+                                @*         @if (current > 0) *@
+                                @*         { *@
+                                @*             <div class="current-progress bar-value" style="width:@current%"></div> *@
+                                @*         } *@
+                                @*         <div class="overall-progress  bar-value" style="width:@overall%"></div> *@
+                                @*     </div> *@
+                                @* } *@
                             }
                         }
                         </div>
