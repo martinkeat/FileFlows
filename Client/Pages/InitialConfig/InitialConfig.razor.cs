@@ -206,6 +206,7 @@ public partial class InitialConfig : ComponentBase
             
             DockerModTable.SetData(AvailableDockerMods);
             DockerModTable.SetSelected(AvailableDockerMods.Where(x => x.Default == true).ToArray());
+            DockerModTable.TriggerStateHasChanged();
         }
     }
 }

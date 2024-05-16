@@ -10,7 +10,7 @@
 else
 {
     <div class="initial-config">
-        <FlowWizard FinishDisabled="@(EulaAccepted == false)" OnFinish="() => _ = Save()">
+        <FlowWizard FinishDisabled="@(EulaAccepted == false)" OnFinish="@Save">
             <FlowWizardPage Title="Welcome" Description="Welcome to FileFlows">
                 @if (onlyEula == false)
                 {
