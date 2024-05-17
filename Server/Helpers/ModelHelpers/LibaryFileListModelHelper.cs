@@ -40,9 +40,7 @@ public class LibaryFileListModelHelper
             }
             if (status == FileStatus.OnHold && x.Library != null && dictLibraries.ContainsKey(x.Library.Uid))
             {
-                var lib = dictLibraries[x.Library.Uid];
-                var scheduledAt = x.DateCreated.AddMinutes(lib.HoldMinutes);
-                item.ProcessingTime = scheduledAt.Subtract(DateTime.UtcNow);
+                item.ProcessingTime = x.HoldUntil.Subtract(DateTime.UtcNow);
             }
 
             if (status == FileStatus.Processing)
