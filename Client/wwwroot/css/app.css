@@ -3248,16 +3248,6 @@ hr {
   align-items: center;
 }
 
-.vi-container.fix-width {
-  max-width: unset !important;
-}
-.vi-container.fix-width .top-row {
-  max-width: 1440px;
-}
-.vi-container.fix-width > .content > div {
-  max-width: 1400px;
-}
-
 .page:not(.collapsed) .navbar-brand {
   margin: 0.75rem 0 0 0.75rem;
 }

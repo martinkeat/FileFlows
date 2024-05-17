@@ -686,19 +686,6 @@ input[type=file]{
     }
 }
 
-.vi-container.fix-width {
-    max-width: unset !important;
-    .top-row {
-        max-width:1440px;
-        
-    }
-    > .content {
-        > div {
-            max-width:1400px;
-        }
-    }    
-}
-
 .page:not(.collapsed) .navbar-brand 
 {
     margin: .75rem 0 0 .75rem;
