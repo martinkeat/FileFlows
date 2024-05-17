@@ -223,7 +223,7 @@ public class FlowEditor : IDisposable
             }
             else
             {
-                Toast.ShowError(
+                Toast.ShowEditorError(
                     result.Success || string.IsNullOrEmpty(result.Body) ? Translater.Instant($"ErrorMessages.UnexpectedError") : Translater.TranslateIfNeeded(result.Body),
                     duration: 60_000
                 );

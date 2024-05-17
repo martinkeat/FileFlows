@@ -75,7 +75,7 @@ public partial class DockerMods
             var saveResult = await HttpHelper.Post<DockerMod>($"{ApiUrl}", model);
             if (saveResult.Success == false)
             {
-                Toast.ShowError( Translater.TranslateIfNeeded(saveResult.Body?.EmptyAsNull() ?? "ErrorMessages.SaveFailed"));
+                Toast.ShowEditorError( Translater.TranslateIfNeeded(saveResult.Body?.EmptyAsNull() ?? "ErrorMessages.SaveFailed"));
                 return false;
             }
 

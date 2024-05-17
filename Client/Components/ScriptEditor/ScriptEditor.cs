@@ -172,7 +172,7 @@ let ffApi = new FileFlowsApi();
             var saveResult = await HttpHelper.Post<Script>($"/api/script", model);
             if (saveResult.Success == false)
             {
-                Toast.ShowError(saveResult.Body?.EmptyAsNull() ?? Translater.Instant("ErrorMessages.SaveFailed"));
+                Toast.ShowEditorError(saveResult.Body?.EmptyAsNull() ?? Translater.Instant("ErrorMessages.SaveFailed"));
                 return false;
             }
 

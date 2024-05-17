@@ -16,11 +16,11 @@
   box-shadow: 0 0.1rem 0.25rem rgba(0, 0, 0, 0.1);
   overflow: hidden;
   transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
-  transform: translateY(100%);
+  transform: translateX(100%);
   opacity: 0;
 }
 .ff-toast.show {
-  transform: translateY(0);
+  transform: translateX(0);
   opacity: 1;
 }
 .ff-toast.hide {
@@ -28,28 +28,28 @@
   transform: translateX(100%);
   transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
 }
-.ff-toast.info {
+.ff-toast.info, .ff-toast.Info {
   border-color: var(--info);
 }
-.ff-toast.info .toast-icon {
+.ff-toast.info .toast-icon, .ff-toast.Info .toast-icon {
   color: var(--info);
 }
-.ff-toast.error {
+.ff-toast.error, .ff-toast.Error {
   border-color: var(--error);
 }
-.ff-toast.error .toast-icon {
+.ff-toast.error .toast-icon, .ff-toast.Error .toast-icon {
   color: var(--error);
 }
-.ff-toast.warn {
+.ff-toast.warn, .ff-toast.Warning {
   border-color: var(--warning);
 }
-.ff-toast.warn .toast-icon {
+.ff-toast.warn .toast-icon, .ff-toast.Warning .toast-icon {
   color: var(--warning);
 }
-.ff-toast.success {
+.ff-toast.success, .ff-toast.Success {
   border-color: var(--success);
 }
-.ff-toast.success .toast-icon {
+.ff-toast.success .toast-icon, .ff-toast.Success .toast-icon {
   color: var(--success);
 }
 .ff-toast .toast-icon, .ff-toast .toast-close {
@@ -86,5 +86,3 @@
 .ff-toast .toast-close:hover {
   opacity: 1;
 }
-
-/*# sourceMappingURL=toast.css.map */

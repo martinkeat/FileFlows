@@ -119,7 +119,7 @@ public partial class Nodes : ListPage<Guid, ProcessingNode>
             var saveResult = await HttpHelper.Post<ProcessingNode>($"{ApiUrl}", model);
             if (saveResult.Success == false)
             {
-                Toast.ShowError( saveResult.Body?.EmptyAsNull() ?? Translater.Instant("ErrorMessages.SaveFailed"));
+                Toast.ShowEditorError( saveResult.Body?.EmptyAsNull() ?? Translater.Instant("ErrorMessages.SaveFailed"));
                 return false;
             }
 

@@ -16,11 +16,11 @@
   box-shadow: 0 0.1rem 0.25rem rgba(0, 0, 0, 0.1);
   overflow: hidden;
   transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
-  transform: translateY(100%);
+  transform: translateX(100%);
   opacity: 0;
 
   &.show {
-    transform: translateY(0);
+    transform: translateX(0);
     opacity: 1;
   }
   
@@ -30,28 +30,28 @@
     transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
   }
 
-  &.info {
+  &.info, &.Info {
     border-color: var(--info);
     .toast-icon {
       color:var(--info);
     }
   }
 
-  &.error {
+  &.error, &.Error {
     border-color: var(--error);
     .toast-icon {
       color:var(--error);
     }
   }
 
-  &.warn {
+  &.warn, &.Warning {
     border-color: var(--warning);
     .toast-icon {
       color:var(--warning);
     }
   }
 
-  &.success {
+  &.success, &.Success {
     border-color: var(--success);
     .toast-icon {
       color:var(--success);

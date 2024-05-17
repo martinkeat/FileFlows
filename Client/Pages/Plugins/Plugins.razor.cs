@@ -78,7 +78,7 @@ public partial class Plugins : ListPage<Guid, PluginInfoModel>
             var pluginResult = await HttpHelper.Post($"{ApiUrl}/{EditingPlugin.PackageName}/settings", json);
             if (pluginResult.Success == false)
             {
-                Toast.ShowError( Translater.Instant("ErrorMessages.SaveFailed"));
+                Toast.ShowEditorError( Translater.Instant("ErrorMessages.SaveFailed"));
                 return false;
             }
             return true;

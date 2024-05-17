@@ -62,7 +62,7 @@ public partial class Variables : ListPage<Guid, Variable>
             var saveResult = await HttpHelper.Post<Variable>($"{ApiUrl}", model);
             if (saveResult.Success == false)
             {
-                Toast.ShowError( saveResult.Body?.EmptyAsNull() ?? Translater.Instant("ErrorMessages.SaveFailed"));
+                Toast.ShowEditorError( saveResult.Body?.EmptyAsNull() ?? Translater.Instant("ErrorMessages.SaveFailed"));
                 return false;
             }
 

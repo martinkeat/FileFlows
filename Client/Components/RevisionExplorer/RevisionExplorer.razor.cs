@@ -43,18 +43,18 @@ public partial class RevisionExplorer
             {
                 Restored = true;
                 Toast.ShowSuccess(Translater.Instant("Labels.RestoredMessage",
-                    new { type = item.RevisionType[(item.RevisionType.LastIndexOf(".") + 1)..].Humanize(LetterCasing.Title) }));
+                    new { type = item.RevisionType[(item.RevisionType.LastIndexOf(".", StringComparison.Ordinal) + 1)..].Humanize(LetterCasing.Title) }));
                 this.Close();
             }
             else
             {
-                Toast.ShowError(Translater.Instant("Labels.RestoredFailedMessage",
-                    new { type = item.RevisionType[(item.RevisionType.LastIndexOf(".") + 1)..].Humanize(LetterCasing.Title) }));
+                Toast.ShowEditorError(Translater.Instant("Labels.RestoredFailedMessage",
+                    new { type = item.RevisionType[(item.RevisionType.LastIndexOf(".", StringComparison.Ordinal) + 1)..].Humanize(LetterCasing.Title) }));
             }
         }
         catch (Exception ex)
         {
-            Toast.ShowError(ex.Message);
+            Toast.ShowEditorError(ex.Message);
         }
         finally
         {

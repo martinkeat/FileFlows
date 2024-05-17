@@ -261,7 +261,7 @@ public partial class Tasks : ListPage<Guid, FileFlowsTask>
             var saveResult = await HttpHelper.Post<FileFlowsTask>($"{ApiUrl}", task);
             if (saveResult.Success == false)
             {
-                Toast.ShowError( saveResult.Body?.EmptyAsNull() ?? Translater.Instant("ErrorMessages.SaveFailed"));
+                Toast.ShowEditorError( saveResult.Body?.EmptyAsNull() ?? Translater.Instant("ErrorMessages.SaveFailed"));
                 return false;
             }
 

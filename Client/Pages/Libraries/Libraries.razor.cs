@@ -97,7 +97,7 @@ public partial class Libraries : ListPage<Guid, Library>
             var saveResult = await HttpHelper.Post<Library>($"{ApiUrl}", model);
             if (saveResult.Success == false)
             {
-                Toast.ShowError( Translater.TranslateIfNeeded(saveResult.Body?.EmptyAsNull() ?? "ErrorMessages.SaveFailed"));
+                Toast.ShowEditorError( Translater.TranslateIfNeeded(saveResult.Body?.EmptyAsNull() ?? "ErrorMessages.SaveFailed"));
                 return false;
             }
             if ((Profile.ConfigurationStatus & ConfigurationStatus.Libraries) !=
@@ -151,8 +151,8 @@ public partial class Libraries : ListPage<Guid, Library>
 
         try
         {
-            var deleteResult = await HttpHelper.Put($"{ApiUrl}/rescan", new ReferenceModel<Guid> { Uids = uids });
-            if (deleteResult.Success == false)
+            var result = await HttpHelper.Put($"{ApiUrl}/rescan", new ReferenceModel<Guid> { Uids = uids });
+            if (result.Success == false)
                 return;
         }
         finally
@@ -180,8 +180,8 @@ public partial class Libraries : ListPage<Guid, Library>
 
         try
         {
-            var deleteResult = await HttpHelper.Put($"{ApiUrl}/reprocess", new ReferenceModel<Guid> { Uids = uids });
-            if (deleteResult.Success == false)
+            var result = await HttpHelper.Put($"{ApiUrl}/reprocess", new ReferenceModel<Guid> { Uids = uids });
+            if (result.Success == false)
                 return;
         }
         finally

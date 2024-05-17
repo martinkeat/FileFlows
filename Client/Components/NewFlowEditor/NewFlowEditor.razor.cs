@@ -432,7 +432,7 @@ public partial class NewFlowEditor : Editor
                 var newFlowResult = await HttpHelper.Put<Flow>("/api/flow", flow);
                 if (newFlowResult.Success == false)
                 {
-                    Toast.ShowError(newFlowResult.Body?.EmptyAsNull() ?? "Failed to create new flow");
+                    Toast.ShowEditorError(newFlowResult.Body?.EmptyAsNull() ?? "Failed to create new flow");
                     return false;
                 }
 

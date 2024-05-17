@@ -71,7 +71,7 @@ public partial class Scripts : ListPage<string, Script>
             var saveResult = await HttpHelper.Post<Script>($"{ApiUrl}", model);
             if (saveResult.Success == false)
             {
-                Toast.ShowError(saveResult.Body?.EmptyAsNull() ?? Translater.Instant("ErrorMessages.SaveFailed"));
+                Toast.ShowEditorError(saveResult.Body?.EmptyAsNull() ?? Translater.Instant("ErrorMessages.SaveFailed"));
                 return false;
             }
 

@@ -1,60 +1,97 @@
-namespace FileFlows.Client.Components
+using Microsoft.AspNetCore.Components;
+
+namespace FileFlows.Client.Components;
+
+/// <summary>
+/// Container with title and body
+/// </summary>
+public partial class ViContainer
 {
-    using Microsoft.AspNetCore.Components;
-    using FileFlows.Client.Shared;
+    /// <summary>
+    /// Gets or sets the title
+    /// </summary>
+    [Parameter]
+    public string Title { get; set; }
 
-    public partial class ViContainer
+    /// <summary>
+    /// Gets or sets the Icon to show
+    /// </summary>
+    [Parameter]
+    public string Icon { get; set; }
+    
+    /// <summary>
+    /// Gets or sets if this is a page view
+    /// </summary>
+    [Parameter]public bool PageView { get; set; }
+
+    /// <summary>
+    /// Gets or sets if this takes up the entire width
+    /// </summary>
+    [Parameter]
+    public bool FullWidth { get; set; }
+
+    /// <summary>
+    /// Gets or sets if the title show always be shown
+    /// </summary>
+    [Parameter]
+    public bool AlwaysShowTitle { get; set; }
+
+
+    /// <summary>
+    /// Gest or sets the head fragment
+    /// </summary>
+    [Parameter]
+    public RenderFragment Head { get; set; }
+    /// <summary>
+    /// Gets or sets the left head fragment
+    /// </summary>
+    [Parameter]
+    public RenderFragment HeadLeft { get; set; }
+
+    /// <summary>
+    /// Gets or sets the body to render
+    /// </summary>
+    [Parameter]
+    public RenderFragment Body { get; set; }
+
+    /// <summary>
+    /// Gets or sets if this container can be maxmised
+    /// </summary>
+    [Parameter] public bool Maximise { get; set; }
+
+    /// <summary>
+    /// Gets or sets event callback when the maximise is changed
+    /// </summary>
+    [Parameter] public EventCallback<bool> OnMaximised { get; set; }
+
+    /// <summary>
+    /// Gets or sets if this should flex
+    /// </summary>
+    [Parameter]
+    public bool Flex { get; set; }
+    
+    /// <summary>
+    /// Gets or sets additional class names to add to the ViContainer
+    /// </summary>
+    [Parameter] public string ClassName { get; set; }
+
+    /// <summary>
+    /// Gets or sets if this is maximised
+    /// </summary>
+    private bool IsMaximised { get; set; }
+
+    /// <inheritdoc />
+    protected override void OnInitialized()
     {
-        [Parameter]
-        public string Title { get; set; }
+        this.IsMaximised = false;
+    }
 
-        [Parameter]
-        public string Icon { get; set; }
-
-        [Parameter]
-        public bool FullWidth { get; set; }
-
-        [Parameter]
-        public bool AlwaysShowTitle { get; set; }
-
-
-        [Parameter]
-        public RenderFragment Head { get; set; }
-        [Parameter]
-        public RenderFragment HeadLeft { get; set; }
-
-        [Parameter]
-        public RenderFragment Body { get; set; }
-
-        /// <summary>
-        /// Gets or sets if this container can be maxmised
-        /// </summary>
-        [Parameter] public bool Maximise { get; set; }
-
-        /// <summary>
-        /// Gets or sets event callback when the maximise is changed
-        /// </summary>
-        [Parameter] public EventCallback<bool> OnMaximised { get; set; }
-
-        [Parameter]
-        public bool Flex { get; set; }
-        
-        /// <summary>
-        /// Gets or sets additional class names to add to the ViContainer
-        /// </summary>
-        [Parameter] public string ClassName { get; set; }
-
-        private bool IsMaximised { get; set; }
-
-        protected override void OnInitialized()
-        {
-            this.IsMaximised = false;
-        }
-
-        private void ToggleMaximise()
-        {
-            this.IsMaximised = !this.IsMaximised;
-            OnMaximised.InvokeAsync(this.IsMaximised);
-        }
+    /// <summary>
+    /// Toggles if this is maxmimised
+    /// </summary>
+    private void ToggleMaximise()
+    {
+        this.IsMaximised = !this.IsMaximised;
+        OnMaximised.InvokeAsync(this.IsMaximised);
     }
 }
