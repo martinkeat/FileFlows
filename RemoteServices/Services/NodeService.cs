@@ -200,7 +200,20 @@ public class NodeService : RemoteService, INodeService
         }
         catch (Exception)
         {
-            return;
+            // Ignored
+        }
+    }
+
+    /// <inheritdoc />
+    public async Task Pause(int minutes)
+    {
+        try
+        {
+            await HttpHelper.Post($"{ServiceBaseUrl}/remote/node/pause?minutes=" + minutes);
+        }
+        catch (Exception)
+        {
+            // Ignored
         }
     }
 }

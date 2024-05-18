@@ -1,16 +1,13 @@
 using System.Diagnostics;
 using FileFlows.Server.Authentication;
-using FileFlows.Server.Helpers;
 using FileFlows.Server.Hubs;
 using FileFlows.Server.Services;
 using FileFlows.Server.Workers;
-using FileFlows.ServerShared.Models;
 using FileFlows.ServerShared.Models.StatisticModels;
 using FileFlows.Shared.Models;
 using Microsoft.AspNetCore.Mvc;
 using FileHelper = FileFlows.ServerShared.Helpers.FileHelper;
 using LibraryFileService = FileFlows.Server.Services.LibraryFileService;
-using NodeService = FileFlows.Server.Services.NodeService;
 using SettingsService = FileFlows.Server.Services.SettingsService;
 using StatisticService = FileFlows.Server.Services.StatisticService;
 
@@ -229,23 +226,30 @@ public class SystemController:BaseController
 
     private async Task<float> GetCpuPercentage()
     {
-        var startTime = DateTime.UtcNow;
-        var startCpuUsage = Process.GetCurrentProcess().TotalProcessorTime;
-        var stopWatch = new Stopwatch();
-        stopWatch.Start();
+        try
+        {
+            var startTime = DateTime.UtcNow;
+            var startCpuUsage = Process.GetCurrentProcess().TotalProcessorTime;
+            var stopWatch = new Stopwatch();
+            stopWatch.Start();
 
-        await Task.Delay(100);
+            await Task.Delay(100);
 
-        stopWatch.Stop();
-        var endTime = DateTime.UtcNow;
-        var endCpuUsage = Process.GetCurrentProcess().TotalProcessorTime;
+            stopWatch.Stop();
+            var endTime = DateTime.UtcNow;
+            var endCpuUsage = Process.GetCurrentProcess().TotalProcessorTime;
 
-        var cpuUsedMs = (endCpuUsage - startCpuUsage).TotalMilliseconds;
-        var totalMsPassed = (endTime - startTime).TotalMilliseconds;
-        var cpuUsageTotal = cpuUsedMs / (Environment.ProcessorCount * totalMsPassed);
+            var cpuUsedMs = (endCpuUsage - startCpuUsage).TotalMilliseconds;
+            var totalMsPassed = (endTime - startTime).TotalMilliseconds;
+            var cpuUsageTotal = cpuUsedMs / (Environment.ProcessorCount * totalMsPassed);
 
-        var cpuUsagePercentage = (float)(cpuUsageTotal * 100);
-        return cpuUsagePercentage;
+            var cpuUsagePercentage = (float)(cpuUsageTotal * 100);
+            return cpuUsagePercentage;
+        }
+        catch (Exception)
+        {
+            return 0;
+        }
     }
 
     /// <summary>

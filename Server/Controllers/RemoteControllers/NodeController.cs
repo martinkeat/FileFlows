@@ -1,5 +1,6 @@
 using FileFlows.Server.Authentication;
 using FileFlows.Server.Helpers;
+using FileFlows.Server.Hubs;
 using FileFlows.Server.Services;
 using FileFlows.Server.Workers;
 using FileFlows.ServerShared.Models;
@@ -154,6 +155,23 @@ public class NodeController : BaseController
 
     }
     
+    /// <summary>
+    /// Pauses the system
+    /// </summary>
+    /// <param name="minutes">The minutes to pause the system for</param>
+    [HttpPost("pause")]
+    public async Task Pause([FromQuery] int minutes)
+    {
+        var service = ServiceLoader.Load<SettingsService>();
+        var settings = await service.Get();
+        if (settings.IsPaused)
+            return; // already paused
+        
+        settings.PausedUntil = DateTime.UtcNow.AddMinutes(minutes);
+        ClientServiceManager.Instance.SystemPaused(minutes);
+        await service.Save(settings, await GetAuditDetails());
+
+    }
 
 
     /// <summary>

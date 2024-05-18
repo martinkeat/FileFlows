@@ -72,5 +72,12 @@ public interface INodeService
     /// <param name="args">the node system statistics</param>
     /// <returns>the task to await</returns>
     Task RecordNodeSystemStatistics(NodeSystemStatistics args);
+
+    /// <summary>
+    /// Pauses the system for the given time
+    /// </summary>
+    /// <param name="minutes">the minutes to pause the system for</param>
+    /// <returns>the task to await</returns>
+    Task Pause(int minutes);
 }
 

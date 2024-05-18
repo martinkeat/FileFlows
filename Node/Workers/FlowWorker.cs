@@ -184,7 +184,11 @@ public class FlowWorker : Worker
         }
 
         if (UpdateConfiguration(node).Result == false)
+        {
+            Logger.Instance?.WLog("Failed to write configuration for Node, pausing system");
+            nodeService.Pause(30).Wait();
             return;
+        }
 
         var frService = ServiceLoader.Load<IFlowRunnerService>();
         var isLicensed = frService.IsLicensed().Result;
