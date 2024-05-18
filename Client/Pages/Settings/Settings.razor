@@ -97,7 +97,7 @@
                         <InputSwitch @bind-Value="@Model.KeepFailedFlowTempFiles" Label="Pages.Settings.Fields.KeepFailedFlowTempFiles" />
                         @if (Profile.ServerOS is OperatingSystemType.Docker)
                         {
-                            <InputSwitch @bind-Value="@Model.DockerModsOnServer" Label="Pages.Settings.Fields.RunDockerMods" />
+                            <InputSwitch @bind-Value="@Model.DockerModsOnServer" Label="Pages.Settings.Fields.DockerModsOnServer" />
                         }
                         @if (IsLicensed)
                         {
