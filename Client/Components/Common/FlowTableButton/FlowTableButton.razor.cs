@@ -21,14 +21,12 @@ public partial class FlowTableButton : ComponentBase, IDisposable
     /// </summary>
     [Parameter] public string Label { get; set; }
 
-    protected string _Icon = string.Empty;
-
     /// <summary>
     /// Gets or sets the icon for this button
     /// </summary>
     [Parameter]
-    public string Icon { get => _Icon; set => _Icon = value; }
-    
+    public string Icon { get; set; }
+
     /// <summary>
     /// Gets or sets if this button is disabled
     /// </summary>
@@ -80,6 +78,7 @@ public partial class FlowTableButton : ComponentBase, IDisposable
         await this.Clicked.InvokeAsync();
     }
     
+    /// <inheritdoc />
     protected override void OnInitialized()
     {
         if (this.Table != null)
@@ -87,11 +86,20 @@ public partial class FlowTableButton : ComponentBase, IDisposable
             this.Table.AddButton(this);
             this.Table.SelectionChanged += Table_SelectionChanged;
         }
-        Label = Translater.TranslateIfNeeded(Label ?? string.Empty); 
         Table_SelectionChanged(null);
     }
 
+    /// <inheritdoc />
+    protected override void OnParametersSet()
+    {
+        Label = Translater.TranslateIfNeeded(Label ?? string.Empty); 
+    }
 
+
+    /// <summary>
+    /// Called when the table selection has changed
+    /// </summary>
+    /// <param name="items">the newly selected items</param>
     private void Table_SelectionChanged(List<object> items)
     {
         bool current = this.Enabled;
