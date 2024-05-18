@@ -49,8 +49,11 @@ public class DockerModService
         bool isDocker = Globals.IsDocker;
         if (isDocker && result.Success(out DockerMod updated))
         {
-            if(updated.Enabled)
-                _ = DockerModHelper.Execute(updated); // dont wait this, it can take a while to install the DockerMod
+            if (updated.Enabled)
+            {
+                if(ServiceLoader.Load<AppSettingsService>().Settings.DockerModsOnServer)
+                    _ = DockerModHelper.Execute(updated); // dont wait this, it can take a while to install the DockerMod
+            }
             else
                 DockerModHelper.DeleteFromDisk(updated);
         }

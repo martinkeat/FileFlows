@@ -34,8 +34,6 @@ public class Upgrade_24_05_1
             dbo.DateCreated = DateTime.UtcNow;
             dbo.Uid = Guid.NewGuid();
             db.Db.Insert(dbo);
-
-            _ = DockerModHelper.Execute(dm);
         }
 
         return true;

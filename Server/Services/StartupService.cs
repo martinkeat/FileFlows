@@ -90,13 +90,13 @@ public class StartupService
         
             UpdateStatus("Updating Templates...");
             UpdateTemplates();
-
-            if (Globals.IsDocker)
-                RunnerDockerMods();
-            
             // do this so the settings object is loaded
             var settings = ServiceLoader.Load<SettingsService>().Get().Result;
             var appSettings = ServiceLoader.Load<AppSettingsService>().Settings;
+
+
+            if (Globals.IsDocker && appSettings.DockerModsOnServer)
+                RunnerDockerMods();
 
             ScanForPlugins();
 

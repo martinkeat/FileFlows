@@ -24,7 +24,7 @@ public class FlowTableHelpButton : FlowTableButton
         base.OnInitialized();
 
         this._Icon = "fas fa-question-circle";
-        this._Label = Translater.Instant("Labels.Help");
+        this.Label = Translater.Instant("Labels.Help");
     }
 
     /// <summary>

@@ -86,5 +86,10 @@ public class SettingsUiModel:Settings
     /// Gets or set the placeholder for the OIDC call back address
     /// </summary>
     public string OidcCallbackAddressPlaceholder { get; set; }
+    
+    /// <summary>
+    /// Gets or sets if DockerMods should run on the server on startup/when enabled
+    /// </summary>
+    public bool DockerModsOnServer { get; set; }
 
 }

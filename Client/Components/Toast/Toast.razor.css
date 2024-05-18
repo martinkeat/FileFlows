@@ -2,7 +2,7 @@
   position: absolute;
   top: 0.65rem;
   right: 1rem;
-  z-index: 5;
+  z-index: 2;
 }
 
 @media (min-width: 850px) {

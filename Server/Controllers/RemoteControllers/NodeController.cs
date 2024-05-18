@@ -163,7 +163,7 @@ public class NodeController : BaseController
     /// <returns>The processing node instance</returns>
     [HttpPost("register")]
     [FileFlowsApiAuthorize(node: false)]
-    public async Task<ProcessingNode> RegisterPost([FromBody] RegisterModel model)
+    public async Task<ProcessingNode?> RegisterPost([FromBody] RegisterModel model)
     {
         if (string.IsNullOrWhiteSpace(model?.Address))
             throw new ArgumentNullException(nameof(model.Address));
@@ -226,7 +226,14 @@ public class NodeController : BaseController
                            KeyValuePair<string, string>(x.Value, "")
                        )?.ToList() ?? new()
         };
-        node = await service.Update(node, await GetAuditDetails());
+        var result = await service.Update(node, await GetAuditDetails());
+        if (result.Failed(out string error))
+        {
+            Logger.Instance?.ELog("Failed registering node: " + error);
+            throw new Exception(error);
+        }
+
+        node = result.Value;
         node.SignalrUrl = "flow";
         return node;
     }

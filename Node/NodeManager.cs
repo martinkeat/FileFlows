@@ -127,7 +127,7 @@ public class NodeManager
     /// <summary>
     /// Registers the node with the server
     /// </summary>
-    /// <returns>whether or not it was registered</returns>
+    /// <returns>whether it was registered</returns>
     public async Task<(bool Success, string Message)> Register()
     {
         string path = DirectoryHelper.BaseDirectory;

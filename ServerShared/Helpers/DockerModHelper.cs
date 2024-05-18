@@ -23,10 +23,11 @@ public static class DockerModHelper
     /// <param name="mod">the DockerMod to execute</param>
     /// <param name="forceExecution">If this should run even if it has already been run</param>
     /// <param name="outputCallback">Callback to log the output to</param>
-    public static async Task Execute(DockerMod mod, bool forceExecution = false, Action<string>? outputCallback = null)
+    /// <returns>true if successful, otherwise the failure reason</returns>
+    public static async Task<Result<bool>> Execute(DockerMod mod, bool forceExecution = false, Action<string>? outputCallback = null)
     {
         if (Globals.IsDocker == false)
-            return; // Only run on Docker instances
+            return true; // Only run on Docker instances
 
         await _semaphore.WaitAsync();
 
@@ -43,7 +44,7 @@ public static class DockerModHelper
 
             if (forceExecution == false && ExecutedDockerMods.TryGetValue(mod.Uid, out int value) &&
                 value == mod.Revision)
-                return; // already executed
+                return true; // already executed
 
             // Run dpkg to configure any pending package installations
             //await Process.Start("dpkg", "--configure -a").WaitForExitAsync();
@@ -70,7 +71,7 @@ public static class DockerModHelper
             if (process == null)
             {
                 Logger.Instance.WLog($"Failed Running DockerMod '{mod.Name}': Failed to start the process.");
-                return;
+                return Result<bool>.Fail($"Failed Running DockerMod '{mod.Name}': Failed to start the process.");
             }
 
             StringBuilder outputBuilder = new StringBuilder();
@@ -97,21 +98,36 @@ public static class DockerModHelper
             process.BeginErrorReadLine(); // Begin reading standard error stream asynchronously
 
             await process.WaitForExitAsync();
+            int exitCode = process.ExitCode;
             string output = outputBuilder.ToString();
 
             var totalLength = 120;
             var modNameLength = mod.Name.Length;
             var sideLength = (totalLength - modNameLength - 14) / 2; // Subtracting 14 for the length of " Docker Mod: "
-            var header = new string('-', sideLength) + " Docker Mod: " + mod.Name + " " +
-                         new string('-', sideLength + (modNameLength % 2));
-            Logger.Instance.ILog("\n" + header + "\n" + output + "\n" +
+
+            if (exitCode != 0)
+            {
+                var header = new string('-', sideLength) + " Docker Mod Failed: " + mod.Name + " " +
+                             new string('-', sideLength + (modNameLength % 2));
+                Logger.Instance.ELog("\n" + header + "\n" + output + "\n" +
+                                     new string('-', totalLength));
+                return Result<bool>.Fail(output);
+            }
+            else
+            {
+                var header = new string('-', sideLength) + " Docker Mod: " + mod.Name + " " +
+                             new string('-', sideLength + (modNameLength % 2));
+                Logger.Instance.ILog("\n" + header + "\n" + output + "\n" +
                                  new string('-', totalLength));
+            }
 
             ExecutedDockerMods[mod.Uid] = mod.Revision;
+            return true;
         }
         catch (Exception ex)
         {
             Logger.Instance.WLog("Failed Running DockerMod: " + ex.Message);
+            return Result<bool>.Fail("Failed Running DockerMod: " + ex.Message);
         }
         finally
         {

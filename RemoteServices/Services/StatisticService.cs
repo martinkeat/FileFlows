@@ -18,6 +18,7 @@ public class StatisticService : RemoteService, IStatisticService
         }
         catch (Exception)
         {
+            // Ignored
         }
     }
 

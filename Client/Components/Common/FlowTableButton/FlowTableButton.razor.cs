@@ -15,8 +15,6 @@ public partial class FlowTableButton : ComponentBase, IDisposable
     /// Gets or sets the flow table that this button is contained within 
     /// </summary>
     [CascadingParameter] FlowTableBase Table { get; set; }
-
-    protected string _Label = string.Empty;
     
     /// <summary>
     /// Gets or sets the label for this button
@@ -89,7 +87,7 @@ public partial class FlowTableButton : ComponentBase, IDisposable
             this.Table.AddButton(this);
             this.Table.SelectionChanged += Table_SelectionChanged;
         }
-        _Label = Translater.TranslateIfNeeded(Label ?? string.Empty); 
+        Label = Translater.TranslateIfNeeded(Label ?? string.Empty); 
         Table_SelectionChanged(null);
     }
 

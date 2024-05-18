@@ -76,5 +76,10 @@ internal class AppSettings
     /// Gets or sets the security mode
     /// </summary>
     public SecurityMode Security { get; set; }
+    
+    /// <summary>
+    /// Gets or sets if DockerMods should run on the server on startup/when enabled
+    /// </summary>
+    public bool DockerModsOnServer { get; set; }
 
 }

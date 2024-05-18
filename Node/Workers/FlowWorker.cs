@@ -717,7 +717,8 @@ public class FlowWorker : Worker
 
         if (Globals.IsDocker)
         {
-            WriteAndRunDockerMods(config.DockerMods ?? new ());
+            if (WriteAndRunDockerMods(config.DockerMods ?? new()) == false)
+                return false;
         }
 
         CurrentConfigurationRevision = revision;
@@ -730,7 +731,7 @@ public class FlowWorker : Worker
     /// Writes and run all the DockerMods
     /// </summary>
     /// <param name="mods">the DockerMods</param>
-    void WriteAndRunDockerMods(List<DockerMod> mods)
+    bool WriteAndRunDockerMods(List<DockerMod> mods)
     {
         var directory = DirectoryHelper.DockerModsDirectory;
         Logger.Instance.ILog("DockerMods Directory: " + directory);
@@ -747,13 +748,22 @@ public class FlowWorker : Worker
         if (mods?.Any() != true)
         {
             Logger.Instance.ILog("No DockerMods to run");
-            return;
+            return true;
         }
         
         foreach (var mod in mods)
         {
-            DockerModHelper.Execute(mod).Wait();
+            var result = DockerModHelper.Execute(mod).Result;
+            if (result.Failed(out string error))
+            {
+                _ = ServiceLoader.Load<NotificationService>().Record(NotificationSeverity.Critical,
+                    "Flow Mod Failed: " + mod.Name,
+                    error);
+                return false;
+            }
         }
+
+        return true;
     }
 
     /// <summary>

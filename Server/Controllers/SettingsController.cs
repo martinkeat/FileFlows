@@ -93,6 +93,7 @@ public class SettingsController : BaseController
             PopulateDbSettings(uiModel,
                 Settings.DatabaseMigrateConnection?.EmptyAsNull() ?? Settings.DatabaseConnection);
         uiModel.RecreateDatabase = Settings.RecreateDatabase;
+        uiModel.DockerModsOnServer = Settings.DockerModsOnServer;
 
         uiModel.Security = ServiceLoader.Load<AppSettingsService>().Settings.Security;
         if (uiModel.TokenExpiryMinutes < 1)
@@ -215,7 +216,8 @@ public class SettingsController : BaseController
              Settings.DatabaseMigrateType = model.DbType;
         }
 
-        Settings.RecreateDatabase = model.RecreateDatabase; 
+        Settings.RecreateDatabase = model.RecreateDatabase;
+        Settings.DockerModsOnServer = model.DockerModsOnServer;
         // save AppSettings with updated license and db migration if set
         SettingsService.Save();
     }
