@@ -1,4 +1,5 @@
 using FileFlows.Plugin;
+using FileFlows.Server.Hubs;
 using FileFlows.Shared.Models;
 
 namespace FileFlows.Server.Services;
@@ -44,6 +45,7 @@ public class NotificationService
             else
             {
                 _Notifications.Add(notification);
+                ClientServiceManager.Instance.SendNotification(severity, title);
             }
         }
         finally

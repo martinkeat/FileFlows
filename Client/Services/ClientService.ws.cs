@@ -42,6 +42,20 @@ public partial class ClientService
     public event Action<List<LibraryStatus>> FileStatusUpdated;
 
     /// <summary>
+    /// The profile service
+    /// </summary>
+    private readonly ProfileService profileService;
+
+    /// <summary>
+    /// Constructs a new instance of the client service
+    /// </summary>
+    /// <param name="profileService">the profile service</param>
+    public ClientService(ProfileService profileService)
+    {
+        this.profileService = profileService;
+    }
+
+    /// <summary>
     /// Starts the client service asynchronously.
     /// </summary>
     public async Task StartAsync()
@@ -78,6 +92,7 @@ public partial class ClientService
                 _hubConnection.On<LibraryFile>("StartProcessing", StartProcessing);
                 _hubConnection.On<LibraryFile>("FinishProcessing", FinishProcessing);
                 _hubConnection.On<int>("SystemPaused", UpdateSystemPaused);
+                _hubConnection.On<NotificationData>("Notification", HandleNotification);
 
                 await _hubConnection.StartAsync();
 
@@ -114,6 +129,15 @@ public partial class ClientService
                 Toast.ShowError(data.Message);
                 break;
         }
+    }
+
+    /// <summary>
+    /// Handles the notification data received from the SignalR server.
+    /// </summary>
+    /// <param name="data">The notification data.</param>
+    private void HandleNotification(NotificationData data)
+    {
+        _ = profileService.Refresh();
     }
 
     /// <summary>
@@ -174,5 +198,21 @@ public partial class ClientService
         /// Gets or sets the toast message.
         /// </summary>
         public string Message { get; set; }
+    }
+    
+    /// <summary>
+    /// Represents the Notification data received from the SignalR server.
+    /// </summary>
+    private class NotificationData
+    {
+        /// <summary>
+        /// Gets or sets the severity
+        /// </summary>
+        public NotificationSeverity Severity { get; set; }
+
+        /// <summary>
+        /// Gets or sets the title
+        /// </summary>
+        public string Title { get; set; }
     }
 }

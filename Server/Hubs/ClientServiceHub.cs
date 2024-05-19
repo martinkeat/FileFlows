@@ -57,6 +57,14 @@ public class ClientServiceManager
         => _hubContext.Clients.All.SendAsync("Toast", new { Type = type, Message = message });
 
     /// <summary>
+    /// Sends a notification to the clients
+    /// </summary>
+    /// <param name="severity">the severity of notification</param>
+    /// <param name="title">the title of the notification</param>
+    public void SendNotification(NotificationSeverity severity, string title)
+        => _hubContext.Clients.All.SendAsync("Notification", new { Severity = severity, Title = title });
+
+    /// <summary>
     /// A semaphore to ensure only one update is set at a time
     /// </summary>
     private SemaphoreSlim UpdateSemaphore = new SemaphoreSlim(1);
