@@ -43,7 +43,7 @@ public class LibraryFileFilter
     /// <summary>
     /// Gets or sets a filter text the file name must contain
     /// </summary>
-    public string Filter { get; set; }
+    public string? Filter { get; set; }
     
     /// <summary>
     /// Gets or sets a Node UID to filter by

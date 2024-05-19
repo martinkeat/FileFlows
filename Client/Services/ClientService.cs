@@ -46,13 +46,20 @@ public partial class ClientService
     private System.Timers.Timer PausedTimer;
 
     /// <summary>
+    /// The profile service
+    /// </summary>
+    private readonly ProfileService _profileService;
+
+    /// <summary>
     /// Initializes a new instance of the ClientService class.
     /// </summary>
     /// <param name="navigationManager">The navigation manager instance.</param>
+    /// <param name="profileService">The profile service</param>
     /// <param name="memoryCache">The memory cache instance used for caching.</param>
     /// <param name="jsRuntime">The javascript runtime.</param>
-    public ClientService(NavigationManager navigationManager, IMemoryCache memoryCache, IJSRuntime jsRuntime)
+    public ClientService(NavigationManager navigationManager, ProfileService profileService, IMemoryCache memoryCache, IJSRuntime jsRuntime)
     {
+        this._profileService = profileService;
         _jsRuntime = jsRuntime; 
         _navigationManager = navigationManager; 
         _cache = memoryCache;

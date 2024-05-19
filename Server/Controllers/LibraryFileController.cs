@@ -37,7 +37,7 @@ public class LibraryFileController : Controller //ControllerStore<LibraryFile>
     /// <returns>a slimmed down list of files with only needed information</returns>
     [HttpGet("list-all")]
     public async Task<LibraryFileDatalistModel> ListAll([FromQuery] int status, [FromQuery] int page = 0, 
-        [FromQuery] int pageSize = 0, [FromQuery] string filter = null, [FromQuery] Guid? node = null, 
+        [FromQuery] int pageSize = 0, [FromQuery] string? filter = null, [FromQuery] Guid? node = null, 
         [FromQuery] Guid? library = null, [FromQuery] Guid? flow = null, [FromQuery] FilesSortBy? sortBy = null)
     {
         var service = ServiceLoader.Load<LibraryFileService>();

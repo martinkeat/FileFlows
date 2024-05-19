@@ -41,19 +41,6 @@ public partial class ClientService
     /// </summary>
     public event Action<List<LibraryStatus>> FileStatusUpdated;
 
-    /// <summary>
-    /// The profile service
-    /// </summary>
-    private readonly ProfileService profileService;
-
-    /// <summary>
-    /// Constructs a new instance of the client service
-    /// </summary>
-    /// <param name="profileService">the profile service</param>
-    public ClientService(ProfileService profileService)
-    {
-        this.profileService = profileService;
-    }
 
     /// <summary>
     /// Starts the client service asynchronously.
@@ -137,7 +124,7 @@ public partial class ClientService
     /// <param name="data">The notification data.</param>
     private void HandleNotification(NotificationData data)
     {
-        _ = profileService.Refresh();
+        _ = _profileService.Refresh();
     }
 
     /// <summary>

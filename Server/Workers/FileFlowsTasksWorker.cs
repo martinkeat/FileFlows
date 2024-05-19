@@ -19,7 +19,8 @@ public class FileFlowsTasksWorker: ServerWorker
     /// <summary>
     /// Gets the instance of the tasks worker
     /// </summary>
-    internal static FileFlowsTasksWorker Instance { get;private set; }
+    internal static FileFlowsTasksWorker Instance { get;private set; } = null!;
+
     /// <summary>
     /// A list of tasks and the quarter they last ran in
     /// </summary>
@@ -48,7 +49,7 @@ public class FileFlowsTasksWorker: ServerWorker
     /// <returns>a dictionary of variables</returns>
     public static Dictionary<string, object> GetVariables()
     {
-        var list = ServiceLoader.Load<VariableService>().GetAllAsync().Result;
+        var list = ServiceLoader.Load<VariableService>().GetAllAsync().Result ?? new ();
         var dict = new Dictionary<string, object>();
         foreach (var var in list)
         {
@@ -104,7 +105,7 @@ public class FileFlowsTasksWorker: ServerWorker
     /// </summary>
     /// <param name="task">the task to run</param>
     /// <param name="additionalVariables">any additional variables</param>
-    private async Task<FileFlowsTaskRun> RunTask(FileFlowsTask task, Dictionary<string, object> additionalVariables = null)
+    private async Task<FileFlowsTaskRun> RunTask(FileFlowsTask task, Dictionary<string, object>? additionalVariables = null)
     {
         string code = await new ScriptController().GetCode(task.Script, type: ScriptType.System);
         if (string.IsNullOrWhiteSpace(code))

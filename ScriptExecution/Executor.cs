@@ -21,7 +21,7 @@ public class Executor
     /// <summary>
     /// Gets or sets the variables that will be passed into the executed code
     /// </summary>
-    public Dictionary<string, object> Variables { get; set; } = new Dictionary<string, object>();
+    public Dictionary<string, object> Variables { get; set; } = new ();
 
     /// <summary>
     /// Gets or sets the logger for the code execution
