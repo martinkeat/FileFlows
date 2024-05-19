@@ -15,6 +15,9 @@ public class NotificationService : RemoteService
     {
         try
         {
+            // give it some breathing room
+            await Task.Delay(5000);
+            
             await HttpHelper.Post($"{ServiceBaseUrl}/remote/notification/record", new
             {
                 Severity = severity,

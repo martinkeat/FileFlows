@@ -18,9 +18,28 @@ public class NotificationController
     /// </summary>
     /// <param name="notification">the notification being recorded</param>
     [HttpPost("record")]
-    public async Task Record([FromBody] Notification notification)
+    public async Task Record([FromBody] NotificationModel notification)
     {
         var service = ServiceLoader.Load<NotificationService>();
         await service.Record(notification.Severity, notification.Title, notification.Message);
+    }
+
+    /// <summary>
+    /// Notification model
+    /// </summary>
+    public class NotificationModel
+    {
+        /// <summary>
+        /// Gets the notification severity
+        /// </summary>
+        public NotificationSeverity Severity { get; init; }
+        /// <summary>
+        /// Gets the notification title
+        /// </summary>
+        public string Title { get; init; }
+        /// <summary>
+        /// Gets the notification message
+        /// </summary>
+        public string? Message { get; init; }
     }
 }
