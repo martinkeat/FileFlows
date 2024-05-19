@@ -153,7 +153,14 @@ public class FlowWorker : Worker
 
         if (IsEnabledCheck?.Invoke() == false)
             return;
+        
+        
         var nodeService = ServiceLoader.Load<INodeService>();
+        if (nodeService.GetSystemIsRunning().Result != true)
+        {
+            Logger.Instance?.ELog("FileFlows server is paused or not running.");
+            return;
+        }
         try
         {
             node = isServer ? nodeService.GetServerNodeAsync().Result : nodeService.GetByAddressAsync(this.Hostname).Result;
@@ -183,13 +190,6 @@ public class FlowWorker : Worker
             return;
         }
 
-        if (UpdateConfiguration(node).Result == false)
-        {
-            Logger.Instance?.WLog("Failed to write configuration for Node, pausing system");
-            nodeService.Pause(30).Wait();
-            return;
-        }
-
         var frService = ServiceLoader.Load<IFlowRunnerService>();
         var isLicensed = frService.IsLicensed().Result;
 
@@ -201,6 +201,13 @@ public class FlowWorker : Worker
             return;
         }
 
+        if (UpdateConfiguration(node).Result == false)
+        {
+            Logger.Instance?.WLog("Failed to write configuration for Node, pausing system");
+            nodeService.Pause(30).Wait();
+            return;
+        }
+        
         if (node?.FlowRunners <= ExecutingRunners.Count)
         {
             Logger.Instance?.DLog($"At limit of running executors on '{nodeName}': " + node.FlowRunners);

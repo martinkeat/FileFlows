@@ -216,4 +216,21 @@ public class NodeService : RemoteService, INodeService
             // Ignored
         }
     }
+
+    /// <inheritdoc />
+    public async Task<bool> GetSystemIsRunning()
+    {
+        try
+        {
+            var isPaused = await HttpHelper.Get<bool>($"{ServiceBaseUrl}/remote/node/system-is-paused");
+            if (isPaused.Success == false)
+                return false;
+            return isPaused.Data == false;
+        }
+        catch (Exception)
+        {
+            // Ignored
+            return false;
+        }
+    }
 }

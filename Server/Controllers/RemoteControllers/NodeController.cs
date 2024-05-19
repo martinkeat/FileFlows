@@ -170,7 +170,18 @@ public class NodeController : BaseController
         settings.PausedUntil = DateTime.UtcNow.AddMinutes(minutes);
         ClientServiceManager.Instance.SystemPaused(minutes);
         await service.Save(settings, await GetAuditDetails());
-
+    }
+    
+    /// <summary>
+    /// Gets if the system is paused
+    /// </summary>
+    /// <returns>true if the system is paused,otherwise false</returns>
+    [HttpGet("system-is-paused")]
+    public async Task<bool> SystemIsPaused()
+    {
+        var service = ServiceLoader.Load<SettingsService>();
+        var settings = await service.Get();
+        return settings.IsPaused;
     }
 
 

@@ -79,5 +79,11 @@ public interface INodeService
     /// <param name="minutes">the minutes to pause the system for</param>
     /// <returns>the task to await</returns>
     Task Pause(int minutes);
+
+    /// <summary>
+    /// Gets if the system is running and not paused
+    /// </summary>
+    /// <returns>true if running and not paused, otherwise false</returns>
+    Task<bool> GetSystemIsRunning();
 }
 
