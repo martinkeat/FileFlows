@@ -125,6 +125,19 @@ public partial class ClientService
     private void HandleNotification(NotificationData data)
     {
         _ = _profileService.Refresh();
+        switch (data.Severity)
+        {
+            case NotificationSeverity.Critical:
+            case NotificationSeverity.Error: 
+                Toast.ShowError(data.Title);
+                break;
+            case NotificationSeverity.Warning: 
+                Toast.ShowWarning(data.Title);
+                break;
+            case NotificationSeverity.Information: 
+                Toast.ShowInfo(data.Title);
+                break;
+        }
     }
 
     /// <summary>

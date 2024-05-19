@@ -10,6 +10,10 @@
   white-space: pre-wrap;
 }
 
+.icon {
+  align-self: auto;
+  padding-top: 0.25rem;
+}
 .icon.info {
   color: var(--info);
 }
