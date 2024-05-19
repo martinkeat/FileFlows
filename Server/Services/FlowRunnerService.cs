@@ -52,7 +52,7 @@ public class FlowRunnerService : IFlowRunnerService
         if (info.Uid == Guid.Empty)
             throw new Exception("No UID specified for flow execution info");
 
-        if (new SettingsService().Get()?.Result?.HideProcessingStartedNotifications != true)
+        if (ServiceLoader.Load<SettingsService>().Get()?.Result?.HideProcessingStartedNotifications != true)
             ClientServiceManager.Instance.SendToast(LogType.Info, "Started processing: " +
                                                                   ServiceLoader.Load<FileDisplayNameService>().GetDisplayName(
                                                                       info.LibraryFile));
@@ -239,13 +239,13 @@ public class FlowRunnerService : IFlowRunnerService
             {
                 SystemEvents.TriggerLibraryFileProcessedFailed(existing, library);
                 
-                if(new SettingsService().Get()?.Result?.HideProcessingFinishedNotifications != true)
+                if(ServiceLoader.Load<SettingsService>().Get()?.Result?.HideProcessingFinishedNotifications != true)
                     ClientServiceManager.Instance.SendToast(LogType.Error, "Failed processing: " + ServiceLoader.Load<FileDisplayNameService>().GetDisplayName(info.LibraryFile));
             }
             else
             {
                 SystemEvents.TriggerLibraryFileProcessedSuccess(existing, library);
-                if(new SettingsService().Get()?.Result?.HideProcessingFinishedNotifications != true)
+                if(ServiceLoader.Load<SettingsService>().Get()?.Result?.HideProcessingFinishedNotifications != true)
                     ClientServiceManager.Instance.SendToast(LogType.Info, "Finished processing: " + ServiceLoader.Load<FileDisplayNameService>().GetDisplayName(info.LibraryFile));
             }
 

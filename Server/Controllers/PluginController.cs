@@ -281,7 +281,7 @@ public class PluginController : BaseController
         if (newJson == oldSettings)
             return;
         await service.SetSettingsJson(packageName, newJson, await GetAuditDetails());
-        await new SettingsService().RevisionIncrement();
+        await ServiceLoader.Load<SettingsService>().RevisionIncrement();
     }
 
     

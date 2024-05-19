@@ -11,6 +11,9 @@ namespace FileFlows.Server.Services;
 /// </summary>
 public class SettingsService // : ISettingsService
 {
+    private ConfigurationRevision? currentConfig;
+    private FairSemaphore _semaphore = new(1);
+    
     /// <summary>
     /// Gets the system settings
     /// </summary>
@@ -38,72 +41,84 @@ public class SettingsService // : ISettingsService
     /// Gets the current configuration revision
     /// </summary>
     /// <returns>the current configuration revision</returns>
-    public async Task<ConfigurationRevision> GetCurrentConfiguration()   
+    public async Task<ConfigurationRevision> GetCurrentConfiguration()
     {
-        var settings = await new SettingsManager().Get();
-        var cfg = new ConfigurationRevision();
-        cfg.Revision = settings.Revision;
-        var scriptService = new ScriptService();
-        cfg.FlowScripts = (await scriptService.GetAllByType(ScriptType.Flow)).ToList();
-        cfg.SystemScripts = (await scriptService.GetAllByType(ScriptType.System)).ToList();
-        cfg.SharedScripts = (await scriptService.GetAllByType(ScriptType.Shared)).ToList();
-        cfg.Variables = (await ServiceLoader.Load<VariableService>().GetAllAsync()).ToDictionary(x => x.Name, x => x.Value);
-        cfg.Flows = await ServiceLoader.Load<FlowService>().GetAllAsync();
-        cfg.Libraries = await ServiceLoader.Load<LibraryService>().GetAllAsync();
-        cfg.Enterprise = LicenseHelper.IsLicensed(LicenseFlags.Enterprise);
-        cfg.AllowRemote = settings.FileServerDisabled == false && LicenseHelper.IsLicensed(LicenseFlags.FileServer);
-        cfg.PluginSettings = await new PluginService().GetAllPluginSettings();
-        cfg.MaxNodes = LicenseHelper.IsLicensed() ? 250 : 30;
-        cfg.KeepFailedFlowTempFiles = settings.KeepFailedFlowTempFiles;
-        cfg.Enterprise = LicenseHelper.IsLicensed(LicenseFlags.Enterprise);
-        var pluginInfos = (await ServiceLoader.Load<PluginService>().GetPluginInfoModels(true))
-            .Where(x => x.Enabled)
-            .ToDictionary(x => x.PackageName + ".ffplugin", x => x);
-        var plugins = new List<string>();
-        var pluginNames = new List<string>();
-        List<string> flowElementsInUse = cfg.Flows.SelectMany(x => x.Parts.Select(x => x.FlowElementUid)).ToList();
-
-        cfg.DockerMods = (await ServiceLoader.Load<DockerModService>().GetAll()).Where(x => x.Enabled).Select(x =>
-            new DockerMod()
-            {
-                // we only care about these, dont send Icons/extra stuff to reduce config size
-                Uid = x.Uid,
-                Name = x.Name,
-                Enabled = x.Enabled,
-                Code = x.Code
-            }).ToList();
-        
-        // Logger.Instance.DLog("Plugin, Flow Elements in Use: \n" + string.Join("\n", flowElementsInUse));
-
-        foreach (var file in new DirectoryInfo(DirectoryHelper.PluginsDirectory).GetFiles("*.ffplugin"))
+        await _semaphore.WaitAsync();
+        try
         {
-            Logger.Instance.DLog($"Plugin found '{file.Name}'");
-            if (pluginInfos.ContainsKey(file.Name) == false)
+            var settings = await new SettingsManager().Get();
+            if (currentConfig?.Revision == settings.Revision)
+                return currentConfig;
+
+
+            var cfg = new ConfigurationRevision();
+            cfg.Revision = settings.Revision;
+            var scriptService = new ScriptService();
+            cfg.FlowScripts = (await scriptService.GetAllByType(ScriptType.Flow)).ToList();
+            cfg.SystemScripts = (await scriptService.GetAllByType(ScriptType.System)).ToList();
+            cfg.SharedScripts = (await scriptService.GetAllByType(ScriptType.Shared)).ToList();
+            cfg.Variables =
+                (await ServiceLoader.Load<VariableService>().GetAllAsync()).ToDictionary(x => x.Name, x => x.Value);
+            cfg.Flows = await ServiceLoader.Load<FlowService>().GetAllAsync();
+            cfg.Libraries = await ServiceLoader.Load<LibraryService>().GetAllAsync();
+            cfg.Enterprise = LicenseHelper.IsLicensed(LicenseFlags.Enterprise);
+            cfg.AllowRemote = settings.FileServerDisabled == false && LicenseHelper.IsLicensed(LicenseFlags.FileServer);
+            cfg.PluginSettings = await new PluginService().GetAllPluginSettings();
+            cfg.MaxNodes = LicenseHelper.IsLicensed() ? 250 : 30;
+            cfg.KeepFailedFlowTempFiles = settings.KeepFailedFlowTempFiles;
+            cfg.Enterprise = LicenseHelper.IsLicensed(LicenseFlags.Enterprise);
+            var pluginInfos = (await ServiceLoader.Load<PluginService>().GetPluginInfoModels(true))
+                .Where(x => x.Enabled)
+                .ToDictionary(x => x.PackageName + ".ffplugin", x => x);
+            var plugins = new List<string>();
+            var pluginNames = new List<string>();
+            List<string> flowElementsInUse = cfg.Flows.SelectMany(x => x.Parts.Select(x => x.FlowElementUid)).ToList();
+
+            cfg.DockerMods = (await ServiceLoader.Load<DockerModService>().GetAll()).Where(x => x.Enabled).Select(x =>
+                new DockerMod()
+                {
+                    // we only care about these, dont send Icons/extra stuff to reduce config size
+                    Uid = x.Uid,
+                    Name = x.Name,
+                    Enabled = x.Enabled,
+                    Code = x.Code
+                }).ToList();
+
+            // Logger.Instance.DLog("Plugin, Flow Elements in Use: \n" + string.Join("\n", flowElementsInUse));
+
+            foreach (var file in new DirectoryInfo(DirectoryHelper.PluginsDirectory).GetFiles("*.ffplugin"))
             {
-                Logger.Instance.DLog($"Plugin '{file.Name}' not enabled skipping for configuration.");
-                continue; // not enabled, skipped
+                Logger.Instance.DLog($"Plugin found '{file.Name}'");
+                if (pluginInfos.TryGetValue(file.Name, out var pluginInfo) == false)
+                {
+                    Logger.Instance.DLog($"Plugin '{file.Name}' not enabled skipping for configuration.");
+                    continue; // not enabled, skipped
+                }
+
+                var inUse = pluginInfo.Elements.Any(x => flowElementsInUse.Contains(x.Uid));
+                if (inUse == false)
+                {
+                    Logger.Instance.DLog($"Plugin '{pluginInfo.Name}' not in use by any flow, skipping");
+                    Logger.Instance.DLog("Plugin not using flow parts: " +
+                                         string.Join(", ", pluginInfo.Elements.Select(x => x.Uid)));
+                    continue; // plugin not used, skipping
+                }
+
+                Logger.Instance.DLog($"Plugin '{pluginInfo.Name}' is used in configuration.");
+                plugins.Add(file.Name); //, await System.IO.File.ReadAllBytesAsync(file.FullName));
+                pluginNames.Add(pluginInfo.Name);
             }
 
-            var pluginInfo = pluginInfos[file.Name];
-            
-            var inUse = pluginInfo.Elements.Any(x => flowElementsInUse.Contains(x.Uid));
-            if (inUse == false)
-            {
-                Logger.Instance.DLog($"Plugin '{pluginInfo.Name}' not in use by any flow, skipping");
-                Logger.Instance.DLog("Plugin not using flow parts: " + string.Join(", ", pluginInfo.Elements.Select(x => x.Uid)));
-                continue; // plugin not used, skipping
-            }
-
-            Logger.Instance.DLog($"Plugin '{pluginInfo.Name}' is used in configuration.");
-            plugins.Add(file.Name);//, await System.IO.File.ReadAllBytesAsync(file.FullName));
-            pluginNames.Add(pluginInfo.Name);
+            cfg.Plugins = plugins;
+            cfg.PluginNames = pluginNames;
+            Logger.Instance.DLog($"Plugin list that is used in configuration:", string.Join(", ", plugins));
+            currentConfig = cfg;
+            return cfg;
         }
-
-        cfg.Plugins = plugins;
-        cfg.PluginNames = pluginNames;
-        Logger.Instance.DLog($"Plugin list that is used in configuration:", string.Join(", ", plugins));
-        
-        return cfg;
+        finally
+        {
+            _semaphore.Release();
+        }
     }
 
     /// <inheritdoc />

@@ -293,7 +293,7 @@ public class RepositoryController : BaseController
     /// </summary>
     /// <returns>an awaited task</returns>
     private Task RevisionIncrement()
-        => new SettingsService().RevisionIncrement();
+        => ServiceLoader.Load<SettingsService>().RevisionIncrement();
 
     /// <summary>
     /// Gets the code of a script

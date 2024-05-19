@@ -190,7 +190,7 @@ public class NodeController : BaseController
     /// </summary>
     /// <returns>an awaited task</returns>
     private Task RevisionIncrement()
-        => new SettingsService().RevisionIncrement();
+        => ServiceLoader.Load<SettingsService>().RevisionIncrement();
 
     /// <summary>
     /// Delete processing nodes from the system

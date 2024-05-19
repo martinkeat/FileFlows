@@ -21,7 +21,7 @@ public class LogFileCleaner:Worker
     /// </summary>
     protected sealed override void Execute()
     {
-        // var settings = new SettingsService().Get().Result;
+        // var settings = ServiceLoader.Load<SettingsService>().Get().Result;
         // if (settings == null || settings.LogFileRetention < 1)
         //     return; // not yet ready
         // var dir = DirectoryHelper.LoggingDirectory;

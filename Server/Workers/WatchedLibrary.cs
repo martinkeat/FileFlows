@@ -83,7 +83,7 @@ public class WatchedLibrary:IDisposable
     private void LogQueueMessage(string message, Settings? settings = null)
     {
         if (settings == null)
-            settings = new SettingsService().Get().Result;
+            settings = ServiceLoader.Load<SettingsService>().Get().Result;
 
         if (settings?.LogQueueMessages != true)
             return;
@@ -282,7 +282,7 @@ public class WatchedLibrary:IDisposable
                 Logger.Instance.DLog(
                     $"Time taken \"{(DateTime.UtcNow.Subtract(dtTotal))}\" to successfully add new library file: \"{fullpath}\"");
                 
-                if (new SettingsService().Get()?.Result?.ShowFileAddedNotifications == true)
+                if (ServiceLoader.Load<SettingsService>().Get()?.Result?.ShowFileAddedNotifications == true)
                     ClientServiceManager.Instance.SendToast(LogType.Info, "New File: " + result.RelativePath);
             }
             else
@@ -729,7 +729,7 @@ public class WatchedLibrary:IDisposable
                 var knownFiles = service.GetKnownLibraryFilesWithCreationTimes(Library.Uid).Result;
 
                 var files = GetFiles(new DirectoryInfo(Library.Path));
-                var settings = new SettingsService().Get().Result;
+                var settings = ServiceLoader.Load<SettingsService>().Get().Result;
                 foreach (var file in files)
                 {
                     if (IsMatch(file.FullName) == false || file.FullName.EndsWith("_"))
