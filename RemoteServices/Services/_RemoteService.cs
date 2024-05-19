@@ -19,10 +19,8 @@ public abstract class RemoteService
                 _ServiceBaseUrl = string.Empty;
                 return;
             }
-            if(value.EndsWith("/"))
-                _ServiceBaseUrl = value.Substring(0, value.Length - 1); 
-            else
-                _ServiceBaseUrl = value;
+
+            _ServiceBaseUrl = value.EndsWith('/') ? value[..^1] : value;
         }
     }
 
