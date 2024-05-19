@@ -18,7 +18,7 @@ public class NotificationController
     /// </summary>
     /// <param name="notification">the notification being recorded</param>
     [HttpPost("record")]
-    public async Task Record(Notification notification)
+    public async Task Record([FromBody] Notification notification)
     {
         var service = ServiceLoader.Load<NotificationService>();
         await service.Record(notification.Severity, notification.Title, notification.Message);

@@ -22,9 +22,10 @@ public class NotificationService : RemoteService
                 Message = message
             });
         }
-        catch (Exception)
+        catch (Exception ex)
         {
             // ignored
+            Logger.Instance?.ELog("Failed to record notification: " + ex.Message);
         }
     }
 }
