@@ -1,28 +1,20 @@
-﻿using FileFlows.Node.Workers;
-using FileFlows.Server.Workers;
+﻿using FileFlows.Server.Workers;
 using System.Text.RegularExpressions;
 using Microsoft.OpenApi.Models;
 using System.Runtime.InteropServices;
+using FileFlows.Client.Services;
 using FileFlows.Plugin;
-using FileFlows.RemoteServices;
 using FileFlows.Server.Authentication;
 using FileFlows.Server.Filters;
 using FileFlows.Server.Helpers;
 using FileFlows.Server.Hubs;
 using FileFlows.Server.Middleware;
 using FileFlows.Server.Services;
-using FileFlows.Server.Views.Shared;
-using FileFlows.ServerShared.Workers;
 using FileFlows.Shared.Models;
 using Microsoft.AspNetCore.SignalR;
-using FlowRunnerService = FileFlows.Server.Services.FlowRunnerService;
 using HttpMethod = System.Net.Http.HttpMethod;
-using LibraryFileService = FileFlows.Server.Services.LibraryFileService;
-using NodeService = FileFlows.Server.Services.NodeService;
 using ServiceLoader = FileFlows.Server.Services.ServiceLoader;
 using SettingsService = FileFlows.Server.Services.SettingsService;
-using StatisticService = FileFlows.Server.Services.StatisticService;
-using VariableService = FileFlows.Server.Services.VariableService;
 
 namespace FileFlows.Server;
 
@@ -154,6 +146,7 @@ public class WebServer
         // Dynamically register services from the console application's service provider
         builder.Services.AddSingleton<AppSettingsService>(x => ServiceLoader.Load<AppSettingsService>());
         builder.Services.AddSingleton<SettingsService>(x => ServiceLoader.Load<SettingsService>());
+        builder.Services.AddSingleton<ProfileService>(x => ServiceLoader.Load<ProfileService>());
 
         var appSettings = ServiceLoader.Load<AppSettingsService>().Settings;
 
