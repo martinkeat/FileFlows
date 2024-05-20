@@ -231,6 +231,7 @@ public class FlowRunnerService : IFlowRunnerService
                 existing.Flow = updated.Flow;
             else if(string.IsNullOrWhiteSpace(existing.Flow?.Name))
                 existing.Flow = updated.Flow;
+            existing.ProcessOnNodeUid = updated.ProcessOnNodeUid;
             
             await lfService.Update(existing);
             var library = await ServiceLoader.Load<LibraryService>().GetByUidAsync(existing.Library.Uid);

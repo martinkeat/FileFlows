@@ -280,7 +280,6 @@ public class Runner
             {
 
                 var service = ServiceLoader.Load<IFlowRunnerService>();
-                Logger.Instance.ILog("Process On Node: " + (Info.LibraryFile?.ProcessOnNodeUid?.ToString() ?? "Unknown"));
                 await service.Finish(Info);
                 return;
             }
@@ -382,6 +381,7 @@ public class Runner
         }
         catch (Exception)
         {
+            // Ignored
         }
         finally
         {
