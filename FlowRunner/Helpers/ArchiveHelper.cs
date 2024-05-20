@@ -4,6 +4,7 @@ using FileFlows.FlowRunner.Helpers.ArchiveHelpers;
 using FileFlows.Plugin;
 using FileFlows.Plugin.Helpers;
 using SharpCompress.Archives;
+using SharpCompress.Archives.Rar;
 using SharpCompress.Common;
 using SharpCompress.Readers;
 
@@ -169,8 +170,7 @@ public partial class ArchiveHelper : IArchiveHelper
         if (File.Exists(archivePath) == false)
             return Result<bool>.Fail("Archive file not found: " + archivePath);
 
-        if (archivePath.ToLowerInvariant().EndsWith(".rar") || Regex.IsMatch(archivePath, @"\.r[\d]{2,}$",
-                RegexOptions.CultureInvariant | RegexOptions.IgnoreCase))
+        if (IsMultipartRarExtension(archivePath))
         {
             // rar file
             var result = rarHelper.Extract(archivePath, destinationPath, percentCallback);
@@ -184,6 +184,12 @@ public partial class ArchiveHelper : IArchiveHelper
         
         try
         {
+            // Check if the file is part of a multi-part RAR archive
+            if (IsMultipartRar(archivePath))
+            {
+                return ExtractMultipartRar(archivePath, destinationPath);
+            }
+            
             using Stream stream = File.OpenRead(archivePath);
             using var reader = ReaderFactory.Open(stream);
             while (reader.MoveToNextEntry())
@@ -213,6 +219,85 @@ public partial class ArchiveHelper : IArchiveHelper
         }
     }
 
+/// <summary>
+/// Determines if the given file path is part of a multi-part RAR archive.
+/// </summary>
+/// <param name="archivePath">The path to the archive file.</param>
+/// <returns>True if the file is part of a multipart RAR archive, otherwise false.</returns>
+private bool IsMultipartRar(string archivePath)
+{
+    var baseArchivePath = Path.GetDirectoryName(archivePath);
+    var baseFileName = Path.GetFileNameWithoutExtension(archivePath);
+    var extension = Path.GetExtension(archivePath).ToLower();
+
+    // Check if the archive path ends with .rar or .rXX (where XX are digits)
+    if (extension == ".rar")
+    {
+        // Check if there are other parts (e.g., .r01, .r02, etc.) in the same directory
+        var otherParts = Directory.GetFiles(baseArchivePath, $"{baseFileName}.r*")
+            .Where(f => f != archivePath && IsMultipartRarExtension(f))
+            .ToList();
+        return otherParts.Count > 0;
+    }
+
+    return IsMultipartRarExtension(archivePath);
+}
+
+/// <summary>
+/// Determines if the file has a multi-part RAR extension.
+/// </summary>
+/// <param name="filePath">The path to the file.</param>
+/// <returns>True if the file has a multipart RAR extension, otherwise false.</returns>
+private bool IsMultipartRarExtension(string filePath)
+{
+    var extension = Path.GetExtension(filePath).ToLower();
+    return extension == ".rar" || Regex.IsMatch(extension, @"\.r[\d]{2,}$",
+        RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
+}
+
+/// <summary>
+/// Extracts files from a multi-part RAR archive.
+/// </summary>
+/// <param name="archivePath">The path to the archive file.</param>
+/// <param name="destinationPath">The path where the files will be extracted.</param>
+/// <returns>A Result object indicating success or failure of the extraction.</returns>
+private Result<bool> ExtractMultipartRar(string archivePath, string destinationPath)
+{
+    try
+    {
+        // Determine the base path for the multipart archive
+        var baseArchivePath = Path.GetDirectoryName(archivePath);
+        var baseFileName = Path.GetFileNameWithoutExtension(archivePath);
+
+        // Collect all parts of the RAR archive
+        var archiveFiles = new DirectoryInfo(baseArchivePath).GetFiles($"{baseFileName}.*")
+                                    .Where(f => IsMultipartRarExtension(f.FullName))
+                                    .OrderBy(f => f);
+
+        // Open the multipart RAR archive
+        using var archive = RarArchive.Open(archiveFiles);
+        foreach (var entry in archive.Entries)
+        {
+            if (!entry.IsDirectory)
+            {
+                // Extract the file
+                var entryPath = Path.Combine(destinationPath, entry.Key);
+                Logger?.ILog("Extracting file: " + entryPath);
+                entry.WriteToDirectory(destinationPath, new ExtractionOptions()
+                {
+                    ExtractFullPath = true, // Extract files with full path
+                    Overwrite = true        // Overwrite existing files
+                });
+            }
+        }
+
+        return Result<bool>.Success(true);
+    }
+    catch (Exception ex)
+    {
+        return Result<bool>.Fail("Failed to extract multipart RAR archive: " + ex.Message);
+    }
+}
     /// <summary>
     /// Precompiled is rar regex
     /// </summary>
