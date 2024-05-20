@@ -318,24 +318,6 @@ public class FlowWorker : Worker
                         exitCode = 0; // special case
                         keepFiles = true;
                     }
-
-                    if (File.Exists(Path.Combine(workingDir, libFile.Uid + ".json")))
-                    {
-                        try
-                        {
-                            var libFileJson = File.ReadAllText(Path.Combine(workingDir, libFile.Uid + ".json"));
-                            var deserialized = JsonSerializer.Deserialize<LibraryFile>(libFileJson);
-                            if (deserialized != null)
-                            {
-                                libFile = deserialized;
-                                completeLog.AppendLine("Parsed LibraryFile from temporary JSON");
-                            }
-                        }
-                        catch (Exception)
-                        {
-                            // Ignored
-                        }
-                    }
                     
                     if (string.IsNullOrEmpty(output) == false)
                     {
@@ -359,19 +341,19 @@ public class FlowWorker : Worker
                             "===                    PROCESSING NODE ERROR OUTPUT END                    ===" + Environment.NewLine +
                             "==============================================================================");
                     }
+
+                    if (exitCode is 0 or (int)FileStatus.ReprocessByFlow)
+                        return;
                     
-                    if (exitCode != 0)
+                    Logger.Instance?.ELog("Error executing runner: Exit code: " + exitCode);
+                    if (Enum.IsDefined(typeof(FileStatus), exitCode))
+                        libFile.Status = (FileStatus)exitCode;
+                    else
                     {
-                        Logger.Instance?.ELog("Error executing runner: Exit code: " + exitCode);
-                        if (Enum.IsDefined(typeof(FileStatus), exitCode))
-                            libFile.Status = (FileStatus)exitCode;
-                        else
-                        {
-                            libFile.Status = FileStatus.ProcessingFailed;
-                            Logger.Instance?.ILog("Invalid exit code, setting file as failed");
-                        }
-                        FinishWork(processUid, node2, libFile);
+                        libFile.Status = FileStatus.ProcessingFailed;
+                        Logger.Instance?.ILog("Invalid exit code, setting file as failed");
                     }
+                    FinishWork(processUid, node2, libFile);
                 }
                 catch (Exception ex)
                 {

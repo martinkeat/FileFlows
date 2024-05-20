@@ -184,9 +184,6 @@ public class Runner
         {
             Program.Logger.ELog("Failed 'Finishing' runner: " + ex.Message + Environment.NewLine + ex.StackTrace);
         }
-        
-        var json = JsonSerializer.Serialize(Info.LibraryFile);
-        File.WriteAllText(Path.Combine(WorkingDir, Info.LibraryFile.Uid + ".json"), json);
 
         systemHelper.Stop();
         return (success, Info.LibraryFile.Status == FileStatus.ProcessingFailed);
