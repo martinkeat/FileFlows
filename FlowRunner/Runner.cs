@@ -440,8 +440,6 @@ public class Runner
             IsRemote = Info.IsRemote,
             LogImageActual = logger.Image,
         };
-        nodeParameters.ArchiveHelper = new ArchiveHelper(nodeParameters);
-        nodeParameters.ImageHelper = new ImageHelper(logger, nodeParameters);
         
         nodeParameters.Variables["library.Name"] = Info.Library.Name;
         nodeParameters.Variables["library.Path"] = Info.LibraryPath;
@@ -547,6 +545,11 @@ public class Runner
             nodeParameters?.Logger?.ILog($"Tool '{name}' variable = '{final}");
             return final;
         };
+        
+        // must be done after GetToolPathActual so we can get the tools
+        nodeParameters.ArchiveHelper = new ArchiveHelper(nodeParameters);
+        nodeParameters.ImageHelper = new ImageHelper(logger, nodeParameters);
+        
         nodeParameters.GetPluginSettingsJson = (pluginSettingsType) =>
         {
             string? json = null;

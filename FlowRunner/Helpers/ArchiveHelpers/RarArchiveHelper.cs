@@ -7,6 +7,9 @@ using FileFlows.Shared;
 
 namespace FileFlows.FlowRunner.Helpers.ArchiveHelpers;
 
+/// <summary>
+/// RAR archive helper for extracting and compressing RAR archives
+/// </summary>
 public class RarArchiveHelper : IArchiveHelper
 {
     /// <summary>
@@ -28,8 +31,8 @@ public class RarArchiveHelper : IArchiveHelper
     /// <param name="args">The Node parameters</param>
     public RarArchiveHelper(NodeParameters args)
     {
-        RarExecutable = args.GetToolPath("rar")?.EmptyAsNull() ?? "rar";
-        UnrarExecutable = args.GetToolPath("unrar")?.EmptyAsNull() ?? "unrar";
+        RarExecutable = args.GetToolPath("rar")?.EmptyAsNull() ?? (OperatingSystem.IsWindows() ? "rar.exe" : "rar");
+        UnrarExecutable = args.GetToolPath("unrar")?.EmptyAsNull() ?? (OperatingSystem.IsWindows() ? "unrar.exe" : "unrar");
         Logger = args.Logger;
     }
     
