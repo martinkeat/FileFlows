@@ -83,7 +83,7 @@ public class FlowEditor : IDisposable
     {
         //this.SetTitle();
         model.Parts ??= new List<ffPart>(); // just incase its null
-        foreach (var p in model.Parts)
+        foreach (FlowPart p in model.Parts)
         {
             // FF-347: sane limits to flow positions
             if (p.xPos < 10)
@@ -96,13 +96,6 @@ public class FlowEditor : IDisposable
             else if (p.yPos > 1780)
                 p.yPos = 1750;
             
-            if (string.IsNullOrEmpty(p.Name) == false || string.IsNullOrEmpty(p?.FlowElementUid))
-                continue;
-            string type = p.FlowElementUid[(p.FlowElementUid.LastIndexOf(".", StringComparison.Ordinal) + 1)..];
-            string name = Translater.Instant($"Flow.Parts.{type}.Label", suppressWarnings: true);
-            if (name == "Label")
-                name = FlowHelper.FormatLabel(type);
-            
             if (p.FlowElementUid == "FileFlows.BasicNodes.Functions.Matches" && p.Model is IDictionary<string, object> dict)
             {
                 // special case, outputs is determine by the "Matches" count
@@ -111,6 +104,13 @@ public class FlowEditor : IDisposable
                     p.Outputs = ObjectHelper.GetArrayLength(oMatches) + 1; // add +1 for not matching
                 }
             }
+            
+            if (string.IsNullOrEmpty(p.Name) == false || string.IsNullOrEmpty(p?.FlowElementUid))
+                continue;
+            var type = p.FlowElementUid[(p.FlowElementUid.LastIndexOf('.') + 1)..];
+            var name = Translater.Instant($"Flow.Parts.{type}.Label", suppressWarnings: true);
+            if (name == "Label")
+                name = FlowHelper.FormatLabel(type);
             p.Name = name;
         }
 
