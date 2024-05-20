@@ -10,6 +10,7 @@ using FileFlows.FlowRunner.TemplateRenders;
 using FileFlows.Plugin.Services;
 using FileFlows.RemoteServices;
 using FileFlows.ServerShared.FileServices;
+using FileFlows.Shared;
 using Humanizer;
 
 namespace FileFlows.FlowRunner;
@@ -278,7 +279,8 @@ public class Runner
             try
             {
 
-                var service = ServiceLoader.Load<IFlowRunnerService>();;
+                var service = ServiceLoader.Load<IFlowRunnerService>();
+                Logger.Instance.ILog("Process On Node: " + (Info.LibraryFile?.ProcessOnNodeUid?.ToString() ?? "Unknown"));
                 await service.Finish(Info);
                 return;
             }
