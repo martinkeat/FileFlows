@@ -168,6 +168,19 @@ public partial class ArchiveHelper : IArchiveHelper
         // Check if the archive file exists
         if (File.Exists(archivePath) == false)
             return Result<bool>.Fail("Archive file not found: " + archivePath);
+
+        if (archivePath.ToLowerInvariant().EndsWith(".rar") || Regex.IsMatch(archivePath, @"\.r[\d]{2,}$",
+                RegexOptions.CultureInvariant | RegexOptions.IgnoreCase))
+        {
+            // rar file
+            var result = rarHelper.Extract(archivePath, destinationPath, percentCallback);
+            if (result.IsFailed == false)
+            {
+                Logger.ILog("Successfully extracted rar archive using unrar");
+                return true;
+            }
+            Logger.WLog("Failed to extract using unrar: " + result.Error);
+        }
         
         try
         {
