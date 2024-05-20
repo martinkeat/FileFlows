@@ -281,6 +281,7 @@ public class FlowWorker : Worker
                     .Select(s => s[new Random().Next(s.Length)]).ToArray());
                 string encrypted = Decrypter.Encrypt(json, "hVYjHrWvtEq8huShjTkA" + randomString + "oZf4GW3jJtjuNHlMNpl9");
                 var parameters = new[] { encrypted, randomString };
+                string workingDir = Path.Combine(tempPath, "Runner-" + processUid);
 #pragma warning restore CS8601 // Possible null reference assignment.
 
                 try
@@ -316,6 +317,24 @@ public class FlowWorker : Worker
                     {
                         exitCode = 0; // special case
                         keepFiles = true;
+                    }
+
+                    if (File.Exists(Path.Combine(workingDir, libFile.Uid + ".json")))
+                    {
+                        try
+                        {
+                            var libFileJson = File.ReadAllText(Path.Combine(workingDir, libFile.Uid + ".json"));
+                            var deserialized = JsonSerializer.Deserialize<LibraryFile>(libFileJson);
+                            if (deserialized != null)
+                            {
+                                libFile = deserialized;
+                                completeLog.AppendLine("Parsed LibraryFile from temporary JSON");
+                            }
+                        }
+                        catch (Exception)
+                        {
+                            // Ignored
+                        }
                     }
                     
                     if (string.IsNullOrEmpty(output) == false)

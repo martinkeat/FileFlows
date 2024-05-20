@@ -174,8 +174,9 @@ public class Program
                 WorkingDirectory = workingDir,
                 Hostname = hostname
             });
-            // we only want to return 0 here if the execute complete, the file may have finished in that, but its been
-            // successfully recorded/completed by that, so we dont need to tell the Node to update this file any more
+            
+            // we only want to return 0 here if to execute complete, the file may have finished in that, but it's been
+            // successfully recorded/completed by that, so we don't need to tell the Node to update this file anymore
 
             return result.Success ? (result.KeepFiles ? 100 : 0) : (int)FileStatus.ProcessingFailed;
         }

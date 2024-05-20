@@ -184,6 +184,9 @@ public class Runner
         {
             Program.Logger.ELog("Failed 'Finishing' runner: " + ex.Message + Environment.NewLine + ex.StackTrace);
         }
+        
+        var json = JsonSerializer.Serialize(Info.LibraryFile);
+        File.WriteAllText(Path.Combine(WorkingDir, Info.LibraryFile.Uid + ".json"), json);
 
         systemHelper.Stop();
         return (success, Info.LibraryFile.Status == FileStatus.ProcessingFailed);
@@ -219,7 +222,7 @@ public class Runner
             Info.LibraryFile.OriginalMetadata = nodeParameters.OriginalMetadata;
         if (nodeParameters?.Metadata != null)
             Info.LibraryFile.FinalMetadata = nodeParameters.Metadata;
-        // calculates the final finger print
+        // calculates the final fingerprint
         if (string.IsNullOrWhiteSpace(Info.LibraryFile.OutputPath) == false)
         {
             Info.LibraryFile.FinalFingerprint = FileHelper.CalculateFingerprint(Info.LibraryFile.OutputPath);
@@ -574,6 +577,7 @@ public class Runner
         {
             if (nodeParameters.ReprocessNode != null)
             {
+                logger.ILog($"Setting ProcessOnNodeUid = '{nodeParameters.ReprocessNode.Uid}'");
                 Info.LibraryFile.ProcessOnNodeUid = nodeParameters.ReprocessNode.Uid;
                 SetStatus(FileStatus.ReprocessByFlow);
             }
