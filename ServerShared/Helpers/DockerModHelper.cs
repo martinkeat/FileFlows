@@ -169,9 +169,8 @@ public static class DockerModHelper
                 // Run the file and capture output to string
                 var process = Process.Start(new ProcessStartInfo
                 {
-                    //FileName = "/bin/bash",
                     FileName = "/bin/su",
-                    ArgumentList = { "-c", unknown.FullName, "--uninstall" },
+                    ArgumentList = { "-c", "\"" + unknown.FullName + "\" --uninstall" },
                     RedirectStandardOutput = true,
                     RedirectStandardError = true, // Redirect standard error stream
                     UseShellExecute = false,
