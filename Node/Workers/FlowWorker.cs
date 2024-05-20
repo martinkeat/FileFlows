@@ -750,18 +750,14 @@ public class FlowWorker : Worker
         if (Directory.Exists(directory) == false)
             Directory.CreateDirectory(directory);
         
-        // Delete all .sh files in the directory
-        var files = Directory.GetFiles(directory, "*.sh");
-        foreach (var file in files)
-        {
-            File.Delete(file);
-        }
+        DockerModHelper.UninstallUnknownMods(mods).Wait();
 
         if (mods?.Any() != true)
         {
             Logger.Instance.ILog("No DockerMods to run");
             return true;
         }
+
         
         foreach (var mod in mods)
         {

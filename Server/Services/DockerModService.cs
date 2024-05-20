@@ -54,8 +54,8 @@ public class DockerModService
                 if(ServiceLoader.Load<AppSettingsService>().Settings.DockerModsOnServer)
                     _ = DockerModHelper.Execute(updated); // dont wait this, it can take a while to install the DockerMod
             }
-            else
-                DockerModHelper.DeleteFromDisk(updated);
+            // else
+            //     DockerModHelper.DeleteFromDisk(updated);
         }
         return result;
     }

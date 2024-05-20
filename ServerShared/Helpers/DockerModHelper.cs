@@ -136,15 +136,105 @@ public static class DockerModHelper
     }
     
     
+    //
+    // /// <summary>
+    // /// Deletes a DockerMod from disk
+    // /// </summary>
+    // /// <param name="mod">the DockerMod to delete</param>
+    // public static void DeleteFromDisk(DockerMod mod)
+    // {
+    //     var file = Path.Combine(DirectoryHelper.DockerModsDirectory, mod.Name + ".sh");
+    //     if(File.Exists(file))
+    //         File.Delete(file);
+    // }
 
     /// <summary>
-    /// Deletes a DockerMod from disk
+    /// Uninstalls any DockerMod that is not know
     /// </summary>
-    /// <param name="mod">the DockerMod to delete</param>
-    public static void DeleteFromDisk(DockerMod mod)
+    /// <param name="mods">The known DockerMods</param>
+    public static async Task UninstallUnknownMods(List<DockerMod> mods)
     {
-        var file = Path.Combine(DirectoryHelper.DockerModsDirectory, mod.Name + ".sh");
-        if(File.Exists(file))
-            File.Delete(file);
+        var modNames = mods?.Select(x => x.Name.ToLowerInvariant())?.ToList() ?? new (); // Convert to list for efficient lookup
+        var modFiles = new DirectoryInfo(DirectoryHelper.DockerModsDirectory).GetFiles("*.sh");
+        var unknownMods = modFiles
+            .Where(file => !modNames.Contains(Path.GetFileNameWithoutExtension(file.Name).ToLowerInvariant())).ToList();
+
+        foreach (var unknown in unknownMods)
+        {
+            string name = Path.GetFileNameWithoutExtension(unknown.Name);
+            try
+            {
+                Logger.Instance.WLog($"About to uninstall DockerMod '{name}'");
+
+                // Run the file and capture output to string
+                var process = Process.Start(new ProcessStartInfo
+                {
+                    //FileName = "/bin/bash",
+                    FileName = "/bin/su",
+                    ArgumentList = { "-c", unknown.FullName, "--uninstall" },
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true, // Redirect standard error stream
+                    UseShellExecute = false,
+                    WorkingDirectory = DirectoryHelper.DockerModsDirectory
+                });
+
+                if (process == null)
+                {
+                    Logger.Instance.WLog($"Failed Uninstalling DockerMod '{name}': Failed to start the process.");
+                    continue;
+                }
+
+                StringBuilder outputBuilder = new StringBuilder();
+
+                process.OutputDataReceived += (sender, e) =>
+                {
+                    if (!string.IsNullOrEmpty(e.Data))
+                    {
+                        outputBuilder.AppendLine(e.Data);
+                    }
+                };
+
+                process.ErrorDataReceived += (sender, e) =>
+                {
+                    if (!string.IsNullOrEmpty(e.Data))
+                    {
+                        outputBuilder.AppendLine(e.Data);
+                    }
+                };
+
+                process.BeginOutputReadLine();
+                process.BeginErrorReadLine(); // Begin reading standard error stream asynchronously
+
+                await process.WaitForExitAsync();
+                int exitCode = process.ExitCode;
+                string output = outputBuilder.ToString();
+
+                var totalLength = 120;
+                var modNameLength = unknown.Name.Length;
+                var sideLength =
+                    (totalLength - modNameLength - 14) / 2; // Subtracting 14 for the length of " Docker Mod: "
+
+                if (exitCode != 0)
+                {
+                    var header = new string('-', sideLength) + " Docker Mod Uninstall Failed: " + name + " " +
+                                 new string('-', sideLength + (modNameLength % 2));
+                    Logger.Instance.ELog("\n" + header + "\n" + output + "\n" +
+                                         new string('-', totalLength));
+                }
+                else
+                {
+                    var header = new string('-', sideLength) + " Docker Mod Uninstall: " + name + " " +
+                                 new string('-', sideLength + (modNameLength % 2));
+                    Logger.Instance.ILog("\n" + header + "\n" + output + "\n" +
+                                         new string('-', totalLength));
+                }
+            }
+            catch (Exception)
+            {
+                Logger.Instance.ELog("Failed to uninstall DockerMod: " + name);
+            }
+
+            unknown.Delete();
+        }
     }
 }
