@@ -38,6 +38,18 @@ public class ImageHelper : IImageHelper
         NodeParameters = args;
         ImageMagick = new(args);
     }
+    
+    /// <summary>
+    /// Initialises a new instance of the image helper
+    /// </summary>
+    /// <param name="logger">the logger</param>
+    /// <param name="convert">The convert executable file</param>
+    /// <param name="identify">The identify executable file</param>
+    public ImageHelper(ILogger logger, string convert, string identify)
+    {
+        Logger = logger;
+        ImageMagick = new(convert, identify);
+    }
 
     /// <inheritdoc />
     public Result<ImageInfo> GetInfo(string imagePath)

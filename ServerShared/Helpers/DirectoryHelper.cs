@@ -232,11 +232,11 @@ public class DirectoryHelper
     /// Gets the directory for library templates
     /// </summary>
     public static string TemplateDirectoryLibrary => Path.Combine(TemplateDirectory, "Library");
-    
+
     /// <summary>
     /// Gets the DockerMods directory
     /// </summary>
-    public static string DockerModsDirectory => Path.Combine(DataDirectory, "DockerMods");
+    public static string DockerModsDirectory => "/app/DockerMods"; // this directory will not be mapped out, so will be cleaned when new DockerImage is pulled
     
     /// <summary>
     /// Gets the scripts directory

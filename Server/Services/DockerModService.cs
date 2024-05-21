@@ -169,44 +169,4 @@ public class DockerModService
     /// <returns>a task to await</returns>
     public Task Delete(Guid[] uids, AuditDetails auditDetails)
         => new DockerModManager().Delete(uids, auditDetails);
-
-    /// <summary>
-    /// Writes the DockerMods to the DockerMods directory
-    /// </summary>
-    public async Task WriteDockerMods()
-    {
-        if (Globals.IsDocker == false)
-            return;
-        var mods = await GetAll();
-        foreach (var dm in mods)
-        {
-            if (dm.Enabled == false)
-                continue;
-            WriteDockerMod(dm);
-        }
-    }
-
-    /// <summary>
-    /// Writes a single DockerMod to the DockerMods directory
-    /// </summary>
-    /// <param name="mod">the DockerMod to write</param>
-    private void WriteDockerMod(DockerMod mod)
-    {
-        if (Globals.IsDocker == false)
-            return;
-        if (mod.Enabled == false)
-            return;
-        if (string.IsNullOrWhiteSpace(mod.Code))
-            return;
-
-        try
-        {
-            var file = Path.Combine(DirectoryHelper.DockerModsDirectory, mod.Name + ".sh");
-            File.WriteAllText(file, mod.Code);
-        }
-        catch (Exception ex)
-        {
-            Logger.Instance.WLog($"Failed writing DockerMod '{mod.Name}': {ex.Message}");
-        }
-    }
 }
