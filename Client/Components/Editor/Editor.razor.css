@@ -14,11 +14,11 @@
 }
 
 .flow-element-editor-overlay.background-overlay {
-  z-index: 3;
+  z-index: 5;
 }
 
 .flow-element-editor {
-  z-index: 4;
+  z-index: 6;
 }
 .flow-element-editor.maximised {
   left: 0;
@@ -38,5 +38,3 @@
   right: unset;
   height: 100%;
 }
-
-/*# sourceMappingURL=Editor.razor.css.map */

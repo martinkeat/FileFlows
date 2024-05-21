@@ -18,10 +18,10 @@
 .flow-elements {
     width:var(--flow-elements-width);
     padding-top: 0.75rem;
-    z-index:4;
+    z-index: 4;
     background: var(--base-darker);
     &.flow-elements-on-top {
-        z-index:3;
+        z-index:6;
     }
 
     ::deep

@@ -22,7 +22,7 @@
   background: var(--base-darker);
 }
 .flow-elements.flow-elements-on-top {
-  z-index: 3;
+  z-index: 6;
 }
 .flow-elements ::deep .row {
   margin: 0 1rem;
