@@ -3,6 +3,7 @@ using System.Text.RegularExpressions;
 using FileFlows.FlowRunner.Helpers.ArchiveHelpers;
 using FileFlows.Plugin;
 using FileFlows.Plugin.Helpers;
+using FileFlows.Shared;
 using SharpCompress.Archives;
 using SharpCompress.Archives.Rar;
 using SharpCompress.Common;
@@ -17,14 +18,27 @@ public partial class ArchiveHelper : IArchiveHelper
 {
     private readonly ILogger Logger;
     private readonly RarArchiveHelper rarHelper;
+    
     /// <summary>
-    /// Initialises a new instance of the image helper
+    /// Initialises a new instance of the archive helper
     /// </summary>
     /// <param name="args">the Node Parameters</param>
     public ArchiveHelper(NodeParameters args)
     {
         Logger = args.Logger;
         rarHelper = new(args);
+    }
+    
+    /// <summary>
+    /// Initialises a new instance of the archive helper
+    /// </summary>
+    /// <param name="rarExecutable">The rar executable</param>
+    /// <param name="unrarExecutable">The unrar executable</param>
+    /// <param name="logger">The logger</param>
+    public ArchiveHelper(ILogger logger, string rarExecutable, string unrarExecutable)
+    {
+        Logger = logger;
+        rarHelper = new(logger, rarExecutable, unrarExecutable);
     }
 
     /// <summary>
@@ -169,18 +183,6 @@ public partial class ArchiveHelper : IArchiveHelper
         // Check if the archive file exists
         if (File.Exists(archivePath) == false)
             return Result<bool>.Fail("Archive file not found: " + archivePath);
-
-        if (IsMultipartRarExtension(archivePath))
-        {
-            // rar file
-            var result = rarHelper.Extract(archivePath, destinationPath, percentCallback);
-            if (result.IsFailed == false)
-            {
-                Logger.ILog("Successfully extracted rar archive using unrar");
-                return true;
-            }
-            Logger.WLog("Failed to extract using unrar: " + result.Error);
-        }
         
         try
         {
@@ -261,7 +263,7 @@ private bool IsMultipartRarExtension(string filePath)
 /// <param name="archivePath">The path to the archive file.</param>
 /// <param name="destinationPath">The path where the files will be extracted.</param>
 /// <returns>A Result object indicating success or failure of the extraction.</returns>
-private Result<bool> ExtractMultipartRar(string archivePath, string destinationPath)
+public Result<bool> ExtractMultipartRar(string archivePath, string destinationPath)
 {
     try
     {
@@ -270,9 +272,12 @@ private Result<bool> ExtractMultipartRar(string archivePath, string destinationP
         var baseFileName = Path.GetFileNameWithoutExtension(archivePath);
 
         // Collect all parts of the RAR archive
-        var archiveFiles = new DirectoryInfo(baseArchivePath).GetFiles($"{baseFileName}.*")
+        var allFiles = new DirectoryInfo(baseArchivePath).GetFiles($"{baseFileName}.*");
+        var archiveFiles = allFiles
                                     .Where(f => IsMultipartRarExtension(f.FullName))
-                                    .OrderBy(f => f);
+                                    .OrderBy(f => f.Extension.Equals(".rar", StringComparison.InvariantCultureIgnoreCase) ? 0 : 1)
+                                    .ThenBy(f => f.Name)
+                                    .ToList();
 
         // Open the multipart RAR archive
         using var archive = RarArchive.Open(archiveFiles);

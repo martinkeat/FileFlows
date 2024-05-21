@@ -36,6 +36,19 @@ public class RarArchiveHelper : IArchiveHelper
         Logger = args.Logger;
     }
     
+    /// <summary>
+    /// Initializes a new instance of the Rar Archive Helper
+    /// </summary>
+    /// <param name="logger">The logger</param>
+    /// <param name="rarExecutable">The rar executable</param>
+    /// <param name="unrarExecutable">The unrar executable</param>
+    public RarArchiveHelper(ILogger logger, string rarExecutable, string unrarExecutable)
+    {
+        RarExecutable = rarExecutable;
+        UnrarExecutable = unrarExecutable;
+        Logger = logger;
+    }
+    
     /// <inheritdoc />
     public Result<bool> FileExists(string archivePath, string file)
     {
@@ -180,6 +193,7 @@ public class RarArchiveHelper : IArchiveHelper
     {
         try
         {
+            Logger.ILog("Extracting using unrar: " + archivePath);
             var processStartInfo = new ProcessStartInfo
             {
                 FileName = UnrarExecutable,

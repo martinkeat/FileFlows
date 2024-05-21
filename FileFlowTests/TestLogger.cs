@@ -65,7 +65,7 @@ public class TestLogger : ILogger
     /// <summary>
     /// Gets or sets an optional writer
     /// </summary>
-    public  Action<string> Writer { get; set; }
+    public Action<string> Writer { get; set; }
 
     /// <summary>
     /// Returns the entire log as a string

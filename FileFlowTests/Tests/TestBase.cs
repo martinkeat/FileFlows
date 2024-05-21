@@ -18,4 +18,28 @@ public class TestBase
         get => testContextInstance;
         set => testContextInstance = value;
     }
+
+    /// <summary>
+    /// When the test starts
+    /// </summary>
+    [TestInitialize]
+    public void TestStarted()
+    {
+        Logger.Writer = (message) => TestContext.WriteLine(message);
+    }
+
+    /// <summary>
+    /// The test logger
+    /// </summary>
+    public readonly TestLogger Logger = new ();
+
+    /// <summary>
+    /// The directory with the test files
+    /// </summary>
+    protected readonly string TestFilesDir = "/home/john/src/ff-files/test-files";
+
+    /// <summary>
+    /// The temp path to use during testing
+    /// </summary>
+    protected readonly string TempPath = "/home/john/src/ff-files/temp";
 }
