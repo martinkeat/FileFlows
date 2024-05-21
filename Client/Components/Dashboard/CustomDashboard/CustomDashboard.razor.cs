@@ -77,7 +77,7 @@ public partial class CustomDashboard : IDisposable
     
     protected override async Task OnInitializedAsync()
     {
-        jsCharts = await jSRuntime.InvokeAsync<IJSObjectReference>("import", $"./scripts/Charts/FFCharts.js");
+        jsCharts = await jSRuntime.InvokeAsync<IJSObjectReference>("import", $"./scripts/Charts/FFCharts.js?v=" + Globals.Version);
         Dashboard.AddWidgetEvent = (sender, args) => _ = AddWidgetDialog();
 
         Profile = await ProfileService.Get();

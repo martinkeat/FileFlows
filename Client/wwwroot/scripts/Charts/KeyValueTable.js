@@ -1,4 +1,4 @@
-import { FFChart } from "./FFChart.js";
+import { FFChart } from "./FFChart.js?v=#VERSION#";
 
 export class KeyValueTable extends FFChart
 {

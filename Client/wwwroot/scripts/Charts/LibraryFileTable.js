@@ -1,4 +1,4 @@
-﻿import { FFChart } from './FFChart.js';
+﻿import { FFChart } from './FFChart.js?v=#VERSION#';
 
 /**
  * Widget for displaying library files in table

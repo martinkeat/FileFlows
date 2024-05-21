@@ -1,9 +1,9 @@
-import { FFChart } from './FFChart.js';
-import { Processing } from './Processing.js';
-import { LibraryFileTable } from "./LibraryFileTable.js";
-import { ProcessingNodes } from './ProcessingNodes.js';
-import { TotalsTable } from './TotalsTable.js';
-import { Counter } from './Counter.js';
+import { FFChart } from './FFChart.js?v=#VERSION#';
+import { Processing } from './Processing.js?v=#VERSION#';
+import { LibraryFileTable } from "./LibraryFileTable.js?v=#VERSION#";
+import { ProcessingNodes } from './ProcessingNodes.js?v=#VERSION#';
+import { TotalsTable } from './TotalsTable.js?v=#VERSION#';
+import { Counter } from './Counter.js?v=#VERSION#';
 
 export function initDashboard(uid, Widgets, csharp, isReadOnly){
     if(!Widgets)
