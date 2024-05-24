@@ -551,6 +551,7 @@ public class FileServerController : Controller
         {
             // Log the exception
             log.AppendLine($"FileServer: An error occurred: {ex.Message}" + Environment.NewLine + ex.StackTrace);
+            Logger.Instance?.ELog($"FileServer: An error occurred: {ex.Message}" + Environment.NewLine + ex.StackTrace);
             return StatusCode(500, log.ToString());
         }
     }

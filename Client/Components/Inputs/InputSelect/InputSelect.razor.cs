@@ -60,6 +60,11 @@ namespace FileFlows.Client.Components.Inputs
 
         private string lblSelectOne;
         [Parameter] public bool AllowClear { get; set; }
+        
+        /// <summary>
+        /// Gets or sets if the clear label should be blank
+        /// </summary>
+        [Parameter] public bool BlankClearLabel { get; set; }
 
         private int _SelectedIndex = -1;
         public int SelectedIndex
@@ -76,10 +81,11 @@ namespace FileFlows.Client.Components.Inputs
             }
         }
 
+        /// <inheritdoc />
         protected override void OnInitialized()
         {
             base.OnInitialized();
-            lblSelectOne = Translater.Instant("Labels.SelectOne");
+            lblSelectOne = BlankClearLabel ? string.Empty : Translater.Instant("Labels.SelectOne");
             ValueUpdated();
         }
 
