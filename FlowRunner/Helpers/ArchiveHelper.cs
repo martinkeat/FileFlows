@@ -192,6 +192,7 @@ public partial class ArchiveHelper : IArchiveHelper
                 return ExtractMultipartRar(archivePath, destinationPath);
             }
             
+            Logger.ILog("About to open archive: " + archivePath);
             using Stream stream = File.OpenRead(archivePath);
             using var reader = ReaderFactory.Open(stream);
             while (reader.MoveToNextEntry())
@@ -208,7 +209,7 @@ public partial class ArchiveHelper : IArchiveHelper
                 Logger?.ILog("Extracting file: " + entryPath);
                 reader.WriteEntryToDirectory(destinationPath, new ExtractionOptions()
                 {
-                    ExtractFullPath = false,     // Extract files without full path
+                    ExtractFullPath = true,     // Extract files with full path, ie in the appropriate sub directories
                     Overwrite = true            // Overwrite existing files
                 });
             }
