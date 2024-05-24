@@ -11,6 +11,13 @@ namespace FileFlows.Server.Controllers;
 [FileFlowsAuthorize(UserRole.Libraries | UserRole.Flows)]
 public class FileBrowserController : Controller
 {
+    /// <summary>
+    /// Gets the items in a given folder
+    /// </summary>
+    /// <param name="start">the start path</param>
+    /// <param name="includeFiles">if files should be included</param>
+    /// <param name="extensions">the allowed file extensions</param>
+    /// <returns>a list of items</returns>
     [HttpGet]
     public IEnumerable<FileBrowserItem> GetItems([FromQuery] string start, [FromQuery] bool includeFiles, [FromQuery] string[] extensions)
     {
@@ -58,7 +65,10 @@ public class FileBrowserController : Controller
             foreach (var dir in di.GetDirectories().OrderBy(x => x.Name?.ToLower() ?? string.Empty))
             {
                 if ((dir.Attributes & FileAttributes.Hidden) == FileAttributes.Hidden)
-                    continue;
+                {
+                    if(OperatingSystem.IsWindows())
+                        continue;
+                }
 
                 items.Add(new FileBrowserItem { FullName = dir.FullName, Name = dir.Name, IsPath = true });
             }

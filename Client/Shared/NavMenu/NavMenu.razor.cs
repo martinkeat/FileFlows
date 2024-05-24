@@ -62,6 +62,9 @@ public partial class NavMenu : IDisposable
     [Inject] private ProfileService ProfileService { get; set; }
 
     private List<NavMenuItem> UserMenu = new();
+    /// <summary>
+    /// Gets or sets the users profile
+    /// </summary>
     private Profile Profile;
     /// <summary>
     /// If the bubbles have been loaded at least once

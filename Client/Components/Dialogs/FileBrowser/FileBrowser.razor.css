@@ -1,4 +1,4 @@
-﻿@media screen and (min-width: 578.0001px) {
+@media screen and (min-width: 578.0001px) {
   .file-list {
     max-height: 80vh;
     height: 30rem;
@@ -43,4 +43,12 @@
 }
 .file-list li.selected {
   border-color: var(--accent);
+}
+
+.switch {
+  display: inline;
+  float: left;
+  position: relative;
+  top: 0.4rem;
+  font-size: 0.9rem;
 }

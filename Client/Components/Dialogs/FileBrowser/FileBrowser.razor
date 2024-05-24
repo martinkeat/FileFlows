@@ -6,6 +6,11 @@
         <ul class="file-list">
             @foreach (var item in Items)
             {
+                if (IsWindows == false && item.Name.StartsWith(".") && ShowHidden == false)
+                {
+                    continue;
+                }
+
                 <li @onclick="() => SetSelected(item)" @ondblclick="() => DblClick(item)"
                 class="@(item == Selected ? "selected" : "")">
                     @if (item.IsDrive)
@@ -33,7 +38,14 @@
         </ul>
     </Body>
     <Footer>
-        <button @onclick=@Select disabled="@(Selected == null ? "disabled": null)">@lblSelect</button>
+        @if (IsWindows == false)
+        {
+            <label class="switch">
+                <FlowSwitch @bind-Value="ShowHidden" />
+                <span>@lblShowHidden</span>
+            </label>
+        }
+        <button @onclick=@Select disabled="@(Selected == null ? "disabled" : null)">@lblSelect</button>
         <button @onclick=@Cancel>@lblCancel</button>
     </Footer>
 </Modal>

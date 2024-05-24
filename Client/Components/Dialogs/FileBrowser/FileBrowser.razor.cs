@@ -9,6 +9,9 @@ using FileFlows.Shared.Models;
 
 namespace FileFlows.Client.Components.Dialogs;
 
+/// <summary>
+/// A file browser that lets a user picks a file or folder
+/// </summary>
 public partial class FileBrowser : ComponentBase, IDisposable
 {
     private string lblSelect, lblCancel;
@@ -17,24 +20,47 @@ public partial class FileBrowser : ComponentBase, IDisposable
     private bool DirectoryMode = false;
     private string[] Extensions = new string[] { };
     TaskCompletionSource<string> ShowTask;
+    private bool ShowHidden = false;
 
     private static FileBrowser Instance { get; set; }
 
     private FileBrowserItem Selected;
     List<FileBrowserItem> Items = new List<FileBrowserItem>();
 
+    /// <summary>
+    /// Gets or sets the profile service
+    /// </summary>
+    [Inject] private ProfileService ProfileService { get; set; }
     private bool Visible { get; set; }
 
+    /// <summary>
+    /// The API url to call
+    /// </summary>
     private const string API_URL = "/api/file-browser";
+    /// <summary>
+    /// The label for show hidden
+    /// </summary>
+    private string lblShowHidden;
+    /// <summary>
+    /// If the server is windows or not
+    /// </summary>
+    private bool IsWindows;
 
-    protected override void OnInitialized()
+    /// <inheritdoc />
+    protected override async Task OnInitializedAsync()
     {
+        IsWindows = (await ProfileService.Get()).ServerOS == OperatingSystemType.Windows;
         this.lblSelect = Translater.Instant("Labels.Select");
         this.lblCancel = Translater.Instant("Labels.Cancel");
+        lblShowHidden = Translater.Instant("Labels.ShowHidden");
         App.Instance.OnEscapePushed += InstanceOnOnEscapePushed;
         Instance = this;
     }
 
+    /// <summary>
+    /// Escaped is pressed
+    /// </summary>
+    /// <param name="args">the escape arguments</param>
     private void InstanceOnOnEscapePushed(OnEscapeArgs args)
     {
         if (Visible)
@@ -121,25 +147,9 @@ public partial class FileBrowser : ComponentBase, IDisposable
 
     private async Task<RequestResult<List<FileBrowserItem>>> GetPathData(string path)
     {
-#if (DEMO)
-        List<FileBrowserItem> items = new List<FileBrowserItem>();
-        items.AddRange(Enumerable.Range(1, 5).Select(x => new FileBrowserItem { IsPath = true, Name = "Demo Folder " + x, FullName = "DemoFolder" + x }));
-
-        if (DirectoryMode == false)
-        {
-            var random = new Random(DateTime.UtcNow.Millisecond);
-            items.AddRange(Enumerable.Range(1, 5).Select(x =>
-            {
-                string extension = "." + (Extensions?.Any() != true ? "mkv" : Extensions[random.Next(0, Extensions.Length)]);
-                return new FileBrowserItem { IsPath = true, Name = "DemoFile" + x + extension, FullName = "DemoFile" + x + extension };
-            }));
-        }
-        return new RequestResult<List<FileBrowserItem>> { Success = true, Data = items };
-#else
         return await HttpHelper.Get<List<FileBrowserItem>>($"{API_URL}?includeFiles={DirectoryMode == false}" +
         $"&start={Uri.EscapeDataString(path)}" +
         string.Join("", Extensions?.Select(x => "&extensions=" + Uri.EscapeDataString(x))?.ToArray() ?? new string[] { }));
-#endif
     }
 
     public void Dispose()
