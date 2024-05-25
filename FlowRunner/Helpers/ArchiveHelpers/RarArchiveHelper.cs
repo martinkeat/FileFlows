@@ -215,7 +215,8 @@ public class RarArchiveHelper : IArchiveHelper
             if (process.ExitCode == 0) return true;
             
             var error = process.StandardError.ReadToEnd();
-            return Result<bool>.Fail($"Failed to extract RAR archive: {error}");
+            var output = process.StandardOutput.ReadToEnd();
+            return Result<bool>.Fail($"Failed to extract RAR archive: {error?.EmptyAsNull() ?? output}");
 
         }
         catch (Exception ex)

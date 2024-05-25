@@ -15,7 +15,7 @@ public class RarTests : TestBase
     public void MutlipartRarTest_Internal()
     {
         string rar = $"{TestFilesDir}/archives/multi-part-rar/multi-part-rar.rar";
-        var helper = new ArchiveHelper(Logger, "rar", "unrar");
+        var helper = new ArchiveHelper(Logger, "rar", "unrar", "7z");
         var result = helper.ExtractMultipartRar(rar, TempPath);
         if(result.Failed(out string error))
             Assert.Fail(error);
