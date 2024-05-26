@@ -4,6 +4,7 @@ using FileFlows.ServerShared.Services;
 using FileFlows.Shared.Helpers;
 using FileFlows.Shared.Models;
 using System.Net;
+using System.Net.Sockets;
 using FileFlows.Plugin.Services;
 using FileFlows.RemoteServices;
 using FileFlows.ServerShared;
@@ -11,6 +12,7 @@ using FileFlows.ServerShared.FileServices;
 using FileFlows.ServerShared.Helpers;
 using FileFlows.ServerShared.Models;
 using FileFlows.Shared;
+using Microsoft.VisualBasic;
 
 namespace FileFlows.FlowRunner;
 
@@ -359,9 +361,16 @@ public class Program
             IsDirectory = lib.Folders,
             LibraryPath = lib.Path, 
             Fingerprint = lib.UseFingerprinting,
-            InitialSize = lib.Folders ? GetDirectorySize(workingFile) : FileService.Instance.FileSize(workingFile).ValueOrDefault,
+            InitialSize = lib.Folders ? GetDirectorySize(workingFile) : _fileService.FileSize(workingFile).ValueOrDefault,
             AdditionalInfos = new ()
         };
+
+        if (lib.Folders == false)
+        {
+            // FF-1563: Set original size of file as it processes
+            libFile.OriginalSize = info.InitialSize;
+        }
+        
         LogInfo("Start Working File: " + info.WorkingFile);
         info.LibraryFile.OriginalSize = info.InitialSize;
         LogInfo("Initial Size: " + info.InitialSize);

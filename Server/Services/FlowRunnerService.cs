@@ -87,6 +87,8 @@ public class FlowRunnerService : IFlowRunnerService
         {
             var service = ServiceLoader.Load<LibraryFileService>();
             var lf = info.LibraryFile;
+            if (info.LibraryFile.IsDirectory == false && info.InitialSize > 0)
+                await service.UpdateOriginalSize(info.Uid, info.InitialSize);
             if (lf.LibraryUid != null)
             {
                 var library = await ServiceLoader.Load<LibraryService>().GetByUidAsync(lf.LibraryUid.Value);
