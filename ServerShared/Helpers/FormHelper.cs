@@ -42,8 +42,6 @@ public class FormHelper
 
             fields.Add(ef);
 
-            var parameters = new Dictionary<string, object>();
-
             foreach (var attProp in attribute.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance))
             {
                 if (new string[] { nameof(FormInputAttribute.Order), nameof(FormInputAttribute.InputType), "TypeId" }.Contains(attProp.Name))

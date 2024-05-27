@@ -23,10 +23,12 @@ public partial class InputNumber<TItem> : Input<TItem>
     public TItem Min { get => _Min; set => _Min = value; }
 #pragma warning disable BL0007
     [Parameter]
-    public TItem Max { get => _Max; 
+    public TItem Max 
+    { 
+        get => _Max; 
         set => _Max = value.Equals(0) ? (TItem)(object)int.MaxValue : value; 
-#pragma warning restore BL0007
     }
+#pragma warning restore BL0007
 
     protected override void OnInitialized()
     {

@@ -2,10 +2,34 @@
 @inherits Input<TItem>
 @typeparam TItem
 
+@{
+    bool showMax = false;
+    float step = 1;
+    Type tType = typeof(TItem);
+    
+    // Perform type checks and ensure TItem is a number
+    if (tType == typeof(int) || tType == typeof(short) || tType == typeof(float) ||
+        tType == typeof(long) || tType == typeof(double) || tType == typeof(decimal))
+    {
+        // Convert Min and Max to double for comparison
+        double min = Convert.ToDouble(Min);
+        double max = Convert.ToDouble(Max);
+        showMax = max >= min;
+    }
+
+    if (tType == typeof(decimal) || tType == typeof(float))
+    {
+        step = 0.1f;
+    }
+}
+
 <InputWrapper Input="@this">
     <div class="input-number-wrapper">
         <div class="flow-numeric">
-            <input id=@Uid type="number" value="@(Value?.ToString() == "0" && ZeroAsEmpty ? "" : Value)" disabled=@(Disabled || ReadOnly ? string.Empty : null) @onchange="ChangeValue" placeholder="@Placeholder" min="@Min" max="@Max"  @onkeydown="OnKeyDown" />
+            <input id=@Uid type="number" value="@(Value?.ToString() == "0" && ZeroAsEmpty ? "" : Value)" 
+                   disabled=@(Disabled || ReadOnly ? string.Empty : null) @onchange="ChangeValue" placeholder="@Placeholder" 
+                   min="@Min" max="@(showMax ? null : Max)" step="@step" 
+                   @onkeydown="OnKeyDown" />
         </div>
         @if (string.IsNullOrEmpty(Suffix) == false)
         {
