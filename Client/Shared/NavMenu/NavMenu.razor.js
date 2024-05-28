@@ -56,9 +56,11 @@ export class NavMenu {
         let idealGroupHeight = this.collapsed ? 0 : 2.75;
         let idealItemHeight = this.collapsed ? 3 : 2.5;
         
-        let maxHeight = this.ul.clientHeight;
+        let maxHeight = this.ul.clientHeight
         
-        let height = idealGroupHeight * this.groups * this.rem + idealItemHeight * this.totalItems * this.rem;
+        let items = this.totalItems - this.groups - 1; // minus one for as one item is only in collapsed menu
+                
+        let height = idealGroupHeight * this.groups * this.rem + idealItemHeight * items * this.rem;
         if(height <= maxHeight)
         {
             this.setHeights(idealGroupHeight, idealItemHeight);
@@ -71,8 +73,8 @@ export class NavMenu {
         let itemHeight = idealItemHeight + 0.1;
         let count = 0;
         while(height > maxHeight && ++count < 100){
-            itemHeight -= 0.05;
-            height = (groupHeight * this.groups * this.rem) + (itemHeight * this.totalItems * this.rem);
+            itemHeight -= 0.1;
+            height = (groupHeight * this.groups * this.rem) + (itemHeight * items * this.rem);
         }
         this.setHeights(groupHeight, itemHeight);
     }
