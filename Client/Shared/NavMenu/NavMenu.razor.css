@@ -33,6 +33,14 @@
   display: flex;
   flex-direction: column;
 }
+@media screen and (min-width: 850px) {
+  .nav-menu-container {
+    overflow: hidden;
+  }
+  .nav-menu-container ul {
+    overflow: hidden;
+  }
+}
 .nav-menu-container .nav {
   flex: 1;
 }

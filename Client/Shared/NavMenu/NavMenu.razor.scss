@@ -36,6 +36,12 @@ $maxItems: 15;
     flex: 1;
     display: flex;
     flex-direction: column;
+    @media screen and (min-width: 850px) {
+        overflow: hidden;
+        ul {
+            overflow: hidden;
+        }
+    }
     .nav {
         flex:1;
     }
