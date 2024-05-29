@@ -85,7 +85,7 @@ else
             @if (Profile.ServerOS == OperatingSystemType.Docker)
             {
                 <FlowWizardPage Title="DockerMods" Disabled="@(EulaAccepted == false)"
-                                Visible="(AvailableDockerMods?.Any() == true)"
+                                Visible="@(AvailableDockerMods?.Any() == true)"
                                 Description="Choose which DockerMods to install">
                     <FlowTable @ref="DockerModTable" TItem="RepositoryObject"
                                HideHead="true" HideToolbar="true" Selection="SelectionMode.Multiple"

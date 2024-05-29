@@ -40,7 +40,8 @@ public class RepositoryController : BaseController
                 _ => []
             };
 
-            objects = objects.Where(x => known.Contains(x.Path) == false && known.Contains(x.Name) == false).ToList();
+            if(known?.Any() == true)
+                objects = objects.Where(x => known.Contains(x.Path) == false && known.Contains(x.Name) == false).ToList();
         }
         return objects;
     }
