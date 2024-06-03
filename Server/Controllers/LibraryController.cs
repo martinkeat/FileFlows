@@ -217,7 +217,8 @@ public class LibraryController : BaseController
                 string json = System.IO.File.ReadAllText(tf.FullName);
                 if(json.StartsWith("//"))
                     json = string.Join("\n", json.Split('\n').Skip(1)); // remove the //path comment
-                json = TemplateHelper.ReplaceWindowsPathIfWindows(json);
+                json = TemplateHelper.ReplaceMediaWithHomeDirectory(json);
+                // json = TemplateHelper.ReplaceWindowsPathIfWindows(json);
                 var jst =JsonSerializer.Deserialize<LibraryTemplate>(json, new JsonSerializerOptions
                 {
                     AllowTrailingCommas = true,

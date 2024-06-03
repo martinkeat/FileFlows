@@ -409,10 +409,12 @@ public class DirectoryHelper
     /// <returns>the users home directory</returns>
     public static string GetUsersHomeDirectory()
     {
-        if (OperatingSystem.IsWindows())
-            return Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)?.EmptyAsNull() ?? "C:\\";
-        if (Globals.IsDocker)
+        var home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)?.EmptyAsNull() ?? Environment.GetEnvironmentVariable("HOME");
+        if (string.IsNullOrWhiteSpace(home) == false)
+            return home;
+        if(OperatingSystem.IsWindows() == false && Directory.Exists("/media"))
             return "/media";
-        return Environment.GetEnvironmentVariable("HOME")?.EmptyAsNull() ?? "/";
+        
+        return OperatingSystem.IsWindows() ? "C:\\" : "/";
     }
 }

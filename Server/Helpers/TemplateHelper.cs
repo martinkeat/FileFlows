@@ -24,6 +24,32 @@ public class TemplateHelper
         json = json.Replace("\"/media\"", "\"" + System.Web.HttpUtility.JavaScriptStringEncode(userDir) + "\"");
         return json;
     }
+    
+    /// <summary>
+    /// Replaces all instances of "/media/A" where A is any letter with a custom string followed by the capitalized version of the letter.
+    /// </summary>
+    /// <param name="template">The template containing instances of "/media/A".</param>
+    /// <returns>A string with all instances of "/media/A" replaced by the custom string and capitalized letter.</returns>
+    public static string ReplaceMediaWithHomeDirectory(string template)
+    {
+      // Define the regex pattern to match /media/ followed by any letter
+      string pattern = @"/media/([a-zA-Z])";
+
+      string home = DirectoryHelper.GetUsersHomeDirectory() + Path.DirectorySeparatorChar;
+
+      // Define the replacement function using MatchEvaluator
+      string result = Regex.Replace(template, pattern, match =>
+      {
+        // Get the letter from the match
+        char letter = match.Groups[1].Value[0];
+        // Convert the letter to uppercase
+        char upperLetter = char.ToUpper(letter);
+        // Return the replacement string
+        return home + upperLetter;
+      });
+
+      return result;
+    }
 
     /// <summary>
     /// Finds and extracts items inside a JSON array based on a specified property name.

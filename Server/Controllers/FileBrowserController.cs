@@ -88,10 +88,15 @@ public class FileBrowserController : Controller
         }
         return items;
     }
+    
+    /// <summary>
+    /// Gets the start directory of the directory browser
+    /// </summary>
+    /// <returns>the start directory</returns>
     private string GetStartDirectory()
     {
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) == false && Directory.Exists("/media"))
+        if (Globals.IsDocker && Directory.Exists("/media"))
             return "/media";
-        return Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+        return DirectoryHelper.GetUsersHomeDirectory();
     }
 }
