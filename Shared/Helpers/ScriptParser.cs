@@ -1,7 +1,10 @@
 using System.Text;
 using System.Text.RegularExpressions;
+using FileFlows.Plugin;
+using FileFlows.ScriptExecution;
+using FileFlows.Shared.Models;
 
-namespace FileFlows.ScriptExecution;
+namespace FileFlows.Shared.Helpers;
 
 /// <summary>
 /// Parses a script code block into a ScriptModel
@@ -17,21 +20,21 @@ public class ScriptParser
     /// <param name="name">the name of the script</param>
     /// <param name="code">the script to parse</param>
     /// <returns>a parsed model</returns>
-    public (bool Success, ScriptModel? Model, string Error) Parse(string name, string code)
+    public Result<Script> Parse(string name, string code)
     {
         if (string.IsNullOrEmpty(code))
-            return (false, null, "No script found");
+            return Result<Script>.Fail("No script found");
         var rgxComments = new Regex(@"\/\*(\*)?(.*?)\*\/", RegexOptions.Singleline);
         var matchComments = rgxComments.Match(code.Trim());
         if (matchComments.Success == false)
-            return (false, null, "Failed to locate comment section.  A script must start with a comment block describing the script.");
+            return Result<Script>.Fail("Failed to locate comment section.  A script must start with a comment block describing the script.");
         var comments = matchComments.Value.Trim()[1..^1];
         code = code.Replace(matchComments.Value, string.Empty).Trim();
         // remove the start * 
         comments = string.Join("\n", comments.Replace("\r\n", "\n").Split('\n')
             .Select(x => Regex.Replace(x, @"^[\s]*[\*]+[\s]*", ""))).Trim();
 
-        ScriptModel model = new()
+        Script model = new()
         {
             Name = name,
             Code = code,
@@ -40,7 +43,7 @@ public class ScriptParser
         };
         var atIndex = comments.IndexOf('@');
         if (atIndex < 0)
-            return (false, null, "No comment parameters found");
+            return Result<Script>.Fail("No comment parameters found");
         
         model.Description = comments[..atIndex].Trim();
         
@@ -85,7 +88,7 @@ public class ScriptParser
             }
         }
 
-        return (true, model, string.Empty);
+        return model;
     }
 
     /// <summary>
@@ -95,7 +98,7 @@ public class ScriptParser
     /// <param name="line">the comment line to parse</param>
     /// <returns>true if parsed as a argument</returns>
     /// <exception cref="Exception">throws exception if line is invalid</exception>
-    private bool ParseArgument(ScriptModel model, string line)
+    private bool ParseArgument(Script model, string line)
     {
         var paramMatch = rgxParameter.Match(line);
         if (paramMatch.Success == false)
@@ -136,7 +139,7 @@ public class ScriptParser
     /// <param name="model">the ScriptModel to add the argument to</param>
     /// <param name="line">the comment line to parse</param>
     /// <returns>true if parsed as a output</returns>
-    private bool ParseOutput(ScriptModel model, string line)
+    private bool ParseOutput(Script model, string line)
     {
         var match = rgxOutput.Match(line);
         if (match.Success == false)
@@ -152,11 +155,14 @@ public class ScriptParser
     /// Generates a comment block from a script
     /// </summary>
     /// <param name="script">the script</param>
+    /// <param name="skipName">if the name should be skipped and not shown</param>
     /// <returns>the comment block</returns>
-    public string GenerateCommentBlock(ScriptModel script)
+    public string GenerateCommentBlock(Script script, bool skipName = false)
     {
-        var header = new StringBuilder("/**");
-        AddField("name", script.Name);
+        var header = new StringBuilder();
+        header.AppendLine("/**");
+        if(skipName == false)
+            AddField("name", script.Name);
         AddField("description", script.Description);
         AddField("author", script.Author);
         AddField("revision", script.Revision?.ToString());
@@ -184,6 +190,7 @@ public class ScriptParser
             }
         }
 
+        header.Append(" */");
         return header.ToString();
 
         void AddField(string name, string? value)

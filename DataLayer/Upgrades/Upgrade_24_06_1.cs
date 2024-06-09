@@ -6,6 +6,7 @@ using FileFlows.Plugin;
 using FileFlows.ScriptExecution;
 using FileFlows.ServerShared.Helpers;
 using FileFlows.Shared;
+using FileFlows.Shared.Helpers;
 using FileFlows.Shared.Models;
 
 namespace FileFlows.DataLayer.Upgrades;
@@ -265,7 +266,7 @@ public class Upgrade_24_06_1
         }
 
         var result = new ScriptParser().Parse(name, code);
-        if (result.Success == false)
+        if (result.IsFailed)
         {
             // basic script
             return new Script()
@@ -276,7 +277,7 @@ public class Upgrade_24_06_1
             };
         }
 
-        var model = result.Model!;
+        var model = result.Value!;
         
         return new Script
         {

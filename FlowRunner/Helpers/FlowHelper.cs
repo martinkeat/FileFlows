@@ -141,13 +141,12 @@ public class FlowHelper
                 return Result<Node>.Fail("Failed to parse script UID: " + part.FlowElementUid[7..]);
 
             var flowScript = Program.Config.FlowScripts.FirstOrDefault(x => x.Uid == scriptUid);
-
-            nodeScript.Code = flowScript?.Code;// GetScriptCode(scriptUid);
-            if (string.IsNullOrEmpty(nodeScript.Code))
+            if (flowScript == null)
                 return Result<Node>.Fail("Script not found");
 
+            nodeScript.Script = flowScript;
             if (string.IsNullOrWhiteSpace(part.Name))
-                part.Name = flowScript?.Name?.EmptyAsNull() ?? scriptUid.ToString();
+                part.Name = flowScript.Name?.EmptyAsNull() ?? scriptUid.ToString();
             return nodeScript;
         }
         

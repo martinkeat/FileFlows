@@ -3,6 +3,8 @@ using FileFlows.ScriptExecution;
 using Logger = FileFlows.Shared.Logger;
 using FileFlows.Plugin;
 using System.Dynamic;
+using FileFlows.Shared.Helpers;
+using FileFlows.Shared.Models;
 
 namespace FileFlows.Server;
 
@@ -24,10 +26,9 @@ public class ScriptNode:Node
     public ExpandoObject Model { get; set; }
 
     /// <summary>
-    /// Gets or sets the code to execute
+    /// Gets or sets the Script to execute
     /// </summary>
-    public string Code { get; set; }
-
+    public Script Script { get; set; }
 
     /// <summary>
     /// Executes the script node
@@ -36,15 +37,8 @@ public class ScriptNode:Node
     /// <returns>the output node to call next</returns>
     public override int Execute(NodeParameters args)
     {
-        // will throw exception if invalid
-        var scriptParseResult = new ScriptParser().Parse("ScriptNode", Code);
-        if (scriptParseResult.Success == false)
-            throw new Exception(scriptParseResult.Error);
-        
-        var script = scriptParseResult.Model;
-
         // build up the entry point
-        string epParams = string.Join(", ", script.Parameters?.Select(x => x.Name).ToArray());
+        string epParams = string.Join(", ", Script.Parameters?.Select(x => x.Name).ToArray());
         // all scripts must contain the "Script" method we then add this to call that 
         //string entryPoint = $"Script({epParams});";
         string entryPoint = $"var scriptResult = Script({epParams});\nexport const result = scriptResult;";
@@ -53,18 +47,18 @@ public class ScriptNode:Node
         {
             Args = args,
             ScriptType = ScriptType.Flow,
-            Code = (Code + "\n\n" + entryPoint).Replace("\t", "   ").Trim(),
+            Code = (Script.Code + "\n\n" + entryPoint).Replace("\t", "   ").Trim(),
             AdditionalArguments = new ()
         };
 
-        if (script.Parameters?.Any() == true)
+        if (Script.Parameters?.Any() == true)
         {
             var dictModel = Model as IDictionary<string, object>;
-            foreach (var p in script.Parameters) 
+            foreach (var p in Script.Parameters) 
             {
                 try
                 {
-                    var value = dictModel?.ContainsKey(p.Name) == true ? dictModel[p.Name] : null;
+                    var value = dictModel?.TryGetValue(p.Name, out var value1) is true ? value1 : null;
                     if (value is JsonElement je)
                     {
                         if (je.ValueKind == JsonValueKind.String)

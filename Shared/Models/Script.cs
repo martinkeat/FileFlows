@@ -1,5 +1,6 @@
 using FileFlows.Plugin;
 using FileFlows.ScriptExecution;
+using FileFlows.Shared.Helpers;
 
 namespace FileFlows.Shared.Models;
 
@@ -81,13 +82,14 @@ public class Script: FileFlowObject, IInUse
     public static Result<Script> FromCode(string name, string code)
     {
         var result = new ScriptParser().Parse(name, code);
-        if (result.Success == false)
-            return Result<Script>.Fail(result.Error);
+        if (result.Failed(out string error))
+            return Result<Script>.Fail(error);
 
-        var scriptModel = result.Model;
+        var scriptModel = result.Value;
         return new Script()
         {
-            Uid = scriptModel.Uid ?? Guid.Empty,
+            Uid = scriptModel.Uid,
+            Name = scriptModel.Name?.EmptyAsNull() ?? name,
             Code = scriptModel.Code,
             Revision = scriptModel.Revision,
             Description = scriptModel.Description,
@@ -106,10 +108,10 @@ public class Script: FileFlowObject, IInUse
     public Result<bool> UpdateFromCode(string code)
     {
         var result = new ScriptParser().Parse(this.Name, code);
-        if (result.Success == false)
-            return Result<bool>.Fail(result.Error);
+        if (result.Failed(out string error))
+            return Result<bool>.Fail(error);
         
-        var scriptModel = result.Model;
+        var scriptModel = result.Value;
         this.Code = scriptModel.Code;
         this.Revision = scriptModel.Revision;
         this.Description = scriptModel.Description;
@@ -119,4 +121,60 @@ public class Script: FileFlowObject, IInUse
         this.MinimumVersion = scriptModel.MinimumVersion;
         return true;
     }
+}
+
+/// <summary>
+/// Definition of a script output node
+/// </summary>
+public class ScriptOutput
+{
+    /// <summary>
+    /// Gets or sets the output index
+    /// </summary>
+    public int Index { get; set; }
+
+    /// <summary>
+    /// Gets or sets the description of the output
+    /// </summary>
+    public string Description { get; set; } = string.Empty;
+}
+
+/// <summary>
+/// A parameter passed into a script
+/// </summary>
+public class ScriptParameter
+{
+    /// <summary>
+    /// Gets or sets the name of the parameter
+    /// </summary>
+    public string Name { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the description of the parameter
+    /// </summary>
+    public string Description { get; set; } = string.Empty;
+    
+    /// <summary>
+    /// Gets or sets the type of script argument
+    /// </summary>
+    public ScriptArgumentType Type {get; set; }
+}
+
+/// <summary>
+/// Types of script parameters
+/// </summary>
+public enum ScriptArgumentType
+{
+    /// <summary>
+    /// String parameter
+    /// </summary>
+    String, 
+    /// <summary>
+    /// Integer parameter
+    /// </summary>
+    Int,
+    /// <summary>
+    /// Boolean parameter
+    /// </summary>
+    Bool
 }
