@@ -7,7 +7,7 @@ namespace FileFlows.Client.Pages;
 /// <summary>
 /// A page for user to manage their webhooks
 /// </summary>
-public partial class Webhooks : ListPage<string, Webhook>
+public partial class Webhooks : ListPage<Guid, Webhook>
 {
     /// <summary>
     /// Gets the API URL endpoint for the webhooks

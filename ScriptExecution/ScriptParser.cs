@@ -1,3 +1,4 @@
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace FileFlows.ScriptExecution;
@@ -16,15 +17,16 @@ public class ScriptParser
     /// <param name="name">the name of the script</param>
     /// <param name="code">the script to parse</param>
     /// <returns>a parsed model</returns>
-    public ScriptModel Parse(string name, string code)
+    public (bool Success, ScriptModel? Model, string Error) Parse(string name, string code)
     {
         if (string.IsNullOrEmpty(code))
-            throw new Exception("No script found");
+            return (false, null, "No script found");
         var rgxComments = new Regex(@"\/\*(\*)?(.*?)\*\/", RegexOptions.Singleline);
         var matchComments = rgxComments.Match(code.Trim());
         if (matchComments.Success == false)
-            throw new Exception("Failed to locate comment section.  A script must start with a comment block describing the script.");
+            return (false, null, "Failed to locate comment section.  A script must start with a comment block describing the script.");
         var comments = matchComments.Value.Trim()[1..^1];
+        code = code.Replace(matchComments.Value, string.Empty).Trim();
         // remove the start * 
         comments = string.Join("\n", comments.Replace("\r\n", "\n").Split('\n')
             .Select(x => Regex.Replace(x, @"^[\s]*[\*]+[\s]*", ""))).Trim();
@@ -32,18 +34,17 @@ public class ScriptParser
         ScriptModel model = new()
         {
             Name = name,
+            Code = code,
             Outputs = new (),
             Parameters = new()
         };
-        int atIndex = comments.IndexOf("@", StringComparison.Ordinal);
-        if (atIndex < 1)
-            throw new Exception("No output parameters found");
+        var atIndex = comments.IndexOf('@');
+        if (atIndex < 0)
+            return (false, null, "No comment parameters found");
         
-        model.Description = comments.Substring(0, atIndex).Trim();
-        if (string.IsNullOrEmpty(model.Description))
-            throw new Exception("No description found in comments");
+        model.Description = comments[..atIndex].Trim();
         
-        comments = comments.Substring(atIndex);
+        comments = comments[atIndex..];
 
         foreach (var line in comments.Split('\n'))
         {
@@ -51,14 +52,40 @@ public class ScriptParser
                 continue;
             if (ParseOutput(model, line))
                 continue;
-            if (line.StartsWith("@author ") || line.StartsWith("@version ") || line.StartsWith("@revision "))
-                continue;
+            if (line.StartsWith('@') == false)
+            {
+                if (string.IsNullOrWhiteSpace(model.Description))
+                    model.Description = line;
+                else
+                    model.Description += "\n" + line;
+            }
+            else if (line.StartsWith("@name "))
+                model.Name = line["@name ".Length..].Trim();
+            else if (line.StartsWith("@uid ") && Guid.TryParse(line[5..].Trim(), out var uid))
+                model.Uid = uid;
+            else if (line.StartsWith("@revision ") && int.TryParse(line["@revision ".Length..].Trim(), out var revision))
+                model.Revision = revision;
+            else if (line.StartsWith("@description "))
+                model.Description = line["@description ".Length..].Trim();
+            else if (line.StartsWith("@author "))
+                model.Author = line["@author ".Length..].Trim();
+            else if (line.StartsWith("@minimumversion ", StringComparison.InvariantCultureIgnoreCase) &&
+                     Version.TryParse(line["@minimumVersion ".Length..].Trim(), out var version))
+                model.MinimumVersion = version;
+            else if (line.StartsWith("@outputs") && int.TryParse(line[9..].Trim(), out var outputs))
+            {
+                for (int i = 1; i <= outputs; i++)
+                {
+                    model.Outputs.Add(new ()
+                    {
+                        Index = i,
+                        Description = "Output " + i
+                    });
+                }
+            }
         }
 
-        if (model.Outputs.Count == 0)
-            throw new Exception("No outputs defined.  You must define at least one output node");
-
-        return model;
+        return (true, model, string.Empty);
     }
 
     /// <summary>
@@ -109,7 +136,6 @@ public class ScriptParser
     /// <param name="model">the ScriptModel to add the argument to</param>
     /// <param name="line">the comment line to parse</param>
     /// <returns>true if parsed as a output</returns>
-    /// <exception cref="Exception">throws exception if line is invalid</exception>
     private bool ParseOutput(ScriptModel model, string line)
     {
         var match = rgxOutput.Match(line);
@@ -120,5 +146,51 @@ public class ScriptParser
         output.Description = match.Value;
         model.Outputs.Add(output);
         return true;
+    }
+
+    /// <summary>
+    /// Generates a comment block from a script
+    /// </summary>
+    /// <param name="script">the script</param>
+    /// <returns>the comment block</returns>
+    public string GenerateCommentBlock(ScriptModel script)
+    {
+        var header = new StringBuilder("/**");
+        AddField("name", script.Name);
+        AddField("description", script.Description);
+        AddField("author", script.Author);
+        AddField("revision", script.Revision?.ToString());
+        AddField("minimumVersion", script.MinimumVersion?.ToString());
+        if (script.Parameters?.Any() == true)
+        {
+            foreach (var parameter in script.Parameters)
+            {
+                header.AppendLine(" * @param " + (
+                        parameter.Type switch
+                        {
+                            ScriptArgumentType.Bool => "{bool}",
+                            ScriptArgumentType.Int => "{int}",
+                            _ => "{string}",
+                        }
+                    ) + $" {parameter.Name} {parameter.Description}");
+            }
+        }
+
+        if (script.Outputs?.Any() == true)
+        {
+            foreach (var output in script.Outputs.OrderBy(x => x.Index))
+            {
+                header.AppendLine($" * @output {(string.IsNullOrWhiteSpace(output.Description) ? $"Output {output.Index}" : output.Description)}");
+            }
+        }
+
+        return header.ToString();
+
+        void AddField(string name, string? value)
+        {
+            if (string.IsNullOrWhiteSpace(value) == false)
+                header.AppendLine($" * @{name} {value}");
+        }
+
     }
 }

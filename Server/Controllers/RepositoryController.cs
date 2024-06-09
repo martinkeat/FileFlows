@@ -24,6 +24,7 @@ public class RepositoryController : BaseController
     public async Task<IEnumerable<RepositoryObject>> GetByType([FromRoute] string type, [FromQuery] bool missing = true)
     {
         var repo = await new RepositoryService().GetRepository();
+        
         var objects = (type.ToLowerInvariant() switch
         {
             "dockermod" => repo.DockerMods,
@@ -247,22 +248,8 @@ public class RepositoryController : BaseController
             .Where(x => new Version(Globals.Version) >= x.MinimumVersion);
         if (missing)
         {
-            List<string> known = new();
-            foreach (var file in new DirectoryInfo(
-                         type == ScriptType.System ? DirectoryHelper.ScriptsDirectorySystem : 
-                         DirectoryHelper.ScriptsDirectoryFlow).GetFiles("*.js", SearchOption.AllDirectories))
-            {
-                try
-                {
-                    string line = (await System.IO.File.ReadAllLinesAsync(file.FullName)).First();
-                    if (line?.StartsWith("// path:") == true)
-                        known.Add(line[9..].Trim());
-                }
-                catch (Exception)
-                {
-                    // ignored
-                }
-            }
+            var service = ServiceLoader.Load<ScriptService>();
+            var known = (await service.GetAllByType(type)).Where(x => x.Repository).Select(x => x.Path).ToList();
 
             scripts = scripts.Where(x => known.Contains(x.Path) == false && known.Contains(x.Name) == false).ToList();
         }
@@ -323,7 +310,7 @@ public class RepositoryController : BaseController
 
         // always re-download all the shared scripts to ensure they are up to date
         await DownloadActual(model.Scripts);
-        await RevisionIncrement();
+        // await RevisionIncrement();
     }
 
     /// <summary>
@@ -380,7 +367,7 @@ public class RepositoryController : BaseController
         var service = new RepositoryService();
         await service.Init();
         await service.DownloadSharedScripts();
-        await service.DownloadObjects(scripts);
+        await service.DownloadScripts(scripts);
         
     }
 

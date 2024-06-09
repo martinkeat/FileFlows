@@ -119,8 +119,7 @@ public class Program
             string cfgFile = Path.Combine(cfgPath, "config.json");
             if(File.Exists(cfgFile) == false)
                 throw new Exception("Configuration file doesnt exist: " + cfgFile);
-
-
+            
             string cfgKey = parameters.ConfigKey;
             if (string.IsNullOrEmpty(cfgKey))
                 throw new Exception("Configuration Key not set");
@@ -138,8 +137,7 @@ public class Program
             }
 
             var config = JsonSerializer.Deserialize<ConfigurationRevision>(cfgJson);
-
-
+            
             string hostname = parameters.Hostname?.EmptyAsNull() ?? Environment.MachineName;
 
             Globals.IsDocker = parameters.IsDocker;

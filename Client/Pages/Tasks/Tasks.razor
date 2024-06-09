@@ -46,7 +46,14 @@
                     Script
                 </Header>
                 <Cell Context="item">
-                    <span>@item.Script</span>
+                    @if(Scripts.TryGetValue(item.Script, out var scriptName))
+                    {
+                        <span>@scriptName</span>                              
+                    }
+                    else
+                    {
+                        <span>Unknown</span>
+                    }
                 </Cell>
             </FlowTableColumn>
             <FlowTableColumn TItem="FileFlowsTask" Width="14rem" MobileWidth="0" >

@@ -8,7 +8,7 @@ public class FileFlowsTask : FileFlowObject
     /// <summary>
     /// Gets or sets the script this task will execute
     /// </summary>
-    public string Script { get; set; }
+    public Guid Script { get; set; }
 
     /// <summary>
     /// Gets or sets the type of task

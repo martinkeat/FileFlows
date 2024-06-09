@@ -13,7 +13,7 @@ using FileFlows.Client.Components;
 /// <summary>
 /// Page for processing nodes
 /// </summary>
-public partial class Scripts : ListPage<string, Script>
+public partial class Scripts : ListPage<Guid, Script>
 {
     public override string ApiUrl => "/api/script";
 
@@ -247,8 +247,8 @@ public partial class Scripts : ListPage<string, Script>
 
     async Task Update()
     {
-        var scripts = Table.GetSelected()?.Where(x => string.IsNullOrEmpty(x.Path) == false)?.Select(x => x.Path)?.ToArray() ?? new string[] { };
-        if (scripts?.Any() != true)
+        var uids = Table.GetSelected()?.Where(x => string.IsNullOrEmpty(x.Path) == false)?.Select(x => x.Uid)?.ToArray() ?? new Guid[] { };
+        if (uids?.Any() != true)
         {
             Toast.ShowWarning("Pages.Scripts.Messages.NoRepositoryScriptsToUpdate");
             return;
@@ -259,7 +259,7 @@ public partial class Scripts : ListPage<string, Script>
         Data.Clear();
         try
         {
-            var result = await HttpHelper.Post($"/api/repository/update-specific-scripts", new ReferenceModel<string> { Uids = scripts });
+            var result = await HttpHelper.Post($"/api/repository/update-specific-scripts", new ReferenceModel<Guid> { Uids = uids });
             if (result.Success)
                 await Refresh();
         }

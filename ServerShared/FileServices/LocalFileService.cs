@@ -302,6 +302,7 @@ public class LocalFileService : IFileService
             var destDir = new FileInfo(destination).Directory;
             CreateDirectoryIfNotExists(destDir.FullName);
 
+            Logger.ILog($"About to move file '{fileInfo.FullName}' to '{destination}'");
             fileInfo.MoveTo(destination, overwrite);
             SetPermissions(destination);
             return true;
@@ -322,34 +323,42 @@ public class LocalFileService : IFileService
     {
         if (Directory.Exists(path))
             return;
-        if (OperatingSystem.IsWindows() || OperatingSystem.IsMacOS())
+        try
         {
-            Directory.CreateDirectory(path);
-            return;
-        }
-        
-        Logger?.ILog("Recursively creating directory: " + path);
-        Stack<string> directoryStack = new Stack<string>();
-        string? currentPath = path;
-
-        // Push all parent directories onto the stack until we reach the root directory
-        while (Directory.Exists(currentPath) == false)
-        {
-            directoryStack.Push(currentPath);
-            currentPath = Path.GetDirectoryName(currentPath);
-            if (string.IsNullOrEmpty(currentPath))
+            Logger.ILog("Directory does not exist, creating: " + path);
+            if (OperatingSystem.IsWindows() || OperatingSystem.IsMacOS())
             {
-                throw new DirectoryNotFoundException("Parent directory not found.");
+                Directory.CreateDirectory(path);
+                return;
+            }
+
+            Logger?.ILog("Recursively creating directory: " + path);
+            Stack<string> directoryStack = new Stack<string>();
+            string? currentPath = path;
+
+            // Push all parent directories onto the stack until we reach the root directory
+            while (Directory.Exists(currentPath) == false)
+            {
+                directoryStack.Push(currentPath);
+                currentPath = Path.GetDirectoryName(currentPath);
+                if (string.IsNullOrEmpty(currentPath))
+                {
+                    throw new DirectoryNotFoundException("Parent directory not found.");
+                }
+            }
+
+            // Create directories and set permissions for each directory in the stack
+            while (directoryStack.Count > 0)
+            {
+                string dir = directoryStack.Pop();
+                Logger?.ILog("Creating path: " + dir);
+                Directory.CreateDirectory(dir);
+                SetPermissions(dir);
             }
         }
-
-        // Create directories and set permissions for each directory in the stack
-        while (directoryStack.Count > 0)
+        catch (Exception ex)
         {
-            string dir = directoryStack.Pop();
-            Logger?.ILog("Creating path: " + dir);
-            Directory.CreateDirectory(dir);
-            SetPermissions(dir);
+            throw new Exception("Failed to created directory: " + ex.Message);
         }
     }
 

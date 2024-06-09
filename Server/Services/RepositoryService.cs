@@ -1,5 +1,6 @@
 using System.Text.RegularExpressions;
 using FileFlows.Plugin;
+using FileFlows.ServerShared.Models;
 using FileFlows.Shared.Helpers;
 using FileFlows.Shared.Models;
 
@@ -61,9 +62,91 @@ class RepositoryService
     /// </summary>
     /// <param name="force">when true, this will force every template to be re-downloaded and not just updates</param>
     /// <returns>a task to await</returns>
-    internal Task DownloadSharedScripts(bool force = false) =>
-        DownloadObjects(repo.SharedScripts, DirectoryHelper.ScriptsDirectoryShared, force);
-    
+    internal async Task DownloadSharedScripts(bool force = false)
+    {
+        var service = ServiceLoader.Load<ScriptService>();
+        var existingScripts = (await service.GetAllByType(ScriptType.Shared)).Where(x => x.Repository).ToList();
+        foreach (var ss in repo.SharedScripts)
+        {
+            if (ss.MinimumVersion > new Version(Globals.Version))
+                continue;
+            var existing = existingScripts.FirstOrDefault(x => string.Equals(x.Path, ss.Path, StringComparison.InvariantCultureIgnoreCase));
+            if (force == false && existing != null)
+                continue;
+            
+            var result = await GetContent(ss.Path);
+            if (result.Failed(out string error))
+            {
+                Logger.Instance.WLog($"Failed to download shared script '{ss.Name}': " + error);
+                continue;
+            }
+            if (existing != null)
+            {
+                existing.UpdateFromCode(result.Value);
+                await service.Save(existing, null);
+            }
+            else
+            {
+                var scriptResult = Script.FromCode(ss.Name, result.Value);
+                if (scriptResult.Failed(out error))
+                {
+                    Logger.Instance.WLog($"Failed parsing script '{ss.Name}': {error}");
+                    continue;
+                }
+
+                var script = scriptResult.Value;
+                script.Type = ScriptType.Shared;
+                script.Path = ss.Path;
+                script.Repository = true;
+                script.Name = ss.Name;
+                await service.Save(script, null);
+            }
+        }
+    }
+
+
+    /// <summary>
+    /// Downloads the shared scripts from the repository into the database
+    /// </summary>
+    /// <param name="scripts">the scripts to download and save</param>
+    /// <returns>a task to await</returns>
+    public async Task DownloadScripts(List<string> scripts)
+    {
+        var service = ServiceLoader.Load<ScriptService>();
+        foreach (var type in new [] { ScriptType.Flow, ScriptType.System})
+        {
+            var list = type == ScriptType.Flow ? repo.FlowScripts : repo.SystemScripts;
+            foreach (var ss in list)
+            {
+                if (ss.MinimumVersion > new Version(Globals.Version))
+                    continue;
+                if (scripts.Contains(ss.Path) == false)
+                    continue;
+
+                var result = await GetContent(ss.Path);
+                if (result.Failed(out string error))
+                {
+                    Logger.Instance.WLog($"Failed to download script '{ss.Name}': " + error);
+                    continue;
+                }
+
+                var scriptResult = Script.FromCode(ss.Name, result.Value);
+                if (scriptResult.Failed(out error))
+                {
+                    Logger.Instance.WLog($"Failed parsing script '{ss.Name}': {error}");
+                    continue;
+                }
+
+                var script = scriptResult.Value;
+                script.Type = type;
+                script.Path = ss.Path;
+                script.Repository = true;
+                script.Name = ss.Name;
+                await service.Save(script, null);
+            }
+        }
+    }
+
     /// <summary>
     /// Downloads the function scripts from the repository
     /// <param name="force">when true, this will force every template to be re-downloaded and not just updates</param>
@@ -181,14 +264,20 @@ class RepositoryService
     /// <returns>an awaited task</returns>
     internal async Task UpdateScripts()
     {
-        var files = Directory.GetFiles(DirectoryHelper.ScriptsDirectory, "*.js", SearchOption.AllDirectories);
-        var knownPaths = repo.FlowScripts.Union(repo.FunctionScripts).Union(repo.SharedScripts)
-            .Union(repo.SystemScripts).Where(x => new Version(Globals.Version) >= x.MinimumVersion)
-            .Select(x => x.Path)
-            .Where(x => x != null)
-            .Select(x => x!)
-            .ToList();
-        await UpdateObjects(files, knownPaths);
+        var service = ServiceLoader.Load<ScriptService>();
+        var scripts = (await service.GetAll()).Where(x => x.Repository).ToList();
+        foreach (var script in scripts)
+        {
+            var result = await GetContent(script.Path);
+            if (result.Failed(out string error))
+            {
+                Logger.Instance?.ELog(error);
+                continue;
+            }
+
+            script.UpdateFromCode(result.Value);
+            await service.Save(script, null);
+        }
     }
     
     
@@ -232,19 +321,5 @@ class RepositoryService
         }
 
         Task.WaitAll(tasks.ToArray());
-        
-    }
-
-    /// <summary>
-    /// Downloads objects from the repository
-    /// </summary>
-    /// <param name="paths">paths of the objects to download</param>
-    /// <returns>a task to await</returns>
-    internal async Task DownloadObjects(List<string> paths)
-    {
-        foreach (string path in paths)
-        {
-            await DownloadObject(path, Path.Combine(DirectoryHelper.ScriptsDirectory, "..", path));
-        }
     }
 }

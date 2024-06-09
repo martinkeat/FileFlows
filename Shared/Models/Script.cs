@@ -1,17 +1,13 @@
 using FileFlows.Plugin;
+using FileFlows.ScriptExecution;
 
 namespace FileFlows.Shared.Models;
 
 /// <summary>
 /// A script is a special function node that lets you reuse them
 /// </summary>
-public class Script:IUniqueObject<string>, IInUse
+public class Script: FileFlowObject, IInUse
 {
-    /// <summary>
-    /// Gets or sets the name of the script
-    /// </summary>
-    public string Name { get; set; }
-
     /// <summary>
     /// Gets or sets the javascript code of the script
     /// </summary>
@@ -26,34 +22,101 @@ public class Script:IUniqueObject<string>, IInUse
     /// Gets or sets the type of script
     /// </summary>
     public ScriptType Type { get; set; }
-
-    /// <summary>
-    /// Gets or sets the UID of this script, which is the original name of it
-    /// </summary>
-    public string Uid { get; set; }
     
     /// <summary>
     /// Gets or sets the revision of the script
     /// </summary>
-    public int Revision { get; set; }
-    
-    /// <summary>
-    /// Gets or sets the latest revision of the script
-    /// </summary>
-    public int LatestRevision { get; set; }
+    public int? Revision { get; set; }
 
     /// <summary>
     /// Gets or sets the remote path of the script
     /// </summary>
-    public string Path { get; set; }
+    public string? Path { get; set; }
     
     /// <summary>
-    /// Gets or sets the comment block for this script
+    /// Gets or sets the description of the script
     /// </summary>
-    public string CommentBlock { get; set; }
+    public string? Description { get; set; }
+    
+    /// <summary>
+    /// Gets or sets the minimum version of FileFlows required
+    /// </summary>
+    public Version? MinimumVersion { get; set; }
+    
+    /// <summary>
+    /// Gets or sets the Author who wrote this script
+    /// </summary>
+    public string? Author { get; set; } = string.Empty;
 
+    /// <summary>
+    /// Gets or sets a list of outputs for the script
+    /// </summary>
+    public List<ScriptOutput> Outputs { get; set; } = new List<ScriptOutput>();
+
+    /// <summary>
+    /// Gets or sets parameters for the script
+    /// </summary>
+    public List<ScriptParameter> Parameters { get; set; } = new List<ScriptParameter>();
+
+    
+    /// <summary>
+    /// Gets or sets the latest revision of the script
+    /// </summary>
+    [DbIgnore]
+    public int LatestRevision { get; set; }
+    
     /// <summary>
     /// Gets or sets what is using this object
     /// </summary>
+    [DbIgnore]
     public List<ObjectReference> UsedBy { get; set; }
+
+
+    /// <summary>
+    /// Gets a script from the code
+    /// </summary>
+    /// <param name="name">the name of the script</param>
+    /// <param name="code">the script code</param>
+    /// <returns>the new script</returns>
+    public static Result<Script> FromCode(string name, string code)
+    {
+        var result = new ScriptParser().Parse(name, code);
+        if (result.Success == false)
+            return Result<Script>.Fail(result.Error);
+
+        var scriptModel = result.Model;
+        return new Script()
+        {
+            Uid = scriptModel.Uid ?? Guid.Empty,
+            Code = scriptModel.Code,
+            Revision = scriptModel.Revision,
+            Description = scriptModel.Description,
+            Author = scriptModel.Author,
+            Outputs = scriptModel.Outputs,
+            Parameters = scriptModel.Parameters,
+            MinimumVersion = scriptModel.MinimumVersion
+        };
+    }
+
+    /// <summary>
+    /// Updates this script from new code
+    /// </summary>
+    /// <param name="code">the code</param>
+    /// <returns>the result of the update</returns>
+    public Result<bool> UpdateFromCode(string code)
+    {
+        var result = new ScriptParser().Parse(this.Name, code);
+        if (result.Success == false)
+            return Result<bool>.Fail(result.Error);
+        
+        var scriptModel = result.Model;
+        this.Code = scriptModel.Code;
+        this.Revision = scriptModel.Revision;
+        this.Description = scriptModel.Description;
+        this.Author = scriptModel.Author;
+        this.Outputs = scriptModel.Outputs;
+        this.Parameters = scriptModel.Parameters;
+        this.MinimumVersion = scriptModel.MinimumVersion;
+        return true;
+    }
 }

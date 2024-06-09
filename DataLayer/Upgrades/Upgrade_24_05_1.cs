@@ -1,10 +1,6 @@
 using FileFlows.DataLayer.DatabaseConnectors;
-using FileFlows.DataLayer.Models;
 using FileFlows.Plugin;
-using FileFlows.ServerShared;
-using FileFlows.ServerShared.Helpers;
 using FileFlows.Shared.Models;
-using Microsoft.Extensions.Logging;
 using DatabaseType = FileFlows.Shared.Models.DatabaseType;
 using ILogger = FileFlows.Plugin.ILogger;
 

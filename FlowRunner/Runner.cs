@@ -107,86 +107,93 @@ public class Runner
     public (bool Success, bool KeepFiles) Run(FlowLogger logger)
     {
         var systemHelper = new SystemHelper();
-        try
-        {
-            systemHelper.Start();
-            var service = ServiceLoader.Load<IFlowRunnerService>();
-            var updated = service.Start(Info).Result;
-            if (updated == null)
-                return (false, false); // failed to update
-            var communicator = FlowRunnerCommunicator.Load(Info.LibraryFile.Uid);
-            communicator.OnCancel += Communicator_OnCancel;
-            logger.SetCommunicator(communicator);
-            bool finished = false;
-            DateTime lastSuccessHello = DateTime.UtcNow;
-            var task = Task.Run(async () =>
-            {
-                while (finished == false)
-                {
-                    if (finished == false)
-                    {
-                        bool success = await communicator.Hello(Program.Uid, this.Info, nodeParameters);
-                        if (success == false)
-                        {
-                            if (lastSuccessHello < DateTime.UtcNow.AddMinutes(-2))
-                            {
-                                nodeParameters?.Logger?.ELog("Hello failed, cancelling flow");
-                                Communicator_OnCancel();
-                                return;
-                            }
-
-                            nodeParameters?.Logger?.WLog("Hello failed, if continues the flow will be canceled");
-                        }
-                        else
-                        {
-                            lastSuccessHello = DateTime.UtcNow;
-                        }
-                    }
-
-                    await Task.Delay(5_000);
-                }
-            });
-            try
-            {
-                RunActual(logger);
-            }
-            catch (Exception ex)
-            {
-                finished = true;
-                task.Wait();
-
-                nodeParameters?.Logger?.ELog("Error in runner: " + ex.Message + Environment.NewLine + ex.StackTrace);
-
-                if (string.IsNullOrWhiteSpace(nodeParameters.FailureReason))
-                    nodeParameters.FailureReason = "Error in runner: " + ex.Message;
-                if (Info.LibraryFile?.Status == FileStatus.Processing)
-                    SetStatus(FileStatus.ProcessingFailed);
-            }
-            finally
-            {
-                finished = true;
-                task.Wait();
-                communicator.OnCancel -= Communicator_OnCancel;
-                communicator.Close();
-            }
-        }
-        catch (Exception ex)
-        {
-            Program.Logger.ELog("Failure in runner: " + ex.Message + Environment.NewLine + ex.StackTrace);
-        }
-
         bool success = false;
         try
         {
-            Finish().Wait();
-            success = true;
+            try
+            {
+                systemHelper.Start();
+                var service = ServiceLoader.Load<IFlowRunnerService>();
+                var updated = service.Start(Info).Result;
+                if (updated == null)
+                    return (false, false); // failed to update
+                var communicator = FlowRunnerCommunicator.Load(Info.LibraryFile.Uid);
+                communicator.OnCancel += Communicator_OnCancel;
+                logger.SetCommunicator(communicator);
+                bool finished = false;
+                DateTime lastSuccessHello = DateTime.UtcNow;
+                var task = Task.Run(async () =>
+                {
+                    while (finished == false)
+                    {
+                        if (finished == false)
+                        {
+                            bool success = await communicator.Hello(Program.Uid, this.Info, nodeParameters);
+                            if (success == false)
+                            {
+                                if (lastSuccessHello < DateTime.UtcNow.AddMinutes(-2))
+                                {
+                                    nodeParameters?.Logger?.ELog("Hello failed, cancelling flow");
+                                    Communicator_OnCancel();
+                                    return;
+                                }
+
+                                nodeParameters?.Logger?.WLog("Hello failed, if continues the flow will be canceled");
+                            }
+                            else
+                            {
+                                lastSuccessHello = DateTime.UtcNow;
+                            }
+                        }
+
+                        await Task.Delay(5_000);
+                    }
+                });
+                try
+                {
+                    RunActual(logger);
+                }
+                catch (Exception ex)
+                {
+                    finished = true;
+                    task.Wait();
+
+                    nodeParameters?.Logger?.ELog("Error in runner: " + ex.Message + Environment.NewLine +
+                                                 ex.StackTrace);
+
+                    if (string.IsNullOrWhiteSpace(nodeParameters.FailureReason))
+                        nodeParameters.FailureReason = "Error in runner: " + ex.Message;
+                    if (Info.LibraryFile?.Status == FileStatus.Processing)
+                        SetStatus(FileStatus.ProcessingFailed);
+                }
+                finally
+                {
+                    finished = true;
+                    task.Wait();
+                    communicator.OnCancel -= Communicator_OnCancel;
+                    communicator.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                Program.Logger.ELog("Failure in runner: " + ex.Message + Environment.NewLine + ex.StackTrace);
+            }
+
+            try
+            {
+                Finish().Wait();
+                success = true;
+            }
+            catch (Exception ex)
+            {
+                Program.Logger.ELog("Failed 'Finishing' runner: " + ex.Message + Environment.NewLine + ex.StackTrace);
+            }
         }
-        catch (Exception ex)
+        finally
         {
-            Program.Logger.ELog("Failed 'Finishing' runner: " + ex.Message + Environment.NewLine + ex.StackTrace);
+            systemHelper.Stop();
         }
 
-        systemHelper.Stop();
         return (success, Info.LibraryFile.Status == FileStatus.ProcessingFailed);
     }
 

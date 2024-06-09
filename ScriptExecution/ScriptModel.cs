@@ -11,6 +11,11 @@ public class ScriptModel
     public string Name { get; set; } = string.Empty;
     
     /// <summary>
+    /// Gets or sets the UID of the script
+    /// </summary>
+    public Guid? Uid { get; set; }
+    
+    /// <summary>
     /// Gets or sets the code of the script
     /// </summary>
     public string Code { get; set; } = string.Empty;
@@ -19,6 +24,16 @@ public class ScriptModel
     /// Gets or sets the Author who wrote this script
     /// </summary>
     public string Author { get; set; } = string.Empty;
+    
+    /// <summary>
+    /// Gets or sets the minimum version of FileFlows required for this script
+    /// </summary>
+    public Version? MinimumVersion { get; set; }
+    
+    /// <summary>
+    /// Gets or sets the revision
+    /// </summary>
+    public int? Revision { get; set; }
     
     /// <summary>
     /// Gets or sets the description of this script

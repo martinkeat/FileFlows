@@ -137,13 +137,17 @@ public class FlowHelper
             // special type
             var nodeScript = new ScriptNode();
             nodeScript.Model = part.Model;
-            string scriptName = part.FlowElementUid[7..]; // 7 to remove "Scripts." 
-            nodeScript.Code = GetScriptCode(scriptName);
+            if (Guid.TryParse(part.FlowElementUid[7..], out Guid scriptUid) == false) // 7 to remove "Scripts."
+                return Result<Node>.Fail("Failed to parse script UID: " + part.FlowElementUid[7..]);
+
+            var flowScript = Program.Config.FlowScripts.FirstOrDefault(x => x.Uid == scriptUid);
+
+            nodeScript.Code = flowScript?.Code;// GetScriptCode(scriptUid);
             if (string.IsNullOrEmpty(nodeScript.Code))
                 return Result<Node>.Fail("Script not found");
-            
-            if(string.IsNullOrWhiteSpace(part.Name))
-                part.Name = scriptName;
+
+            if (string.IsNullOrWhiteSpace(part.Name))
+                part.Name = flowScript?.Name?.EmptyAsNull() ?? scriptUid.ToString();
             return nodeScript;
         }
         
@@ -341,13 +345,11 @@ public class FlowHelper
     /// <summary>
     /// Loads the code for a script
     /// </summary>
-    /// <param name="scriptName">the name of the script</param>
+    /// <param name="scriptUid">the UID of the script</param>
     /// <returns>the code of the script</returns>
-    private static string GetScriptCode(string scriptName)
+    private static string GetScriptCode(Guid scriptUid)
     {
-        if (scriptName.EndsWith(".js") == false)
-            scriptName += ".js";
-        var file = new FileInfo(Path.Combine(Program.ConfigDirectory, "Scripts", "Flow", scriptName));
+        var file = new FileInfo(Path.Combine(Program.ConfigDirectory, "Scripts", "Flow", scriptUid + ".js"));
         if (file.Exists == false)
             return string.Empty;
         return File.ReadAllText(file.FullName);

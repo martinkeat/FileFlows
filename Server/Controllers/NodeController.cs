@@ -114,6 +114,9 @@ public class NodeController : BaseController
     {
         // see if we are updating the internal node
         var service = ServiceLoader.Load<NodeService>();
+        if (node.PreExecuteScript == Guid.Empty)
+            node.PreExecuteScript = null; // null it out
+        
         if(node.Libraries?.Any() == true)
         {
             // remove any removed libraries and update any names
@@ -145,10 +148,7 @@ public class NodeController : BaseController
                 internalNode.MaxFileSizeMb = node.MaxFileSizeMb;
                 internalNode.Variables = node.Variables ?? new();
                 internalNode.ProcessFileCheckInterval = node.ProcessFileCheckInterval;
-                if (string.IsNullOrWhiteSpace(node.PreExecuteScript))
-                    internalNode.PreExecuteScript = null;
-                else
-                    internalNode.PreExecuteScript = node.PreExecuteScript;
+                internalNode.PreExecuteScript = node.PreExecuteScript;
                 
                 internalNode.Libraries = node.Libraries;
                 internalNode = await service.Update(internalNode, await GetAuditDetails());

@@ -1,4 +1,5 @@
 using FileFlows.Managers.InitializationManagers;
+using FileFlows.Plugin;
 using FileFlows.Server.Helpers;
 using FileFlows.Server.Services;
 using FileFlows.Shared.Models;
@@ -24,11 +25,12 @@ public class Upgrade_24_02 : UpgradeBase
     /// <summary>
     /// Runs the update
     /// </summary>
-    public void Run()
+    /// <returns>the result of the upgrade</returns>
+    public Result<bool> Run()
     {
         Logger.ILog("Upgrade running, running 24.02 upgrade script");
         SetServerPort();
-        UpgradeManager.Run_Upgrade_24_02(Logger, DbType, ConnectionString).Wait();
+        return UpgradeManager.Run_Upgrade_24_02(Logger, DbType, ConnectionString);
     }
 
     /// <summary>

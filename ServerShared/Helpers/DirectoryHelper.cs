@@ -12,11 +12,9 @@ public class DirectoryHelper
     /// </summary>
     public static void Init()
     {
-        
         InitLoggingDirectory();
         InitDataDirectory();
         InitPluginsDirectory();
-        InitScriptsDirectory();
         InitTemplatesDirectory();
 
         FlowRunnerDirectory = Path.Combine(BaseDirectory, "FlowRunner");
@@ -36,20 +34,6 @@ public class DirectoryHelper
             return;
         MoveDirectoryContent(oldDir, dir);
         #endif
-    }
-
-    private static void InitScriptsDirectory()
-    {
-#if(DEBUG && false)
-        return;
-#else
-        foreach (var dir in new[] { ScriptsDirectory, ScriptsDirectoryFlow, ScriptsDirectorySystem, ScriptsDirectoryShared, ScriptsDirectoryFunction, ScriptsDirectoryWebhook })
-        {
-            if (Directory.Exists(dir) == false)
-                Directory.CreateDirectory(dir);
-        }
-#endif
-        
     }
 
     private static void InitTemplatesDirectory()
@@ -238,45 +222,45 @@ public class DirectoryHelper
     /// </summary>
     public static string DockerModsDirectory => "/app/DockerMods"; // this directory will not be mapped out, so will be cleaned when new DockerImage is pulled
     
-    /// <summary>
-    /// Gets the scripts directory
-    /// </summary>
-    public static string ScriptsDirectory
-    {
-        get
-        {
-            // docker we expose this in the data directory so we
-            // reduce how many things we have to map out
-            if (Globals.IsDocker) 
-                return Path.Combine(DataDirectory, "Scripts");
-            return Path.Combine(BaseDirectory, "Scripts");
-        }
-    }
+    // /// <summary>
+    // /// Gets the scripts directory
+    // /// </summary>
+    // public static string ScriptsDirectory
+    // {
+    //     get
+    //     {
+    //         // docker we expose this in the data directory so we
+    //         // reduce how many things we have to map out
+    //         if (Globals.IsDocker) 
+    //             return Path.Combine(DataDirectory, "Scripts");
+    //         return Path.Combine(BaseDirectory, "Scripts");
+    //     }
+    // }
     
-    /// <summary>
-    /// Gets the scripts directory for flow scripts
-    /// </summary>
-    public static string ScriptsDirectoryFlow => Path.Combine(ScriptsDirectory, "Flow");
-    
-    /// <summary>
-    /// Gets the scripts directory for system scripts
-    /// </summary>
-    public static string ScriptsDirectorySystem => Path.Combine(ScriptsDirectory, "System");
-
-    /// <summary>
-    /// Gets the scripts directory for scripts from the repository
-    /// </summary>
-    public static string ScriptsDirectoryShared => Path.Combine(ScriptsDirectory, "Shared");
-    
-    /// <summary>
-    /// Gets the scripts directory for webhook scripts
-    /// </summary>
-    public static string ScriptsDirectoryWebhook => Path.Combine(ScriptsDirectory, "Webhook");
+    // /// <summary>
+    // /// Gets the scripts directory for flow scripts
+    // /// </summary>
+    // public static string ScriptsDirectoryFlow => Path.Combine(ScriptsDirectory, "Flow");
+    //
+    // /// <summary>
+    // /// Gets the scripts directory for system scripts
+    // /// </summary>
+    // public static string ScriptsDirectorySystem => Path.Combine(ScriptsDirectory, "System");
+    //
+    // /// <summary>
+    // /// Gets the scripts directory for scripts from the repository
+    // /// </summary>
+    // public static string ScriptsDirectoryShared => Path.Combine(ScriptsDirectory, "Shared");
+    //
+    // /// <summary>
+    // /// Gets the scripts directory for webhook scripts
+    // /// </summary>
+    // public static string ScriptsDirectoryWebhook => Path.Combine(ScriptsDirectory, "Webhook");
     
     /// <summary>
     /// Gets the scripts directory for template scripts
     /// </summary>
-    public static string ScriptsDirectoryFunction => Path.Combine(ScriptsDirectory, "Function");
+    public static string ScriptsDirectoryFunction => Path.Combine(TemplateDirectory, "Function");
     
     /// <summary>
     /// Gets the location of the encryption key file

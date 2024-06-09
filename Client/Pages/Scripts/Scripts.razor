@@ -1,7 +1,7 @@
 @namespace FileFlows.Client.Pages
 @using FileFlows.Shared.Models
 @using FileFlows.Plugin
-@inherits ListPage<string, Script>
+@inherits ListPage<Guid, Script>
 
 @page "/scripts"
 
@@ -44,13 +44,6 @@
                    @Globals.lblName
                </Header>
                <Cell Context="item">
-               @{
-                   
-                   var match = Regex.Match(item.CommentBlock, @"@description\s+(.*?)\s*[@\*/]", RegexOptions.Singleline);
-                   var description = match.Success ? match.Groups[1].Value : null;
-                   match = Regex.Match(item.CommentBlock, @"@author\s+(.*?)\s*[@\*/]", RegexOptions.Singleline);
-                   var author = match.Success ? match.Groups[1].Value : null;
-               }
                    <div class="table-item">
                        <span class="icon">
                            @{
@@ -68,12 +61,16 @@
                        <div class="center">
                            <span class="name">
                                <span>@item.Name</span>
-                               @if(description != null){
-                                   <span>@description</span>
+                               @if(string.IsNullOrWhiteSpace(item.Description) == false){
+                                   <span>@item.Description</span>
                                }
                            </span>
                            <div class="info">
                                <IconValue Color="IconValueColor.Blue" Icon="fas fa-code-branch" Value="@item.Revision.ToString()" />
+                               @if (item.Repository)
+                               {
+                                    <IconValue Color="IconValueColor.Red" Icon="fas fa-ban" Value="@lblReadOnly" Tooltip="@lblReadOnly"/>
+                               }
                                @if (item.LatestRevision > item.Revision)
                                {
                                    <IconValue Color="IconValueColor.Orange" Icon="fas fa-code-branch" Value="@item.LatestRevision.ToString()" Tooltip="@lblUpdateAvailable"/>
@@ -85,14 +82,10 @@
                            </div>
                        </div>
                         <div class="right">
-                            @if (author != null)
+                            @if (string.IsNullOrEmpty(item.Author) == false)
                             {
-                                <span class="top-right @(item.Repository ? "error" : "") title=@(item.Repository ? lblReadOnly : "")">
-                                    @if (item.Repository)
-                                    {
-                                        <i class="fas fa-ban"></i>
-                                    }
-                                    @author
+                                <span class="top-right" title="@(item.Repository ? lblReadOnly : "")">
+                                    @item.Author
                                 </span>
                             }
                         </div>

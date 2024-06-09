@@ -36,6 +36,7 @@ public static class ServiceLoader
             .AddSingleton<RevisionService>()
             .AddSingleton<AccessControlService>()
             .AddSingleton<FlowRunnerService>()
+            .AddSingleton<ScriptService>()
             .AddSingleton<RepositoryFlowTemplateService>()
             .AddSingleton<AuditService>()
             .AddSingleton<DockerModService>()

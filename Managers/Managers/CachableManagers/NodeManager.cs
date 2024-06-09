@@ -3,6 +3,7 @@ using FileFlows.Plugin;
 using FileFlows.ServerShared;
 using FileFlows.ServerShared.Helpers;
 using FileFlows.ServerShared.Models;
+using Microsoft.Extensions.Logging;
 
 namespace FileFlows.Managers;
 
@@ -64,52 +65,60 @@ public class NodeManager : CachedManager<ProcessingNode>
     /// <returns>true if successful</returns>
     public async Task<Result<bool>> EnsureInternalNodeExists()
     {
-        var manager  = DatabaseAccessManager.Instance.FileFlowsObjectManager;
-        var node = await manager.Single<ProcessingNode>(Globals.InternalNodeUid);
-        if (node.Failed(out string error))
-            return Result<bool>.Fail(error);
-        if (node.Value == null)
+        try
         {
-            string tempPath;
-            if (Globals.IsDocker)
-                tempPath = "/temp";
-            else
-                tempPath = Path.Combine(DirectoryHelper.BaseDirectory, "Temp");
-
-            if (Directory.Exists(tempPath) == false)
-                Directory.CreateDirectory(tempPath);
-
-            node = new ProcessingNode
+            var manager = DatabaseAccessManager.Instance.FileFlowsObjectManager;
+            var node = await manager.Single<ProcessingNode>(Globals.InternalNodeUid);
+            if (node.Failed(out string error))
+                return Result<bool>.Fail(error);
+            if (node.Value == null)
             {
-                Uid = Globals.InternalNodeUid,
-                Name = Globals.InternalNodeName,
-                Address = Globals.InternalNodeName,
-                AllLibraries = ProcessingLibraries.All,
-                OperatingSystem = Globals.IsDocker ? OperatingSystemType.Docker :
-                    Globals.IsWindows ? OperatingSystemType.Windows :
-                    Globals.IsLinux ? OperatingSystemType.Linux :
-                    Globals.IsMac ? OperatingSystemType.Mac :
-                    OperatingSystemType.Unknown,
-                Architecture = RuntimeInformation.ProcessArchitecture == Architecture.Arm ? ArchitectureType.Arm32 :
-                    RuntimeInformation.ProcessArchitecture == Architecture.Arm64 ? ArchitectureType.Arm64 :
-                    RuntimeInformation.ProcessArchitecture == Architecture.Arm ? ArchitectureType.Arm64 :
-                    RuntimeInformation.ProcessArchitecture == Architecture.X64 ? ArchitectureType.x64 :
-                    RuntimeInformation.ProcessArchitecture == Architecture.X86 ? ArchitectureType.x86 :
-                    ArchitectureType.Unknown,
-                Schedule = new string('1', 672),
-                Enabled = true,
-                FlowRunners = 1,
-                TempPath = tempPath,
-            };
+                string tempPath;
+                if (Globals.IsDocker)
+                    tempPath = "/temp";
+                else
+                    tempPath = Path.Combine(DirectoryHelper.BaseDirectory, "Temp");
+
+                if (Directory.Exists(tempPath) == false)
+                    Directory.CreateDirectory(tempPath);
+
+                node = new ProcessingNode
+                {
+                    Uid = Globals.InternalNodeUid,
+                    Name = Globals.InternalNodeName,
+                    Address = Globals.InternalNodeName,
+                    AllLibraries = ProcessingLibraries.All,
+                    OperatingSystem = Globals.IsDocker ? OperatingSystemType.Docker :
+                        Globals.IsWindows ? OperatingSystemType.Windows :
+                        Globals.IsLinux ? OperatingSystemType.Linux :
+                        Globals.IsMac ? OperatingSystemType.Mac :
+                        OperatingSystemType.Unknown,
+                    Architecture = RuntimeInformation.ProcessArchitecture == Architecture.Arm ? ArchitectureType.Arm32 :
+                        RuntimeInformation.ProcessArchitecture == Architecture.Arm64 ? ArchitectureType.Arm64 :
+                        RuntimeInformation.ProcessArchitecture == Architecture.Arm ? ArchitectureType.Arm64 :
+                        RuntimeInformation.ProcessArchitecture == Architecture.X64 ? ArchitectureType.x64 :
+                        RuntimeInformation.ProcessArchitecture == Architecture.X86 ? ArchitectureType.x86 :
+                        ArchitectureType.Unknown,
+                    Schedule = new string('1', 672),
+                    Enabled = true,
+                    FlowRunners = 1,
+                    TempPath = tempPath,
+                };
+            }
+            else
+            {
+                node.Value.Version = Globals.Version;
+            }
+
+            await manager.AddOrUpdateObject((FileFlowObject)node.Value!, auditDetails: AuditDetails.ForServer());
+
+            return true;
         }
-        else
+        catch (Exception ex)
         {
-            node.Value.Version = Globals.Version;
-        }
-
-        await manager.AddOrUpdateObject((FileFlowObject)node.Value!, auditDetails: AuditDetails.ForServer());
-
-        return true;
+            Logger.Instance.ELog("Failed to ensure default node exists: " + ex.Message + Environment.NewLine + ex.StackTrace);
+            return Result<bool>.Fail(ex.Message);
+        } 
     }
 
     /// <summary>

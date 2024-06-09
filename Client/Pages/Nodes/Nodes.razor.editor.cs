@@ -17,12 +17,12 @@ public partial class Nodes : ListPage<Guid, ProcessingNode>
         node.Mappings ??= new();
         this.EditingItem = node;
 
-        Dictionary<string, string> scripts;
+        Dictionary<Guid, string> scripts;
         var tabs = new Dictionary<string, List<ElementField>>();
         Blocker.Show();
         try
         {
-            scripts = (await HttpHelper.Get<Dictionary<string, string>>("/api/script/basic-list")).Data ?? new ();
+            scripts = (await HttpHelper.Get<Dictionary<Guid, string>>("/api/script/basic-list?type=System")).Data ?? new ();
             tabs.Add("General", TabGeneral(node, isServerProcessingNode, scripts));
             tabs.Add("Schedule", TabSchedule(node, isServerProcessingNode));
             if (isServerProcessingNode == false)
@@ -51,7 +51,7 @@ public partial class Nodes : ListPage<Guid, ProcessingNode>
         return false;
     }
 
-    private List<ElementField> TabGeneral(ProcessingNode node, bool isServerProcessingNode, Dictionary<string, string> scripts)
+    private List<ElementField> TabGeneral(ProcessingNode node, bool isServerProcessingNode, Dictionary<Guid, string> scripts)
     {
         List<ElementField> fields = new List<ElementField>();
 
@@ -127,9 +127,9 @@ public partial class Nodes : ListPage<Guid, ProcessingNode>
         {
             var scriptOptions = scripts.Select(x => new ListOption
             {
-                Value = x.Value, Label = x.Value
+                Value = x.Key, Label = x.Value
             }).ToList();
-            scriptOptions.Insert(0, new ListOption() { Label = "Labels.None", Value = string.Empty});
+            scriptOptions.Insert(0, new ListOption() { Label = "Labels.None", Value = Guid.Empty});
             fields.Add(new ElementField
             {
                 InputType = FormInputType.Select,

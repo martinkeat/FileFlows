@@ -14,14 +14,13 @@ namespace FileFlows.Server.Controllers;
 [FileFlowsAuthorize(UserRole.Scripts)]
 public class ScriptController : BaseController
 {
-
     /// <summary>
     /// Gets all scripts in the system
     /// </summary>
     /// <returns>a list of all scripts</returns>
     [HttpGet]
-    public Task<IEnumerable<Script>> GetAll()
-        => new ScriptService().GetAll();
+    public Task<List<Script>> GetAll()
+        => ServiceLoader.Load<ScriptService>().GetAll();
 
     /// <summary>
     /// Basic script list
@@ -30,11 +29,11 @@ public class ScriptController : BaseController
     /// <returns>script list</returns>
     [HttpGet("basic-list")]
     [FileFlowsAuthorize(UserRole.Nodes | UserRole.Tasks)]
-    public async Task<Dictionary<string, string>> GetBasicList([FromQuery] ScriptType? type = null)
+    public async Task<Dictionary<Guid, string>> GetBasicList([FromQuery] ScriptType? type = null)
     {
-        IEnumerable<Script> items = await new ScriptService().GetAll();
+        var items = await ServiceLoader.Load<ScriptService>().GetAll();
         if (type != null)
-            items = items.Where(x => x.Type == type.Value);
+            items = items.Where(x => x.Type == type.Value).ToList();
         return items.ToDictionary(x => x.Uid, x => x.Name);
     }
 
@@ -45,7 +44,7 @@ public class ScriptController : BaseController
     [HttpGet("templates")]
     [FileFlowsAuthorize(UserRole.Scripts | UserRole.Flows)]
     public Task<IEnumerable<Script>> GetTemplates() 
-        => new ScriptService().GetAllByType(ScriptType.Template);
+        => ServiceLoader.Load<ScriptService>().GetAllByType(ScriptType.Template);
     
     /// <summary>
     /// Returns a list of scripts
@@ -54,7 +53,7 @@ public class ScriptController : BaseController
     /// <returns>a list of scripts</returns>
     [HttpGet("all-by-type/{type}")]
     public Task<IEnumerable<Script>> GetAllByType([FromRoute] ScriptType type) 
-        => new ScriptService().GetAllByType(type, loadCode: true);
+        => ServiceLoader.Load<ScriptService>().GetAllByType(type);
 
     /// <summary>
     /// Returns a basic list of scripts
@@ -63,29 +62,30 @@ public class ScriptController : BaseController
     /// <returns>a basic list of scripts</returns>
     [HttpGet("list/{type}")]
     public Task<IEnumerable<Script>> List([FromRoute] ScriptType type)
-        => new ScriptService().GetAllByType(type);
+        => ServiceLoader.Load<ScriptService>().GetAllByType(type);
 
 
     /// <summary>
     /// Get a script
     /// </summary>
-    /// <param name="name">The name of the script</param>
-    /// <param name="type">The type of script</param>
+    /// <param name="uid">The uid of the script</param>
     /// <returns>the script instance</returns>
-    [HttpGet("{name}")]
-    public Task<Script> Get([FromRoute] string name, [FromQuery] ScriptType type = ScriptType.Flow)
-        => new ScriptService().Get(name, type);
+    [HttpGet("{uid}")]
+    public Task<Script?> Get([FromRoute] Guid uid)
+        => ServiceLoader.Load<ScriptService>().Get(uid);
 
 
     /// <summary>
     /// Gets the code for a script
     /// </summary>
-    /// <param name="name">The name of the script</param>
-    /// <param name="type">The type of script</param>
+    /// <param name="uid">The name of the script</param>
     /// <returns>the code for a script</returns>
-    [HttpGet("{name}/code")]
-    public Task<string> GetCode(string name, [FromQuery] ScriptType type = ScriptType.Flow)
-        => new ScriptService().GetCode(name, type);
+    [HttpGet("{uid}/code")]
+    public async Task<string?> GetCode([FromRoute] Guid uid)
+    {
+        var script = await ServiceLoader.Load<ScriptService>().Get(uid);
+        return script?.Code;
+    }
 
 
     /// <summary>
@@ -93,8 +93,13 @@ public class ScriptController : BaseController
     /// </summary>
     /// <param name="args">the arguments to validate</param>
     [HttpPost("validate")]
-    public void ValidateScript([FromBody] ValidateScriptModel args)
-        => new ScriptService().ValidateScript(args.Code, args.IsFunction, args.Variables);
+    public IActionResult ValidateScript([FromBody] ValidateScriptModel args)
+    {
+        var result = ServiceLoader.Load<ScriptService>().ValidateScript(args.Code);//, args.IsFunction, args.Variables);
+        if (result.Failed(out string error))
+            return BadRequest(error);
+        return Ok();
+    }
 
     /// <summary>
     /// Saves a script
@@ -102,39 +107,44 @@ public class ScriptController : BaseController
     /// <param name="script">The script to save</param>
     /// <returns>the saved script instance</returns>
     [HttpPost]
-    public async Task<Script> Save([FromBody] Script script)
-        => await new ScriptService().Save(script, await GetAuditDetails());
+    public async Task<IActionResult> Save([FromBody] Script script)
+    {
+        var result = await ServiceLoader.Load<ScriptService>().Save(script, await GetAuditDetails());
+        if (result.Failed(out string error))
+            return BadRequest(error);
+        return Ok(result.Value);
+    }
 
 
     /// <summary>
     /// Delete scripts from the system
     /// </summary>
     /// <param name="model">A reference model containing UIDs to delete</param>
-    /// <param name="type">The type of scripts being deleted</param>
     /// <returns>an awaited task</returns>
     [HttpDelete]
-    public void Delete([FromBody] ReferenceModel<string> model, [FromQuery] ScriptType type = ScriptType.Flow)
+    public async Task Delete([FromBody] ReferenceModel<Guid> model)
     {
-        var service = new ScriptService();
-        foreach (string m in model.Uids)
+        var service = ServiceLoader.Load<ScriptService>();
+        var auditDetails = await GetAuditDetails();
+        foreach (var uid in model.Uids)
         {
-            service.Delete(m, type);
+            await service.Delete(uid, auditDetails);
         }
     }
 
     /// <summary>
     /// Exports a script
     /// </summary>
-    /// <param name="name">The name of the script</param>
+    /// <param name="uid">The uid of the script</param>
     /// <returns>A download response of the script</returns>
-    [HttpGet("export/{name}")]
-    public async Task<IActionResult> Export([FromRoute] string name)
+    [HttpGet("export/{uid}")]
+    public async Task<IActionResult> Export([FromRoute] Guid uid)
     {
-        var script = await GetCode(name);
+        var script = await ServiceLoader.Load<ScriptService>().Get(uid);
         if (script == null)
             return NotFound();
-        byte[] data = System.Text.UTF8Encoding.UTF8.GetBytes(script);
-        return File(data, "application/octet-stream", name + ".js");
+        byte[] data = System.Text.UTF8Encoding.UTF8.GetBytes(script.Code);
+        return File(data, "application/octet-stream", script.Name + ".js");
     }
 
     /// <summary>
@@ -145,33 +155,30 @@ public class ScriptController : BaseController
     [HttpPost("import")]
     public async Task<Script> Import([FromQuery(Name = "filename")] string name, [FromBody] string code)
     {
-        var service = new ScriptService();
+        var service = ServiceLoader.Load<ScriptService>();
         // will throw if any errors
         name = name.Replace(".js", "").Replace(".JS", "");
-        name = service.GetNewUniqueName(name);
+        name = await service.GetNewUniqueName(name);
         return await service.Save(new () { Name = name, Code = code, Repository = false}, await GetAuditDetails());
     }
 
     /// <summary>
     /// Duplicates a script
     /// </summary>
-    /// <param name="name">The name of the script to duplicate</param>
-    /// <param name="type">the script type</param>
+    /// <param name="uid">The uid of the script to duplicate</param>
     /// <returns>The duplicated script</returns>
-    [HttpGet("duplicate/{name}")]
-    public async Task<Script> Duplicate([FromRoute] string name, [FromQuery] ScriptType type = ScriptType.Flow)
+    [HttpGet("duplicate/{uid}")]
+    public async Task<Script> Duplicate([FromRoute] Guid uid)
     {
-        var script = await Get(name, type);
+        var service = ServiceLoader.Load<ScriptService>();
+        var script = await service.Get(uid);;
         if (script == null)
             return null;
-        bool isRepositoryScript = script.Repository;
 
-        var service = new ScriptService();
-        script.Name = service.GetNewUniqueName(name);
+        script.Name = await service.GetNewUniqueName(script.Name);
         script.Code = Regex.Replace(script.Code, "@name(.*?)$", "@name " + script.Name, RegexOptions.Multiline);
         script.Repository = false;
-        script.Uid = script.Name;
-        script.Type = type;
+        script.Uid = Guid.NewGuid();
         return await service.Save(script, await GetAuditDetails());
     }
     

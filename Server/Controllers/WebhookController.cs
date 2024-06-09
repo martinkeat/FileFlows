@@ -14,7 +14,7 @@ namespace FileFlows.Server.Controllers;
 /// </summary>
 [Route("/api/webhook")]
 [FileFlowsAuthorize(UserRole.Webhooks)]
-public class WebhookController : Controller
+public class WebhookController : BaseController
 {
     /// <summary>
     /// Get all webhooks configured in the system
@@ -39,12 +39,8 @@ public class WebhookController : Controller
     /// <returns>the webhook</returns>
     private Webhook? FromScript(Script script)
     {
-        if (string.IsNullOrWhiteSpace(script?.CommentBlock))
-            return null;
-
         Webhook webhook = new()
         {
-            CommentBlock = script.CommentBlock,
             Code = script.Code,
             Name = script.Name,
             Path = script.Path,
@@ -53,17 +49,22 @@ public class WebhookController : Controller
             Type = script.Type,
             Uid = script.Uid,
             LatestRevision = script.LatestRevision,
-            UsedBy = script.UsedBy
+            UsedBy = script.UsedBy,
+            Description = script.Description,
+            Author = script.Author,
+            MinimumVersion = script.MinimumVersion,
+            Parameters = script.Parameters,
+            Outputs = script.Outputs
         };
 
         if(webhook.Code.StartsWith("// path: "))
             webhook.Code = webhook.Code.Substring(webhook.Code.IndexOf('\n') + 1).Trim();
 
-        CommentBlock cblock = new(webhook.CommentBlock);
-        webhook.Code = webhook.Code.Replace(webhook.CommentBlock, string.Empty);
-
-        webhook.Method = cblock.GetValue("method") == "POST" ? HttpMethod.Post : HttpMethod.Get;
-        webhook.Route = cblock.GetValue("route");
+        // CommentBlock cblock = new(webhook.CommentBlock);
+        // webhook.Code = webhook.Code.Replace(webhook.CommentBlock, string.Empty);
+        //
+        // webhook.Method = cblock.GetValue("method") == "POST" ? HttpMethod.Post : HttpMethod.Get;
+        // webhook.Route = cblock.GetValue("route");
         if (string.IsNullOrWhiteSpace(webhook.Route))
         {
             Logger.Instance.WLog("Webhook: No route found for webhook: " + webhook.Name);
@@ -76,15 +77,15 @@ public class WebhookController : Controller
     /// <summary>
     /// Get webhook
     /// </summary>
-    /// <param name="name">The name of the webhook</param>
+    /// <param name="uid">The UID of the webhook</param>
     /// <returns>The webhook instance</returns>
-    [HttpGet("{name}")]
-    public async Task<Webhook?> Get(string name)
+    [HttpGet("{uid}")]
+    public async Task<Webhook?> Get(Guid uid)
     {
         if(LicenseHelper.IsLicensed(LicenseFlags.Webhooks) == false)
             return null;
-        var script = await new ScriptController().Get(name, ScriptType.Webhook);
-        return script != null ? FromScript(script) : null;
+        var script = await new ScriptService().Get(uid);
+        return script?.Type == ScriptType.Webhook ? FromScript(script) : null;
     }
 
     /// <summary>
@@ -97,22 +98,21 @@ public class WebhookController : Controller
     {
         if(LicenseHelper.IsLicensed(LicenseFlags.Webhooks) == false || string.IsNullOrWhiteSpace(webhook.Name))
             return null;
-        var existing = await Get(webhook.Uid?.EmptyAsNull() ?? webhook.Name);
-        CommentBlock comments;
-        if (existing != null)
-        {
-            if (existing.HasChanged(webhook) == false)
-                return existing;
-            comments = new(existing.CommentBlock);
-        }
-        else
-        {
-            comments = new(webhook.CommentBlock);
-        }
-        comments.AddOrUpdate("name", webhook.Name);
-        comments.AddOrUpdate("route", webhook.Route);
-        comments.AddOrUpdate("method", webhook.Method.ToString().ToUpperInvariant());
-        webhook.CommentBlock = comments.ToString();
+        var existing = await Get(webhook.Uid);
+        //CommentBlock comments;
+        // if (existing != null)
+        // {
+        //     if (existing.HasChanged(webhook) == false)
+        //         return existing;
+        //     comments = new(existing.CommentBlock);
+        // }
+        // else
+        // {
+        //     comments = new(webhook.CommentBlock);
+        // }
+        // comments.AddOrUpdate("name", webhook.Name);
+        // comments.AddOrUpdate("route", webhook.Route);
+        // comments.AddOrUpdate("method", webhook.Method.ToString().ToUpperInvariant());
         
         // string code = 
         
@@ -126,10 +126,13 @@ public class WebhookController : Controller
     /// <param name="model">A reference model containing UIDs to delete</param>
     /// <returns>an awaited task</returns>
     [HttpDelete]
-    public void Delete([FromBody] ReferenceModel<string> model)
+    public async Task Delete([FromBody] ReferenceModel<Guid> model)
     {
         if(LicenseHelper.IsLicensed(LicenseFlags.Webhooks) == false)
             return;
-        new ScriptController().Delete(model, ScriptType.Webhook);
+        var service = ServiceLoader.Load<ScriptService>();
+        var auditDetails = await GetAuditDetails();
+        foreach(var uid in model.Uids)
+            await service.Delete(uid, auditDetails);
     }
 }

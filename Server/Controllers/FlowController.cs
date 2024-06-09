@@ -386,16 +386,18 @@ public class FlowController : BaseController
 
             var elements = await GetElements(uid);
 
-            var scripts = (await new ScriptController().GetAll()).Select(x => x.Name).ToList();
+            var scripts = (await ServiceLoader.Load<ScriptService>().GetAll()).ToDictionary(x => x.Uid, x => x.Name);
             var flows = (await ServiceLoader.Load<FlowService>().GetAllAsync()).ToDictionary(x => x.Uid.ToString(), x => x.Name);
             foreach (var p in flow.Parts)
             {
                 if (p.Type == FlowElementType.Script && string.IsNullOrWhiteSpace(p.Name))
                 {
-                    string feName = p.FlowElementUid[7..];
+                    string sScriptUid = p.FlowElementUid[7..];
                     // set the name to the script name
-                    if (scripts.Contains(feName))
-                        p.Name = feName;
+                    if (Guid.TryParse(sScriptUid, out var scriptUid) &&
+                        scripts.TryGetValue(scriptUid, out var scriptName) &&
+                        string.IsNullOrWhiteSpace(scriptName) == false)
+                        p.Name = scriptName;
                     else
                         p.Name = "Missing Script";
                 }
@@ -537,7 +539,7 @@ public class FlowController : BaseController
         }
 
         // get scripts 
-        var scripts = (await new ScriptService().GetAll())?
+        var scripts = (await ServiceLoader.Load<ScriptService>().GetAll())?
             .Where(x => x.Type == ScriptType.Flow)
             .Select(x => ScriptToFlowElement(x))
             .Where(x => x != null)
@@ -557,10 +559,9 @@ public class FlowController : BaseController
     {
         try
         {
-            var sm = new ScriptParser().Parse(script?.Name, script?.Code);
             FlowElement ele = new FlowElement();
             ele.Name = script.Name;
-            ele.Uid = $"Script:{script.Name}";
+            ele.Uid = $"Script:{script.Uid}";
             ele.Icon = "fas fa-scroll";
             
             int index = script.Name.IndexOf(" - ", StringComparison.InvariantCulture);
@@ -570,11 +571,11 @@ public class FlowController : BaseController
                 ele.Group = "Scripts";
             
             ele.Inputs = 1;
-            ele.Description = sm.Description;
-            ele.OutputLabels = sm.Outputs.Select(x => x.Description).ToList();
+            ele.Description = script.Description;
+            ele.OutputLabels = script.Outputs.Select(x => x.Description).ToList();
             int count = 0;
             IDictionary<string, object> model = new ExpandoObject()!;
-            ele.Fields = sm.Parameters.Select(x =>
+            ele.Fields = script.Parameters.Select(x =>
             {
                 ElementField ef = new ElementField();
                 ef.InputType = x.Type switch
@@ -597,7 +598,7 @@ public class FlowController : BaseController
                 return ef;
             }).ToList();
             ele.Type = FlowElementType.Script;
-            ele.Outputs = sm.Outputs.Count;
+            ele.Outputs = script.Outputs.Count;
             ele.Model = model as ExpandoObject;
             return ele;
         }

@@ -50,7 +50,7 @@ public class ScriptEditor
         {
             item.Code = flowScript ? @"
 /**
- * Description of this script
+ * @description The description of this script
  * @param {int} NumberParameter Description of this input
  * @output Description of output 1
  * @output Description of output 2

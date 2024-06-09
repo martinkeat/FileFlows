@@ -102,33 +102,39 @@ public class UpgradeManager
     /// <summary>
     /// Run upgrade from 24.02
     /// </summary>
-    public Task Run_Upgrade_24_02(ILogger logger, DatabaseType dbType, string connectionString)
-        => new Upgrade_24_02().Run(logger, dbType, connectionString);
+    public Result<bool> Run_Upgrade_24_02(ILogger logger, DatabaseType dbType, string connectionString)
+        => new Upgrade_24_02().Run(logger, dbType, connectionString).Result;
     
     /// <summary>
     /// Run upgrade from 24.03.2
     /// </summary>
-    public void Run_Upgrade_24_03_2(ILogger logger, DatabaseType dbType, string connectionString)
+    public Result<bool> Run_Upgrade_24_03_2(ILogger logger, DatabaseType dbType, string connectionString)
         => new Upgrade_24_03_2().Run(logger, dbType, connectionString);
     
     /// <summary>
     /// Run upgrade from 24.03.5
     /// </summary>
-    public void Run_Upgrade_24_03_5(ILogger logger, DatabaseType dbType, string connectionString)
+    public Result<bool> Run_Upgrade_24_03_5(ILogger logger, DatabaseType dbType, string connectionString)
         => new Upgrade_24_03_5().Run(logger, dbType, connectionString);
     
     /// <summary>
     /// Run upgrade from 24.04.1
     /// </summary>
-    public void Run_Upgrade_24_04_1(ILogger logger, DatabaseType dbType, string connectionString)
+    public Result<bool> Run_Upgrade_24_04_1(ILogger logger, DatabaseType dbType, string connectionString)
         => new Upgrade_24_04_1().Run(logger, dbType, connectionString);
     
     /// <summary>
     /// Run upgrade from 24.05.1
     /// </summary>
-    public void Run_Upgrade_24_05_1(ILogger logger, DatabaseType dbType, string connectionString)
+    public Result<bool> Run_Upgrade_24_05_1(ILogger logger, DatabaseType dbType, string connectionString)
         => new Upgrade_24_05_1().Run(logger, dbType, connectionString);
-
+    
+    /// <summary>
+    /// Run upgrade from 24.06.1
+    /// </summary>
+    public Result<bool> Run_Upgrade_24_06_1(ILogger logger, DatabaseType dbType, string connectionString)
+        => new Upgrade_24_06_1().Run(logger, dbType, connectionString);
+    
     /// <summary>
     /// Legacy settings which has the version in the settings model
     /// </summary>

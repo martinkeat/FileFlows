@@ -62,7 +62,7 @@ public class WebhookHandlerController:Controller
             return NotFound();
 
         // need to get the code of the webhook
-        webhook = await new WebhookController().Get(webhook.Name);
+        webhook = await new WebhookController().Get(webhook.Uid);
         if (webhook == null)
             return NotFound();
 
@@ -79,7 +79,7 @@ public class WebhookHandlerController:Controller
                 { "Request", Request },
                 { "Body", body },
                 { "FileFlows.Url", Application.ServerUrl }
-            }, sharedDirectory: DirectoryHelper.ScriptsDirectoryShared, dontLogCode: true);
+            }, sharedDirectory: null, dontLogCode: true);
             if (result.Success)
                 return Ok(result.Log);
             return BadRequest(result.Log);

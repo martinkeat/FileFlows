@@ -106,7 +106,7 @@ public class ScriptExecutor:IScriptExecutor
     {
         Executor executor = new Executor();
         executor.Code = code;
-        executor.SharedDirectory = sharedDirectory?.EmptyAsNull() ?? DirectoryHelper.ScriptsDirectoryShared;
+        executor.SharedDirectory = sharedDirectory; //.EmptyAsNull() ?? DirectoryHelper.ScriptsDirectoryShared;
         executor.HttpClient = httpClient;
         executor.Logger = new ScriptExecution.Logger();
         executor.DontLogCode = dontLogCode;

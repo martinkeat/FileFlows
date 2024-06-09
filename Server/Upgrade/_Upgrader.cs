@@ -12,7 +12,7 @@ namespace FileFlows.Server.Upgrade;
 public class Upgrader
 {
     // update this with the latest db version
-    private readonly Version LATEST_DB_VERSION = new Version(24, 05, 1, 3143);
+    private readonly Version LATEST_DB_VERSION = new Version(24, 06, 1, 3217);
 
     /// <summary>
     /// Gets an instance of the upgrade manager
@@ -119,37 +119,68 @@ public class Upgrader
         DataLayer.Helpers.Decrypter.EncryptionKey = appSettingsService.Settings.EncryptionKey;
         if (currentVersion < new Version(24, 2))
         {
-            statusCallback("Running 24.2 upgrade");
-            Logger.Instance.ILog("Running 24.2 upgrade");
-            new Upgrade_24_02(Logger.Instance, appSettingsService, manager).Run();
+            statusCallback("Running 24.02.1 upgrade");
+            Logger.Instance.ILog("Running 24.02.1 upgrade");
+            if(new Upgrade_24_02(Logger.Instance, appSettingsService, manager).Run().Failed(out string error))
+            {
+                Logger.Instance.ELog("24.02.1 Upgrade failed: " + error);
+                return Result<bool>.Fail(error);
+            }
         }
 
         if (currentVersion < new Version(24, 3, 2))
         {
-            statusCallback("Running 24.3.2 upgrade");
-            Logger.Instance.ILog("Running 24.3.2 upgrade");
-            new Upgrade_24_03_2(Logger.Instance, appSettingsService, manager).Run();
+            statusCallback("Running 24.03.2 upgrade");
+            Logger.Instance.ILog("Running 24.03.2 upgrade");
+            if(new Upgrade_24_03_2(Logger.Instance, appSettingsService, manager).Run().Failed(out string error))
+            {
+                Logger.Instance.ELog("24.03.2 Upgrade failed: " + error);
+                return Result<bool>.Fail(error);
+            }
         }
 
         if (currentVersion < new Version(24, 3, 5))
         {
-            statusCallback("Running 24.3.5 upgrade");
-            Logger.Instance.ILog("Running 24.3.5 upgrade");
-            new Upgrade_24_03_5(Logger.Instance, appSettingsService, manager).Run();
+            statusCallback("Running 24.03.5 upgrade");
+            Logger.Instance.ILog("Running 24.03.5 upgrade");
+            if(new Upgrade_24_03_5(Logger.Instance, appSettingsService, manager).Run().Failed(out string error))
+            {
+                Logger.Instance.ELog("24.03.5 Upgrade failed: " + error);
+                return Result<bool>.Fail(error);
+            }
         }
 
         if (currentVersion < new Version(24, 4, 1))
         {
-            statusCallback("Running 24.4.1 upgrade");
-            Logger.Instance.ILog("Running 24.4.1 upgrade");
-            new Upgrade_24_04_1(Logger.Instance, appSettingsService, manager).Run();
+            statusCallback("Running 24.04.1 upgrade");
+            Logger.Instance.ILog("Running 24.04.1 upgrade");
+            if(new Upgrade_24_04_1(Logger.Instance, appSettingsService, manager).Run().Failed(out string error))
+            {
+                Logger.Instance.ELog("24.04.1 Upgrade failed: " + error);
+                return Result<bool>.Fail(error);
+            }
         }
 
         if (currentVersion < new Version(24, 5, 1, 3143))
         {
-            statusCallback("Running 24.5.1 upgrade");
-            Logger.Instance.ILog("Running 24.5.1 upgrade");
-            new Upgrade_24_05_1(Logger.Instance, appSettingsService, manager).Run();
+            statusCallback("Running 24.05.1 upgrade");
+            Logger.Instance.ILog("Running 24.05.1 upgrade");
+            if(new Upgrade_24_05_1(Logger.Instance, appSettingsService, manager).Run().Failed(out string error))
+            {
+                Logger.Instance.ELog("24.05.1 Upgrade failed: " + error);
+                return Result<bool>.Fail(error);
+            }
+        }
+        
+        if (currentVersion < new Version(24, 6, 1, 3217))
+        {
+            statusCallback("Running 24.06.1 upgrade");
+            Logger.Instance.ILog("Running 24.06.1 upgrade");
+            if(new Upgrade_24_06_1(Logger.Instance, appSettingsService, manager).Run().Failed(out string error))
+            {
+                Logger.Instance.ELog("24.06.1 Upgrade failed: " + error);
+                return Result<bool>.Fail(error);
+            }
         }
 
         // save the settings

@@ -30,6 +30,8 @@ public partial class Tasks : ListPage<Guid, FileFlowsTask>
     private static readonly string SCHEDULE_12_HOURLY = string.Concat(Enumerable.Repeat("1" + new string('0', 47), 2 * 7));
     private static readonly string SCHEDULE_DAILY = string.Concat(Enumerable.Repeat("1" + new string('0', 95), 7));
 
+    private Dictionary<Guid, string> Scripts = new ();
+
     /// <summary>
     /// The script importer
     /// </summary>
@@ -66,6 +68,21 @@ public partial class Tasks : ListPage<Guid, FileFlowsTask>
         return "Custom Schedule";
     }
     
+    /// <inheritdoc />
+    public async override Task PostLoad()
+    {
+        try
+        {
+            var result = await HttpHelper.Get<Dictionary<Guid, string>>("/api/script/basic-list?type=system");
+            if (result.Success)
+                Scripts = result.Data.Where(x => x.Value != "FILE_DISPLAY_NAME").ToDictionary();
+        }
+        catch (Exception)
+        {
+            Toast.ShowError("Failed loading scripts");
+        }
+    }
+    
     /// <summary>
     /// Adds a new task
     /// </summary>
@@ -81,23 +98,21 @@ public partial class Tasks : ListPage<Guid, FileFlowsTask>
     {
         List<ElementField> fields = new List<ElementField>();
 
-        var scriptResponse = await HttpHelper.Get<Dictionary<string, string>>("/api/script/basic-list?type=system");
-        if (scriptResponse.Success == false)
-        {
-            Toast.ShowError(scriptResponse.Body);
-            return false;
-        }
+        // var scriptResponse = await HttpHelper.Get<Dictionary<string, string>>("/api/script/basic-list?type=system");
+        // if (scriptResponse.Success == false)
+        // {
+        //     Toast.ShowError(scriptResponse.Body);
+        //     return false;
+        // }
 
-        var data = scriptResponse.Data.Where(x => x.Key != "FILE_DISPLAY_NAME")
-            .ToDictionary(x => x.Key, x => x.Value);
 
-        if (data.Any() != true)
+        if (Scripts.Any() != true)
         {
             Toast.ShowError("Pages.Tasks.Messages.NoScripts");
             return false;
         }
 
-        var scriptOptions = data.Select(x => new ListOption()
+        var scriptOptions = Scripts.Select(x => new ListOption()
         {
             Label = x.Value,
             Value = x.Key
@@ -232,7 +247,7 @@ public partial class Tasks : ListPage<Guid, FileFlowsTask>
         var task = new FileFlowsTask();
         var dict = model as IDictionary<string, object>;
         task.Name = dict["Name"].ToString() ?? string.Empty;
-        task.Script = dict["Script"].ToString() ?? string.Empty;
+        task.Script = (Guid)dict["Script"];
         task.Uid = (Guid)dict["Uid"];
         task.Type = (TaskType)dict["Type"];
         if (task.Type == TaskType.Schedule)
@@ -426,7 +441,7 @@ public partial class Tasks : ListPage<Guid, FileFlowsTask>
         try
         {
             var response =
-                await HttpHelper.Get<Script>("/api/script/" + HttpUtility.UrlPathEncode(item.Script) + "?type=System");
+                await HttpHelper.Get<Script>("/api/script/" + HttpUtility.UrlPathEncode(item.Script.ToString()) + "?type=System");
             if (response.Success == false)
             {
                 Toast.ShowError("Failed to load script");

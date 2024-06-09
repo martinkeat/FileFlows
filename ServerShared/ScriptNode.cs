@@ -37,7 +37,11 @@ public class ScriptNode:Node
     public override int Execute(NodeParameters args)
     {
         // will throw exception if invalid
-        var script = new ScriptParser().Parse("ScriptNode", Code);
+        var scriptParseResult = new ScriptParser().Parse("ScriptNode", Code);
+        if (scriptParseResult.Success == false)
+            throw new Exception(scriptParseResult.Error);
+        
+        var script = scriptParseResult.Model;
 
         // build up the entry point
         string epParams = string.Join(", ", script.Parameters?.Select(x => x.Name).ToArray());
@@ -50,7 +54,7 @@ public class ScriptNode:Node
             Args = args,
             ScriptType = ScriptType.Flow,
             Code = (Code + "\n\n" + entryPoint).Replace("\t", "   ").Trim(),
-            AdditionalArguments = new (),
+            AdditionalArguments = new ()
         };
 
         if (script.Parameters?.Any() == true)

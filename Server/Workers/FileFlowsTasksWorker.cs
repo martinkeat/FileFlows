@@ -107,7 +107,7 @@ public class FileFlowsTasksWorker: ServerWorker
     /// <param name="additionalVariables">any additional variables</param>
     private async Task<FileFlowsTaskRun> RunTask(FileFlowsTask task, Dictionary<string, object>? additionalVariables = null)
     {
-        string code = await new ScriptController().GetCode(task.Script, type: ScriptType.System);
+        var code = (await ServiceLoader.Load<ScriptService>().Get(task.Script))?.Code;
         if (string.IsNullOrWhiteSpace(code))
         {
             var msg = $"No code found for Task '{task.Name}' using script: {task.Script}";
@@ -126,7 +126,10 @@ public class FileFlowsTasksWorker: ServerWorker
             }
         }
 
-        var result = ScriptExecutor.Execute(code, variables, dontLogCode: true);
+        var scriptService = ServiceLoader.Load<ScriptService>();
+        string sharedDirectory = await scriptService.GetSharedDirectory();
+
+        var result = ScriptExecutor.Execute(code, variables, sharedDirectory: sharedDirectory, dontLogCode: true);
         if (result.Success)
         {
             Logger.Instance.ILog($"Task '{task.Name}' completed in: " + (DateTime.UtcNow.Subtract(dtStart)) + "\n" +

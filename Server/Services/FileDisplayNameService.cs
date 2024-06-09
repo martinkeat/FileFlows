@@ -31,16 +31,12 @@ public class FileDisplayNameService
     /// </summary>
     public void Reinitialize()
     {
-        string? code = null;
+        string? code;
         try
         {
             var service = new ScriptService();
-            bool exists = service.Exists(Globals.FileDisplayNameScript, ScriptType.System);
-            if (exists)
-            {
-                var script = service.Get(Globals.FileDisplayNameScript, ScriptType.System).Result;
-                code = script.Code;
-            }
+            var script = service.GetByName(Globals.FileDisplayNameScript).Result;
+            code = script?.Code;
         }
         catch(Exception)
         {

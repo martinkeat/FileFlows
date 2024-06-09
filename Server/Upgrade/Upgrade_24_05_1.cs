@@ -1,5 +1,6 @@
 
 using FileFlows.Managers.InitializationManagers;
+using FileFlows.Plugin;
 using FileFlows.Server.Services;
 using FileFlows.Shared.Models;
 
@@ -25,6 +26,7 @@ public class Upgrade_24_05_1 : UpgradeBase
     /// <summary>
     /// Runs the upgrade
     /// </summary>
-    public void Run()
+    /// <returns>the result of the upgrade</returns>
+    public Result<bool> Run()
      => UpgradeManager.Run_Upgrade_24_05_1(Logger, DbType, ConnectionString);
 }

@@ -235,7 +235,7 @@ public class FlowWorker : Worker
             }
         }
 
-        if (isLicensed && string.IsNullOrWhiteSpace(node?.PreExecuteScript) == false)
+        if (isLicensed && node?.PreExecuteScript != null)
         {
             if (PreExecuteScriptTest(node) == false)
                 return;
@@ -579,6 +579,11 @@ public class FlowWorker : Worker
         return Dotnet;
     }
 
+    /// <summary>
+    /// Gets the configuration directory
+    /// </summary>
+    /// <param name="configVersion">the config revision</param>
+    /// <returns>the configuration directory</returns>
     private string GetConfigurationDirectory(int? configVersion = null) =>
         Path.Combine(DirectoryHelper.ConfigDirectory, (configVersion ?? CurrentConfigurationRevision).ToString());
 
@@ -639,11 +644,9 @@ public class FlowWorker : Worker
         }
 
         foreach (var script in config.FlowScripts)
-            await System.IO.File.WriteAllTextAsync(Path.Combine(dir, "Scripts", "Flow", script.Name + ".js"), script.Code);
-        foreach (var script in config.SystemScripts)
-            await System.IO.File.WriteAllTextAsync(Path.Combine(dir, "Scripts", "System", script.Name + ".js"), script.Code);
+            await File.WriteAllTextAsync(Path.Combine(dir, "Scripts", "Flow", script.Uid + ".js"), script.Code);
         foreach (var script in config.SharedScripts)
-            await System.IO.File.WriteAllTextAsync(Path.Combine(dir, "Scripts", "Shared", script.Name + ".js"), script.Code);
+            await File.WriteAllTextAsync(Path.Combine(dir, "Scripts", "Shared", script.Name + ".js"), script.Code);
         
         bool windows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
         bool macOs = RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
