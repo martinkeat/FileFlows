@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Components;
-using Microsoft.Extensions.Logging;
 using Microsoft.JSInterop;
 
 namespace FileFlows.Client.Components;
@@ -105,7 +104,7 @@ public partial class Toast : ComponentBase
 
         ToastItem toastItem = new()
         {
-            Message = message,
+            Message = Translater.TranslateIfNeeded(message),
             Level = level,
             Editor = editor,
             Icon = level switch
