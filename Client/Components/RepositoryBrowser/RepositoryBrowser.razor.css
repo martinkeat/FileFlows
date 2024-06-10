@@ -1,5 +1,9 @@
-﻿.browser-wrapper:not(.visible) {
+.browser-wrapper:not(.visible) {
   display: none;
+}
+
+.name {
+  font-weight: var(--bold, 600);
 }
 
 .browser {
@@ -9,7 +13,7 @@
   bottom: 0;
   max-width: 100%;
   background: var(--base-darker);
-  z-index: 3;
+  z-index: 4;
   left: 0;
 }
 

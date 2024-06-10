@@ -36,7 +36,8 @@ public partial class Scripts : ListPage<Guid, Script>
     /// <summary>
     /// Gets or sets the instance of the ScriptBrowser
     /// </summary>
-    private ScriptBrowser ScriptBrowser { get; set; }
+    private RepositoryBrowser ScriptBrowser { get; set; }
+    //private ScriptBrowser ScriptBrowser { get; set; }
 
     protected override void OnInitialized()
     {
@@ -240,7 +241,7 @@ public partial class Scripts : ListPage<Guid, Script>
     
     async Task Browser()
     {
-        bool result = await ScriptBrowser.Open(this.SelectedType);
+        bool result = await ScriptBrowser.Open();//this.SelectedType);
         if (result)
             await this.Refresh();
     }

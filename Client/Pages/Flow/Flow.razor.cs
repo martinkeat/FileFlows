@@ -1,4 +1,3 @@
-using System.Collections;
 using Microsoft.AspNetCore.Components;
 using FileFlows.Client.Components;
 using ffPart = FileFlows.Shared.Models.FlowPart;
@@ -18,7 +17,7 @@ namespace FileFlows.Client.Pages;
 public partial class Flow : ComponentBase, IDisposable
 {
     public Editor Editor { get; set; }
-    [Parameter] public System.Guid Uid { get; set; }
+    [Parameter] public Guid Uid { get; set; }
     [Inject] INavigationService NavigationService { get; set; }
     [Inject] public IBlazorContextMenuService ContextMenuService { get; set; }
     [CascadingParameter] Blocker Blocker { get; set; }
@@ -39,7 +38,7 @@ public partial class Flow : ComponentBase, IDisposable
     /// <summary>
     /// Gets or sets the instance of the ScriptBrowser
     /// </summary>
-    private ScriptBrowser ScriptBrowser { get; set; }
+    private RepositoryBrowser ScriptBrowser { get; set; }
     
     /// <summary>
     /// Gets or sets the instance of the SubFlowBrowser
@@ -433,7 +432,8 @@ public partial class Flow : ComponentBase, IDisposable
         if (part.Type == FlowElementType.Script)
         {
             typeName = "Script";
-            typeDisplayName = part.FlowElementUid[7..]; // 7 to remove Script:
+            var script = AvailableScripts.FirstOrDefault(x => x.Uid == part.FlowElementUid);
+            typeDisplayName = script?.Name?.EmptyAsNull() ?? part.Label?.EmptyAsNull() ?? "Script";
         }
         else if (part.Type == FlowElementType.SubFlow)
         {
@@ -852,7 +852,7 @@ public partial class Flow : ComponentBase, IDisposable
     /// </summary>
     private async Task OpenScriptBrowser()
     {
-        bool result = await ScriptBrowser.Open(ScriptType.Flow);
+        bool result = await ScriptBrowser.Open();
         if (result == false)
             return; // no new scripts downloaded
 

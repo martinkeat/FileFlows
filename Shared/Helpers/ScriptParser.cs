@@ -150,6 +150,34 @@ public class ScriptParser
         model.Outputs.Add(output);
         return true;
     }
+    
+    
+    /// <summary>
+    /// Generates code from a script with an inserted comment block
+    /// </summary>
+    /// <param name="script">The script</param>
+    /// <returns>The combined code with the comment block inserted.</returns>
+    public static string GetCodeWithCommentBlock(Script script)
+    {
+        string commentBlock = GenerateCommentBlock(script);
+        // Pattern to match all import statements at the beginning of the code
+        var importPattern = @"(^\s*import\s.*?;\s*)+";
+        var section1 = string.Empty;
+        var section2 = script.Code;
+
+        // Find all import statements
+        var match = Regex.Match(script.Code, importPattern, RegexOptions.Multiline);
+
+        if (match.Success)
+        {
+            // Split the code into section1 (imports) and section2 (everything else)
+            section1 = match.Value;
+            section2 = script.Code[match.Length..];
+        }
+
+        // Combine sections with the comment block
+        return (section1.Trim() + "\n\n" + commentBlock + "\n" + section2.Trim()).Trim();
+    }
 
     /// <summary>
     /// Generates a comment block from a script
@@ -157,7 +185,7 @@ public class ScriptParser
     /// <param name="script">the script</param>
     /// <param name="skipName">if the name should be skipped and not shown</param>
     /// <returns>the comment block</returns>
-    public string GenerateCommentBlock(Script script, bool skipName = false)
+    public static string GenerateCommentBlock(Script script, bool skipName = false)
     {
         var header = new StringBuilder();
         header.AppendLine("/**");

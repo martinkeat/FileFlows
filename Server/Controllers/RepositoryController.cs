@@ -28,6 +28,9 @@ public class RepositoryController : BaseController
         var objects = (type.ToLowerInvariant() switch
         {
             "dockermod" => repo.DockerMods,
+            "script:system" => repo.SystemScripts,
+            "script:flow" => repo.FlowScripts,
+            "script:shared" => repo.SharedScripts,
             _ => new List<RepositoryObject>()
         }).Where(x => x.MinimumVersion == null || new Version(Globals.Version) >= x.MinimumVersion)
         .OrderBy(x => x.Name.ToLowerInvariant())
@@ -38,6 +41,9 @@ public class RepositoryController : BaseController
             var known = type.ToLowerInvariant() switch
             {
                 "dockermod" => CanAccess(UserRole.DockerMods) ? (await ServiceLoader.Load<DockerModService>().GetAll()).Select(x => x.Name).ToList() : [],
+                "script:system" => CanAccess(UserRole.Scripts) ? (await ServiceLoader.Load<ScriptService>().GetAllByType(ScriptType.System)).Where(x => x.Repository).Select(x => x.Name).ToList() : [],
+                "script:shared" => CanAccess(UserRole.Scripts) ? (await ServiceLoader.Load<ScriptService>().GetAllByType(ScriptType.Shared)).Where(x => x.Repository).Select(x => x.Name).ToList() : [],
+                "script:flow" => CanAccess(UserRole.Scripts) | CanAccess(UserRole.Flows) ? (await ServiceLoader.Load<ScriptService>().GetAllByType(ScriptType.Flow)).Where(x => x.Repository).Select(x => x.Name).ToList() : [],
                 _ => []
             };
 
@@ -59,7 +65,7 @@ public class RepositoryController : BaseController
         if (objects?.Any() != true)
             return Ok(); // nothing to download
 
-        Func<string, AuditDetails, Task<Result<bool>>>? processor = null;
+        Func<RepositoryObject, string, AuditDetails, Task<Result<bool>>>? processor = null;
 
         switch (type.ToLowerInvariant())
         {
@@ -70,6 +76,32 @@ public class RepositoryController : BaseController
 
                 var dmService = ServiceLoader.Load<DockerModService>();
                 processor = dmService.ImportFromRepository;
+            }
+            break;
+            case "script:flow":
+            {
+                if (CanAccess(UserRole.Scripts) == false && CanAccess(UserRole.Flows) == false)
+                    throw new UnauthorizedAccessException();
+                
+                var repoService = new RepositoryService();
+                await repoService.Init();
+                await repoService.DownloadSharedScripts();
+                
+                var scriptService = ServiceLoader.Load<ScriptService>();
+                processor = (ro, content, auditDetails) => scriptService.ImportFromRepository(ScriptType.Flow, ro, content, auditDetails);
+            }
+            break;
+            case "script:system":
+            {
+                if (CanAccess(UserRole.Scripts) == false)
+                    throw new UnauthorizedAccessException();
+                
+                var repoService = new RepositoryService();
+                await repoService.Init();
+                await repoService.DownloadSharedScripts();
+                
+                var scriptService = ServiceLoader.Load<ScriptService>();
+                processor = (ro, content,auditDetails) => scriptService.ImportFromRepository(ScriptType.System, ro, content, auditDetails);
             }
             break;
         }
@@ -84,7 +116,7 @@ public class RepositoryController : BaseController
             var result = await service.GetContent(ro.Path);
              if (result.Failed(out string error))
                 return BadRequest(error);
-            var rr = await processor(result.Value, auditDetails);
+            var rr = await processor(ro, result.Value, auditDetails);
             if (rr.Failed(out error))
                 return BadRequest(error);
         }
@@ -124,6 +156,25 @@ public class RepositoryController : BaseController
                 {
                     Model = modResult.Value,
                     Fields = GetElementFields(modResult.Value.Code, "shell")
+                };
+                return Ok(form);
+            }
+            case "script:flow":
+            case "script:system":
+            {
+                if (CanAccess(UserRole.Scripts) == false && CanAccess(UserRole.Flows) == false)
+                    throw new UnauthorizedAccessException();
+
+                var form = new FormFieldsModel()
+                {
+                    Model = new { Code = result.Value},
+                    Fields = [
+                        new()
+                        {
+                            Name = "Code",
+                            InputType = FormInputType.Code
+                        }
+                    ]
                 };
                 return Ok(form);
             }
@@ -195,7 +246,7 @@ public class RepositoryController : BaseController
         var service = ServiceLoader.Load<RepositoryService>();
         var repo = await service.GetRepository();
         List<RepositoryObject>? toUpdate = null;
-        Func<string, AuditDetails?, Task<Result<bool>>>? updater = null;
+        Func<RepositoryObject, string, AuditDetails?, Task<Result<bool>>>? updater = null;
         switch (type.ToLowerInvariant())
         {
             case "dockermod":
@@ -225,7 +276,7 @@ public class RepositoryController : BaseController
             var cResult = await service.GetContent(ro.Path);
             if (cResult.IsFailed)
                 continue;
-            await updater(cResult.Value, auditDetails);
+            await updater(ro, cResult.Value, auditDetails);
         }
 
         return Ok();

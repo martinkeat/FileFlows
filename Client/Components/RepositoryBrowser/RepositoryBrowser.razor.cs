@@ -105,6 +105,12 @@ public partial class RepositoryBrowser : ComponentBase
                 return;
             }
 
+            if (Type.StartsWith("Script:"))
+            {
+                foreach (var item in result.Data)
+                    item.Icon = ScriptIconHelper.GetIcon(item.Name);
+            }
+
             this.Table.SetData(result.Data);
         }
         finally

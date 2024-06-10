@@ -48,13 +48,12 @@ public class ScriptService
                 ScriptType.System => dictSystemScripts,
                 _ => dictFlowScripts
             };
-            if (dict.ContainsKey(script.Path) == false)
-                continue;
-            script.LatestRevision = dict[script.Path];
+            if (dict.TryGetValue(script.Path, out var value))
+                script.LatestRevision = value;
         }
         
         scripts = scripts.DistinctBy(x => x.Name).ToList();
-        var dictScripts = scripts.ToDictionary(x => x.Name.ToLower(), x => x);
+        var dictScripts = scripts.ToDictionary(x => x.Uid, x => x);
         var flows = (await ServiceLoader.Load<FlowService>().GetAllAsync()) ?? new ();
         string flowTypeName = typeof(Flow).FullName ?? string.Empty;
         foreach (var flow in flows)
@@ -65,8 +64,9 @@ public class ScriptService
             {
                 if (p.FlowElementUid.StartsWith("Script:") == false)
                     continue;
-                string scriptName = p.FlowElementUid[7..].ToLower();
-                if (dictScripts.TryGetValue(scriptName, out var script) == false)
+                if(Guid.TryParse(p.FlowElementUid[7..], out var scriptUid) == false)
+                    continue;
+                if (dictScripts.TryGetValue(scriptUid, out var script) == false)
                     continue;
                 script.UsedBy ??= new();
                 if (script.UsedBy.Any(x => x.Uid == flow.Uid))
@@ -132,14 +132,36 @@ public class ScriptService
     /// <param name="code">the code to validate</param>
     public Result<bool> ValidateScript(string code)
     {
+        string codeToValidate = code;
         try
         {
-            // Remove import statements
-            string pattern = @"^\s*import\s.*?$";
-            string cleanedCode = Regex.Replace(code, pattern, string.Empty, RegexOptions.Multiline);
+
+            // Split code into lines
+            var lines = code.Replace("\r\n", "\n").Split(new[] { '\n' }, StringSplitOptions.None);
+
+            bool inFunction = false;
+            // Detect top-level return statements and wrap them
+            for (int i = 0; i < lines.Length; i++)
+            {
+                string line = lines[i].Trim();
+                if (line.StartsWith("function"))
+                    inFunction = true;
+                
+                if (line.StartsWith("export class"))
+                    lines[i] = lines[i].Replace("export class", "class");
+                else if (line.StartsWith("import "))
+                    lines[i] = "";
+                else if (inFunction == false && line.StartsWith("return"))
+                {
+                    lines[i] = "(function() { " + line + " })();";
+                }
+            }
+
+            // Join lines back into a single string
+            codeToValidate = string.Join("\n", lines);
             
             var parser = new JavaScriptParser();
-            parser.ParseScript(cleanedCode);
+            parser.ParseScript(codeToValidate);
             return true;
         }
         catch (ParserException ex)
@@ -234,6 +256,36 @@ public class ScriptService
         return script;
     }
 
+    /// <summary>
+    /// Imports a Script from the repository script
+    /// </summary>
+    /// <param name="type">the type of scripot to import</param>
+    /// <param name="content">the repository script content</param>
+    /// <param name="ro">the repository object</param>
+    /// <param name="auditDetails">The audit details</param>
+    public async Task<Result<bool>> ImportFromRepository(ScriptType type, RepositoryObject ro, string content, AuditDetails? auditDetails)
+    {
+        
+        var scriptResult = Script.FromCode(ro.Name, content);
+        if (scriptResult.Failed(out string error))
+        {
+            Logger.Instance.WLog($"Failed parsing script: {error}");
+            return Result<bool>.Fail(error);
+        }
+
+        var script = scriptResult.Value;
+        script.Type = type;
+        script.Path = ro.Path;
+        script.Repository = true;
+        var result = await Save(script, null);
+        if (result.Failed(out error))
+        {
+            Logger.Instance.WLog($"Failed saving script '{script.Name}': {error}");
+            return Result<bool>.Fail(error);
+        }
+
+        return true;
+    }
 
     /// <summary>
     /// Delete scripts from the system

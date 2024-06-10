@@ -70,8 +70,7 @@ let ffApi = new FileFlowsApi();
         }
         else
         {
-            var commentBlock = new ScriptParser().GenerateCommentBlock(item, skipName: true);
-            item.Code = InsertCommentBlock(item.Code, commentBlock);
+            item.Code = ScriptParser.GetCodeWithCommentBlock(item);
         }
 
         item.Code = item.Code.Replace("\r\n", "\n").Trim();
@@ -122,33 +121,6 @@ let ffApi = new FileFlowsApi();
         });
     }
     
-    /// <summary>
-    /// Inserts a comment block after any import statements in the given JavaScript code.
-    /// If no import statements are found, the comment block is added at the top.
-    /// </summary>
-    /// <param name="code">The original JavaScript code.</param>
-    /// <param name="commentBlock">The comment block to insert.</param>
-    /// <returns>The combined code with the comment block inserted.</returns>
-    static string InsertCommentBlock(string code, string commentBlock)
-    {
-        // Pattern to match all import statements at the beginning of the code
-        var importPattern = @"(^\s*import\s.*?;\s*)+";
-        var section1 = string.Empty;
-        var section2 = code;
-
-        // Find all import statements
-        var match = Regex.Match(code, importPattern, RegexOptions.Multiline);
-
-        if (match.Success)
-        {
-            // Split the code into section1 (imports) and section2 (everything else)
-            section1 = match.Value;
-            section2 = code[match.Length..];
-        }
-
-        // Combine sections with the comment block
-        return (section1.Trim() + "\n\n" + commentBlock + "\n" + section2.Trim()).Trim();
-    }
     
     private List<Script> _Shared;
 

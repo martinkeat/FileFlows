@@ -66,9 +66,9 @@
                                }
                            </span>
                            <div class="info">
-                               <IconValue Color="IconValueColor.Blue" Icon="fas fa-code-branch" Value="@item.Revision.ToString()" />
                                @if (item.Repository)
                                {
+                                   <IconValue Color="IconValueColor.Blue" Icon="fas fa-code-branch" Value="@item.Revision.ToString()" />
                                     <IconValue Color="IconValueColor.Red" Icon="fas fa-ban" Value="@lblReadOnly" Tooltip="@lblReadOnly"/>
                                }
                                @if (item.LatestRevision > item.Revision)
@@ -110,5 +110,6 @@
 
 </PageView>
 
-<ScriptBrowser @ref="ScriptBrowser" />
+@* <ScriptBrowser @ref="ScriptBrowser" /> *@
+<RepositoryBrowser @ref="ScriptBrowser" Type="@("Script:"+ SelectedType)" Icons="true" Icon="fas fa-scroll" />
 <FileFlows.Client.Components.Dialogs.ImportScript @ref="ScriptImporter" />

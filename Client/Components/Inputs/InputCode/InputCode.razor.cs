@@ -91,7 +91,7 @@ public partial class InputCode : Input<string>, IDisposable
         this.Updating = true;
         this.Value = await CodeEditor.GetValue();
         this.Updating = false;
-        if (this.InitialValue != this.Value)
+        if (this.InitialValue.Trim() != this.Value.Trim())
         {
             bool cancel = await Dialogs.Confirm.Show(Translater.Instant("Labels.Confirm"), Translater.Instant("Labels.CancelMessage"));
             if (cancel == false)

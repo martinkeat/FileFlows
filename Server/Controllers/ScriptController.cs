@@ -2,6 +2,7 @@ using System.Text.RegularExpressions;
 using FileFlows.Plugin;
 using FileFlows.Server.Authentication;
 using FileFlows.Server.Services;
+using FileFlows.Shared.Helpers;
 using FileFlows.Shared.Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -150,23 +151,37 @@ public class ScriptController : BaseController
         var script = await ServiceLoader.Load<ScriptService>().Get(uid);
         if (script == null)
             return NotFound();
-        byte[] data = System.Text.UTF8Encoding.UTF8.GetBytes(script.Code);
+
+        string code = ScriptParser.GetCodeWithCommentBlock(script);
+        
+        
+        byte[] data = System.Text.Encoding.UTF8.GetBytes(code);
         return File(data, "application/octet-stream", script.Name + ".js");
     }
 
     /// <summary>
     /// Imports a script
     /// </summary>
-    /// <param name="name">The name</param>
+    /// <param name="filename">The name of the file</param>
     /// <param name="code">The code</param>
     [HttpPost("import")]
-    public async Task<Script> Import([FromQuery(Name = "filename")] string name, [FromBody] string code)
+    public async Task<IActionResult> Import([FromQuery] string filename, [FromBody] string code)
     {
         var service = ServiceLoader.Load<ScriptService>();
-        // will throw if any errors
-        name = name.Replace(".js", "").Replace(".JS", "");
-        name = await service.GetNewUniqueName(name);
-        return await service.Save(new () { Name = name, Code = code, Repository = false}, await GetAuditDetails());
+        var name = filename.Replace(".js", "").Replace(".JS", "");
+        var result = new ScriptParser().Parse(name, code);
+        if (result.Failed(out string error))
+            return BadRequest(error);
+        
+        var script = result.Value;
+        script.Name = name = await service.GetNewUniqueName(script.Name);
+        script.Repository = false;
+        script.Path = null;
+        script.Uid = Guid.Empty;
+        var saveResult = await service.Save(script, await GetAuditDetails());
+        if (saveResult.Failed(out error))
+            return BadRequest(error);
+        return Ok(saveResult.Value);
     }
 
     /// <summary>

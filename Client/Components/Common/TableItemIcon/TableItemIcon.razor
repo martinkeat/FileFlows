@@ -9,7 +9,7 @@
     {
         <img src="/icons/@(Icon[4..]).svg"/>
     }
-    else if (Icon.StartsWith("data:"))
+    else if (Icon.StartsWith("data:") || Icon.EndsWith(".svg"))
     {
         <img src="@Icon" />
     }

@@ -92,9 +92,10 @@ public class DockerModService
     /// <summary>
     /// Imports a DockerMod from the repository script
     /// </summary>
+    /// <param name="ro">the repository object</param>
     /// <param name="content">the repository script content</param>
     /// <param name="auditDetails">The audit details</param>
-    public async Task<Result<bool>> ImportFromRepository(string content, AuditDetails? auditDetails)
+    public async Task<Result<bool>> ImportFromRepository(RepositoryObject ro, string content, AuditDetails? auditDetails)
     {
         var modResult = Parse(content);
         if (modResult.Failed(out string error))

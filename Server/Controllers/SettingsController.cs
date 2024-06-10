@@ -413,7 +413,7 @@ public class SettingsController : BaseController
             {
                 var content = await repoService.GetContent(dm.Path);
                 if (content.IsFailed == false)
-                    await dmService.ImportFromRepository(content.Value, null);
+                    await dmService.ImportFromRepository(dm, content.Value, null);
             }
         }
 
