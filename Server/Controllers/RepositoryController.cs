@@ -31,6 +31,7 @@ public class RepositoryController : BaseController
             "script:system" => repo.SystemScripts,
             "script:flow" => repo.FlowScripts,
             "script:shared" => repo.SharedScripts,
+            "script:webhook" => repo.WebhookScripts,
             _ => new List<RepositoryObject>()
         }).Where(x => x.MinimumVersion == null || new Version(Globals.Version) >= x.MinimumVersion)
         .OrderBy(x => x.Name.ToLowerInvariant())
@@ -44,6 +45,7 @@ public class RepositoryController : BaseController
                 "script:system" => CanAccess(UserRole.Scripts) ? (await ServiceLoader.Load<ScriptService>().GetAllByType(ScriptType.System)).Where(x => x.Repository).Select(x => x.Name).ToList() : [],
                 "script:shared" => CanAccess(UserRole.Scripts) ? (await ServiceLoader.Load<ScriptService>().GetAllByType(ScriptType.Shared)).Where(x => x.Repository).Select(x => x.Name).ToList() : [],
                 "script:flow" => CanAccess(UserRole.Scripts) | CanAccess(UserRole.Flows) ? (await ServiceLoader.Load<ScriptService>().GetAllByType(ScriptType.Flow)).Where(x => x.Repository).Select(x => x.Name).ToList() : [],
+                "script:webhook" => CanAccess(UserRole.Webhooks) ? (await ServiceLoader.Load<ScriptService>().GetAllByType(ScriptType.Webhook)).Where(x => x.Repository).Select(x => x.Name).ToList() : [],
                 _ => []
             };
 
@@ -104,6 +106,19 @@ public class RepositoryController : BaseController
                 processor = (ro, content,auditDetails) => scriptService.ImportFromRepository(ScriptType.System, ro, content, auditDetails);
             }
             break;
+            case "script:webhook":
+            {
+                if (CanAccess(UserRole.Webhooks) == false)
+                    throw new UnauthorizedAccessException();
+                
+                var repoService = new RepositoryService();
+                await repoService.Init();
+                await repoService.DownloadSharedScripts();
+                
+                var scriptService = ServiceLoader.Load<ScriptService>();
+                processor = (ro, content,auditDetails) => scriptService.ImportFromRepository(ScriptType.Webhook, ro, content, auditDetails);
+            }
+                break;
         }
 
         if (processor == null)
@@ -161,6 +176,7 @@ public class RepositoryController : BaseController
             }
             case "script:flow":
             case "script:system":
+            case "script:webhook":
             {
                 if (CanAccess(UserRole.Scripts) == false && CanAccess(UserRole.Flows) == false)
                     throw new UnauthorizedAccessException();

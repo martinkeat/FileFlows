@@ -1,11 +1,9 @@
-using System.Text.RegularExpressions;
 using FileFlows.Plugin;
 using FileFlows.Server.Authentication;
 using FileFlows.Server.Helpers;
 using FileFlows.Server.Services;
 using FileFlows.Shared.Models;
 using Microsoft.AspNetCore.Mvc;
-using HttpMethod = FileFlows.Shared.HttpMethod;
 
 namespace FileFlows.Server.Controllers;
 

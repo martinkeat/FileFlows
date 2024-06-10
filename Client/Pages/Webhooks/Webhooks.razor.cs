@@ -16,7 +16,7 @@ public partial class Webhooks : ListPage<Guid, Webhook>
     /// <summary>
     /// Gets or sets the script browser component instance
     /// </summary>
-    private ScriptBrowser ScriptBrowser { get; set; }
+    private RepositoryBrowser ScriptBrowser { get; set; }
 
     private Webhook EditingItem = null;
     private string lblRoute, lblMethod;
@@ -162,7 +162,7 @@ public partial class Webhooks : ListPage<Guid, Webhook>
     /// </summary>
     async Task Browser()
     {
-        bool result = await ScriptBrowser.Open(ScriptType.Webhook);
+        bool result = await ScriptBrowser.Open();
         if (result)
             await this.Refresh();
     }
