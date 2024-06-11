@@ -55,6 +55,7 @@ public abstract class Formatter
             new UpperCaseFormatter(),
             new NumberFormatter(),
             new SizeFormatter(),
+            new FileFormatter(),
             _dateFormatter
         };
     }

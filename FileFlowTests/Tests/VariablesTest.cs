@@ -46,20 +46,22 @@ public class VariablesTest
     /// Tests a variable with odd characters in it
     /// </summary>
     [TestMethod]
-    public void Foramtters()
+    public void Formatters()
     {
         var variables = new Dictionary<string, object>();
         const string name = "This is mixed Casing!";
         variables["value"] = new DateTime(2022, 10, 29, 11, 41, 32, 532);
         Assert.AreEqual("Test 29/10/2022", VariablesHelper.ReplaceVariables("Test {value|dd/MM/yyyy}", variables, stripMissing: true));
         Assert.AreEqual("Test 29-10-2022", VariablesHelper.ReplaceVariables("Test {value|dd-MM-yyyy}", variables, stripMissing: true));
-        Assert.AreEqual("Test 29-10-2022 11:41:32.532 am", VariablesHelper.ReplaceVariables("Test {value|dd-MM-yyyy hh:mm:ss.fff tt}", variables, stripMissing: true));
-        Assert.AreEqual("Test 11:41am", VariablesHelper.ReplaceVariables("Test {value|time}", variables, stripMissing: true));
+        Assert.AreEqual("Test 29-10-2022 11:41:32.532 AM", VariablesHelper.ReplaceVariables("Test {value|dd-MM-yyyy hh:mm:ss.fff tt}", variables, stripMissing: true));
+        Assert.AreEqual("Test 11:41 AM", VariablesHelper.ReplaceVariables("Test {value|time}", variables, stripMissing: true));
         variables["value"] = name;
         Assert.AreEqual("Test " + name.ToUpper(), VariablesHelper.ReplaceVariables("Test {value!}", variables, stripMissing: true));
         variables["value"] = 12;
         Assert.AreEqual("Test 0012", VariablesHelper.ReplaceVariables("Test {value|0000}", variables, stripMissing: true));
         variables["value"] = 645645654;
         Assert.AreEqual("Test 645.65 MB", VariablesHelper.ReplaceVariables("Test {value|size}", variables, stripMissing: true));
+        variables["value"] = "this !:\\/ is #%^&*!~@?%$ not a safe name!..";
+        Assert.AreEqual("Test this ! is #%^&!~@%$ not a safe name!", VariablesHelper.ReplaceVariables("Test {value|file}", variables, stripMissing: true));
     }
 }
