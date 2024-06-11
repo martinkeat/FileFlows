@@ -219,6 +219,10 @@ public class MappedFileService : IFileService
     public Result<bool> Touch(string path)
         => _localFileService.Touch(Map(path));
 
+    /// <inheritdoc />
+    public Result<long> DirectorySize(string path)
+        => _localFileService.DirectorySize(Map(path));
+
     /// <summary>
     /// Sets the UTC creation time of the specified file.
     /// </summary>

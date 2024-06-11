@@ -176,8 +176,27 @@ public interface IFileService
     /// <param name="path">the path of the file or directory</param>
     /// <returns>true if successfully touched or not</returns>
     Result<bool> Touch(string path);
+    
+    /// <summary>
+    /// Gets the size of the directory
+    /// </summary>
+    /// <param name="path">the path to the directory, or a file in a directory</param>
+    /// <returns>the size of that folder</returns>
+    Result<long> DirectorySize(string path);
 
+    /// <summary>
+    /// Sets the creation time of a file or folder
+    /// </summary>
+    /// <param name="path">the path of that file or folder</param>
+    /// <param name="date">the date to set</param>
+    /// <returns>true if successful</returns>
     Result<bool> SetCreationTimeUtc(string path, DateTime date);
+    /// <summary>
+    /// Sets the last write time of a file or folder
+    /// </summary>
+    /// <param name="path">the path of that file or folder</param>
+    /// <param name="date">the date to set</param>
+    /// <returns>true if successful</returns>
     Result<bool> SetLastWriteTimeUtc(string path, DateTime date);
 }
 

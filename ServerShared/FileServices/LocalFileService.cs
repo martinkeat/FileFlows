@@ -454,6 +454,25 @@ public class LocalFileService : IFileService
     }
 
     /// <inheritdoc />
+    public Result<long> DirectorySize(string path)
+    {
+        if (File.Exists(path))
+            path = new FileInfo(path).Directory.FullName;
+        if (Directory.Exists(path))
+            return 0;
+        
+        try
+        {
+            DirectoryInfo dir = new DirectoryInfo(path);
+            return dir.EnumerateFiles("*.*", SearchOption.AllDirectories).Sum(x => x.Length);
+        }
+        catch (Exception)
+        {
+            return 0;
+        }
+    }
+
+    /// <inheritdoc />
     public Result<bool> SetCreationTimeUtc(string path, DateTime date)
     {
         if (IsProtectedPath(ref path))

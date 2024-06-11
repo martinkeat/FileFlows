@@ -441,7 +441,9 @@ public class NodeParameters
                         { "folder.Orig.Name", diOriginal.Name ?? "" },
                         { "folder.Orig.FullName", diOriginal.FullName ?? "" },
                     });
-
+                    
+                    if (FileService.DirectorySize(diOriginal.FullName).Success(out var origSize))
+                        Variables["folder.Orig.Size"] = origSize;
                 }
             }
             else
@@ -496,6 +498,8 @@ public class NodeParameters
                         { "folder.Orig.Name", FileHelper.GetDirectoryName(fiOriginal.FullName) ?? string.Empty },
                         { "folder.Orig.FullName", fiOriginal.Directory ?? "" }
                     });
+                    if (FileService.DirectorySize(fiOriginal.Directory).Success(out var origSize))
+                        Variables["folder.Orig.Size"] = origSize;
 
                     if (string.IsNullOrEmpty(this.LibraryPath) == false &&
                         fiOriginal.FullName.StartsWith(this.LibraryPath))
@@ -507,6 +511,8 @@ public class NodeParameters
                     }
                 }
             }
+            if (FileService.DirectorySize(filename).Success(out var size))
+                Variables["folder.Size"] = size;
         }
         catch (Exception ex)
         {

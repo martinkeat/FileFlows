@@ -929,6 +929,8 @@ public class FlowController : BaseController
             variables.Add("folder.Orig.FullName",
                 windows ? @"C:\OriginalFolder\SubFolder" : "/originalFolder/subfolder");
         }
+        variables.Add("folder.Size", 10000);
+        variables.Add("folder.Orig.Size", 10000);
         variables["library.Name"] = "My Library";
         variables["library.Path"] = "/library/path";
         variables["temp"] = "/node-temp";

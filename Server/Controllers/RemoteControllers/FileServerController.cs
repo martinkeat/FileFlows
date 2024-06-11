@@ -152,6 +152,22 @@ public class FileServerController : Controller
     }
 
     /// <summary>
+    /// Gets the size of a directory
+    /// </summary>
+    /// <param name="path">The directory path.</param>
+    /// <returns>the size of the directory</returns>
+    [HttpPost("directory-size")]
+    public IActionResult DirectorySize([FromBody] PathRequest path)
+    {
+        if (ValidateRequest(out string message) == false)
+            return StatusCode(503, message?.EmptyAsNull() ?? "File service is currently disabled.");
+        var result = _localFileService.DirectorySize(path);
+        if (result.IsFailed)
+            return StatusCode(500, result.Error);
+        return Ok(result.Value);
+    }
+
+    /// <summary>
     /// Deletes a directory at the specified path.
     /// </summary>
     /// <param name="request">Request parameters for deleting a directory.</param>

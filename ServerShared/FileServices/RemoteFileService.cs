@@ -275,6 +275,22 @@ public class RemoteFileService : IFileService
     }
 
     /// <inheritdoc />
+    public Result<long> DirectorySize(string path)
+    {
+        if (FileIsLocal(PreparePath(ref path)))
+            return _localFileService.DirectorySize(path);
+        try
+        {
+            var result = HttpHelper.Post<long>(GetUrl("directory-size"), new { path }).Result;
+            return result.Data;
+        }
+        catch (Exception ex)
+        {
+            return Result<long>.Fail("Failed getting folder size: " + ex.Message);
+        }
+    }
+
+    /// <inheritdoc />
     public Result<FileInformation> FileInfo(string path)
     {
         if (FileIsLocal(PreparePath(ref path)))
