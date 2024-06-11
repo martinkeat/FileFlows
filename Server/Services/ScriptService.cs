@@ -265,8 +265,7 @@ public class ScriptService
     /// <param name="auditDetails">The audit details</param>
     public async Task<Result<bool>> ImportFromRepository(ScriptType type, RepositoryObject ro, string content, AuditDetails? auditDetails)
     {
-        
-        var scriptResult = Script.FromCode(ro.Name, content);
+        var scriptResult = Script.FromCode(ro.Name, content, type);
         if (scriptResult.Failed(out string error))
         {
             Logger.Instance.WLog($"Failed parsing script: {error}");

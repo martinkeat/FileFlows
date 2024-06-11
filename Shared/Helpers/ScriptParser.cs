@@ -19,15 +19,28 @@ public class ScriptParser
     /// </summary>
     /// <param name="name">the name of the script</param>
     /// <param name="code">the script to parse</param>
+    /// <param name="type">the type of the script</param>
     /// <returns>a parsed model</returns>
-    public Result<Script> Parse(string name, string code)
+    public Result<Script> Parse(string name, string code, ScriptType type)
     {
         if (string.IsNullOrEmpty(code))
             return Result<Script>.Fail("No script found");
         var rgxComments = new Regex(@"\/\*(\*)?(.*?)\*\/", RegexOptions.Singleline);
         var matchComments = rgxComments.Match(code.Trim());
         if (matchComments.Success == false)
-            return Result<Script>.Fail("Failed to locate comment section.  A script must start with a comment block describing the script.");
+        {
+            if (type is ScriptType.Shared or ScriptType.System)
+                return new Script()
+                {
+                    Name = name,
+                    Code = code,
+                    Type = type
+                };
+            
+            return Result<Script>.Fail(
+                "Failed to locate comment section.  A script must start with a comment block describing the script.");
+        }
+
         var comments = matchComments.Value.Trim()[1..^1];
         code = code.Replace(matchComments.Value, string.Empty).Trim();
         // remove the start * 
@@ -38,6 +51,7 @@ public class ScriptParser
         {
             Name = name,
             Code = code,
+            Type = type,
             Outputs = new (),
             Parameters = new()
         };
@@ -156,24 +170,25 @@ public class ScriptParser
     /// Generates code from a script with an inserted comment block
     /// </summary>
     /// <param name="script">The script</param>
+    /// <param name="skipName">if the name should be skipped and not shown</param>
     /// <returns>The combined code with the comment block inserted.</returns>
-    public static string GetCodeWithCommentBlock(Script script)
+    public static string GetCodeWithCommentBlock(Script script, bool skipName = false)
     {
-        string commentBlock = GenerateCommentBlock(script);
-        // Pattern to match all import statements at the beginning of the code
-        var importPattern = @"(^\s*import\s.*?;\s*)+";
+        string commentBlock = GenerateCommentBlock(script, skipName);
+        if (commentBlock.Split('\n').Length < 3)
+            return script.Code; // no comment block generated
+        
         var section1 = string.Empty;
         var section2 = script.Code;
 
-        // Find all import statements
-        var match = Regex.Match(script.Code, importPattern, RegexOptions.Multiline);
-
-        if (match.Success)
+        var lines = section2.Split('\n').ToList();
+        while (lines.Count > 0 && lines[0].StartsWith("import "))
         {
-            // Split the code into section1 (imports) and section2 (everything else)
-            section1 = match.Value;
-            section2 = script.Code[match.Length..];
+            section1 += lines[0] + "\n";
+            lines.RemoveAt(0);
         }
+
+        section2 = string.Join("\n", lines);
 
         // Combine sections with the comment block
         return (section1.Trim() + "\n\n" + commentBlock + "\n" + section2.Trim()).Trim();

@@ -87,7 +87,7 @@ class RepositoryService
             }
             else
             {
-                var scriptResult = Script.FromCode(ss.Name, result.Value);
+                var scriptResult = Script.FromCode(ss.Name, result.Value, ScriptType.Shared);
                 if (scriptResult.Failed(out error))
                 {
                     Logger.Instance.WLog($"Failed parsing script '{ss.Name}': {error}");
@@ -130,7 +130,7 @@ class RepositoryService
                     continue;
                 }
 
-                var scriptResult = Script.FromCode(ss.Name, result.Value);
+                var scriptResult = Script.FromCode(ss.Name, result.Value, type);
                 if (scriptResult.Failed(out error))
                 {
                     Logger.Instance.WLog($"Failed parsing script '{ss.Name}': {error}");

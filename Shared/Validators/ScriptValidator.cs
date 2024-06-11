@@ -21,7 +21,7 @@ public class ScriptValidator:Validator
         await Task.CompletedTask;
         try
         {
-            new ScriptParser().Parse("Validating", value as string);
+            new ScriptParser().Parse("Validating", value as string, ScriptType.Flow);
             return (true, string.Empty);
         }
         catch (Exception ex)

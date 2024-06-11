@@ -110,7 +110,7 @@ public class ScriptController : BaseController
     [HttpPost]
     public async Task<IActionResult> Save([FromBody] Script script)
     {
-        var scriptResult = Script.FromCode(script.Name, script.Code);
+        var scriptResult = Script.FromCode(script.Name, script.Code, script.Type);
         if (scriptResult.Failed(out string error))
             return BadRequest(error);
 
@@ -164,12 +164,13 @@ public class ScriptController : BaseController
     /// </summary>
     /// <param name="filename">The name of the file</param>
     /// <param name="code">The code</param>
+    /// <param name="type">the script type</param>
     [HttpPost("import")]
-    public async Task<IActionResult> Import([FromQuery] string filename, [FromBody] string code)
+    public async Task<IActionResult> Import([FromQuery] string filename, [FromBody] string code, [FromQuery] ScriptType type)
     {
         var service = ServiceLoader.Load<ScriptService>();
         var name = filename.Replace(".js", "").Replace(".JS", "");
-        var result = new ScriptParser().Parse(name, code);
+        var result = new ScriptParser().Parse(name, code, type);
         if (result.Failed(out string error))
             return BadRequest(error);
         

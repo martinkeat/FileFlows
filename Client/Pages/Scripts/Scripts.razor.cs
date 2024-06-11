@@ -37,7 +37,6 @@ public partial class Scripts : ListPage<Guid, Script>
     /// Gets or sets the instance of the ScriptBrowser
     /// </summary>
     private RepositoryBrowser ScriptBrowser { get; set; }
-    //private ScriptBrowser ScriptBrowser { get; set; }
 
     protected override void OnInitialized()
     {
@@ -122,7 +121,7 @@ public partial class Scripts : ListPage<Guid, Script>
         Blocker.Show();
         try
         {
-            var newItem = await HttpHelper.Post<Script>("/api/script/import?filename=" + UrlEncoder.Create().Encode(idResult.filename), js);
+            var newItem = await HttpHelper.Post<Script>("/api/script/import?filename=" + UrlEncoder.Create().Encode(idResult.filename) + "&type=" + SelectedType, js);
             if (newItem != null && newItem.Success)
             {
                 await this.Refresh();

@@ -424,16 +424,8 @@ public class FlowWorker : Worker
         string jsFile = Path.Combine(scriptDir, "System", node.PreExecuteScript + ".js");
         if (File.Exists(jsFile) == false)
         {
-            jsFile = Path.Combine(GetConfigurationDirectory(), "Scripts", "Flow", node.PreExecuteScript + ".js");
-            if (File.Exists(jsFile) == false)
-            {
-                jsFile = Path.Combine(sharedDir, node.PreExecuteScript + ".js");
-                if (File.Exists(jsFile) == false)
-                {
-                    Logger.Instance.ELog("Failed to locate pre-execute script: " + node.PreExecuteScript);
-                    return false;
-                }
-            }
+            Logger.Instance.ELog("Failed to locate pre-execute script: " + node.PreExecuteScript);
+            return false;
         }
 
         Logger.Instance.ILog("Loading Pre-Execute Script: " + jsFile);
@@ -645,6 +637,8 @@ public class FlowWorker : Worker
 
         foreach (var script in config.FlowScripts)
             await File.WriteAllTextAsync(Path.Combine(dir, "Scripts", "Flow", script.Uid + ".js"), script.Code);
+        foreach (var script in config.SystemScripts)
+            await File.WriteAllTextAsync(Path.Combine(dir, "Scripts", "System", script.Uid + ".js"), script.Code);
         foreach (var script in config.SharedScripts)
             await File.WriteAllTextAsync(Path.Combine(dir, "Scripts", "Shared", script.Name + ".js"), script.Code);
         

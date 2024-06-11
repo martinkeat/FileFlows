@@ -265,7 +265,7 @@ public class Upgrade_24_06_1
             code = string.Join('\n', lines.Skip(1)).Trim();
         }
 
-        var result = new ScriptParser().Parse(name, code);
+        var result = new ScriptParser().Parse(name, code, type);
         if (result.IsFailed)
         {
             // basic script

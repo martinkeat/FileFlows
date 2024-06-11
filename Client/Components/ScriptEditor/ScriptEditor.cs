@@ -70,7 +70,7 @@ let ffApi = new FileFlowsApi();
         }
         else
         {
-            item.Code = ScriptParser.GetCodeWithCommentBlock(item);
+            item.Code = ScriptParser.GetCodeWithCommentBlock(item, true);
         }
 
         item.Code = item.Code.Replace("\r\n", "\n").Trim();
@@ -100,9 +100,9 @@ let ffApi = new FileFlowsApi();
         {
             InputType = FormInputType.Code,
             Name = "Code",
-            Validators = item.Type == ScriptType.Flow ? new List<FileFlows.Shared.Validators.Validator>
+            Validators = item.Type == ScriptType.Flow ? new List<Validator>
             {
-                new FileFlows.Shared.Validators.ScriptValidator()
+                new ScriptValidator()
             } : new List<Validator>()
         });
 
@@ -110,7 +110,7 @@ let ffApi = new FileFlowsApi();
         {
             TypeName = "Pages.Script", Title = title, Fields = fields, Model = item, Large = true, ReadOnly = readOnly,
             SaveCallback = SaveCallback ?? Save, HelpUrl = "https://fileflows.com/docs/webconsole/extensions/scripts",
-            AdditionalButtons = new ActionButton[]
+            AdditionalButtons = readOnly ? null : new ActionButton[]
             {
                 new ()
                 {

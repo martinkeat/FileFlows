@@ -78,10 +78,11 @@ public class Script: FileFlowObject, IInUse
     /// </summary>
     /// <param name="name">the name of the script</param>
     /// <param name="code">the script code</param>
+    /// <param name="type">the type of the script</param>
     /// <returns>the new script</returns>
-    public static Result<Script> FromCode(string name, string code)
+    public static Result<Script> FromCode(string name, string code, ScriptType type)
     {
-        var result = new ScriptParser().Parse(name, code);
+        var result = new ScriptParser().Parse(name, code, type);
         if (result.Failed(out string error))
             return Result<Script>.Fail(error);
 
@@ -89,6 +90,7 @@ public class Script: FileFlowObject, IInUse
         return new Script()
         {
             Uid = scriptModel.Uid,
+            Type = type,
             Name = scriptModel.Name?.EmptyAsNull() ?? name,
             Code = scriptModel.Code,
             Revision = scriptModel.Revision,
@@ -107,11 +109,13 @@ public class Script: FileFlowObject, IInUse
     /// <returns>the result of the update</returns>
     public Result<bool> UpdateFromCode(string code)
     {
-        var result = new ScriptParser().Parse(this.Name, code);
+        var result = new ScriptParser().Parse(this.Name, code, this.Type);
         if (result.Failed(out string error))
             return Result<bool>.Fail(error);
         
         var scriptModel = result.Value;
+        if(string.IsNullOrWhiteSpace(scriptModel.Name) == false)
+            this.Name = scriptModel.Name;
         this.Code = scriptModel.Code;
         this.Revision = scriptModel.Revision;
         this.Description = scriptModel.Description;
