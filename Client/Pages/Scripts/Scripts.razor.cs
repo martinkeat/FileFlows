@@ -102,7 +102,14 @@ public partial class Scripts : ListPage<Guid, Script>
 #if (DEBUG)
         url = "http://localhost:6868" + url;
 #endif
-        await jsRuntime.InvokeVoidAsync("ff.downloadFile", new object[] { url, item.Name + ".js" });
+        var result = await HttpHelper.Get<string>(url);
+        if (result.Success == false)
+        {
+            Toast.ShowError(Translater.Instant("Pages.Script.Messages.FailedToExport"));
+            return;
+        }
+
+        await jsRuntime.InvokeVoidAsync("ff.saveTextAsFile", item.Name + ".js", result.Body);
     }
 
     private async Task Import()
