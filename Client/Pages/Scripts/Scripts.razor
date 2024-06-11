@@ -79,6 +79,10 @@
                                 {
                                     <IconValue Color="IconValueColor.Green" OnClick="() => OpenUsedBy(item)" Icon="fas fa-folder" Value="@lblInUse" />
                                 }
+                               else if (item.Name == "FILE_DISPLAY_NAME")
+                               {
+                                   <IconValue Color="IconValueColor.Green" Icon="fas fa-folder" Value="@lblInUse" />
+                               }
                            </div>
                        </div>
                         <div class="right">
@@ -93,16 +97,6 @@
                        
                </Cell>
            </FlowTableColumn>
-            <FlowTableColumn TItem="Script" Width="36rem" MobileWidth="0" Hidden=@(SelectedType != ScriptType.Shared)>
-                <Header>
-                    Import
-                </Header>
-                <Cell Context="item">
-                    <span>
-                        import { @item.Name } from 'Shared/@(item.Name)';
-                    </span>
-                </Cell>
-            </FlowTableColumn>
         </Columns>
     </FlowTable>
 

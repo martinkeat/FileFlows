@@ -33,7 +33,14 @@
                                             <span>@item.Description</span>
                                         </div>
                                         <div class="right">
-                                            <span class="top-right">@item.Revision</span>
+                                            @if (string.IsNullOrWhiteSpace(item.Author))
+                                            {
+                                                <span class="top-right">@item.Author</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="top-right">@item.Revision</span>
+                                            }
                                         </div>
                                     </div>
                                         
