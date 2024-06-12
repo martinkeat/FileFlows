@@ -2628,6 +2628,10 @@ body {
   --nav-menu-bold:700;
 }
 
+.initial-config + .toast-button {
+  display: none;
+}
+
 @media screen and (max-width: 849.99px) {
   html, body, #app, .page {
     height: 100%;

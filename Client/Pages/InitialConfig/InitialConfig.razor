@@ -46,48 +46,47 @@ else
                     </div>
                 </div>
             </FlowWizardPage>
-            <FlowWizardPage Title="Plugins" Disabled="@(EulaAccepted == false)" 
-                            Visible="(AvailablePlugins?.Any() == true)" 
-                            Description="Choose which plugins to install">
-                <FlowTable @ref="PluginTable" Data="AvailablePlugins" TItem="PluginPackageInfo" 
-                           HideHead="true" HideToolbar="true" Selection="SelectionMode.Multiple"
-                           TableIdentifier="InitialConfigPlugins" DontClearOnClick="true" ForcedSelection="ForcedPlugins">
-                    <Columns>
-                        <FlowTableColumn TItem="PluginPackageInfo" NoHeight="true">
-                            <Header>
-                                @Globals.lblName
-                            </Header>
-                            <Cell Context="item">
-                                <div class="table-item">
-                                    <TableItemIcon Icon="@item.Icon" DefaultIcon="fas fa-puzzle-piece" />
-                                    <div class="center">
-                                        <span class="name"><span>@item.Name</span></span>
-                                        <span class="description"><span>@item.Description</span></span>
-                                    </div>
-                                    @if (item.Installed)
-                                    {
-                                        <div class="right">
-                                            <span class="top-right">
-                                                @lblInstalled
-                                            </span>
+            @if (AvailablePlugins?.Any() == true)
+            {
+                <FlowWizardPage Title="Plugins" Disabled="@(EulaAccepted == false)"
+                                Description="Choose which plugins to install">
+                    <FlowTable @ref="PluginTable" Data="AvailablePlugins" TItem="PluginPackageInfo"
+                               HideHead="true" HideToolbar="true" Selection="SelectionMode.Multiple"
+                               TableIdentifier="InitialConfigPlugins" DontClearOnClick="true" ForcedSelection="ForcedPlugins">
+                        <Columns>
+                            <FlowTableColumn TItem="PluginPackageInfo" NoHeight="true">
+                                <Header>
+                                    @Globals.lblName
+                                </Header>
+                                <Cell Context="item">
+                                    <div class="table-item">
+                                        <TableItemIcon Icon="@item.Icon" DefaultIcon="fas fa-puzzle-piece"/>
+                                        <div class="center">
+                                            <span class="name"><span>@item.Name</span></span>
+                                            <span class="description"><span>@item.Description</span></span>
                                         </div>
-                                    }
-                                </div>
+                                        @if (item.Installed)
+                                        {
+                                            <div class="right">
+                                                <span class="top-right">
+                                                    @lblInstalled
+                                                </span>
+                                            </div>
+                                        }
+                                    </div>
 
-                            </Cell>
-                        </FlowTableColumn>
-                    </Columns>
-                </FlowTable>
+                                </Cell>
+                            </FlowTableColumn>
+                        </Columns>
+                    </FlowTable>
+                </FlowWizardPage>
+            }
 
-
-            </FlowWizardPage>
-
-            @if (Profile.ServerOS == OperatingSystemType.Docker)
+            @if (Profile.ServerOS == OperatingSystemType.Docker && AvailableDockerMods?.Any() == true)
             {
                 <FlowWizardPage Title="DockerMods" Disabled="@(EulaAccepted == false)"
-                                Visible="@(AvailableDockerMods?.Any() == true)"
                                 Description="Choose which DockerMods to install">
-                    <FlowTable @ref="DockerModTable" TItem="RepositoryObject"
+                    <FlowTable @ref="DockerModTable" Data="AvailableDockerMods" TItem="RepositoryObject"
                                HideHead="true" HideToolbar="true" Selection="SelectionMode.Multiple"
                                TableIdentifier="InitialConfigDockerMods" DontClearOnClick="true">
                         <Columns>

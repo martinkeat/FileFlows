@@ -100,7 +100,7 @@ public partial class InitialConfig : ComponentBase
             NavigationManager.NavigateTo("/");
             return;
         }
-        string html = Markdig.Markdown.ToHtml(EULA).Trim();
+        var html = Markdig.Markdown.ToHtml(EULA).Trim();
         msEula = new MarkupString(html);
         lblInstalled = Translater.Instant("Labels.Installed");
 
@@ -111,6 +111,7 @@ public partial class InitialConfig : ComponentBase
         {
             await GetPlugins();
             await GetDockerMods();
+            StateHasChanged();
         }
 
         Blocker.Hide();
@@ -138,12 +139,18 @@ public partial class InitialConfig : ComponentBase
     {
         var request = await HttpHelper.Get<List<RepositoryObject>>("/api/repository/by-type/DockerMod");
         if (request.Success == false)
+        {
+            Logger.Instance.ILog("Failed to get DockerMods: " + request.StatusCode);
             return;
+        }
 
+        Logger.Instance.ILog("Got DockerMods 1");
         AvailableDockerMods = request.Data
             .OrderBy(x => x.Default == true ? 0 : 1)
             .ThenBy(x => x.Name.ToLowerInvariant()?.StartsWith("ffmpeg") == true ? 0 : 1)
             .ThenBy(x => x.Name.ToLowerInvariant()).ToList();
+        
+        Logger.Instance.ILog("Got DockerMods 2: " + AvailableDockerMods.Count);
     }
 
     /// <summary>
@@ -204,9 +211,7 @@ public partial class InitialConfig : ComponentBase
         {
             InitDone = true;
             
-            DockerModTable.SetData(AvailableDockerMods);
             DockerModTable.SetSelected(AvailableDockerMods.Where(x => x.Default == true).ToArray());
-            DockerModTable.TriggerStateHasChanged();
         }
     }
 }
