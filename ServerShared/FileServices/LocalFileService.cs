@@ -296,19 +296,19 @@ public class LocalFileService : IFileService
             return Result<bool>.Fail("Cannot access protected path: " + destination);
         try
         {
-            Logger.ILog("LocalFileService.FileMove: Path: " + path);
-            Logger.ILog("LocalFileService.FileMove: Destination: " + destination);
-            Logger.ILog("LocalFileService.FileMove: Overwrite: " + overwrite);
+            Logger?.ILog("LocalFileService.FileMove: Path: " + path);
+            Logger?.ILog("LocalFileService.FileMove: Destination: " + destination);
+            Logger?.ILog("LocalFileService.FileMove: Overwrite: " + overwrite);
             
             var fileInfo = new FileInfo(path);
             if (fileInfo.Exists == false)
                 return Result<bool>.Fail("File does not exist");
-            Logger.ILog("File exists: " + path);
+            Logger?.ILog("File exists: " + path);
             var destDir = new FileInfo(destination).Directory;
-            Logger.ILog("Checking destination exists: " + destDir);
+            Logger?.ILog("Checking destination exists: " + destDir);
             CreateDirectoryIfNotExists(destDir.FullName);
 
-            Logger.ILog($"About to move file '{fileInfo.FullName}' to '{destination}'");
+            Logger?.ILog($"About to move file '{fileInfo.FullName}' to '{destination}'");
             fileInfo.MoveTo(destination, overwrite);
             SetPermissions(destination);
             return true;
@@ -331,7 +331,7 @@ public class LocalFileService : IFileService
             return;
         try
         {
-            Logger.ILog("Directory does not exist, creating: " + path);
+            Logger?.ILog("Directory does not exist, creating: " + path);
             if (OperatingSystem.IsWindows() || OperatingSystem.IsMacOS())
             {
                 Directory.CreateDirectory(path);

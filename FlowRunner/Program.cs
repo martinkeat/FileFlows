@@ -279,7 +279,9 @@ public class Program
         IFileService _fileService;
         if (fileExists)
         {
-            _fileService = args.IsServer ? new LocalFileService() : new MappedFileService(node);
+            _fileService = args.IsServer
+                ? new LocalFileService { Logger = Logger }
+                : new MappedFileService(node, Logger);
         }
         else if (args.IsServer || libfileService.ExistsOnServer(libFile.Uid).Result == false)
         {
@@ -292,7 +294,7 @@ public class Program
         }
         else
         {
-            _fileService = new MappedFileService(node);
+            _fileService = new MappedFileService(node, Logger);
             bool exists = lib.Folders
                 ? _fileService.DirectoryExists(workingFile)
                 : _fileService.FileExists(workingFile);

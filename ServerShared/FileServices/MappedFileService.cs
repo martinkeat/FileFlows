@@ -36,11 +36,14 @@ public class MappedFileService : IFileService
     /// Initializes a new instance of the <see cref="MappedFileService"/> class with the specified <paramref name="node"/>.
     /// </summary>
     /// <param name="node">The processing node used for mapping file operations.</param>
-    public MappedFileService(ProcessingNode node)
+    /// <param name="logger">the logger</param>
+    public MappedFileService(ProcessingNode node, ILogger logger)
     {
+        Logger = logger;
         int permissions = node.PermissionsFiles ?? Globals.DefaultPermissionsFile;
         _localFileService = new LocalFileService()
         {
+            Logger = logger,
             PermissionsFile = permissions,
             PermissionsFolder = node.PermissionsFolders ?? Globals.DefaultPermissionsFile
         };
