@@ -280,19 +280,24 @@ public class LibraryFileService
             LicensedForProcessingOrder = LicenseHelper.IsLicensed(LicenseFlags.ProcessingOrder)
         };
 
-        var canProcess = allLibraries.Where(x =>
-        {
-            if (node.AllLibraries == ProcessingLibraries.All)
-                return true;
-            if (node.AllLibraries == ProcessingLibraries.Only)
-                return nodeLibraries.Contains(x.Uid);
-            return nodeLibraries.Contains(x.Uid) == false;
-        }).Select(x => x.Uid).ToList();
-        var executing = await FlowRunnerService.ExecutingLibraryFiles();
-
         await NextFileSemaphore.WaitAsync();
         try
         {
+            var executing = await FlowRunnerService.ExecutingLibraryFiles();
+            var executingLibraries = await FlowRunnerService.ExecutingLibraryRunners();
+            var canProcess = allLibraries.Where(x =>
+            {
+                if (x.MaxRunners > 0 && executingLibraries.TryGetValue(x.Uid, out var currentRunners)
+                                     && x.MaxRunners >= currentRunners)
+                    return false;
+            
+                if (node.AllLibraries == ProcessingLibraries.All)
+                    return true;
+                if (node.AllLibraries == ProcessingLibraries.Only)
+                    return nodeLibraries.Contains(x.Uid);
+                return nodeLibraries.Contains(x.Uid) == false;
+            }).Select(x => x.Uid).ToList();
+            
             var manager = new LibraryFileManager();
             var waitingForReprocess = outOfSchedule
                 ? null
@@ -305,9 +310,8 @@ public class LibraryFileService
             var nextFile = waitingForReprocess ?? (await manager.GetAll(new ()
                 {
                     Status = FileStatus.Unprocessed, Skip = 0, Rows = 1, AllowedLibraries = canProcess,
-                    MaxSizeMBs = node.MaxFileSizeMb, ExclusionUids =  executing, ForcedOnly = outOfSchedule,
+                    MaxSizeMBs = node.MaxFileSizeMb, ExclusionUids = executing, ForcedOnly = outOfSchedule,
                     SysInfo = sysInfo
-                
                 }
             )).FirstOrDefault();
 
@@ -331,7 +335,7 @@ public class LibraryFileService
                 return nextFile;
             #endif
 
-            await manager.StartProcessing(nextFile.Uid, node.Uid,node.Name, workerUid);
+            await manager.StartProcessing(nextFile.Uid, node.Uid, node.Name, workerUid);
             return nextFile;
         }
         finally

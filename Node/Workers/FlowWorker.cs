@@ -7,7 +7,6 @@ using FileFlows.ServerShared.Helpers;
 using FileFlows.ServerShared.Services;
 using FileFlows.ServerShared.Workers;
 using FileFlows.Shared.Models;
-using Jint.Native.Json;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace FileFlows.Node.Workers;
@@ -24,6 +23,11 @@ public class FlowWorker : Worker
     /// not match the UI of an executor in the UI
     /// </summary>
     public readonly Guid Uid = Guid.NewGuid();
+    
+    /// <summary>
+    /// Gets the Current configuration revision
+    /// </summary>
+    public static ConfigurationRevision? CurrentConfig { get; set; }
 
     private readonly string _configKeyDefault = Guid.NewGuid().ToString();
     
@@ -57,11 +61,6 @@ public class FlowWorker : Worker
         
         return false;
     }
-
-    /// <summary>
-    /// The current configuration
-    /// </summary>
-    internal static int CurrentConfigurationRevision { get; private set; } = -1;
     
     /// <summary>
     /// Gets or sets if a failed flow should keep its files
@@ -124,10 +123,16 @@ public class FlowWorker : Worker
     /// </summary>
     protected override void Execute()
     {
-        ExecuteActual(out ProcessingNode? node);
+        bool canProcessMore = ExecuteActual(out ProcessingNode? node);
         // check if the timer has changed
         if (node == null)
             return;
+
+        if (canProcessMore)
+        {
+            Task.Run(Execute);
+            return;
+        }
 
         int newInterval = node.ProcessFileCheckInterval;
         if (newInterval < 1)
@@ -145,21 +150,22 @@ public class FlowWorker : Worker
     /// <summary>
     /// Actually executes this worker
     /// </summary>
-    private void ExecuteActual(out ProcessingNode? node)
+    /// <returns>true if a node started processing and it can instantly start processing more files</returns>
+    private bool ExecuteActual(out ProcessingNode? node)
     {
         node = null;
         if (UpdaterWorker.UpdatePending)
-            return;
+            return false;
 
         if (IsEnabledCheck?.Invoke() == false)
-            return;
+            return false;
         
         
         var nodeService = ServiceLoader.Load<INodeService>();
         if (nodeService.GetSystemIsRunning().Result != true)
         {
             Logger.Instance?.ELog("FileFlows server is paused or not running.");
-            return;
+            return false;
         }
         try
         {
@@ -167,13 +173,13 @@ public class FlowWorker : Worker
             if(node == null)
             {
                 Logger.Instance?.ELog("Failed to register node");
-                return;
+                return false;
             }
         }
         catch(Exception ex)
         {
             Logger.Instance?.ELog("Failed to register node: " + ex.Message);
-            return;
+            return false;
         }
 
 
@@ -184,12 +190,6 @@ public class FlowWorker : Worker
             nodeService.ClearWorkersAsync(node.Uid).Wait();
         }
 
-        if (node == null)
-        {
-            Logger.Instance?.DLog($"Node not found");
-            return;
-        }
-
         var frService = ServiceLoader.Load<IFlowRunnerService>();
         var isLicensed = frService.IsLicensed().Result;
 
@@ -198,20 +198,21 @@ public class FlowWorker : Worker
         if (node?.Enabled != true)
         {
             Logger.Instance?.DLog($"Node '{nodeName}' is not enabled");
-            return;
+            return false;
         }
 
         if (UpdateConfiguration(node).Result == false)
         {
             Logger.Instance?.WLog("Failed to write configuration for Node, pausing system");
             nodeService.Pause(30).Wait();
-            return;
+            return false;
         }
-        
+
+        int count = ExecutingRunners.Count;
         if (node?.FlowRunners <= ExecutingRunners.Count)
         {
             Logger.Instance?.DLog($"At limit of running executors on '{nodeName}': " + node.FlowRunners);
-            return; // already maximum executors running
+            return false; // already maximum executors running
         }
 
 
@@ -219,7 +220,7 @@ public class FlowWorker : Worker
         if (string.IsNullOrEmpty(tempPath))
         {
             Logger.Instance?.ELog($"Temp Path not set on node '{nodeName}', cannot process");
-            return;
+            return false;
         }
         
         if(Directory.Exists(tempPath) == false)
@@ -231,14 +232,14 @@ public class FlowWorker : Worker
             catch (Exception)
             {
                 Logger.Instance?.ELog($"Temp Path does not exist on on node '{nodeName}', and failed to create it: {tempPath}");
-                return;
+                return false;
             }
         }
 
         if (isLicensed && node?.PreExecuteScript != null)
         {
             if (PreExecuteScriptTest(node) == false)
-                return;
+                return false;
         }
         
         var libFileService = ServiceLoader.Load<ILibraryFileService>();
@@ -246,10 +247,10 @@ public class FlowWorker : Worker
         if (libFileResult?.Status != NextLibraryFileStatus.Success)
         {
             Logger.Instance.ILog("No file found to process, status from server: " + (libFileResult?.Status.ToString() ?? "UNKNOWN"));
-            return;
+            return false;
         }
         if (libFileResult?.File == null)
-            return; // nothing to process
+            return false; // nothing to process
         var libFile = libFileResult.File;
 
         bool windows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
@@ -393,6 +394,15 @@ public class FlowWorker : Worker
                 Trigger();
             }
         });
+        
+        if (count + 1 >= node!.FlowRunners)
+            return false;
+
+        var library = CurrentConfig?.Libraries?.FirstOrDefault(x => x.Uid == libFile.LibraryUid);
+        if (library is { MaxRunners: > 0 })
+            return false; // cant process instantly or this could ignore the library limit
+
+        return true;
     }
 
     private void FinishWork(Guid processUid, ProcessingNode node, LibraryFile libFile)
@@ -577,7 +587,7 @@ public class FlowWorker : Worker
     /// <param name="configVersion">the config revision</param>
     /// <returns>the configuration directory</returns>
     private string GetConfigurationDirectory(int? configVersion = null) =>
-        Path.Combine(DirectoryHelper.ConfigDirectory, (configVersion ?? CurrentConfigurationRevision).ToString());
+        Path.Combine(DirectoryHelper.ConfigDirectory, (configVersion ?? CurrentConfig?.Revision ?? 0).ToString());
 
     private bool GetCurrentConfigEncrypted()
     {
@@ -606,7 +616,7 @@ public class FlowWorker : Worker
         }
 
 
-        if (revision == CurrentConfigurationRevision)
+        if (revision == CurrentConfig?.Revision)
             return true;
 
         var config = await service.GetCurrentConfiguration();
@@ -730,7 +740,8 @@ public class FlowWorker : Worker
                 return false;
         }
 
-        CurrentConfigurationRevision = revision;
+
+        CurrentConfig = config;
         CurrentConfigurationKeepFailedFlowFiles = config.KeepFailedFlowTempFiles;
 
         return true;

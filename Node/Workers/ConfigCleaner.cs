@@ -27,7 +27,7 @@ public class ConfigCleaner: Worker
             max = Math.Max(revision, max);
         }
 
-        int current = FlowWorker.CurrentConfigurationRevision;
+        int current = FlowWorker.CurrentConfig?.Revision ?? 0;
         foreach (var kv in dirs)
         {
             if (kv.Key == max || kv.Key == current)

@@ -508,6 +508,25 @@ public class FlowRunnerService : IFlowRunnerService
     }
 
     /// <summary>
+    /// Get runner count for executing libraries
+    /// </summary>
+    /// <returns>Count of executing library files in each library</returns>
+    internal static async Task<Dictionary<Guid, int>> ExecutingLibraryRunners()
+    {
+        await executorsSempahore.WaitAsync();
+        try
+        {
+            return Executors?.Values?.Where(x => x.Library?.Uid != null)
+                .GroupBy(x => x.Library.Uid)
+                .ToDictionary(x => x.Key, x => x.Count()) ?? new();
+        }
+        finally
+        {
+            executorsSempahore.Release();
+        }
+    }
+    
+    /// <summary>
     /// Tries and gets a file from the running executor list
     /// </summary>
     /// <param name="libraryFileUid">the UID of the library file to get</param>
