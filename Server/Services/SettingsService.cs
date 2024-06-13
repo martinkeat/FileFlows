@@ -53,6 +53,7 @@ public class SettingsService // : ISettingsService
 
             var cfg = new ConfigurationRevision();
             cfg.Revision = settings.Revision;
+            cfg.DelayBetweenNextFile = settings.DelayBetweenNextFile;
             var scriptService = new ScriptService();
             cfg.FlowScripts = (await scriptService.GetAllByType(ScriptType.Flow)).ToList();
             cfg.SystemScripts = (await scriptService.GetAllByType(ScriptType.System)).ToList();

@@ -164,6 +164,7 @@ public class SettingsController : BaseController
             EulaAccepted = model.EulaAccepted,
             InitialConfigDone = model.InitialConfigDone,
             
+            DelayBetweenNextFile = model.DelayBetweenNextFile,
             PausedUntil = model.PausedUntil,
             Language = model.Language,
             LogFileRetention = model.LogFileRetention,

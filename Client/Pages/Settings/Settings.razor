@@ -89,6 +89,7 @@
                     </FlowTab>
                     <FlowTab Title="@lblAdvanced">
                         <InputSelect @bind-Value="@Language" Options=@LanguageOptions Label="Pages.Settings.Fields.Language" AllowClear="false" />
+                        <InputNumber @bind-Value="@Model.DelayBetweenNextFile" Label="Pages.Settings.Fields.DelayBetweenNextFile" Min=0 Max=60000 />
                         @{
                             if (Model.ProcessFileCheckInterval < 5)
                                 Model.ProcessFileCheckInterval = 5;

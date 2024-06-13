@@ -216,6 +216,11 @@ public class Settings : FileFlowObject
     /// Gets or sets if the EULA has been accepted
     /// </summary>
     public bool EulaAccepted { get; set; }
+
+    /// <summary>
+    /// Gets the delay between requesting a new file if a file can be processed instantly
+    /// </summary>
+    public int DelayBetweenNextFile { get; set; }
 }
 
 /// <summary>

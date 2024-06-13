@@ -130,7 +130,15 @@ public class FlowWorker : Worker
 
         if (canProcessMore)
         {
-            Task.Run(Execute);
+            Initialize(ScheduleType.Minute, 1);
+            Task.Run(async () =>
+            {
+                // wait one second so the other process can start and actually tell the service its running
+                int delay = CurrentConfig?.DelayBetweenNextFile ?? 0;
+                if(delay > 0)
+                    await Task.Delay(delay);
+                Execute();
+            });
             return;
         }
 

@@ -217,7 +217,7 @@ public abstract class Worker
         return SecondsUntilNext(next);
     }
     /// <summary>
-    /// Gets how many how many seconds until specified minute
+    /// Gets how many seconds until specified minute
     /// </summary>
     /// <returns>how many seconds until specified minute</returns>
     private int ScheduleMinute()

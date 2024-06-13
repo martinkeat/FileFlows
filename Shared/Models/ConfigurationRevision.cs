@@ -9,6 +9,11 @@ public class ConfigurationRevision
     /// Gets or sets the Revision
     /// </summary>
     public int Revision { get; set; }
+    
+    /// <summary>
+    /// Gets the delay between requesting a new file if a file can be processed instantly
+    /// </summary>
+    public int DelayBetweenNextFile { get; set; }
 
     /// <summary>
     /// Gets or sets the maximum nodes that can be executed
