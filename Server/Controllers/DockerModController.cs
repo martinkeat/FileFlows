@@ -75,10 +75,10 @@ public class DockerModController : BaseController
         => await ServiceLoader.Load<DockerModService>().Delete(model.Uids, await GetAuditDetails());
     
     /// <summary>
-    /// Set state of a DockerMod node
+    /// Set state of a DockerMod
     /// </summary>
     /// <param name="uid">The UID of the DockerMod</param>
-    /// <param name="enable">Whether or not this DockerMod is enabled</param>
+    /// <param name="enable">Whether this DockerMod is enabled</param>
     /// <returns>an awaited task</returns>
     [HttpPut("state/{uid}")]
     public async Task<IActionResult> SetState([FromRoute] Guid uid, [FromQuery] bool? enable)

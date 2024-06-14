@@ -53,6 +53,30 @@ public class TaskController : BaseController
     }
 
     /// <summary>
+    /// Set state of a Task
+    /// </summary>
+    /// <param name="uid">The UID of the Task</param>
+    /// <param name="enable">Whether this Task is enabled</param>
+    /// <returns>an awaited task</returns>
+    [HttpPut("state/{uid}")]
+    public async Task<IActionResult> SetState([FromRoute] Guid uid, [FromQuery] bool? enable)
+    {
+        var service = ServiceLoader.Load<TaskService>();
+        var item = await service.GetByUidAsync(uid);
+        if (item == null)
+            return BadRequest("Task not found.");
+        if (enable != null && item.Enabled != enable.Value)
+        {
+            item.Enabled = enable.Value;
+            var result = await service.Update(item, await GetAuditDetails());
+            if (result.Failed(out string error))
+                return BadRequest(error);
+            item = result.Value;
+        }
+        return Ok(item);
+    }
+    
+    /// <summary>
     /// Delete scheduled tasks from the system
     /// </summary>
     /// <param name="model">A reference model containing UIDs to delete</param>

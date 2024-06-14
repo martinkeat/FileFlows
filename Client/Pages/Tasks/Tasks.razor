@@ -1,6 +1,5 @@
 @namespace FileFlows.Client.Pages
 @using FileFlows.Shared.Models
-@using Humanizer
 @using FileFlows.Client.Helpers
 @inherits ListPage<Guid, FileFlowsTask>
 
@@ -13,7 +12,7 @@
 
     <Body>
     <FlowTable @ref="Table" Data="@Data" TItem="FileFlowsTask" Selection="SelectionMode.Multiple"
-               DoubleClick="@OnDoubleClick" TableIdentifier="Tasks">
+               DoubleClick="@OnDoubleClick" TableIdentifier="Tasks" DisableColumn="(item) => !item.Enabled">
         <ToolBar>            
             <FlowTableButton Clicked=Add Icon="fas fa-plus" Label="Labels.Add" />
             <FlowTableButton Clicked=Edit SelectedOne="true" Icon="fas fa-edit" Label="Labels.Edit" />

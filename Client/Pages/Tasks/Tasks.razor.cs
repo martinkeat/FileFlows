@@ -68,18 +68,12 @@ public partial class Tasks : ListPage<Guid, FileFlowsTask>
         base.OnInitialized();
     }
 
-    private string GetSchedule(FileFlowsTask task)
-    {
-        if (task.Type != TaskType.Schedule)
-            return string.Empty;
-        if (task.Schedule == SCHEDULE_HOURLY) return "Hourly";
-        if (task.Schedule == SCHEDULE_3_HOURLY) return "Every 3 Hours";
-        if (task.Schedule == SCHEDULE_6_HOURLY) return "Every 6 Hours";
-        if (task.Schedule == SCHEDULE_12_HOURLY) return "Every 12 Hours";
-        if (task.Schedule == SCHEDULE_DAILY) return "Daily";
-        return "Custom Schedule";
-    }
-    
+    /// <summary>
+    /// we only want to do the sort the first time, otherwise the list will jump around for the user
+    /// </summary>
+    private List<Guid> initialSortOrder;
+
+
     /// <inheritdoc />
     public async override Task PostLoad()
     {
@@ -94,6 +88,41 @@ public partial class Tasks : ListPage<Guid, FileFlowsTask>
             Toast.ShowError("Failed loading scripts");
         }
     }
+
+    /// <inheritdoc />
+    public override Task<List<FileFlowsTask>> PostLoadGotData(List<FileFlowsTask> data)
+    {
+        if(initialSortOrder == null)
+        {
+            data = data.OrderByDescending(x => x.Enabled).ThenBy(x => x.Name)
+                .ToList();
+            initialSortOrder = data.Select(x => x.Uid).ToList();
+        }
+        else
+        {
+            data = data.OrderBy(x => initialSortOrder.Contains(x.Uid) ? initialSortOrder.IndexOf(x.Uid) : 1000000)
+                .ThenBy(x => x.Name)
+                .ToList();
+        }
+        return Task.FromResult(data);
+    }
+    
+    /// <summary>
+    /// Gets the text for the schedule
+    /// </summary>
+    /// <param name="task">the task</param>
+    /// <returns>the schedule text</returns>
+    private string GetSchedule(FileFlowsTask task)
+    {
+        if (task.Type != TaskType.Schedule)
+            return string.Empty;
+        if (task.Schedule == SCHEDULE_HOURLY) return "Hourly";
+        if (task.Schedule == SCHEDULE_3_HOURLY) return "Every 3 Hours";
+        if (task.Schedule == SCHEDULE_6_HOURLY) return "Every 6 Hours";
+        if (task.Schedule == SCHEDULE_12_HOURLY) return "Every 12 Hours";
+        if (task.Schedule == SCHEDULE_DAILY) return "Daily";
+        return "Custom Schedule";
+    }
     
     /// <summary>
     /// Adds a new task
@@ -106,6 +135,7 @@ public partial class Tasks : ListPage<Guid, FileFlowsTask>
         });
     }
     
+    /// <inheritdoc />
     public override async Task<bool> Edit(FileFlowsTask item)
     {
         List<ElementField> fields = new List<ElementField>();
@@ -252,6 +282,11 @@ public partial class Tasks : ListPage<Guid, FileFlowsTask>
     }
     
     
+    /// <summary>
+    /// Saves a task
+    /// </summary>
+    /// <param name="model">the model of the task to save</param>
+    /// <returns>true if successful and if the editor should be closed</returns>
     async Task<bool> Save(ExpandoObject model)
     {
         Blocker.Show();
@@ -308,8 +343,9 @@ public partial class Tasks : ListPage<Guid, FileFlowsTask>
         }
     }
     
-    
-
+    /// <summary>
+    /// Runs the task on the server
+    /// </summary>
     async Task Run()
     {
         var item = Table.GetSelected()?.FirstOrDefault();
@@ -336,6 +372,9 @@ public partial class Tasks : ListPage<Guid, FileFlowsTask>
     }
 
 
+    /// <summary>
+    /// Gets the run history for the selected task and shows it
+    /// </summary>
     async Task RunHistory()
     {
         var item = Table.GetSelected()?.FirstOrDefault();
@@ -371,6 +410,10 @@ public partial class Tasks : ListPage<Guid, FileFlowsTask>
         }
     }
 
+    /// <summary>
+    /// Shows the task history
+    /// </summary>
+    /// <param name="task">the task to show the history</param>
     async Task TaskHistory(FileFlowsTask task)
     {
         List<ElementField> fields = new List<ElementField>();

@@ -105,10 +105,18 @@ public abstract class ListPage<U, T> : ComponentBase where T : IUniqueObject<U>
     /// <summary>
     /// Called after the data is loaded
     /// </summary>
-    public async virtual Task PostLoad()
-    {
-        await Task.CompletedTask;
-    }
+    public virtual Task PostLoad()
+        => Task.CompletedTask;
+
+    /// <summary>
+    /// Called directly after the data is fetched from the server, and before it is bound to the table
+    /// This happens before "PostLoad"
+    /// </summary>
+    /// <param name="data">the data from the server</param>
+    /// <returns>a task to await</returns>
+    public virtual Task<List<T>> PostLoadGotData(List<T> data)
+        => Task.FromResult(data);
+    
     /// <summary>
     /// Waits for a render to occur
     /// </summary>
@@ -147,7 +155,7 @@ public abstract class ListPage<U, T> : ComponentBase where T : IUniqueObject<U>
             var result = await FetchData();
             if (result.Success)
             {
-                this.Data = result.Data;
+                this.Data = await PostLoadGotData(result.Data);
                 if (Table != null)
                 {
                     SetTableData(this.Data);
