@@ -1,5 +1,6 @@
 using FileFlows.Client.Components;
 using FileFlows.Client.Components.Dialogs;
+using FileFlows.Client.Shared;
 using Microsoft.AspNetCore.Components;
 
 namespace FileFlows.Client.Pages;
@@ -281,6 +282,18 @@ public partial class Libraries : ListPage<Guid, Library>
                 ?.ToList();
         }
         return base.PostLoad();
+    }
+
+    /// <summary>
+    /// Opens the flow in the editor
+    /// </summary>
+    /// <param name="flowUid">the UID of the flow</param>
+    private void OpenFlow(Guid? flowUid)
+    {
+        if (flowUid == null || Profile.HasRole(UserRole.Flows) == false)
+            return;
+
+        NavigationManager.NavigateTo($"/flows/{flowUid}");
     }
 }
 

@@ -75,7 +75,7 @@ public partial class NavMenu : IDisposable
     private IJSObjectReference jsNavMenu;
 
     /// <inheritdoc />
-    protected async override Task OnInitializedAsync()
+    protected override async Task OnInitializedAsync()
     {
         lblVersion = Translater.Instant("Labels.Version");
         lblHelp = Translater.Instant("Labels.Help");
@@ -123,7 +123,7 @@ public partial class NavMenu : IDisposable
         if (MenuItems?.Any() != true)
             return;
         
-        var lastRoute = e?.Location?.Split('/')?.LastOrDefault();
+        var lastRoute = e?.Location?.Contains("/flows/") == true ? "flows" : e?.Location?.Split('/')?.LastOrDefault();
         if (string.IsNullOrWhiteSpace(lastRoute))
             return;
         

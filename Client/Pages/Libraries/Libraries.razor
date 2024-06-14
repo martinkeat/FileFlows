@@ -48,7 +48,9 @@
                                     <span class="page">@item.Path</span>
                                 </span>
                                 <div class="info">
-                                    <IconValue Icon="fas fa-sitemap" Color="IconValueColor.Blue" Value="@item.Flow?.Name"></IconValue>
+                                    <IconValue Icon="fas fa-sitemap" Color="IconValueColor.Blue" 
+                                               Value="@item.Flow?.Name" OnClick="() => OpenFlow(item.Flow?.Uid)"
+                                               />
                                 </div>
                             </div>
                         </div>
