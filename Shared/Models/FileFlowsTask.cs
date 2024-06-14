@@ -9,6 +9,11 @@ public class FileFlowsTask : FileFlowObject
     /// Gets or sets the script this task will execute
     /// </summary>
     public Guid Script { get; set; }
+    
+    /// <summary>
+    /// Gets or sets if this task is enabled
+    /// </summary>
+    public bool Enabled { get; set; }
 
     /// <summary>
     /// Gets or sets the type of task

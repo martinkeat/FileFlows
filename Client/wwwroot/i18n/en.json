@@ -305,6 +305,15 @@
       "Local": "Local Users",
       "OpenIdConnect": "Open ID Connect"
     },
+    "TaskType": {
+      "FileAdded": "File Added",
+      "FileProcessed":"File Processed",
+      "FileProcessing": "File Processing",
+      "FileProcessFailed":"Process Failed",
+      "FileProcessSuccess": "Process Success",
+      "FileFlowsServerUpdating":"Server Updating",
+      "FileFlowsServerUpdateAvailable": "Update Available"     
+    },
     "UserRole": {
       "Files": "Files",
       "Flows": "Flows",

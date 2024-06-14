@@ -1,11 +1,6 @@
-using System.Text;
-using FileFlows.Plugin;
-using FileFlows.ScriptExecution;
-using FileFlows.Server.Controllers;
 using FileFlows.Server.Helpers;
 using FileFlows.Server.Services;
 using FileFlows.ServerShared.Models;
-using FileFlows.ServerShared.Workers;
 using FileFlows.Shared.Models;
 using Logger = FileFlows.Shared.Logger;
 
@@ -25,7 +20,6 @@ public class FileFlowsTasksWorker: ServerWorker
     /// A list of tasks and the quarter they last ran in
     /// </summary>
     private Dictionary<Guid, int> TaskLastRun = new ();
-    
     
     /// <summary>
     /// Creates a new instance of the Scheduled Task Worker
@@ -74,6 +68,9 @@ public class FileFlowsTasksWorker: ServerWorker
         // 0, 1, 2, 3, 4
         foreach (var task in tasks)
         {
+            if (task.Enabled == false)
+                continue;
+            
             if (task.Type != TaskType.Schedule)
                 continue;
             if (task.Schedule[quarter] != '1')

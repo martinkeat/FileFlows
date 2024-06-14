@@ -31,6 +31,9 @@ public partial class Tasks : ListPage<Guid, FileFlowsTask>
     private static readonly string SCHEDULE_DAILY = string.Concat(Enumerable.Repeat("1" + new string('0', 95), 7));
 
     private Dictionary<Guid, string> Scripts = new ();
+    
+    private string lblFileAdded, lblFileProcessed, lblFileProcessing, lblFileProcessFailed, lblFileProcessSuccess, 
+        lblFileFlowsServerUpdating,  lblFileFlowsServerUpdateAvailable, lblCustomSchedule;
 
     /// <summary>
     /// The script importer
@@ -53,6 +56,15 @@ public partial class Tasks : ListPage<Guid, FileFlowsTask>
         lblSuccess = Translater.Instant("Labels.Success");
         lblReturnCode = Translater.Instant("Labels.ReturnCode");
         lblEditScript = Translater.Instant("Pages.Tasks.Buttons.EditScript");
+
+        lblCustomSchedule = Translater.Instant("Pages.Tasks.Fields.CustomSchedule");
+        lblFileAdded = Translater.Instant($"Enums.{nameof(TaskType)}.{nameof(TaskType.FileAdded)}");
+        lblFileProcessed = Translater.Instant($"Enums.{nameof(TaskType)}.{nameof(TaskType.FileProcessed)}");
+        lblFileProcessing = Translater.Instant($"Enums.{nameof(TaskType)}.{nameof(TaskType.FileProcessing)}");
+        lblFileProcessFailed = Translater.Instant($"Enums.{nameof(TaskType)}.{nameof(TaskType.FileProcessFailed)}");
+        lblFileProcessSuccess = Translater.Instant($"Enums.{nameof(TaskType)}.{nameof(TaskType.FileProcessSuccess)}");
+        lblFileFlowsServerUpdating = Translater.Instant($"Enums.{nameof(TaskType)}.{nameof(TaskType.FileFlowsServerUpdating)}");
+        lblFileFlowsServerUpdateAvailable = Translater.Instant($"Enums.{nameof(TaskType)}.{nameof(TaskType.FileFlowsServerUpdateAvailable)}");
         base.OnInitialized();
     }
 
@@ -458,4 +470,42 @@ public partial class Tasks : ListPage<Guid, FileFlowsTask>
         var editor = new ScriptEditor(Editor, ScriptImporter, blocker: Blocker);
         await editor.Open(script);
     }
+
+    /// <summary>
+    /// Gets the icon for a task
+    /// </summary>
+    /// <param name="task">the task</param>
+    /// <returns>the icon</returns>
+    private string GetIcon(FileFlowsTask task)
+    {
+        return task.Type switch
+        {
+            TaskType.FileAdded => "fas fa-folder-plus",
+            TaskType.FileProcessed => "fas fa-thumbs-up",
+            TaskType.FileProcessing => "fas fa-running",
+            TaskType.FileProcessFailed => "fas fa-exclamation-circle",
+            TaskType.FileProcessSuccess => "fas fa-check-circle",
+            TaskType.FileFlowsServerUpdating => "fas fa-hourglass-half",
+            TaskType.FileFlowsServerUpdateAvailable => "fas fa-cloud-download-alt",
+            _ => "fas fa-clock"
+        };
+    }
+
+    /// <summary>
+    /// Gets the text for a task
+    /// </summary>
+    /// <param name="task">the task</param>
+    /// <returns>the text</returns>
+    private string GetScheduleText(FileFlowsTask task)
+        => task.Type switch
+        {
+            TaskType.FileAdded => lblFileAdded,
+            TaskType.FileProcessed => lblFileProcessed,
+            TaskType.FileProcessing => lblFileProcessing,
+            TaskType.FileProcessSuccess => lblFileProcessSuccess,
+            TaskType.FileProcessFailed => lblFileProcessFailed,
+            TaskType.FileFlowsServerUpdating => lblFileFlowsServerUpdating,
+            TaskType.FileFlowsServerUpdateAvailable => lblFileFlowsServerUpdateAvailable,
+            _ => GetSchedule(task)
+        };
 }

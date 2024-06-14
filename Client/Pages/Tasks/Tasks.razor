@@ -33,56 +33,38 @@
         </ToolBar>
 
         <Columns>
-            <FlowTableColumn TItem="FileFlowsTask">
+            <FlowTableColumn TItem="FileFlowsTask" NoHeight="true">
                 <Header>
                     @Globals.lblName
                 </Header>
                 <Cell Context="item">
-                    <span>@item.Name</span>
-                </Cell>
-            </FlowTableColumn>
-            <FlowTableColumn TItem="FileFlowsTask" Width="30rem" MobileWidth="0" >
-                <Header>
-                    Script
-                </Header>
-                <Cell Context="item">
-                    @if(Scripts.TryGetValue(item.Script, out var scriptName))
-                    {
-                        <span>@scriptName</span>                              
-                    }
-                    else
-                    {
-                        <span>Unknown</span>
-                    }
-                </Cell>
-            </FlowTableColumn>
-            <FlowTableColumn TItem="FileFlowsTask" Width="14rem" MobileWidth="0" >
-                <Header>
-                    @lblLastRun
-                </Header>
-                <Cell Context="item">
-                    @if (item.LastRun < new DateTime(2000, 1, 1))
-                    {
-                        <span>@lblNever</span>
-                    }
-                    else{
-                        <span>@FormatHelper.HumanizeDate(item.LastRun)</span>
-                    }
-                </Cell>
-            </FlowTableColumn>
-            <FlowTableColumn TItem="FileFlowsTask" Width="14rem" MobileWidth="0" >
-                <Header>
-                    @lblTrigger
-                </Header>
-                <Cell Context="item">
-                    @if (item.Type == TaskType.Schedule)
-                    {
-                        <span>@GetSchedule(item)</span>
-                    }
-                    else
-                    {
-                        <span>@item.Type.Humanize()</span>
-                    }
+                    <div class="table-item">
+                        <TableItemIcon Icon="@GetIcon(item)" DefaultIcon="fab fa-docker" />
+                        <div class="center">
+                            <span class="name"><span>@item.Name</span></span>
+                            <div class="info">
+                                @if (Scripts.TryGetValue(item.Script, out var scriptName))
+                                {
+                                    <IconValue Color="IconValueColor.Blue" Icon="fas fa-scroll" Value="@scriptName" />
+                                }
+                                else
+                                {
+                                    <IconValue Color="IconValueColor.Blue" Icon="fas fa-scroll" Value="Unknown" />
+                                }
+                                
+                                @if (item.LastRun > new DateTime(2000, 1, 1))
+                                {
+                                    <IconValue Color="IconValueColor.Pink" Icon="fas fa-calendar" Value="@FormatHelper.HumanizeDate(item.LastRun)" />
+                                }
+                            </div>
+                        </div>
+                        <div class="right">
+                            <span class="top-right">@GetScheduleText(item)</span>
+
+                            <FlowSwitch Value="@item.Enabled" ValueChanged="@(args => { item.Enabled = args; Enable(args, item); })"/>
+                        </div>
+                    </div>
+
                 </Cell>
             </FlowTableColumn>
         </Columns>
