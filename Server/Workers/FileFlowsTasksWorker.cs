@@ -155,11 +155,16 @@ public class FileFlowsTasksWorker: ServerWorker
         return result;
     }
     
+    /// <summary>
+    /// Triggers all tasks of a certain type to run
+    /// </summary>
+    /// <param name="type">the type of task</param>
+    /// <param name="variables">the variables to pass into the task</param>
     private void TriggerTaskType(TaskType type, Dictionary<string, object> variables)
     {
         if (LicenseHelper.IsLicensed(LicenseFlags.Tasks) == false)
             return;
-        var tasks = ServiceLoader.Load<TaskService>().GetAllAsync().Result.Where(x => x.Type == type).ToArray();
+        var tasks = ServiceLoader.Load<TaskService>().GetAllAsync().Result.Where(x => x.Type == type && x.Enabled).ToArray();
         foreach (var task in tasks)
         {
             _ = RunTask(task, variables);
