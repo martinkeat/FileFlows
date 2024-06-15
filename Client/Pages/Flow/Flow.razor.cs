@@ -120,6 +120,7 @@ public partial class Flow : ComponentBase, IDisposable
     /// </summary>
     protected Profile Profile { get; private set; }
 
+    /// <inheritdoc />
     protected override async Task OnInitializedAsync()
     {
         Profile = await ProfileService.Get();
@@ -152,8 +153,10 @@ public partial class Flow : ComponentBase, IDisposable
             }
             return true;
         };
+        
 
         NavigationService.RegisterNavigationCallback(NavigationCheck);
+        NavigationService.RegisterPostNavigateCallback(NavigateAwayCallback);
 
         HotKeyService.RegisterHotkey("FlowFilter", "/", callback: () =>
         {
@@ -168,6 +171,18 @@ public partial class Flow : ComponentBase, IDisposable
         HotKeyService.RegisterHotkey("FlowUndo", "Z", ctrl: true, shift: false, callback: () => Undo());
         HotKeyService.RegisterHotkey("FlowUndo", "Z", ctrl: true, shift: true, callback: () => Redo());
         _ = Init();
+    }
+
+    /// <summary>
+    /// Callback when the user navigates away, we need to dispose of the opened flows
+    /// </summary>
+    private async Task NavigateAwayCallback()
+    {
+        NavigationService.UnRegisterPostNavigateCallback(NavigateAwayCallback);
+        foreach (var flows in OpenedFlows)
+        {
+            await flows.ffFlow.dispose();
+        }
     }
 
     private void OnFlowElementsTabChange(int index)

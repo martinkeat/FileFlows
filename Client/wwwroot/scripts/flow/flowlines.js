@@ -378,7 +378,6 @@ class ffFlowLines {
         return false; // Click is not near any segment of the line
     }
     deleteConnection() {
-        console.log('delet connection');
         if (!this.ioSelectedConnection)
             return;
 
