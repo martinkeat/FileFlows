@@ -467,7 +467,7 @@ public partial class Flow : ComponentBase, IDisposable
             ? new()
             : ObjectCloner.Clone(flowElement.Fields).Select(x =>
             {
-                if (FieldsTabOpened)
+                // if (FieldsTabOpened)
                     x.CopyValue = $"{part.Uid}.{x.Name}";
                 return x;
             }).ToList();
