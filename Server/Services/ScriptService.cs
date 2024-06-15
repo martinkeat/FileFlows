@@ -372,4 +372,40 @@ public class ScriptService
             _sharedSemaphore.Release();
         }
     }
+
+    private List<Script>? FunctionTemplates;
+
+    /// <summary>
+    /// Gets the function tempaltes
+    /// </summary>
+    /// <returns>the function templates</returns>
+    public IEnumerable<Script> GetFunctionTemplates()
+    {
+        if(FunctionTemplates == null)
+            RescanFunctionTemplates();
+        return FunctionTemplates ?? [];
+    }
+
+    /// <summary>
+    /// Rescans the function templates
+    /// </summary>
+    public void RescanFunctionTemplates()
+    {
+        var dir = DirectoryHelper.ScriptsDirectoryFunction;
+        if (Directory.Exists(dir) == false)
+        {
+            Logger.Instance.WLog("Script Function Template Directory does not exist: " + dir);
+            return;
+        }
+
+        FunctionTemplates = new();
+        foreach (var js in new DirectoryInfo(dir).GetFiles("*.js", SearchOption.AllDirectories))
+        {
+            FunctionTemplates.Add(new ()
+            {
+                Name = js.Name[..^3], // remove the .js
+                Code = File.ReadAllText(js.FullName)
+            });
+        }
+    }
 }

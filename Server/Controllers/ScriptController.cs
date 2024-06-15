@@ -44,8 +44,8 @@ public class ScriptController : BaseController
     /// <returns>a list of script templates</returns>
     [HttpGet("templates")]
     [FileFlowsAuthorize(UserRole.Scripts | UserRole.Flows)]
-    public Task<IEnumerable<Script>> GetTemplates() 
-        => ServiceLoader.Load<ScriptService>().GetAllByType(ScriptType.Template);
+    public IEnumerable<Script> GetTemplates() 
+        => ServiceLoader.Load<ScriptService>().GetFunctionTemplates();
     
     /// <summary>
     /// Returns a list of scripts

@@ -25,10 +25,12 @@ public class RepositoryUpdaterWorker: ServerWorker
     /// <inheritdoc />
     protected override void ExecuteActual(Settings settings)
     {
-        var service = new RepositoryService();
+        var service = ServiceLoader.Load<RepositoryService>();
         service.Init().Wait();
         service.DownloadLibraryTemplates().Wait();
         service.DownloadFunctionScripts().Wait();
+
+        ServiceLoader.Load<ScriptService>().RescanFunctionTemplates();
 
         new RevisionCleaner(DirectoryHelper.TemplateDirectoryFlow).DeleteOldRevisions();
     }
