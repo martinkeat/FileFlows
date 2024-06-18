@@ -219,7 +219,6 @@ public class LibraryController : BaseController
                 if (json.StartsWith("//"))
                     json = string.Join("\n", json.Split('\n').Skip(1)); // remove the //path comment
                 json = TemplateHelper.ReplaceMediaWithHomeDirectory(json);
-                Logger.Instance.ILog($"Library Template '{tf.Name}':\n{json}");
                 // json = TemplateHelper.ReplaceWindowsPathIfWindows(json);
                 var jst = JsonSerializer.Deserialize<LibraryTemplate>(json, new JsonSerializerOptions
                 {
