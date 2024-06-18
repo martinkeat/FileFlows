@@ -35,11 +35,21 @@
   }
   
   .editor {
-    position:unset;
-    top:unset;
-    bottom:unset;
-    left:unset;
-    right:unset;
+    position: unset;
+    top: unset;
+    bottom: unset;
+    left: unset;
+    right: unset;
     height: 100%;
+
+    ::deep .input-label {
+      i.fa-clipboard {
+        display: none;
+      }
+
+      &:hover i.fa-clipboard {
+        display: unset;
+      }
+    }
   }
 }
