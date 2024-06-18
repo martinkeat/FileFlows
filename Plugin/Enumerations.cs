@@ -155,7 +155,11 @@ public enum FormInputType
     /// <summary>
     /// Icon Picker
     /// </summary>
-    IconPicker = 34
+    IconPicker = 34,
+    /// <summary>
+    /// Math Value
+    /// </summary>
+    MathValue = 35
 }
 
 
