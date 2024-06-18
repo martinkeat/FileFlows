@@ -38,11 +38,10 @@ public class DirectoryIterator : Node
     /// Gets or sets if all files or just the top directory files should be iterated over
     /// </summary>
     public bool Recursive { get; set; }
-
+    
     /// <inheritdoc />
     public override int Execute(NodeParameters args)
     {
-        
         if (string.IsNullOrWhiteSpace(Directory))
         {
             args.FailureReason = "No directory given";
@@ -213,7 +212,7 @@ public class DirectoryIterator : Node
             return Result<Node>.Fail("Failed to load Directory Iterator model from: " + json);
 
 
-        var flow = Program.Config.Flows.FirstOrDefault(x => x.Uid == orFlow.Uid);
+        var flow = runner.runInstance.Config.Flows.FirstOrDefault(x => x.Uid == orFlow.Uid);
         if (flow == null)
             return Result<Node>.Fail("Failed to locate Flow defined in the Directory Iterator flow element.");
         var directoryIterator = new DirectoryIterator()
@@ -246,7 +245,7 @@ public class DirectoryIterator : Node
         var newArgs = NewNodeParameters(args, file);
         
         int count = 0;
-        while (++count < Math.Min(Program.Config.MaxNodes, 250))
+        while (++count < Math.Min(Runner.runInstance.Config.MaxNodes, 250))
         {
             if (Runner.CancellationToken.IsCancellationRequested || Runner.Canceled)
                 return Result<int>.Fail("Flow was canceled");
@@ -257,7 +256,7 @@ public class DirectoryIterator : Node
             TemporaryLogger? loadFELogger = new(); // log this to a string, so we can include it in the flow element start
             try
             {
-                var lfeResult = FlowHelper.LoadFlowElement(loadFELogger, part, newArgs.Variables, Runner);
+                var lfeResult = new FlowHelper(Runner.runInstance).LoadFlowElement(loadFELogger, part, newArgs.Variables, Runner);
                 if(lfeResult.Failed(out var lfeError) || lfeResult.Value == null)
                 {
                     if(string.IsNullOrWhiteSpace(lfeError) == false)

@@ -11,17 +11,18 @@ public class PluginHelper
     /// <summary>
     /// Invokes a method in a plugin
     /// </summary>
+    /// <param name="runInstance">the run instance executing this</param>
     /// <param name="nodeParameters">the node parameters being used in the flow</param>
     /// <param name="plugin">the name of the plugin to invoke</param>
     /// <param name="method">the method in the plugin to invoke</param>
     /// <param name="args">the arguments to pass into the method</param>
     /// <returns>the result from the invoked method</returns>
-    internal static object PluginMethodInvoker(NodeParameters nodeParameters, string plugin, string method, object[] args)
+    internal static object PluginMethodInvoker(RunInstance runInstance, NodeParameters nodeParameters, string plugin, string method, object[] args)
     {
-        var dll = new DirectoryInfo(Program.WorkingDirectory).GetFiles(plugin + ".dll", SearchOption.AllDirectories).FirstOrDefault();
+        var dll = new DirectoryInfo(runInstance.WorkingDirectory).GetFiles(plugin + ".dll", SearchOption.AllDirectories).FirstOrDefault();
         if (dll == null)
         {
-            Program.Logger.ELog("Failed to locate plugin: " + plugin);
+            runInstance.Logger.ELog("Failed to locate plugin: " + plugin);
             return null;
         }
 
@@ -32,14 +33,14 @@ public class PluginHelper
             var type = assembly.GetTypes().FirstOrDefault(x => x.Name == "StaticMethods");
             if (type == null)
             {
-                Program.Logger.ELog("No static methods found in plugin: " + plugin);
+                runInstance.Logger.ELog("No static methods found in plugin: " + plugin);
                 return null;
             }
 
             var methodInfo = type.GetMethod(method, BindingFlags.Public | BindingFlags.Static);
             if (methodInfo == null)
             {
-                Program.Logger.ELog($"Method not found in plugin: {plugin}.{method}");
+                runInstance.Logger.ELog($"Method not found in plugin: {plugin}.{method}");
                 return null;
             }
 
@@ -51,7 +52,7 @@ public class PluginHelper
         }
         catch (Exception ex)
         {
-            Program.Logger.ELog($"Error executing plugin method [{plugin}.{method}]: " + ex.Message);
+            runInstance.Logger.ELog($"Error executing plugin method [{plugin}.{method}]: " + ex.Message);
             return null;
         }
     }

@@ -1,0 +1,19 @@
+@namespace FileFlows.Client.Components.Inputs
+@inherits Input<string>
+
+<InputWrapper Input="@this">
+    <div class="input-math-value-wrapper">
+        <div class="math-operation">
+            <select @onchange="OperationSelectionChanged">
+                @foreach (var operation in Operations)
+                {
+                    <option selected=@(Operation == operation) value="@operation">@operation</option>
+                }
+            </select>
+        </div>
+        <div class="math-value-text">
+            <input id=@Uid type="text" value="@TextValue" disabled=@(Disabled || ReadOnly ? string.Empty : null) 
+                                @onchange="ChangeValue" placeholder="@Placeholder" @onkeydown="OnKeyDown" />
+        </div>
+    </div>
+</InputWrapper>

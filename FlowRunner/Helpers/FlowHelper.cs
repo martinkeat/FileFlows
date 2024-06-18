@@ -3,6 +3,7 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using FileFlows.FlowRunner.RunnerFlowElements;
 using FileFlows.Plugin;
+using FileFlows.Plugin.Attributes;
 using FileFlows.Server;
 using FileFlows.Shared;
 using FileFlows.Shared.Models;
@@ -14,7 +15,21 @@ namespace FileFlows.FlowRunner.Helpers;
 /// </summary>
 public class FlowHelper
 {
-    private static readonly Dictionary<Guid, Flow> FlowInstances = new();
+    private readonly Dictionary<Guid, Flow> FlowInstances = new();
+
+    /// <summary>
+    /// the run instance running this
+    /// </summary>
+    private readonly RunInstance runInstance;
+
+    /// <summary>
+    /// Creates a new instance of the flow helper
+    /// </summary>
+    /// <param name="runInstance">the run instance running this</param>
+    public FlowHelper(RunInstance runInstance)
+    {
+        this.runInstance = runInstance;
+    }
     
     /// <summary>
     /// Creates the instance of the startup flow
@@ -22,7 +37,7 @@ public class FlowHelper
     /// <param name="isRemote">if this is a remote flow and the file needs downloading</param>
     /// <param name="initialFlow">the initial flow to run after startup</param>
     /// <returns>the startup flow</returns>
-    internal static Flow GetStartupFlow(bool isRemote, Flow initialFlow)
+    internal Flow GetStartupFlow(bool isRemote, Flow initialFlow)
     {
         FlowInstances[initialFlow.Uid] = initialFlow;
 
@@ -70,7 +85,7 @@ public class FlowHelper
         
         // connect the failure flow up to these so any sub flow will trigger a failure flow
         var failureFlow =
-            Program.Config.Flows?.FirstOrDefault(x => x is { Type: FlowType.Failure, Default: true });
+            runInstance.Config.Flows?.FirstOrDefault(x => x is { Type: FlowType.Failure, Default: true });
         if (failureFlow != null)
         {
             FlowPart fpFailure = new()
@@ -105,7 +120,7 @@ public class FlowHelper
     /// </summary>
     /// <param name="flow">the flow to create the sub flow part for</param>
     /// <returns>the flow part</returns>
-    internal static FlowPart CreateSubFlowPart(Flow flow)
+    internal FlowPart CreateSubFlowPart(Flow flow)
         => new ()
         {
             Uid = Guid.NewGuid(), // flow.Uid,
@@ -130,7 +145,7 @@ public class FlowHelper
     /// <param name="runner">the runner</param>
     /// <returns>the node instance</returns>
     /// <exception cref="Exception">If the flow element type cannot be found</exception>
-    internal static Result<Node> LoadFlowElement(ILogger logger, FlowPart part, Dictionary<string, object> variables, Runner runner)
+    internal Result<Node> LoadFlowElement(ILogger logger, FlowPart part, Dictionary<string, object> variables, Runner runner)
     {
         if (part.Type == FlowElementType.Script)
         {
@@ -140,7 +155,7 @@ public class FlowHelper
             if (Guid.TryParse(part.FlowElementUid[7..], out Guid scriptUid) == false) // 7 to remove "Scripts."
                 return Result<Node>.Fail("Failed to parse script UID: " + part.FlowElementUid[7..]);
 
-            var flowScript = Program.Config.FlowScripts.FirstOrDefault(x => x.Uid == scriptUid);
+            var flowScript = runInstance.Config.FlowScripts.FirstOrDefault(x => x.Uid == scriptUid);
             if (flowScript == null)
                 return Result<Node>.Fail("Script not found");
 
@@ -176,7 +191,7 @@ public class FlowHelper
                 return Result<Node>.Fail("Failed to load GotoFlow model from: " + json);
 
 
-            var gotoFlow = Program.Config.Flows.FirstOrDefault(x => x.Uid == orFlow.Uid);
+            var gotoFlow = runInstance.Config.Flows.FirstOrDefault(x => x.Uid == orFlow.Uid);
             if(gotoFlow == null)
                 return Result<Node>.Fail("Failed to locate Flow defined in the GotoFlow flow element.");
 
@@ -198,7 +213,7 @@ public class FlowHelper
         if (part.Type == FlowElementType.SubFlow)
         {
             string sUid = part.FlowElementUid[8..]; // remove SubFlow:
-            var subFlow = Program.Config.Flows.FirstOrDefault(x => x.Uid.ToString() == sUid);
+            var subFlow = runInstance.Config.Flows.FirstOrDefault(x => x.Uid.ToString() == sUid);
             if (subFlow == null)
                 return Result<Node>.Fail($"Failed to locate sub flow '{sUid}'.");
             // add all the fields into the variables 
@@ -245,9 +260,16 @@ public class FlowHelper
     /// <param name="flowElementType">the flow element type</param>
     /// <param name="variables">the variables to load</param>
     /// <returns>an instance of the flow element</returns>
-    private static Node CreateFlowElementInstance(ILogger logger, FlowPart part, Type flowElementType, Dictionary<string, object> variables)
+    private Node CreateFlowElementInstance(ILogger logger, FlowPart part, Type flowElementType, Dictionary<string, object> variables)
     {
-        var node = Activator.CreateInstance(flowElementType);
+        object? node;
+        if (flowElementType == typeof(Startup))
+            node = new Startup(runInstance);
+        else if (flowElementType == typeof(FileDownloader))
+            node = new FileDownloader(runInstance);
+        else
+            node = Activator.CreateInstance(flowElementType);
+        
         if(node == null)
             return default;
 
@@ -274,14 +296,25 @@ public class FlowHelper
                     if (dict[k] == null)
                         continue;
 
-                    var value = Converter.ConvertObject(prop.PropertyType, dict[k]);
+                    object  value;
+                    if (dict[k] is JsonElement je && je.ValueKind == JsonValueKind.Number &&
+                        prop.PropertyType == typeof(string))
+                    {
+                        // FF-1591: Video Has Stream.Channels went from int to string, others may do something similar
+                        if (prop.GetCustomAttribute<MathValueAttribute>() != null)
+                            value = "=" + je;
+                        else
+                            value = je.ToString();
+                    }
+                    else 
+                        value = Converter.ConvertObject(prop.PropertyType, dict[k]);
                     if (value != null)
                         prop.SetValue(node, value);
                 }
                 catch (Exception ex)
                 {
-                    Program.Logger?.ELog("Failed setting property: " + ex.Message + Environment.NewLine + ex.StackTrace);
-                    Program.Logger?.ELog("Type: " + flowElementType.Name + ", Property: " + k);
+                    runInstance.Logger?.ELog("Failed setting property: " + ex.Message + Environment.NewLine + ex.StackTrace);
+                    runInstance.Logger?.ELog("Type: " + flowElementType.Name + ", Property: " + k);
                 }
             }
         }
@@ -346,9 +379,9 @@ public class FlowHelper
     /// </summary>
     /// <param name="scriptUid">the UID of the script</param>
     /// <returns>the code of the script</returns>
-    private static string GetScriptCode(Guid scriptUid)
+    private string GetScriptCode(Guid scriptUid)
     {
-        var file = new FileInfo(Path.Combine(Program.ConfigDirectory, "Scripts", "Flow", scriptUid + ".js"));
+        var file = new FileInfo(Path.Combine(runInstance.ConfigDirectory, "Scripts", "Flow", scriptUid + ".js"));
         if (file.Exists == false)
             return string.Empty;
         return File.ReadAllText(file.FullName);
@@ -360,7 +393,7 @@ public class FlowHelper
     /// </summary>
     /// <param name="fullName">the full name of the flow element</param>
     /// <returns>the type if known otherwise null</returns>
-    internal static Type? GetFlowElementType(string fullName)
+    internal Type? GetFlowElementType(string fullName)
     {
         // special checks for our internal flow elements
         if (fullName.EndsWith("." + nameof(FileDownloader)))
@@ -374,7 +407,7 @@ public class FlowHelper
         if (fullName.EndsWith(nameof(SubFlowOutput)) || fullName.StartsWith(nameof(SubFlowOutput)))
             return typeof(SubFlowOutput);
         
-        foreach (var dll in new DirectoryInfo(Program.WorkingDirectory).GetFiles("*.dll", SearchOption.AllDirectories))
+        foreach (var dll in new DirectoryInfo(runInstance.WorkingDirectory).GetFiles("*.dll", SearchOption.AllDirectories))
         {
             try
             {
@@ -387,7 +420,7 @@ public class FlowHelper
             }
             catch (Exception ex)
             {
-                Program.Logger.WLog("Failed to load assembly: " + dll.FullName + " > " + ex.Message);
+                runInstance.Logger.WLog("Failed to load assembly: " + dll.FullName + " > " + ex.Message);
             }
         }
         return null;

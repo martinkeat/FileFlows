@@ -11,27 +11,29 @@ public class RunPreparationHelper
     /// <summary>
     /// Downloads the scripts being used
     /// </summary>
-    internal static void DownloadScripts()
+    /// <param name="runInstance">the run instance running this</param>
+    internal static void DownloadScripts(RunInstance runInstance)
     {
-        if (Directory.Exists(Program.WorkingDirectory) == false)
-            Directory.CreateDirectory(Program.WorkingDirectory);
+        if (Directory.Exists(runInstance.WorkingDirectory) == false)
+            Directory.CreateDirectory(runInstance.WorkingDirectory);
         
         DirectoryHelper.CopyDirectory(
-            Path.Combine(Program.ConfigDirectory, "Scripts"),
-            Path.Combine(Program.WorkingDirectory, "Scripts"));
+            Path.Combine(runInstance.ConfigDirectory, "Scripts"),
+            Path.Combine(runInstance.WorkingDirectory, "Scripts"));
     }
     
     /// <summary>
     /// Downloads the plugins being used
     /// </summary>
-    internal static void DownloadPlugins()
+    /// <param name="runInstance">the run instance running this</param>
+    internal static void DownloadPlugins(RunInstance runInstance)
     {
-        var dir = Path.Combine(Program.ConfigDirectory, "Plugins");
+        var dir = Path.Combine(runInstance.ConfigDirectory, "Plugins");
         if (Directory.Exists(dir) == false)
             return;
         foreach (var sub in new DirectoryInfo(dir).GetDirectories())
         {
-            string dest = Path.Combine(Program.WorkingDirectory, sub.Name);
+            string dest = Path.Combine(runInstance.WorkingDirectory, sub.Name);
             DirectoryHelper.CopyDirectory(sub.FullName, dest);
         }
     }

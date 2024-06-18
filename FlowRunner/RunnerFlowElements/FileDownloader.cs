@@ -11,6 +11,20 @@ namespace FileFlows.FlowRunner.RunnerFlowElements;
 public class FileDownloader : Node
 {
     /// <summary>
+    /// The run instance running this
+    /// </summary>
+    private readonly RunInstance runInstance;
+    
+    /// <summary>
+    /// Creates a new instance of the file downloader
+    /// </summary>
+    /// <param name="runInstance">the run instance running this</param>
+    public FileDownloader(RunInstance runInstance)
+    {
+        this.runInstance = runInstance;
+    }
+    
+    /// <summary>
     /// Executes the flow element
     /// </summary>
     /// <param name="args">the node parameters</param>
@@ -19,7 +33,7 @@ public class FileDownloader : Node
     {
         string dest = Path.Combine(args.TempPath, new FileInfo(args.LibraryFileName).Name);
         var downloader = new ServerShared.FileServices.FileDownloader(args.Logger, RemoteService.ServiceBaseUrl, 
-            Program.Uid, RemoteService.AccessToken, RemoteService.NodeUid);
+            runInstance.Uid, RemoteService.AccessToken, RemoteService.NodeUid);
         downloader.OnProgress += (percent, eta, speed) =>
         {
             args.PartPercentageUpdate(percent);

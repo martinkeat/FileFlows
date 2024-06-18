@@ -18,37 +18,63 @@ public class MathHelper
         return new[] { "<=", "<", ">", ">=", "==", "=" }.Any(comparison.StartsWith);
     }
     
-    
     /// <summary>
     /// Tests if a math operation is true
     /// </summary>
-    /// <param name="value">The value to apply the operation to.</param>
     /// <param name="operation">The operation string representing the mathematical operation.</param>
+    /// <param name="value">The value to apply the operation to.</param>
     /// <returns>True if the mathematical operation is successful, otherwise false.</returns>
-    public static bool IsTrue(string value, string operation)
+    public static bool IsTrue(string operation, string value)
+        => IsTrue(operation, Convert.ToDouble(value));
+    
+    /// <summary>
+    /// Tests if a math operation is false
+    /// </summary>
+    /// <param name="operation">The operation string representing the mathematical operation.</param>
+    /// <param name="value">The value to apply the operation to.</param>
+    /// <returns>True if the mathematical operation is not successful, otherwise false.</returns>
+    public static bool IsFalse(string operation, string value)
+        => IsTrue(operation, Convert.ToDouble(value)) == false;
+
+    /// <summary>
+    /// Tests if a math operation is false
+    /// </summary>
+    /// <param name="operation">The operation string representing the mathematical operation.</param>
+    /// <param name="value">The value to apply the operation to.</param>
+    /// <returns>True if the mathematical operation is not successful, otherwise false.</returns>
+    public static bool IsFalse(string operation, double value)
+        => IsTrue(operation, value) == false;
+
+    /// <summary>
+    /// Tests if a math operation is true
+    /// </summary>
+    /// <param name="operation">The operation string representing the mathematical operation.</param>
+    /// <param name="value">The value to apply the operation to.</param>
+    /// <returns>True if the mathematical operation is successful, otherwise false.</returns>
+    public static bool IsTrue(string operation, double value)
     {
         // This is a basic example; you may need to handle different operators
         switch (operation[..2])
         {
             case "<=":
-                return Convert.ToDouble(value) <= Convert.ToDouble(AdjustComparisonValue(operation[2..].Trim()));
+                return value <= Convert.ToDouble(AdjustComparisonValue(operation[2..].Trim()));
             case ">=":
-                return Convert.ToDouble(value) >= Convert.ToDouble(AdjustComparisonValue(operation[2..].Trim()));
+                return value >= Convert.ToDouble(AdjustComparisonValue(operation[2..].Trim()));
             case "==":
-                return Math.Abs(Convert.ToDouble(value) - Convert.ToDouble(AdjustComparisonValue(operation[2..].Trim()))) < 0.05f;
+                return Math.Abs(value - Convert.ToDouble(AdjustComparisonValue(operation[2..].Trim()))) < 0.05f;
             case "!=":
             case "<>":
-                return Math.Abs(Convert.ToDouble(value) - Convert.ToDouble(AdjustComparisonValue(operation[2..].Trim()))) > 0.05f;
+                return Math.Abs(value - Convert.ToDouble(AdjustComparisonValue(operation[2..].Trim()))) > 0.05f;
         }
 
         switch (operation[..1])
         {
             case "<":
-                return Convert.ToDouble(value) < Convert.ToDouble(AdjustComparisonValue(operation[1..].Trim()));
+                return value < Convert.ToDouble(AdjustComparisonValue(operation[1..].Trim()));
             case ">":
-                return Convert.ToDouble(value) > Convert.ToDouble(AdjustComparisonValue(operation[1..].Trim()));
+                return value > Convert.ToDouble(AdjustComparisonValue(operation[1..].Trim()));
             case "=":
-                return Math.Abs(Convert.ToDouble(value) - Convert.ToDouble(AdjustComparisonValue(operation[1..].Trim()))) < 0.05f;
+                return Math.Abs(value - Convert.ToDouble(AdjustComparisonValue(operation[1..].Trim()))) < 0.05f;
         }
 
         return false;

@@ -97,7 +97,7 @@ public class ExecuteFlow : Node
 
 
         int count = 0;
-        while(++count < Math.Min(Program.Config.MaxNodes * 2, 300))
+        while(++count < Math.Min(Runner.runInstance.Config.MaxNodes * 2, 300))
         {
             if (Runner.CancellationToken.IsCancellationRequested || Runner.Canceled)
             {
@@ -115,7 +115,7 @@ public class ExecuteFlow : Node
             TemporaryLogger? loadFELogger = new(); // log this to a string, so we can include it in the flow element start
             try
             {
-                var lfeResult = FlowHelper.LoadFlowElement(loadFELogger, part, args.Variables, Runner);
+                var lfeResult = new FlowHelper(Runner.runInstance).LoadFlowElement(loadFELogger, part, args.Variables, Runner);
                 if(lfeResult.Failed(out var lfeError) || lfeResult.Value == null)
                 {
                     if(string.IsNullOrWhiteSpace(lfeError) == false)
@@ -234,7 +234,7 @@ public class ExecuteFlow : Node
                 
                 args.Result = NodeResult.Failure;
                 args.Logger?.ELog("Execution error: " + ex.Message + Environment.NewLine + ex.StackTrace);
-                Program.Logger?.ELog("Execution error: " + ex.Message + Environment.NewLine + ex.StackTrace);
+                Runner.runInstance.Logger?.ELog("Execution error: " + ex.Message + Environment.NewLine + ex.StackTrace);
                 if(currentFlowElement != null)
                     RecordFlowElementFinish(args, nodeStartTime, RunnerCodes.Failure, part, currentFlowElement);
                 return RunnerCodes.Failure;
@@ -321,7 +321,7 @@ public class ExecuteFlow : Node
             // this is the input for a Failure Flow
             // in this case we want to record the name of the failure flow as the feName
             var failureFlow =
-                Program.Config.Flows?.FirstOrDefault(x => x is { Type: FlowType.Failure, Default: true });
+                Runner.runInstance.Config.Flows?.FirstOrDefault(x => x is { Type: FlowType.Failure, Default: true });
             if (failureFlow != null)
                 feName = failureFlow.Name;
             // so the failure elements appear 'beneath this one'

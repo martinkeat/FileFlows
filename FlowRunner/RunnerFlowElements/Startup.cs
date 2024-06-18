@@ -13,6 +13,20 @@ namespace FileFlows.FlowRunner.RunnerFlowElements;
 public class Startup : Node
 {
     /// <summary>
+    /// The run instance running this
+    /// </summary>
+    private readonly RunInstance runInstance;
+    
+    /// <summary>
+    /// Creates a new instance of the startup
+    /// </summary>
+    /// <param name="runInstance">the run instance running this</param>
+    public Startup(RunInstance runInstance)
+    {
+        this.runInstance = runInstance;
+    }
+    
+    /// <summary>
     /// Executes the startup of a flow
     /// </summary>
     /// <param name="args">the node parameters</param>
@@ -22,11 +36,10 @@ public class Startup : Node
         // now we can initialize the file safely
         args.InitFile(args.WorkingFile);
         
-        LogHeader(args, Program.ConfigDirectory, Program.ProcessingNode);
-        Helpers.RunPreparationHelper.DownloadPlugins();
-        Helpers.RunPreparationHelper.DownloadScripts();
+        LogHeader(args, runInstance.ConfigDirectory, runInstance.ProcessingNode);
+        Helpers.RunPreparationHelper.DownloadPlugins(runInstance);
+        Helpers.RunPreparationHelper.DownloadScripts(runInstance);
         
-
         return 1;
     }
     

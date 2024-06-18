@@ -8,10 +8,11 @@ public class SystemHelper
 {
     System.Timers.Timer StayAwakeTimer;
     readonly bool IsWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
-    readonly bool IsLinux = RuntimeInformation.IsOSPlatform(OSPlatform.Linux); 
+    private readonly RunInstance runInstance;
     
-    public SystemHelper()
+    public SystemHelper(RunInstance runInstance)
     {
+        this.runInstance = runInstance;
         this.StayAwakeTimer = new  System.Timers.Timer();
         this.StayAwakeTimer.AutoReset = true;
         this.StayAwakeTimer.Interval = 30_000;
@@ -21,7 +22,7 @@ public class SystemHelper
 
     private void StayAwakeTimerOnElapsed(object? sender, ElapsedEventArgs e)
     {
-        Program.Logger?.DLog("Telling Windows to stay awake");
+        runInstance.Logger?.DLog("Telling Windows to stay awake");
         NativeMethods.SetThreadExecutionState(EXECUTION_STATE.ES_SYSTEM_REQUIRED);
     }
 

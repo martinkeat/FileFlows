@@ -21,6 +21,7 @@ namespace FileFlows.FlowRunner;
 /// </summary>
 public class Runner
 {
+    internal readonly RunInstance runInstance;
     internal FlowExecutorInfo Info { get; private set; }
     private Flow Flow;
     private ProcessingNode Node;
@@ -46,12 +47,14 @@ public class Runner
     /// <summary>
     /// Creates an instance of a Runner
     /// </summary>
-    /// <param name="info">The execution info that is be run</param>
+    /// <param name="runInstance">the run intance running this</param>
+    /// <param name="info">The execution info that is being run</param>
     /// <param name="flow">The flow that is being executed</param>
     /// <param name="node">The processing node that is executing this flow</param>
     /// <param name="workingDir">the temporary working directory to use</param>
-    public Runner(FlowExecutorInfo info, Flow flow, ProcessingNode node, string workingDir)
+    public Runner(RunInstance runInstance, FlowExecutorInfo info, Flow flow, ProcessingNode node, string workingDir)
     {
+        this.runInstance = runInstance;
         this.Info = info;
         this.Flow = flow;
         this.Node = node;
@@ -106,7 +109,7 @@ public class Runner
     /// </summary>
     public (bool Success, bool KeepFiles) Run(FlowLogger logger)
     {
-        var systemHelper = new SystemHelper();
+        var systemHelper = new SystemHelper(runInstance);
         bool success = false;
         try
         {
@@ -117,7 +120,7 @@ public class Runner
                 var updated = service.Start(Info).Result;
                 if (updated == null)
                     return (false, false); // failed to update
-                var communicator = FlowRunnerCommunicator.Load(Info.LibraryFile.Uid);
+                var communicator = FlowRunnerCommunicator.Load(runInstance, Info.LibraryFile.Uid);
                 communicator.OnCancel += Communicator_OnCancel;
                 logger.SetCommunicator(communicator);
                 bool finished = false;
@@ -128,7 +131,7 @@ public class Runner
                     {
                         if (finished == false)
                         {
-                            bool success = await communicator.Hello(Program.Uid, this.Info, nodeParameters);
+                            bool success = await communicator.Hello(runInstance.Uid, this.Info, nodeParameters);
                             if (success == false)
                             {
                                 if (lastSuccessHello < DateTime.UtcNow.AddMinutes(-2))
@@ -176,7 +179,7 @@ public class Runner
             }
             catch (Exception ex)
             {
-                Program.Logger.ELog("Failure in runner: " + ex.Message + Environment.NewLine + ex.StackTrace);
+                runInstance.Logger.ELog("Failure in runner: " + ex.Message + Environment.NewLine + ex.StackTrace);
             }
 
             try
@@ -186,7 +189,7 @@ public class Runner
             }
             catch (Exception ex)
             {
-                Program.Logger.ELog("Failed 'Finishing' runner: " + ex.Message + Environment.NewLine + ex.StackTrace);
+                runInstance.Logger.ELog("Failed 'Finishing' runner: " + ex.Message + Environment.NewLine + ex.StackTrace);
             }
         }
         finally
@@ -296,7 +299,7 @@ public class Runner
             }
             await Task.Delay(30_000);
         } while (DateTime.UtcNow.Subtract(start) < new TimeSpan(0, 10, 0));
-        Program.Logger?.ELog("Failed to inform server of flow completion");
+        runInstance.Logger?.ELog("Failed to inform server of flow completion");
     }
 
     /// <summary>
@@ -310,7 +313,7 @@ public class Runner
         if (dontCountTowardsTotal == false)
             ++ExecutedStepsCountedTowardsTotal;
         
-        if (ExecutedStepsCountedTowardsTotal > Program.Config.MaxNodes)
+        if (ExecutedStepsCountedTowardsTotal > runInstance.Config.MaxNodes)
              return Result<bool>.Fail("Exceeded maximum number of flow elements to process");
 
         // remove old additional info
@@ -331,7 +334,7 @@ public class Runner
         catch (Exception) 
         { 
             // silently fail, not a big deal, just incremental progress update
-            Program.Logger.WLog("Failed to record step change: " + ExecutedSteps + " : " + partName);
+            runInstance.Logger.WLog("Failed to record step change: " + ExecutedSteps + " : " + partName);
         }
 
         return true;
@@ -420,13 +423,13 @@ public class Runner
             {
                 CalculateFinalSize();
                 SendUpdate(Info, waitMilliseconds: 1000).Wait();
-                Program.Logger?.DLog("Set final status to: " + status);
+                runInstance.Logger?.DLog("Set final status to: " + status);
                 return;
             }
             catch (Exception ex)
             {
                 // this is more of a problem, its not ideal, so we do try again
-                Program.Logger?.WLog("Failed to set status on server: " + ex.Message);
+                runInstance.Logger?.WLog("Failed to set status on server: " + ex.Message);
             }
             Thread.Sleep(5_000);
         } while (DateTime.UtcNow.Subtract(start) < new TimeSpan(0, 3, 0));
@@ -442,7 +445,7 @@ public class Runner
             Info.IsDirectory, Info.LibraryPath, fileService: FileService.Instance)
         {
             Node = new () { Uid = Node.Uid, Name = Node.Name, Type = Node.Address },
-            Enterprise = Program.Config.Enterprise,
+            Enterprise = runInstance.Config.Enterprise,
             LibraryFileName = Info.LibraryFile.Name,
             IsRemote = Info.IsRemote,
             LogImageActual = logger.Image,
@@ -459,19 +462,19 @@ public class Runner
         nodeParameters.HasPluginActual = (name) =>
         {
             var normalizedSearchName = Regex.Replace(name.ToLower(), "[^a-z]", string.Empty);
-            return Program.Config.PluginNames?.Any(x =>
+            return runInstance.Config.PluginNames?.Any(x =>
                 Regex.Replace(x.ToLower(), "[^a-z]", string.Empty) == normalizedSearchName) == true;
         };
         nodeParameters.UploadFile = (string source, string destination) =>
         {
-            var task = new FileUploader(logger, RemoteService.ServiceBaseUrl, Program.Uid, RemoteService.AccessToken, RemoteService.NodeUid)
+            var task = new FileUploader(logger, RemoteService.ServiceBaseUrl, runInstance.Uid, RemoteService.AccessToken, RemoteService.NodeUid)
                 .UploadFile(source, destination);
             task.Wait();
             return task.Result;
         };
         nodeParameters.DeleteRemote = (path, ifEmpty, includePatterns) =>
         {
-            var task = new FileUploader(logger, RemoteService.ServiceBaseUrl, Program.Uid, RemoteService.AccessToken, RemoteService.NodeUid)
+            var task = new FileUploader(logger, RemoteService.ServiceBaseUrl, runInstance.Uid, RemoteService.AccessToken, RemoteService.NodeUid)
                 .DeleteRemote(path, ifEmpty, includePatterns);
             task.Wait();
             return task.Result.Success;
@@ -491,12 +494,12 @@ public class Runner
         nodeParameters.PathUnMapper = (path) => Node.UnMap(path);
         nodeParameters.ScriptExecutor = new ScriptExecutor()
         {
-            SharedDirectory = Path.Combine(Program.ConfigDirectory, "Scripts", "Shared"),
+            SharedDirectory = Path.Combine(runInstance.ConfigDirectory, "Scripts", "Shared"),
             FileFlowsUrl = RemoteService.ServiceBaseUrl,
             PluginMethodInvoker = (plugin, method, methodArgs) 
-                => Helpers.PluginHelper.PluginMethodInvoker(nodeParameters, plugin, method, methodArgs)
+                => Helpers.PluginHelper.PluginMethodInvoker(runInstance, nodeParameters, plugin, method, methodArgs)
         };
-        foreach (var variable in Program.Config.Variables)
+        foreach (var variable in runInstance.Config.Variables)
         {
             object value = variable.Value;
             if (value == null)
@@ -542,7 +545,7 @@ public class Runner
 
             if (string.IsNullOrEmpty(variable))
             {
-                variable = Program.Config.Variables.Where(x => string.Equals(x.Key, name, StringComparison.InvariantCultureIgnoreCase))
+                variable = runInstance.Config.Variables.Where(x => string.Equals(x.Key, name, StringComparison.InvariantCultureIgnoreCase))
                     .Select(x => x.Value).FirstOrDefault();
                 if (string.IsNullOrWhiteSpace(variable))
                     return variable;
@@ -560,7 +563,7 @@ public class Runner
         nodeParameters.GetPluginSettingsJson = (pluginSettingsType) =>
         {
             string? json = null;
-            Program.Config.PluginSettings?.TryGetValue(pluginSettingsType, out json);
+            runInstance.Config.PluginSettings?.TryGetValue(pluginSettingsType, out json);
             return json;
         };
         var statService = ServiceLoader.Load<IStatisticService>();;
@@ -570,7 +573,7 @@ public class Runner
             _ = statService.RecordAverage(name, value);
         nodeParameters.AdditionalInfoRecorder = RecordAdditionalInfo;
 
-        var flow = FlowHelper.GetStartupFlow(Info.IsRemote, Flow);
+        var flow = new FlowHelper(runInstance).GetStartupFlow(Info.IsRemote, Flow);
 
         var flowExecutor = new ExecuteFlow()
         {

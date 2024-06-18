@@ -49,16 +49,22 @@ public class FlowRunnerCommunicator : IFlowRunnerCommunicator
     /// </summary>
     public event Cancel OnCancel;
 
+    /// <summary>
+    /// The run instance running this
+    /// </summary>
+    private readonly RunInstance runInstance;
 
     /// <summary>
     /// Creates an instance of the flow runner communicator
     /// </summary>
+    /// <param name="runInstance">the run instance running this</param>
     /// <param name="libraryFileUid">the UID of the library file being executed</param>
     /// <exception cref="Exception">throws an exception if cannot connect to the server</exception>
-    public FlowRunnerCommunicator(Guid libraryFileUid)
+    public FlowRunnerCommunicator(RunInstance runInstance, Guid libraryFileUid)
     {
+        this.runInstance = runInstance;
         this.LibraryFileUid = libraryFileUid;
-        Program.LogInfo("SignalrUrl: " + SignalrUrl);
+        runInstance.LogInfo("SignalrUrl: " + SignalrUrl);
         connection = new HubConnectionBuilder()
                             .WithUrl(new Uri(SignalrUrl))
                             .WithAutomaticReconnect()
@@ -94,7 +100,7 @@ public class FlowRunnerCommunicator : IFlowRunnerCommunicator
     /// <returns>a completed task</returns>
     private Task Connection_Closed(Exception? arg)
     {
-        Program.LogInfo("Connection_Closed");
+        runInstance.LogInfo("Connection_Closed");
         return Task.CompletedTask;
     }
 
@@ -104,7 +110,7 @@ public class FlowRunnerCommunicator : IFlowRunnerCommunicator
     /// <param name="obj">the connection object</param>
     private void Connection_Received(string obj)
     {
-        Program.LogInfo("Connection_Received");
+        runInstance.LogInfo("Connection_Received");
     }
 
     /// <summary>
@@ -169,11 +175,12 @@ public class FlowRunnerCommunicator : IFlowRunnerCommunicator
     /// <summary>
     /// Loads an instance of the FlowRunnerCommunicator
     /// </summary>
+    /// <param name="runInstance">The run instance running this</param>
     /// <param name="libraryFileUid">the UID of the library file being processed</param>
     /// <returns>an instance of the FlowRunnerCommunicator</returns>
-    public static FlowRunnerCommunicator Load(Guid libraryFileUid)
+    public static FlowRunnerCommunicator Load(RunInstance runInstance, Guid libraryFileUid)
     {
-        return new FlowRunnerCommunicator(libraryFileUid);
+        return new FlowRunnerCommunicator(runInstance, libraryFileUid);
 
     }
 }

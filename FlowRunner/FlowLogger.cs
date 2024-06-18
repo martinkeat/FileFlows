@@ -31,6 +31,27 @@ public class FlowLogger : ILogger
     public void ELog(params object[] args) => Log(LogType.Error, args);
 
     /// <summary>
+    /// The run instance running this
+    /// </summary>
+    private readonly RunInstance runInstance;
+
+    /// <summary>
+    /// The communicator used to send messages to the server
+    /// </summary>
+    IFlowRunnerCommunicator? Communicator;
+    
+    /// <summary>
+    /// Constructs a new instance of the flow logger
+    /// </summary>
+    /// <param name="runInstance">the run instance running this</param>
+    /// <param name="communicator">a communicator to report messages to the FileFlows server</param>
+    public FlowLogger(RunInstance runInstance, IFlowRunnerCommunicator communicator)
+    {
+        this.runInstance = runInstance;
+        this.Communicator = communicator;
+    }
+
+    /// <summary>
     /// Logs an image
     /// </summary>
     /// <param name="path">the path to the image</param>
@@ -119,17 +140,6 @@ public class FlowLogger : ILogger
         Debug
     }
 
-    IFlowRunnerCommunicator? Communicator;
-    
-    /// <summary>
-    /// Creates an instance of the flow logger
-    /// </summary>
-    /// <param name="communicator">a communicator to report messages to the FileFlows server</param>
-    public FlowLogger(IFlowRunnerCommunicator communicator)
-    {
-        this.Communicator = communicator;
-    }
-
     public void SetCommunicator(IFlowRunnerCommunicator communicator)
     {
         this.Communicator = communicator;
@@ -193,7 +203,7 @@ public class FlowLogger : ILogger
         try
         {
             if(Communicator != null)
-                await Communicator.LogMessage(Program.Uid, messages);
+                await Communicator.LogMessage(runInstance.Uid, messages);
         }
         finally
         {

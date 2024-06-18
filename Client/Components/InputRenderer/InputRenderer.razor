@@ -120,6 +120,13 @@
                          OnSubmit=@OnSubmit OnClose=@OnClose Help=@field.HelpText  />
         }
             break;
+        case FormInputType.MathValue:
+        {
+            var value = GetValue<string>(field.Name);
+            <InputMathValue Field=@field Label="@label" Value="@value" ReadOnly=@readOnly ValueChanged="@(x => UpdateValue(field, x))" 
+                                Validators=@field.Validators Placeholder="@field.Placeholder" HideLabel=@hideLabel OnSubmit=@OnSubmit OnClose=@OnClose Help=@field.HelpText />
+        }
+            break;
         case FormInputType.NumberPercent:
         {
             var value = GetValue<NumberPercent>(field.Name) ?? new ();
