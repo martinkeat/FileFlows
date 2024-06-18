@@ -37,6 +37,8 @@ public class TemplateHelper
 
       string home = DirectoryHelper.GetUsersHomeDirectory() + Path.DirectorySeparatorChar;
 
+      home = home.Replace("\\", "\\\\");
+
       // Define the replacement function using MatchEvaluator
       string result = Regex.Replace(template, pattern, match =>
       {

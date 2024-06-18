@@ -65,7 +65,6 @@ public class DirectoryHelper
                 if (string.IsNullOrEmpty(dllDir))
                     throw new Exception("Failed to find DLL directory");
                 _BaseDirectory = new DirectoryInfo(dllDir).Parent.FullName;
-                Logger.Instance?.ILog("Base Directory: " + _BaseDirectory);
             }
             return _BaseDirectory;
         }
