@@ -209,17 +209,18 @@ public class LibraryController : BaseController
     {
         SortedDictionary<string, List<Library>> templates = new(StringComparer.OrdinalIgnoreCase);
         var lstGeneral = new List<Library>();
+        Logger.Instance.ILog("Library Templates Directory: " + DirectoryHelper.TemplateDirectoryLibrary);
         string generalGroup = Translater.Instant("Templates.Libraries.Groups.General");
         foreach (var tf in GetTemplateFiles())
         {
             try
             {
                 string json = System.IO.File.ReadAllText(tf.FullName);
-                if(json.StartsWith("//"))
+                if (json.StartsWith("//"))
                     json = string.Join("\n", json.Split('\n').Skip(1)); // remove the //path comment
                 json = TemplateHelper.ReplaceMediaWithHomeDirectory(json);
                 // json = TemplateHelper.ReplaceWindowsPathIfWindows(json);
-                var jst =JsonSerializer.Deserialize<LibraryTemplate>(json, new JsonSerializerOptions
+                var jst = JsonSerializer.Deserialize<LibraryTemplate>(json, new JsonSerializerOptions
                 {
                     AllowTrailingCommas = true,
                     PropertyNameCaseInsensitive = true
@@ -228,17 +229,17 @@ public class LibraryController : BaseController
                 group = Translater.Instant("Templates.Groups." + CleanForJsonKey(group));
                 if (string.IsNullOrWhiteSpace(group) || group == CleanForJsonKey(jst.Group))
                     group = jst.Group ?? string.Empty;
-                
+
                 string name = jst.Name;
                 string prefix = "Templates.Libraries." + CleanForJsonKey(jst.Name) + ".";
-                string translateName = Translater.Instant( prefix + "Name");
+                string translateName = Translater.Instant(prefix + "Name");
                 if (string.IsNullOrWhiteSpace(translateName) == false && translateName != "Name")
                     name = translateName;
                 string description = jst.Description;
                 string translateDescription = Translater.Instant(prefix + "Description");
                 if (string.IsNullOrWhiteSpace(translateDescription) == false && translateDescription != "Description")
                     description = translateDescription;
-                    
+
                 var library = new Library
                 {
                     Enabled = true,
@@ -263,7 +264,10 @@ public class LibraryController : BaseController
                     templates[group].Add(library);
                 }
             }
-            catch (Exception) { }
+            catch (Exception ex)
+            {
+                Logger.Instance.WLog($"Error parsing library template '{tf.FullName}': {ex.Message}");
+            }
         }
 
         var dict = new Dictionary<string, List<Library>>();
