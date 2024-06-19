@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Text.RegularExpressions;
 
 namespace FileFlows.Plugin.Helpers;
 
@@ -14,6 +15,11 @@ public class MathHelper
     /// <returns>True if the comparison is a mathematical operation, otherwise false.</returns>
     public static bool IsMathOperation(string comparison)
     {
+        if (Regex.IsMatch(comparison, @"^\d+(\.\d+)?><\d+(\.\d+)?$"))
+            return true;
+        if (Regex.IsMatch(comparison, @"^\d+(\.\d+)?<>\d+(\.\d+)?$"))
+            return true;
+        
         // Check if the comparison string starts with <=, <, >, >=, ==, or =
         return new[] { "<=", "<", ">", ">=", "==", "=" }.Any(comparison.StartsWith);
     }
@@ -53,6 +59,24 @@ public class MathHelper
     /// <returns>True if the mathematical operation is successful, otherwise false.</returns>
     public static bool IsTrue(string operation, double value)
     {
+        if (Regex.IsMatch(operation, @"^\d+(\.\d+)?><\d+(\.\d+)?$"))
+        {
+            // between
+            var values = operation.Split(["><"], StringSplitOptions.None);
+            var low = double.Parse(values[0]);
+            var high = double.Parse(values[0]);
+            return value >= low && value <= high;
+        }
+        
+        if (Regex.IsMatch(operation, @"^\d+(\.\d+)?<>\d+(\.\d+)?$"))
+        {
+            // not between
+            var values = operation.Split(["<>"], StringSplitOptions.None);
+            var low = double.Parse(values[0]);
+            var high = double.Parse(values[0]);
+            return value < low || value > high;
+        }
+        
         // This is a basic example; you may need to handle different operators
         switch (operation[..2])
         {

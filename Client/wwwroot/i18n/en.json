@@ -15,6 +15,7 @@
     "Yes": "Yes",
     "No": "No",
     "Ok": "OK",
+    "And": "And",
     "About": "About",
     "Pause": "Pause Processing",
     "Paused":"Resume Processing",
@@ -276,6 +277,16 @@
       "After": "After",
       "Before": "Before"
     },
+    "MathValue": {
+      "Equals": "Equals",
+      "NotEquals": "Not Equals",
+      "GreaterThan": "Greater Than",
+      "LessThan": "Less Than",
+      "Between": "Between",
+      "NotBetween": "Not Between",
+      "GreaterThanOrEqual": "Greater Or Equal",
+      "LessThanOrEqual": "Less Or Equal"
+    },
     "ProcessingOrder":{
       "AsFound": "As Found (Default)",
       "Alphabetical": "Alphabetical",
@@ -341,7 +352,8 @@
     "NoFlowSpecified": "No flow specified, you must select a flow to create a library",
     "CannotDeleteInternalNode": "You cannot delete the internal processing node.",
     "NotAllFilesCouldBeDeleted": "Not all the files could be deleted.\nSee the log for more information.",
-    "SetFileStatus": "Failed to set file status"
+    "SetFileStatus": "Failed to set file status",
+    "BothMathValuesRequired": "Both values must be entered"
   },
   "Times": {
     "Never": "Never",

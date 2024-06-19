@@ -1,19 +1,29 @@
 @namespace FileFlows.Client.Components.Inputs
 @inherits Input<string>
 
+@{
+bool invalid = string.IsNullOrEmpty(ErrorMessage) == false;
+}
 <InputWrapper Input="@this">
-    <div class="input-math-value-wrapper">
+    <div class="input-math-value-wrapper @(invalid ? "error": "")">
         <div class="math-operation">
             <select @onchange="OperationSelectionChanged">
                 @foreach (var operation in Operations)
                 {
-                    <option selected=@(Operation == operation) value="@operation">@operation</option>
+                    var strValue = operation.Value as string;
+                    <option selected=@(Operation == strValue) value="@strValue">@operation.Label</option>
                 }
             </select>
         </div>
-        <div class="math-value-text">
+        <div class="math-value-text @(TwoValue ? "two-value": "")">
             <input id=@Uid type="text" value="@TextValue" disabled=@(Disabled || ReadOnly ? string.Empty : null) 
-                                @onchange="ChangeValue" placeholder="@Placeholder" @onkeydown="OnKeyDown" />
+                                                                @onchange="ChangeValue" placeholder="@Placeholder" @onkeydown="OnKeyDown" />
+            @if (TwoValue)
+            {
+                <span class="and">@lblAnd</span>
+                <input id="@Uid-2" type="text" value="@TextValue2" disabled=@(Disabled || ReadOnly ? string.Empty : null)
+                       @onchange="ChangeValue2" placeholder="@Placeholder" @onkeydown="OnKeyDown"/>
+            }
         </div>
     </div>
 </InputWrapper>
