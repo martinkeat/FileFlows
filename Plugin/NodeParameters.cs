@@ -288,7 +288,11 @@ public class NodeParameters
     /// Gets or sets the file service to use
     /// </summary>
     public IFileService FileService { get; init; }
-
+    
+    /// <summary>
+    /// Gets the math helper 
+    /// </summary>
+    public MathHelper MathHelper { get; init; }
 
     /// <summary>
     /// Constructs a node parameters instance used by the flow runner
@@ -306,6 +310,7 @@ public class NodeParameters
         this.LibraryPath = libraryPath;
         this.WorkingFile = filename;
         this.FileService = fileService;
+        this.MathHelper = new(logger);
         if (Fake == false)
         {
             try

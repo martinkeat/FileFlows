@@ -6,14 +6,15 @@ namespace FileFlows.Plugin.Helpers;
 /// <summary>
 /// Helper for math operations
 /// </summary>
-public class MathHelper
+public class MathHelper(ILogger _logger)
 {
+    
     /// <summary>
     /// Checks if the comparison string represents a mathematical operation.
     /// </summary>
     /// <param name="comparison">The comparison string to check.</param>
     /// <returns>True if the comparison is a mathematical operation, otherwise false.</returns>
-    public static bool IsMathOperation(string comparison)
+    public bool IsMathOperation(string comparison)
     {
         if (Regex.IsMatch(comparison, @"^\d+(\.\d+)?><\d+(\.\d+)?$"))
             return true;
@@ -30,7 +31,7 @@ public class MathHelper
     /// <param name="operation">The operation string representing the mathematical operation.</param>
     /// <param name="value">The value to apply the operation to.</param>
     /// <returns>True if the mathematical operation is successful, otherwise false.</returns>
-    public static bool IsTrue(string operation, string value)
+    public bool IsTrue(string operation, string value)
         => IsTrue(operation, Convert.ToDouble(value));
     
     /// <summary>
@@ -39,7 +40,7 @@ public class MathHelper
     /// <param name="operation">The operation string representing the mathematical operation.</param>
     /// <param name="value">The value to apply the operation to.</param>
     /// <returns>True if the mathematical operation is not successful, otherwise false.</returns>
-    public static bool IsFalse(string operation, string value)
+    public bool IsFalse(string operation, string value)
         => IsTrue(operation, Convert.ToDouble(value)) == false;
 
     /// <summary>
@@ -48,7 +49,7 @@ public class MathHelper
     /// <param name="operation">The operation string representing the mathematical operation.</param>
     /// <param name="value">The value to apply the operation to.</param>
     /// <returns>True if the mathematical operation is not successful, otherwise false.</returns>
-    public static bool IsFalse(string operation, double value)
+    public bool IsFalse(string operation, double value)
         => IsTrue(operation, value) == false;
 
     /// <summary>
@@ -57,7 +58,7 @@ public class MathHelper
     /// <param name="operation">The operation string representing the mathematical operation.</param>
     /// <param name="value">The value to apply the operation to.</param>
     /// <returns>True if the mathematical operation is successful, otherwise false.</returns>
-    public static bool IsTrue(string operation, double value)
+    public bool IsTrue(string operation, double value)
     {
         if (Regex.IsMatch(operation, @"^\d+(\.\d+)?><\d+(\.\d+)?$"))
         {
@@ -65,7 +66,9 @@ public class MathHelper
             var values = operation.Split(["><"], StringSplitOptions.None);
             var low = double.Parse(values[0]);
             var high = double.Parse(values[0]);
-            return value >= low && value <= high;
+            bool between = value >= low && value <= high;
+            _logger.ILog($"Between: {value} is{(between ? "" : " NOT")} between {low} and {high}");
+            return between;
         }
         
         if (Regex.IsMatch(operation, @"^\d+(\.\d+)?<>\d+(\.\d+)?$"))
@@ -74,31 +77,67 @@ public class MathHelper
             var values = operation.Split(["<>"], StringSplitOptions.None);
             var low = double.Parse(values[0]);
             var high = double.Parse(values[0]);
-            return value < low || value > high;
+            bool notBetween = value < low || value > high;
+            _logger.ILog($"NotBetween: {value} is{(notBetween ? " NOT" : "")} between {low} and {high}");
+            return notBetween;
         }
         
         // This is a basic example; you may need to handle different operators
         switch (operation[..2])
         {
             case "<=":
-                return value <= Convert.ToDouble(AdjustComparisonValue(operation[2..].Trim()));
+            {
+                var comparisson = Convert.ToDouble(AdjustComparisonValue(operation[2..].Trim())); 
+                var result = value <= comparisson;
+                _logger.ILog($"LessOrEqual: {value} is{(result ? "" :" NOT")} less or equal to {comparisson}");
+                return result;
+            }
             case ">=":
-                return value >= Convert.ToDouble(AdjustComparisonValue(operation[2..].Trim()));
+            {
+                var comparisson = Convert.ToDouble(AdjustComparisonValue(operation[2..].Trim())); 
+                var result = value >= comparisson;
+                _logger.ILog($"GreaterOrEqual: {value} is{(result ? "" :" NOT")} greater or equal to {comparisson}");
+                return result;
+            }
             case "==":
-                return Math.Abs(value - Convert.ToDouble(AdjustComparisonValue(operation[2..].Trim()))) < 0.05f;
+            {
+                var comparisson = Convert.ToDouble(AdjustComparisonValue(operation[2..].Trim())); 
+                var result = Math.Abs(value - Convert.ToDouble(AdjustComparisonValue(operation[2..].Trim()))) < 0.05f;
+                _logger.ILog($"Equal: {value} is{(result ? "" :" NOT")} equal to {comparisson}");
+                return result;
+            }
             case "!=":
-            case "<>":
-                return Math.Abs(value - Convert.ToDouble(AdjustComparisonValue(operation[2..].Trim()))) > 0.05f;
+            {
+                var comparisson = Convert.ToDouble(AdjustComparisonValue(operation[2..].Trim())); 
+                var result = Math.Abs(value - Convert.ToDouble(AdjustComparisonValue(operation[2..].Trim()))) > 0.05f;
+                _logger.ILog($"NotEqual: {value} is{(result ? " NOT" :"")} equal to {comparisson}");
+                return result;
+            }
         }
 
         switch (operation[..1])
         {
             case "<":
-                return value < Convert.ToDouble(AdjustComparisonValue(operation[1..].Trim()));
+            {
+                var comparisson = Convert.ToDouble(AdjustComparisonValue(operation[2..].Trim()));
+                var result = value < Convert.ToDouble(AdjustComparisonValue(operation[1..].Trim()));
+                _logger.ILog($"LessThan: {value} is{(result ? "" :" NOT")} less than {comparisson}");
+                return result;
+            }
             case ">":
-                return value > Convert.ToDouble(AdjustComparisonValue(operation[1..].Trim()));
+            {
+                var comparisson = Convert.ToDouble(AdjustComparisonValue(operation[2..].Trim()));
+                var result = value > Convert.ToDouble(AdjustComparisonValue(operation[1..].Trim()));
+                _logger.ILog($"GreaterThan: {value} is{(result ? "" :" NOT")} greater than {comparisson}");
+                return result;
+            }
             case "=":
-                return Math.Abs(value - Convert.ToDouble(AdjustComparisonValue(operation[1..].Trim()))) < 0.05f;
+            {
+                var comparisson = Convert.ToDouble(AdjustComparisonValue(operation[2..].Trim()));
+                var result = Math.Abs(value - Convert.ToDouble(AdjustComparisonValue(operation[1..].Trim()))) < 0.05f;
+                _logger.ILog($"Equal: {value} is{(result ? "" :" NOT")} equal to {comparisson}");
+                return result;
+            }
         }
 
         return false;
@@ -109,7 +148,7 @@ public class MathHelper
     /// </summary>
     /// <param name="comparisonValue">The original comparison string to be adjusted.</param>
     /// <returns>The adjusted comparison string with corrected units or the original comparison if no adjustments are made.</returns>
-    private static string AdjustComparisonValue(string comparisonValue)
+    private string AdjustComparisonValue(string comparisonValue)
     {
         if (string.IsNullOrWhiteSpace(comparisonValue))
             return string.Empty;
