@@ -192,7 +192,12 @@ public partial class FlowPropertiesEditor
     /// </summary>
     public string DefaultValueString
     {
-        get => Editing?.DefaultValue as string ?? string.Empty;
+        get
+        {
+            if (Editing?.DefaultValue is JsonElement { ValueKind: JsonValueKind.String } je)
+                return je.GetString();
+            return Editing?.DefaultValue as string ?? string.Empty;
+        }
         set
         {
             if (Editing?.Type is FlowFieldType.String or FlowFieldType.Directory or FlowFieldType.Select)
@@ -200,7 +205,7 @@ public partial class FlowPropertiesEditor
                 Editing.DefaultValue = value;
                 MarkDirty();
             }
-        } 
+        }
     }
 
     /// <summary>
@@ -208,7 +213,17 @@ public partial class FlowPropertiesEditor
     /// </summary>
     public bool DefaultValueBoolean
     {
-        get => Editing?.DefaultValue as bool? == true;
+        get
+        {
+            if (Editing?.DefaultValue is JsonElement je)
+            {
+                if (je.ValueKind == JsonValueKind.True)
+                    return true;
+                if (je.ValueKind == JsonValueKind.False)
+                    return false;
+            }
+            return Editing?.DefaultValue as bool? == true;
+        }
         set
         {
             if (Editing?.Type == FlowFieldType.Boolean)
@@ -223,7 +238,15 @@ public partial class FlowPropertiesEditor
     /// </summary>
     public int DefaultValueNumber
     {
-        get => Editing?.DefaultValue as int? ?? 0;
+        get
+        {
+            if (Editing?.DefaultValue is JsonElement { ValueKind: JsonValueKind.Number } je)
+            {
+                return je.GetInt32();
+            }
+            
+            return Editing?.DefaultValue as int? ?? 0;
+        }
         set
         {
             if (Editing?.Type is FlowFieldType.Number or FlowFieldType.Slider)
