@@ -289,8 +289,11 @@ public class LibraryFileService
             {
                 if (x.MaxRunners > 0 && executingLibraries.TryGetValue(x.Uid, out var currentRunners)
                                      && x.MaxRunners >= currentRunners)
+                {
+                    Logger.Instance.ILog($"Library '{x.Name}' at maximum runners '{currentRunners}' out of '{x.MaxRunners}'");
                     return false;
-            
+                }
+
                 if (node.AllLibraries == ProcessingLibraries.All)
                     return true;
                 if (node.AllLibraries == ProcessingLibraries.Only)
