@@ -59,6 +59,8 @@ public partial class InputMathValue : Input<string>
         if (string.IsNullOrWhiteSpace(Value))
             return;
         
+        Logger.Instance.ILog("MathValue Value: " + Value);
+        
         if (Regex.IsMatch(Value, @"^\d+(\.\d+)?><\d+(\.\d+)?$"))
         {
             Operation = "><";
@@ -72,6 +74,13 @@ public partial class InputMathValue : Input<string>
             var values = Value.Split(["<>"], StringSplitOptions.None);
             TextValue = values[0];
             TextValue2 = values[1];
+        }
+        else if (Regex.IsMatch(Value, @"^\d+(\.\d+)?$"))
+        {
+            // Upgrades if a field changed from a float to a MathValue
+            Operation = "=";
+            TextValue = Value;
+            Value = "=" + Value;
         }
         else
         {

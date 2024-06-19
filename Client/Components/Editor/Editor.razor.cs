@@ -602,7 +602,12 @@ public partial class Editor : InputRegister, IDisposable
         if (value is JsonElement je)
         {
             if (typeof(T) == typeof(string))
+            {
+                if (je.ValueKind == JsonValueKind.Number)
+                    return (T)(object)je.ToString();
                 return (T)(object)je.GetString()!;
+            }
+
             if (typeof(T) == typeof(int))
                 return (T)(object)je.GetInt32();
             if (typeof(T) == typeof(bool))

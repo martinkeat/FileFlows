@@ -119,21 +119,21 @@ public class MathHelper(ILogger _logger)
         {
             case "<":
             {
-                var comparisson = Convert.ToDouble(AdjustComparisonValue(operation[2..].Trim()));
+                var comparisson = Convert.ToDouble(AdjustComparisonValue(operation[1..].Trim()));
                 var result = value < Convert.ToDouble(AdjustComparisonValue(operation[1..].Trim()));
                 _logger.ILog($"LessThan: {value} is{(result ? "" :" NOT")} less than {comparisson}");
                 return result;
             }
             case ">":
             {
-                var comparisson = Convert.ToDouble(AdjustComparisonValue(operation[2..].Trim()));
+                var comparisson = Convert.ToDouble(AdjustComparisonValue(operation[1..].Trim()));
                 var result = value > Convert.ToDouble(AdjustComparisonValue(operation[1..].Trim()));
                 _logger.ILog($"GreaterThan: {value} is{(result ? "" :" NOT")} greater than {comparisson}");
                 return result;
             }
             case "=":
             {
-                var comparisson = Convert.ToDouble(AdjustComparisonValue(operation[2..].Trim()));
+                var comparisson = Convert.ToDouble(AdjustComparisonValue(operation[1..].Trim()));
                 var result = Math.Abs(value - Convert.ToDouble(AdjustComparisonValue(operation[1..].Trim()))) < 0.05f;
                 _logger.ILog($"Equal: {value} is{(result ? "" :" NOT")} equal to {comparisson}");
                 return result;
