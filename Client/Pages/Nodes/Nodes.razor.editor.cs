@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using System.Linq.Expressions;
+using System.Text.Json;
 using FileFlows.Client.Components;
 using FileFlows.Client.Components.Dialogs;
 using FileFlows.Client.Components.Inputs;
@@ -221,8 +222,10 @@ public partial class Nodes : ListPage<Guid, ProcessingNode>
         {
             if (node.Mappings.Any(x => x.Key == mapping.Key))
                 continue;
+            Logger.Instance.ILog("Adding Mapping: " + mapping.Key);
             node.Mappings.Add(new(mapping.Key, mapping.Value));
         }
+        Logger.Instance.ILog("Mappings: " + JsonSerializer.Serialize(node.Mappings));
         efMappings.InvokeValueChanged(this, node.Mappings);
     }
     
