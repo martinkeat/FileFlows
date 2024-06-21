@@ -37,7 +37,7 @@ public static class DockerModHelper
             var file = Path.Combine(directory, mod.Name.Replace(" ","-").TrimStart('.').Replace("/", "-") + ".sh");
             if (Directory.Exists(directory) == false)
                 Directory.CreateDirectory(directory);
-            await File.WriteAllTextAsync(file, mod.Code);
+            await File.WriteAllTextAsync(file, mod.Code.Replace("\r\n", "\n"));
 
             // Set execute permission for the file
             await Process.Start("chmod", $"+x {file}").WaitForExitAsync();

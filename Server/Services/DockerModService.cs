@@ -45,6 +45,7 @@ public class DockerModService
     /// <returns>the saved DockerMod instance</returns>
     public async Task<Result<DockerMod>> Save(DockerMod mod, AuditDetails? auditDetails)
     {
+        mod.Code = mod.Code.Replace("\r\n", "\n");
         var result = await new DockerModManager().Update(mod, auditDetails);
         bool isDocker = Globals.IsDocker;
         if (isDocker && result.Success(out DockerMod updated))
@@ -108,7 +109,7 @@ public class DockerModService
         {
             if(mod.Repository == false)
                 return Result<bool>.Fail("Cannot update non-repository DockerMod");
-            existing.Code = mod.Code;
+            existing.Code = mod.Code.Replace("\r\n", "\n");
             existing.Revision = mod.Revision;
             existing.Author = mod.Author;
             existing.Description = mod.Description;
@@ -139,7 +140,7 @@ public class DockerModService
                 return Result<DockerMod>.Fail("Invalid DockerMod content");
 
             var head = match.Value;
-            content = content.Replace(head, string.Empty).Trim();
+            content = content.Replace("\r\n", "\n").Replace(head, string.Empty).Trim();
 
             var yaml = string.Join("\n", head.Split('\n').Where(x => x.StartsWith("# -----") == false)
                 .Select(x => x[2..]));

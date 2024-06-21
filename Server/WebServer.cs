@@ -156,6 +156,8 @@ public class WebServer
         {
             if(appSettings.DatabaseType != DatabaseType.Sqlite)
                 options.Filters.Add<DatabaseExceptionFilter>();
+            
+            options.Filters.Add<TrimStringsFilter>();
         });
         
         builder.Services.AddSignalR();
@@ -248,6 +250,7 @@ public class WebServer
         app.UseMiddleware<ExceptionMiddleware>();
         app.UseMiddleware<LoggingMiddleware>();
         app.UseMiddleware<FileFlowsIPAddressAuthorizeFilter>();
+        app.UseMiddleware<NormalizeLineEndingsMiddleware>();
         // this is an experiment, may reuse it one day
         //app.UseMiddleware<UiMiddleware>();
         app.UseRouting();
