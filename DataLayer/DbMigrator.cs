@@ -77,6 +77,8 @@ internal class DbMigrator
             updateStatusCallback?.Invoke((backingUp ? "Backing up" : "Migrating") + " revisions");
             MigrateRevisions(source, dest);
 
+            MigrateVersion(source, dest);
+            
             Logger?.ILog($"Database {(backingUp ? "backup" : "migration")} complete");
             return true;
         }
@@ -85,6 +87,18 @@ internal class DbMigrator
             Logger?.ELog($"Failed to {(backingUp ? "backup" : "migrate")} data: " + ex.Message + Environment.NewLine + ex.StackTrace);
             return Result<bool>.Fail($"Failed to {(backingUp ? "backup" : "migrate")} data: " + ex.Message);
         }
+    }
+
+    /// <summary>
+    /// Sets the version in the database
+    /// </summary>
+    /// <param name="source">the source database</param>
+    /// <param name="dest">the destination database</param>
+    private void MigrateVersion(DatabaseAccessManager source, DatabaseAccessManager dest)
+    {
+        var version = source.VersionManager.Get().Result;
+        if(version != null)
+            dest.VersionManager.Set(version.ToString()).Wait();
     }
 
     /// <summary>

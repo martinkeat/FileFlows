@@ -81,7 +81,7 @@ public class Upgrader
             try
             {
                 Logger.Instance.ILog("Backing up database, please wait this may take a while");
-                string dbBackup = Path.Combine(DirectoryHelper.DatabaseDirectory, "FileFlow-" +
+                string dbBackup = Path.Combine(DirectoryHelper.DatabaseDirectory, "FileFlows-" +
                     currentVersion.Major + "." + currentVersion.Minor + "." + currentVersion.Build +
                     ".sqlite.backup");
                 var manager = new MigrationManager(Logger.Instance,
