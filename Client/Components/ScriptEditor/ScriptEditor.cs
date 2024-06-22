@@ -75,7 +75,7 @@ let ffApi = new FileFlowsApi();
 
         item.Code = item.Code.Replace("\r\n", "\n").Trim();
 
-        bool readOnly = item.Repository || item.Type == ScriptType.Shared;
+        bool readOnly = item.Repository;
         string title = "Pages.Script.Title";
 
         if (readOnly)

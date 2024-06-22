@@ -18,19 +18,18 @@
     <FlowTable @ref="Table" Data="@(SelectedType == ScriptType.Flow ? DataFlow : SelectedType == ScriptType.Shared ? DataShared : DataSystem)" TItem="Script" Selection="SelectionMode.Multiple"
                DoubleClick="@OnDoubleClick" TableIdentifier="@TableIdentifier">
         <ToolBar>
-            <FlowTableButton Visible="@(SelectedType == ScriptType.Shared)" Clicked=Edit SelectedOne="true" Icon="fas fa-info-circle" Label="Labels.View"/>
-            <FlowTableButton Visible="@(SelectedType != ScriptType.Shared)" Clicked=Add Icon="fas fa-plus" Label="Labels.Add"/>
-            <FlowTableButton Visible="@(SelectedType != ScriptType.Shared)" Clicked=Edit SelectedOne="true" Icon="fas fa-edit" Label="Labels.Edit"/>
-            <FlowTableButton Visible="@(SelectedType != ScriptType.Shared)" Clicked=Delete SelectedOneOrMore="true" Icon="fas fa-trash" Label="Labels.Delete"/>
+            <FlowTableButton Clicked=Add Icon="fas fa-plus" Label="Labels.Add"/>
+            <FlowTableButton Clicked=Edit SelectedOne="true" Icon="fas fa-edit" Label="Labels.Edit"/>
+            <FlowTableButton Clicked=Delete SelectedOneOrMore="true" Icon="fas fa-trash" Label="Labels.Delete"/>
             @if (App.Instance.IsMobile == false)
             {
                 <FlowTableButtonSeparator Visible="@(SelectedType != ScriptType.Shared)" />
                 <FlowTableButton Visible="@(SelectedType != ScriptType.Shared)"  Clicked=Update SelectedOneOrMore="true" Icon="fas fa-cloud-download-alt" Label="Labels.Update"/>
                 <FlowTableButton Visible="@(SelectedType != ScriptType.Shared)"  Clicked=Browser Icon="fas fa-code-branch" Label="Pages.Scripts.Buttons.ScriptBrowser"/>
-                <FlowTableButtonSeparator Visible="@(SelectedType != ScriptType.Shared)" />
-                <FlowTableButton Visible="@(SelectedType != ScriptType.Shared)" Clicked=Import Icon="fas fa-file-import" Label="Labels.Import"/>
-                <FlowTableButton Visible="@(SelectedType != ScriptType.Shared)" Clicked=Export SelectedOne="true" Icon="fas fa-file-export" Label="Labels.Export"/>
-                <FlowTableButton Visible="@(SelectedType != ScriptType.Shared)" Clicked=Duplicate SelectedOne="true" Icon="fas fa-clone" Label="Labels.Duplicate"/>
+                <FlowTableButtonSeparator />
+                <FlowTableButton Clicked=Import Icon="fas fa-file-import" Label="Labels.Import"/>
+                <FlowTableButton Clicked=Export SelectedOne="true" Icon="fas fa-file-export" Label="Labels.Export"/>
+                <FlowTableButton Clicked=Duplicate SelectedOne="true" Icon="fas fa-clone" Label="Labels.Duplicate"/>
                 <FlowTableButtonSeparator Visible="@(SelectedType != ScriptType.Shared)" />
                 <FlowTableButton Visible="@(SelectedType != ScriptType.Shared)"  Clicked=UsedBy SelectedOne="true" Icon="fas fa-info-circle" Label="Labels.UsedBy"/>
             }

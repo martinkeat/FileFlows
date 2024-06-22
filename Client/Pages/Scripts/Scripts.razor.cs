@@ -60,9 +60,6 @@ public partial class Scripts : ListPage<Guid, Script>
 
     async Task<bool> Save(ExpandoObject model)
     {
-#if (DEMO)
-        return true;
-#else
         Blocker.Show();
         this.StateHasChanged();
 
@@ -89,7 +86,6 @@ public partial class Scripts : ListPage<Guid, Script>
             Blocker.Hide();
             this.StateHasChanged();
         }
-#endif
     }
 
     private async Task Export()
