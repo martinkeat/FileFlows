@@ -486,6 +486,10 @@ public partial class Settings : InputRegister
     }
     
     
+    /// <summary>
+    /// When the user changes the telemetry value
+    /// </summary>
+    /// <param name="disabled">if the switch is disabled</param>
     private async Task OnTelemetryChange(bool disabled)
     {
         if (firstRenderedAt < DateTime.UtcNow.AddSeconds(-1) && disabled)
@@ -499,6 +503,23 @@ public partial class Settings : InputRegister
         }
     }
 
+    /// <summary>
+    /// When the user changes the DB backup value
+    /// </summary>
+    /// <param name="enabled">if the switch is enabled</param>
+    private async Task OnDbBackupChange(bool enabled)
+    {
+        if (firstRenderedAt < DateTime.UtcNow.AddSeconds(-1) && enabled)
+        {
+            if (await Confirm.Show("Labels.Confirm",
+                    "Pages.Settings.Messages.Database.DontBackupOnUpgrade",
+                    false) == false)
+            {
+                Model.DontBackupOnUpgrade = false;
+            }
+        }
+    }
+    
     private string GetDatabasePortHelp()
     {
         switch (Model.DbType)

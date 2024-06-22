@@ -78,6 +78,7 @@
                             {
                                 <InputSwitch @bind-Value="@Model.RecreateDatabase" Label="Pages.Settings.Fields.Database.RecreateDatabase" />
                             }
+                            <InputSwitch @bind-Value="@Model.DontBackupOnUpgrade" Label="Pages.Settings.Fields.Database.DontBackupOnUpgrade" OnChangedValue="OnDbBackupChange" />
                         }
                         <div class="btn-test">
                             @if (Model.DbType != DatabaseType.Sqlite)

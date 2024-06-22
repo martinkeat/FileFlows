@@ -76,7 +76,7 @@ public class Upgrader
             {
             }
         }
-        else
+        else if(settings.DontBackupOnUpgrade == false)
         {
             try
             {

@@ -73,6 +73,11 @@ public class SettingsUiModel:Settings
     public bool RecreateDatabase { get; set; }
     
     /// <summary>
+    /// Gets or sets if database backups should not be taken during upgrade
+    /// </summary>
+    public bool DontBackupOnUpgrade { get; set; }
+    
+    /// <summary>
     /// Gets or sets the file server all list
     /// </summary>
     public string FileServerAllowedPathsString { get; set; }

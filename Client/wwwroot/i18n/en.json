@@ -964,7 +964,8 @@
           "NoUser":"User is required",
           "NoPassword":"Password is required",
           "TestSuccess":"Successfully connected to database",
-          "TestingDatabase":"Testing Database Connection"
+          "TestingDatabase":"Testing Database Connection",
+          "DontBackupOnUpgrade": "Turning off automatic database backups means that no backup will be taken during application updates. It's important to ensure you have an alternative method in place to back up your database externally to safeguard your data.\n\nAre you sure you wish to turn off these backups?"
         },
         "Restart":{
           "Title":"Restart FileFlows",
@@ -1043,7 +1044,9 @@
           "Password": "Password",
           "Password-Help":"The password of the user to connect to the database",
           "RecreateDatabase":"Recreate Database",
-          "RecreateDatabase-Help":"When enabled, if the new database already exists, it will be dropped and recreated.  Otherwise if off, and the database already exists, no data will be migrated and the new database will just be used as is."
+          "RecreateDatabase-Help":"When enabled, if the new database already exists, it will be dropped and recreated.  Otherwise if off, and the database already exists, no data will be migrated and the new database will just be used as is.",
+          "DontBackupOnUpgrade": "Don't Backup On Upgrade",
+          "DontBackupOnUpgrade-Help": "Database backups involve copying all your database data into a SQLite file, which can be time-consuming. If you already back up your external database via other means, you can choose to disable this process."
         },
         "FileServer": {
           "Description": "This allows for external processing nodes to download a file for processing without mapping.\n\nThis does expose your files over your network, so disable if not on a trusted network.",

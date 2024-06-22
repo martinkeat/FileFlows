@@ -82,4 +82,9 @@ internal class AppSettings
     /// </summary>
     public bool DockerModsOnServer { get; set; }
 
+    /// <summary>
+    /// Gets or sets if backups should not be taken on upgrades.
+    /// This is only used when using an external database
+    /// </summary>
+    public bool DontBackupOnUpgrade { get; set; }
 }
