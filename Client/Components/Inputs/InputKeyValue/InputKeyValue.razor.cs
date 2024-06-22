@@ -88,7 +88,7 @@ public partial class InputKeyValue : Input<List<KeyValuePair<string, string>>>
         bool differences = false;
         foreach (var kvp in kvps)
         {
-            var existing = this.Data.Values.FirstOrDefault(x => x.Value == kvp.Key);
+            var existing = this.Data.Values.FirstOrDefault(x => x.Key == kvp.Key);
             if (existing == null)
             {
                 Data[Guid.NewGuid()] = new () { Key = kvp.Key, Value = kvp.Value };
