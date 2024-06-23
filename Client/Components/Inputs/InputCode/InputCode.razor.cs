@@ -89,9 +89,9 @@ public partial class InputCode : Input<string>, IDisposable
     private async Task<bool> Editor_OnCancel()
     {
         this.Updating = true;
-        this.Value = await CodeEditor.GetValue();
+        this.Value = await CodeEditor?.GetValue();
         this.Updating = false;
-        if (this.InitialValue.Trim() != this.Value.Trim())
+        if (this.InitialValue?.Trim()?.EmptyAsNull() != this.Value?.Trim()?.EmptyAsNull())
         {
             bool cancel = await Dialogs.Confirm.Show(Translater.Instant("Labels.Confirm"), Translater.Instant("Labels.CancelMessage"));
             if (cancel == false)
