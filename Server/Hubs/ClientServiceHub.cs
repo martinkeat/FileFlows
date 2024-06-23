@@ -2,8 +2,6 @@
 using FileFlows.Server.Services;
 using FileFlows.Shared.Models;
 using Microsoft.AspNetCore.SignalR;
-using Org.BouncyCastle.Tls;
-
 
 namespace FileFlows.Server.Hubs;
 
@@ -81,26 +79,31 @@ public class ClientServiceManager
         try
         {
             Dictionary<Guid, FlowExecutorInfoMinified> minified = new();
+            // Make a copy of the keys to avoid modifying the collection during enumeration
+            var keys = new List<Guid>(executors.Keys);
 
-            foreach (var executor in executors)
+            foreach (var key in keys)
             {
-                minified[executor.Key] = new()
+                if (executors.TryGetValue(key, out var executor) == false)
+                    continue;
+
+                minified[key] = new()
                 {
-                    Uid = executor.Key,
-                    DisplayName = ServiceLoader.Load<FileDisplayNameService>().GetDisplayName(executor.Value.LibraryFile.Name,
-                        executor.Value.LibraryFile.RelativePath,
-                        executor.Value.Library.Name),
-                    LibraryName = executor.Value.Library.Name,
-                    LibraryFileUid = executor.Value.LibraryFile.Uid,
-                    LibraryFileName = executor.Value.LibraryFile.Name,
-                    RelativeFile = executor.Value.RelativeFile,
-                    NodeName = executor.Value.NodeName,
-                    CurrentPartName = executor.Value.CurrentPartName,
-                    StartedAt = executor.Value.StartedAt,
-                    CurrentPart = executor.Value.CurrentPart,
-                    TotalParts = executor.Value.TotalParts,
-                    CurrentPartPercent = executor.Value.CurrentPartPercent,
-                    Additional = executor.Value.AdditionalInfos
+                    Uid = key,
+                    DisplayName = ServiceLoader.Load<FileDisplayNameService>().GetDisplayName(executor.LibraryFile.Name,
+                        executor.LibraryFile.RelativePath,
+                        executor.Library.Name),
+                    LibraryName = executor.Library.Name,
+                    LibraryFileUid = executor.LibraryFile.Uid,
+                    LibraryFileName = executor.LibraryFile.Name,
+                    RelativeFile = executor.RelativeFile,
+                    NodeName = executor.NodeName,
+                    CurrentPartName = executor.CurrentPartName,
+                    StartedAt = executor.StartedAt,
+                    CurrentPart = executor.CurrentPart,
+                    TotalParts = executor.TotalParts,
+                    CurrentPartPercent = executor.CurrentPartPercent,
+                    Additional = executor.AdditionalInfos
                         ?.Where(x => x.Value.Expired == false)
                         ?.Select(x => new object[]
                         {
@@ -111,6 +114,10 @@ public class ClientServiceManager
 
             await _hubContext.Clients.All.SendAsync("UpdateExecutors", minified);
             await Task.Delay(500); // creates a 500 ms delay between messages to the client
+        }
+        catch (Exception ex)
+        {
+            Logger.Instance.WLog("Failed updating executors: " + ex.Message);
         }
         finally
         {
