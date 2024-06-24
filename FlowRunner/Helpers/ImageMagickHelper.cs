@@ -425,7 +425,11 @@ public class ImageMagickHelper
                 UseShellExecute = false,
                 CreateNoWindow = true
             };
+            startInfo.ArgumentList.Add("-density");
+            startInfo.ArgumentList.Add("300");
             startInfo.ArgumentList.Add(pdf);
+            startInfo.ArgumentList.Add("-quality");
+            startInfo.ArgumentList.Add("100");
             startInfo.ArgumentList.Add(Path.Combine(destination, "output-%04d.png"));
             
             using Process? process = Process.Start(startInfo);
