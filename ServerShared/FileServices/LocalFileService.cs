@@ -464,7 +464,7 @@ public class LocalFileService : IFileService
     {
         if (File.Exists(path))
             path = new FileInfo(path).Directory.FullName;
-        if (Directory.Exists(path))
+        if (Directory.Exists(path) == false)
             return 0;
         
         try

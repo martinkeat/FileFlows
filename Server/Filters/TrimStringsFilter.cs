@@ -62,7 +62,7 @@ public class TrimStringsFilter : IActionFilter
                 list[i] = TrimStrings(list[i]);
             }
         }
-        else if (obj is IEnumerable enumerable && !(obj is string))
+        else if (obj is IEnumerable enumerable and not string)
         {
             // If the object is a collection (excluding strings and lists), iterate through each item and trim it
             var items = enumerable.Cast<object>().ToList();
