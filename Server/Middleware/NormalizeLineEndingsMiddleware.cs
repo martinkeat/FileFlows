@@ -25,6 +25,18 @@ public class NormalizeLineEndingsMiddleware
     /// <returns>A task representing the completion of the middleware execution.</returns>
     public async Task InvokeAsync(HttpContext context)
     {
+        // Check if the Content-Type is text, json or xml
+        var contentType = context.Request.ContentType;
+        if (contentType == null || 
+            (contentType.StartsWith("text/") || 
+              contentType.Equals("application/json", StringComparison.OrdinalIgnoreCase) ||
+              contentType.Equals("application/xml", StringComparison.OrdinalIgnoreCase)) == false)
+        {
+            // Call the next middleware in the pipeline if not the right content type
+            await _next(context);
+            return;
+        }
+            
         // Enable seeking on the request body stream
         context.Request.EnableBuffering();
 
