@@ -235,7 +235,7 @@ public class MathHelper(ILogger _logger)
         {
             return adjustedComparison[..^3] switch
             {
-                { } value when double.TryParse(value, out var numericValue) => (numericValue * 1_099_511_627_776 )
+                { } value when double.TryParse(value, out var numericValue) => (numericValue * 1_073_741_824 )
                     .ToString(CultureInfo.InvariantCulture),
                 _ => comparisonValue
             };
@@ -244,7 +244,7 @@ public class MathHelper(ILogger _logger)
         {
             return adjustedComparison[..^3] switch
             {
-                { } value when double.TryParse(value, out var numericValue) => (numericValue * 1_000_000_000_000)
+                { } value when double.TryParse(value, out var numericValue) => (numericValue * 1_099_511_627_776)
                     .ToString(CultureInfo.InvariantCulture),
                 _ => comparisonValue
             };
