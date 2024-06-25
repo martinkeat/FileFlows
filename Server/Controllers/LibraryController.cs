@@ -253,7 +253,9 @@ public class LibraryController : BaseController
                     Path = jst.Path,
                     Priority = jst.Priority,
                     ScanInterval = jst.ScanInterval,
-                    ReprocessRecreatedFiles = jst.ReprocessRecreatedFiles
+                    ReprocessRecreatedFiles = jst.ReprocessRecreatedFiles,
+                    Folders = jst.Folders,
+                    UpdateMovedFiles = jst.DontUpdateMovedFiles == false
                 };
                 if (group == generalGroup)
                     lstGeneral.Add(library);

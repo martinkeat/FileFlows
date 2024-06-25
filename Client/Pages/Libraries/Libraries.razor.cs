@@ -79,7 +79,8 @@ public partial class Libraries : ListPage<Guid, Library>
         SetModelProperty(nameof(template.Priority), template.Priority);
         SetModelProperty(nameof(template.ScanInterval), template.ScanInterval);
         SetModelProperty(nameof(template.ReprocessRecreatedFiles), template.ReprocessRecreatedFiles);
-        SetModelProperty(nameof(Library.Folders), false);
+        SetModelProperty(nameof(template.Folders), template.Folders);
+        SetModelProperty(nameof(template.UpdateMovedFiles), template.UpdateMovedFiles);
 
         editor.TriggerStateHasChanged();
         void SetModelProperty(string property, object value)

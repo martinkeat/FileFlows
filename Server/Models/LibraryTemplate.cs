@@ -68,4 +68,16 @@ class LibraryTemplate
     /// Gets or sets if fingerprinting should be turned on
     /// </summary>
     public bool UseFingerprint { get; set; }
+    
+    /// <summary>
+    /// Gets or sets if this is a folder template
+    /// </summary>
+    public bool Folders { get; set; }
+    
+    /// <summary>
+    /// Gets or sets if a moved/renamed files should have their database entries updated automatically
+    /// during a scan, if set a 'Duplicate' will not be created and the original file will be updated.
+    /// Note: this only happens if the original file no longer exists.  This is also is limited to files in the same library
+    /// </summary>
+    public bool DontUpdateMovedFiles { get; set; }
 }
