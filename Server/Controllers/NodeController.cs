@@ -144,6 +144,7 @@ public class NodeController : BaseController
                 internalNode.DontChangeOwner = node.DontChangeOwner;
                 internalNode.DontSetPermissions = node.DontSetPermissions;
                 internalNode.PermissionsFiles = node.PermissionsFiles;
+                internalNode.PermissionsFolders = node.PermissionsFolders;
                 internalNode.AllLibraries = node.AllLibraries;
                 internalNode.MaxFileSizeMb = node.MaxFileSizeMb;
                 internalNode.Variables = node.Variables ?? new();
