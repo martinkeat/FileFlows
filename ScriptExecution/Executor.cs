@@ -194,11 +194,32 @@ public class Executor
                return result;
             })
             .SetValue(nameof(FileInfo), new Func<string, FileInfo>((string file) => new FileInfo(file)))
-            .SetValue(nameof(DirectoryInfo), new Func<string, DirectoryInfo>((string path) => new DirectoryInfo(path))); ;
-            
-            foreach (var arg in AdditionalArguments ?? new ())
+            .SetValue(nameof(DirectoryInfo), new Func<string, DirectoryInfo>((string path) => new DirectoryInfo(path)));
+
+            foreach (var arg in AdditionalArguments ?? new())
+            {
+                if (arg.Value is JsonElement je)
+                {
+                    switch (je.ValueKind)
+                    {
+                        case JsonValueKind.False:
+                            engine.SetValue(arg.Key, false);
+                            continue;
+                        case JsonValueKind.True:
+                            engine.SetValue(arg.Key, true);
+                            continue;
+                        case JsonValueKind.Number:
+                            engine.SetValue(arg.Key, je.GetDouble());
+                            continue;
+                        case JsonValueKind.String:
+                            engine.SetValue(arg.Key, je.GetString());
+                            continue;
+                    }   
+                }
+                
                 engine.SetValue(arg.Key, arg.Value);
-            
+            }
+
             if(DontLogCode == false)
                 Logger.DLog("Executing code: \n\n" + tcode + "\n\n" + new string('-', 30));
             engine.Modules.Add("Script", tcode);
