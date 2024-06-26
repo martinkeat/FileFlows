@@ -23,6 +23,9 @@ public partial class LibraryFilesSearch : ListPage<Guid, LibraryFile>
 
     private List<ListOption> StatusOptions;
     
+    /// <inheritdoc />
+    protected override string DeleteMessage => "Labels.DeleteLibraryFiles";
+    
     private readonly LibraryFileSearchModel SearchModel = new()
     {
         Path = string.Empty,
