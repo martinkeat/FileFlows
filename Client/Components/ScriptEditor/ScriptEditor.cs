@@ -13,9 +13,10 @@ namespace FileFlows.Client.Components.ScriptEditor;
 public class ScriptEditor
 {
     /// <summary>
-    /// The editor isntance
+    /// The editor instance
     /// </summary>
     private readonly Editor Editor;
+    
     /// <summary>
     /// The script importer
     /// </summary>
@@ -44,7 +45,8 @@ public class ScriptEditor
     /// Opens the script editor to edit a specific script
     /// </summary>
     /// <param name="item">the script to edit</param>
-    public async Task Open(Script item)
+    /// <returns>true if the script was saved, otherwise false</returns>
+    public async Task<bool> Open(Script item)
     {
         List<ElementField> fields = new List<ElementField>();
         bool flowScript = item.Type == ScriptType.Flow;
@@ -95,7 +97,6 @@ let ffApi = new FileFlowsApi();
             });
         }
 
-
         fields.Add(new ElementField
         {
             InputType = FormInputType.Code,
@@ -119,6 +120,8 @@ let ffApi = new FileFlowsApi();
                 }
             }
         });
+
+        return result != null;
     }
     
     
@@ -156,14 +159,13 @@ let ffApi = new FileFlowsApi();
 
         string code = await codeInput.GetCode() ?? string.Empty;
         var shared = await GetShared();
-        var available = shared.Where(x => code.IndexOf("Shared/" + x.Name) < 0).Select(x => x.Name).ToList();
+        var available = shared.Where(x => code.IndexOf("Shared/" + x.Name, StringComparison.Ordinal) < 0).Select(x => x.Name).ToList();
         if (available.Any() == false)
         {
             Toast.ShowWarning("Dialogs.ImportScript.Messages.NoMoreImports");
             return;
         }
 
-        Logger.Instance.ILog("open import!");
         List<string> import = await ScriptImporter.Show(available);
         Logger.Instance.ILog("Import", import);
         await codeInput.AddImports(import);
