@@ -338,7 +338,7 @@ public class FileHelper
     /// </summary>
     /// <param name="filename">The full filename including its extension.</param>
     /// <returns>The filename without its extension.</returns>
-    public string GetShortFileNameWithoutExtension(string filename)
+    public static string GetShortFileNameWithoutExtension(string filename)
     {
         if (string.IsNullOrEmpty(filename))
             return string.Empty;
