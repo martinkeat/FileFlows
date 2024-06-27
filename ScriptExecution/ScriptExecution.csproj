@@ -15,4 +15,7 @@
     <None Remove="Jint.dll" />
     <EmbeddedResource Include="Jint.dll" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Plugin\Plugin.csproj" />
+  </ItemGroup>
 </Project>

@@ -112,6 +112,49 @@ window.ffCode = {
             "javascript"
         );
 
+        monaco.editor.createModel(
+            `const LanguageHelper = {
+        /**
+         * Converts the provided language to its English name.
+         * @param {string} language - The language to convert.
+         * @returns {string} The English name of the language.
+         */
+        GetEnglishFor: function(language) { },
+
+        /**
+         * Retrieves the ISO 639-1 code for the provided language.
+         * @param {string} language - The language.
+         * @returns {string} The ISO 639-1 code for the language.
+         */
+        GetIso1Code: function(language) { },
+
+        /**
+         * Retrieves the ISO 639-2 code for the provided language.
+         * @param {string} language - The language.
+         * @returns {string} The ISO 639-2 code for the language.
+         */
+        GetIso2Code: function(language) { },
+
+        /**
+         * Checks if two languages represent the same language.
+         * @param {string} language1 - The first language code to compare.
+         * @param {string} language2 - The second language code to compare.
+         * @returns {boolean} True if the languages represent the same language, false otherwise.
+         */
+        AreSame: function(language1, language2) { }
+    };
+`,
+        "javascript"
+    );
+
+        monaco.editor.createModel(`
+/**
+ * Sleeps for the given time
+ * @param {number} milliseconds - The number of milliseconds to sleep for
+ */
+Sleep: function (milliseconds) { }`,
+            "javascript"
+        );
 
         monaco.editor.createModel(
             `const Flow = { 
@@ -300,15 +343,7 @@ Execute: function (args:{{ command: string, arguments: string, argumentList: str
    Extension: string
 };`;
         monaco.languages.typescript.javascriptDefaults.addExtraLib(funFileInfo, 'ff.funFileInfo');
-        
-        monaco.editor.createModel(`
-/**
- * Sleeps for the given time
- * @param {number} milliseconds - The number of milliseconds to sleep for
- */
-Sleep: function (milliseconds) { }`,
-            "javascript"
-        );
+
 
         if (variables) {
             var actualVaraibles = {};

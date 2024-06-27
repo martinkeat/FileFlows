@@ -2,6 +2,7 @@
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using FileFlows.Plugin;
 using Jint;
 using Jint.Runtime;
 
@@ -91,6 +92,15 @@ public class Executor
             return false; // no code, flow cannot continue doesnt know what to do
         try
         {
+            // Create a wrapper object for LanguageHelper
+            var languageHelperWrapper = new
+            {
+                GetEnglishFor = new Func<string, string>(LanguageHelper.GetEnglishFor),
+                GetIso1Code = new Func<string, string>(LanguageHelper.GetIso1Code),
+                GetIso2Code = new Func<string, string>(LanguageHelper.GetIso2Code),
+                AreSame = new Func<string, string, bool>(LanguageHelper.AreSame)
+            };
+            
             // replace Variables. with dictionary notation
             string tcode = Code;
             foreach (string k in Variables.Keys.OrderByDescending(x => x.Length))
@@ -170,7 +180,8 @@ public class Executor
             .SetValue("Sleep", (int milliseconds) => Thread.Sleep(milliseconds))
             .SetValue("http", HttpClient)
             .SetValue("CacheStore", CacheStore.Instance)
-            .SetValue("StringContent", (string content) => new System.Net.Http.StringContent(content))
+            .SetValue("LanguageHelper", languageHelperWrapper)
+            .SetValue("StringContent", (string content) => new StringContent(content))
             .SetValue("JsonContent", (object content) =>
             {
                 if (content is string == false)
