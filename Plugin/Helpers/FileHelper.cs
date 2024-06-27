@@ -346,7 +346,7 @@ public class FileHelper
         var shortname = GetShortFileName(filename);
 
         var extensionIndex = shortname.LastIndexOf('.');
-        return extensionIndex < 0 ? string.Empty : shortname[(extensionIndex + 1)..];
+        return extensionIndex < 0 ? string.Empty : shortname[..extensionIndex];
     }
    
     
