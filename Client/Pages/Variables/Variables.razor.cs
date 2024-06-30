@@ -10,15 +10,12 @@ public partial class Variables : ListPage<Guid, Variable>
 
     private async Task Add()
     {
-#if (!DEMO)
         await Edit(new Variable());
-#endif
     }
 
 
     public override async Task<bool> Edit(Variable variable)
     {
-#if (!DEMO)
         this.EditingItem = variable;
         List<ElementField> fields = new List<ElementField>();
         fields.Add(new ElementField
@@ -41,19 +38,15 @@ public partial class Variables : ListPage<Guid, Variable>
                 new FileFlows.Shared.Validators.Required()
             }
         });
-        var result = await Editor.Open(new () { TypeName = "Pages.Variable", Title = "Pages.Variable.Title", 
+        await Editor.Open(new () { TypeName = "Pages.Variable", Title = "Pages.Variable.Title", 
             Fields = fields, Model = variable, SaveCallback = Save,
             FullWidth = true
         });
-#endif
         return false;
     }
 
     async Task<bool> Save(ExpandoObject model)
     {
-#if (DEMO)
-        return true;
-#else
         Blocker.Show();
         this.StateHasChanged();
 
@@ -80,7 +73,6 @@ public partial class Variables : ListPage<Guid, Variable>
             Blocker.Hide();
             this.StateHasChanged();
         }
-#endif
     }
 
 }

@@ -292,6 +292,14 @@
                        OnSubmit=@OnSubmit OnClose=@OnClose Help=@field.HelpText />
         }
             break;
+        case FormInputType.DateRange:
+        {
+            var value = GetValue<DateRange>(field.Name);
+            <InputDateRange Field=@field Label="@label" Value="@value" ReadOnly=@readOnly 
+                       ValueChanged="@(x => UpdateValue(field, x))" HideLabel=@hideLabel 
+                       OnSubmit=@OnSubmit OnClose=@OnClose Help=@field.HelpText />
+        }
+            break;
         case FormInputType.Time:
         {
             var value = GetValue<TimeSpan>(field.Name);
@@ -325,6 +333,14 @@
                     oValue = Activator.CreateInstance(genericListType);
                 }
                 <InputTable Field=@field Label="@label" Value="@oValue" HideLabel=@hideLabel TableType=@type Columns=@columns SelectAction=@selectAction />
+            }
+            break;
+        case FormInputType.Html: 
+            {
+                var html = GetValue<string>(field.Name);
+                <div class="input-html">
+                    @((MarkupString)html)
+                </div>   
             }
             break;
         case FormInputType.Label:

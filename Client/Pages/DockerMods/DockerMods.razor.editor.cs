@@ -56,7 +56,7 @@ public partial class DockerMods
             }
         });
         
-        var result = await Editor.Open(new()
+        await Editor.Open(new()
         {
             TypeName = "Pages.DockerMod", Title = "Pages.DockerMod.Title", Model = item,
             SaveCallback = Save, ReadOnly = item.Repository, Fields = fields,

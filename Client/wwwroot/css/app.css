@@ -3785,3 +3785,50 @@ hr {
 .top-right.error {
   background: var(--danger);
 }
+
+.report-output .percentage {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  background: #13191b;
+  border: solid 2px #33b2df;
+  font-size: 0.8rem;
+  height: 1.5rem;
+  position: relative;
+  top: 0.35rem;
+}
+.report-output .percentage div {
+  height: 100%;
+  display: flex;
+}
+.report-output .percentage .label {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  text-align: center;
+  align-self: center;
+  font-weight: var(--bold, 600);
+}
+.report-output .percentage .bar {
+  border-top-right-radius: 0.5rem;
+  border-bottom-right-radius: 0.5rem;
+  background: rgba(51, 178, 223, 0.3803921569);
+  background: linear-gradient(to right, rgba(51, 178, 223, 0.25), rgba(51, 178, 223, 0.5));
+}
+.report-output .percentage.over-100 {
+  border-color: #545454;
+}
+.report-output .percentage.over-100 .bar {
+  background: rgba(77, 77, 77, 0.38);
+  background: linear-gradient(to right, rgba(94, 94, 94, 0.25), rgba(255, 255, 255, 0.5));
+}
+
+.Report.editor.large {
+  width: 65rem !important;
+  min-width: min(100vw, 65rem) !important;
+  max-width: 100vw !important;
+}

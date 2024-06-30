@@ -1235,7 +1235,10 @@ and {Wrap(nameof(LibraryFile.HoldUntil))} <= {Date(DateTime.UtcNow)}
     }
     #endregion
     
-    static readonly JsonSerializerOptions JsonOptions = new JsonSerializerOptions()
+    /// <summary>
+    /// Gets the serialize options for Library Files
+    /// </summary>
+    internal static readonly JsonSerializerOptions JsonOptions = new JsonSerializerOptions()
     {
         Converters = { new TimeSpanConverter() }
     };

@@ -1,17 +1,4 @@
-using System;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Components;
-using FileFlows.Shared;
-using FileFlows.Shared.Models;
-using ffElement = FileFlows.Shared.Models.FlowElement;
-using System.Collections;
-using System.Collections.Generic;
-using System.Dynamic;
-using System.Reflection;
-using FileFlows.Plugin.Attributes;
-using System.Linq;
-using System.ComponentModel;
-using FileFlows.Client.Components.Inputs;
 using FileFlows.Plugin;
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -70,7 +57,7 @@ public partial class Editor : InputRegister, IDisposable
 
     public ExpandoObject Model { get; set; }
 
-    TaskCompletionSource<ExpandoObject> OpenTask;
+    TaskCompletionSource<(bool Success, ExpandoObject? Model)> OpenTask;
 
     public delegate Task<bool> SaveDelegate(ExpandoObject model);
     protected SaveDelegate SaveCallback;
@@ -179,7 +166,7 @@ public partial class Editor : InputRegister, IDisposable
     /// </summary>
     /// <param name="args">the opening arguments</param>
     /// <returns>the updated model from the edit</returns>
-    internal Task<ExpandoObject> Open(EditorOpenArgs args)
+    internal Task<(bool Success, ExpandoObject? Model)> Open(EditorOpenArgs args)
     {
         this.Loaded = false;
         this.RegisteredInputs.Clear();
@@ -231,7 +218,7 @@ public partial class Editor : InputRegister, IDisposable
         
         BuildFieldsRenderFragment();
         
-        OpenTask = new TaskCompletionSource<ExpandoObject>();
+        OpenTask = new ();
         this.FocusFirst = true;
         this.StateHasChanged();
         return OpenTask.Task;
@@ -337,7 +324,7 @@ public partial class Editor : InputRegister, IDisposable
             if (saved == false)
                 return;
         }
-        OpenTask?.TrySetResult(this.Model);
+        OpenTask?.TrySetResult((true, this.Model));
 
         this.Visible = false;
         this.Fields?.Clear();
@@ -369,7 +356,7 @@ public partial class Editor : InputRegister, IDisposable
             }
         }
 
-        OpenTask?.TrySetCanceled();
+        OpenTask?.TrySetResult((false, null));
         this.Visible = false;
         if(this.Fields != null)
             this.Fields.Clear();

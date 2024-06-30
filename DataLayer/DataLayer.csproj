@@ -27,4 +27,9 @@
     <EmbeddedResource Include="Scripts\Sqlite\Tables.sql" />
     <EmbeddedResource Include="Scripts\SqlServer\Tables.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Humanizer">
+      <HintPath>..\..\..\..\.nuget\packages\humanizer.core\2.14.1\lib\net6.0\Humanizer.dll</HintPath>
+    </Reference>
+  </ItemGroup>
 </Project>

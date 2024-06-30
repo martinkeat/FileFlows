@@ -116,7 +116,7 @@ public partial class Webhooks : ListPage<Guid, Webhook>
             InputType = Plugin.FormInputType.Code,
             Name = nameof(Webhook.Code)
         });
-        var result = await Editor.Open(new () { TypeName = "Pages.Webhook", Title = "Pages.Webhook.Title", 
+        await Editor.Open(new () { TypeName = "Pages.Webhook", Title = "Pages.Webhook.Title", 
             Fields = fields, Model = Webhook, SaveCallback = Save, Large = true, FullWidth = true, HideFieldsScroller = true 
         });
         return false;

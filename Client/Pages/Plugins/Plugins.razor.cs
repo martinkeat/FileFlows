@@ -117,7 +117,7 @@ public partial class Plugins : ListPage<Guid, PluginInfoModel>
         // clone the fields as they get wiped
         var fields = plugin.Settings.ToList();
 
-        var result = await Editor.Open(new()
+        await Editor.Open(new()
         {
             TypeName = "Plugins." + plugin.PackageName, Title = plugin.Name, Fields = fields, Model = model,
             HelpUrl = GetPluginHelpUrl(plugin, true),

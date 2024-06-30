@@ -36,7 +36,7 @@ public partial class Libraries : ListPage<Guid, Library>
         tabs.Add("Detection", TabDetection(library));
         tabs.Add("Scan", TabScan(library));
         tabs.Add("Advanced", TabAdvanced(library, efFolders));
-        var result = await Editor.Open(new()
+        await Editor.Open(new()
         {
             TypeName = "Pages.Library", Title = "Pages.Library.Title", Model = library, SaveCallback = Save, Tabs = tabs,
             HelpUrl = "https://fileflows.com/docs/webconsole/configuration/libraries"

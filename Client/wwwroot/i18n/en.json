@@ -153,7 +153,12 @@
       "Today":"Today",
       "Yesterday":"Yesterday",
       "Last24Hours":"Last 24 Hours",
-      "Last3Days":"Last 3 Days"
+      "Last3Days":"Last 3 Days",
+      "Last7Days":"Last 7 Days",
+      "Last31Days":"Last 31 Days",
+      "Last3Months": "Last 3 Months",
+      "Last6Months": "Last 6 Months",
+      "Last12Months": "Last 12 Months"
     }
   },
   "AuditActions": {
@@ -818,6 +823,9 @@
         "Address": "Address",
         "Enabled": "Enabled"
       }
+    },
+    "Reporting": {
+      "Title": "Reporting"
     },
     "Widget":{
       "Title":"Widget",

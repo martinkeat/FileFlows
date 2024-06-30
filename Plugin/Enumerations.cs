@@ -159,7 +159,15 @@ public enum FormInputType
     /// <summary>
     /// Math Value
     /// </summary>
-    MathValue = 35
+    MathValue = 35,
+    /// <summary>
+    /// Date Range
+    /// </summary>
+    DateRange = 36,
+    /// <summary>
+    /// Raw HTML renderer
+    /// </summary>
+    Html = 37
 }
 
 

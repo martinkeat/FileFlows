@@ -326,7 +326,11 @@ public enum LicenseFlags
     /// <summary>
     /// Auditing 
     /// </summary>
-    Auditing = 4096
+    Auditing = 4096,
+    /// <summary>
+    /// Reporting
+    /// </summary>
+    Reporting = 8192
 }
 
 

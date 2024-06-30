@@ -121,7 +121,7 @@ let ffApi = new FileFlowsApi();
             }
         });
 
-        return result != null;
+        return result.Success;
     }
     
     

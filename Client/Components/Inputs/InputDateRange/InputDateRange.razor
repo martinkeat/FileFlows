@@ -1,0 +1,26 @@
+@namespace FileFlows.Client.Components.Inputs
+
+@using FileFlows.Client.Helpers
+@inherits Input<DateRange>
+
+<InputWrapper Input="@this">
+    <DateRangePicker OnRangeSelect=@OnRangeSelect Ranges=@DateRanges TimePicker="true" TimePicker24Hour="true" DateFormat="@($"d MMM HH:mm")">
+        <PickerTemplate>
+            <div id="@context.Id" @onclick="context.Toggle" class="daterangeinput">
+                <i class="fas fa-calendar"></i>
+                <span>
+                @if ((context.TStartDate == null && context.TEndDate == null) ||
+                    (context.TStartDate == DateRangeHelper.LiveStart && context.TEndDate == DateRangeHelper.LiveEnd))
+                {
+                    <span>Any Time</span>
+                }
+                else
+                {
+                    <span>@context.FormattedRange</span>
+                }
+                </span>
+                <i class="fas fa-chevron-down float-right"></i>
+            </div>
+        </PickerTemplate>
+    </DateRangePicker>
+</InputWrapper>

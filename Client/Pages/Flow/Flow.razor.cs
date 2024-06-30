@@ -412,7 +412,7 @@ public partial class Flow : ComponentBase, IDisposable
         => await HttpHelper.Post<Dictionary<string, object>>(url, parts);
 
     private Dictionary<string, object> EditorVariables;
-    
+
     public async Task<object> Edit(FlowEditor editor, ffPart part, bool isNew, List<ffPart> parts)
     {
         // get flow variables that we can pass onto the form
@@ -424,7 +424,10 @@ public partial class Flow : ComponentBase, IDisposable
             if (variablesResult.Success)
                 variables = variablesResult.Data!;
         }
-        finally { Blocker.Hide(); }
+        finally
+        {
+            Blocker.Hide();
+        }
 
         // add the flow variables to the variables dictionary
         foreach (var variable in editor.Flow.Properties?.Variables ?? new())
@@ -443,7 +446,9 @@ public partial class Flow : ComponentBase, IDisposable
 
         string? typeName;
         string? typeDisplayName;
-        string? typeDescription = null; // should leave blank for most things, editor will look it up, for for sub flows etc, use description from that
+        string?
+            typeDescription =
+                null; // should leave blank for most things, editor will look it up, for for sub flows etc, use description from that
         if (part.Type == FlowElementType.Script)
         {
             typeName = "Script";
@@ -460,7 +465,8 @@ public partial class Flow : ComponentBase, IDisposable
         else
         {
             typeName = part.FlowElementUid[(part.FlowElementUid.LastIndexOf(".", StringComparison.Ordinal) + 1)..];
-            typeDisplayName = Translater.TranslateIfHasTranslation($"Flow.Parts.{typeName}.Label", FlowHelper.FormatLabel(typeName));
+            typeDisplayName =
+                Translater.TranslateIfHasTranslation($"Flow.Parts.{typeName}.Label", FlowHelper.FormatLabel(typeName));
         }
 
         var fields = flowElement.Fields == null
@@ -468,7 +474,7 @@ public partial class Flow : ComponentBase, IDisposable
             : ObjectCloner.Clone(flowElement.Fields).Select(x =>
             {
                 // if (FieldsTabOpened)
-                    x.CopyValue = $"{part.Uid}.{x.Name}";
+                x.CopyValue = $"{part.Uid}.{x.Name}";
                 return x;
             }).ToList();
         // add the name to the fields, so a node can be renamed
@@ -492,7 +498,8 @@ public partial class Flow : ComponentBase, IDisposable
         });
 
 
-        if (FieldsTabOpened && part.Type != FlowElementType.Output) // output is for sub flow outputs, we dont want to show the UID
+        if (FieldsTabOpened &&
+            part.Type != FlowElementType.Output) // output is for sub flow outputs, we dont want to show the UID
         {
             fields.Insert(0, new ElementField
             {
@@ -528,16 +535,16 @@ public partial class Flow : ComponentBase, IDisposable
         foreach (var field in fields)
         {
             field.Variables = variables;
-            if(field.Conditions?.Any() == true)
+            if (field.Conditions?.Any() == true)
             {
-                foreach(var condition in field.Conditions)
+                foreach (var condition in field.Conditions)
                 {
                     if (condition.Owner == null)
                         condition.Owner = field;
                     if (condition.Field == null && string.IsNullOrWhiteSpace(condition.Property) == false)
                     {
                         var other = fields.FirstOrDefault(x => x.Name == condition.Property);
-                        if (other != null && model is IDictionary<string, object> mdict) 
+                        if (other != null && model is IDictionary<string, object> mdict)
                         {
                             var otherValue = mdict.ContainsKey(other.Name) ? mdict[other.Name] : null;
                             condition.SetField(other, otherValue);
@@ -545,11 +552,13 @@ public partial class Flow : ComponentBase, IDisposable
                     }
                 }
             }
+
             // special case, load "Flow" into FLOW_LIST
             // this lets a plugin request the list of flows to be shown
             if (field.Parameters?.Any() == true)
             {
-                if (field.Parameters.ContainsKey("OptionsProperty") && field.Parameters["OptionsProperty"] is JsonElement optProperty)
+                if (field.Parameters.ContainsKey("OptionsProperty") &&
+                    field.Parameters["OptionsProperty"] is JsonElement optProperty)
                 {
                     if (optProperty.ValueKind == JsonValueKind.String)
                     {
@@ -560,7 +569,8 @@ public partial class Flow : ComponentBase, IDisposable
                             if (flowOptions == null)
                             {
                                 flowOptions = new List<ListOption>();
-                                var flowsResult = await HttpHelper.Get<Dictionary<Guid, string>>($"/api/flow/basic-list?type=" + (optp == "FLOW_LIST" ? "Standard": "SubFlow"));
+                                var flowsResult = await HttpHelper.Get<Dictionary<Guid, string>>(
+                                    $"/api/flow/basic-list?type=" + (optp == "FLOW_LIST" ? "Standard" : "SubFlow"));
                                 if (flowsResult.Success)
                                 {
                                     flowOptions = flowsResult.Data?.Where(x => x.Key != editor.Flow?.Uid)
@@ -587,16 +597,17 @@ public partial class Flow : ComponentBase, IDisposable
                                 var variableResult = await HttpHelper.Get<Variable[]>($"/api/variable");
                                 if (variableResult.Success)
                                 {
-                                    variableOptions = variableResult.Data?.OrderBy(x => x.Name)?.Select(x => new ListOption
-                                    {
-                                        Label = x.Name,
-                                        Value = new ObjectReference
+                                    variableOptions = variableResult.Data?.OrderBy(x => x.Name)?.Select(x =>
+                                        new ListOption
                                         {
-                                            Name = x.Name,
-                                            Uid = x.Uid,
-                                            Type = x.GetType().FullName
-                                        }
-                                    })?.ToList() ?? new List<ListOption>();
+                                            Label = x.Name,
+                                            Value = new ObjectReference
+                                            {
+                                                Name = x.Name,
+                                                Uid = x.Uid,
+                                                Type = x.GetType().FullName
+                                            }
+                                        })?.ToList() ?? new List<ListOption>();
                                 }
 
                             }
@@ -611,16 +622,17 @@ public partial class Flow : ComponentBase, IDisposable
                                 var flowsResult = await HttpHelper.Get<ProcessingNode[]>($"/api/node");
                                 if (flowsResult.Success)
                                 {
-                                    nodeOptions = flowsResult.Data?.Where(x => x.Enabled)?.OrderBy(x => x.Name)?.Select(x => new ListOption
-                                    {
-                                        Label = x.Name == "FileFlowsServer" ? "Internal Processing Node" : x.Name,
-                                        Value = new ObjectReference
+                                    nodeOptions = flowsResult.Data?.Where(x => x.Enabled)?.OrderBy(x => x.Name)?.Select(
+                                        x => new ListOption
                                         {
-                                            Name = x.Name,
-                                            Uid = x.Uid,
-                                            Type = x.GetType().FullName
-                                        }
-                                    })?.ToList() ?? new List<ListOption>();
+                                            Label = x.Name == "FileFlowsServer" ? "Internal Processing Node" : x.Name,
+                                            Value = new ObjectReference
+                                            {
+                                                Name = x.Name,
+                                                Uid = x.Uid,
+                                                Type = x.GetType().FullName
+                                            }
+                                        })?.ToList() ?? new List<ListOption>();
                                 }
 
                             }
@@ -638,52 +650,42 @@ public partial class Flow : ComponentBase, IDisposable
         EditorOpen = true;
         StateHasChanged();
         EditorVariables = variables;
-        var newModelTask = Editor.Open(new()
+        var result = await Editor.Open(new()
         {
-            TypeName = "Flow.Parts." + typeName, Title = title, Fields = fields, Model = model, Description = typeDescription,
+            TypeName = "Flow.Parts." + typeName, Title = title, Fields = fields, Model = model,
+            Description = typeDescription,
             Large = fields.Count > 1, HelpUrl = flowElement.HelpUrl,
             SaveCallback = isFunctionNode ? FunctionSaveCallback : null
-        });           
-        try
+        });
+        EditorOpen = false;
+        StateHasChanged();
+        if (result.Success == false)
         {
-            await newModelTask;
-        }
-        catch (Exception)
-        {
-            // can throw if canceled
+            // was canceled
             return null;
         }
-        finally
+
+        var newModel = result.Model;
+        int outputs = -1;
+        if (part.Model is IDictionary<string, object> dictNew && dictNew != null)
         {
-            EditorOpen = false;
-            StateHasChanged();
-            // await ffFlow.focusElement(part.Uid.ToString());
-        }
-        if (newModelTask.IsCanceled == false)
-        {
-            var newModel = newModelTask.Result;
-            int outputs = -1;
-            if (part.Model is IDictionary<string, object> dictNew && dictNew != null)
+            if (dictNew.TryGetValue("Outputs", out var oOutputs) && int.TryParse(oOutputs?.ToString(), out outputs))
             {
-                if (dictNew.TryGetValue("Outputs", out var oOutputs) && int.TryParse(oOutputs?.ToString(), out outputs)) { }
-                else if (part.FlowElementUid == "FileFlows.BasicNodes.Functions.Matches")
+            }
+            else if (part.FlowElementUid == "FileFlows.BasicNodes.Functions.Matches")
+            {
+                // special case, outputs is determine by the "Matches" count
+                if (dictNew?.TryGetValue("MatchConditions", out var oMatches) == true)
                 {
-                    // special case, outputs is determine by the "Matches" count
-                    if (dictNew?.TryGetValue("MatchConditions", out var oMatches) == true)
-                    {
-                        outputs = ObjectHelper.GetArrayLength(oMatches) + 1; // add +1 for not matching
-                    }
+                    outputs = ObjectHelper.GetArrayLength(oMatches) + 1; // add +1 for not matching
                 }
             }
-            ActiveFlow?.MarkDirty();
-            return new { outputs, model = newModel };
         }
-        else
-        {
-            return null;
-        }
+
+        ActiveFlow?.MarkDirty();
+        return new { outputs, model = newModel };
     }
-    
+
     private void ShowElementsOnClick()
     {
         ElementsVisible = !ElementsVisible;

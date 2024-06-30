@@ -351,7 +351,7 @@ public partial class CustomDashboard
             });
         }
         
-        var result = await Editor.Open(new()
+        await Editor.Open(new()
         {
             TypeName = "Pages.Widget", Title = "Pages.Widget.Title", Fields = fields, SaveLabel = "Labels.Add",
             SaveCallback =

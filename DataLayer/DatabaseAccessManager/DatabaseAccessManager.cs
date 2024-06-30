@@ -197,4 +197,35 @@ internal  class DatabaseAccessManager
     /// <returns>the number of connections</returns>
     public int GetOpenConnections()
         => DbConnector.GetOpenedConnections();
+
+    /// <summary>
+    /// Gets the database connection
+    /// </summary>
+    /// <returns>the database connection</returns>
+    internal Task<DatabaseConnection> GetDb()
+        => DbConnector.GetDb();
+
+    /// <summary>
+    /// Wraps a field name in the character supported by this database
+    /// </summary>
+    /// <param name="field">the name of the field to wrap</param>
+    /// <returns>the wrapped field name</returns>
+    public string WrapFieldName(string field)
+        => DbConnector.WrapFieldName(field);
+
+
+    /// <summary>
+    /// Converts a datetime to a string for the database in quotes
+    /// </summary>
+    /// <param name="date">the date to convert</param>
+    /// <returns>the converted data as a string</returns>
+    public string FormatDateQuoted(DateTime date)
+        => DbConnector.FormatDateQuoted(date);
+
+    /// <summary>
+    /// Gets the database type
+    /// </summary>
+    /// <returns>the database type</returns>
+    public DatabaseType GetDatabaseType()
+        => DbConnector.Type;
 }
