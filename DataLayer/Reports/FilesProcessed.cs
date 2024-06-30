@@ -36,10 +36,10 @@ public class FilesProcessed : Report
         var statistic = GetEnumValue<ProcessedStatistic>(model, nameof(Statistic)); 
 
         using var db = await GetDb();
-        
+
         string sql =
             $"select {Wrap("ProcessingStarted")}, {Wrap("ProcessingEnded")}, {Wrap("OriginalSize")} " +
-            $"from {Wrap("LibraryFile")} where {Wrap("Status")} = 1 " +
+            $"from {Wrap("LibraryFile")} where {Wrap("Status")} = 1 ";
         AddLibrariesToSql(model, ref sql);
         AddPeriodToSql(model, ref sql);
         sql += $" order by {Wrap("ProcessingStarted")}";
