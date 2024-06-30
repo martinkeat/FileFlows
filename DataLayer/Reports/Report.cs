@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text;
 using System.Text.Json;
 using FileFlows.DataLayer.DatabaseConnectors;
@@ -56,7 +57,7 @@ public abstract class Report
         return
         [
             new FlowElementExecution(), new LibrarySavings(),
-            new Codec(), new Language()
+            new Codec(), new Language(), new FilesProcessed()
         ];
     }
 
@@ -189,7 +190,6 @@ public abstract class Report
         if (list?.Any() != true)
             return string.Empty;
 
-
         var sb = new StringBuilder();
         sb.Append("<table class=\"report-table table\">");
 
@@ -229,6 +229,11 @@ public abstract class Report
                     sb.Append("</div>");
                     sb.Append("</td>");
                 }
+                else if (value is IFormattable numericValue)
+                {
+                    // Format numeric value with thousands separator in current culture
+                    sb.AppendFormat("<td>{0}</td>", numericValue.ToString("N", CultureInfo.CurrentCulture));
+                }
                 else
                 {
                     sb.AppendFormat("<td>{0}</td>", System.Net.WebUtility.HtmlEncode(value.ToString()));
@@ -251,85 +256,192 @@ public abstract class Report
         "#2e8b57", "#d2691e", "#ff1493", "#00ced1", "#b22222",
         "#daa520", "#5f9ea0", "#7f007f", "#808000", "#3cb371"
     ];
-/// <summary>
-/// Generates an SVG pie chart from a collection of data with interactive pop-out slices on hover.
+
+    /// <summary>
+    /// Generates an SVG pie chart from a collection of data with interactive pop-out slices on hover.
+    /// </summary>
+    /// <param name="data">The collection of data to generate the SVG pie chart from.</param>
+    /// <returns>An SVG string representing the pie chart.</returns>
+    protected string GenerateSvgPieChart(Dictionary<string, int> data)
+    {
+        var list = data?.ToList();
+        if (list?.Any() != true)
+            return string.Empty;
+
+        const int chartWidth = 600;
+        const int chartHeight = 500;
+        const int radius = 200;
+        const int centerX = (chartWidth - 100) / 2;
+        const int centerY = chartHeight / 2;
+        const int legendX = chartWidth - 120; // Positioning the legend to the right of the pie chart
+        const int legendY = 20;
+        const int legendSpacing = 20;
+        const int legendColorBoxSize = 10;
+
+        double total = list.Sum(item => (double)item.Value);
+        double startAngle = 270;
+
+        StringBuilder svgBuilder = new StringBuilder();
+        svgBuilder.AppendLine(
+            $"<svg class=\"pie-chart\" width=\"{chartWidth + 200}\" height=\"{chartHeight}\" viewBox=\"0 0 {chartWidth + 200} {chartHeight}\" xmlns=\"http://www.w3.org/2000/svg\">");
+
+
+        var legendEntries = new List<(string Label, string Color, double Percentage)>();
+
+        int count = 0;
+        foreach (var item in list)
+        {
+            string label = item.Key;
+            double value = (double)item.Value;
+            double sliceAngle = (value / total) * 360;
+            double endAngle = startAngle + sliceAngle;
+            double percentage = (value / total) * 100;
+
+            double startAngleRadians = (Math.PI / 180) * startAngle;
+            double endAngleRadians = (Math.PI / 180) * endAngle;
+
+            double x1 = centerX + radius * Math.Cos(startAngleRadians);
+            double y1 = centerY + radius * Math.Sin(startAngleRadians);
+
+            double x2 = centerX + radius * Math.Cos(endAngleRadians);
+            double y2 = centerY + radius * Math.Sin(endAngleRadians);
+
+            var largeArcFlag = sliceAngle > 180 ? 1 : 0;
+
+            string color = COLORS[count % COLORS.Length];
+            string tooltip = $"{label}: {value} ({percentage:F2}%)";
+
+            svgBuilder.AppendLine(
+                $"<path data-title=\"{System.Net.WebUtility.HtmlEncode(tooltip)}\" class=\"slice\" d=\"M{centerX},{centerY} L{x1},{y1} A{radius},{radius} 0 {largeArcFlag},1 {x2},{y2} Z\" fill=\"{color}\">" +
+                "</path>");
+
+            legendEntries.Add((label, color, percentage));
+
+            startAngle = endAngle;
+            ++count;
+        }
+
+        // Add legend
+        int legendYPosition = legendY;
+        foreach (var entry in legendEntries)
+        {
+            svgBuilder.AppendLine(
+                $"<rect x=\"{legendX}\" y=\"{legendYPosition}\" width=\"{legendColorBoxSize}\" height=\"{legendColorBoxSize}\" fill=\"{entry.Color}\" />");
+            svgBuilder.AppendLine(
+                $"<text x=\"{legendX + legendColorBoxSize + 5}\" y=\"{legendYPosition + legendColorBoxSize}\">{entry.Label} ({entry.Percentage:F2}%)</text>");
+            legendYPosition += legendSpacing;
+        }
+
+        svgBuilder.AppendLine("</svg>");
+        return svgBuilder.ToString();
+    }
+
+    /// <summary>
+/// Generates an SVG bar chart from a collection of data with a single color for all bars.
 /// </summary>
-/// <param name="data">The collection of data to generate the SVG pie chart from.</param>
-/// <returns>An SVG string representing the pie chart.</returns>
-protected string GenerateSvgPieChart(Dictionary<string, int> data)
+/// <typeparam name="T">The type of the numeric values in the data dictionary.</typeparam>
+/// <param name="data">The collection of data to generate the SVG bar chart from.</param>
+/// <param name="yAxisLabel">Optional label for the y-axis.</param>
+/// <returns>An SVG string representing the bar chart.</returns>
+protected string GenerateSvgBarChart<T>(Dictionary<object, T> data, string? yAxisLabel = null) where T : struct, IConvertible
 {
     var list = data?.ToList();
     if (list?.Any() != true)
         return string.Empty;
 
-    const int chartWidth = 500;
+    const int chartWidth = 900; // Increased chart width
     const int chartHeight = 500;
-    const int radius = 200;
-    const int centerX = chartWidth / 2;
-    const int centerY = chartHeight / 2;
-    const int legendX = chartWidth + 15; // Positioning the legend to the right of the pie chart
-    const int legendY = 20;
-    const int legendSpacing = 20;
-    const int legendColorBoxSize = 10;
+    const int barWidth = 40;
+    const int barSpacing = 20;
+    const int chartStartX = 100;
+    const int chartStartY = 50;
+    const int xAxisLabelOffset = 100;
+    const int yAxisLabelOffset = 40;
+    const int yAxisLabelFrequency = 10; // Change as needed to control the number of labels
+    const string backgroundColor = "#333"; // Dark background color
 
-    double total = list.Sum(item => (double)item.Value);
-    double startAngle = 270;
+    // Convert values to double for processing
+    double ConvertToDouble(T value) => Convert.ToDouble(value);
+    double maxValue = list.Max(item => ConvertToDouble(item.Value));
+
+    // Calculate bar width based on available space and number of bars
+    int totalBars = list.Count;
+    int availableWidth = chartWidth - 2 * chartStartX;
+    int actualBarWidth = Math.Min(barWidth, (availableWidth - (totalBars - 1) * barSpacing) / totalBars);
 
     StringBuilder svgBuilder = new StringBuilder();
     svgBuilder.AppendLine(
-        $"<svg class=\"pie-chart\" width=\"{chartWidth + 200}\" height=\"{chartHeight}\" viewBox=\"0 0 {chartWidth + 200} {chartHeight}\" xmlns=\"http://www.w3.org/2000/svg\">");
+        $"<svg class=\"bar-chart\" width=\"{chartWidth}\" height=\"{chartHeight}\" viewBox=\"0 0 {chartWidth} {chartHeight}\" xmlns=\"http://www.w3.org/2000/svg\">");
 
+    // Draw background
+    svgBuilder.AppendLine(
+        $"<rect x=\"{chartStartX}\" y=\"{chartStartY}\" width=\"{chartWidth - 2 * chartStartX}\" height=\"{(chartHeight - chartStartY - xAxisLabelOffset + 20) - 70}\" fill=\"{backgroundColor}\" />");
 
-    var legendEntries = new List<(string Label, string Color, double Percentage)>();
-
-    int count = 0;
-    foreach (var item in list)
+    // Draw y-axis labels and grid lines
+    for (int i = 0; i <= yAxisLabelFrequency; i++)
     {
-        string label = item.Key;
-        double value = (double)item.Value;
-        double sliceAngle = (value / total) * 360;
-        double endAngle = startAngle + sliceAngle;
-        double percentage = (value / total) * 100;
+        double value = (maxValue / yAxisLabelFrequency) * i;
+        int y = chartHeight - chartStartY - xAxisLabelOffset - (int)((value / maxValue) * (chartHeight - 2 * chartStartY - xAxisLabelOffset));
 
-        double startAngleRadians = (Math.PI / 180) * startAngle;
-        double endAngleRadians = (Math.PI / 180) * endAngle;
+        // Draw grid line
+        svgBuilder.AppendLine($"<line x1=\"{chartStartX}\" y1=\"{y}\" x2=\"{chartWidth - chartStartX}\" y2=\"{y}\" stroke=\"#555\" />");
 
-        double x1 = centerX + radius * Math.Cos(startAngleRadians);
-        double y1 = centerY + radius * Math.Sin(startAngleRadians);
+        // Draw y-axis label
+        svgBuilder.AppendLine($"<text x=\"{chartStartX - yAxisLabelOffset}\" y=\"{y + 5}\" text-anchor=\"start\" fill=\"#fff\">{value:F0}</text>");
 
-        double x2 = centerX + radius * Math.Cos(endAngleRadians);
-        double y2 = centerY + radius * Math.Sin(endAngleRadians);
-
-        var largeArcFlag = sliceAngle > 180 ? 1 : 0;
-
-        string color = COLORS[count % COLORS.Length];
-        string tooltip = $"{label}: {value} ({percentage:F2}%)";
-
-        svgBuilder.AppendLine(
-            $"<path data-title=\"{System.Net.WebUtility.HtmlEncode(tooltip)}\" class=\"slice\" d=\"M{centerX},{centerY} L{x1},{y1} A{radius},{radius} 0 {largeArcFlag},1 {x2},{y2} Z\" fill=\"{color}\">" +
-            "</path>");
-
-        legendEntries.Add((label, color, percentage));
-
-        startAngle = endAngle;
-        ++count;
+        // Draw y-axis tick
+        svgBuilder.AppendLine($"<line x1=\"{chartStartX - 5}\" y1=\"{y}\" x2=\"{chartStartX}\" y2=\"{y}\" stroke=\"#fff\" />");
     }
 
-    // Add legend
-    int legendYPosition = legendY;
-    foreach (var entry in legendEntries)
+    // Draw y-axis main label if provided, rotated 90 degrees
+    if (!string.IsNullOrEmpty(yAxisLabel))
     {
         svgBuilder.AppendLine(
-            $"<rect x=\"{legendX}\" y=\"{legendYPosition}\" width=\"{legendColorBoxSize}\" height=\"{legendColorBoxSize}\" fill=\"{entry.Color}\" />");
+            $"<text x=\"{chartStartX - yAxisLabelOffset - 30}\" y=\"{chartHeight / 2}\" text-anchor=\"middle\" fill=\"#fff\" transform=\"rotate(-90, {chartStartX - yAxisLabelOffset - 30}, {chartHeight / 2})\">{yAxisLabel}</text>");
+    }
+
+    // Draw bars
+    int x = chartStartX;
+    int labelInterval = Math.Max(1, totalBars / 20); // Show approximately 20 labels on the x-axis
+    for (int i = 0; i < totalBars; i++)
+    {
+        var item = list[i];
+        string label;
+        if (item.Key is DateTime dt)
+            label = dt.ToString("d MMMM");
+        else
+            label = item.Key?.ToString() ?? string.Empty;
+        double value = ConvertToDouble(item.Value);
+        int barHeight = (int)((value / maxValue) * (chartHeight - 2 * chartStartY - xAxisLabelOffset));
+
+        // Bar coordinates
+        int y = chartHeight - chartStartY - xAxisLabelOffset - barHeight;
+
+        // Bar color
+        string color = "#4682b4"; // Blue color, you can customize this
+
+        // Tooltip
+        string tooltip = $"{label}: {value}";
+
+        // Draw bar
         svgBuilder.AppendLine(
-            $"<text x=\"{legendX + legendColorBoxSize + 5}\" y=\"{legendYPosition + legendColorBoxSize}\">{entry.Label} ({entry.Percentage:F2}%)</text>");
-        legendYPosition += legendSpacing;
+            $"<rect x=\"{x}\" y=\"{y}\" width=\"{actualBarWidth}\" height=\"{barHeight}\" fill=\"{color}\" data-title=\"{System.Net.WebUtility.HtmlEncode(tooltip)}\" />");
+
+        // Label below the bar (rotated 90 degrees)
+        if (i % labelInterval == 0)
+        {
+            svgBuilder.AppendLine(
+                $"<text x=\"{x + actualBarWidth / 2}\" y=\"{chartHeight - xAxisLabelOffset + 10}\" text-anchor=\"end\" transform=\"rotate(90, {x + actualBarWidth / 2}, {chartHeight - xAxisLabelOffset + 10})\" fill=\"#fff\">{label}</text>");
+
+            // Draw x-axis tick
+            svgBuilder.AppendLine($"<line x1=\"{x + actualBarWidth / 2}\" y1=\"{chartHeight - xAxisLabelOffset}\" x2=\"{x + actualBarWidth / 2}\" y2=\"{chartHeight - xAxisLabelOffset + 5}\" stroke=\"#fff\" />");
+        }
+
+        x += actualBarWidth + barSpacing;
     }
 
     svgBuilder.AppendLine("</svg>");
     return svgBuilder.ToString();
 }
-
-
 
 }
