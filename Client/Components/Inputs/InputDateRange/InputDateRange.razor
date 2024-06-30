@@ -12,7 +12,8 @@
                 @if ((context.TStartDate == null && context.TEndDate == null) ||
                     (context.TStartDate == DateRangeHelper.LiveStart && context.TEndDate == DateRangeHelper.LiveEnd))
                 {
-                    <span>Any Time</span>
+                    var selected = Value == null ? null : DateRanges.FirstOrDefault(x => x.Value == Value).Key;
+                    <span>@(selected?.EmptyAsNull() ?? "Any Time")</span>
                 }
                 else
                 {

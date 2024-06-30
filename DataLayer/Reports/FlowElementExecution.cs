@@ -18,8 +18,6 @@ public class FlowElementExecution : Report
     /// <inheritdoc />
     public override string Icon => "fas fa-sitemap";
     /// <inheritdoc />
-    public override bool PeriodSelection => true;
-    /// <inheritdoc />
     public override ReportSelection LibrarySelection => ReportSelection.Any;
 
     /// <inheritdoc />

@@ -19,8 +19,6 @@ public class LibrarySavings : Report
     public override string Icon => "fas fa-hdd";
     /// <inheritdoc />
     public override ReportSelection LibrarySelection => ReportSelection.AnyRequired;
-    /// <inheritdoc />
-    public override bool PeriodSelection => true;
 
     /// <inheritdoc />
     public override async Task<Result<string>> Generate(Dictionary<string, object> model)

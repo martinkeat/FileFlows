@@ -41,8 +41,12 @@ public partial class Reporting
             var librariesResult = await HttpHelper.Get<Dictionary<Guid, string>>($"/api/library/basic-list");
             libraries = librariesResult.Success ? librariesResult.Data ?? new() : new();
 
-            if (rd.PeriodSelection)
+            if (rd.DefaultReportPeriod != null)
             {
+                if (InputDateRange.DateRanges.TryGetValue(
+                        Translater.Instant($"Labels.DateRanges.{rd.DefaultReportPeriod.Value}"), out var period))
+                    model["Period"] = period;
+                
                 fields.Add(new ElementField()
                 {
                     InputType = FormInputType.DateRange,

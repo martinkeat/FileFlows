@@ -24,10 +24,12 @@ public class ReportDefinition : IUniqueObject<Guid>
     /// Gets or sets the icon
     /// </summary>
     public string Icon { get; set; }
+
     /// <summary>
-    /// Gets if this report supports a period selection
+    /// Gets the default report period for this report if it supports a period
     /// </summary>
-    public bool PeriodSelection { get; set; }
+    public ReportPeriod? DefaultReportPeriod { get; set; }
+
     /// <summary>
     /// Gets the flow selection for this report
     /// </summary>
@@ -65,4 +67,56 @@ public enum ReportSelection
     /// Any of these can be selected, but at least one MUST be selected
     /// </summary>
     AnyRequired
+}
+
+
+/// <summary>
+/// Enumeration representing different report periods.
+/// </summary>
+public enum ReportPeriod
+{
+    /// <summary>
+    /// Any period.
+    /// </summary>
+    Any = 0,
+
+    /// <summary>
+    /// Last 24 hours period.
+    /// </summary>
+    Last24Hours,
+
+    /// <summary>
+    /// Today's period.
+    /// </summary>
+    Today,
+
+    /// <summary>
+    /// Yesterday's period.
+    /// </summary>
+    Yesterday,
+
+    /// <summary>
+    /// Last 7 days period.
+    /// </summary>
+    Last7Days,
+
+    /// <summary>
+    /// Last 31 days period.
+    /// </summary>
+    Last31Days,
+
+    /// <summary>
+    /// Last 3 months period.
+    /// </summary>
+    Last3Months,
+
+    /// <summary>
+    /// Last 6 months period.
+    /// </summary>
+    Last6Months,
+
+    /// <summary>
+    /// Last 12 months period.
+    /// </summary>
+    Last12Months
 }

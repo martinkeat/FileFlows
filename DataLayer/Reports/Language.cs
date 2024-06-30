@@ -18,9 +18,6 @@ public class Language : Report
     /// <inheritdoc />
     public override string Icon => "fas fa-comments";
     
-    /// <inheritdoc />
-    public override bool PeriodSelection => true;
-    
     /// <summary>
     /// Gets or sets the stream type
     /// </summary>

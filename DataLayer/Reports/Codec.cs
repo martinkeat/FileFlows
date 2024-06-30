@@ -18,9 +18,6 @@ public class Codec : Report
     /// <inheritdoc />
     public override string Icon => "fas fa-photo-video";
     
-    /// <inheritdoc />
-    public override bool PeriodSelection => true;
-    
     /// <summary>
     /// Gets or sets the stream type
     /// </summary>
@@ -30,9 +27,6 @@ public class Codec : Report
     /// Gets or sets the direction
     /// </summary>
     public IODirection Direction { get; set; }
-    
-    /// <inheritdoc />
-    public override ReportSelection LibrarySelection => ReportSelection.Any;
 
     /// <inheritdoc />
     public override async Task<Result<string>> Generate(Dictionary<string, object> model)

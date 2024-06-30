@@ -34,6 +34,11 @@ public abstract class Report
     public abstract string Icon { get; }
 
     /// <summary>
+    /// Gets the default report period for this report if it supports a period
+    /// </summary>
+    public virtual ReportPeriod? DefaultReportPeriod => ReportPeriod.Any;
+
+    /// <summary>
     /// Gets if this report supports flow selection
     /// </summary>
     public virtual ReportSelection FlowSelection => ReportSelection.None;
@@ -42,11 +47,6 @@ public abstract class Report
     /// Gets if this report supports library selection
     /// </summary>
     public virtual ReportSelection LibrarySelection => ReportSelection.None;
-
-    /// <summary>
-    /// Gets if this report supports a period selection
-    /// </summary>
-    public virtual bool PeriodSelection => false;
 
     /// <summary>
     /// Gets all reports in the system
@@ -230,6 +230,10 @@ public abstract class Report
                     sb.Append("</div>");
                     sb.Append("</td>");
                 }
+                else if (value is int or long)
+                {
+                    sb.AppendFormat("<td>{0:N0}</td>", value); // Format with thousands separator, no decimals
+                }
                 else if (value is IFormattable numericValue)
                 {
                     // Format numeric value with thousands separator in current culture
@@ -344,8 +348,9 @@ public abstract class Report
     /// <typeparam name="T">The type of the numeric values in the data dictionary.</typeparam>
     /// <param name="data">The collection of data to generate the SVG bar chart from.</param>
     /// <param name="yAxisLabel">Optional label for the y-axis.</param>
+    /// <param name="yAxisFormatter">Optional formatter for the y-axis labels</param>
     /// <returns>An SVG string representing the bar chart.</returns>
-    protected string GenerateSvgBarChart<T>(Dictionary<object, T> data, string? yAxisLabel = null)
+    protected string GenerateSvgBarChart<T>(Dictionary<object, T> data, string? yAxisLabel = null, Func<double, string>? yAxisFormatter = null)
         where T : struct, IConvertible
     {
         var list = data?.ToList();
@@ -396,9 +401,11 @@ public abstract class Report
             svgBuilder.AppendLine(
                 $"<line x1=\"{chartStartX}\" y1=\"{y}\" x2=\"{chartWidth - chartStartX}\" y2=\"{y}\" stroke=\"#555\" />");
 
+            string yLabel = yAxisFormatter == null ? $"{value:F0}" : yAxisFormatter(value);
+            
             // Draw y-axis label
             svgBuilder.AppendLine(
-                $"<text x=\"{chartStartX - yAxisLabelOffset}\" y=\"{y + 5}\" text-anchor=\"end\" fill=\"#fff\">{value:F0}</text>");
+                $"<text x=\"{chartStartX - yAxisLabelOffset + 30}\" y=\"{y + 5}\" text-anchor=\"end\" fill=\"#fff\">{yLabel}</text>");
 
             // Draw y-axis tick
             svgBuilder.AppendLine(
@@ -458,4 +465,117 @@ public abstract class Report
         svgBuilder.AppendLine("</svg>");
         return svgBuilder.ToString();
     }
+    
+    /// <summary>
+/// Generates an SVG line chart from a collection of data with a single color for all lines.
+/// </summary>
+/// <typeparam name="T">The type of the numeric values in the data dictionary.</typeparam>
+/// <param name="data">The collection of data to generate the SVG line chart from.</param>
+/// <param name="yAxisLabel">Optional label for the y-axis.</param>
+/// <param name="yAxisFormatter">Optional formatter for the y-axis labels</param>
+/// <returns>An SVG string representing the line chart.</returns>
+protected string GenerateSvgLineChart<T>(Dictionary<object, T> data, string? yAxisLabel = null, Func<double, string>? yAxisFormatter = null)
+    where T : struct, IConvertible
+{
+    var list = data?.ToList();
+    if (list?.Any() != true)
+        return string.Empty;
+
+    const int chartWidth = 900; // Increased chart width
+    const int chartHeight = 600; // Increased chart height
+    const int lineThickness = 3;
+    int chartStartX = string.IsNullOrWhiteSpace(yAxisLabel) ? 60 : 100; // Adjusted based on yAxisLabel presence
+    const int chartStartY = 20; // The top of the y-axis where it starts, from the top
+    int xAxisLabelOffset =
+        string.IsNullOrWhiteSpace(yAxisLabel) ? 110 : 150; // Adjusted based on yAxisLabel presence
+    const int yAxisLabelOffset = 40; // Fixed offset when yAxisLabel is present
+    const int yAxisLabelFrequency = 10; // Change as needed to control the number of labels
+    const string backgroundColor = "#161616"; // Dark background color
+
+    // Convert values to double for processing
+    double ConvertToDouble(T value) => Convert.ToDouble(value);
+    double maxValue = list.Max(item => ConvertToDouble(item.Value));
+
+    // Calculate the total width needed by the lines and spacing
+    int totalLines = list.Count;
+    int availableWidth = chartWidth - 2 * chartStartX;
+    int startX = chartStartX; // Starting point for the first line
+
+    StringBuilder svgBuilder = new StringBuilder();
+    svgBuilder.AppendLine(
+        $"<svg class=\"line-chart\" width=\"{chartWidth}\" height=\"{chartHeight}\" viewBox=\"0 0 {chartWidth} {chartHeight}\" xmlns=\"http://www.w3.org/2000/svg\">");
+
+    // Draw background
+    svgBuilder.AppendLine(
+        $"<rect x=\"{chartStartX}\" y=\"{chartStartY}\" width=\"{chartWidth - 2 * chartStartX}\" height=\"{chartHeight - chartStartY - xAxisLabelOffset}\" fill=\"{backgroundColor}\" />");
+
+    // Draw y-axis labels and grid lines
+    int yAxisHeight = chartHeight - xAxisLabelOffset - chartStartY;
+    for (int i = 0; i <= yAxisLabelFrequency; i++)
+    {
+        double value = (maxValue / yAxisLabelFrequency) * i;
+        int y = chartHeight - xAxisLabelOffset - (int)((value / maxValue) * yAxisHeight);
+
+        // Draw grid line
+        svgBuilder.AppendLine(
+            $"<line x1=\"{chartStartX}\" y1=\"{y}\" x2=\"{chartWidth - chartStartX}\" y2=\"{y}\" stroke=\"#555\" />");
+
+        string yLabel = yAxisFormatter == null ? $"{value:F0}" : yAxisFormatter(value);
+        // Draw y-axis label
+        svgBuilder.AppendLine(
+            $"<text x=\"{chartStartX - yAxisLabelOffset}\" y=\"{y + 5}\" text-anchor=\"end\" fill=\"#fff\">{yLabel}</text>");
+
+        // Draw y-axis tick
+        svgBuilder.AppendLine(
+            $"<line x1=\"{chartStartX - 5}\" y1=\"{y}\" x2=\"{chartStartX}\" y2=\"{y}\" stroke=\"#fff\" />");
+    }
+
+    // Draw y-axis main label if provided, rotated 90 degrees
+    if (!string.IsNullOrEmpty(yAxisLabel))
+    {
+        svgBuilder.AppendLine(
+            $"<text x=\"{chartStartX - yAxisLabelOffset - 30}\" y=\"{chartHeight / 2}\" text-anchor=\"middle\" fill=\"#fff\" transform=\"rotate(-90, {chartStartX - yAxisLabelOffset - 30}, {chartHeight / 2})\">{yAxisLabel}</text>");
+    }
+
+    // Draw lines
+    var linePoints = new List<string>();
+    int labelInterval = Math.Max(1, totalLines / 20); // Show approximately 20 labels on the x-axis
+    double xStep = (double)availableWidth / (totalLines - 1); // Calculate the step for evenly spaced x-coordinates
+    for (int i = 0; i < totalLines; i++)
+    {
+        var item = list[i];
+        string label;
+        if (item.Key is DateTime dt)
+            label = dt.ToString("d MMMM");
+        else
+            label = item.Key?.ToString() ?? string.Empty;
+        double value = ConvertToDouble(item.Value);
+        int y = chartHeight - xAxisLabelOffset - (int)((value / maxValue) * yAxisHeight);
+
+        // Add point to line path
+        int x = (int)(startX + i * xStep);
+        linePoints.Add($"{x},{y}");
+
+        // Label below the line point (rotated 90 degrees)
+        if (i % labelInterval == 0)
+        {
+            svgBuilder.AppendLine(
+                $"<g transform=\"translate({x}, {chartHeight - xAxisLabelOffset + 10})\">" +
+                $"<text transform=\"rotate(90)\" dy=\"0.4em\" fill=\"#fff\">{label}</text>" +
+                "</g>");
+
+            // Draw x-axis tick
+            svgBuilder.AppendLine(
+                $"<line x1=\"{x}\" y1=\"{chartHeight - xAxisLabelOffset}\" x2=\"{x}\" y2=\"{chartHeight - xAxisLabelOffset + 5}\" stroke=\"#fff\" />");
+        }
+    }
+
+    // Draw the line connecting points
+    svgBuilder.AppendLine(
+        $"<polyline points=\"{string.Join(" ", linePoints)}\" fill=\"none\" stroke=\"#007bff\" stroke-width=\"{lineThickness}\" />");
+
+    svgBuilder.AppendLine("</svg>");
+    return svgBuilder.ToString();
+}
+
 }

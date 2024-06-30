@@ -26,7 +26,6 @@ public class SizeFormatter : Formatter
         }
     }
 
-    
     /// <summary>
     /// Formats the value
     /// </summary>
@@ -34,6 +33,15 @@ public class SizeFormatter : Formatter
     /// <param name="format">the format to use</param>
     /// <returns>the formatted value string</returns>
     public override string Format(object value, string format)
+        => Format(value, decimalPoints: 2);
+    
+    /// <summary>
+    /// Formats the value
+    /// </summary>
+    /// <param name="value">the value to format</param>
+    /// <param name="decimalPoints">the number of decimal points to use</param>
+    /// <returns>the formatted value string</returns>
+    public string Format(object value, int decimalPoints = 2)
     {
         if (value == null)
             return string.Empty;
@@ -57,6 +65,8 @@ public class SizeFormatter : Formatter
             order++;
             num /= 1000;
         }
-        return num.ToString("0.##") + ' ' + Sizes[order];
+        if(decimalPoints < 1)
+            return num.ToString("0") + ' ' + Sizes[order];
+        return num.ToString("0." + new string('#', decimalPoints)) + ' ' + Sizes[order];
     }
 }

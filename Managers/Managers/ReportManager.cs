@@ -23,7 +23,7 @@ public class ReportManager
             rd.Name = report.Name;
             rd.Description = report.Description;
             rd.Icon = report.Icon;
-            rd.PeriodSelection = report.PeriodSelection;
+            rd.DefaultReportPeriod = report.DefaultReportPeriod;
             rd.FlowSelection = report.FlowSelection;
             rd.LibrarySelection = report.LibrarySelection;
             rd.Fields = new();

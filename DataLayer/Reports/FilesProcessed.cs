@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Esprima.Ast;
 using FileFlows.Plugin;
+using FileFlows.Plugin.Formatters;
 using FileFlows.Shared.Models;
 
 namespace FileFlows.DataLayer.Reports;
@@ -18,10 +19,10 @@ public class FilesProcessed : Report
     public override string Description => "Reports on the files processed over a given period.";
     /// <inheritdoc />
     public override string Icon => "fas fa-file-powerpoint";
-    
+
     /// <inheritdoc />
-    public override bool PeriodSelection => true;
-    
+    public override ReportPeriod? DefaultReportPeriod => ReportPeriod.Last31Days;
+
     /// <summary>
     /// Gets or sets the statistic to report on
     /// </summary>
@@ -79,11 +80,23 @@ public class FilesProcessed : Report
             current = current.AddDays(1);
         }
         
-        var table = GenerateHtmlTable(data.Select(x => new { Date = x.Key.ToString("d MMMM"), x.Value})) ?? string.Empty;
+        var formatter = new SizeFormatter();
+        var table = statistic == ProcessedStatistic.Size
+            ?
+            GenerateHtmlTable(data.Select(x => new
+                { Date = x.Key.ToString("d MMMM"), Size = formatter.Format(x.Value, null!) }))
+            : statistic == ProcessedStatistic.Duration
+                ? GenerateHtmlTable(data.Select(x => new { Date = x.Key.ToString("d MMMM"), Minutes = (long)x.Value }))
+                :
+                GenerateHtmlTable(data.Select(x => new { Date = x.Key.ToString("d MMMM"), Value = (long)x.Value }));
 
-        var chart = GenerateSvgBarChart(data.ToDictionary(x => (object)x.Key, x=> x.Value)) ?? string.Empty;
+        var chart = maxDateUtc.Value.Subtract(minDateUtc.Value).TotalDays > 35 ?
+            GenerateSvgLineChart(data.ToDictionary(x => (object)x.Key, x=> x.Value),
+                yAxisFormatter: statistic == ProcessedStatistic.Size ? (y) => formatter.Format(y, 0!) : null) :
+             GenerateSvgBarChart(data.ToDictionary(x => (object)x.Key, x=> x.Value),
+                 yAxisFormatter: statistic == ProcessedStatistic.Size ? (y) => formatter.Format(y, 0) : null);
 
-        return table + chart;
+        return (table ?? string.Empty) + (chart ?? string.Empty);
     }
 
     public enum ProcessedStatistic
