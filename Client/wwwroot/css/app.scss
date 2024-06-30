@@ -1330,14 +1330,15 @@ input[type=file]{
             display: flex;
         }
         .label {
-            position:absolute;
-            top:0;
-            bottom:0;
-            left:0;
-            right:0;
-            text-align: center;
-            align-self: center;
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
             font-weight: var(--bold, 600);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .bar {

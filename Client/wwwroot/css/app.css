@@ -3809,9 +3809,10 @@ hr {
   bottom: 0;
   left: 0;
   right: 0;
-  text-align: center;
-  align-self: center;
   font-weight: var(--bold, 600);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 .report-output .percentage .bar {
   border-top-right-radius: 0.5rem;
