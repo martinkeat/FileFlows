@@ -107,6 +107,7 @@ public class NodeUpdater:UpdaterWorker
         return settingsService.AutoUpdateNodes().Result;
     }
 
+    /// <inheritdoc />
     protected override bool GetUpdateAvailable()
     {
         var service = ServiceLoader.Load<INodeService>();
