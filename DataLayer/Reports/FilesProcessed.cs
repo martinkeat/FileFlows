@@ -40,9 +40,9 @@ public class FilesProcessed : Report
         string sql =
             $"select {Wrap("ProcessingStarted")}, {Wrap("ProcessingEnded")}, {Wrap("OriginalSize")} " +
             $"from {Wrap("LibraryFile")} where {Wrap("Status")} = 1 " +
-            $"order by {Wrap("ProcessingStarted")}";
         AddLibrariesToSql(model, ref sql);
         AddPeriodToSql(model, ref sql);
+        sql += $" order by {Wrap("ProcessingStarted")}";
 
         var files = await db.Db.FetchAsync<FilesProcessedData>(sql);
         
