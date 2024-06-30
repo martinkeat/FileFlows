@@ -112,6 +112,6 @@ public class NodeUpdater:UpdaterWorker
         var service = ServiceLoader.Load<INodeService>();
         var serverVersion = service.GetNodeUpdateVersion().Result;
         Logger.Instance.DLog("Checking for auto update: " + serverVersion);
-        return serverVersion > CurrentVersion;
+        return CurrentVersion != serverVersion;
     }
 }

@@ -221,8 +221,8 @@ public class ServerUpdater : UpdaterWorker
                 Logger.Instance.ILog($"{nameof(ServerUpdater)}: Failed to parse online version: " + result.Data);
                 return (false, new Version(0, 0, 0, 0));
             }
-
-            if (current >= onlineVersion)
+            
+            if (current >= onlineVersion && current.Build >= onlineVersion.Build)
             {
                 Logger.Instance.ILog(
                     $"{nameof(ServerUpdater)}: Current version '{Globals.Version}' newer or same as online version '{onlineVersion}'");
