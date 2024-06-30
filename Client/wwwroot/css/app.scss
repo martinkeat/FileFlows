@@ -1313,9 +1313,38 @@ input[type=file]{
 .report-output
 {
     text-align: center;
-    table {
-        text-align: left;
+    .table-container {
+        max-height: 40vh;
+        overflow-y: auto;
+        position: relative;
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            thead {
+                position: sticky;
+                top: -1px;
+                z-index: 1;
+                background: var(--base);
+                th {
+                  border:none !important;  
+                    position: relative;
+                    height:var(--input-height);
+                }
+                span {
+                    position:absolute;
+                    top:0;
+                    left:0;
+                    right:0;
+                    bottom:0;
+                    border:solid 1px var(--input-background);
+                    padding-left: 0.5rem;
+                }
+            }
+        }
     }
+
     .percentage {
         display: flex;
         flex-direction: row;

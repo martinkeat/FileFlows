@@ -191,6 +191,7 @@ public abstract class Report
             return string.Empty;
 
         var sb = new StringBuilder();
+        sb.Append("<div class=\"table-container\">");
         sb.Append("<table class=\"report-table table\">");
 
         // Add table headers
@@ -202,7 +203,7 @@ public abstract class Report
             var properties = ((Type)firstItem.GetType()).GetProperties();
             foreach (var prop in properties)
             {
-                sb.AppendFormat("<th>{0}</th>",
+                sb.AppendFormat("<th><span>{0}</span></th>",
                     System.Net.WebUtility.HtmlEncode(prop.Name.Humanize(LetterCasing.Title)));
             }
         }
@@ -245,6 +246,7 @@ public abstract class Report
 
         sb.Append("</tbody>");
         sb.Append("</table>");
+        sb.Append("</div>");
         return sb.ToString();
     }
 
@@ -337,111 +339,123 @@ public abstract class Report
     }
 
     /// <summary>
-/// Generates an SVG bar chart from a collection of data with a single color for all bars.
-/// </summary>
-/// <typeparam name="T">The type of the numeric values in the data dictionary.</typeparam>
-/// <param name="data">The collection of data to generate the SVG bar chart from.</param>
-/// <param name="yAxisLabel">Optional label for the y-axis.</param>
-/// <returns>An SVG string representing the bar chart.</returns>
-protected string GenerateSvgBarChart<T>(Dictionary<object, T> data, string? yAxisLabel = null) where T : struct, IConvertible
-{
-    var list = data?.ToList();
-    if (list?.Any() != true)
-        return string.Empty;
-
-    const int chartWidth = 900; // Increased chart width
-    const int chartHeight = 500;
-    const int barWidth = 40;
-    const int barSpacing = 20;
-    const int chartStartX = 100;
-    const int chartStartY = 50;
-    const int xAxisLabelOffset = 100;
-    const int yAxisLabelOffset = 40;
-    const int yAxisLabelFrequency = 10; // Change as needed to control the number of labels
-    const string backgroundColor = "#333"; // Dark background color
-
-    // Convert values to double for processing
-    double ConvertToDouble(T value) => Convert.ToDouble(value);
-    double maxValue = list.Max(item => ConvertToDouble(item.Value));
-
-    // Calculate bar width based on available space and number of bars
-    int totalBars = list.Count;
-    int availableWidth = chartWidth - 2 * chartStartX;
-    int actualBarWidth = Math.Min(barWidth, (availableWidth - (totalBars - 1) * barSpacing) / totalBars);
-
-    StringBuilder svgBuilder = new StringBuilder();
-    svgBuilder.AppendLine(
-        $"<svg class=\"bar-chart\" width=\"{chartWidth}\" height=\"{chartHeight}\" viewBox=\"0 0 {chartWidth} {chartHeight}\" xmlns=\"http://www.w3.org/2000/svg\">");
-
-    // Draw background
-    svgBuilder.AppendLine(
-        $"<rect x=\"{chartStartX}\" y=\"{chartStartY}\" width=\"{chartWidth - 2 * chartStartX}\" height=\"{(chartHeight - chartStartY - xAxisLabelOffset + 20) - 70}\" fill=\"{backgroundColor}\" />");
-
-    // Draw y-axis labels and grid lines
-    for (int i = 0; i <= yAxisLabelFrequency; i++)
+    /// Generates an SVG bar chart from a collection of data with a single color for all bars.
+    /// </summary>
+    /// <typeparam name="T">The type of the numeric values in the data dictionary.</typeparam>
+    /// <param name="data">The collection of data to generate the SVG bar chart from.</param>
+    /// <param name="yAxisLabel">Optional label for the y-axis.</param>
+    /// <returns>An SVG string representing the bar chart.</returns>
+    protected string GenerateSvgBarChart<T>(Dictionary<object, T> data, string? yAxisLabel = null)
+        where T : struct, IConvertible
     {
-        double value = (maxValue / yAxisLabelFrequency) * i;
-        int y = chartHeight - chartStartY - xAxisLabelOffset - (int)((value / maxValue) * (chartHeight - 2 * chartStartY - xAxisLabelOffset));
+        var list = data?.ToList();
+        if (list?.Any() != true)
+            return string.Empty;
 
-        // Draw grid line
-        svgBuilder.AppendLine($"<line x1=\"{chartStartX}\" y1=\"{y}\" x2=\"{chartWidth - chartStartX}\" y2=\"{y}\" stroke=\"#555\" />");
+        const int chartWidth = 900; // Increased chart width
+        const int chartHeight = 600; // Increased chart height
+        const int barWidth = 40;
+        const int barSpacing = 20;
+        int chartStartX = string.IsNullOrWhiteSpace(yAxisLabel) ? 60 : 100; // Adjusted based on yAxisLabel presence
+        const int chartStartY = 20; // The top of the y-axis where it starts, from the top
+        int xAxisLabelOffset =
+            string.IsNullOrWhiteSpace(yAxisLabel) ? 110 : 150; // Adjusted based on yAxisLabel presence
+        const int yAxisLabelOffset = 40; // Fixed offset when yAxisLabel is present
+        const int yAxisLabelFrequency = 10; // Change as needed to control the number of labels
+        const string backgroundColor = "#161616"; // Dark background color
 
-        // Draw y-axis label
-        svgBuilder.AppendLine($"<text x=\"{chartStartX - yAxisLabelOffset}\" y=\"{y + 5}\" text-anchor=\"start\" fill=\"#fff\">{value:F0}</text>");
+        // Convert values to double for processing
+        double ConvertToDouble(T value) => Convert.ToDouble(value);
+        double maxValue = list.Max(item => ConvertToDouble(item.Value));
 
-        // Draw y-axis tick
-        svgBuilder.AppendLine($"<line x1=\"{chartStartX - 5}\" y1=\"{y}\" x2=\"{chartStartX}\" y2=\"{y}\" stroke=\"#fff\" />");
-    }
+        // Calculate bar width based on available space and number of bars
+        int totalBars = list.Count;
+        int availableWidth = chartWidth - 2 * chartStartX;
+        int actualBarWidth = Math.Min(barWidth, (availableWidth - (totalBars - 1) * barSpacing) / totalBars);
 
-    // Draw y-axis main label if provided, rotated 90 degrees
-    if (!string.IsNullOrEmpty(yAxisLabel))
-    {
+        // Calculate the total width needed by the bars and spacing
+        int totalWidthNeeded = totalBars * (actualBarWidth + barSpacing) - barSpacing;
+        int startX = (availableWidth - totalWidthNeeded) / 2 + chartStartX; // Starting point for the first bar
+
+        StringBuilder svgBuilder = new StringBuilder();
         svgBuilder.AppendLine(
-            $"<text x=\"{chartStartX - yAxisLabelOffset - 30}\" y=\"{chartHeight / 2}\" text-anchor=\"middle\" fill=\"#fff\" transform=\"rotate(-90, {chartStartX - yAxisLabelOffset - 30}, {chartHeight / 2})\">{yAxisLabel}</text>");
-    }
+            $"<svg class=\"bar-chart\" width=\"{chartWidth}\" height=\"{chartHeight}\" viewBox=\"0 0 {chartWidth} {chartHeight}\" xmlns=\"http://www.w3.org/2000/svg\">");
 
-    // Draw bars
-    int x = chartStartX;
-    int labelInterval = Math.Max(1, totalBars / 20); // Show approximately 20 labels on the x-axis
-    for (int i = 0; i < totalBars; i++)
-    {
-        var item = list[i];
-        string label;
-        if (item.Key is DateTime dt)
-            label = dt.ToString("d MMMM");
-        else
-            label = item.Key?.ToString() ?? string.Empty;
-        double value = ConvertToDouble(item.Value);
-        int barHeight = (int)((value / maxValue) * (chartHeight - 2 * chartStartY - xAxisLabelOffset));
-
-        // Bar coordinates
-        int y = chartHeight - chartStartY - xAxisLabelOffset - barHeight;
-
-        // Bar color
-        string color = "#4682b4"; // Blue color, you can customize this
-
-        // Tooltip
-        string tooltip = $"{label}: {value}";
-
-        // Draw bar
+        // Draw background
         svgBuilder.AppendLine(
-            $"<rect x=\"{x}\" y=\"{y}\" width=\"{actualBarWidth}\" height=\"{barHeight}\" fill=\"{color}\" data-title=\"{System.Net.WebUtility.HtmlEncode(tooltip)}\" />");
+            $"<rect x=\"{chartStartX}\" y=\"{chartStartY}\" width=\"{chartWidth - 2 * chartStartX}\" height=\"{chartHeight - chartStartY - xAxisLabelOffset}\" fill=\"{backgroundColor}\" />");
 
-        // Label below the bar (rotated 90 degrees)
-        if (i % labelInterval == 0)
+        // Draw y-axis labels and grid lines
+        int yAxisHeight = chartHeight - xAxisLabelOffset - chartStartY;
+        for (int i = 0; i <= yAxisLabelFrequency; i++)
         {
-            svgBuilder.AppendLine(
-                $"<text x=\"{x + actualBarWidth / 2}\" y=\"{chartHeight - xAxisLabelOffset + 10}\" text-anchor=\"end\" transform=\"rotate(90, {x + actualBarWidth / 2}, {chartHeight - xAxisLabelOffset + 10})\" fill=\"#fff\">{label}</text>");
+            double value = (maxValue / yAxisLabelFrequency) * i;
+            int y = chartHeight - xAxisLabelOffset - (int)((value / maxValue) * yAxisHeight);
 
-            // Draw x-axis tick
-            svgBuilder.AppendLine($"<line x1=\"{x + actualBarWidth / 2}\" y1=\"{chartHeight - xAxisLabelOffset}\" x2=\"{x + actualBarWidth / 2}\" y2=\"{chartHeight - xAxisLabelOffset + 5}\" stroke=\"#fff\" />");
+            // Draw grid line
+            svgBuilder.AppendLine(
+                $"<line x1=\"{chartStartX}\" y1=\"{y}\" x2=\"{chartWidth - chartStartX}\" y2=\"{y}\" stroke=\"#555\" />");
+
+            // Draw y-axis label
+            svgBuilder.AppendLine(
+                $"<text x=\"{chartStartX - yAxisLabelOffset}\" y=\"{y + 5}\" text-anchor=\"end\" fill=\"#fff\">{value:F0}</text>");
+
+            // Draw y-axis tick
+            svgBuilder.AppendLine(
+                $"<line x1=\"{chartStartX - 5}\" y1=\"{y}\" x2=\"{chartStartX}\" y2=\"{y}\" stroke=\"#fff\" />");
         }
 
-        x += actualBarWidth + barSpacing;
+        // Draw y-axis main label if provided, rotated 90 degrees
+        if (!string.IsNullOrEmpty(yAxisLabel))
+        {
+            svgBuilder.AppendLine(
+                $"<text x=\"{chartStartX - yAxisLabelOffset - 30}\" y=\"{chartHeight / 2}\" text-anchor=\"middle\" fill=\"#fff\" transform=\"rotate(-90, {chartStartX - yAxisLabelOffset - 30}, {chartHeight / 2})\">{yAxisLabel}</text>");
+        }
+
+        // Draw bars
+        int x = startX;
+        int labelInterval = Math.Max(1, totalBars / 20); // Show approximately 20 labels on the x-axis
+        for (int i = 0; i < totalBars; i++)
+        {
+            var item = list[i];
+            string label;
+            if (item.Key is DateTime dt)
+                label = dt.ToString("d MMMM");
+            else
+                label = item.Key?.ToString() ?? string.Empty;
+            double value = ConvertToDouble(item.Value);
+            int barHeight = (int)((value / maxValue) * yAxisHeight);
+
+            // Bar coordinates
+            int y = chartHeight - xAxisLabelOffset - barHeight;
+
+            // Bar color
+            string color = "#007bff"; // Blue color
+
+            // Tooltip
+            string tooltip = $"{label}: {value}";
+
+            // Draw bar
+            svgBuilder.AppendLine(
+                $"<rect class=\"bar-chart-bar\" x=\"{x}\" y=\"{y}\" width=\"{actualBarWidth}\" height=\"{barHeight}\" fill=\"{color}\" data-title=\"{System.Net.WebUtility.HtmlEncode(tooltip)}\" />");
+
+            // Label below the bar (rotated 90 degrees)
+            if (i % labelInterval == 0)
+            {
+                svgBuilder.AppendLine(
+                    $"<g transform=\"translate({x + actualBarWidth / 2}, {chartHeight - xAxisLabelOffset + 10})\">" +
+                    $"<text transform=\"rotate(90)\" dy=\"0.4em\" fill=\"#fff\">{label}</text>" +
+                    "</g>");
+
+                // Draw x-axis tick
+                svgBuilder.AppendLine(
+                    $"<line x1=\"{x + actualBarWidth / 2}\" y1=\"{chartHeight - xAxisLabelOffset}\" x2=\"{x + actualBarWidth / 2}\" y2=\"{chartHeight - xAxisLabelOffset + 5}\" stroke=\"#fff\" />");
+            }
+
+            x += actualBarWidth + barSpacing;
+        }
+
+        svgBuilder.AppendLine("</svg>");
+        return svgBuilder.ToString();
     }
-
-    svgBuilder.AppendLine("</svg>");
-    return svgBuilder.ToString();
-}
-
 }

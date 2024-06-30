@@ -111,7 +111,7 @@ button:not(.flowtable-button):not(.navbar-toggler):not(.dd-btn), a.btn, .btn-sel
   font-size: 0.8rem !important;
   text-transform: uppercase;
   border-radius: unset !important;
-  height: 2.1875rem;
+  height: var(--input-height, 2.1875rem);
   font-weight: normal;
   outline: none !important;
   line-height: initial;
@@ -3336,7 +3336,7 @@ hr {
   display: inline-block;
   border: solid 1px var(--accent);
   position: relative;
-  height: 2.1875rem;
+  height: var(--input-height, 2.1875rem);
   margin-left: 0.5rem;
 }
 .dashboard-selector * {
@@ -3789,8 +3789,35 @@ hr {
 .report-output {
   text-align: center;
 }
-.report-output table {
+.report-output .table-container {
+  max-height: 40vh;
+  overflow-y: auto;
+  position: relative;
+}
+.report-output .table-container table {
+  width: 100%;
+  border-collapse: collapse;
   text-align: left;
+}
+.report-output .table-container table thead {
+  position: sticky;
+  top: -1px;
+  z-index: 1;
+  background: var(--base);
+}
+.report-output .table-container table thead th {
+  border: none !important;
+  position: relative;
+  height: var(--input-height);
+}
+.report-output .table-container table thead span {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border: solid 1px var(--input-background);
+  padding-left: 0.5rem;
 }
 .report-output .percentage {
   display: flex;
