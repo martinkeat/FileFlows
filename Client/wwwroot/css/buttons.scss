@@ -3,7 +3,7 @@
     font-size: 0.8rem !important;
     text-transform: uppercase;
     border-radius: unset !important;
-    height: 2.1875rem;
+    height: var(--input-height, 2.1875rem);
     font-weight: normal;
     outline: none !important;
     line-height: initial;

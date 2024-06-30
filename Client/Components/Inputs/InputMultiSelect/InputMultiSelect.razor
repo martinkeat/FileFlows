@@ -1,0 +1,30 @@
+@namespace FileFlows.Client.Components.Inputs
+@inherits Input<List<object>>
+
+<InputWrapper Input="@this">
+    <div id="@Uid" class="input-multiselect-wrapper @(dropdownOpen ? "dd-opened" : "")">
+        <div class="select-label" @onclick="ToggleDropdown">
+            <span>@SelectedLabel()</span> 
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#fff" stroke-width="2.5">
+                <path d="M6 9l6 6 6-6"/>
+            </svg>
+        </div>
+        <ul class="select-options">
+            <li class="all-option">
+                <label>
+                    <input type="checkbox" checked="@IsAllSelected" @onchange="(e) => ToggleAll()">
+                    <span>@lblAll</span>
+                </label>
+            </li>
+            @foreach (var opt in Options ?? [])
+            {
+                <li>
+                    <label>
+                        <input type="checkbox" checked="@Value.Contains(opt.Value)" @onchange="(e) => ToggleSelection(opt.Value)">
+                        <span>@opt.Label</span>
+                    </label>
+                </li>
+            }
+        </ul>
+    </div>
+</InputWrapper>

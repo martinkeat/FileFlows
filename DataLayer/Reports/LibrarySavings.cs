@@ -44,7 +44,7 @@ public class LibrarySavings : Report
                 var originalSize = group.Sum(lib => lib.OriginalSize);
                 var finalSize = group.Sum(lib => lib.FinalSize);
                 var savings = originalSize - finalSize;
-                var savingsPercentage = (savings / (double)originalSize);
+                var savingsPercentage = originalSize > 0 ? (savings / (double)originalSize) : 0;
 
                 return new
                 {
@@ -52,7 +52,7 @@ public class LibrarySavings : Report
                     OriginalSize = formatter.Format(originalSize, null!),
                     FinalSize = formatter.Format(finalSize, null!),
                     Savings = formatter.Format(savings, null!),
-                    Percentage = savingsPercentage * 100//.ToString("P1")
+                    Percentage = savingsPercentage * 100
                 };
             })
             .OrderBy(x => x.Library.ToLowerInvariant())

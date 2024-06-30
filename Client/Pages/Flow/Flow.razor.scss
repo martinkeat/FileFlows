@@ -250,7 +250,7 @@
         align-items: center;
 
 
-        height: 2.1875rem;
+        height: var(--input-height, 2.1875rem);
         font-weight: normal;
         outline: none !important;
         line-height: initial;

@@ -172,6 +172,14 @@
     Validators=@field.Validators Options="@options" HideLabel=@hideLabel ListOnly=@listOnly OnSubmit=@OnSubmit OnClose=@OnClose Help=@field.HelpText />
             }
             break;
+        case FormInputType.MultiSelect:
+        {
+            var value = GetValue<List<object>>(field.Name);
+            var options = GetParameter<List<ListOption>>(field, nameof(InputChecklist.Options));
+            <InputMultiSelect Field=@field Label="@label" Value="@value" ReadOnly=@readOnly ValueChanged="@(x => UpdateValue(field, x))"
+                            Validators=@field.Validators Options="@options" HideLabel=@hideLabel OnSubmit=@OnSubmit OnClose=@OnClose Help=@field.HelpText />
+        }
+            break;
         case FormInputType.Slider:
             {
                 var value = GetValue<int>(field.Name);

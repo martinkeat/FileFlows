@@ -24,6 +24,7 @@ $offset:7;
 
 body {
     @include generate-base-colors($step, $offset);
+    --input-height: 2.1875rem;
     
     
     --color: rgb(240, 240, 240);

@@ -165,9 +165,13 @@ public enum FormInputType
     /// </summary>
     DateRange = 36,
     /// <summary>
+    /// Multi-select
+    /// </summary>
+    MultiSelect = 37,
+    /// <summary>
     /// Raw HTML renderer
     /// </summary>
-    Html = 37
+    Html = 38
 }
 
 

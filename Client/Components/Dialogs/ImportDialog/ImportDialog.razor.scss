@@ -4,7 +4,7 @@
 }
 
 .file-input {
-    height: 2.1875rem;
+    height: var(--input-height, 2.1875rem);
     display:flex;
     flex-direction:row;
     margin:  2rem 0;

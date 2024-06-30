@@ -9,7 +9,7 @@
         outline: unset !important;
         display:inline;
         flex-grow:1;
-        height:2.1875rem;
+        height:var(--input-height, 2.1875rem);
     }
 }
 

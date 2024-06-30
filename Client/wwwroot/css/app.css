@@ -3835,6 +3835,7 @@ hr {
 }
 .report-output svg text {
   fill: var(--color);
+  font-size: 0.9rem;
 }
 
 .Report.editor.large {

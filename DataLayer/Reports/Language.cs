@@ -70,10 +70,11 @@ public class Language : Report
                 var value = dict[key];
                 if (value is JsonElement je && je.ValueKind == JsonValueKind.String)
                     value = je.GetString();
-                if (value is string codec == false)
+                if (value is string lang == false)
                     continue;
-                if (languages.TryAdd(codec, 1) == false)
-                    languages[codec] += 1;
+                lang = LanguageHelper.GetEnglishFor(lang);
+                if (languages.TryAdd(lang, 1) == false)
+                    languages[lang] += 1;
             }
         }
 
@@ -81,7 +82,7 @@ public class Language : Report
             return string.Empty;
         
         var data = languages.OrderByDescending(x => x.Value)
-            .Select(x => new { Language = LanguageHelper.GetEnglishFor(x.Key), Count = x.Value })
+            .Select(x => new { Language = x.Key, Count = x.Value })
             .ToList();
 
         var table = GenerateHtmlTable(data) ?? string.Empty;

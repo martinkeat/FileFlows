@@ -267,7 +267,7 @@ protected string GenerateSvgPieChart(Dictionary<string, int> data)
     const int radius = 200;
     const int centerX = chartWidth / 2;
     const int centerY = chartHeight / 2;
-    const int legendX = chartWidth + 20; // Positioning the legend to the right of the pie chart
+    const int legendX = chartWidth + 15; // Positioning the legend to the right of the pie chart
     const int legendY = 20;
     const int legendSpacing = 20;
     const int legendColorBoxSize = 10;

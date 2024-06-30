@@ -3,6 +3,7 @@ using FileFlows.Client.Components;
 using FileFlows.Client.Components.Inputs;
 using FileFlows.Plugin;
 using FileFlows.Shared.Validators;
+using Microsoft.Extensions.Options;
 using Microsoft.JSInterop;
 
 namespace FileFlows.Client.Pages;
@@ -30,6 +31,8 @@ public partial class Reporting
 
         Dictionary<Guid, string> flows;
         Dictionary<Guid, string> libraries;
+
+        IDictionary<string, object> model = new ExpandoObject() as IDictionary<string, object>;
         try
         {
             var flowsResult = await HttpHelper.Get<Dictionary<Guid, string>>($"/api/flow/basic-list");
@@ -47,8 +50,8 @@ public partial class Reporting
                 });
             }
 
-            AddLibrarySelectField("Flow", flows, rd.FlowSelection, ref fields);
-            AddLibrarySelectField("Library", libraries, rd.LibrarySelection, ref fields);
+            AddSelectField("Flow", flows, rd.FlowSelection, ref fields, model);
+            AddSelectField("Library", libraries, rd.LibrarySelection, ref fields, model);
 
             foreach (var tf in rd.Fields ?? [])
             {
@@ -64,6 +67,7 @@ public partial class Reporting
                 {
                     var listOptions =
                         JsonSerializer.Deserialize<List<ListOption>>(JsonSerializer.Serialize(tf.Parameters));
+                    model[tf.Name] = listOptions.First().Value;
                     fields.Add(new ElementField
                     {
                         InputType = FormInputType.Select,
@@ -103,7 +107,7 @@ public partial class Reporting
         {
             await ReportFormEditor.Open(new()
             {
-                TypeName = "Report", Title = rd.Name, Fields = fields,
+                TypeName = "Report", Title = rd.Name, Fields = fields, Model = model,
                 SaveLabel = "Labels.Run", CancelLabel = "Labels.Close", Large = true,
                 SaveCallback = async (model) =>
                 {
@@ -176,8 +180,16 @@ public partial class Reporting
         await task;
     }
 
-    private void AddLibrarySelectField(string title, Dictionary<Guid, string> list, ReportSelection selection,
-        ref List<ElementField> fields)
+    /// <summary>
+    /// Adds a select field
+    /// </summary>
+    /// <param name="title">the title of the field</param>
+    /// <param name="list">the list of options</param>
+    /// <param name="selection">the selection method</param>
+    /// <param name="fields">the fields to update</param>
+    /// <param name="model">the model to update</param>
+    private void AddSelectField(string title, Dictionary<Guid, string> list, ReportSelection selection,
+        ref List<ElementField> fields, IDictionary<string, object> model)
     {
         var listOptions = list.OrderBy(x => x.Value.ToLowerInvariant())
             .Select(x => new ListOption() { Label = x.Value, Value = x.Key }).ToList();
@@ -197,10 +209,11 @@ public partial class Reporting
                 });
                 break;
             case ReportSelection.Any:
+                model[title] = listOptions.Select(x => x.Value).ToList();
                 fields.Add(new ElementField()
                 {
                     Name = title,
-                    InputType = FormInputType.Checklist,
+                    InputType = FormInputType.MultiSelect,
                     Parameters = new()
                     {
                         {
@@ -210,10 +223,11 @@ public partial class Reporting
                 });
                 break;
             case ReportSelection.AnyRequired:
+                model[title] = listOptions.Select(x => x.Value).ToList();
                 fields.Add(new ElementField()
                 {
                     Name = title,
-                    InputType = FormInputType.Checklist,
+                    InputType = FormInputType.MultiSelect,
                     Parameters = new()
                     {
                         {

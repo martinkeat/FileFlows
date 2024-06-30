@@ -1,0 +1,68 @@
+.input-multiselect-wrapper {
+  max-width: 40rem;
+  background: var(--input-background);
+  border: solid 1px transparent;
+  position: relative;
+}
+.input-multiselect-wrapper.dd-opened {
+  border-color: var(--accent);
+}
+.input-multiselect-wrapper.dd-opened .select-options {
+  display: block;
+}
+.input-multiselect-wrapper.dd-opened .select-label svg {
+  transform: rotate(180deg); /* Rotate arrow when dropdown is open */
+}
+
+.select-label {
+  padding: 0 0.25rem;
+  display: flex;
+  height: var(--input-height, 2.1875rem);
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  user-select: none;
+}
+.select-label svg {
+  transition: transform 0.2s ease;
+  transform: rotate(0deg);
+  position: relative;
+  right: -3px;
+}
+
+.select-options {
+  position: absolute;
+  border: solid 1px var(--accent);
+  border-top: none;
+  display: none;
+  top: 100%;
+  width: 100%;
+  left: 0;
+  background-color: var(--input-background);
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 1;
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+.select-options label {
+  display: inline-flex;
+  cursor: pointer;
+  width: 100%;
+  margin: 0;
+  padding: 0.25rem;
+}
+.select-options label input {
+  top: 2px;
+  margin-right: 0.65rem;
+}
+.select-options label:hover {
+  background-color: rgba(var(--accent-rgb), 0.3);
+}
+.all-option {
+  margin-bottom: 0.25rem;
+  padding: 0.25rem 0;
+  border-bottom: solid 1px var(--border-color);
+  border-top: solid 1px var(--border-color);
+}

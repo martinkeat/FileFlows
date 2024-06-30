@@ -11,6 +11,7 @@ body {
   --base-lightest-rgb: 35, 35, 35;
   --base-lightest-2: rgb(42, 42, 42);
   --base-lightest-2-rgb: 42, 42, 42;
+  --input-height: 2.1875rem;
   --color: rgb(240, 240, 240);
   --color-rgb: 240, 240, 240;
   --color-darker: rgb(220, 220, 220);

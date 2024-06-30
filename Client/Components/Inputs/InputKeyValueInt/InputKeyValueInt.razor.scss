@@ -17,7 +17,7 @@ input {
     display: inline;
     width: 100%;
     flex-grow: 1;
-    height: 2.1875rem;
+    height: var(--input-height, 2.1875rem);
     border-color: transparent !important;
     line-height: 1.5;
     font-size: 1rem;

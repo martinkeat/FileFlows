@@ -1,6 +1,6 @@
 input {
   width: 100% !important;
-  height:2.1875rem;
+  height:var(--input-height, 2.1875rem);
 }
 
 .input-icon-picker-wrapper {

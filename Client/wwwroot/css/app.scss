@@ -786,7 +786,7 @@ input[type=file]{
     display: inline-block;
     border: solid 1px var(--accent);
     position:relative;
-    height: 2.1875rem;
+    height: var(--input-height, 2.1875rem);
     margin-left:0.5rem;
     *
     {
@@ -1363,6 +1363,7 @@ input[type=file]{
     
     svg text {
         fill: var(--color);
+        font-size: 0.9rem;
     }
 }
 
