@@ -17,12 +17,19 @@ public class FlowElementExecution : Report
     public override string Description => "Shows the flow elements that have been executed in the system.";
     /// <inheritdoc />
     public override string Icon => "fas fa-sitemap";
+    /// <inheritdoc />
+    public override bool PeriodSelection => true;
+    /// <inheritdoc />
+    public override ReportSelection LibrarySelection => ReportSelection.Any;
 
     /// <inheritdoc />
     public override async Task<Result<string>> Generate(Dictionary<string, object> model)
     {
         using var db = await GetDb();
         string sql = $"select {Wrap("ExecutedNodes")} from {Wrap("LibraryFile")} where {Wrap("Status")} = 1"; 
+        AddLibrariesToSql(model, ref sql);
+        AddPeriodToSql(model, ref sql);
+        
         var nodesString = await db.Db.FetchAsync<string>(sql);
         var nodes = nodesString.Where(x => string.IsNullOrWhiteSpace(x) == false)
             .SelectMany(x => JsonSerializer.Deserialize<List<ExecutedNode>>(x, DbLibraryFileManager.JsonOptions)!)

@@ -25,18 +25,13 @@ public class LibrarySavings : Report
     /// <inheritdoc />
     public override async Task<Result<string>> Generate(Dictionary<string, object> model)
     {
-        var libraryUids = GetLibraryUids(model);
-
-        (DateTime? startUtc, DateTime? endUtc) = GetPeriod(model);
-
         using var db = await GetDb();
         string sql =
-            $"select {Wrap("LibraryUid")}, {Wrap("LibraryName")}, {Wrap("OriginalSize")}, {Wrap("FinalSize")} from {Wrap("LibraryFile")} where {Wrap("Status")} = 1";
-        if (libraryUids.Count > 0)
-            sql += $" and {Wrap("LibraryUid")} in ({string.Join(", ", libraryUids.Select(x => $"'{x}'"))})";
-
-        if (startUtc != null && endUtc != null)
-            sql += $" and {Wrap("ProcessingEnded")} between {FormatDateQuoted(startUtc.Value)} and {FormatDateQuoted(endUtc.Value)}";
+            $"select {Wrap("LibraryUid")}, {Wrap("LibraryName")}, {Wrap("OriginalSize")}, " +
+            $"{Wrap("FinalSize")} from {Wrap("LibraryFile")} where {Wrap("Status")} = 1";
+        
+        AddLibrariesToSql(model, ref sql);
+        AddPeriodToSql(model, ref sql);
 
         var libraries = await db.Db.FetchAsync<LibrarySavingsData>(sql);
 

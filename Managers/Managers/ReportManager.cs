@@ -39,6 +39,18 @@ public class ReportManager
                     tf.Type = "Int";
                 else if (prop.PropertyType == typeof(string))
                     tf.Type = "String";
+                else if (prop.PropertyType.IsEnum)
+                {
+                    tf.Type = "Select";
+                    
+                    tf.Parameters = Enum.GetValues(prop.PropertyType).Cast<object>()
+                        .Select(enumValue => new ListOption
+                        {
+                            Label = enumValue.ToString(),  // Set label as string representation of enum value
+                            Value = enumValue               // Set value as enum value itself
+                        })
+                        .ToList();
+                }
                 else
                     continue;
                 tf.Name = prop.Name;

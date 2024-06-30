@@ -49,7 +49,11 @@ public abstract class Report
     /// <returns>all reports in the system</returns>
     public static List<Report> GetReports()
     {
-        return [new FlowElementExecution(), new LibrarySavings()];
+        return
+        [
+            new FlowElementExecution(), new LibrarySavings(),
+            new Codec(), new Language()
+        ];
     }
 
     /// <summary>
@@ -84,13 +88,37 @@ public abstract class Report
         => DatabaseAccessManager.Instance.FormatDateQuoted(date);
 
     /// <summary>
+    /// Adds the period to the SQL command
+    /// </summary>
+    /// <param name="model">the model passed to the report</param>
+    /// <param name="sql">the SQL to update</param>
+    protected void AddPeriodToSql(Dictionary<string, object> model, ref string sql)
+    {
+        (DateTime? startUtc, DateTime? endUtc) = GetPeriod(model);
+        if (startUtc != null && endUtc != null)
+            sql += $" and {Wrap("ProcessingEnded")} between {FormatDateQuoted(startUtc.Value)} and {FormatDateQuoted(endUtc.Value)}";
+    }
+
+    /// <summary>
+    /// Adds the libraries to the SQL command
+    /// </summary>
+    /// <param name="model">the model passed to the report</param>
+    /// <param name="sql">the SQL to update</param>
+    protected void AddLibrariesToSql(Dictionary<string, object> model, ref string sql)
+    {
+        var libraryUids = GetLibraryUids(model);
+        if (libraryUids.Count > 0)
+            sql += $" and {Wrap("LibraryUid")} in ({string.Join(", ", libraryUids.Select(x => $"'{x}'"))})";
+    }
+
+    /// <summary>
     /// Gets the period
     /// </summary>
     /// <param name="model">the model passed into the report</param>
     /// <returns>the period</returns>
     protected (DateTime? StartUtc, DateTime? EndUtc) GetPeriod(Dictionary<string, object> model)
     {
-        if (!model.TryGetValue("Period", out var period) || period is not JsonElement jsonElement) 
+        if (model.TryGetValue("Period", out var period) == false || period is not JsonElement jsonElement) 
             return (null, null);
         if (jsonElement.ValueKind != JsonValueKind.Object) 
             return (null, null);
@@ -98,6 +126,20 @@ public abstract class Report
         var start = jsonElement.GetProperty("Start").GetDateTime().ToUniversalTime();
         var end = jsonElement.GetProperty("End").GetDateTime().ToUniversalTime();
         return (start, end);
+    }
+
+    /// <summary>
+    /// Gets the period
+    /// </summary>
+    /// <param name="model">the model passed into the report</param>
+    /// <returns>the period</returns>
+    protected T? GetEnumValue<T>(Dictionary<string, object> model, string name) where T : Enum
+    {
+        if (model.TryGetValue(name, out var value) == false || value is not JsonElement je) 
+            return default;
+        if (je.ValueKind == JsonValueKind.Number)
+            return (T)(object)je.GetInt32();
+        return default;
     }
 
     /// <summary>
@@ -136,10 +178,10 @@ public abstract class Report
     /// <exception cref="ArgumentNullException">Thrown when the data is null.</exception>
     protected string GenerateHtmlTable(IEnumerable<dynamic> data)
     {
-        if (data == null)
-        {
-            throw new ArgumentNullException(nameof(data));
-        }
+        var list = data?.ToList();
+        if (list?.Any() != true)
+            return string.Empty;
+        
 
         var sb = new StringBuilder();
         sb.Append("<table class=\"report-table table\">");
@@ -147,7 +189,7 @@ public abstract class Report
         // Add table headers
         sb.Append("<thead>");
         sb.Append("<tr>");
-        var firstItem = data.FirstOrDefault();
+        var firstItem = list.FirstOrDefault();
         if (firstItem != null)
         {
             var properties = ((Type)firstItem.GetType()).GetProperties();
@@ -161,7 +203,7 @@ public abstract class Report
         sb.Append("<tbody>");
 
         // Add table rows
-        foreach (var item in data)
+        foreach (var item in list)
         {
             sb.Append("<tr>");
             var properties = ((Type)item.GetType()).GetProperties();

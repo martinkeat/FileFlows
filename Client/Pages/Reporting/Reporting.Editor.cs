@@ -1,4 +1,6 @@
+using System.Text.Json;
 using FileFlows.Client.Components;
+using FileFlows.Client.Components.Inputs;
 using FileFlows.Plugin;
 using FileFlows.Shared.Validators;
 
@@ -30,10 +32,10 @@ public partial class Reporting
         try
         {
             var flowsResult = await HttpHelper.Get<Dictionary<Guid, string>>($"/api/flow/basic-list");
-            flows = flowsResult.Success ? flowsResult.Data ?? new () : new();
+            flows = flowsResult.Success ? flowsResult.Data ?? new() : new();
 
             var librariesResult = await HttpHelper.Get<Dictionary<Guid, string>>($"/api/library/basic-list");
-            libraries = librariesResult.Success ? librariesResult.Data ?? new () : new();
+            libraries = librariesResult.Success ? librariesResult.Data ?? new() : new();
 
             if (rd.PeriodSelection)
             {
@@ -49,7 +51,7 @@ public partial class Reporting
 
             foreach (var tf in rd.Fields ?? [])
             {
-                if(tf.Type == "Switch")
+                if (tf.Type == "Switch")
                 {
                     fields.Add(new ElementField
                     {
@@ -57,7 +59,27 @@ public partial class Reporting
                         Name = tf.Name
                     });
                 }
+                else if (tf.Type == "Select")
+                {
+                    var listOptions =
+                        JsonSerializer.Deserialize<List<ListOption>>(JsonSerializer.Serialize(tf.Parameters));
+                    fields.Add(new ElementField
+                    {
+                        InputType = FormInputType.Select,
+                        Name = tf.Name,
+                        Parameters = new ()
+                        {
+                            { "Options", listOptions }
+                        }
+                    });
+
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            // Ignored
+            Logger.Instance.ILog(ex.Message);
         }
         finally
         {
@@ -128,6 +150,11 @@ public partial class Reporting
     /// <returns>the task to await for the opened report</returns>
     private async Task ShowReport(string name, string html)
     {
+        if (string.IsNullOrWhiteSpace(html))
+        {
+            Toast.ShowWarning("No matching data found.");
+            return;
+        }
         await Editor.Open(new()
         {
             TypeName = "ReportRender", Title = name, Model = new { Html = $"<div class=\"report-output\">{html}</div>" },
