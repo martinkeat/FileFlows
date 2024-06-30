@@ -3786,6 +3786,12 @@ hr {
   background: var(--danger);
 }
 
+.report-output {
+  text-align: center;
+}
+.report-output table {
+  text-align: left;
+}
 .report-output .percentage {
   display: flex;
   flex-direction: row;
@@ -3827,6 +3833,9 @@ hr {
   background: rgba(77, 77, 77, 0.38);
   background: linear-gradient(to right, rgba(94, 94, 94, 0.25), rgba(255, 255, 255, 0.5));
 }
+.report-output svg text {
+  fill: var(--color);
+}
 
 .Report.editor.large {
   width: 65rem !important;
@@ -3836,4 +3845,14 @@ hr {
 
 .daterangeinput {
   max-width: 40rem;
+}
+
+.svg-tooltip {
+  position: absolute;
+  z-index: 6;
+  background: var(--base-lighter);
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  font-weight: var(--bold, 600);
+  font-size: 0.9rem;
 }

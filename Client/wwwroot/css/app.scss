@@ -1312,6 +1312,10 @@ input[type=file]{
 
 .report-output
 {
+    text-align: center;
+    table {
+        text-align: left;
+    }
     .percentage {
         display: flex;
         flex-direction: row;
@@ -1356,6 +1360,10 @@ input[type=file]{
             }
         }
     }
+    
+    svg text {
+        fill: var(--color);
+    }
 }
 
 .Report.editor.large {
@@ -1365,4 +1373,14 @@ input[type=file]{
 }
 .daterangeinput {
     max-width: 40rem;
+}
+
+.svg-tooltip {
+    position:absolute;    
+    z-index:6;
+    background: var(--base-lighter);
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    font-weight: var(--bold, 600);
+    font-size: 0.9rem;
 }

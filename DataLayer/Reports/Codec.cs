@@ -77,8 +77,15 @@ public class Codec : Report
             }
         }
 
-        return GenerateHtmlTable(codecs.OrderByDescending(x => x.Value)
-            .Select(x => new { Codec = x.Key, Count = x.Value }));
+        var data = codecs.OrderByDescending(x => x.Value)
+            .Select(x => new { Codec = x.Key, Count = x.Value })
+            .ToList();
+        
+        var table = GenerateHtmlTable(data) ?? string.Empty;
+
+        var chart = GenerateSvgPieChart(data.ToDictionary(x => x.Codec, x=> x.Count)) ?? string.Empty;
+
+        return table + chart;
 
     }
 }

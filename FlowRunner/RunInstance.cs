@@ -233,6 +233,7 @@ public class RunInstance
             FinishEarly(libFile);
             return (true, false);
         }
+        LogInfo("Flow: " + flow.Name);
         // update the library file to reference the updated flow (if changed)
         if (libFile.Flow?.Name != flow.Name || libFile.Flow?.Uid != flow.Uid)
         {

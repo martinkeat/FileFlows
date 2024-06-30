@@ -77,8 +77,17 @@ public class Language : Report
             }
         }
 
-        return GenerateHtmlTable(languages.OrderByDescending(x => x.Value)
-            .Select(x => new { Language = LanguageHelper.GetEnglishFor(x.Key), Count = x.Value }));
+        if (languages.Count == 0)
+            return string.Empty;
+        
+        var data = languages.OrderByDescending(x => x.Value)
+            .Select(x => new { Language = LanguageHelper.GetEnglishFor(x.Key), Count = x.Value })
+            .ToList();
 
+        var table = GenerateHtmlTable(data) ?? string.Empty;
+
+        var chart = GenerateSvgPieChart(data.ToDictionary(x => x.Language, x=> x.Count)) ?? string.Empty;
+
+        return table + chart;
     }
 }

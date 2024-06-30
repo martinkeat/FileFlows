@@ -3,6 +3,7 @@ using FileFlows.Client.Components;
 using FileFlows.Client.Components.Inputs;
 using FileFlows.Plugin;
 using FileFlows.Shared.Validators;
+using Microsoft.JSInterop;
 
 namespace FileFlows.Client.Pages;
 
@@ -155,7 +156,7 @@ public partial class Reporting
             Toast.ShowWarning("No matching data found.");
             return;
         }
-        await Editor.Open(new()
+        var task = Editor.Open(new()
         {
             TypeName = "ReportRender", Title = name, Model = new { Html = $"<div class=\"report-output\">{html}</div>" },
             Large = true, ReadOnly = true,
@@ -168,6 +169,11 @@ public partial class Reporting
                 }
             ]
         });
+
+        await Task.Delay(50);
+        await jsReports.InvokeVoidAsync("initCharts");
+
+        await task;
     }
 
     private void AddLibrarySelectField(string title, Dictionary<Guid, string> list, ReportSelection selection,
