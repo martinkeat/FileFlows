@@ -92,9 +92,9 @@ public class FilesProcessed : Report
 
         var chart = maxDateUtc.Value.Subtract(minDateUtc.Value).TotalDays > 35 ?
             GenerateSvgLineChart(data.ToDictionary(x => (object)x.Key, x=> x.Value),
-                yAxisFormatter: statistic == ProcessedStatistic.Size ? (y) => formatter.Format(y, 0!) : null) :
+                yAxisFormatter: statistic == ProcessedStatistic.Size ? "filesize" : null) :
              GenerateSvgBarChart(data.ToDictionary(x => (object)x.Key, x=> x.Value),
-                 yAxisFormatter: statistic == ProcessedStatistic.Size ? (y) => formatter.Format(y, 0) : null);
+                 yAxisFormatter: statistic == ProcessedStatistic.Size ? "filesize" : null);
 
         return (table ?? string.Empty) + (chart ?? string.Empty);
     }

@@ -357,7 +357,7 @@ public abstract class Report
     /// <param name="yAxisFormatter">Optional formatter for the y-axis labels</param>
     /// <param name="jsVersion">If the javascript version should be used</param>
     /// <returns>An SVG string representing the bar chart.</returns>
-    protected string GenerateSvgBarChart<T>(Dictionary<object, T> data, string? yAxisLabel = null, Func<double, string>? yAxisFormatter = null, bool jsVersion = true)
+    protected string GenerateSvgBarChart<T>(Dictionary<object, T> data, string? yAxisLabel = null, string? yAxisFormatter = null, bool jsVersion = true)
         where T : struct, IConvertible
     {
         var list = data?.ToList();
@@ -365,7 +365,13 @@ public abstract class Report
             return string.Empty;
 
         if (jsVersion)
-            return "<input type=\"hidden\" class=\"report-bar-chart-data\" value=\"" + HttpUtility.HtmlEncode(JsonSerializer.Serialize(data)) + "\" />";
+            return "<input type=\"hidden\" class=\"report-bar-chart-data\" value=\"" + HttpUtility.HtmlEncode(
+                JsonSerializer.Serialize(
+                    new
+                    {
+                        data,
+                        yAxisFormatter
+                    })) + "\" />";
 
         const int chartWidth = 900; // Increased chart width
         const int chartHeight = 600; // Increased chart height
@@ -411,7 +417,8 @@ public abstract class Report
             svgBuilder.AppendLine(
                 $"<line x1=\"{chartStartX}\" y1=\"{y}\" x2=\"{chartWidth - chartStartX}\" y2=\"{y}\" stroke=\"#555\" />");
 
-            string yLabel = yAxisFormatter == null ? $"{value:F0}" : yAxisFormatter(value);
+            //string yLabel = yAxisFormatter == null ? $"{value:F0}" : yAxisFormatter(value);
+            string yLabel = $"{value:F0}";
             
             // Draw y-axis label
             svgBuilder.AppendLine(
@@ -485,7 +492,7 @@ public abstract class Report
 /// <param name="yAxisFormatter">Optional formatter for the y-axis labels</param>
 /// <param name="jsVersion">If the javascript version should be used</param>
 /// <returns>An SVG string representing the line chart.</returns>
-protected string GenerateSvgLineChart<T>(Dictionary<object, T> data, string? yAxisLabel = null, Func<double, string>? yAxisFormatter = null, bool jsVersion = true)
+protected string GenerateSvgLineChart<T>(Dictionary<object, T> data, string? yAxisLabel = null, string? yAxisFormatter = null, bool jsVersion = true)
     where T : struct, IConvertible
 {
     var list = data?.ToList();
@@ -493,7 +500,11 @@ protected string GenerateSvgLineChart<T>(Dictionary<object, T> data, string? yAx
         return string.Empty;
     
     if (jsVersion)
-        return "<input type=\"hidden\" class=\"report-line-chart-data\" value=\"" + HttpUtility.HtmlEncode(JsonSerializer.Serialize(data)) + "\" />";
+        return "<input type=\"hidden\" class=\"report-line-chart-data\" value=\"" + HttpUtility.HtmlEncode(JsonSerializer.Serialize(
+    new {
+        data,
+        yAxisFormatter
+    })) + "\" />";
 
     const int chartWidth = 900; // Increased chart width
     const int chartHeight = 600; // Increased chart height
@@ -534,7 +545,8 @@ protected string GenerateSvgLineChart<T>(Dictionary<object, T> data, string? yAx
         svgBuilder.AppendLine(
             $"<line x1=\"{chartStartX}\" y1=\"{y}\" x2=\"{chartWidth - chartStartX}\" y2=\"{y}\" stroke=\"#555\" />");
 
-        string yLabel = yAxisFormatter == null ? $"{value:F0}" : yAxisFormatter(value);
+        //string yLabel = yAxisFormatter == null ? $"{value:F0}" : yAxisFormatter(value);
+        string yLabel = $"{value:F0}";
         // Draw y-axis label
         svgBuilder.AppendLine(
             $"<text x=\"{chartStartX - yAxisLabelOffset}\" y=\"{y + 5}\" text-anchor=\"end\" fill=\"#fff\">{yLabel}</text>");

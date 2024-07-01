@@ -143,7 +143,28 @@ export class Reporting {
             this.createChart(ele, options)
         }
     }
+    
+    formatValue(value, formatter)
+    {
+        if(!formatter)
+            return value;
+        if(formatter.toLowerCase() === 'filesize')
+            return this.formatBytes(value);
+        return value;
+    }
+    
+    formatBytes(size) {
+        const sizes = ["B", "KB", "MB", "GB", "TB"];
+        let order = 0;
+        let num = size;
 
+        while (num >= 1000 && order < sizes.length - 1) {
+            order++;
+            num /= 1000;
+        }
+
+        return `${num.toFixed(2)} ${sizes[order]}`;
+    }
     initBarJsCharts()
     {
         let hidden = document.querySelectorAll('.report-output .report-bar-chart-data');
@@ -152,7 +173,8 @@ export class Reporting {
             let ele = document.createElement('div');
             hPid.insertAdjacentElement('afterend', ele);
 
-            let data = JSON.parse(hPid.value);
+            let args = JSON.parse(hPid.value);
+            let data = args.data;
             let series = [];
             let dates = false;
             Object.keys(data).forEach((key) => {
@@ -173,17 +195,22 @@ export class Reporting {
                 chart: {
                     type: 'bar'
                 },
-                plotOptions: {
-                    bar: {
-                        horizontal: false
-                    }
-                },
                 tooltip: {
                     y: {
                         title: {
                             formatter: function(seriesName) {
                                 return '';
                             }
+                        }                      
+                    }
+                },
+                dataLabels: {
+                    enabled: false
+                },
+                yaxis: {
+                    labels : {
+                        formatter: (value) => {
+                            return value ? this.formatValue(value, args.yAxisFormatter) : '';
                         }
                     }
                 },
@@ -207,7 +234,8 @@ export class Reporting {
             let ele = document.createElement('div');
             hPid.insertAdjacentElement('afterend', ele);
 
-            let data = JSON.parse(hPid.value);
+            let args = JSON.parse(hPid.value);
+            let data = args.data;
             let series = [];
             let dates = false;
             Object.keys(data).forEach((key) => {
@@ -253,6 +281,13 @@ export class Reporting {
                             formatter: function(seriesName) {
                                 return '';
                             }
+                        }
+                    }
+                },
+                yaxis: {
+                    labels : {
+                        formatter: (value) => {
+                            return value ? this.formatValue(value, args.yAxisFormatter) : '';
                         }
                     }
                 },
