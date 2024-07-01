@@ -3798,6 +3798,7 @@ hr {
   width: 100%;
   border-collapse: collapse;
   text-align: left;
+  margin: 0;
 }
 .report-output .table-container table thead {
   position: sticky;
