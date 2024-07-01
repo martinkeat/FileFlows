@@ -47,7 +47,7 @@ public class Executor
     /// <summary>
     /// Gets or sets the directory where shared modules will be loaded from
     /// </summary>
-    public string SharedDirectory { get; set; } = string.Empty;
+    public string? SharedDirectory { get; set; } = string.Empty;
 
     /// <summary>
     /// Gets or sets the process executor that is used by script to execute an external process

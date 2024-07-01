@@ -21,6 +21,9 @@ public class Globals
     /// </summary>
     public static readonly Version MinimumNodeVersion = new (Version);
 
+    /// <summary>
+    /// Gets or sets if this is running in development
+    /// </summary>
     public static bool IsDevelopment { get; set; }
 
     /// <summary>
@@ -99,6 +102,9 @@ public class Globals
     /// </summary>
     public const string FileDisplayNameScript = "FILE_DISPLAY_NAME";
 
+    /// <summary>
+    /// The UID for the flow failure input
+    /// </summary>
     public const string FlowFailureInputUid = "FileFlows.BasicNodes.FlowFailure";
 
     /// <summary>

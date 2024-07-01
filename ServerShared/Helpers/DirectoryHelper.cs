@@ -64,14 +64,15 @@ public class DirectoryHelper
                 var dllDir = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
                 if (string.IsNullOrEmpty(dllDir))
                     throw new Exception("Failed to find DLL directory");
-                _BaseDirectory = new DirectoryInfo(dllDir).Parent.FullName;
+                _BaseDirectory = new DirectoryInfo(dllDir).Parent?.FullName ?? string.Empty;
             }
             return _BaseDirectory;
         }
         set =>  _BaseDirectory = value;
     }
     
-    private static string ExecutingDirectory => Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+    private static string ExecutingDirectory => 
+        Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location)!;
 
 
     /// <summary>

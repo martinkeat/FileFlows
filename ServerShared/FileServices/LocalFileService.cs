@@ -206,7 +206,7 @@ public class LocalFileService : IFileService
                 Name = fileInfo.Name,
                 FullName = fileInfo.FullName,
                 Length = fileInfo.Length,
-                Directory = fileInfo.DirectoryName
+                Directory = fileInfo.DirectoryName ?? string.Empty
             };
         }
         catch (Exception ex)
@@ -306,7 +306,7 @@ public class LocalFileService : IFileService
             Logger?.ILog("File exists: " + path);
             var destDir = new FileInfo(destination).Directory;
             Logger?.ILog("Checking destination exists: " + destDir);
-            CreateDirectoryIfNotExists(destDir.FullName);
+            CreateDirectoryIfNotExists(destDir?.FullName!);
 
             Logger?.ILog($"About to move file '{fileInfo.FullName}' to '{destination}'");
             fileInfo.MoveTo(destination, overwrite);
@@ -327,6 +327,9 @@ public class LocalFileService : IFileService
     /// </remarks>
     private void CreateDirectoryIfNotExists(string path)
     {
+        if (string.IsNullOrWhiteSpace(path))
+            return;
+        
         if (Directory.Exists(path))
             return;
         try
@@ -382,7 +385,7 @@ public class LocalFileService : IFileService
                 return Result<bool>.Fail("File does not exist");
             
             var destDir = new FileInfo(destination).Directory;
-            CreateDirectoryIfNotExists(destDir.FullName);
+            CreateDirectoryIfNotExists(destDir?.FullName!);
 
             fileInfo.CopyTo(destination, overwrite);
             SetPermissions(destination);
@@ -462,8 +465,15 @@ public class LocalFileService : IFileService
     /// <inheritdoc />
     public Result<long> DirectorySize(string path)
     {
+        if (string.IsNullOrWhiteSpace(path))
+            return 0;
+        
         if (File.Exists(path))
-            path = new FileInfo(path).Directory.FullName;
+            path = new FileInfo(path).Directory?.FullName ?? string.Empty;
+        
+        if (string.IsNullOrWhiteSpace(path))
+            return 0;
+        
         if (Directory.Exists(path) == false)
             return 0;
         
@@ -558,7 +568,7 @@ public class LocalFileService : IFileService
     /// </summary>
     /// <param name="path">the path</param>
     /// <param name="logMethod">the log method</param>
-    public void SetPermissions(string path, Action<string> logMethod = null)
+    public void SetPermissions(string path, Action<string>? logMethod = null)
     {
         logMethod ??= (string message) => Logger?.ILog(message);
 

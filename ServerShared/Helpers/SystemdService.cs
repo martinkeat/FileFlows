@@ -71,8 +71,8 @@ public class SystemdService
         // dotnet: /usr/share/dotnet /home/john/.dotnet/dotnet
         if (whereIsDotnet?.StartsWith("dotnet:") == false)
             return "dotnet";
-        whereIsDotnet = whereIsDotnet[7..].Trim();
-        int spaceIndex = whereIsDotnet.IndexOf(" ");
+        whereIsDotnet = whereIsDotnet![7..].Trim();
+        int spaceIndex = whereIsDotnet.IndexOf(' ');
         if (spaceIndex > 0)
             whereIsDotnet = whereIsDotnet.Substring(0, spaceIndex);
         if (string.IsNullOrWhiteSpace(whereIsDotnet))
@@ -169,7 +169,7 @@ WantedBy=multi-user.target";
 
         string file = Path.Combine(GetSystemdServiceFolder(), $"fileflows{(isNode ? "-node" : "")}.service");
         var fileInfo = new FileInfo(file);
-        if (fileInfo.Directory.Exists == false)
+        if (fileInfo.Directory?.Exists == false)
         {
             try
             {

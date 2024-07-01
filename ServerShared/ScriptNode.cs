@@ -38,7 +38,7 @@ public class ScriptNode:Node
     public override int Execute(NodeParameters args)
     {
         // build up the entry point
-        string epParams = string.Join(", ", Script.Parameters?.Select(x => x.Name).ToArray());
+        string epParams = string.Join(", ", Script.Parameters?.Select(x => x.Name)?.ToArray() ?? []);
         // all scripts must contain the "Script" method we then add this to call that 
         //string entryPoint = $"Script({epParams});";
         string entryPoint = $"var scriptResult = Script({epParams});\nexport const result = scriptResult;";
@@ -67,7 +67,7 @@ public class ScriptNode:Node
                             if (string.IsNullOrWhiteSpace(str) == false)
                             {
                                 Logger.Instance.ILog("Parameter is string replacing variables: " + str);
-                                string replaced = args.ReplaceVariables(str);
+                                var replaced = args?.ReplaceVariables(str);
                                 if (replaced != str)
                                 {
                                     Logger.Instance.ILog("Variables replaced: " + replaced);
@@ -85,7 +85,7 @@ public class ScriptNode:Node
                             value = null;
                     }
 
-                    execArgs.AdditionalArguments.Add(p.Name, value);
+                    execArgs.AdditionalArguments.Add(p.Name, value!);
                 }
                 catch (Exception ex)
                 {
@@ -95,6 +95,6 @@ public class ScriptNode:Node
             }
         }
 
-        return args.ScriptExecutor.Execute(execArgs);
+        return args?.ScriptExecutor?.Execute(execArgs) ?? 0;
     }
 }

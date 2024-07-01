@@ -64,7 +64,7 @@ public abstract class Worker
 
     static readonly List<Worker> Workers = new List<Worker>();
 
-    private System.Timers.Timer timer;
+    private System.Timers.Timer? timer;
 
     /// <summary>
     /// Start the worker
@@ -121,7 +121,7 @@ public abstract class Worker
         }
         finally
         {
-            if (Schedule != ScheduleType.Startup)
+            if (Schedule != ScheduleType.Startup && timer != null)
             {
                 timer.Interval = ScheduleNext() * 1_000;
                 timer.AutoReset = false;

@@ -12,11 +12,6 @@ using FileFlows.Shared.Models;
 /// </summary>
 public class PluginHelper
 {
-    //HostAssemblyLoadContext Context;
-    public PluginHelper()
-    {
-        //  Context = new HostAssemblyLoadContext(GetPluginDirectory());
-    }
 #if (DEBUG)
     private static string GetPluginDirectory()
     {

@@ -2,6 +2,9 @@ using FileFlows.Shared.Models;
 
 namespace FileFlows.ServerShared.Models;
 
+/// <summary>
+/// Filter used for searching for library files
+/// </summary>
 public class LibraryFileFilter
 {
     /// <summary>
@@ -71,6 +74,9 @@ public class LibraryFileFilter
     public LibraryFilterSystemInfo SysInfo { get; set; }
 }
 
+/// <summary>
+/// Library Filter system information
+/// </summary>
 public class LibraryFilterSystemInfo
 {
     /// <summary>

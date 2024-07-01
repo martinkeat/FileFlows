@@ -33,7 +33,7 @@ public class FileDownloader
     /// <param name="percent">The progress percentage.</param>
     /// <param name="eta">The estimate time to completion.</param>
     /// <param name="speed">The speed of the download.</param>
-    public delegate void OnProgressDelegate(int percent, TimeSpan? eta, string speed);
+    public delegate void OnProgressDelegate(int percent, TimeSpan? eta, string? speed);
 
     /// <summary>
     /// Event that is triggered to notify subscribers about the progress, using the <see cref="OnProgressDelegate"/> delegate.
@@ -175,7 +175,7 @@ public class FileDownloader
                 if (iPercent != percent)
                 {
                     percent = iPercent;
-                    logger.ILog($"Download Percentage: {percent} %");
+                    logger?.ILog($"Download Percentage: {percent} %");
                     OnProgress?.Invoke(iPercent, eta, speedString);
                 }
             }
@@ -183,7 +183,7 @@ public class FileDownloader
 
             var timeTaken = DateTime.UtcNow.Subtract(start);
             var size = new FileInfo(destinationPath).Length;
-            logger.ILog(
+            logger?.ILog(
                 $"Time taken to download file: {timeTaken}, bytes read: {bytesReadTotal}, expected size: {fileSize}, size on disk: {size})");
             
             // using FileStream fileStream = File.OpenWrite(destinationPath);

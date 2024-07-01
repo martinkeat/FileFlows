@@ -55,7 +55,7 @@ public class FileFlowsTaskRun
     /// <summary>
     /// Gets the return value
     /// </summary>
-    public object ReturnValue { get; init; }
+    public object? ReturnValue { get; init; }
 
     /// <summary>
     /// Gets if the script ran successfully

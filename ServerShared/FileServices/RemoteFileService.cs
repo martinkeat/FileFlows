@@ -159,7 +159,8 @@ public class RemoteFileService : IFileService
                 path,
                 recursive
             }).Result;
-            logger.ILog(result.Data);
+            if(result.Data != null)
+                logger.ILog(result.Data);
             return true;
         }
         catch (Exception ex)
@@ -188,7 +189,8 @@ public class RemoteFileService : IFileService
                 path,
                 destination
             }).Result;
-            logger.ILog(result.Data);
+            if(result.Data != null)
+                logger.ILog(result.Data);
             return true;
         }
         catch (Exception ex)
@@ -205,7 +207,8 @@ public class RemoteFileService : IFileService
         try
         {
             var result = HttpHelper.Post<string>(GetUrl("directory/create"), new { path }).Result;
-            logger.ILog(result.Data);
+            if(result.Data != null)
+                logger.ILog(result.Data);
             return true;
         }
         catch (Exception ex)
@@ -254,7 +257,7 @@ public class RemoteFileService : IFileService
         var result = new FileDownloader(logger, serverUrl, executorUid, AccessToken, RemoteNodeUid)
             .DownloadFile(path, filename).Result;
         if (result.IsFailed)
-            return Result<string>.Fail(result.Error);
+            return Result<string>.Fail(result.Error ?? "Failed to get local path");
         return filename;
     }
 
@@ -298,7 +301,7 @@ public class RemoteFileService : IFileService
         try
         {
             var result = HttpHelper.Post<FileInformation>(GetUrl("file/info"), new { path }).Result;
-            return result.Data;
+            return result.Data!;
         }
         catch (Exception ex)
         {
@@ -314,7 +317,8 @@ public class RemoteFileService : IFileService
         try
         {
             var result = HttpHelper.Post<string>(GetUrl("file/delete"), new { path }).Result;
-            logger.ILog(result.Data);
+            if(result.Data != null)
+                logger.ILog(result.Data);
             return true;
         }
         catch (Exception ex)
@@ -397,7 +401,8 @@ public class RemoteFileService : IFileService
             }).Result;
             if (result.Success == false)
                 return false;
-            logger.ILog(result.Data);
+            if(result.Data != null)
+                logger.ILog(result.Data);
             return true;
         }
         catch (Exception ex)
@@ -426,7 +431,7 @@ public class RemoteFileService : IFileService
             var result = new FileDownloader(logger, serverUrl, executorUid, AccessToken, RemoteNodeUid)
                 .DownloadFile(path, destination).Result;
             if (result.IsFailed)
-                return Result<bool>.Fail(result.Error);
+                return Result<bool>.Fail(result.Error ?? "Failed to copy file");
             return true;
             
         }
@@ -441,7 +446,8 @@ public class RemoteFileService : IFileService
             }).Result;
             if (result.Success == false)
                 return false;
-            logger.ILog(result.Data);
+            if(result.Data != null)
+                logger.ILog(result.Data);
             return true;
         }
         catch (Exception ex)

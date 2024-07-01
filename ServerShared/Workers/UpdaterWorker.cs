@@ -42,6 +42,7 @@ public abstract class UpdaterWorker : Worker
         RunCheck();
     }
 
+    /// <inheritdoc />
     protected override void Execute()
     {
         RunCheck();
@@ -184,6 +185,9 @@ public abstract class UpdaterWorker : Worker
             };
 
             Process? process = Process.Start(psi);
+            if (process == null)
+                return false;
+            
             process.WaitForExit();
 
             // Check the exit code to determine if chmod was successful
@@ -248,7 +252,7 @@ public abstract class UpdaterWorker : Worker
             Logger.Instance?.ILog($"{UpdaterName}: Extracting update to: " + updateDir);
             try
             {
-                ZipFile.ExtractToDirectory(update, updateDir, true);
+                ZipFile.ExtractToDirectory(update, updateDir!, true);
             }
             catch (Exception)
             {
@@ -262,7 +266,7 @@ public abstract class UpdaterWorker : Worker
             File.Delete(update);
             Logger.Instance?.ILog($"{UpdaterName}: Deleted update file: " + update);
 
-            var updateFile = Path.Combine(updateDir, UpgradeScriptPrefix + (Globals.IsWindows ? ".bat" : ".sh"));
+            var updateFile = Path.Combine(updateDir!, UpgradeScriptPrefix + (Globals.IsWindows ? ".bat" : ".sh"));
             if (File.Exists(updateFile) == false)
             {
                 Logger.Instance?.WLog($"{UpdaterName}: No update script found: " + updateFile);

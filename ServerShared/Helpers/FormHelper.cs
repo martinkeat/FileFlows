@@ -34,7 +34,7 @@ public class FormHelper
                 Name = prop.Name,
                 Order = attribute.Order,
                 InputType = attribute.InputType,
-                Type = prop.PropertyType.FullName,
+                Type = prop.PropertyType.FullName ?? string.Empty,
                 Parameters = new Dictionary<string, object>(),
                 Validators = new List<Shared.Validators.Validator>(),
                 ChangeValues = new ()
@@ -48,8 +48,9 @@ public class FormHelper
                     continue;
 
                 var value = attProp.GetValue(attribute);
-                Logger.Instance.DLog(attProp.Name, value);
-                ef.Parameters.Add(attProp.Name, attProp.GetValue(attribute));
+                if(value != null)
+                    Logger.Instance.DLog(attProp.Name, value);
+                ef.Parameters.Add(attProp.Name, attProp.GetValue(attribute)!);
 
             }
 
@@ -139,7 +140,7 @@ public class FormHelper
             if (model.ContainsKey(prop.Name) == false)
             {
                 var dValue = prop.GetCustomAttributes(typeof(DefaultValueAttribute), false).FirstOrDefault() as DefaultValueAttribute;
-                model.Add(prop.Name, dValue != null ? dValue.Value : prop.PropertyType.IsValueType ? Activator.CreateInstance(prop.PropertyType) : null);
+                model.Add(prop.Name, (dValue != null ? dValue.Value : prop.PropertyType.IsValueType ? Activator.CreateInstance(prop.PropertyType) : null)!);
             }
 
 
@@ -179,14 +180,14 @@ public class FormHelper
         return fields;
     }
 
-    private static object GetStaticProperty(Type type, string name)
+    private static object? GetStaticProperty(Type type, string name)
     {
         if (type == null || type.Name == "Node" || type == typeof(object))
             return null;
             
         var prop = type.GetProperty(name, BindingFlags.Public | BindingFlags.Static);
         if (prop == null)
-            return GetStaticProperty(type.BaseType, name);
+            return GetStaticProperty(type.BaseType!, name);
         return prop.GetValue(null);
     }
 }

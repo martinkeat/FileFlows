@@ -54,7 +54,7 @@ public static class DockerModHelper
                 FileName = "/bin/su",
                 ArgumentList = { "c", "dpkg --configure -a" },
                 UseShellExecute = false
-            }).WaitForExitAsync();
+            })!.WaitForExitAsync();
 
             // Run the file and capture output to string
             var process = Process.Start(new ProcessStartInfo
