@@ -236,8 +236,6 @@ export class Reporting {
 
             let parameters = JSON.parse(hPid.value);
             let args = parameters.data;
-            console.log('line args:', args);
-            //let series = [];
             let dates = false;
             for(let i= 0;i<args.labels.length;i++)
             {
@@ -260,42 +258,29 @@ export class Reporting {
                     }
                 }
             }
-            // Object.keys(data).forEach((key) => {
-            //     let x = key;
-            //     if(/20[\d]{2}\-/.test(key)) {
-            //         let utcDate = new Date(key); // Parse the UTC date string into a Date object
-            //         let timezoneOffset = utcDate.getTimezoneOffset(); // Get local timezone offset in minutes                     
-            //         // Adjust date by adding the local timezone offset
-            //         utcDate.setMinutes(utcDate.getMinutes() - timezoneOffset);
-            //         x = utcDate;
-            //         dates = true;
-            //     }
-            //     let y = data[key];
-            //     series.push({ x: x, y: y});
-            // });
 
             let options= {
                 series: args.series,//[{ data: series}],
                 chart: {
-                    type: 'line',
-                    // stacked: false,
-                    // zoom: {
-                    //     type: 'x',
-                    //     enabled: true,
-                    //     autoScaleYaxis: true
-                    // },
-                    // toolbar: {
-                    //     show: true,
-                    //     autoSelected: 'zoom',
-                    //     tools: {
-                    //         download: false,
-                    //         selection: false,
-                    //         zoom: true,
-                    //         zoomin: false,
-                    //         zoomout: false,
-                    //         pan: true
-                    //     },
-                    // }
+                    type: 'area',
+                    stacked: false,
+                    zoom: {
+                        type: 'x',
+                        enabled: true,
+                        autoScaleYaxis: true
+                    },
+                    toolbar: {
+                        show: true,
+                        autoSelected: 'zoom',
+                        tools: {
+                            download: false,
+                            selection: false,
+                            zoom: true,
+                            zoomin: false,
+                            zoomout: false,
+                            pan: true
+                        },
+                    }
                 },
                 xaxis: {
                     categories: args.labels
@@ -327,16 +312,17 @@ export class Reporting {
                     curve: 'smooth',
                     colors: this.COLORS
                 },
-                // fill: {
-                //     type: 'gradient',
-                //     gradient: {
-                //         shadeIntensity: 1,
-                //         inverseColors: false,
-                //         opacityFrom: 0.5,
-                //         opacityTo: 0,
-                //         stops: [0, 90, 100]
-                //     },
-                // },
+                colors: this.COLORS,
+                fill: {
+                    type: 'gradient',
+                    gradient: {
+                        shadeIntensity: 1,
+                        inverseColors: false,
+                        opacityFrom: 0.5,
+                        opacityTo: 0,
+                        //stops: [0, 90, 100]
+                    },
+                },
                 markers: {
                     size: 0
                 }
