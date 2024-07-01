@@ -1,3 +1,4 @@
+#if(DEBUG)
 using FileFlows.FlowRunner.Helpers;
 
 namespace FileFlowTests.Tests.RunnerTests.ImageHelperTests;
@@ -39,3 +40,4 @@ public class HeicTests : TestBase
         Assert.AreEqual("HEIC", info.Format);
     }
 }
+#endif

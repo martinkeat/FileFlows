@@ -86,15 +86,15 @@ public abstract class UpdaterWorker : Worker
 
             UpdatePending = true;
             PrepareApplicationShutdown();
-            Logger.Instance.ILog($"{UpdaterName}: Update pending installation");
+            Logger.Instance?.ILog($"{UpdaterName}: Update pending installation");
             do
             {
-                Logger.Instance.ILog($"{UpdaterName}: Waiting to run update");
+                Logger.Instance?.ILog($"{UpdaterName}: Waiting to run update");
                 // sleep just in case something has just started
                 Thread.Sleep(10_000);
             } while (CanUpdate() == false);
 
-            Logger.Instance.ILog($"{UpdaterName} - Update about to be installed");
+            Logger.Instance?.ILog($"{UpdaterName} - Update about to be installed");
             RunUpdateScript(updateScript);
             return true;
 #endif

@@ -1,3 +1,4 @@
+#if(DEBUG)
 using FileFlows.FlowRunner.Helpers;
 
 namespace FileFlowTests.Tests.RunnerTests.ArchiveHelperTests;
@@ -39,3 +40,4 @@ public class TarTests : TestBase
         Assert.IsTrue(result.Value);
     }
 }
+#endif

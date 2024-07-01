@@ -1,3 +1,4 @@
+#if(DEBUG)
 using System.IO;
 using FileFlows.FlowRunner.Helpers;
 
@@ -37,3 +38,4 @@ public class PdfTests : TestBase
         Assert.IsTrue(result.Value);
     }
 }
+#endif

@@ -1,3 +1,5 @@
+#if(DEBUG)
+
 using FileFlows.FlowRunner.Helpers;
 
 namespace FileFlowTests.Tests.RunnerTests.ArchiveHelperTests;
@@ -22,3 +24,4 @@ public class RarTests : TestBase
         Assert.IsTrue(result.Value);
     }
 }
+#endif

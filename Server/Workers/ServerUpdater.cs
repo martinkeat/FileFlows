@@ -222,10 +222,10 @@ public class ServerUpdater : UpdaterWorker
                 return (false, new Version(0, 0, 0, 0));
             }
             
-            if (current.Build >= onlineVersion.Build)
+            if (current.Revision >= onlineVersion.Revision)
             {
                 Logger.Instance.ILog(
-                    $"{nameof(ServerUpdater)}: Current version '{Globals.Version}' newer or same as online version '{onlineVersion}' [{current.Build} v {onlineVersion.Build}]");
+                    $"{nameof(ServerUpdater)}: Current version '{Globals.Version}' newer or same as online version '{onlineVersion}' [{current.Revision} v {onlineVersion.Revision}]");
                 return (false, onlineVersion);
             }
 
