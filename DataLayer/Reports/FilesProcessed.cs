@@ -99,13 +99,6 @@ public class FilesProcessed : Report
         return (table ?? string.Empty) + (chart ?? string.Empty);
     }
 
-    public enum ProcessedStatistic
-    {
-        Count,
-        Size,
-        Duration
-    }
-
     public class FilesProcessedData
     {
         public DateTime ProcessingStarted { get; set; }

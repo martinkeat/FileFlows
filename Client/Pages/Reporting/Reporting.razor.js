@@ -234,55 +234,71 @@ export class Reporting {
             let ele = document.createElement('div');
             hPid.insertAdjacentElement('afterend', ele);
 
-            let args = JSON.parse(hPid.value);
-            let data = args.data;
-            let series = [];
+            let parameters = JSON.parse(hPid.value);
+            let args = parameters.data;
+            console.log('line args:', args);
+            //let series = [];
             let dates = false;
-            Object.keys(data).forEach((key) => {
-                let x = key;
-                if(/20[\d]{2}\-/.test(key)) {
-                    let utcDate = new Date(key); // Parse the UTC date string into a Date object
+            for(let i= 0;i<args.labels.length;i++)
+            {
+                let label = args.labels[i];
+                if(/20[\d]{2}\-/.test(label)) {
+                    let utcDate = new Date(label); // Parse the UTC date string into a Date object
                     let timezoneOffset = utcDate.getTimezoneOffset(); // Get local timezone offset in minutes                     
                     // Adjust date by adding the local timezone offset
                     utcDate.setMinutes(utcDate.getMinutes() - timezoneOffset);
-                    x = utcDate;
+                    args.labels[i] = utcDate;
                     dates = true;
+                }                
+            }
+            if(dates)
+            {
+                for(let s of args.series){
+                    for(let i=0;i<s.data.length;i++)
+                    {
+                        s.data[i] = { x: args.labels[i].getTime(), y: s.data[i]};
+                    }
                 }
-                let y = data[key];
-                series.push({ x: x, y: y});
-            });
+            }
+            // Object.keys(data).forEach((key) => {
+            //     let x = key;
+            //     if(/20[\d]{2}\-/.test(key)) {
+            //         let utcDate = new Date(key); // Parse the UTC date string into a Date object
+            //         let timezoneOffset = utcDate.getTimezoneOffset(); // Get local timezone offset in minutes                     
+            //         // Adjust date by adding the local timezone offset
+            //         utcDate.setMinutes(utcDate.getMinutes() - timezoneOffset);
+            //         x = utcDate;
+            //         dates = true;
+            //     }
+            //     let y = data[key];
+            //     series.push({ x: x, y: y});
+            // });
 
             let options= {
-                series: [{ data: series}],
+                series: args.series,//[{ data: series}],
                 chart: {
-                    type: 'area',
-                    stacked: false,
-                    zoom: {
-                        type: 'x',
-                        enabled: true,
-                        autoScaleYaxis: true
-                    },
-                    toolbar: {
-                        show: true,
-                        autoSelected: 'zoom',
-                        tools: {
-                            download: false,
-                            selection: false,
-                            zoom: true,
-                            zoomin: false,
-                            zoomout: false,
-                            pan: true
-                        },
-                    }
+                    type: 'line',
+                    // stacked: false,
+                    // zoom: {
+                    //     type: 'x',
+                    //     enabled: true,
+                    //     autoScaleYaxis: true
+                    // },
+                    // toolbar: {
+                    //     show: true,
+                    //     autoSelected: 'zoom',
+                    //     tools: {
+                    //         download: false,
+                    //         selection: false,
+                    //         zoom: true,
+                    //         zoomin: false,
+                    //         zoomout: false,
+                    //         pan: true
+                    //     },
+                    // }
                 },
-                tooltip: {
-                    y: {
-                        title: {
-                            formatter: function(seriesName) {
-                                return '';
-                            }
-                        }
-                    }
+                xaxis: {
+                    categories: args.labels
                 },
                 yaxis: {
                     labels : {
@@ -290,6 +306,18 @@ export class Reporting {
                             return value ? this.formatValue(value, args.yAxisFormatter) : '';
                         }
                     }
+                },
+                tooltip: {
+                    y: {
+                        title: {
+                            formatter: function(seriesName) {
+                                return args.series.length === 1 ? '' : seriesName;
+                            }
+                        },
+                        formatter: function(value) {
+                            return value || '0';
+                        }
+                    }                    
                 },
                 dataLabels: {
                     enabled: false,
@@ -299,23 +327,27 @@ export class Reporting {
                     curve: 'smooth',
                     colors: this.COLORS
                 },
-                fill: {
-                    type: 'gradient',
-                    gradient: {
-                        shadeIntensity: 1,
-                        inverseColors: false,
-                        opacityFrom: 0.5,
-                        opacityTo: 0,
-                        stops: [0, 90, 100]
-                    },
-                },
+                // fill: {
+                //     type: 'gradient',
+                //     gradient: {
+                //         shadeIntensity: 1,
+                //         inverseColors: false,
+                //         opacityFrom: 0.5,
+                //         opacityTo: 0,
+                //         stops: [0, 90, 100]
+                //     },
+                // },
                 markers: {
                     size: 0
                 }
             };
 
-            if(dates)
-                options.xaxis = { type: 'datetime'};
+            if(dates) {
+                options.xaxis.type = 'datetime';
+                delete options.xaxis.categories;
+            }
+            
+            console.log('chart options', JSON.parse(JSON.stringify(options)));
 
             this.createChart(ele, options)
         }

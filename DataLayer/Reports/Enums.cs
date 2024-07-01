@@ -39,3 +39,22 @@ public enum StreamType
     /// </summary>
     Subtitle
 }
+
+/// <summary>
+/// Different processed statistics
+/// </summary>
+public enum ProcessedStatistic
+{
+    /// <summary>
+    /// Number of files processed
+    /// </summary>
+    Count,
+    /// <summary>
+    /// Size of files processed
+    /// </summary>
+    Size,
+    /// <summary>
+    /// Processing duration
+    /// </summary>
+    Duration
+}
