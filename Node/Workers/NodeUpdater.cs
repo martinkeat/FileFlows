@@ -74,7 +74,7 @@ public class NodeUpdater:UpdaterWorker
         var service = ServiceLoader.Load<ISettingsService>();
         var serverVersion = service.GetServerVersion().Result;
         Logger.Instance.DLog("Checking for auto update: " + serverVersion);
-        if (serverVersion <= CurrentVersion)
+        if (serverVersion == CurrentVersion)
             return string.Empty;
 
         Logger.Instance.ILog($"New Node version {serverVersion} detected, starting download");
