@@ -9,11 +9,31 @@ export function createReporting(dotNetObject)
 }
 
 export class Reporting {
+    
+    constructor() {
+        this.COLORS = [
+            // #33b2df , common blue
+            '#33b2df',
+            'rgba(51,223,85,0.65)',
+            '#84004bd9',
 
+            'var(--blue)',
+            'var(--indigo)',
+            'var(--cyan)',
+            'var(--orange)',
+            'var(--green)',
+            'var(--teal)',
+            'var(--teal)',
+            'var(--yellow)',
+            'var(--error)',
+        ];
+    }
     initCharts() {
-        console.log('init charts!');
         this.initPieCharts();
-        this.initBarCharts()
+        this.initBarCharts();
+        this.initPieJsCharts();
+        this.initBarJsCharts();
+        this.initLineJsCharts();
     }
     
     initPieCharts()
@@ -84,5 +104,233 @@ export class Reporting {
                 }
             });
         }        
+    }
+    
+    initPieJsCharts()
+    {
+        let hidden = document.querySelectorAll('.report-output .report-pie-chart-data');
+        for(let hPid of hidden)
+        {
+            let ele = document.createElement('div');
+            hPid.insertAdjacentElement('afterend', ele);
+            
+            let data = JSON.parse(hPid.value);
+            let series = [];
+            let labels = [];
+            Object.keys(data).forEach((key) => {
+                series.push(data[key]);
+                labels.push(key);                
+            });
+            
+            let options = {
+                chart: {
+                    type: 'donut',
+                },
+                theme: {
+                    monochrome: {
+                        enabled: true,
+                        color:'#02647e'
+                    }
+                },
+                stroke:{
+                    colors:['#33b2df']
+                },
+                colors: this.COLORS,
+                series: series,
+                labels: labels
+            };
+            
+            this.createChart(ele, options)
+        }
+    }
+
+    initBarJsCharts()
+    {
+        let hidden = document.querySelectorAll('.report-output .report-bar-chart-data');
+        for(let hPid of hidden)
+        {
+            let ele = document.createElement('div');
+            hPid.insertAdjacentElement('afterend', ele);
+
+            let data = JSON.parse(hPid.value);
+            let series = [];
+            let dates = false;
+            Object.keys(data).forEach((key) => {
+                let x = key;
+                 if(/20[\d]{2}\-/.test(key)) {
+                     let utcDate = new Date(key); // Parse the UTC date string into a Date object
+                     let timezoneOffset = utcDate.getTimezoneOffset(); // Get local timezone offset in minutes                     
+                     // Adjust date by adding the local timezone offset
+                     utcDate.setMinutes(utcDate.getMinutes() - timezoneOffset);
+                     x = utcDate;
+                     dates = true;
+                }
+                let y = data[key];
+                series.push({ x: x, y: y === 0 ? null : y});
+            });
+
+            let options= {
+                chart: {
+                    type: 'bar'
+                },
+                plotOptions: {
+                    bar: {
+                        horizontal: false
+                    }
+                },
+                tooltip: {
+                    y: {
+                        title: {
+                            formatter: function(seriesName) {
+                                return '';
+                            }
+                        }
+                    }
+                },
+                colors: this.COLORS,
+                series: [{ data: series }]
+            };
+            
+            if(dates)
+                options.xaxis = { type: 'datetime'};
+
+            this.createChart(ele, options)
+        }
+    }
+
+
+    initLineJsCharts()
+    {
+        let hidden = document.querySelectorAll('.report-output .report-line-chart-data');
+        for(let hPid of hidden)
+        {
+            let ele = document.createElement('div');
+            hPid.insertAdjacentElement('afterend', ele);
+
+            let data = JSON.parse(hPid.value);
+            let series = [];
+            let dates = false;
+            Object.keys(data).forEach((key) => {
+                let x = key;
+                if(/20[\d]{2}\-/.test(key)) {
+                    let utcDate = new Date(key); // Parse the UTC date string into a Date object
+                    let timezoneOffset = utcDate.getTimezoneOffset(); // Get local timezone offset in minutes                     
+                    // Adjust date by adding the local timezone offset
+                    utcDate.setMinutes(utcDate.getMinutes() - timezoneOffset);
+                    x = utcDate;
+                    dates = true;
+                }
+                let y = data[key];
+                series.push({ x: x, y: y});
+            });
+
+            let options= {
+                series: [{ data: series}],
+                chart: {
+                    type: 'area',
+                    stacked: false,
+                    zoom: {
+                        type: 'x',
+                        enabled: true,
+                        autoScaleYaxis: true
+                    },
+                    toolbar: {
+                        show: true,
+                        autoSelected: 'zoom',
+                        tools: {
+                            download: false,
+                            selection: false,
+                            zoom: true,
+                            zoomin: false,
+                            zoomout: false,
+                            pan: true
+                        },
+                    }
+                },
+                tooltip: {
+                    y: {
+                        title: {
+                            formatter: function(seriesName) {
+                                return '';
+                            }
+                        }
+                    }
+                },
+                dataLabels: {
+                    enabled: false,
+                },
+                stroke: {
+                    width: 2,
+                    curve: 'smooth',
+                    colors: this.COLORS
+                },
+                fill: {
+                    type: 'gradient',
+                    gradient: {
+                        shadeIntensity: 1,
+                        inverseColors: false,
+                        opacityFrom: 0.5,
+                        opacityTo: 0,
+                        stops: [0, 90, 100]
+                    },
+                },
+                markers: {
+                    size: 0
+                }
+            };
+
+            if(dates)
+                options.xaxis = { type: 'datetime'};
+
+            this.createChart(ele, options)
+        }
+    }
+    createChart(ele, options){
+        ele.style.margin = '0 1rem';
+        let defaultOptions = {
+            chart: {
+                background: 'transparent',
+                height: 400,
+                zoom: {
+                    enabled: false
+                },
+                toolbar: {
+                    show: false
+                }
+            },
+            theme: {
+                mode: 'dark'
+            },
+            stroke: {
+                colors: ['#ffffff']
+            },
+            grid: {
+                borderColor: '#90A4AE33'
+            }
+        };
+        let completeOptions = this.mergeDeep(defaultOptions, options);
+        this.chart = new ApexCharts(ele, completeOptions);
+        this.chart.render();
+    }
+
+    isObject(item) {
+        return (item && typeof item === 'object' && !Array.isArray(item));
+    }
+    mergeDeep(target, ...sources) {
+        if (!sources.length) return target;
+        const source = sources.shift();
+
+        if (this.isObject(target) && this.isObject(source)) {
+            for (const key in source) {
+                if (this.isObject(source[key])) {
+                    if (!target[key]) Object.assign(target, { [key]: {} });
+                    this.mergeDeep(target[key], source[key]);
+                } else {
+                    Object.assign(target, { [key]: source[key] });
+                }
+            }
+        }
+
+        return this.mergeDeep(target, ...sources);
     }
 }

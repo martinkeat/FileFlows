@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Text;
 using System.Text.Json;
+using System.Web;
 using FileFlows.DataLayer.DatabaseConnectors;
 using FileFlows.Plugin;
 using FileFlows.Shared.Models;
@@ -267,12 +268,15 @@ public abstract class Report
     /// Generates an SVG pie chart from a collection of data with interactive pop-out slices on hover.
     /// </summary>
     /// <param name="data">The collection of data to generate the SVG pie chart from.</param>
+    /// <param name="jsVersion">If the javascript version should be used</param>
     /// <returns>An SVG string representing the pie chart.</returns>
-    protected string GenerateSvgPieChart(Dictionary<string, int> data)
+    protected string GenerateSvgPieChart(Dictionary<string, int> data, bool jsVersion = true)
     {
         var list = data?.ToList();
         if (list?.Any() != true)
             return string.Empty;
+        if (jsVersion)
+            return "<input type=\"hidden\" class=\"report-pie-chart-data\" value=\"" + HttpUtility.HtmlEncode(JsonSerializer.Serialize(data)) + "\" />";
 
         const int chartWidth = 600;
         const int chartHeight = 500;
@@ -349,13 +353,17 @@ public abstract class Report
     /// <param name="data">The collection of data to generate the SVG bar chart from.</param>
     /// <param name="yAxisLabel">Optional label for the y-axis.</param>
     /// <param name="yAxisFormatter">Optional formatter for the y-axis labels</param>
+    /// <param name="jsVersion">If the javascript version should be used</param>
     /// <returns>An SVG string representing the bar chart.</returns>
-    protected string GenerateSvgBarChart<T>(Dictionary<object, T> data, string? yAxisLabel = null, Func<double, string>? yAxisFormatter = null)
+    protected string GenerateSvgBarChart<T>(Dictionary<object, T> data, string? yAxisLabel = null, Func<double, string>? yAxisFormatter = null, bool jsVersion = true)
         where T : struct, IConvertible
     {
         var list = data?.ToList();
         if (list?.Any() != true)
             return string.Empty;
+
+        if (jsVersion)
+            return "<input type=\"hidden\" class=\"report-bar-chart-data\" value=\"" + HttpUtility.HtmlEncode(JsonSerializer.Serialize(data)) + "\" />";
 
         const int chartWidth = 900; // Increased chart width
         const int chartHeight = 600; // Increased chart height
@@ -473,13 +481,17 @@ public abstract class Report
 /// <param name="data">The collection of data to generate the SVG line chart from.</param>
 /// <param name="yAxisLabel">Optional label for the y-axis.</param>
 /// <param name="yAxisFormatter">Optional formatter for the y-axis labels</param>
+/// <param name="jsVersion">If the javascript version should be used</param>
 /// <returns>An SVG string representing the line chart.</returns>
-protected string GenerateSvgLineChart<T>(Dictionary<object, T> data, string? yAxisLabel = null, Func<double, string>? yAxisFormatter = null)
+protected string GenerateSvgLineChart<T>(Dictionary<object, T> data, string? yAxisLabel = null, Func<double, string>? yAxisFormatter = null, bool jsVersion = true)
     where T : struct, IConvertible
 {
     var list = data?.ToList();
     if (list?.Any() != true)
         return string.Empty;
+    
+    if (jsVersion)
+        return "<input type=\"hidden\" class=\"report-line-chart-data\" value=\"" + HttpUtility.HtmlEncode(JsonSerializer.Serialize(data)) + "\" />";
 
     const int chartWidth = 900; // Increased chart width
     const int chartHeight = 600; // Increased chart height
