@@ -24,7 +24,7 @@ public class LogServiceMessage
     /// <summary>
     /// Gets or sets address of the node this message came from
     /// </summary>
-    public string NodeAddress { get; set; }
+    public string NodeAddress { get; set; } = null!;
     /// <summary>
     /// Gets or sets the type of log message
     /// </summary>
@@ -32,5 +32,5 @@ public class LogServiceMessage
     /// <summary>
     /// Gets or sets the arguments for the log
     /// </summary>
-    public object[] Arguments { get; set; }
+    public object[]? Arguments { get; set; }
 }

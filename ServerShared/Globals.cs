@@ -110,7 +110,7 @@ public class Globals
     /// <summary>
     /// A custom URL for FileFlows.com
     /// </summary>
-    public static string CustomFileFlowsDotComUrl;
+    public static string? CustomFileFlowsDotComUrl;
 
     /// <summary>
     /// The URL for fileflows.com

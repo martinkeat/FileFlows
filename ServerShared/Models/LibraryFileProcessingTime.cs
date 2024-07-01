@@ -8,7 +8,7 @@ public class LibraryFileProcessingTime
     /// <summary>
     /// Gets or sets the name of the library
     /// </summary>
-    public string Library { get; set; }
+    public string Library { get; set; } = null!;
     /// <summary>
     /// Gets or sets the original size of the file
     /// </summary>

@@ -13,12 +13,12 @@ public class NodeSystemStatistics
     /// <summary>
     /// Gets or sets the size of the temporary directory
     /// </summary>
-    public DirectorySize TemporaryDirectorySize { get; set; }
+    public DirectorySize? TemporaryDirectorySize { get; set; }
     
     /// <summary>
     /// Gets or sets the size of the log directory
     /// </summary>
-    public DirectorySize LogDirectorySize { get; set; }
+    public DirectorySize? LogDirectorySize { get; set; }
 
     /// <summary>
     /// Gets or sets when this was recorded
@@ -34,7 +34,7 @@ public class DirectorySize
     /// <summary>
     /// Gets or sets the path of the directory
     /// </summary>
-    public string Path { get; set; }
+    public string Path { get; set; } = null!;
     /// <summary>
     /// Gets or sets the size of the directory
     /// </summary>

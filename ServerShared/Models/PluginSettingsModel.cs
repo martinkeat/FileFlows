@@ -10,5 +10,5 @@ public class PluginSettingsModel : FileFlowObject
     /// <summary>
     /// Gets or sets the JSON for hte plugin settings
     /// </summary>
-    public string Json { get; set; }
+    public string Json { get; set; } = null!;
 }

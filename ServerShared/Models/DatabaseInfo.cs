@@ -11,10 +11,11 @@ public class DatabaseInfo
     /// The database type
     /// </summary>
     public DatabaseType Type { get; init; }
+
     /// <summary>
     /// The connection string
     /// </summary>
-    public string ConnectionString { get; init; }
+    public string ConnectionString { get; init; } = null!;
 }
 
 
@@ -26,11 +27,11 @@ public class DbConnectionInfo
     /// <summary>
     /// Gets or sets the server address
     /// </summary>
-    public string Server { get; set; }
+    public string Server { get; set; } = null!;
     /// <summary>
     /// Gets or sets the database name
     /// </summary>
-    public string Name { get; set; }
+    public string Name { get; set; } = null!;
     /// <summary>
     /// Gets or sets the port
     /// </summary>
@@ -38,11 +39,11 @@ public class DbConnectionInfo
     /// <summary>
     /// Gets or sets the connecting user
     /// </summary>
-    public string User { get; set; }
+    public string User { get; set; } = null!;
     /// <summary>
     /// Gets or sets the password used
     /// </summary>
-    public string Password { get; set; }
+    public string Password { get; set; } = null!;
     /// <summary>
     /// Gets or sets the database type
     /// </summary>

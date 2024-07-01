@@ -25,5 +25,5 @@ public class DbLogMessage
     /// <summary>
     /// Gets or sets the message to log
     /// </summary>
-    public string Message { get; set; }
+    public string Message { get; set; } = null!;
 }

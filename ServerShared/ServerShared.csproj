@@ -9,12 +9,6 @@
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
     <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <NoWarn>CS8618;</NoWarn>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <NoWarn>CS8618;</NoWarn>
-  </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\Plugin\Plugin.csproj" />
     <ProjectReference Include="..\ScriptExecution\ScriptExecution.csproj" />

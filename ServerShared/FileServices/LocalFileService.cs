@@ -18,7 +18,7 @@ public class LocalFileService : IFileService
     /// <summary>
     /// Gets or sets the allowed paths the file service can access
     /// </summary>
-    public string[] AllowedPaths { get; init; }
+    public string[]? AllowedPaths { get; init; }
     
     /// <summary>
     /// Gets or sets a function for replacing variables in a string.
@@ -63,7 +63,7 @@ public class LocalFileService : IFileService
     /// <summary>
     /// Gets or sets the owner:group to use for files
     /// </summary>
-    public string OwnerGroup { get; set; }
+    public string OwnerGroup { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the logger used for logging

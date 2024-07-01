@@ -25,18 +25,18 @@ public class ScriptExecutor:IScriptExecutor
     /// <summary>
     /// Gets or sets the shared directory 
     /// </summary>
-    public string SharedDirectory { get; set; }
+    public string SharedDirectory { get; set; } = null!;
     
     /// <summary>
     /// Gets or sets the URL to the FileFlows server 
     /// </summary>
-    public string FileFlowsUrl { get; set; }
+    public string FileFlowsUrl { get; set; } = null!;
     
     /// <summary>
     /// Gets or sets the plugin method invoker
     /// This allows plugins to expose static functions that can be called from functions/scripts
     /// </summary>
-    public Func<string, string, object[], object> PluginMethodInvoker { get; set; }
+    public Func<string, string, object[], object> PluginMethodInvoker { get; set; } = null!;
     
     /// <summary>
     /// Executes javascript

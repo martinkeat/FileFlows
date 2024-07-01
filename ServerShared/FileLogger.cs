@@ -22,7 +22,7 @@ public class FileLogger : ILogWriter
     /// <summary>
     /// Gets an instance of the FileLogger
     /// </summary>
-    public static FileLogger Instance { get; private set; }
+    public static FileLogger Instance { get; private set; } = null!;
 
     /// <summary>
     /// Creates a file logger

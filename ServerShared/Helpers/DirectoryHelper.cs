@@ -49,7 +49,7 @@ public class DirectoryHelper
 #endif
         
     }
-    private static string _BaseDirectory;
+    private static string _BaseDirectory = null!;
 
     /// <summary>
     /// Gets or sets the base directory of FileFlows
@@ -150,32 +150,32 @@ public class DirectoryHelper
     /// <summary>
     /// Gets the logging directory
     /// </summary>
-    public static string LoggingDirectory { get; private set; }
+    public static string LoggingDirectory { get; private set; } = null!;
     
     /// <summary>
     /// Gets the directory where library file logs are stored 
     /// </summary>
-    public static string LibraryFilesLoggingDirectory { get; private set; }
+    public static string LibraryFilesLoggingDirectory { get; private set; } = null!;
 
     /// <summary>
     /// Gets the data directory
     /// </summary>
-    public static string DataDirectory { get; private set; }
+    public static string DataDirectory { get; private set; } = null!;
     
     /// <summary>
     /// Gets the directory containing the cached configurations
     /// </summary>
-    public static string ConfigDirectory { get; private set; }
+    public static string ConfigDirectory { get; private set; } = null!;
     
     /// <summary>
     /// Gets the directory the database is saved in
     /// </summary>
-    public static string DatabaseDirectory { get; private set; }
+    public static string DatabaseDirectory { get; private set; } = null!;
 
     /// <summary>
     /// Gets the flow runner directory
     /// </summary>
-    public static string FlowRunnerDirectory { get; private set; }
+    public static string FlowRunnerDirectory { get; private set; } = null!;
 
     /// <summary>
     /// Gets the logging directory
@@ -266,18 +266,18 @@ public class DirectoryHelper
     /// <summary>
     /// Gets the location of the encryption key file
     /// </summary>
-    public static string EncryptionKeyFile { get;private set; }
+    public static string EncryptionKeyFile { get;private set; } = null!;
 
     /// <summary>
     /// Gets the location of the node configuration file
     /// </summary>
-    public static string NodeConfigFile { get; private set; }
+    public static string NodeConfigFile { get; private set; } = null!;
 
 
     /// <summary>
     /// Gets the location of the server configuration file
     /// </summary>
-    public static string ServerConfigFile { get; private set; }
+    public static string ServerConfigFile { get; private set; } = null!;
     
     private static void MoveDirectoryContent(string source, string destination)
     {

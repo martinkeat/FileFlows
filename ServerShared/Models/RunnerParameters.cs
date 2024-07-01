@@ -24,23 +24,23 @@ public class RunnerParameters
     /// <summary>
     /// Gets or sets the temporary path
     /// </summary>
-    public string TempPath { get; set; }
+    public string TempPath { get; set; } = null!;
     /// <summary>
     /// Gets or sets the configuration path
     /// </summary>
-    public string ConfigPath { get; set; }
+    public string ConfigPath { get; set; } = null!;
     /// <summary>
     /// Gets or sets the configuration encryption key
     /// </summary>
-    public string ConfigKey { get; set; }
+    public string ConfigKey { get; set; } = null!;
     /// <summary>
     /// Gets or sets the base URL for the FileFlows server
     /// </summary>
-    public string BaseUrl { get; set; }
+    public string BaseUrl { get; set; } = null!;
     /// <summary>
     /// Gets or sets the Access token 
     /// </summary>
-    public string AccessToken { get; set; }
+    public string AccessToken { get; set; } = null!;
     /// <summary>
     /// Gets or sets if running inside docker 
     /// </summary>

@@ -10,7 +10,7 @@ public class AuditDetails
     /// <summary>
     /// Gets or sets the IP Address this was performed from
     /// </summary>
-    public string IPAddress { get; init; }
+    public string IPAddress { get; init; } = null!;
     /// <summary>
     /// Gets or sets the UID of the user performing this action
     /// </summary>
@@ -18,7 +18,7 @@ public class AuditDetails
     /// <summary>
     /// Gets or sets the name of the user performing this action
     /// </summary>
-    public string UserName { get; init; }
+    public string UserName { get; init; } = null!;
     /// <summary>
     /// Gets or sets the operator type
     /// </summary>

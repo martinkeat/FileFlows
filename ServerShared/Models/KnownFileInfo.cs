@@ -12,7 +12,7 @@ public class KnownFileInfo
     /// <summary>
     /// Gets or sets the filename
     /// </summary>
-    public string Name { get; set; }
+    public string Name { get; set; } = null!;
     /// <summary>
     /// Gets or sets the creation time
     /// </summary>

@@ -325,15 +325,15 @@ public class NvidiaGpu
     /// <summary>
     /// Gets or sets the GPUs name
     /// </summary>
-    public string Name { get; set; }
+    public string Name { get; set; } = null!;
     /// <summary>
     /// Gets or sets the GPUs brand
     /// </summary>B
-    public string Brand { get; set; }
+    public string Brand { get; set; } = null!;
     /// <summary>
     /// Gets or sets the GPUs architecture
     /// </summary>
-    public string Architecture { get; set; }
+    public string Architecture { get; set; } = null!;
     /// <summary>
     /// Gets or sets the current fan speed on the GPU
     /// </summary>
@@ -368,7 +368,7 @@ public class NvidiaGpu
     /// <summary>
     /// Gets or sets the processes running on the GPU
     /// </summary>
-    public List<NvidiaGpuProcess> Processes { get; set; }
+    public List<NvidiaGpuProcess>? Processes { get; set; }
 }
 
 /// <summary>
@@ -379,7 +379,7 @@ public class NvidiaGpuProcess
     /// <summary>
     /// Gets or sets the process name
     /// </summary>
-    public string ProcessName { get; set; }
+    public string ProcessName { get; set; } = null!;
     /// <summary>
     /// Gets or sets the amount of memory being used
     /// </summary>

@@ -63,7 +63,7 @@ public class HeatmapData
     /// Gets or sets the day name, should be 3 digits
     /// </summary>
     [JsonPropertyName("name")]
-    public string Day { get; set; }
+    public string Day { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the data for this day
@@ -81,7 +81,7 @@ public class HeatmapDayData
     /// Gets or sets the hour name, with the am/pm
     /// </summary>
     [JsonPropertyName("x")]
-    public string Time { get; set; }
+    public string Time { get; set; } = null!;
     /// <summary>
     /// Gets or sets the total for this hour
     /// </summary>

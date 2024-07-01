@@ -23,12 +23,12 @@ public class ScriptNode:Node
     /// <summary>
     /// Gets or sets the model to pass to the node
     /// </summary>
-    public ExpandoObject Model { get; set; }
+    public ExpandoObject? Model { get; set; }
 
     /// <summary>
     /// Gets or sets the Script to execute
     /// </summary>
-    public Script Script { get; set; }
+    public Script? Script { get; set; }
 
     /// <summary>
     /// Executes the script node
@@ -37,6 +37,12 @@ public class ScriptNode:Node
     /// <returns>the output node to call next</returns>
     public override int Execute(NodeParameters args)
     {
+        if (Script == null)
+        {
+            args.FailureReason = "Script not found";
+            args.Logger?.ELog(args.FailureReason);
+            return -1;
+        }
         // build up the entry point
         string epParams = string.Join(", ", Script.Parameters?.Select(x => x.Name)?.ToArray() ?? []);
         // all scripts must contain the "Script" method we then add this to call that 

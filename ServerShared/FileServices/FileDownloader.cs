@@ -38,7 +38,7 @@ public class FileDownloader
     /// <summary>
     /// Event that is triggered to notify subscribers about the progress, using the <see cref="OnProgressDelegate"/> delegate.
     /// </summary>
-    public event OnProgressDelegate OnProgress;
+    public event OnProgressDelegate? OnProgress;
     /// <summary>
     /// The api token
     /// </summary>

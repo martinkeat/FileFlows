@@ -16,18 +16,20 @@ public class LibraryFileFilter
     /// the status of the data
     /// </summary>
     public FileStatus? Status { get; set; }
+
     /// <summary>
     /// Gets or sets a list of libraries that are allowed, or null if any are allowed
     /// </summary>
-    public List<Guid> AllowedLibraries { get; set; }
+    public List<Guid> AllowedLibraries { get; set; } = new();
     /// <summary>
     /// Gets or sets the maximum size in MBs of the file to be returned
     /// </summary>
     public long? MaxSizeMBs { get; set; }
+
     /// <summary>
     /// Gets or sets UIDs of files to be ignored
     /// </summary>
-    public List<Guid> ExclusionUids { get; set; }
+    public List<Guid> ExclusionUids { get; set; } = new();
     /// <summary>
     /// Gets or sets if only forced files should be returned
     /// </summary>
@@ -71,7 +73,7 @@ public class LibraryFileFilter
     /// <summary>
     /// Gets or sets the system info
     /// </summary>
-    public LibraryFilterSystemInfo SysInfo { get; set; }
+    public LibraryFilterSystemInfo SysInfo { get; set; } = new();
 }
 
 /// <summary>
@@ -82,12 +84,12 @@ public class LibraryFilterSystemInfo
     /// <summary>
     /// Gets or sets all the libraries in the system
     /// </summary>
-    public Dictionary<Guid, Library> AllLibraries { get; set; }
-    
+    public Dictionary<Guid, Library> AllLibraries { get; set; } = new();
+
     /// <summary>
     /// Gets or sets a list of current executors
     /// </summary>
-    public List<FlowExecutorInfo> Executors { get; set; }
+    public List<FlowExecutorInfo> Executors { get; set; } = new();
     
     /// <summary>
     /// Gets or sets if licensed for processing order
