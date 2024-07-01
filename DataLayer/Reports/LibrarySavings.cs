@@ -56,7 +56,7 @@ public class LibrarySavings : Report
             .OrderBy(x => x.Library.ToLowerInvariant())
             .ToList();
 
-        return GenerateHtmlTable(groupedSavings);
+        return GenerateHtmlTable(groupedSavings, dontWrap: true);
     }
 
     /// <summary>

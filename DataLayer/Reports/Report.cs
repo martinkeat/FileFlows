@@ -58,7 +58,7 @@ public abstract class Report
         return
         [
             new FlowElementExecution(), new LibrarySavings(),
-            new Codec(), new Language(), new FilesProcessed()
+            new Codecs(), new Languages(), new FilesProcessed()
         ];
     }
 
@@ -183,16 +183,17 @@ public abstract class Report
     /// Generates an HTML table from a collection of data.
     /// </summary>
     /// <param name="data">The collection of data to generate the HTML table from.</param>
+    /// <param name="dontWrap">If the table should not be wrapped with a table-container class</param>
     /// <returns>An HTML string representing the table.</returns>
-    /// <exception cref="ArgumentNullException">Thrown when the data is null.</exception>
-    protected string GenerateHtmlTable(IEnumerable<dynamic> data)
+    protected string GenerateHtmlTable(IEnumerable<dynamic> data, bool dontWrap = false)
     {
         var list = data?.ToList();
         if (list?.Any() != true)
             return string.Empty;
 
         var sb = new StringBuilder();
-        sb.Append("<div class=\"table-container\">");
+        if(dontWrap == false)
+            sb.Append("<div class=\"table-container\">");
         sb.Append("<table class=\"report-table table\">");
 
         // Add table headers
@@ -251,7 +252,8 @@ public abstract class Report
 
         sb.Append("</tbody>");
         sb.Append("</table>");
-        sb.Append("</div>");
+        if(dontWrap == false)
+            sb.Append("</div>");
         return sb.ToString();
     }
 
