@@ -52,8 +52,8 @@ public static class DateBasedChartHelper
     private static DateTime[] GenerateDateTimeLabels(DateTime minDateUtc, DateTime maxDateUtc)
     {
         List<DateTime> labels = new List<DateTime>();
-        DateTime currentDate = minDateUtc;
         bool hourly = maxDateUtc.Subtract(minDateUtc).TotalDays <= 1;
+        DateTime currentDate = hourly ? minDateUtc : minDateUtc.Date;
 
         while (currentDate <= maxDateUtc)
         {
