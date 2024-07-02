@@ -3872,6 +3872,9 @@ hr {
   background: rgba(77, 77, 77, 0.38);
   background: linear-gradient(to right, rgba(94, 94, 94, 0.25), rgba(255, 255, 255, 0.5));
 }
+.report-output svg {
+  min-height: 600px;
+}
 .report-output svg text {
   fill: var(--color);
   font-size: 0.9rem;

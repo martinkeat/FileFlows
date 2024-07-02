@@ -1356,6 +1356,7 @@ input[type=file]{
             }
         }
     }
+    
 
     .percentage {
         display: flex;
@@ -1401,10 +1402,12 @@ input[type=file]{
             }
         }
     }
-    
-    svg text {
-        fill: var(--color);
-        font-size: 0.9rem;
+    svg {
+        min-height:600px;
+        text {
+            fill: var(--color);
+            font-size: 0.9rem;
+        }
     }
 }
 

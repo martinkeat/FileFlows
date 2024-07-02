@@ -146,8 +146,16 @@ export class Reporting {
     
     formatValue(value, formatter)
     {
-        if(!formatter)
-            return value;
+        if(!formatter) {
+            if(typeof(value) === 'number') {
+                // Check if the value is an integer
+                if (Number.isInteger(value)) {
+                    return value;
+                }
+                // Round the value to one decimal place
+                return Math.round(value * 10) / 10;
+            }
+        }
         if(formatter.toLowerCase() === 'filesize')
             return this.formatBytes(value);
         return value;

@@ -25,19 +25,20 @@ public static class DateBasedChartHelper
         var (labels, tableData) = GenerateTableData(minDateUtc, maxDateUtc, data, tableDataFormatter);
 
         // Ensure line chart labels are at daily intervals
-        var dailyLabels = GenerateDailyLabels(minDateUtc, maxDateUtc);
+        var dailyLabels = GenerateDateTimeLabels(minDateUtc, maxDateUtc);
 
         var table = TableGenerator.Generate(new[] { "Date" }.Union(data.Keys).ToArray(), tableData.ToArray());
-        var chart = MultiLineChart.Generate(new
+        var chart = MultiLineChart.Generate(new MultilineChartData
         {
-            labels = dailyLabels.Select(label => label.ToString("yyyy-MM-dd")), // Convert DateTime to string here
-            yAxisFormatter,
-            series = data.Select(seriesItem => new
+            //Labels = dailyLabels.Select(label => label.ToString("yyyy-MM-dd")).ToArray(), // Convert DateTime to string here
+            Labels = dailyLabels, // Convert DateTime to string here
+            YAxisFormatter = yAxisFormatter,
+            Series = data.Select(seriesItem => new ChartSeries
             {
-                name = seriesItem.Key,
-                data = dailyLabels.Select(label => seriesItem.Value.GetValueOrDefault(label, 0)).ToList()
-            }).ToList()
-        });
+                Name = seriesItem.Key,
+                Data = dailyLabels.Select(label => (double)seriesItem.Value.GetValueOrDefault(label, 0)).ToArray()
+            }).ToArray()
+        }, generateSvg: true);
 
         return (table ?? string.Empty) + (chart ?? string.Empty);
     }
@@ -48,15 +49,19 @@ public static class DateBasedChartHelper
     /// <param name="minDateUtc">The minimum date.</param>
     /// <param name="maxDateUtc">The maximum date.</param>
     /// <returns>An array of daily labels.</returns>
-    private static DateTime[] GenerateDailyLabels(DateTime minDateUtc, DateTime maxDateUtc)
+    private static DateTime[] GenerateDateTimeLabels(DateTime minDateUtc, DateTime maxDateUtc)
     {
         List<DateTime> labels = new List<DateTime>();
-        DateTime currentDate = minDateUtc.Date;
+        DateTime currentDate = minDateUtc;
+        bool hourly = maxDateUtc.Subtract(minDateUtc).TotalDays <= 1;
 
         while (currentDate <= maxDateUtc)
         {
             labels.Add(currentDate);
-            currentDate = currentDate.AddDays(1);
+            if(hourly)
+                currentDate = currentDate.AddHours(1);
+            else
+                currentDate = currentDate.AddDays(1);
         }
 
         return labels.ToArray();
