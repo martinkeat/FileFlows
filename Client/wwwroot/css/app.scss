@@ -1402,11 +1402,19 @@ input[type=file]{
             }
         }
     }
-    svg {
-        min-height:600px;
-        text {
+    div.chart {
+        margin:auto;
+        > svg {
+            min-height: 500px;
+        }
+        svg text {
             fill: var(--color);
-            font-size: 0.9rem;
+            font-size: 0.8rem;
+        }
+        .legend {
+            margin-top: 1rem;
+            text-align: center;
+            font-size: 0.8rem;            
         }
     }
 }

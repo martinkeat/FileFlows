@@ -20,7 +20,7 @@ public class MultiLineChart
     public static string Generate(MultilineChartData data, string? yAxisFormatter = null, bool generateSvg = false)
     {
         if (generateSvg)
-            return Svg(data, yAxisFormatter);
+            return Svg(data);
         return JavaScript(data, yAxisFormatter);
     }
 
@@ -44,6 +44,10 @@ public class MultiLineChart
 
     private static readonly string[] COLORS =
     [
+        // same colors as JS
+        "#33b2df","#33DF55A6", "#84004bd9", "#007bff", "#6610f2",
+        "#17a2b8", "#fd7e14", "#28a745", "#20c997", "#ffc107",  "#ff4d76",
+        // different colors
         "#007bff", "#28a745", "#ffc107", "#dc3545", "#17a2b8",
         "#fd7e14", "#6f42c1", "#20c997", "#6610f2", "#e83e8c",
         "#ff6347", "#4682b4", "#9acd32", "#8a2be2", "#ff4500",
@@ -55,23 +59,21 @@ public class MultiLineChart
     /// <summary>
     /// Generates an SVG line chart
     /// </summary>
-    /// <param name="data">The data for the chart.</param>
-    /// <param name="yAxisFormatter">Optional formatter for the y-axis labels</param>
+    /// <param name="chartData">The data for the chart.</param>
     /// <returns>An SVG string representing the line chart.</returns>
-
-    private static string Svg(MultilineChartData chartData, string? yAxisFormatter)
+    private static string Svg(MultilineChartData chartData)
     {
         string? yAxisLabel = null;
 
         // Constants and initial setup
-        const int chartWidth = 900; // Increased chart width
-        const int chartHeight = 600; // Increased chart height
-        const int lineThickness = 3;
-        int chartStartX = string.IsNullOrWhiteSpace(yAxisLabel) ? 60 : 100; // Adjusted based on yAxisLabel presence
+        const int chartWidth = 800; // Increased chart width
+        const int chartHeight = 500; // Increased chart height
+        const int lineThickness = 2;
+        int chartStartX = string.IsNullOrWhiteSpace(yAxisLabel) ? 100 : 140; // Adjusted based on yAxisLabel presence
         const int chartStartY = 20; // The top of the y-axis where it starts, from the top
         int xAxisLabelOffset =
-            string.IsNullOrWhiteSpace(yAxisLabel) ? 110 : 150; // Adjusted based on yAxisLabel presence
-        const int yAxisLabelOffset = 40; // Fixed offset when yAxisLabel is present
+            string.IsNullOrWhiteSpace(yAxisLabel) ? 40 : 80; // Adjusted based on yAxisLabel presence
+        const int yAxisLabelOffset = 10; // Fixed offset when yAxisLabel is present
         const int yAxisLabelFrequency = 10; // Change as needed to control the number of labels
         const string backgroundColor = "#161616"; // Dark background color
 
@@ -79,12 +81,13 @@ public class MultiLineChart
         double maxValue = chartData.Series.SelectMany(x => x.Data).Max(item => item);
 
         // Start building SVG content
-        StringBuilder svgBuilder = new StringBuilder();
-        svgBuilder.AppendLine(
+        StringBuilder builder = new StringBuilder();
+        builder.AppendLine("<div class=\"chart line-chart\">");
+        builder.AppendLine(
             $"<svg class=\"line-chart\" width=\"{chartWidth}\" height=\"{chartHeight}\" viewBox=\"0 0 {chartWidth} {chartHeight}\" xmlns=\"http://www.w3.org/2000/svg\">");
 
         // Draw background
-        svgBuilder.AppendLine(
+        builder.AppendLine(
             $"<rect x=\"{chartStartX}\" y=\"{chartStartY}\" width=\"{chartWidth - 2 * chartStartX}\" height=\"{chartHeight - chartStartY - xAxisLabelOffset}\" fill=\"{backgroundColor}\" />");
 
         // Draw y-axis labels and grid lines
@@ -95,25 +98,26 @@ public class MultiLineChart
             int y = chartHeight - xAxisLabelOffset - (int)((value / maxValue) * yAxisHeight);
 
             // Draw grid line
-            svgBuilder.AppendLine(
+            builder.AppendLine(
                 $"<line x1=\"{chartStartX}\" y1=\"{y}\" x2=\"{chartWidth - chartStartX}\" y2=\"{y}\" stroke=\"#555\" />");
 
             // Format y-axis label
-            string yLabel = $"{value:F0}";
+            object yValue = string.IsNullOrWhiteSpace(chartData.YAxisFormatter) ? (object)Convert.ToInt64(value) : (object)value;
+            string yLabel = ChartFormatter.Format(yValue, chartData.YAxisFormatter);
 
             // Draw y-axis label
-            svgBuilder.AppendLine(
+            builder.AppendLine(
                 $"<text x=\"{chartStartX - yAxisLabelOffset}\" y=\"{y + 5}\" text-anchor=\"end\" fill=\"#fff\">{yLabel}</text>");
 
             // Draw y-axis tick
-            svgBuilder.AppendLine(
+            builder.AppendLine(
                 $"<line x1=\"{chartStartX - 5}\" y1=\"{y}\" x2=\"{chartStartX}\" y2=\"{y}\" stroke=\"#fff\" />");
         }
 
         // Draw y-axis main label if provided
         if (!string.IsNullOrEmpty(yAxisLabel))
         {
-            svgBuilder.AppendLine(
+            builder.AppendLine(
                 $"<text x=\"{chartStartX - yAxisLabelOffset - 30}\" y=\"{chartHeight / 2}\" text-anchor=\"middle\" fill=\"#fff\">{yAxisLabel}</text>");
         }
 
@@ -138,7 +142,7 @@ public class MultiLineChart
             }
 
             // Draw polyline for the series
-            svgBuilder.AppendLine(
+            builder.AppendLine(
                 $"<polyline points=\"{pointsBuilder}\" fill=\"none\" stroke=\"{color}\" stroke-width=\"{lineThickness}\" />");
         }
 
@@ -164,18 +168,36 @@ public class MultiLineChart
             int x = chartStartX + (int)(i * xStep);
 
             // Draw x-axis label
-            svgBuilder.AppendLine(
+            builder.AppendLine(
                 $"<text x=\"{x}\" y=\"{chartHeight - xAxisLabelOffset + 25}\" text-anchor=\"middle\" fill=\"#fff\">{label}</text>");
 
             // Draw x-axis tick
-            svgBuilder.AppendLine(
+            builder.AppendLine(
                 $"<line x1=\"{x}\" y1=\"{chartHeight - xAxisLabelOffset}\" x2=\"{x}\" y2=\"{chartHeight - xAxisLabelOffset + 5}\" stroke=\"#fff\" />");
         }
 
         // Close SVG tag
-        svgBuilder.AppendLine("</svg>");
+        builder.AppendLine("</svg>");
+        
+        builder.AppendLine("<div class=\"legend\">");
+        for (int seriesIndex = 0; seriesIndex < chartData.Series.Length; seriesIndex++)
+        {
+            var series = chartData.Series[seriesIndex];
+            string color = COLORS[seriesIndex % COLORS.Length]; // Cycling through COLORS array
 
-        return svgBuilder.ToString();
+            builder.AppendLine(
+                $"<span style=\"display: inline-block; margin: 0 10px;\">" +
+                $"<svg width=\"12\" height=\"12\">" +
+                $"<circle cx=\"6\" cy=\"6\" r=\"5\" fill=\"{color}\" />" +
+                $"</svg>" +
+                $"<span style=\"color: #fff; margin-left: 5px;\">{series.Name}</span>" +
+                $"</span>");
+        }
+        builder.AppendLine("</div>");
+        builder.AppendLine("</div>");
+        
+
+        return builder.ToString();
     }
 }
 

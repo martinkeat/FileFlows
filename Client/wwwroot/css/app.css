@@ -3872,12 +3872,20 @@ hr {
   background: rgba(77, 77, 77, 0.38);
   background: linear-gradient(to right, rgba(94, 94, 94, 0.25), rgba(255, 255, 255, 0.5));
 }
-.report-output svg {
-  min-height: 600px;
+.report-output div.chart {
+  margin: auto;
 }
-.report-output svg text {
+.report-output div.chart > svg {
+  min-height: 500px;
+}
+.report-output div.chart svg text {
   fill: var(--color);
-  font-size: 0.9rem;
+  font-size: 0.8rem;
+}
+.report-output div.chart .legend {
+  margin-top: 1rem;
+  text-align: center;
+  font-size: 0.8rem;
 }
 
 .Report.editor.large {

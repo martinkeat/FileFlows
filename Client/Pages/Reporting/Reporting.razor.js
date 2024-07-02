@@ -23,7 +23,6 @@ export class Reporting {
             'var(--orange)',
             'var(--green)',
             'var(--teal)',
-            'var(--teal)',
             'var(--yellow)',
             'var(--error)',
         ];
