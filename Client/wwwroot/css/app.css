@@ -3788,17 +3788,22 @@ hr {
 
 .report-output {
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 7rem);
 }
 .report-output .table-container {
-  max-height: 40vh;
   overflow-y: auto;
   position: relative;
+  margin-bottom: 2rem;
+  min-height: 26rem;
 }
 .report-output .table-container table {
   width: 100%;
   border-collapse: collapse;
   text-align: left;
   margin: 0;
+  table-layout: fixed;
 }
 .report-output .table-container table thead {
   position: sticky;
@@ -3819,6 +3824,12 @@ hr {
   bottom: 0;
   border: solid 1px var(--input-background);
   padding-left: 0.5rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.report-output .table-container table tbody tr td:first-child {
+  width: 12rem;
 }
 .report-output .percentage {
   display: flex;

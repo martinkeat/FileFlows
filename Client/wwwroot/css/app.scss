@@ -1313,16 +1313,21 @@ input[type=file]{
 .report-output
 {
     text-align: center;
+    display:flex;
+    flex-direction: column;
+    max-height: calc(100vh - 7rem);
     .table-container {
-        max-height: 40vh;
         overflow-y: auto;
         position: relative;
+        margin-bottom: 2rem;
+        min-height: 26rem;
 
         table {
             width: 100%;
             border-collapse: collapse;
             text-align: left;
             margin:0;
+            table-layout: fixed;
             thead {
                 position: sticky;
                 top: -1px;
@@ -1341,7 +1346,13 @@ input[type=file]{
                     bottom:0;
                     border:solid 1px var(--input-background);
                     padding-left: 0.5rem;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
                 }
+            }
+            tbody tr td:first-child {
+                width:12rem;
             }
         }
     }

@@ -1,8 +1,8 @@
-using System.Globalization;
-
 namespace FileFlows.DataLayer.Reports.Helpers;
 
-
+/// <summary>
+/// Date Based Chart Helper
+/// </summary>
 public static class DateBasedChartHelper
 {
     private const int MaxDaysForDaily = 35;
@@ -57,25 +57,25 @@ public static class DateBasedChartHelper
     }
 
     /// <summary>
-    /// Parses a date string to DateTime, handling the format "yyyy-MM-dd", "yyyy-MM", etc.
+    /// Generates hourly labels between the min and max dates.
     /// </summary>
-    /// <param name="dateString">The date string to parse.</param>
-    /// <returns>The parsed DateTime if successful, otherwise DateTime.MinValue.</returns>
-    private static DateTime ParseDate(string dateString)
+    /// <param name="minDateUtc">The minimum date.</param>
+    /// <param name="maxDateUtc">The maximum date.</param>
+    /// <returns>An array of hourly labels.</returns>
+    private static DateTime[] GenerateHourlyLabels(DateTime minDateUtc, DateTime maxDateUtc)
     {
-        if (DateTime.TryParseExact(dateString, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime parsedDate))
-        {
-            return parsedDate;
-        }
-        else if (DateTime.TryParseExact(dateString, "yyyy-MM", CultureInfo.InvariantCulture, DateTimeStyles.None, out parsedDate))
-        {
-            return parsedDate;
-        }
-        // Add more formats if needed
+        List<DateTime> labels = new List<DateTime>();
+        DateTime currentDate = minDateUtc;
 
-        return DateTime.MinValue; // Or throw exception if parsing fails
+        while (currentDate <= maxDateUtc)
+        {
+            labels.Add(currentDate);
+            currentDate = currentDate.AddHours(1);
+        }
+
+        return labels.ToArray();
     }
-    
+
     /// <summary>
     /// Generates table data based on the specified date range and data series.
     /// </summary>
@@ -96,9 +96,12 @@ public static class DateBasedChartHelper
             // Group by hour
             while (current <= maxDateUtc)
             {
-                AddRowToTable(tableData, data, current, current.AddHours(1), "yyyy-MM-dd HH:00");
+                AddRowToTable(tableData, data, current, current.AddHours(1), "{0:HH}:00");
                 labels.Add(current.ToString("yyyy-MM-dd HH:00"));
                 current = current.AddHours(1);
+
+                // Ensure the line data contains an entry for every single day between minDateUtc and maxDateUtc
+                EnsureLineDataHasHourlyEntries(data, minDateUtc, maxDateUtc);
             }
         }
         else if (totalDays <= MaxDaysForDaily)
@@ -106,7 +109,7 @@ public static class DateBasedChartHelper
             // Group by day
             while (current <= maxDateUtc)
             {
-                AddRowToTable(tableData, data, current, current.AddDays(1), "yyyy-MM-dd");
+                AddRowToTable(tableData, data, current, current.AddDays(1), "{0:yyyy}-{0:MM}-{0:dd}");
                 labels.Add(current.ToString("yyyy-MM-dd"));
                 current = current.AddDays(1);
             }
@@ -116,7 +119,7 @@ public static class DateBasedChartHelper
             // Group by week
             while (current <= maxDateUtc)
             {
-                AddRowToTable(tableData, data, current, current.AddDays(7), "Week of yyyy-MM-dd");
+                AddRowToTable(tableData, data, current, current.AddDays(7), "Week of {0:yyyy}-{0:MM}-{0:dd}");
                 labels.Add($"Week of {current:yyyy-MM-dd}");
                 current = current.AddDays(7);
             }
@@ -127,7 +130,7 @@ public static class DateBasedChartHelper
             while (current <= maxDateUtc)
             {
                 var startOfNextMonth = new DateTime(current.Year, current.Month, 1).AddMonths(1);
-                AddRowToTable(tableData, data, current, startOfNextMonth, "yyyy-MM");
+                AddRowToTable(tableData, data, current, startOfNextMonth, "{0:MMM} '{0:yy}");
                 labels.Add(current.ToString("yyyy-MM"));
                 current = startOfNextMonth;
             }
@@ -150,7 +153,7 @@ public static class DateBasedChartHelper
     private static void AddRowToTable(List<object[]> tableData, Dictionary<string, Dictionary<DateTime, long>> data,
         DateTime start, DateTime end, string dateFormat)
     {
-        var row = new List<object> { start.ToString(dateFormat) };
+        var row = new List<object> { string.Format(dateFormat, start.ToLocalTime()) };
         foreach (var key in data.Keys)
         {
             var total = data[key]
@@ -162,6 +165,26 @@ public static class DateBasedChartHelper
         tableData.Add(row.ToArray());
     }
 
+    /// <summary>
+    /// Ensures that the line data has an entry for every single hour between the specified minimum and maximum dates.
+    /// </summary>
+    /// <param name="data">The dictionary containing the data series.</param>
+    /// <param name="minDate">The minimum date for the range.</param>
+    /// <param name="maxDate">The maximum date for the range.</param>
+    private static void EnsureLineDataHasHourlyEntries(Dictionary<string, Dictionary<DateTime, long>> data,
+        DateTime minDate, DateTime maxDate)
+    {
+        DateTime current = minDate;
+        while (current <= maxDate)
+        {
+            foreach (var series in data.Values)
+            {
+                series.TryAdd(current, 0);
+            }
+
+            current = current.AddHours(1);
+        }
+    }
 
     /// <summary>
     /// Ensures that the line data has an entry for every single day between the specified minimum and maximum dates.
@@ -177,10 +200,7 @@ public static class DateBasedChartHelper
         {
             foreach (var series in data.Values)
             {
-                if (!series.ContainsKey(current))
-                {
-                    series[current] = 0;
-                }
+                series.TryAdd(current, 0);
             }
 
             current = current.AddDays(1);

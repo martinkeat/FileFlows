@@ -87,6 +87,9 @@ public class FilesProcessed : Report
                     break;
             }
         }
+
+        if (data.Count == 0)
+            return string.Empty;
         
         string html = DateBasedChartHelper.Generate(minDateUtc.Value, maxDateUtc.Value, data);
 
