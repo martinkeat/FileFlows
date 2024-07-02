@@ -14,10 +14,15 @@ public static class DateBasedChartHelper
     /// <param name="minDateUtc">The minimum date for the range.</param>
     /// <param name="maxDateUtc">The maximum date for the range.</param>
     /// <param name="data">The dictionary containing the data series.</param>
+    /// <param name="tableDataFormatter">Optional formatter to use in the table data</param>
+    /// <param name="yAxisFormatter">Optional formatter to use on the client for the y-axis value</param>
     /// <returns>A string containing the HTML for the table and chart.</returns>
-    public static string Generate(DateTime minDateUtc, DateTime maxDateUtc, Dictionary<string, Dictionary<DateTime, long>> data)
+    public static string Generate(DateTime minDateUtc, DateTime maxDateUtc, 
+        Dictionary<string, Dictionary<DateTime, long>> data, 
+        Func<double, string>? tableDataFormatter = null,
+        string? yAxisFormatter = null)
     {
-        var (labels, tableData) = GenerateTableData(minDateUtc, maxDateUtc, data);
+        var (labels, tableData) = GenerateTableData(minDateUtc, maxDateUtc, data, tableDataFormatter);
 
         // Ensure line chart labels are at daily intervals
         var dailyLabels = GenerateDailyLabels(minDateUtc, maxDateUtc);
@@ -26,6 +31,7 @@ public static class DateBasedChartHelper
         var chart = MultiLineChart.Generate(new
         {
             labels = dailyLabels.Select(label => label.ToString("yyyy-MM-dd")), // Convert DateTime to string here
+            yAxisFormatter,
             series = data.Select(seriesItem => new
             {
                 name = seriesItem.Key,
@@ -82,9 +88,10 @@ public static class DateBasedChartHelper
     /// <param name="minDateUtc">The minimum date for the range.</param>
     /// <param name="maxDateUtc">The maximum date for the range.</param>
     /// <param name="data">The dictionary containing the data series.</param>
+    /// <param name="tableDataFormatter">Optional formatter to use in the table data</param>
     /// <returns>A tuple containing the labels and the table data.</returns>
     private static (string[], List<object[]>) GenerateTableData(DateTime minDateUtc, DateTime maxDateUtc,
-        Dictionary<string, Dictionary<DateTime, long>> data)
+        Dictionary<string, Dictionary<DateTime, long>> data, Func<double, string>? tableDataFormatter)
     {
         List<object[]> tableData = new();
         List<string> labels = new() { "Date" };
@@ -96,7 +103,7 @@ public static class DateBasedChartHelper
             // Group by hour
             while (current <= maxDateUtc)
             {
-                AddRowToTable(tableData, data, current, current.AddHours(1), "{0:HH}:00");
+                AddRowToTable(tableData, data, current, current.AddHours(1), "{0:HH}:00", tableDataFormatter);
                 labels.Add(current.ToString("yyyy-MM-dd HH:00"));
                 current = current.AddHours(1);
 
@@ -109,7 +116,7 @@ public static class DateBasedChartHelper
             // Group by day
             while (current <= maxDateUtc)
             {
-                AddRowToTable(tableData, data, current, current.AddDays(1), "{0:yyyy}-{0:MM}-{0:dd}");
+                AddRowToTable(tableData, data, current, current.AddDays(1), "{0:yyyy}-{0:MM}-{0:dd}", tableDataFormatter);
                 labels.Add(current.ToString("yyyy-MM-dd"));
                 current = current.AddDays(1);
             }
@@ -119,7 +126,7 @@ public static class DateBasedChartHelper
             // Group by week
             while (current <= maxDateUtc)
             {
-                AddRowToTable(tableData, data, current, current.AddDays(7), "Week of {0:yyyy}-{0:MM}-{0:dd}");
+                AddRowToTable(tableData, data, current, current.AddDays(7), "Week of {0:yyyy}-{0:MM}-{0:dd}", tableDataFormatter);
                 labels.Add($"Week of {current:yyyy-MM-dd}");
                 current = current.AddDays(7);
             }
@@ -130,7 +137,7 @@ public static class DateBasedChartHelper
             while (current <= maxDateUtc)
             {
                 var startOfNextMonth = new DateTime(current.Year, current.Month, 1).AddMonths(1);
-                AddRowToTable(tableData, data, current, startOfNextMonth, "{0:MMM} '{0:yy}");
+                AddRowToTable(tableData, data, current, startOfNextMonth, "{0:MMM} '{0:yy}", tableDataFormatter);
                 labels.Add(current.ToString("yyyy-MM"));
                 current = startOfNextMonth;
             }
@@ -149,9 +156,10 @@ public static class DateBasedChartHelper
     /// <param name="data">The dictionary containing the data series with dates as keys and values to be summed.</param>
     /// <param name="start">The start date of the range for the row.</param>
     /// <param name="end">The end date of the range for the row.</param>
+    /// <param name="tableDataFormatter">Optional formatter to use in the table data</param>
     /// <param name="dateFormat">The date format string for the first column label.</param>
     private static void AddRowToTable(List<object[]> tableData, Dictionary<string, Dictionary<DateTime, long>> data,
-        DateTime start, DateTime end, string dateFormat)
+        DateTime start, DateTime end, string dateFormat, Func<double, string>? tableDataFormatter)
     {
         var row = new List<object> { string.Format(dateFormat, start.ToLocalTime()) };
         foreach (var key in data.Keys)
@@ -159,7 +167,10 @@ public static class DateBasedChartHelper
             var total = data[key]
                 .Where(d => d.Key >= start && d.Key < end)
                 .Sum(d => d.Value);
-            row.Add(total);
+            if(tableDataFormatter != null)
+                row.Add(tableDataFormatter(total));
+            else
+                row.Add(total);
         }
 
         tableData.Add(row.ToArray());

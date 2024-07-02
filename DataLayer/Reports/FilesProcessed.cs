@@ -3,6 +3,7 @@ using Esprima.Ast;
 using FileFlows.DataLayer.Reports.Helpers;
 using FileFlows.Plugin;
 using FileFlows.Plugin.Formatters;
+using FileFlows.Shared.Formatters;
 using FileFlows.Shared.Models;
 
 namespace FileFlows.DataLayer.Reports;
@@ -58,6 +59,18 @@ public class FilesProcessed : Report
         (DateTime? minDateUtc, DateTime? maxDateUtc) = GetPeriod(model);
         minDateUtc ??= files.Min(x => x.ProcessingStarted);
         maxDateUtc ??= files.Max(x => x.ProcessingStarted);
+        
+        Func<double, string>? formatter = statistic switch
+        {
+            ProcessedStatistic.Size => FileSizeFormatter.Format,
+            ProcessedStatistic.Duration => TimeFormatter.Format,
+            _ => null
+        };
+        var yAxisFormatter = statistic switch
+        {
+            ProcessedStatistic.Size => "filesize",
+            _ => null
+        };
 
         Dictionary<string, Dictionary<DateTime, long>> data = new();
         foreach (var file in files)
@@ -91,7 +104,8 @@ public class FilesProcessed : Report
         if (data.Count == 0)
             return string.Empty;
         
-        string html = DateBasedChartHelper.Generate(minDateUtc.Value, maxDateUtc.Value, data);
+        string html = DateBasedChartHelper.Generate(minDateUtc.Value, maxDateUtc.Value, data, 
+            tableDataFormatter: formatter, yAxisFormatter: yAxisFormatter);
 
         return html;
     }

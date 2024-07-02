@@ -201,7 +201,10 @@ export class Reporting {
                             formatter: function(seriesName) {
                                 return '';
                             }
-                        }                      
+                        },
+                        formatter: (value) => {
+                            return value ? this.formatValue(value, args.yAxisFormatter) : '0';
+                        }
                     }
                 },
                 dataLabels: {
@@ -299,8 +302,8 @@ export class Reporting {
                                 return args.series.length === 1 ? '' : seriesName;
                             }
                         },
-                        formatter: function(value) {
-                            return value || '0';
+                        formatter: (value) => {
+                            return value ? this.formatValue(value, args.yAxisFormatter) : '0';
                         }
                     }                    
                 },
