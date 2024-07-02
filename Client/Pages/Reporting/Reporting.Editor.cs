@@ -29,17 +29,18 @@ public partial class Reporting
         this.StateHasChanged();
         Data.Clear();
 
-        Dictionary<Guid, string> flows;
-        Dictionary<Guid, string> libraries;
 
         IDictionary<string, object> model = new ExpandoObject() as IDictionary<string, object>;
         try
         {
             var flowsResult = await HttpHelper.Get<Dictionary<Guid, string>>($"/api/flow/basic-list");
-            flows = flowsResult.Success ? flowsResult.Data ?? new() : new();
+            var flows = flowsResult.Success ? flowsResult.Data ?? new() : new();
 
             var librariesResult = await HttpHelper.Get<Dictionary<Guid, string>>($"/api/library/basic-list");
-            libraries = librariesResult.Success ? librariesResult.Data ?? new() : new();
+            var libraries = librariesResult.Success ? librariesResult.Data ?? new() : new();
+            
+            var nodesResult = await HttpHelper.Get<Dictionary<Guid, string>>($"/api/node/basic-list");
+            var nodes = nodesResult.Success ? nodesResult.Data ?? new() : new();
 
             if (rd.DefaultReportPeriod != null)
             {
@@ -56,6 +57,7 @@ public partial class Reporting
 
             AddSelectField("Flow", flows, rd.FlowSelection, ref fields, model);
             AddSelectField("Library", libraries, rd.LibrarySelection, ref fields, model);
+            AddSelectField("Node", nodes, rd.NodeSelection, ref fields, model);
 
             foreach (var tf in rd.Fields ?? [])
             {
@@ -223,22 +225,21 @@ public partial class Reporting
                         {
                             "Options", listOptions
                         }
-                    }
+                    },
+                    Validators = [new Required()]
                 });
                 break;
-            case ReportSelection.AnyRequired:
-                model[title] = listOptions.Select(x => x.Value).ToList();
+            case ReportSelection.AnyOrAll:
+                model[title] = new object[] { null }; // any
                 fields.Add(new ElementField()
                 {
                     Name = title,
                     InputType = FormInputType.MultiSelect,
                     Parameters = new()
                     {
-                        {
-                            "Options", listOptions
-                        }
-                    },
-                    Validators = [new Required()]
+                        { "Options", listOptions },
+                        { "AnyOrAll", true }
+                    }
                 });
                 break;
         }

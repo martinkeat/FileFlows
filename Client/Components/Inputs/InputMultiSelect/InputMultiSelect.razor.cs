@@ -7,13 +7,18 @@ namespace FileFlows.Client.Components.Inputs;
 /// <summary>
 /// Input multi-select
 /// </summary>
-public partial class InputMultiSelect: Input<List<object>>
+public partial class InputMultiSelect: Input<List<object?>>
 {
 
     /// <summary>
     /// Gets or sets the options of the checklist
     /// </summary>
     [Parameter] public List<ListOption> Options { get; set; }
+    
+    /// <summary>
+    /// Gets or sets if this allows any or all
+    /// </summary>
+    [Parameter] public bool AnyOrAll { get; set; }
 
     /// <summary>
     /// If the dropdown is opened
@@ -28,15 +33,16 @@ public partial class InputMultiSelect: Input<List<object>>
     /// <summary>
     /// Label for all
     /// </summary>
-    private string lblAll;
+    private string lblAll, lblAny;
 
     /// <inheritdoc />
     protected override void OnInitialized()
     {
         base.OnInitialized();
         lblAll = Translater.Instant("Labels.All");
+        lblAny = Translater.Instant("Labels.Any");
         if (Value == null)
-            Value = new List<object>();
+            Value = new List<object?>();
         else if(Options != null)
         {
             this.Value = this.Value.Select(x =>
@@ -46,6 +52,8 @@ public partial class InputMultiSelect: Input<List<object>>
                     if (opt.Value == x)
                         return x;
                     if (opt.Value is string && x is string)
+                        continue;
+                    if (x == null)
                         continue;
                     if (x.GetType().IsPrimitive)
                         continue;
@@ -59,6 +67,15 @@ public partial class InputMultiSelect: Input<List<object>>
                 return x;
             }).ToList();
         }
+    }
+
+    /// <inheritdoc />
+    public override Task<bool> Validate()
+    {
+        if (Value?.Any() == true)
+            return Task.FromResult(true);
+        ErrorMessage = Translater.Instant("Validators.Required");
+        return Task.FromResult(false);
     }
 
     /// <inheritdoc />
@@ -98,8 +115,13 @@ public partial class InputMultiSelect: Input<List<object>>
     /// <summary>
     /// Gets if all are selected
     /// </summary>
-    private bool IsAllSelected => Value.Count == Options.Count;
+    private bool IsAllSelected => Value.Count(x => x != null) == Options.Count;
 
+    /// <summary>
+    /// Gets if any are selected
+    /// </summary>
+    private bool IsAnySelected => Value is [null];
+    
     /// <summary>
     /// Toggles the dropdown open state 
     /// </summary>
@@ -126,6 +148,22 @@ public partial class InputMultiSelect: Input<List<object>>
     }
 
     /// <summary>
+    /// Toggles if all is clicked
+    /// </summary>
+    private void ToggleAny()
+    {
+        if (IsAnySelected)
+        {
+            Value.Clear();
+        }
+        else
+        {
+            Value.Clear();
+            Value.Add(null);
+        }
+    }
+
+    /// <summary>
     /// Toggles a option on or off
     /// </summary>
     /// <param name="optionValue">the option value</param>
@@ -137,6 +175,7 @@ public partial class InputMultiSelect: Input<List<object>>
         }
         else
         {
+            Value.Remove(null);
             Value.Add(optionValue);
         }
     }
@@ -149,10 +188,13 @@ public partial class InputMultiSelect: Input<List<object>>
     {
         if (Value.Count == 0)
             return "Select...";
+        if (Value is [null])
+            return lblAny;
         if (Value.Count == Options.Count)
             return lblAll;
         if (Value.Count == 1)
             return Options.First(o => o.Value == Value.First()).Label;
+
         return $"{Value.Count} selected";
     }
 }

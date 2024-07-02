@@ -50,6 +50,11 @@ public abstract class Report
     public virtual ReportSelection LibrarySelection => ReportSelection.None;
 
     /// <summary>
+    /// Gets if this report supports node selection
+    /// </summary>
+    public virtual ReportSelection NodeSelection => ReportSelection.None;
+
+    /// <summary>
     /// Gets all reports in the system
     /// </summary>
     /// <returns>all reports in the system</returns>
@@ -59,7 +64,7 @@ public abstract class Report
         [
             new FlowElementExecution(), new LibrarySavings(),
             new Codecs(), new Languages(), new FilesProcessed(),
-            new NodeProcessing()
+            //new NodeProcessing()
         ];
     }
 
@@ -114,9 +119,21 @@ public abstract class Report
     /// <param name="sql">the SQL to update</param>
     protected void AddLibrariesToSql(Dictionary<string, object> model, ref string sql)
     {
-        var libraryUids = GetLibraryUids(model);
+        var libraryUids = GetUids("Library", model);
         if (libraryUids.Count > 0)
             sql += $" and {Wrap("LibraryUid")} in ({string.Join(", ", libraryUids.Select(x => $"'{x}'"))})";
+    }
+
+    /// <summary>
+    /// Adds the nodes to the SQL command
+    /// </summary>
+    /// <param name="model">the model passed to the report</param>
+    /// <param name="sql">the SQL to update</param>
+    protected void AddNodesToSql(Dictionary<string, object> model, ref string sql)
+    {
+        var nodeUids = GetUids("Node", model).Where(x => x != null).ToArray();
+        if (nodeUids.Length > 0)
+            sql += $" and {Wrap("NodeUid")} in ({string.Join(", ", nodeUids.Select(x => $"'{x}'"))})";
     }
 
     /// <summary>
@@ -153,23 +170,24 @@ public abstract class Report
     /// <summary>
     /// Gets the selected library UIDs
     /// </summary>
+    /// <param name="key">the key in the model</param>
     /// <param name="model">the model passed into the report</param>
     /// <returns>the selected library UIDs</returns>
-    protected List<Guid> GetLibraryUids(Dictionary<string, object> model)
+    protected List<Guid?> GetUids(string key, Dictionary<string, object> model)
     {
-        if (model.TryGetValue("Library", out var libraries) == false)
+        if (model.TryGetValue(key, out var value) == false)
             return [];
-        if (libraries is JsonElement je)
+        if (value is JsonElement je)
         {
             if (je.ValueKind == JsonValueKind.Array)
             {
-                var guids = new List<Guid>();
+                var guids = new List<Guid?>();
                 foreach (var element in je.EnumerateArray())
                 {
-                    if (element.TryGetGuid(out var guid))
-                    {
+                    if(element.ValueKind == JsonValueKind.Null)
+                        guids.Add(null);
+                    else if (element.TryGetGuid(out var guid))
                         guids.Add(guid);
-                    }
                 }
 
                 return guids;

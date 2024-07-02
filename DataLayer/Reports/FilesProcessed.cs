@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Esprima.Ast;
+using FileFlows.DataLayer.Reports.Helpers;
 using FileFlows.Plugin;
 using FileFlows.Plugin.Formatters;
 using FileFlows.Shared.Models;
@@ -30,79 +31,76 @@ public class FilesProcessed : Report
     
     /// <inheritdoc />
     public override ReportSelection LibrarySelection => ReportSelection.Any;
+    
+    /// <inheritdoc />
+    public override ReportSelection NodeSelection => ReportSelection.AnyOrAll;
+
 
     /// <inheritdoc />
     public override async Task<Result<string>> Generate(Dictionary<string, object> model)
     {
-        var statistic = GetEnumValue<ProcessedStatistic>(model, nameof(Statistic)); 
+        var statistic = GetEnumValue<ProcessedStatistic>(model, nameof(Statistic));
 
         using var db = await GetDb();
-
         string sql =
-            $"select {Wrap("ProcessingStarted")}, {Wrap("ProcessingEnded")}, {Wrap("OriginalSize")} " +
-            $"from {Wrap("LibraryFile")} where {Wrap("Status")} = 1 ";
-        AddLibrariesToSql(model, ref sql);
-        AddPeriodToSql(model, ref sql);
-        sql += $" order by {Wrap("ProcessingStarted")}";
+            $"select {Wrap("NodeUid")}, {Wrap("NodeName")}, {Wrap("OriginalSize")}, " +
+            $"{Wrap("FinalSize")}, {Wrap("ProcessingStarted")}, {Wrap("ProcessingEnded")} " +
+            $"from {Wrap("LibraryFile")} where {Wrap("Status")} = 1";
 
-        var files = await db.Db.FetchAsync<FilesProcessedData>(sql);
+        AddPeriodToSql(model, ref sql);
+        AddLibrariesToSql(model, ref sql);
+        AddNodesToSql(model, ref sql);
+
+        var nodeUids = GetUids("Node", model).Where(x => x != null).ToList();
+        
+        var files = await db.Db.FetchAsync<NodeData>(sql);
         
         (DateTime? minDateUtc, DateTime? maxDateUtc) = GetPeriod(model);
         minDateUtc ??= files.Min(x => x.ProcessingStarted);
         maxDateUtc ??= files.Max(x => x.ProcessingStarted);
 
-        SortedDictionary<DateTime, double> data = new();
+        Dictionary<string, Dictionary<DateTime, long>> data = new();
         foreach (var file in files)
         {
             var date = file.ProcessingStarted.ToLocalTime();
             date = new DateTime(date.Year, date.Month, date.Day);
-            data.TryAdd(date, 0);
+            string name;
+            if (nodeUids.Count > 0)
+                name = file.NodeName == "FileFlowsServer" ? "Internal Processing Node" : file.NodeName;
+            else
+                name = string.Empty;
+
+            data.TryAdd(name, new Dictionary<DateTime, long>());
+            var d = data[name];
+            d.TryAdd(date, 0);
             
             switch (statistic)
             {
                 case ProcessedStatistic.Count:
-                    data[date] += 1;
+                    d[date] += 1;
                     break;
                 case ProcessedStatistic.Size:
-                    data[date] += file.OriginalSize;
+                    d[date] += file.OriginalSize;
                     break;
                 case ProcessedStatistic.Duration:
-                    data[date] += (int)(file.ProcessingEnded - file.ProcessingStarted).TotalSeconds;
+                    d[date] += (int)(file.ProcessingEnded - file.ProcessingStarted).TotalSeconds;
                     break;
             }
         }
-        DateTime current = minDateUtc.Value;
-        while (current < maxDateUtc.Value)
-        {
-            var date = current.ToLocalTime();
-            date = new DateTime(date.Year, date.Month, date.Day);
-            data.TryAdd(date, 0);
-            current = current.AddDays(1);
-        }
         
-        var formatter = new SizeFormatter();
-        var table = statistic == ProcessedStatistic.Size
-            ?
-            GenerateHtmlTable(data.Select(x => new
-                { Date = x.Key.ToString("d MMMM"), Size = formatter.Format(x.Value, null!) }))
-            : statistic == ProcessedStatistic.Duration
-                ? GenerateHtmlTable(data.Select(x => new { Date = x.Key.ToString("d MMMM"), Minutes = (long)x.Value }))
-                :
-                GenerateHtmlTable(data.Select(x => new { Date = x.Key.ToString("d MMMM"), Value = (long)x.Value }));
+        string html = DateBasedChartHelper.Generate(minDateUtc.Value, maxDateUtc.Value, data);
 
-        var chart = maxDateUtc.Value.Subtract(minDateUtc.Value).TotalDays > 35 ?
-            GenerateSvgLineChart(data.ToDictionary(x => (object)x.Key, x=> x.Value),
-                yAxisFormatter: statistic == ProcessedStatistic.Size ? "filesize" : null) :
-             GenerateSvgBarChart(data.ToDictionary(x => (object)x.Key, x=> x.Value),
-                 yAxisFormatter: statistic == ProcessedStatistic.Size ? "filesize" : null);
-
-        return (table ?? string.Empty) + (chart ?? string.Empty);
+        return html;
     }
-
-    public class FilesProcessedData
-    {
-        public DateTime ProcessingStarted { get; set; }
-        public DateTime ProcessingEnded { get; set; }
-        public long OriginalSize { get; set; }
-    }
+    
+    /// <summary>
+    /// Represents the data for a node in the processing system.
+    /// </summary>
+    /// <param name="NodeUid">The unique identifier of the node.</param>
+    /// <param name="NodeName">The name of the node.</param>
+    /// <param name="OriginalSize">The original size of the data before processing.</param>
+    /// <param name="FinalSize">The final size of the data after processing.</param>
+    /// <param name="ProcessingStarted">The date and time when processing started.</param>
+    /// <param name="ProcessingEnded">The date and time when processing ended.</param>
+    public record NodeData(Guid NodeUid, string NodeName, long OriginalSize, long FinalSize, DateTime ProcessingStarted, DateTime ProcessingEnded);
 }

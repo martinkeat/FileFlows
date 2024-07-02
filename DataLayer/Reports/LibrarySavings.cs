@@ -18,7 +18,7 @@ public class LibrarySavings : Report
     /// <inheritdoc />
     public override string Icon => "fas fa-hdd";
     /// <inheritdoc />
-    public override ReportSelection LibrarySelection => ReportSelection.AnyRequired;
+    public override ReportSelection LibrarySelection => ReportSelection.Any;
 
     /// <inheritdoc />
     public override async Task<Result<string>> Generate(Dictionary<string, object> model)

@@ -73,6 +73,18 @@ public class NodeController : BaseController
         }).ToList();
         return nodes;
     }
+    
+    /// <summary>
+    /// Basic flow list
+    /// </summary>
+    /// <returns>flow list</returns>
+    [HttpGet("basic-list")]
+    [FileFlowsAuthorize(UserRole.Nodes | UserRole.Admin)]
+    public async Task<Dictionary<Guid, string>> GetNodeList()
+    {
+        var items = await new NodeService().GetAllAsync();
+        return items.ToDictionary(x => x.Uid, x => x.Name == Globals.InternalNodeName ? "Internal Processing Node" : x.Name);
+    }
 
     /// <summary>
     /// Gets an overview of the nodes

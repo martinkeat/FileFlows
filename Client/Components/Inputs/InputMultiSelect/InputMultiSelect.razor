@@ -1,8 +1,8 @@
 @namespace FileFlows.Client.Components.Inputs
-@inherits Input<List<object>>
+@inherits Input<List<object?>>
 
 <InputWrapper Input="@this">
-    <div id="@Uid" class="input-multiselect-wrapper @(dropdownOpen ? "dd-opened" : "")">
+    <div id="@Uid" class="input-multiselect-wrapper @(dropdownOpen ? "dd-opened" : "") @(string.IsNullOrEmpty(ErrorMessage) ? "" : "has-error")">
         <div class="select-label" @onclick="ToggleDropdown">
             <span>@SelectedLabel()</span> 
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#fff" stroke-width="2.5">
@@ -10,6 +10,15 @@
             </svg>
         </div>
         <ul class="select-options">
+            @if (AnyOrAll)
+            {
+                <li class="any-option">
+                    <label>
+                        <input type="checkbox" checked="@IsAnySelected" @onchange="(e) => ToggleAny()">
+                        <span>@lblAny</span>
+                    </label>
+                </li>
+            }
             <li class="all-option">
                 <label>
                     <input type="checkbox" checked="@IsAllSelected" @onchange="(e) => ToggleAll()">

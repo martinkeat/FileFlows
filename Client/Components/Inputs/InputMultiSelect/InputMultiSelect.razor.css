@@ -13,6 +13,9 @@
 .input-multiselect-wrapper.dd-opened .select-label svg {
   transform: rotate(180deg); /* Rotate arrow when dropdown is open */
 }
+.input-multiselect-wrapper.has-error {
+  border-color: var(--accent);
+}
 
 .select-label {
   padding: 0 0.25rem;
@@ -60,9 +63,13 @@
 .select-options label:hover {
   background-color: rgba(var(--accent-rgb), 0.3);
 }
-.all-option {
+.all-option, .any-option {
+  border-top: solid 1px var(--border-color);
   margin-bottom: 0.25rem;
   padding: 0.25rem 0;
   border-bottom: solid 1px var(--border-color);
-  border-top: solid 1px var(--border-color);
+}
+
+.any-option + .all-option {
+  border-top: none;
 }

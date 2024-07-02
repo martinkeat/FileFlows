@@ -41,6 +41,11 @@ public class ReportDefinition : IUniqueObject<Guid>
     public ReportSelection LibrarySelection { get; set; }
     
     /// <summary>
+    /// Gets the node selection for this report
+    /// </summary>
+    public ReportSelection NodeSelection { get; set; }
+    
+    /// <summary>
     /// Gets or sets the fields in this template
     /// </summary>
     public List<TemplateField> Fields { get; set; }
@@ -64,9 +69,9 @@ public enum ReportSelection
     /// </summary>
     Any,
     /// <summary>
-    /// Any of these can be selected, but at least one MUST be selected
+    /// Any or all
     /// </summary>
-    AnyRequired
+    AnyOrAll 
 }
 
 
