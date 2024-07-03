@@ -56,6 +56,10 @@ public class ProcessingSummary: Report
         var files = await db.Db.FetchAsync<FileData>(sql);
         if (files.Count < 1)
             return string.Empty; // no data
+
+        string failedSql = $"select count({Wrap("Uid")}) from {Wrap("LibraryFile")} where {Wrap("Status")} = 4 ";
+        AddPeriodToSql(model, ref failedSql);
+        var failedFiles = await db.Db.ExecuteScalarAsync<int>(failedSql);
         
         (DateTime? minDateUtc, DateTime? maxDateUtc) = GetPeriod(model);
         minDateUtc ??= files.Min(x => x.ProcessingStarted);
@@ -130,20 +134,15 @@ public class ProcessingSummary: Report
 
         StringBuilder output = new();
 
-        output.AppendLine("<div class=\"report-row report-row-4\">");
+        output.AppendLine("<div class=\"report-row report-row-3\">");
         foreach (var sum in new[]
                  {
+                     ("Period", minDateUtc.Value.ToLocalTime().ToString("d MMM") +" - " + maxDateUtc.Value.ToLocalTime().ToString("d MMM"), "far fa-clock", ""),
                      ("Total Files", totalFiles.ToString("N0"), "far fa-file", ""),
-                     ("Processing Time", TimeSpan.FromSeconds(totalSeconds).Humanize(1), "far fa-clock", ""),
-                     ("Bytes Processed", FileSizeFormatter.Format(totalBytes), "far fa-hdd", ""),
-                     ("Storage Sized", FileSizeFormatter.Format(totalSavedBytes), "far fa-hdd", totalSavedBytes > 0 ? "success" : "error"),
+                     ("Failed Files", failedFiles.ToString("N0"), "far fa-exclamation-circle", "error"),
                  })
         {
-            output.AppendLine($"<div class=\"report-summary-box {sum.Item4}\">" +
-                      $"<span class=\"icon\"><i class=\"{sum.Item3}\"></i></span>" +
-                      $"<span class=\"title\">{HttpUtility.HtmlEncode(sum.Item1)}</span>" +
-                      $"<span class=\"value\">{HttpUtility.HtmlEncode(sum.Item2)}</span>" +
-                      "</div>");
+            output.AppendLine(ReportSummaryBox.Generate(sum.Item1, sum.Item2, sum.Item3, sum.Item4));
         }
         output.AppendLine("</div>");
 
@@ -161,7 +160,29 @@ public class ProcessingSummary: Report
                 ChartTitle = "Total Files",
                 ChartData = nodeDataCount,
                 ChartYAxisFormatter = ""
-            },
+            }
+        ];
+
+        foreach (var sumRow in summaryRows)
+        {
+            AddSummaryRow(output, sumRow, labels, emailing);
+        }
+
+        
+        output.AppendLine("<div class=\"report-row report-row-3\">");
+        foreach (var sum in new[]
+                 {
+                     ("Processing Time", TimeSpan.FromSeconds(totalSeconds).Humanize(1), "far fa-clock", ""),
+                     ("Bytes Processed", FileSizeFormatter.Format(totalBytes), "far fa-hdd", ""),
+                     ("Storage Sized", FileSizeFormatter.Format(totalSavedBytes), "far fa-hdd", totalSavedBytes > 0 ? "success" : "error"),
+                 })
+        {
+            output.AppendLine(ReportSummaryBox.Generate(sum.Item1, sum.Item2, sum.Item3, sum.Item4));
+        }
+        output.AppendLine("</div>");
+
+        summaryRows =
+        [
             new()
             {
                 TableTitle = "Biggest Savings",
@@ -193,29 +214,8 @@ public class ProcessingSummary: Report
 
         foreach (var sumRow in summaryRows)
         {
-            output.AppendLine("<div class=\"report-row report-row-2\">");
-            
-            output.AppendLine(MultiLineChart.Generate(new MultilineChartData
-            {
-                Title = sumRow.ChartTitle,
-                Labels = labels,
-                YAxisFormatter = sumRow.ChartYAxisFormatter,
-                Series = sumRow.ChartData.Select(seriesItem => new ChartSeries
-                {
-                    Name = seriesItem.Key,
-                    Data = labels.Select(label => (double)seriesItem.Value.GetValueOrDefault(label, 0)).ToArray()
-                }).ToArray()
-            }, generateSvg: emailing));
-            
-            output.AppendLine(TableGenerator.GenerateMinimumTable(sumRow.TableTitle,
-                ["Name", sumRow.TableUnitColumn],
-                sumRow.TableData
-            ));
-            
-            output.AppendLine("</div>");
-            
+            AddSummaryRow(output, sumRow, labels, emailing);
         }
-
         foreach (var group in new[]
                  {
                      // new[]
@@ -272,6 +272,31 @@ public class ProcessingSummary: Report
     public record FileData(string Name, Guid NodeUid, string NodeName, long OriginalSize, long FinalSize,
         Guid LibraryUid, string LibraryName, Guid FlowUid, string FlowName,
         DateTime ProcessingStarted, DateTime ProcessingEnded);
+
+    private void AddSummaryRow(StringBuilder output, SummaryRow sumRow, DateTime[] labels, bool emailing)
+    {
+        
+        output.AppendLine("<div class=\"report-row report-row-2\">");
+            
+        output.AppendLine(MultiLineChart.Generate(new MultilineChartData
+        {
+            Title = sumRow.ChartTitle,
+            Labels = labels,
+            YAxisFormatter = sumRow.ChartYAxisFormatter,
+            Series = sumRow.ChartData.Select(seriesItem => new ChartSeries
+            {
+                Name = seriesItem.Key,
+                Data = labels.Select(label => (double)seriesItem.Value.GetValueOrDefault(label, 0)).ToArray()
+            }).ToArray()
+        }, generateSvg: emailing));
+            
+        output.AppendLine(TableGenerator.GenerateMinimumTable(sumRow.TableTitle,
+            ["Name", sumRow.TableUnitColumn],
+            sumRow.TableData
+        ));
+            
+        output.AppendLine("</div>");
+    }
 
 
     private class SummaryRow
