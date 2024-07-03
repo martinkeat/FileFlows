@@ -54,8 +54,14 @@ public class FileNameFormatter : Formatter
     /// <returns>True if the string looks like a GUID, otherwise false.</returns>
     private static bool IsPotentialGuid(string value)
     {
+        if (string.IsNullOrWhiteSpace(value))
+            return false;
+        int dotIndex = value.LastIndexOf('.');
+        if (dotIndex > 0)
+            value = value[..^dotIndex];
+        
         // A GUID has 32 hexadecimal characters, optionally separated by hyphens
-        if (string.IsNullOrWhiteSpace(value) || value.Length < 32)
+        if (value.Length < 32)
             return false;
 
         string sanitizedValue = value.Replace("-", string.Empty);

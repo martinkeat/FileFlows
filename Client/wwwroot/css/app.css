@@ -3834,8 +3834,11 @@ hr {
   bottom: 0.5rem;
   font-size: 3rem;
   width: 4rem;
-  align-content: center;
   color: var(--info);
+  background: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .report-output .report-summary-box .value {
   font-size: 2rem;
