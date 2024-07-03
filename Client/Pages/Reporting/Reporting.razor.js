@@ -245,6 +245,7 @@ export class Reporting {
         for(let hPid of hidden)
         {
             let ele = document.createElement('div');
+            ele.classList.add('report-chart');
             hPid.insertAdjacentElement('afterend', ele);
 
             let parameters = JSON.parse(hPid.value);

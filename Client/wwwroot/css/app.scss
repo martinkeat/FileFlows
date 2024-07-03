@@ -1471,6 +1471,14 @@ input[type=file]{
         }
     }
     
+    .report-chart {
+        .apexcharts-toolbar {
+            display:none;
+        }
+        &:hover .apexcharts-toolbar {
+            display: flex;
+        }
+    }
     .percentage {
         display: flex;
         flex-direction: row;

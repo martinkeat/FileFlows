@@ -3937,6 +3937,12 @@ hr {
 .report-output .table-container table tbody tr td:first-child {
   width: 12rem;
 }
+.report-output .report-chart .apexcharts-toolbar {
+  display: none;
+}
+.report-output .report-chart:hover .apexcharts-toolbar {
+  display: flex;
+}
 .report-output .percentage {
   display: flex;
   flex-direction: row;

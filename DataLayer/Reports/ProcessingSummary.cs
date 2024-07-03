@@ -139,7 +139,7 @@ public class ProcessingSummary: Report
                  {
                      ("Period", minDateUtc.Value.ToLocalTime().ToString("d MMM") +" - " + maxDateUtc.Value.ToLocalTime().ToString("d MMM"), "far fa-clock", ""),
                      ("Total Files", totalFiles.ToString("N0"), "far fa-file", ""),
-                     ("Failed Files", failedFiles.ToString("N0"), "far fa-exclamation-circle", "error"),
+                     ("Failed Files", failedFiles.ToString("N0"), "fas fa-exclamation-circle", "error"),
                  })
         {
             output.AppendLine(ReportSummaryBox.Generate(sum.Item1, sum.Item2, sum.Item3, sum.Item4));
@@ -204,7 +204,7 @@ public class ProcessingSummary: Report
                 TableData = longestRunning.Select(x => new object[]
                 {
                     FileNameFormatter.Format(x.Name),
-                    (x.ProcessingEnded - x.ProcessingStarted).Humanize(2)
+                    (x.ProcessingEnded - x.ProcessingStarted).Humanize(1)
                 }).ToArray(),
                 ChartTitle = "Processing Time",
                 ChartData = nodeDataTime,
