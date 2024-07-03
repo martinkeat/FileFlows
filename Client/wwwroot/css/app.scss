@@ -1369,7 +1369,7 @@ input[type=file]{
             justify-content: center;
         }
         .value {
-            font-size:2rem;
+            font-size:clamp(1rem, 2vw, 2rem);
         }
         &.warning .icon {
             color:var(--yellow);

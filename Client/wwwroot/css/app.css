@@ -3842,7 +3842,7 @@ hr {
   justify-content: center;
 }
 .report-output .report-summary-box .value {
-  font-size: 2rem;
+  font-size: clamp(1rem, 2vw, 2rem);
 }
 .report-output .report-summary-box.warning .icon {
   color: var(--yellow);

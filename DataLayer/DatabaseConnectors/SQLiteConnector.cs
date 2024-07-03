@@ -1,7 +1,6 @@
 using System.Text.RegularExpressions;
 using FileFlows.Plugin;
 using FileFlows.ServerShared.Helpers;
-using FileFlows.Shared;
 using NPoco.DatabaseTypes;
 using DatabaseType = FileFlows.Shared.Models.DatabaseType;
 
@@ -73,7 +72,12 @@ public class SQLiteConnector : IDatabaseConnector
             // Converters.UtcDateConverter.UseInstance()
         };
 
-        return new DatabaseConnection(db, false);
+        var connection = new DatabaseConnection(db, false);
+        
+        // Set the synchronous mode to FULL
+        connection.Db.Execute("PRAGMA synchronous=FULL;");
+        
+        return connection;
     }
 
 
