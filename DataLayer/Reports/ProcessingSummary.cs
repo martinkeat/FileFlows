@@ -1,9 +1,12 @@
 using System.Numerics;
+using System.Text;
+using System.Web;
 using FileFlows.DataLayer.Reports.Charts;
 using FileFlows.DataLayer.Reports.Helpers;
 using FileFlows.Plugin;
 using FileFlows.Shared.Formatters;
 using FileFlows.Shared.Models;
+using Humanizer;
 
 namespace FileFlows.DataLayer.Reports;
 
@@ -34,7 +37,7 @@ public class ProcessingSummary: Report
 
         using var db = await GetDb();
         string sql =
-            $"select {Wrap("NodeUid")}, {Wrap("NodeName")}, {Wrap("OriginalSize")}, " +
+            $"select {Wrap("Name")}, {Wrap("NodeUid")}, {Wrap("NodeName")}, {Wrap("OriginalSize")}, " +
             $"{Wrap("FinalSize")}, {Wrap("ProcessingStarted")}, {Wrap("ProcessingEnded")}, " +
             $"{Wrap("LibraryUid")}, {Wrap("LibraryName")}, {Wrap("FlowUid")}, {Wrap("FlowName")} " +
             $"from {Wrap("LibraryFile")} where {Wrap("Status")} = 1";
@@ -64,8 +67,21 @@ public class ProcessingSummary: Report
         Dictionary<string, Dictionary<DateTime, long>> libDataCount = new();
         Dictionary<string, Dictionary<DateTime, long>> libDataSize = new();
         Dictionary<string, Dictionary<DateTime, long>> libDataTime = new();
+
+        double totalSeconds = 0, totalBytes = 0, totalSavedBytes = 0;
+        int totalFiles = 0;
+        const int NUM_FILES = 7;
+
+        List<FileData> largestFiles = files.OrderByDescending(x => x.OriginalSize).Take(NUM_FILES).ToList();
+        List<FileData> mostSaved = files.OrderByDescending(x => x.FinalSize - x.OriginalSize).Take(NUM_FILES).ToList();
+        List<FileData> longestRunning = files.OrderByDescending(x => x.ProcessingEnded - x.ProcessingStarted).Take(NUM_FILES).ToList();
+        
         foreach (var file in files)
         {
+            totalFiles++;
+            totalBytes += file.OriginalSize;
+            totalSavedBytes += (file.OriginalSize - file.FinalSize);
+            totalSeconds += (int)(file.ProcessingEnded - file.ProcessingStarted).TotalSeconds;
             var date = file.ProcessingStarted.ToLocalTime();
             date = hourly ?  new DateTime(date.Year, date.Month, date.Day, date.Hour, 0, 0) :  new DateTime(date.Year, date.Month, date.Day);
             
@@ -110,38 +126,164 @@ public class ProcessingSummary: Report
             ldTime[date] += (int)(file.ProcessingEnded - file.ProcessingStarted).TotalSeconds;
         }
 
-        string output = "";
-        foreach (var chart in new []
+        StringBuilder output = new();
+
+        output.AppendLine("<div class=\"report-row report-row-4\">");
+        foreach (var sum in new[]
                  {
-                     ("Node Files", nodeDataCount, ""), 
-                     ("Node Size", nodeDataSize, "filesize"), 
-                     ("Node Time", nodeDataTime, ""),
-                     
-                     ("Library Files", libDataCount, ""), 
-                     ("Library Size", libDataSize, "filesize"), 
-                     ("Library Time", libDataTime, ""),
+                     ("Total Files", totalFiles.ToString("N0"), "far fa-file", ""),
+                     ("Processing Time", TimeSpan.FromSeconds(totalSeconds).Humanize(1), "far fa-clock", ""),
+                     ("Bytes Processed", FileSizeFormatter.Format(totalBytes), "far fa-hdd", ""),
+                     ("Storage Sized", FileSizeFormatter.Format(totalSavedBytes), "far fa-hdd", totalSavedBytes > 0 ? "success" : "error"),
                  })
         {
-            var chartHtml = MultiLineChart.Generate(new MultilineChartData
+            output.AppendLine($"<div class=\"report-summary-box {sum.Item4}\">" +
+                      $"<span class=\"icon\"><i class=\"{sum.Item3}\"></i></span>" +
+                      $"<span class=\"title\">{HttpUtility.HtmlEncode(sum.Item1)}</span>" +
+                      $"<span class=\"value\">{HttpUtility.HtmlEncode(sum.Item2)}</span>" +
+                      "</div>");
+        }
+        output.AppendLine("</div>");
+
+        SummaryRow[] summaryRows =
+        [
+            new()
             {
+                TableTitle = "Largest Files",
+                TableUnitColumn = "Size",
+                TableData = largestFiles.Select(x => new object[]
+                {
+                    FileNameFormatter.Format(x.Name),
+                    FileSizeFormatter.Format(x.OriginalSize)
+                }).ToArray(),
+                ChartTitle = "Total Files",
+                ChartData = nodeDataCount,
+                ChartYAxisFormatter = ""
+            },
+            new()
+            {
+                TableTitle = "Biggest Savings",
+                TableUnitColumn = "Savings",
+                TableData = mostSaved.Select(x => new object[]
+                {
+                    FileNameFormatter.Format(x.Name),
+                    FileSizeFormatter.Format(x.FinalSize - x.OriginalSize)
+                }).ToArray(),
+                
+                ChartTitle = "File Size",
+                ChartData = nodeDataSize,
+                ChartYAxisFormatter = "filesize"
+            },
+            new()
+            {
+                TableTitle = "Longest Running",
+                TableUnitColumn = "Time",
+                TableData = longestRunning.Select(x => new object[]
+                {
+                    FileNameFormatter.Format(x.Name),
+                    (x.ProcessingEnded - x.ProcessingStarted).Humanize(2)
+                }).ToArray(),
+                ChartTitle = "Processing Time",
+                ChartData = nodeDataTime,
+                ChartYAxisFormatter = ""
+            }
+        ];
+
+        foreach (var sumRow in summaryRows)
+        {
+            output.AppendLine("<div class=\"report-row report-row-2\">");
+            
+            output.AppendLine(MultiLineChart.Generate(new MultilineChartData
+            {
+                Title = sumRow.ChartTitle,
                 Labels = labels,
-                YAxisFormatter = chart.Item3,
-                Series = chart.Item2.Select(seriesItem => new ChartSeries
+                YAxisFormatter = sumRow.ChartYAxisFormatter,
+                Series = sumRow.ChartData.Select(seriesItem => new ChartSeries
                 {
                     Name = seriesItem.Key,
                     Data = labels.Select(label => (double)seriesItem.Value.GetValueOrDefault(label, 0)).ToArray()
                 }).ToArray()
-            }, generateSvg: emailing);
-
-            output += $"<h2>{chart.Item1}</h2>" + chartHtml;
+            }, generateSvg: emailing));
+            
+            output.AppendLine(TableGenerator.GenerateMinimumTable(sumRow.TableTitle,
+                ["Name", sumRow.TableUnitColumn],
+                sumRow.TableData
+            ));
+            
+            output.AppendLine("</div>");
+            
         }
 
-        return output;
+        output.AppendLine("<div class=\"report-row report-row-3\">");
+        foreach (var fdgroup in new[]
+                 {
+                     ("Largest Files", "Size", largestFiles.Select(x => new object[]
+                     {
+                         FileNameFormatter.Format(x.Name), 
+                         FileSizeFormatter.Format(x.OriginalSize)
+                     }).ToArray()),
+                     ("Biggest Savings", "Savings", mostSaved.Select(x => new object[]
+                     {
+                         FileNameFormatter.Format(x.Name), 
+                         FileSizeFormatter.Format(x.FinalSize - x.OriginalSize)
+                     }).ToArray()),
+                     ("Longest Running", "Time", longestRunning.Select(x => new object[]
+                     {
+                         FileNameFormatter.Format(x.Name),
+                         (x.ProcessingEnded - x.ProcessingStarted).Humanize(2)
+                     }).ToArray())
+                 })
+        {
+            output.AppendLine(TableGenerator.GenerateMinimumTable(fdgroup.Item1,
+                ["Name", fdgroup.Item2],
+                fdgroup.Item3
+            ));
+        }
+        output.AppendLine("</div>");
+
+        foreach (var group in new[]
+                 {
+                     new[]
+                     {
+                         ("Node Files", nodeDataCount, ""),
+                         ("Node Size", nodeDataSize, "filesize"),
+                         ("Node Time", nodeDataTime, "")
+                     },
+                     new[]
+                     {
+                         ("Library Files", libDataCount, ""),
+                         ("Library Size", libDataSize, "filesize"),
+                         ("Library Time", libDataTime, "")
+
+                     }
+                 })
+        {
+            output.AppendLine("<div class=\"report-row report-row-3\">");
+            foreach (var chart in group)
+            {
+                output.AppendLine(MultiLineChart.Generate(new MultilineChartData
+                {
+                    Title = chart.Item1,
+                    Labels = labels,
+                    YAxisFormatter = chart.Item3,
+                    Series = chart.Item2.Select(seriesItem => new ChartSeries
+                    {
+                        Name = seriesItem.Key,
+                        Data = labels.Select(label => (double)seriesItem.Value.GetValueOrDefault(label, 0)).ToArray()
+                    }).ToArray()
+                }, generateSvg: emailing));
+            }
+
+            output.AppendLine("</div>");
+        }
+
+        return output.ToString();
     }
     
     /// <summary>
     /// Represents the data for a node in the processing system.
     /// </summary>
+    /// <param name="Name">the relative name of the file</param>
     /// <param name="NodeUid">The unique identifier of the node.</param>
     /// <param name="NodeName">The name of the node.</param>
     /// <param name="OriginalSize">The original size of the data before processing.</param>
@@ -152,7 +294,22 @@ public class ProcessingSummary: Report
     /// <param name="FlowName">The name of the flow.</param>
     /// <param name="ProcessingStarted">The date and time when processing started.</param>
     /// <param name="ProcessingEnded">The date and time when processing ended.</param>
-    public record FileData(Guid NodeUid, string NodeName, long OriginalSize, long FinalSize,
+    public record FileData(string Name, Guid NodeUid, string NodeName, long OriginalSize, long FinalSize,
         Guid LibraryUid, string LibraryName, Guid FlowUid, string FlowName,
         DateTime ProcessingStarted, DateTime ProcessingEnded);
+
+
+    private class SummaryRow
+    {
+        public string TableTitle { get; set; } = null!;
+        public object[][] TableData { get; set; } = null!;
+        public string TableUnitColumn { get; set; } = null!;
+        
+        public string ChartTitle { get; set; } = null!;
+        public Dictionary<string, Dictionary<DateTime, long>> ChartData { get; set; } = null!;
+        public string ChartYAxisFormatter { get; set; } = null!;
+
+
+
+    }
 }

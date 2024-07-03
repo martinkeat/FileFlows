@@ -17,11 +17,9 @@ public class MultiLineChart : Chart
     /// <param name="generateSvg">If the image generated should be an SVG image, else the image will require javascript to render</param>
     /// <returns>The chart content</returns>
     public static string Generate(MultilineChartData data, string? yAxisFormatter = null, bool generateSvg = false)
-    {
-        if (generateSvg)
-            return Svg(data);
-        return JavaScript(data, yAxisFormatter);
-    }
+        => $"<div class=\"chart\"><h2 class=\"title\">{data.Title}</h2>" +
+           (generateSvg ? Svg(data) : JavaScript(data, yAxisFormatter))
+           + "</div>";
 
     /// <summary>
     /// Generates an multi line chart using javascript
@@ -199,15 +197,40 @@ public class MultiLineChart : Chart
 }
 
 
+/// <summary>
+/// Multi line chart data
+/// </summary>
 public class MultilineChartData
 {
+    /// <summary>
+    /// Gets or sets the title
+    /// </summary>
+    public string Title { get; set; } = null!;
+    /// <summary>
+    /// Gets or sets the labels
+    /// </summary>
     public DateTime[] Labels { get; set; } = null!;
+    /// <summary>
+    /// Gets or sets the y-axis formatter
+    /// </summary>
     public string? YAxisFormatter { get; set; }
+    /// <summary>
+    /// Gets or sets the series 
+    /// </summary>
     public ChartSeries[] Series { get; set; } = null!;
 }
 
+/// <summary>
+/// Chart series
+/// </summary>
 public class ChartSeries
 {
+    /// <summary>
+    /// Gets or sets the name of the series
+    /// </summary>
     public string Name { get; set; } = null!;
+    /// <summary>
+    /// Gets or sets the data for the series
+    /// </summary>
     public double[] Data { get; set; } = null!;
 }

@@ -3788,18 +3788,106 @@ hr {
 
 .report-output {
   text-align: center;
-  display: flex;
-  flex-direction: column;
-  max-height: calc(100vh - 7rem);
+  --widget-background:var(--base-lighter);
 }
 .report-output h2 {
   font-size: 1.25rem;
+}
+.report-output .report-row {
+  display: grid;
+  gap: 1rem;
+}
+.report-output .report-row + .report-row {
+  margin-top: 1rem;
+}
+.report-output .report-row-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+.report-output .report-row-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+.report-output .report-row-4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+.report-output .report-row > div {
+  background: var(--widget-background);
+  border-radius: 0.5rem;
+  overflow: hidden;
+  padding: 1rem;
+}
+.report-output .report-row > div .title {
+  font-weight: var(--bold, 600);
+  font-size: 1.1rem !important;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+.report-output .report-summary-box {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  padding-left: 4rem !important;
+}
+.report-output .report-summary-box .icon {
+  position: absolute;
+  left: 0.5rem;
+  top: 0.5rem;
+  bottom: 0.5rem;
+  font-size: 3rem;
+  width: 4rem;
+  align-content: center;
+  color: var(--info);
+}
+.report-output .report-summary-box .value {
+  font-size: 2rem;
+}
+.report-output .report-summary-box.warning .icon {
+  color: var(--yellow);
+}
+.report-output .report-summary-box.error .icon {
+  color: var(--red);
+}
+.report-output .report-summary-box.info .icon {
+  color: var(--info);
+}
+.report-output .report-summary-box.success .icon {
+  color: var(--green);
+}
+.report-output .report-summary-box.green {
+  background: var(--green);
+}
+.report-output .report-summary-box.blue {
+  background: var(--blue);
+}
+.report-output .report-summary-box.yellow {
+  background: var(--yellow);
+}
+.report-output .report-summary-box.red {
+  background: var(--red);
+}
+.report-output .min-table table {
+  width: 100%;
+  table-layout: fixed;
+}
+.report-output .min-table td {
+  border: none !important;
+}
+.report-output .min-table td {
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.report-output .min-table td + td {
+  text-align: center;
+  font-weight: var(--bold, 600);
+  width: 7rem;
 }
 .report-output .table-container {
   overflow-y: auto;
   position: relative;
   margin-bottom: 2rem;
   min-height: 26rem;
+  background: var(--widget-background);
 }
 .report-output .table-container table {
   width: 100%;
@@ -3876,10 +3964,8 @@ hr {
   background: linear-gradient(to right, rgba(94, 94, 94, 0.25), rgba(255, 255, 255, 0.5));
 }
 .report-output div.chart {
-  margin: auto;
-}
-.report-output div.chart > svg {
-  min-height: 400px;
+  height: fit-content;
+  padding: 1rem 0;
 }
 .report-output div.chart svg text {
   fill: var(--color);

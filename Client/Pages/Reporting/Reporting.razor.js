@@ -143,7 +143,7 @@ export class Reporting {
         }
     }
     
-    formatValue(value, formatter)
+    formatValue(value, formatter, yAxis)
     {
         if(!formatter) {
             if(typeof(value) === 'number') {
@@ -155,12 +155,13 @@ export class Reporting {
                 return Math.round(value * 10) / 10;
             }
         }
+        console.log('yAxis', yAxis);
         if(formatter.toLowerCase() === 'filesize')
-            return this.formatBytes(value);
+            return this.formatBytes(value, yAxis ? 0 : 2);
         return value;
     }
     
-    formatBytes(size) {
+    formatBytes(size, decimalPlaces) {
         const sizes = ["B", "KB", "MB", "GB", "TB"];
         let order = 0;
         let num = size;
@@ -170,7 +171,11 @@ export class Reporting {
             num /= 1000;
         }
 
-        return `${num.toFixed(2)} ${sizes[order]}`;
+        if(decimalPlaces === undefined)
+            decimalPlaces = 2;
+        console.log('decimalPlaces: ' + decimalPlaces);
+
+        return `${num.toFixed(decimalPlaces)} ${sizes[order]}`;
     }
     initBarJsCharts()
     {
@@ -220,7 +225,7 @@ export class Reporting {
                 yaxis: {
                     labels : {
                         formatter: (value) => {
-                            return value ? this.formatValue(value, args.yAxisFormatter) : '';
+                            return value ? this.formatValue(value, args.yAxisFormatter, true) : '';
                         }
                     }
                 },
@@ -298,7 +303,7 @@ export class Reporting {
                 yaxis: {
                     labels : {
                         formatter: (value) => {
-                            return value ? this.formatValue(value, args.yAxisFormatter) : '';
+                            return value ? this.formatValue(value, args.yAxisFormatter, true) : '';
                         }
                     }
                 },
@@ -349,11 +354,11 @@ export class Reporting {
         }
     }
     createChart(ele, options){
-        ele.style.margin = '0 1rem';
+        ele.style.margin = '0';
         let defaultOptions = {
             chart: {
                 background: 'transparent',
-                height: 400,
+                height: 220,
                 zoom: {
                     enabled: false
                 },

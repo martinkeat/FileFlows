@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Text;
+using System.Web;
 using Humanizer;
 
 namespace FileFlows.DataLayer.Reports.Helpers;
@@ -152,5 +153,60 @@ public class TableGenerator
             sb.Append("</div>");
         return sb.ToString();
     }
+    
+    
+    /// <summary>
+    /// Generates an HTML table from a collection of data.
+    /// </summary>
+    /// <param name="title">the title of the table</param>
+    /// <param name="columns">the name of the columns</param>
+    /// <param name="data">The collection of data to generate the HTML table from.</param>
+    /// <returns>An HTML string representing the table.</returns>
+    public static string GenerateMinimumTable(string title, string[] columns, object[][] data)
+    {
+        if (data.Any() != true)
+            return string.Empty;
+
+        var sb = new StringBuilder();
+        sb.AppendLine("<div class=\"min-table\">");
+        sb.AppendLine($"<span class=\"title\">{HttpUtility.HtmlEncode(title)}</span>");
+        sb.AppendLine("<table class=\"table\">");
+
+        sb.Append("<tbody>");
+
+        // Add table rows
+        foreach (var row in data)
+        {
+            sb.Append("<tr>");
+            foreach (var col in row)
+            {
+                if (col is int or long)
+                {
+                    sb.AppendFormat("<td>{0:N0}</td>", col); // Format with thousands separator, no decimals
+                }
+                else if (col is DateTime dt)
+                {
+                    sb.AppendFormat("<td>{0:d MMMM yyyy}</td>", dt);
+                }
+                else if (col is IFormattable numericValue)
+                {
+                    // Format numeric value with thousands separator in current culture
+                    sb.AppendFormat("<td>{0}</td>", numericValue.ToString("N", CultureInfo.CurrentCulture));
+                }
+                else
+                {
+                    sb.AppendFormat("<td>{0}</td>", System.Net.WebUtility.HtmlEncode(col.ToString()));
+                }
+            }
+
+            sb.Append("</tr>");
+        }
+
+        sb.Append("</tbody>");
+        sb.Append("</table>");
+        sb.Append("</div>");
+        return sb.ToString();
+    }
+    
 
 }
