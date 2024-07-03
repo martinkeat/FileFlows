@@ -1405,7 +1405,7 @@ input[type=file]{
     div.chart {
         margin:auto;
         > svg {
-            min-height: 500px;
+            min-height: 400px;
         }
         svg text {
             fill: var(--color);

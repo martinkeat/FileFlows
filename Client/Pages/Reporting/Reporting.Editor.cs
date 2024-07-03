@@ -55,6 +55,12 @@ public partial class Reporting
                 });
             }
 
+            fields.Add(new ElementField
+            {
+                InputType = FormInputType.Text,
+                Name = "Email"
+            });
+            
             AddSelectField("Flow", flows, rd.FlowSelection, ref fields, model);
             AddSelectField("Library", libraries, rd.LibrarySelection, ref fields, model);
             AddSelectField("Node", nodes, rd.NodeSelection, ref fields, model);
@@ -113,10 +119,17 @@ public partial class Reporting
         {
             await ReportFormEditor.Open(new()
             {
-                TypeName = "Report", Title = rd.Name, Fields = fields, Model = model,
+                TypeName = "Pages.Report", Title = rd.Name, Fields = fields, Model = model,
                 SaveLabel = "Labels.Run", CancelLabel = "Labels.Close", Large = true,
                 SaveCallback = async (model) =>
                 {
+                    if (model is IDictionary<string, object> dict && dict.TryGetValue("Email", out var oEmail) && oEmail is string email )
+                    {
+                        _ = HttpHelper.Post<string>($"/api/report/generate/{rd.Uid}", model);
+                        Toast.ShowInfo(Translater.Instant("Pages.Report.Messages.ReportEmailed",
+                            new { email }));
+                        return true; // email reports we do close
+                    }
                     var htmlResult = await GenerateReportHtml(rd.Uid, model);
                     if (htmlResult.Failed(out var error))
                     {

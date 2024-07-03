@@ -3876,7 +3876,7 @@ hr {
   margin: auto;
 }
 .report-output div.chart > svg {
-  min-height: 500px;
+  min-height: 400px;
 }
 .report-output div.chart svg text {
   fill: var(--color);

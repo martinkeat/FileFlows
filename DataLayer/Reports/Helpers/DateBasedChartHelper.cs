@@ -14,11 +14,12 @@ public static class DateBasedChartHelper
     /// <param name="minDateUtc">The minimum date for the range.</param>
     /// <param name="maxDateUtc">The maximum date for the range.</param>
     /// <param name="data">The dictionary containing the data series.</param>
+    /// <param name="emaliing">if the report is being emailed and should generate SVG instead of javascript chart</param>
     /// <param name="tableDataFormatter">Optional formatter to use in the table data</param>
     /// <param name="yAxisFormatter">Optional formatter to use on the client for the y-axis value</param>
     /// <returns>A string containing the HTML for the table and chart.</returns>
     public static string Generate(DateTime minDateUtc, DateTime maxDateUtc, 
-        Dictionary<string, Dictionary<DateTime, long>> data, 
+        Dictionary<string, Dictionary<DateTime, long>> data, bool emailing,
         Func<double, string>? tableDataFormatter = null,
         string? yAxisFormatter = null)
     {
@@ -38,7 +39,7 @@ public static class DateBasedChartHelper
                 Name = seriesItem.Key,
                 Data = dailyLabels.Select(label => (double)seriesItem.Value.GetValueOrDefault(label, 0)).ToArray()
             }).ToArray()
-        }, generateSvg: true);
+        }, generateSvg: emailing);
 
         return (table ?? string.Empty) + (chart ?? string.Empty);
     }

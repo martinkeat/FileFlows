@@ -827,6 +827,19 @@
     "Reporting": {
       "Title": "Reporting"
     },
+    "Report": {
+      "Messages": {
+        "ReportEmailed": "The report will be emailed to ''{email}'' once generated."
+      },
+      "Fields": {
+        "Library": "Library",
+        "Period": "Period",
+        "Email": "Email",
+        "Email-Placeholder": "Enter an email address",
+        "Statistic": "Statistic",
+        "Node": "Node"
+      }
+    },
     "Widget":{
       "Title":"Widget",
       "Fields": {

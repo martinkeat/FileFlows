@@ -1,8 +1,5 @@
-using System.Text.Json;
-using Esprima.Ast;
 using FileFlows.DataLayer.Reports.Helpers;
 using FileFlows.Plugin;
-using FileFlows.Plugin.Formatters;
 using FileFlows.Shared.Formatters;
 using FileFlows.Shared.Models;
 
@@ -38,7 +35,7 @@ public class FilesProcessed : Report
 
 
     /// <inheritdoc />
-    public override async Task<Result<string>> Generate(Dictionary<string, object> model)
+    public override async Task<Result<string>> Generate(Dictionary<string, object> model, bool emaliing)
     {
         var statistic = GetEnumValue<ProcessedStatistic>(model, nameof(Statistic));
 
@@ -104,7 +101,7 @@ public class FilesProcessed : Report
         if (data.Count == 0)
             return string.Empty;
         
-        string html = DateBasedChartHelper.Generate(minDateUtc.Value, maxDateUtc.Value, data, 
+        string html = DateBasedChartHelper.Generate(minDateUtc.Value, maxDateUtc.Value, data, emaliing,
             tableDataFormatter: formatter, yAxisFormatter: yAxisFormatter);
 
         return html;

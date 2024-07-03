@@ -67,7 +67,7 @@ public class MultiLineChart
 
         // Constants and initial setup
         const int chartWidth = 800; // Increased chart width
-        const int chartHeight = 500; // Increased chart height
+        const int chartHeight = 400; // Increased chart height
         const int lineThickness = 2;
         int chartStartX = string.IsNullOrWhiteSpace(yAxisLabel) ? 100 : 140; // Adjusted based on yAxisLabel presence
         const int chartStartY = 20; // The top of the y-axis where it starts, from the top
@@ -75,7 +75,13 @@ public class MultiLineChart
             string.IsNullOrWhiteSpace(yAxisLabel) ? 40 : 80; // Adjusted based on yAxisLabel presence
         const int yAxisLabelOffset = 10; // Fixed offset when yAxisLabel is present
         const int yAxisLabelFrequency = 10; // Change as needed to control the number of labels
-        const string backgroundColor = "#161616"; // Dark background color
+        
+        //if dark
+        // const string backgroundColor = "#161616"; // Dark background color
+        // const string foregroundColor = "#fff";
+        // if light
+        const string backgroundColor = "#fafafa"; // Dark background color
+        const string foregroundColor = "#000";
 
         // Convert values to double for processing
         double maxValue = chartData.Series.SelectMany(x => x.Data).Max(item => item);
@@ -107,18 +113,18 @@ public class MultiLineChart
 
             // Draw y-axis label
             builder.AppendLine(
-                $"<text x=\"{chartStartX - yAxisLabelOffset}\" y=\"{y + 5}\" text-anchor=\"end\" fill=\"#fff\">{yLabel}</text>");
+                $"<text x=\"{chartStartX - yAxisLabelOffset}\" y=\"{y + 5}\" text-anchor=\"end\" fill=\"{foregroundColor}\">{yLabel}</text>");
 
             // Draw y-axis tick
             builder.AppendLine(
-                $"<line x1=\"{chartStartX - 5}\" y1=\"{y}\" x2=\"{chartStartX}\" y2=\"{y}\" stroke=\"#fff\" />");
+                $"<line x1=\"{chartStartX - 5}\" y1=\"{y}\" x2=\"{chartStartX}\" y2=\"{y}\" stroke=\"{foregroundColor}\" />");
         }
 
         // Draw y-axis main label if provided
         if (!string.IsNullOrEmpty(yAxisLabel))
         {
             builder.AppendLine(
-                $"<text x=\"{chartStartX - yAxisLabelOffset - 30}\" y=\"{chartHeight / 2}\" text-anchor=\"middle\" fill=\"#fff\">{yAxisLabel}</text>");
+                $"<text x=\"{chartStartX - yAxisLabelOffset - 30}\" y=\"{chartHeight / 2}\" text-anchor=\"middle\" fill=\"{foregroundColor}\">{yAxisLabel}</text>");
         }
 
         // Calculate the total width needed by the lines and spacing
@@ -169,31 +175,36 @@ public class MultiLineChart
 
             // Draw x-axis label
             builder.AppendLine(
-                $"<text x=\"{x}\" y=\"{chartHeight - xAxisLabelOffset + 25}\" text-anchor=\"middle\" fill=\"#fff\">{label}</text>");
+                $"<text x=\"{x}\" y=\"{chartHeight - xAxisLabelOffset + 25}\" text-anchor=\"middle\" fill=\"{foregroundColor}\">{label}</text>");
 
             // Draw x-axis tick
             builder.AppendLine(
-                $"<line x1=\"{x}\" y1=\"{chartHeight - xAxisLabelOffset}\" x2=\"{x}\" y2=\"{chartHeight - xAxisLabelOffset + 5}\" stroke=\"#fff\" />");
+                $"<line x1=\"{x}\" y1=\"{chartHeight - xAxisLabelOffset}\" x2=\"{x}\" y2=\"{chartHeight - xAxisLabelOffset + 5}\" stroke=\"{foregroundColor}\" />");
         }
 
         // Close SVG tag
         builder.AppendLine("</svg>");
-        
-        builder.AppendLine("<div class=\"legend\">");
-        for (int seriesIndex = 0; seriesIndex < chartData.Series.Length; seriesIndex++)
-        {
-            var series = chartData.Series[seriesIndex];
-            string color = COLORS[seriesIndex % COLORS.Length]; // Cycling through COLORS array
 
-            builder.AppendLine(
-                $"<span style=\"display: inline-block; margin: 0 10px;\">" +
-                $"<svg width=\"12\" height=\"12\">" +
-                $"<circle cx=\"6\" cy=\"6\" r=\"5\" fill=\"{color}\" />" +
-                $"</svg>" +
-                $"<span style=\"color: #fff; margin-left: 5px;\">{series.Name}</span>" +
-                $"</span>");
+        if (chartData.Series.Length > 1) // only show legend if more than one series
+        {
+            builder.AppendLine("<div class=\"legend\">");
+            for (int seriesIndex = 0; seriesIndex < chartData.Series.Length; seriesIndex++)
+            {
+                var series = chartData.Series[seriesIndex];
+                string color = COLORS[seriesIndex % COLORS.Length]; // Cycling through COLORS array
+
+                builder.AppendLine(
+                    $"<span style=\"display: inline-block; margin: 0 10px;\">" +
+                    $"<svg width=\"12\" height=\"12\">" +
+                    $"<circle cx=\"6\" cy=\"6\" r=\"5\" fill=\"{color}\" />" +
+                    $"</svg>" +
+                    $"<span style=\"color: {foregroundColor}; margin-left: 5px;\">{series.Name}</span>" +
+                    $"</span>");
+            }
+
+            builder.AppendLine("</div>");
         }
-        builder.AppendLine("</div>");
+
         builder.AppendLine("</div>");
         
 

@@ -69,8 +69,9 @@ class Emailer
     /// <param name="to">the email addresses of whom to send the email to</param>
     /// <param name="subject">the subject</param>
     /// <param name="body">the body of the email</param>
+    /// <param name="isHtml">if the body is HTML or plaintext</param>
     /// <returns>The final free-form text response from the server.</returns>
-    internal static async Task<Result<string>> Send(string[] to, string subject, string body)
+    internal static async Task<Result<string>> Send(string[] to, string subject, string body, bool isHtml =false)
     {
         var settings = await ServiceLoader.Load<SettingsService>().Get();
 
@@ -82,11 +83,21 @@ class Emailer
         }
         message.Subject = subject;
 
-        message.Body = new TextPart("plain")
+        if (isHtml)
         {
-            Text = body
-        };
-        
+            message.Body = new TextPart("html")
+            {
+                Text = body
+            };
+        }
+        else
+        {
+            message.Body = new TextPart("plain")
+            {
+                Text = body
+            };
+        }
+
         try
         {
             using var client = new SmtpClient();

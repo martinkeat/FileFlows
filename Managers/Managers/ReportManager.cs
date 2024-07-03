@@ -1,4 +1,5 @@
 using System.Reflection;
+using System.Text.Json;
 using FileFlows.DataLayer.Reports;
 
 namespace FileFlows.Managers;
@@ -69,14 +70,15 @@ public class ReportManager
     /// Generates the report
     /// </summary>
     /// <param name="uid">the UID of the report</param>
+    /// <param name="emaliing">if this report is being emailed</param>
     /// <param name="model">the report model</param>
     /// <returns>the reports HTML</returns>
-    public async Task<Result<string>> Generate(Guid uid, Dictionary<string, object> model)
+    public async Task<Result<string>> Generate(Guid uid, bool emaliing, Dictionary<string, object> model)
     {
         var report = Report.GetReports().FirstOrDefault(x => x.Uid == uid);
         if (report == null)
-            return Result<string>.Fail("Report not found"); 
+            return Result<string>.Fail("Report not found");
         
-        return await report.Generate(model);
+        return await report.Generate(model, emaliing: emaliing);
     }
 }

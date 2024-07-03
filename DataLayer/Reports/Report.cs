@@ -72,8 +72,9 @@ public abstract class Report
     /// Generates the report and returns the HTML
     /// </summary>
     /// <param name="model">the model for the report</param>
+    /// <param name="emaliing">if this report is being emailed</param>
     /// <returns>the reports generated HTML</returns>
-    public abstract Task<Result<string>> Generate(Dictionary<string, object> model);
+    public abstract Task<Result<string>> Generate(Dictionary<string, object> model, bool emaliing);
 
     /// <summary>
     /// Gets the database connection

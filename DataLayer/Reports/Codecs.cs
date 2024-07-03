@@ -28,7 +28,7 @@ public class Codecs : Report
     public IODirection Direction { get; set; }
 
     /// <inheritdoc />
-    public override async Task<Result<string>> Generate(Dictionary<string, object> model)
+    public override async Task<Result<string>> Generate(Dictionary<string, object> model, bool emaliing)
     {
         var streamType = GetEnumValue<StreamType>(model, nameof(Type)); 
         var direction = GetEnumValue<IODirection>(model, nameof(Direction)); 

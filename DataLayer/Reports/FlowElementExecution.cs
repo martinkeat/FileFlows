@@ -21,7 +21,7 @@ public class FlowElementExecution : Report
     public override ReportSelection LibrarySelection => ReportSelection.Any;
 
     /// <inheritdoc />
-    public override async Task<Result<string>> Generate(Dictionary<string, object> model)
+    public override async Task<Result<string>> Generate(Dictionary<string, object> model, bool emaliing)
     {
         using var db = await GetDb();
         string sql = $"select {Wrap("ExecutedNodes")} from {Wrap("LibraryFile")} where {Wrap("Status")} = 1"; 
