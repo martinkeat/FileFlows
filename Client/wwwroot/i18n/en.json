@@ -831,6 +831,9 @@
       "Messages": {
         "ReportEmailed": "The report will be emailed to ''{email}'' once generated."
       },
+      "Labels": {
+        "Combined": "Combined"
+      },
       "Fields": {
         "Library": "Library",
         "Period": "Period",

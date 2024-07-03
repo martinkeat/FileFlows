@@ -1,4 +1,5 @@
 using System.Text.Json;
+using FileFlows.DataLayer.Reports.Helpers;
 using FileFlows.Plugin;
 using FileFlows.Shared.Models;
 
@@ -21,7 +22,7 @@ public class FlowElementExecution : Report
     public override ReportSelection LibrarySelection => ReportSelection.Any;
 
     /// <inheritdoc />
-    public override async Task<Result<string>> Generate(Dictionary<string, object> model, bool emaliing)
+    public override async Task<Result<string>> Generate(Dictionary<string, object> model, bool emailing)
     {
         using var db = await GetDb();
         string sql = $"select {Wrap("ExecutedNodes")} from {Wrap("LibraryFile")} where {Wrap("Status")} = 1"; 
@@ -40,6 +41,6 @@ public class FlowElementExecution : Report
             .Select(x => new { Name = x.NodeName, x.Count});
 
 
-        return GenerateHtmlTable(nodeCounts);
+        return TableGenerator.Generate(nodeCounts);
     }
 }

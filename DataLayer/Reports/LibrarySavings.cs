@@ -1,3 +1,4 @@
+using FileFlows.DataLayer.Reports.Helpers;
 using FileFlows.Plugin;
 using FileFlows.Plugin.Formatters;
 using FileFlows.Shared.Models;
@@ -21,7 +22,7 @@ public class LibrarySavings : Report
     public override ReportSelection LibrarySelection => ReportSelection.Any;
 
     /// <inheritdoc />
-    public override async Task<Result<string>> Generate(Dictionary<string, object> model, bool emaliing)
+    public override async Task<Result<string>> Generate(Dictionary<string, object> model, bool emailing)
     {
         using var db = await GetDb();
         string sql =
@@ -56,7 +57,7 @@ public class LibrarySavings : Report
             .OrderBy(x => x.Library.ToLowerInvariant())
             .ToList();
 
-        return GenerateHtmlTable(groupedSavings, dontWrap: true);
+        return TableGenerator.Generate(groupedSavings, dontWrap: true);
     }
 
     /// <summary>

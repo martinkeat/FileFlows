@@ -19,6 +19,11 @@ public partial class InputMultiSelect: Input<List<object?>>
     /// Gets or sets if this allows any or all
     /// </summary>
     [Parameter] public bool AnyOrAll { get; set; }
+    
+    /// <summary>
+    /// Gets or sets the any label string
+    /// </summary>
+    [Parameter] public string LabelAny { get; set; }
 
     /// <summary>
     /// If the dropdown is opened
@@ -40,7 +45,7 @@ public partial class InputMultiSelect: Input<List<object?>>
     {
         base.OnInitialized();
         lblAll = Translater.Instant("Labels.All");
-        lblAny = Translater.Instant("Labels.Any");
+        lblAny =LabelAny?.EmptyAsNull() ??  Translater.Instant("Labels.Any");
         if (Value == null)
             Value = new List<object?>();
         else if(Options != null)

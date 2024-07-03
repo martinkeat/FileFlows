@@ -1,3 +1,5 @@
+using FileFlows.DataLayer.Reports.Charts;
+
 namespace FileFlows.DataLayer.Reports.Helpers;
 
 /// <summary>
@@ -14,7 +16,7 @@ public static class DateBasedChartHelper
     /// <param name="minDateUtc">The minimum date for the range.</param>
     /// <param name="maxDateUtc">The maximum date for the range.</param>
     /// <param name="data">The dictionary containing the data series.</param>
-    /// <param name="emaliing">if the report is being emailed and should generate SVG instead of javascript chart</param>
+    /// <param name="emailing">if the report is being emailed and should generate SVG instead of javascript chart</param>
     /// <param name="tableDataFormatter">Optional formatter to use in the table data</param>
     /// <param name="yAxisFormatter">Optional formatter to use on the client for the y-axis value</param>
     /// <returns>A string containing the HTML for the table and chart.</returns>
@@ -26,7 +28,7 @@ public static class DateBasedChartHelper
         var (labels, tableData) = GenerateTableData(minDateUtc, maxDateUtc, data, tableDataFormatter);
 
         // Ensure line chart labels are at daily intervals
-        var dailyLabels = GenerateDateTimeLabels(minDateUtc, maxDateUtc);
+        var dailyLabels = DateTimeLabelHelper.Generate(minDateUtc, maxDateUtc);
 
         var table = TableGenerator.Generate(new[] { "Date" }.Union(data.Keys).ToArray(), tableData.ToArray());
         var chart = MultiLineChart.Generate(new MultilineChartData
@@ -44,29 +46,6 @@ public static class DateBasedChartHelper
         return (table ?? string.Empty) + (chart ?? string.Empty);
     }
 
-    /// <summary>
-    /// Generates daily labels between the min and max dates.
-    /// </summary>
-    /// <param name="minDateUtc">The minimum date.</param>
-    /// <param name="maxDateUtc">The maximum date.</param>
-    /// <returns>An array of daily labels.</returns>
-    private static DateTime[] GenerateDateTimeLabels(DateTime minDateUtc, DateTime maxDateUtc)
-    {
-        List<DateTime> labels = new List<DateTime>();
-        bool hourly = maxDateUtc.Subtract(minDateUtc).TotalDays <= 1;
-        DateTime currentDate = hourly ? minDateUtc : minDateUtc.Date;
-
-        while (currentDate <= maxDateUtc)
-        {
-            labels.Add(currentDate);
-            if(hourly)
-                currentDate = currentDate.AddHours(1);
-            else
-                currentDate = currentDate.AddDays(1);
-        }
-
-        return labels.ToArray();
-    }
 
     /// <summary>
     /// Generates hourly labels between the min and max dates.

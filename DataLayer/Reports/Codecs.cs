@@ -1,4 +1,6 @@
 using System.Text.Json;
+using FileFlows.DataLayer.Reports.Charts;
+using FileFlows.DataLayer.Reports.Helpers;
 using FileFlows.Plugin;
 
 namespace FileFlows.DataLayer.Reports;
@@ -28,7 +30,7 @@ public class Codecs : Report
     public IODirection Direction { get; set; }
 
     /// <inheritdoc />
-    public override async Task<Result<string>> Generate(Dictionary<string, object> model, bool emaliing)
+    public override async Task<Result<string>> Generate(Dictionary<string, object> model, bool emailing)
     {
         var streamType = GetEnumValue<StreamType>(model, nameof(Type)); 
         var direction = GetEnumValue<IODirection>(model, nameof(Direction)); 
@@ -74,9 +76,12 @@ public class Codecs : Report
             .Select(x => new { Codec = x.Key, Count = x.Value })
             .ToList();
         
-        var table = GenerateHtmlTable(data) ?? string.Empty;
+        var table = TableGenerator.Generate(data) ?? string.Empty;
 
-        var chart = GenerateSvgPieChart(data.ToDictionary(x => x.Codec, x=> x.Count)) ?? string.Empty;
+        var chart = PieChart.Generate(new PieChartData()
+        {
+            Data = data.ToDictionary(x => x.Codec, x=> x.Count),
+        }, emailing) ?? string.Empty;
 
         return table + chart;
 

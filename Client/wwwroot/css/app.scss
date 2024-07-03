@@ -1316,6 +1316,9 @@ input[type=file]{
     display:flex;
     flex-direction: column;
     max-height: calc(100vh - 7rem);
+    h2 {
+        font-size:1.25rem;
+    }
     .table-container {
         overflow-y: auto;
         position: relative;

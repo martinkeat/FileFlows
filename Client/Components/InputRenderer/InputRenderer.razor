@@ -175,9 +175,11 @@
         case FormInputType.MultiSelect:
         {
             var value = GetValue<List<object>>(field.Name);
-            var options = GetParameter<List<ListOption>>(field, nameof(InputChecklist.Options));;
+            var options = GetParameter<List<ListOption>>(field, nameof(InputMultiSelect.Options));;
+            var labelAny = GetParameter<string>(field, nameof(InputMultiSelect.LabelAny));
             var anyOrAll = GetParameter<bool>(field, "AnyOrAll");
-            <InputMultiSelect Field=@field Label="@label" Value="@value" ReadOnly=@readOnly ValueChanged="@(x => UpdateValue(field, x))" AnyOrAll="anyOrAll"
+            <InputMultiSelect Field=@field Label="@label" Value="@value" ReadOnly=@readOnly ValueChanged="@(x => UpdateValue(field, x))" 
+                              AnyOrAll="anyOrAll" LabelAny="@labelAny"
                             Validators=@field.Validators Options="@options" HideLabel=@hideLabel OnSubmit=@OnSubmit OnClose=@OnClose Help=@field.HelpText />
         }
             break;

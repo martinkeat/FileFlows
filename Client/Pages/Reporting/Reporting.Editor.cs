@@ -243,7 +243,8 @@ public partial class Reporting
                 });
                 break;
             case ReportSelection.AnyOrAll:
-                model[title] = new object[] { null }; // any
+                model[title] = listOptions.Select(x => x.Value).ToList();
+                // model[title] = new object[] { null }; // any
                 fields.Add(new ElementField()
                 {
                     Name = title,
@@ -251,7 +252,8 @@ public partial class Reporting
                     Parameters = new()
                     {
                         { "Options", listOptions },
-                        { "AnyOrAll", true }
+                        { "AnyOrAll", true },
+                        { "LabelAny", Translater.Instant("Pages.Report.Labels.Combined") }
                     }
                 });
                 break;

@@ -1,7 +1,7 @@
 using System.Globalization;
 using FileFlows.Shared.Formatters;
 
-namespace FileFlows.DataLayer.Reports.Helpers;
+namespace FileFlows.DataLayer.Reports.Charts;
 
 /// <summary>
 /// Formatter for charts

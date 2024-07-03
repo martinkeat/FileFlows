@@ -35,7 +35,7 @@ public class FilesProcessed : Report
 
 
     /// <inheritdoc />
-    public override async Task<Result<string>> Generate(Dictionary<string, object> model, bool emaliing)
+    public override async Task<Result<string>> Generate(Dictionary<string, object> model, bool emailing)
     {
         var statistic = GetEnumValue<ProcessedStatistic>(model, nameof(Statistic));
 
@@ -101,7 +101,7 @@ public class FilesProcessed : Report
         if (data.Count == 0)
             return string.Empty;
         
-        string html = DateBasedChartHelper.Generate(minDateUtc.Value, maxDateUtc.Value, data, emaliing,
+        string html = DateBasedChartHelper.Generate(minDateUtc.Value, maxDateUtc.Value, data, emailing,
             tableDataFormatter: formatter, yAxisFormatter: yAxisFormatter);
 
         return html;

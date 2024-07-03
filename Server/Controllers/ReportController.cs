@@ -80,6 +80,7 @@ public class ReportController : BaseController
 .report-output {
     font-family: sans-serif;
     font-size:12px;
+    text-align:center;
 }
 table {
     width: 100%;
