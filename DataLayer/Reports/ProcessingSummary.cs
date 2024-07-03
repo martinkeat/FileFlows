@@ -176,7 +176,7 @@ public class ProcessingSummary: Report
                  {
                      //("Processing Time", TimeSpan.FromSeconds(totalSeconds).Humanize(1), "far fa-clock", ""),
                      ("Bytes Processed", FileSizeFormatter.Format(totalBytes), "far fa-hdd", ""),
-                     ("Average Size", FileSizeFormatter.Format(totalBytes / Convert.ToDouble(totalFiles)), "fas fa-balance-scale", "yellow"),
+                     ("Average Size", FileSizeFormatter.Format(totalBytes / Convert.ToDouble(totalFiles)), "fas fa-balance-scale", "warning"),
                      ("Storage Sized", FileSizeFormatter.Format(totalSavedBytes), "far fa-hdd", totalSavedBytes > 0 ? "success" : "error"),
                  })
         {
@@ -204,7 +204,7 @@ public class ProcessingSummary: Report
                  {
                      ("Processing Time", TimeSpan.FromSeconds(totalSeconds).Humanize(1), "far fa-clock", ""),
                      ("Shortest Time", files.Min(x =>x.ProcessingEnded - x.ProcessingStarted).Humanize(1), "fas fa-hourglass-end", "success"),
-                     ("Average Time", TimeSpan.FromSeconds(totalSeconds / Convert.ToDouble(totalFiles)).Humanize(1), "fas fa-hourglass-half", "yellow"),
+                     ("Average Time", TimeSpan.FromSeconds(totalSeconds / Convert.ToDouble(totalFiles)).Humanize(1), "fas fa-hourglass-half", "warning"),
                      ("Longest Time", files.Max(x =>x.ProcessingEnded - x.ProcessingStarted).Humanize(1), "fas fa-hourglass-start", "error"),
                  })
         {
