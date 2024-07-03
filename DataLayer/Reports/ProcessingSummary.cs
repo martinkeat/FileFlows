@@ -79,7 +79,9 @@ public class ProcessingSummary: Report
         const int NUM_FILES = 6;
 
         List<FileData> largestFiles = files.OrderByDescending(x => x.OriginalSize).Take(NUM_FILES).ToList();
-        List<FileData> mostSaved = files.OrderByDescending(x => x.OriginalSize - x.FinalSize).Take(NUM_FILES).ToList();
+        List<FileData> mostSaved = files.Where(x => x.OriginalSize > x.FinalSize)
+            .OrderByDescending(x => x.OriginalSize - x.FinalSize)
+            .Take(NUM_FILES).ToList();
         List<FileData> longestRunning = files.OrderByDescending(x => x.ProcessingEnded - x.ProcessingStarted).Take(NUM_FILES).ToList();
         
         foreach (var file in files)
@@ -190,7 +192,7 @@ public class ProcessingSummary: Report
                 TableData = mostSaved.Select(x => new object[]
                 {
                     FileNameFormatter.Format(x.Name),
-                    FileSizeFormatter.Format(x.FinalSize - x.OriginalSize)
+                    FileSizeFormatter.Format(x.OriginalSize - x.FinalSize)
                 }).ToArray(),
                 
                 ChartTitle = "File Size",
