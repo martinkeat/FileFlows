@@ -3792,6 +3792,9 @@ hr {
   flex-direction: column;
   max-height: calc(100vh - 7rem);
 }
+.report-output h2 {
+  font-size: 1.25rem;
+}
 .report-output .table-container {
   overflow-y: auto;
   position: relative;
