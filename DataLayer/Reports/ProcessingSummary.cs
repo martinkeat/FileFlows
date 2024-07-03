@@ -79,7 +79,7 @@ public class ProcessingSummary: Report
         const int NUM_FILES = 6;
 
         List<FileData> largestFiles = files.OrderByDescending(x => x.OriginalSize).Take(NUM_FILES).ToList();
-        List<FileData> mostSaved = files.Where(x => x.OriginalSize > x.FinalSize)
+        List<FileData> mostSaved = files.Where(x => x.OriginalSize >= x.FinalSize)
             .OrderByDescending(x => x.OriginalSize - x.FinalSize)
             .Take(NUM_FILES).ToList();
         List<FileData> longestRunning = files.OrderByDescending(x => x.ProcessingEnded - x.ProcessingStarted).Take(NUM_FILES).ToList();
@@ -174,50 +174,62 @@ public class ProcessingSummary: Report
         output.AppendLine("<div class=\"report-row report-row-3\">");
         foreach (var sum in new[]
                  {
-                     ("Processing Time", TimeSpan.FromSeconds(totalSeconds).Humanize(1), "far fa-clock", ""),
+                     //("Processing Time", TimeSpan.FromSeconds(totalSeconds).Humanize(1), "far fa-clock", ""),
                      ("Bytes Processed", FileSizeFormatter.Format(totalBytes), "far fa-hdd", ""),
+                     ("Average Size", FileSizeFormatter.Format(totalBytes / Convert.ToDouble(totalFiles)), "fas fa-balance-scale", ""),
                      ("Storage Sized", FileSizeFormatter.Format(totalSavedBytes), "far fa-hdd", totalSavedBytes > 0 ? "success" : "error"),
                  })
         {
             output.AppendLine(ReportSummaryBox.Generate(sum.Item1, sum.Item2, sum.Item3, sum.Item4));
         }
         output.AppendLine("</div>");
-
-        summaryRows =
-        [
-            new()
-            {
-                TableTitle = "Biggest Savings",
-                TableUnitColumn = "Savings",
-                TableData = mostSaved.Select(x => new object[]
-                {
-                    FileNameFormatter.Format(x.Name),
-                    FileSizeFormatter.Format(x.OriginalSize - x.FinalSize)
-                }).ToArray(),
-                
-                ChartTitle = "File Size",
-                ChartData = nodeDataSize,
-                ChartYAxisFormatter = "filesize"
-            },
-            new()
-            {
-                TableTitle = "Longest Running",
-                TableUnitColumn = "Time",
-                TableData = longestRunning.Select(x => new object[]
-                {
-                    FileNameFormatter.Format(x.Name),
-                    (x.ProcessingEnded - x.ProcessingStarted).Humanize(1)
-                }).ToArray(),
-                ChartTitle = "Processing Time",
-                ChartData = nodeDataTime,
-                ChartYAxisFormatter = ""
-            }
-        ];
-
-        foreach (var sumRow in summaryRows)
+        
+        AddSummaryRow(output, new ()
         {
-            AddSummaryRow(output, sumRow, labels, emailing);
+            TableTitle = "Biggest Savings",
+            TableUnitColumn = "Savings",
+            TableData = mostSaved.Select(x => new object[]
+            {
+                FileNameFormatter.Format(x.Name),
+                FileSizeFormatter.Format(x.OriginalSize - x.FinalSize)
+            }).ToArray(),
+
+            ChartTitle = "File Size",
+            ChartData = nodeDataSize,
+            ChartYAxisFormatter = "filesize"
+        }, labels, emailing);
+
+        output.AppendLine("<div class=\"report-row report-row-4\">");
+        foreach (var sum in new[]
+                 {
+                     ("Processing Time", TimeSpan.FromSeconds(totalSeconds).Humanize(1), "far fa-clock", ""),
+                     ("Average Time", FileSizeFormatter.Format(totalSeconds / Convert.ToDouble(totalFiles)), "fas fa-hourglass-half", ""),
+                     ("Shortest Time", files.Min(x =>x.ProcessingEnded - x.ProcessingStarted).Humanize(1), "fas fa-hourglass-end", "success"),
+                     ("Longest Time", files.Max(x =>x.ProcessingEnded - x.ProcessingStarted).Humanize(1), "fas fa-hourglass-start", "error"),
+                 })
+        {
+            output.AppendLine(ReportSummaryBox.Generate(sum.Item1, sum.Item2, sum.Item3, sum.Item4));
         }
+        output.AppendLine("</div>");
+        
+        AddSummaryRow(output, new()
+        {
+            TableTitle = "Longest Running",
+            TableUnitColumn = "Time",
+            TableData = longestRunning.Select(x => new object[]
+            {
+                FileNameFormatter.Format(x.Name),
+                (x.ProcessingEnded - x.ProcessingStarted).Humanize(1)
+            }).ToArray(),
+            ChartTitle = "Processing Time",
+            ChartData = nodeDataTime,
+            ChartYAxisFormatter = ""
+        }, labels, emailing);
+
+        // foreach (var sumRow in summaryRows)
+        // {
+        //     AddSummaryRow(output, sumRow, labels, emailing);
+        // }
         foreach (var group in new[]
                  {
                      // new[]
@@ -243,7 +255,7 @@ public class ProcessingSummary: Report
                     foreach (var v in x.Value.Values)
                         count += (int)v;
                     return count;
-                });
+                }).OrderByDescending(x => x.Value).ToDictionary(x => x.Key, x => x.Value);
             output.AppendLine(PieChart.Generate(new()
             {
                 Title = "Libraries",
@@ -269,7 +281,7 @@ public class ProcessingSummary: Report
                         foreach (var v in x.Value.Values)
                             count += v;
                         return count;
-                    });
+                    }).OrderByDescending(x => x.Value).ToDictionary(x => x.Key, x => x.Value);
                 
                 output.AppendLine(BarChart.Generate(new BarChartData()
                 {

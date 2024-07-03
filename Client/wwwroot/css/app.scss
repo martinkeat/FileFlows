@@ -1361,7 +1361,7 @@ input[type=file]{
             top: 0.5rem;
             bottom: 0.5rem;
             font-size: 3rem;
-            width: 4rem;
+            width: 5rem;
             color: var(--info);
             background: center;
             display: flex;
@@ -1535,6 +1535,9 @@ input[type=file]{
             text-align: center;
             font-size: 0.8rem;            
         }
+    }
+    .apexcharts-legend-series {
+        text-align: left;
     }
 }
 

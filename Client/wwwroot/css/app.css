@@ -3834,7 +3834,7 @@ hr {
   top: 0.5rem;
   bottom: 0.5rem;
   font-size: 3rem;
-  width: 4rem;
+  width: 5rem;
   color: var(--info);
   background: center;
   display: flex;
@@ -3996,6 +3996,9 @@ hr {
   margin-top: 1rem;
   text-align: center;
   font-size: 0.8rem;
+}
+.report-output .apexcharts-legend-series {
+  text-align: left;
 }
 
 .Report.editor.large {
