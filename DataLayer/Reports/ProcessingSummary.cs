@@ -214,41 +214,14 @@ public class ProcessingSummary: Report
             
         }
 
-        output.AppendLine("<div class=\"report-row report-row-3\">");
-        foreach (var fdgroup in new[]
-                 {
-                     ("Largest Files", "Size", largestFiles.Select(x => new object[]
-                     {
-                         FileNameFormatter.Format(x.Name), 
-                         FileSizeFormatter.Format(x.OriginalSize)
-                     }).ToArray()),
-                     ("Biggest Savings", "Savings", mostSaved.Select(x => new object[]
-                     {
-                         FileNameFormatter.Format(x.Name), 
-                         FileSizeFormatter.Format(x.FinalSize - x.OriginalSize)
-                     }).ToArray()),
-                     ("Longest Running", "Time", longestRunning.Select(x => new object[]
-                     {
-                         FileNameFormatter.Format(x.Name),
-                         (x.ProcessingEnded - x.ProcessingStarted).Humanize(2)
-                     }).ToArray())
-                 })
-        {
-            output.AppendLine(TableGenerator.GenerateMinimumTable(fdgroup.Item1,
-                ["Name", fdgroup.Item2],
-                fdgroup.Item3
-            ));
-        }
-        output.AppendLine("</div>");
-
         foreach (var group in new[]
                  {
-                     new[]
-                     {
-                         ("Node Files", nodeDataCount, ""),
-                         ("Node Size", nodeDataSize, "filesize"),
-                         ("Node Time", nodeDataTime, "")
-                     },
+                     // new[]
+                     // {
+                     //     ("Node Files", nodeDataCount, ""),
+                     //     ("Node Size", nodeDataSize, "filesize"),
+                     //     ("Node Time", nodeDataTime, "")
+                     // },
                      new[]
                      {
                          ("Library Files", libDataCount, ""),
