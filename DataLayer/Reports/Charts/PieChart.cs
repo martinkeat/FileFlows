@@ -16,11 +16,9 @@ public class PieChart : Chart
     /// <param name="generateSvg">If the image generated should be an SVG image, else the image will require javascript to render</param>
     /// <returns>The chart content</returns>
     public static string Generate(PieChartData data, bool generateSvg = false)
-    {
-        if (generateSvg)
-            return Svg(data);
-        return JavaScript(data);
-    }
+        => $"<div class=\"chart\"><h2 class=\"title\">{data.Title}</h2>" +
+           (generateSvg ? Svg(data) : JavaScript(data))
+           + "</div>";
 
     /// <summary>
     /// Generates an pie chart using javascript
@@ -117,6 +115,10 @@ public class PieChart : Chart
 /// </summary>
 public class PieChartData
 {
+    /// <summary>
+    /// Gets or sets the title of the pie chart
+    /// </summary>
+    public string Title { get; set; } = null!;
     /// <summary>
     /// The data
     /// </summary>

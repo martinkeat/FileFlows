@@ -3796,6 +3796,7 @@ hr {
 .report-output .report-row {
   display: grid;
   gap: 1rem;
+  align-items: stretch;
 }
 .report-output .report-row + .report-row {
   margin-top: 1rem;
@@ -3985,7 +3986,6 @@ hr {
   background: linear-gradient(to right, rgba(94, 94, 94, 0.25), rgba(255, 255, 255, 0.5));
 }
 .report-output div.chart {
-  height: fit-content;
   padding: 1rem 0;
 }
 .report-output div.chart svg text {

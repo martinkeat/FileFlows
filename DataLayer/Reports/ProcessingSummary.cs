@@ -79,7 +79,7 @@ public class ProcessingSummary: Report
         const int NUM_FILES = 6;
 
         List<FileData> largestFiles = files.OrderByDescending(x => x.OriginalSize).Take(NUM_FILES).ToList();
-        List<FileData> mostSaved = files.OrderByDescending(x => x.FinalSize - x.OriginalSize).Take(NUM_FILES).ToList();
+        List<FileData> mostSaved = files.OrderByDescending(x => x.OriginalSize - x.FinalSize).Take(NUM_FILES).ToList();
         List<FileData> longestRunning = files.OrderByDescending(x => x.ProcessingEnded - x.ProcessingStarted).Take(NUM_FILES).ToList();
         
         foreach (var file in files)
@@ -226,26 +226,54 @@ public class ProcessingSummary: Report
                      // },
                      new[]
                      {
-                         ("Library Files", libDataCount, ""),
+                         //("Library Files", libDataCount, ""),
                          ("Library Size", libDataSize, "filesize"),
-                         ("Library Time", libDataTime, "")
+                         //("Library Time", libDataTime, "")
 
                      }
                  })
         {
-            output.AppendLine("<div class=\"report-row report-row-3\">");
+            output.AppendLine("<div class=\"report-row report-row-2\">");
+            var t = libDataCount.ToDictionary(x => x.Key,
+                x =>
+                {
+                    int count = 0;
+                    foreach (var v in x.Value.Values)
+                        count += (int)v;
+                    return count;
+                });
+            output.AppendLine(PieChart.Generate(new()
+            {
+                Title = "Libraries",
+                Data = t
+            }, generateSvg: emailing));
             foreach (var chart in group)
             {
-                output.AppendLine(MultiLineChart.Generate(new MultilineChartData
+                // output.AppendLine(MultiLineChart.Generate(new MultilineChartData
+                // {
+                //     Title = chart.Item1,
+                //     Labels = labels,
+                //     YAxisFormatter = chart.Item3,
+                //     Series = chart.Item2.Select(seriesItem => new ChartSeries
+                //     {
+                //         Name = seriesItem.Key,
+                //         Data = labels.Select(label => (double)seriesItem.Value.GetValueOrDefault(label, 0)).ToArray()
+                //     }).ToArray()
+                // }, generateSvg: emailing));
+                var t2 = libDataSize.ToDictionary(x => x.Key,
+                    x =>
+                    {
+                        double count = 0;
+                        foreach (var v in x.Value.Values)
+                            count += v;
+                        return count;
+                    });
+                
+                output.AppendLine(BarChart.Generate(new BarChartData()
                 {
                     Title = chart.Item1,
-                    Labels = labels,
-                    YAxisFormatter = chart.Item3,
-                    Series = chart.Item2.Select(seriesItem => new ChartSeries
-                    {
-                        Name = seriesItem.Key,
-                        Data = labels.Select(label => (double)seriesItem.Value.GetValueOrDefault(label, 0)).ToArray()
-                    }).ToArray()
+                    Data = t2,
+                    YAxisFormatter = "filesize"
                 }, generateSvg: emailing));
             }
 
@@ -255,23 +283,6 @@ public class ProcessingSummary: Report
         return output.ToString();
     }
     
-    /// <summary>
-    /// Represents the data for a node in the processing system.
-    /// </summary>
-    /// <param name="Name">the relative name of the file</param>
-    /// <param name="NodeUid">The unique identifier of the node.</param>
-    /// <param name="NodeName">The name of the node.</param>
-    /// <param name="OriginalSize">The original size of the data before processing.</param>
-    /// <param name="FinalSize">The final size of the data after processing.</param>
-    /// <param name="LibraryUid">The unique identifier of the library.</param>
-    /// <param name="LibraryName">The name of the library.</param>
-    /// <param name="FlowUid">The unique identifier of the flow.</param>
-    /// <param name="FlowName">The name of the flow.</param>
-    /// <param name="ProcessingStarted">The date and time when processing started.</param>
-    /// <param name="ProcessingEnded">The date and time when processing ended.</param>
-    public record FileData(string Name, Guid NodeUid, string NodeName, long OriginalSize, long FinalSize,
-        Guid LibraryUid, string LibraryName, Guid FlowUid, string FlowName,
-        DateTime ProcessingStarted, DateTime ProcessingEnded);
 
     private void AddSummaryRow(StringBuilder output, SummaryRow sumRow, DateTime[] labels, bool emailing)
     {
@@ -299,17 +310,96 @@ public class ProcessingSummary: Report
     }
 
 
+    /// <summary>
+    /// Summary row
+    /// </summary>
     private class SummaryRow
     {
+        /// <summary>
+        /// Gets or sets the table title
+        /// </summary>
         public string TableTitle { get; set; } = null!;
+        /// <summary>
+        /// Gets or sets the table data
+        /// </summary>
         public object[][] TableData { get; set; } = null!;
+        /// <summary>
+        /// Gets or sets the table unit column
+        /// </summary>
         public string TableUnitColumn { get; set; } = null!;
         
+        /// <summary>
+        /// Gets or sets the chart title
+        /// </summary>
         public string ChartTitle { get; set; } = null!;
+        /// <summary>
+        /// Gets or sets the chart data
+        /// </summary>
         public Dictionary<string, Dictionary<DateTime, long>> ChartData { get; set; } = null!;
+        /// <summary>
+        /// Gets or sets the chart y-axis formatter
+        /// </summary>
         public string ChartYAxisFormatter { get; set; } = null!;
+    }
 
+    /// <summary>
+    /// Represents the data for a node in the processing system.
+    /// </summary>
+    public class FileData
+    {
+        /// <summary>
+        /// Gets or sets the relative name of the file.
+        /// </summary>
+        public string Name { get; set; } = null!;
 
+        /// <summary>
+        /// Gets or sets the unique identifier of the node.
+        /// </summary>
+        public Guid NodeUid { get; set; }
 
+        /// <summary>
+        /// Gets or sets the name of the node.
+        /// </summary>
+        public string NodeName { get; set; } = null!;
+
+        /// <summary>
+        /// Gets or sets the original size of the data before processing.
+        /// </summary>
+        public long OriginalSize { get; set; }
+
+        /// <summary>
+        /// Gets or sets the final size of the data after processing.
+        /// </summary>
+        public long FinalSize { get; set; }
+
+        /// <summary>
+        /// Gets or sets the unique identifier of the library.
+        /// </summary>
+        public Guid LibraryUid { get; set; }
+
+        /// <summary>
+        /// Gets or sets the name of the library.
+        /// </summary>
+        public string LibraryName { get; set; } = null!;
+
+        /// <summary>
+        /// Gets or sets the unique identifier of the flow.
+        /// </summary>
+        public Guid FlowUid { get; set; }
+
+        /// <summary>
+        /// Gets or sets the name of the flow.
+        /// </summary>
+        public string FlowName { get; set; } = null!;
+
+        /// <summary>
+        /// Gets or sets the date and time when processing started.
+        /// </summary>
+        public DateTime ProcessingStarted { get; set; }
+
+        /// <summary>
+        /// Gets or sets the date and time when processing ended.
+        /// </summary>
+        public DateTime ProcessingEnded { get; set; }
     }
 }

@@ -1320,6 +1320,7 @@ input[type=file]{
     .report-row {
         display: grid;
         gap: 1rem;
+        align-items: stretch;
         + .report-row {
             margin-top:1rem;
         }
@@ -1524,7 +1525,6 @@ input[type=file]{
         }
     }
     div.chart {
-        height: fit-content;
         padding:1rem 0;
         svg text {
             fill: var(--color);

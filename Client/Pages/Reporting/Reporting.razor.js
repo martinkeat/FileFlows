@@ -186,19 +186,8 @@ export class Reporting {
             let args = JSON.parse(hPid.value);
             let data = args.data;
             let series = [];
-            let dates = false;
             Object.keys(data).forEach((key) => {
-                let x = key;
-                 if(/20[\d]{2}\-/.test(key)) {
-                     let utcDate = new Date(key); // Parse the UTC date string into a Date object
-                     let timezoneOffset = utcDate.getTimezoneOffset(); // Get local timezone offset in minutes                     
-                     // Adjust date by adding the local timezone offset
-                     utcDate.setMinutes(utcDate.getMinutes() - timezoneOffset);
-                     x = utcDate;
-                     dates = true;
-                }
-                let y = data[key];
-                series.push({ x: x, y: y === 0 ? null : y});
+                series.push({ x: key, y: data[key]});
             });
 
             let options= {
@@ -230,9 +219,6 @@ export class Reporting {
                 colors: this.COLORS,
                 series: [{ data: series }]
             };
-            
-            if(dates)
-                options.xaxis = { type: 'datetime'};
 
             this.createChart(ele, options)
         }
