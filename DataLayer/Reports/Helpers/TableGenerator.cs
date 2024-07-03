@@ -172,6 +172,18 @@ public class TableGenerator
         sb.AppendLine($"<span class=\"title\">{HttpUtility.HtmlEncode(title)}</span>");
         sb.AppendLine("<table class=\"table\">");
 
+        // Add table headers
+        sb.Append("<thead>");
+        sb.Append("<tr>");
+        foreach(var column in columns)
+        {
+            sb.AppendFormat("<th><span>{0}</span></th>",
+                System.Net.WebUtility.HtmlEncode(column));
+        }
+
+        sb.Append("</tr>");
+        sb.Append("</thead>");
+        
         sb.Append("<tbody>");
 
         // Add table rows

@@ -3817,7 +3817,7 @@ hr {
 }
 .report-output .report-row > div .title {
   font-weight: var(--bold, 600);
-  font-size: 1.1rem !important;
+  font-size: 1.2rem !important;
   margin-bottom: 0.5rem;
   display: block;
 }
@@ -3870,6 +3870,18 @@ hr {
 .report-output .min-table table {
   width: 100%;
   table-layout: fixed;
+}
+.report-output .min-table thead tr {
+  background: transparent;
+}
+.report-output .min-table thead tr th {
+  border: none !important;
+  border-bottom: 1px solid var(--color-darkest) !important;
+  text-align: left;
+}
+.report-output .min-table thead tr th + th {
+  text-align: center;
+  width: 7rem;
 }
 .report-output .min-table td {
   border: none !important;

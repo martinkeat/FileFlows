@@ -155,7 +155,6 @@ export class Reporting {
                 return Math.round(value * 10) / 10;
             }
         }
-        console.log('yAxis', yAxis);
         if(formatter.toLowerCase() === 'filesize')
             return this.formatBytes(value, yAxis ? 0 : 2);
         return value;
@@ -173,7 +172,6 @@ export class Reporting {
 
         if(decimalPlaces === undefined)
             decimalPlaces = 2;
-        console.log('decimalPlaces: ' + decimalPlaces);
 
         return `${num.toFixed(decimalPlaces)} ${sizes[order]}`;
     }

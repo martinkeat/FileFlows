@@ -1344,7 +1344,7 @@ input[type=file]{
         padding:1rem;
         .title {
             font-weight: var(--bold, 600);
-            font-size: 1.1rem !important;
+            font-size: 1.2rem !important;
             margin-bottom:0.5rem;
             display: block;
         }
@@ -1399,6 +1399,20 @@ input[type=file]{
         table {
             width:100%;
             table-layout: fixed;
+        }
+        thead {
+            tr {
+                background: transparent;
+                th {
+                    border: none !important;
+                    border-bottom: 1px solid var(--color-darkest) !important;
+                    text-align: left;
+                    + th {
+                        text-align: center;
+                        width:7rem;
+                    }
+                }
+            }
         }
         td {
             border:none !important;

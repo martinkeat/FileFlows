@@ -29,6 +29,8 @@ public class ProcessingSummary: Report
     public override ReportSelection NodeSelection => ReportSelection.AnyOrAll;
     /// <inheritdoc />
     public override ReportSelection FlowSelection  => ReportSelection.Any;
+    /// <inheritdoc />
+    public override ReportPeriod? DefaultReportPeriod => ReportPeriod.Last7Days;
 
     /// <inheritdoc />
     public override async Task<Result<string>> Generate(Dictionary<string, object> model, bool emailing)
@@ -70,7 +72,7 @@ public class ProcessingSummary: Report
 
         double totalSeconds = 0, totalBytes = 0, totalSavedBytes = 0;
         int totalFiles = 0;
-        const int NUM_FILES = 7;
+        const int NUM_FILES = 6;
 
         List<FileData> largestFiles = files.OrderByDescending(x => x.OriginalSize).Take(NUM_FILES).ToList();
         List<FileData> mostSaved = files.OrderByDescending(x => x.FinalSize - x.OriginalSize).Take(NUM_FILES).ToList();

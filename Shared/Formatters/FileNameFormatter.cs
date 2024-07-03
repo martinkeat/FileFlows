@@ -58,7 +58,7 @@ public class FileNameFormatter : Formatter
             return false;
         int dotIndex = value.LastIndexOf('.');
         if (dotIndex > 0)
-            value = value[..^dotIndex];
+            value = value[..dotIndex];
         
         // A GUID has 32 hexadecimal characters, optionally separated by hyphens
         if (value.Length < 32)
