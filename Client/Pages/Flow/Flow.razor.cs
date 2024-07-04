@@ -17,6 +17,9 @@ namespace FileFlows.Client.Pages;
 public partial class Flow : ComponentBase, IDisposable
 {
     public Editor Editor { get; set; }
+    /// <summary>
+    /// Gets or sets the UID of the flow to edit
+    /// </summary>
     [Parameter] public Guid Uid { get; set; }
     [Inject] INavigationService NavigationService { get; set; }
     [Inject] public IBlazorContextMenuService ContextMenuService { get; set; }

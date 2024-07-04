@@ -139,9 +139,9 @@ public class ProcessingSummary: Report
         output.AppendLine("<div class=\"report-row report-row-3\">");
         foreach (var sum in new[]
                  {
-                     ("Period", minDateUtc.Value.ToLocalTime().ToString("d MMM") +" - " + maxDateUtc.Value.ToLocalTime().ToString("d MMM"), "far fa-clock", ""),
-                     ("Total Files", totalFiles.ToString("N0"), "far fa-file", ""),
-                     ("Failed Files", failedFiles.ToString("N0"), "fas fa-exclamation-circle", "error"),
+                     ("Period", minDateUtc.Value.ToLocalTime().ToString("d MMM") +" - " + maxDateUtc.Value.ToLocalTime().ToString("d MMM"), ReportSummaryBox.IconType.Clock, ReportSummaryBox.BoxColor.Info),
+                     ("Total Files", totalFiles.ToString("N0"), ReportSummaryBox.IconType.File, ReportSummaryBox.BoxColor.Info),
+                     ("Failed Files", failedFiles.ToString("N0"), ReportSummaryBox.IconType.ExclamationCircle, ReportSummaryBox.BoxColor.Error),
                  })
         {
             output.AppendLine(ReportSummaryBox.Generate(sum.Item1, sum.Item2, sum.Item3, sum.Item4));
@@ -175,9 +175,9 @@ public class ProcessingSummary: Report
         foreach (var sum in new[]
                  {
                      //("Processing Time", TimeSpan.FromSeconds(totalSeconds).Humanize(1), "far fa-clock", ""),
-                     ("Bytes Processed", FileSizeFormatter.Format(totalBytes), "far fa-hdd", ""),
-                     ("Average Size", FileSizeFormatter.Format(totalBytes / Convert.ToDouble(totalFiles)), "fas fa-balance-scale", "warning"),
-                     ("Storage Sized", FileSizeFormatter.Format(totalSavedBytes), "far fa-hdd", totalSavedBytes > 0 ? "success" : "error"),
+                     ("Bytes Processed", FileSizeFormatter.Format(totalBytes), ReportSummaryBox.IconType.HardDrive, ReportSummaryBox.BoxColor.Info),
+                     ("Average Size", FileSizeFormatter.Format(totalBytes / Convert.ToDouble(totalFiles)), ReportSummaryBox.IconType.BalanceScale, ReportSummaryBox.BoxColor.Warning),
+                     ("Storage Sized", FileSizeFormatter.Format(totalSavedBytes), ReportSummaryBox.IconType.HardDrive, totalSavedBytes > 0 ? ReportSummaryBox.BoxColor.Success : ReportSummaryBox.BoxColor.Error),
                  })
         {
             output.AppendLine(ReportSummaryBox.Generate(sum.Item1, sum.Item2, sum.Item3, sum.Item4));
@@ -202,10 +202,10 @@ public class ProcessingSummary: Report
         output.AppendLine("<div class=\"report-row report-row-4\">");
         foreach (var sum in new[]
                  {
-                     ("Processing Time", TimeSpan.FromSeconds(totalSeconds).Humanize(1), "far fa-clock", ""),
-                     ("Shortest Time", files.Min(x =>x.ProcessingEnded - x.ProcessingStarted).Humanize(1), "fas fa-hourglass-end", "success"),
-                     ("Average Time", TimeSpan.FromSeconds(totalSeconds / Convert.ToDouble(totalFiles)).Humanize(1), "fas fa-hourglass-half", "warning"),
-                     ("Longest Time", files.Max(x =>x.ProcessingEnded - x.ProcessingStarted).Humanize(1), "fas fa-hourglass-start", "error"),
+                     ("Processing Time", TimeSpan.FromSeconds(totalSeconds).Humanize(1), ReportSummaryBox.IconType.Clock, ReportSummaryBox.BoxColor.Info),
+                     ("Shortest Time", files.Min(x =>x.ProcessingEnded - x.ProcessingStarted).Humanize(1), ReportSummaryBox.IconType.HourglassEnd, ReportSummaryBox.BoxColor.Success),
+                     ("Average Time", TimeSpan.FromSeconds(totalSeconds / Convert.ToDouble(totalFiles)).Humanize(1), ReportSummaryBox.IconType.HourglassHalf, ReportSummaryBox.BoxColor.Warning),
+                     ("Longest Time", files.Max(x =>x.ProcessingEnded - x.ProcessingStarted).Humanize(1), ReportSummaryBox.IconType.HourglassStart, ReportSummaryBox.BoxColor.Error),
                  })
         {
             output.AppendLine(ReportSummaryBox.Generate(sum.Item1, sum.Item2, sum.Item3, sum.Item4));

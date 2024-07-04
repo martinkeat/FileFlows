@@ -8,7 +8,7 @@ using Microsoft.JSInterop;
 
 namespace FileFlows.Client.Components;
 
-public partial class Editor : InputRegister, IDisposable
+public partial class Editor : EditorBase, IDisposable
 {
     /// <summary>
     /// Gets or sets the JavaScript runtime
@@ -19,9 +19,7 @@ public partial class Editor : InputRegister, IDisposable
     /// <summary>
     /// Gets or sets if this is the flow element editor, and if it is, renders slightly differently
     /// </summary>
-    [Parameter]
-    public bool FlowElementEditor { get; set; }
-    
+    [Parameter] public bool FlowElementEditor { get; set; }
 
     private readonly List<ActionButton> AdditionalButtons = new();
 
@@ -32,6 +30,7 @@ public partial class Editor : InputRegister, IDisposable
     public string Icon { get; set; }
 
     private string Uid = Guid.NewGuid().ToString();
+
     private bool UpdateResizer; // when set to true, the afterrender method will reinitailize the resizer in javascript
     
     /// <summary>
@@ -42,20 +41,11 @@ public partial class Editor : InputRegister, IDisposable
     protected bool Maximised { get; set; }
 
     private RenderFragment FieldsFragment;
-
-    /// <summary>
-    /// Get the name of the type this editor is editing
-    /// </summary>
-    public string TypeName { get; set; }
     protected bool IsSaving { get; set; }
 
     protected string lblSave, lblSaving, lblNext, lblCancel, lblClose, lblHelp, lblDownloadButton;
 
-    protected List<ElementField> Fields { get; set; }
-
     protected Dictionary<string, List<ElementField>> Tabs { get; set; }
-
-    public ExpandoObject Model { get; set; }
 
     TaskCompletionSource<(bool Success, ExpandoObject? Model)> OpenTask;
 
@@ -144,21 +134,6 @@ public partial class Editor : InputRegister, IDisposable
             }
             FocusFirst = false;
         }
-    }
-
-    private ExpandoObject ConvertToExando(object model)
-    {
-        if (model == null)
-            return new ExpandoObject();
-        if (model is ExpandoObject eo)
-            return eo;
-
-        var expando = new ExpandoObject();
-        var dictionary = (IDictionary<string, object>)expando!;
-
-        foreach (var property in model.GetType().GetProperties())
-            dictionary.Add(property.Name, property.GetValue(model));
-        return expando;
     }
 
     /// <summary>
@@ -384,264 +359,6 @@ public partial class Editor : InputRegister, IDisposable
         this.OnClosed?.Invoke();
     }
 
-    private string ModelToJsonForCompare(ExpandoObject model)
-    {
-        string json = model == null ? string.Empty : JsonSerializer.Serialize(Model);
-        json = json.Replace("[]", "null");
-        // remove default values, templates do not always set these
-        json = Regex.Replace(json, @"\""[^\""]+""[\s]*:[\s]*(null|false|0)(,)?", string.Empty);
-        while (json.IndexOf(",,") > 0)
-            json = json.Replace(",,", ",");
-        json = json.Replace(",}", "}");
-        return json;
-    }
-
-    /// <summary>
-    /// Finds a field by its name
-    /// </summary>
-    /// <param name="name">the name of the field</param>
-    /// <returns>the field if found, otherwise null</returns>
-    internal ElementField? FindField(string name)
-    {
-        var field = this.Fields?.Where(x => x.Name == name)?.FirstOrDefault();
-        return field;
-    }
-
-    /// <summary>
-    /// Finds an input by name and its type
-    /// </summary>
-    /// <param name="name">the element field of the input</param>
-    /// <typeparam name="T">the type of field</typeparam>
-    /// <returns>the input if found</returns>
-    internal T? FindInput<T>(string name)
-    {
-        var input = this.RegisteredInputs.Values.FirstOrDefault(x => x.Field?.Name == name && x is T);
-        return input == null ? default : (T)input;
-    }
-
-    /// <summary>
-    /// Updates a value
-    /// </summary>
-    /// <param name="field">the field whose value is being updated</param>
-    /// <param name="value">the value of the field</param>
-    internal void UpdateValue(ElementField field, object value)
-    {
-        if (field.UiOnly)
-            return;
-        if (Model == null)
-            return;
-        var dict = (IDictionary<string, object>)Model!;
-        if (dict.ContainsKey(field.Name))
-            dict[field.Name] = value;
-        else
-            dict.Add(field.Name, value);
-    }
-
-    /// <summary>
-    /// Gets a parameter value for a field
-    /// </summary>
-    /// <param name="field">the field to get the value for</param>
-    /// <param name="parameter">the name of the parameter</param>
-    /// <param name="default">the default value if not found</param>
-    /// <typeparam name="T">the type of parameter</typeparam>
-    /// <returns>the parameter value</returns>
-    internal T GetParameter<T>(ElementField field, string parameter, T @default = default(T))
-    {
-        var dict = field?.Parameters as IDictionary<string, object>;
-        if (dict?.ContainsKey(parameter) != true)
-            return @default;
-        var val = dict[parameter];
-        if (val == null)
-            return @default;
-        try
-        {
-            var converted = Converter.ConvertObject(typeof(T), val);
-            T result = (T)converted;
-            if(result is List<ListOption> options)
-            {
-                foreach(var option in options)
-                {
-                    if(option.Value is JsonElement je)
-                    {
-                        if (je.ValueKind == JsonValueKind.String)
-                            option.Value = je.GetString();
-                        else if (je.ValueKind == JsonValueKind.Number)
-                            option.Value = je.GetInt32();
-                    }
-                }
-            }
-
-            return result;
-        }
-        catch (Exception)
-        {
-            Logger.Instance.ELog("Failed converted: " + parameter, val);
-            return @default;
-        }
-    }
-    
-    /// <summary>
-    /// Gets the minimum and maximum from a range validator (if exists)
-    /// </summary>
-    /// <param name="field">The field to get the range for</param>
-    /// <returns>the range</returns>
-    internal (int min, int max) GetRange(ElementField field)
-    {
-        var range = field?.Validators?.Where(x => x is FileFlows.Shared.Validators.Range)?.FirstOrDefault() as FileFlows.Shared.Validators.Range;
-        return range == null ? (0, 0) : (range.Minimum, range.Maximum);
-    }
-
-    /// <summary>
-    /// Gets the default of a specific type
-    /// </summary>
-    /// <param name="type">the type</param>
-    /// <returns>the default value</returns>
-    private object GetDefault(Type type)
-    {
-        if(type?.IsValueType == true)
-        {
-            return Activator.CreateInstance(type);
-        }
-        return null;
-    }
-
-    /// <summary>
-    /// Gets a value for a field
-    /// </summary>
-    /// <param name="field">the field whose value to get</param>
-    /// <param name="type">the type of value to get</param>
-    /// <returns>the value</returns>
-    internal object GetValue(string field, Type type)
-    {
-        if (Model == null)
-        {
-            Logger.Instance.ILog("GetValue: Model was null");
-            return GetDefault(type);
-        }
-
-        var dict = (IDictionary<string, object>)Model!;
-        if (dict.ContainsKey(field) == false)
-        {
-            Logger.Instance.ILog("GetValue: Model does not contain key: " + field);
-            return GetDefault(type);
-        }
-
-        object value = dict[field];
-        if (value == null)
-        {
-            Logger.Instance.ILog("GetValue: value was null");
-            return GetDefault(type);
-        }
-
-        if (value is JsonElement je)
-        {
-            Logger.Instance.ILog("GetValue: value is json element");
-            if (type == typeof(string))
-                return je.GetString();
-            if (type== typeof(int))
-                return je.GetInt32();
-            if (type == typeof(bool))
-                return je.GetBoolean();
-            if (type == typeof(float))
-                return (float)je.GetInt64();
-        }
-
-        if (value.GetType().IsAssignableTo(type))
-        {
-            Logger.Instance.ILog("GetValue: value is assignable to type");
-            return value;
-        }
-
-        try
-        {
-            Logger.Instance.ILog($"GetValue: trying to convert to type '{value.GetType()}' to '{type}'");
-            return Converter.ConvertObject(type, value);
-        }
-        catch(Exception ex)
-        {
-            Logger.Instance.ILog("GetValue: failed converting ot type, returning default: " + ex.Message);
-            return GetDefault(type);
-        }
-    }
-    
-    /// <summary>
-    /// Gets a value for a field
-    /// </summary>
-    /// <param name="field">the field whose value to get</param>
-    /// <param name="default">the default value if none is found</param>
-    /// <typeparam name="T">the type of value to get</typeparam>
-    /// <returns>the value</returns>
-    internal T GetValue<T>(string field, T @default = default)
-    {
-        if (Model == null)
-            return @default;
-        var dict = (IDictionary<string, object>)Model!;
-        if (dict.ContainsKey(field) == false)
-        {
-            return @default;
-        }
-        object value = dict[field];
-        if (value == null)
-        {
-            return @default;
-        }
-
-        if (value is JsonElement je)
-        {
-            if (typeof(T) == typeof(string))
-            {
-                if (je.ValueKind == JsonValueKind.Number)
-                    return (T)(object)je.ToString();
-                return (T)(object)je.GetString()!;
-            }
-
-            if (typeof(T) == typeof(int))
-                return (T)(object)je.GetInt32();
-            if (typeof(T) == typeof(bool))
-            {
-                if (je.ValueKind == JsonValueKind.False)
-                    return (T)(object)false;
-                if (je.ValueKind == JsonValueKind.True)
-                    return (T)(object)true;
-                if (je.ValueKind == JsonValueKind.String)
-                {
-                    var str = je.GetString().ToLowerInvariant();
-                    return (T)(object)(str == "true" || str == "1");
-                }
-                if (je.ValueKind == JsonValueKind.Number)
-                    return (T)(object)(je.GetInt32() > 0);
-
-                return (T)(object)false;
-            }
-
-            if (typeof(T) == typeof(float))
-            {
-                try
-                {
-                    return (T)(object)(float)je.GetInt64();
-                }
-                catch (Exception)
-                {
-                    return (T)(object)(float.Parse(je.ToString()));
-                }
-            }
-        }
-
-        if (value is T)
-        {
-            return (T)value;
-        }
-
-        try
-        {
-            return (T)Converter.ConvertObject(typeof(T), value);
-        }
-        catch(Exception)
-        {
-            return default;
-        }
-    }
-
     protected void OpenHelp()
     {
         if (string.IsNullOrWhiteSpace(HelpUrl))
@@ -671,116 +388,4 @@ public partial class Editor : InputRegister, IDisposable
     {
         App.Instance.OnEscapePushed -= InstanceOnOnEscapePushed;
     }
-}
-
-/// <summary>
-/// UI Button
-/// </summary>
-public class ActionButton
-{
-    private string _Label;
-
-    /// <summary>
-    /// Gets or sets the label of the button
-    /// </summary>
-    public string Label
-    {
-        get => _Label;
-        set => _Label = Translater.TranslateIfNeeded(value);
-    }
-
-    /// <summary>
-    /// Gets or sets the click action
-    /// </summary>
-    public Action<object, EventArgs> Clicked { get; set; }
-}
-
-/// <summary>
-/// Arguments used when opening the editor
-/// </summary>
-public class EditorOpenArgs
-{
-    /// <summary>
-    /// Gets or sets the type name used in translation
-    /// </summary>
-    public string TypeName { get; set; }
-    /// <summary>
-    /// Gets or sets the title of the editor
-    /// </summary>
-    public string Title { get; set; }
-    /// <summary>
-    /// Gets or sets the description to show, if not set, editor will try to find a description using the TypeName
-    /// </summary>
-    public string Description { get; set; }
-    /// <summary>
-    /// Gets or sets the main fields to show in the editor
-    /// </summary>
-    public List<ElementField> Fields { get; set; }
-    /// <summary>
-    /// Gets or sets the model to bind to the editor
-    /// </summary>
-    public object Model { get; set; }
-    /// <summary>
-    /// Gets or sets a callback that is called when the editor is saved
-    /// </summary>
-    public Editor.SaveDelegate SaveCallback  { get; set; }
-    /// <summary>
-    /// Gets or sets if the editor is readonly
-    /// </summary>
-    public bool ReadOnly  { get; set; }
-    /// <summary>
-    /// Gets or sets if the editor is a large editor and takes up more width
-    /// </summary>
-    public bool Large  { get; set; }
-
-    /// <summary>
-    /// Gets or sets if inputs should be full width and not use a maximum width
-    /// </summary>
-    public bool FullWidth { get; set; }
-
-    /// <summary>
-    /// Gets or sets the label to show on the save button
-    /// </summary>
-    public string SaveLabel  { get; set; }
-    /// <summary>
-    /// Gets or sets the label to show on the cancel button
-    /// </summary>
-    public string CancelLabel  { get; set; }
-    /// <summary>
-    /// Gets or sets any additional fields ot show
-    /// </summary>
-    public RenderFragment AdditionalFields  { get; set; }
-    /// <summary>
-    /// Gets or sets the tabs for the editor
-    /// </summary>
-    public Dictionary<string, List<ElementField>> Tabs { get; set; }
-    /// <summary>
-    /// Gets or sets the URL for the help button
-    /// </summary>
-    public string HelpUrl  { get; set; }
-    /// <summary>
-    /// Gets or sets it the title should not be translated
-    /// </summary>
-    public bool NoTranslateTitle  { get; set; }
-    /// <summary>
-    /// Gets or sets the label to shown on the download button
-    /// </summary>
-    public string DownloadButtonLabel { get; set; } = "Labels.Download";
-    /// <summary>
-    /// Gets or sets the URL for the download button
-    /// </summary>
-    public string DownloadUrl { get; set; }
-    /// <summary>
-    /// Gets or sets if a prompt should be shown the user if they try to close the editor with changes
-    /// </summary>
-    public bool PromptUnsavedChanges  { get; set; }
-    /// <summary>
-    /// Gets or sets 
-    /// </summary>
-    public IEnumerable<ActionButton> AdditionalButtons { get; set; }
-    
-    /// <summary>
-    /// Gets or sets if the fields scrollbar should be hidden
-    /// </summary>
-    public bool HideFieldsScroller { get; set; }
 }

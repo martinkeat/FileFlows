@@ -16,6 +16,8 @@
     "No": "No",
     "Ok": "OK",
     "And": "And",
+    "Any": "Any",
+    "All": "All",
     "About": "About",
     "Pause": "Pause Processing",
     "Paused":"Resume Processing",
@@ -828,7 +830,12 @@
       "Title": "Reporting"
     },
     "Report": {
+      "Buttons": {
+        "Back": "Back",
+        "Generate": "Generate"
+      },
       "Messages": {
+        "FailedToFindReport": "Failed to find the report.",
         "ReportEmailed": "The report will be emailed to ''{email}'' once generated."
       },
       "Labels": {
@@ -837,6 +844,7 @@
       "Fields": {
         "Library": "Library",
         "Period": "Period",
+        "Flow": "Flow",
         "Email": "Email",
         "Email-Placeholder": "Enter an email address",
         "Statistic": "Statistic",

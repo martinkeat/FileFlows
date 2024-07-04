@@ -29,6 +29,23 @@ public class ReportController : BaseController
     }
 
     /// <summary>
+    /// Gets a report definition by its UID
+    /// </summary>
+    /// <param name="uid">the UID fo the report to get the definition for</param>
+    /// <returns>the report definitions</returns>
+    [HttpGet("definition/{uid}")]
+    public IActionResult GetReportDefinition([FromRoute] Guid uid)
+    {
+        if (LicenseHelper.IsLicensed(LicenseFlags.Reporting) == false)
+            return NotFound();
+        
+        var result = new ReportManager().GetReports().FirstOrDefault(x => x.Uid == uid);
+        if (result == null)
+            return NotFound();
+        return Ok(result);
+    }
+    
+    /// <summary>
     /// Generates the report
     /// </summary>
     /// <param name="uid">the UID of the report</param>
@@ -57,7 +74,9 @@ public class ReportController : BaseController
                         .Record(NotificationSeverity.Warning, "Report Failed to generate", rError);
                     return;
                 }
-                string html = CSS + "<div class=\"report-output\">" + result.Value + "</div>";
+
+                string css = GetCss();
+                string html = css + "<div class=\"report-output emailed\">" + result.Value + "</div>";
                 await Emailer.Send([email], "FileFlows Report", html, isHtml: true);
             });
             
@@ -70,8 +89,25 @@ public class ReportController : BaseController
             return BadRequest(error);
         return Ok(result.Value);
     }
-    
-    
+
+    /// <summary>
+    /// Gets the CSS 
+    /// </summary>
+    /// <returns>the CSS</returns>
+    private string GetCss()
+    {
+#if (DEBUG)
+        var dir = "wwwroot/css";
+#else
+        var dir = Path.Combine(DirectoryHelper.BaseDirectory, "Server/wwwroot/css");
+#endif
+        string file = Path.Combine(dir, "report-styles.css");
+        if (System.IO.File.Exists(file))
+            return "<style>\n" + System.IO.File.ReadAllText(file) + "\n</style>\n";
+        return string.Empty;
+    }
+
+
     /// <summary>
     /// The CSS for the reports 
     /// </summary>

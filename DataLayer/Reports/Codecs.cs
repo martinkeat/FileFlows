@@ -1,3 +1,4 @@
+using System.Text;
 using System.Text.Json;
 using FileFlows.DataLayer.Reports.Charts;
 using FileFlows.DataLayer.Reports.Helpers;
@@ -75,15 +76,46 @@ public class Codecs : Report
         var data = codecs.OrderByDescending(x => x.Value)
             .Select(x => new { Codec = x.Key, Count = x.Value })
             .ToList();
+
+        if (data.Count == 0)
+            return string.Empty;
+
+        var builder = new StringBuilder();
+        var fewest = data.OrderBy(kv => kv.Count).First().Codec;
+        var top = data.OrderByDescending(kv => kv.Count).First().Codec;
+        int averageCount = (int)Math.Round(data.Average(x => x.Count));
         
-        var table = TableGenerator.Generate(data) ?? string.Empty;
+        builder.AppendLine("<div class=\"report-row report-row-3\">");
+        builder.AppendLine(ReportSummaryBox.Generate("Top Codec", top, ReportSummaryBox.IconType.ArrowAltCircleUp,
+            ReportSummaryBox.BoxColor.Info));
+        builder.AppendLine(ReportSummaryBox.Generate("Least Codec", fewest, ReportSummaryBox.IconType.ArrowAltCircleDown,
+            ReportSummaryBox.BoxColor.Warning));
+        builder.AppendLine(ReportSummaryBox.Generate("Average", averageCount.ToString("N0"), ReportSummaryBox.IconType.BalanceScale,
+            ReportSummaryBox.BoxColor.Error));
+        builder.AppendLine("</div>");
 
-        var chart = PieChart.Generate(new PieChartData()
+        builder.AppendLine("<div class=\"report-row report-row-3\">");
+
+        builder.AppendLine(TreeMap.Generate(new()
         {
-            Data = data.ToDictionary(x => x.Codec, x=> x.Count),
-        }, emailing) ?? string.Empty;
+            Data = data.ToDictionary(x => x.Codec, x => x.Count),
+        }, true));
+        
+        // html += PieChart.Generate(new ()
+        // {
+        //     Data = data.ToDictionary(x => x.Codec, x => x.Count),
+        // }, emailing);
 
-        return table + chart;
+        builder.AppendLine("<div class=\"report-span-2\">" + TableGenerator.Generate(data) + "</div>");
+        builder.AppendLine("</div>");
+        
+        return builder.ToString();
 
+    }
+
+    private class CodecData
+    {
+        public string Name { get; set; } = null!;
+        public int Count { get; set; }
     }
 }

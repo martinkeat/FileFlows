@@ -31,7 +31,7 @@ public abstract class InputRegister:ComponentBase
     /// Validates the registered inputs
     /// </summary>
     /// <returns>if all inputs are valid</returns>
-    protected async Task<bool> Validate()
+    public async Task<bool> Validate()
     {
         bool valid = true;
         foreach (var ri in RegisteredInputs)

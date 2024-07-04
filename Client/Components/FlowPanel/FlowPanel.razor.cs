@@ -11,28 +11,34 @@ using System.Collections.Generic;
 /// </summary>
 public partial class FlowPanel:ComponentBase
 {
-    private List<ElementField> _Fields;
-    
-#pragma warning disable BL0007
     /// <summary>
     /// Gets or sets the fields in the flow panel
     /// </summary>
     [Parameter]
-    public List<ElementField> Fields
-    {
-        get => _Fields;
-        set
-        {
-            _Fields = value;
-            this.StateHasChanged();
-        }
-    }
-#pragma warning restore BL0007
+    public List<ElementField> Fields { get; set; }
+    
+//     private List<ElementField> _Fields;
+//     
+// #pragma warning disable BL0007
+//     /// <summary>
+//     /// Gets or sets the fields in the flow panel
+//     /// </summary>
+//     [Parameter]
+//     public List<ElementField> Fields
+//     {
+//         get => _Fields;
+//         set
+//         {
+//             _Fields = value;
+//             this.StateHasChanged();
+//         }
+//     }
+// #pragma warning restore BL0007
 
     /// <summary>
     /// Gets or sets the Editor this flow panel is used in
     /// </summary>
-    [CascadingParameter] public Editor Editor { get; set; }
+    [CascadingParameter] public EditorBase Editor { get; set; }
 
     /// <summary>
     /// Gets or sets an event that is called when the editor is saved
@@ -91,10 +97,10 @@ public partial class FlowPanel:ComponentBase
     /// </summary>
     protected string TypeName => Editor.TypeName;
 
-    public void SetFields(List<ElementField> fields)
-    {
-        Logger.Instance.ILog("Setting fields", fields);
-        this._Fields = fields;
-        this.StateHasChanged();
-    }
+    // public void SetFields(List<ElementField> fields)
+    // {
+    //     Logger.Instance.ILog("Setting fields", fields);
+    //     this._Fields = fields;
+    //     this.StateHasChanged();
+    // }
 }

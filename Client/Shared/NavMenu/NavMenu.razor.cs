@@ -123,7 +123,9 @@ public partial class NavMenu : IDisposable
         if (MenuItems?.Any() != true)
             return;
         
-        var lastRoute = e?.Location?.Contains("/flows/") == true ? "flows" : e?.Location?.Split('/')?.LastOrDefault();
+        var lastRoute = e?.Location?.Contains("/flows/") == true ? "flows" :
+            e?.Location?.Contains("/report/") == true ? "reporting" : 
+            e?.Location?.Split('/')?.LastOrDefault();
         if (string.IsNullOrWhiteSpace(lastRoute))
             return;
         

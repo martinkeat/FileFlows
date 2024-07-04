@@ -19,7 +19,7 @@ public partial class InputRenderer
     /// <summary>
     /// Gets or sets the Editor this flow panel is used in
     /// </summary>
-    [CascadingParameter] public Editor Editor { get; set; }
+    [CascadingParameter] public EditorBase Editor { get; set; }
 
     /// <summary>
     /// Gets or sets an event that is called when the editor is saved
@@ -80,7 +80,7 @@ public partial class InputRenderer
 
     protected override Task OnParametersSetAsync()
     {
-        this.IsScript = Regex.IsMatch(TypeName, @"^Flow\.Parts\.([0-9A-Fa-f]{8}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{12})");
+        this.IsScript = TypeName != null && Regex.IsMatch(TypeName, @"^Flow\.Parts\.([0-9A-Fa-f]{8}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{12})");
         return base.OnParametersSetAsync();
     }
 

@@ -1,0 +1,16 @@
+@namespace FileFlows.Client.Components
+@inherits EditorBase
+
+<div class="inline-editor">
+    <div class="fields">
+        <CascadingValue IsFixed="true" Value="this">
+            @FieldsFragment
+        </CascadingValue>
+    </div>
+    <div class="inline-buttons">
+        @foreach (var btn in Buttons)
+        {
+            <button @onclick=@((e) => btn.Clicked(this, e))>@btn.Label</button>
+        }
+    </div>
+</div>

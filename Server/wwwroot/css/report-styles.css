@@ -1,0 +1,220 @@
+.report-output {
+  text-align: center;
+  --widget-background:var(--base-lighter, #eee);
+}
+.report-output.emailed {
+  font-family: sans-serif;
+  font-size: 14px;
+  text-align: center;
+}
+.report-output.emailed .chart {
+  padding: 0;
+}
+.report-output.emailed .chart svg {
+  width: 100%;
+  height: 10rem;
+}
+.report-output h2 {
+  font-size: 1.25rem;
+}
+.report-output .fixed-text {
+  font-size: 12px;
+}
+.report-output .report-row {
+  display: grid;
+  gap: 1rem;
+  align-items: stretch;
+}
+.report-output .report-row + .report-row {
+  margin-top: 1rem;
+}
+.report-output .report-row-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+.report-output .report-row-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+.report-output .report-row-4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+.report-output .report-row > div {
+  background: var(--widget-background);
+  border-radius: 0.5rem;
+  overflow: hidden;
+  padding: 1rem;
+}
+.report-output .report-row > div .title {
+  font-weight: var(--bold, 600);
+  font-size: 1.2rem !important;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+.report-output .report-summary-box {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  padding-left: 4rem !important;
+}
+.report-output .report-summary-box .icon {
+  position: absolute;
+  left: 0.5rem;
+  top: 0.5rem;
+  bottom: 0.5rem;
+  width: 5rem;
+  color: var(--info, #17A2B8);
+  background: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.report-output .report-summary-box .icon svg {
+  width: 3.25rem;
+  height: 3.25rem;
+}
+.report-output .report-summary-box .value {
+  font-size: clamp(1rem, 2vw, 2rem);
+}
+.report-output .report-summary-box.warning .icon svg {
+  fill: var(--yellow, #FFC107);
+}
+.report-output .report-summary-box.error .icon svg {
+  fill: var(--red, #DC3545);
+}
+.report-output .report-summary-box.info .icon svg {
+  fill: var(--info, #17A2B8);
+}
+.report-output .report-summary-box.success .icon svg {
+  fill: var(--green, #28A745);
+}
+.report-output .min-table table {
+  width: 100%;
+  table-layout: fixed;
+}
+.report-output .min-table thead tr {
+  background: transparent;
+}
+.report-output .min-table thead tr th {
+  border: none !important;
+  border-bottom: 1px solid var(--color-darkest, #666) !important;
+  text-align: left;
+}
+.report-output .min-table thead tr th + th {
+  text-align: center;
+  width: 7rem;
+}
+.report-output .min-table td {
+  border: none !important;
+}
+.report-output .min-table td {
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.report-output .min-table td + td {
+  text-align: center;
+  font-weight: var(--bold, 600);
+  width: 7rem;
+}
+.report-output .table-container {
+  overflow-y: auto;
+  position: relative;
+  margin-bottom: 2rem;
+  min-height: 26rem;
+  background: var(--widget-background);
+}
+.report-output .table-container table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  margin: 0;
+  table-layout: fixed;
+}
+.report-output .table-container table thead {
+  position: sticky;
+  top: -1px;
+  z-index: 1;
+  background: var(--base);
+}
+.report-output .table-container table thead th {
+  border: none !important;
+  position: relative;
+  height: var(--input-height, 2.1875rem);
+}
+.report-output .table-container table thead span {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border: solid 1px var(--input-background, #313131);
+  padding-left: 0.5rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.report-output .table-container table tbody tr td:first-child {
+  width: 12rem;
+}
+.report-output .report-chart .apexcharts-toolbar {
+  display: none;
+}
+.report-output .report-chart:hover .apexcharts-toolbar {
+  display: flex;
+}
+.report-output .percentage {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  background: #13191b;
+  border: solid 2px #33b2df;
+  font-size: 0.8rem;
+  height: 1.5rem;
+  position: relative;
+  top: 0.35rem;
+}
+.report-output .percentage div {
+  height: 100%;
+  display: flex;
+}
+.report-output .percentage .label {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  font-weight: var(--bold, 600);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.report-output .percentage .bar {
+  border-top-right-radius: 0.5rem;
+  border-bottom-right-radius: 0.5rem;
+  background: rgba(51, 178, 223, 0.3803921569);
+  background: linear-gradient(to right, rgba(51, 178, 223, 0.25), rgba(51, 178, 223, 0.5));
+}
+.report-output .percentage.over-100 {
+  border-color: #545454;
+}
+.report-output .percentage.over-100 .bar {
+  background: rgba(77, 77, 77, 0.38);
+  background: linear-gradient(to right, rgba(94, 94, 94, 0.25), rgba(255, 255, 255, 0.5));
+}
+.report-output div.chart {
+  padding: 1rem 0;
+}
+.report-output div.chart svg text {
+  fill: var(--color, #000);
+  font-size: 0.8rem;
+}
+.report-output div.chart .legend {
+  margin-top: 1rem;
+  text-align: center;
+  font-size: 0.8rem;
+}
+.report-output .apexcharts-legend-series {
+  text-align: left;
+}

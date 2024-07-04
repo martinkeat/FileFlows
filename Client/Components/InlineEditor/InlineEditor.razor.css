@@ -1,0 +1,29 @@
+.inline-editor {
+  padding: 0 2rem;
+}
+.inline-editor .inline-buttons {
+  margin: 1rem 0 0 13rem;
+}
+.inline-editor .inline-buttons button {
+  min-width: 8rem;
+}
+.inline-editor .inline-buttons button + button {
+  margin-left: 0.5rem;
+}
+.inline-editor ::deep .row + .row {
+  margin-top: 1rem;
+}
+
+::deep .flow-tabs {
+  max-height: 100%;
+}
+::deep .flow-tabs .flow-tabs-content {
+  overflow: auto;
+}
+
+::deep .input-label i.fa-clipboard {
+  display: none;
+}
+::deep .input-label:hover i.fa-clipboard {
+  display: unset;
+}

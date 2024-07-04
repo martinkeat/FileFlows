@@ -3,40 +3,115 @@ using FileFlows.Client.Components;
 using FileFlows.Client.Components.Inputs;
 using FileFlows.Plugin;
 using FileFlows.Shared.Validators;
-using Microsoft.Extensions.Options;
+using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 
 namespace FileFlows.Client.Pages;
 
 /// <summary>
-/// The editor for a report
+/// Report page
 /// </summary>
-public partial class Reporting
+public partial class Report : ComponentBase
 {
     /// <summary>
-    /// Launches the report
+    /// Gets or sets the UID of the report to run
     /// </summary>
-    /// <param name="rd">the report definition</param>
-    private Task Launch(ReportDefinition rd)
-        => Edit(rd);
+    [Parameter] public Guid Uid { get; set; }
+    
+    /// <summary>
+    /// Gets or sets the navigation manager
+    /// </summary>
+    [Inject] public NavigationManager NavigationManager { get; set; }
+    
+    /// <summary>
+    /// Gets or sets the blocker
+    /// </summary>
+    [CascadingParameter] public Blocker Blocker { get; set; }
+    /// <summary>
+    /// Gets or sets the JS Runtime
+    /// </summary>
+    [Inject] public IJSRuntime jsRuntime { get; set; }
+    
+    /// <summary>
+    /// Gets or sets the report instance
+    /// </summary>
+    private InlineEditor Editor { get; set; }
+    
+    /// <summary>
+    /// Gets or sets the element fields
+    /// </summary>
+    public List<ElementField> Fields { get; set; }
+    
+    /// <summary>
+    /// Reference to JS Report class
+    /// </summary>
+    private IJSObjectReference jsReports;
+
+    /// <summary>
+    /// The model
+    /// </summary>
+    private ExpandoObject Model;
+    /// <summary>
+    /// Gets or sets the report name
+    /// </summary>
+    private string ReportName { get; set; }
+
+    /// <summary>
+    /// The buttons for the form
+    /// </summary>
+    private List<ActionButton> Buttons = new();
+
+    /// <summary>
+    /// Gets or sets if the form is loaded
+    /// </summary>
+    private bool Loaded = false;
+    
+    /// <summary>
+    /// Gets or sets the HTML of the generated report
+    /// </summary>
+    private string Html { get; set; }
+    
+    /// <summary>
+    /// Gets or sets if the report output should be shown
+    /// </summary>
+    private bool ShowReportOutput { get; set; }
+    /// <summary>
+    /// Indicates if this component needs rendering
+    /// </summary>
+    private bool _needsRendering = false;
+
+    private string lblBack = null!, lblClose = null!;
 
     /// <inheritdoc />
-    public override Task<bool> Edit(ReportDefinition rd)
+    protected override async Task OnInitializedAsync()
     {
-        NavigationManager.NavigateTo($"/report/{rd.Uid}");
-        return Task.FromResult(true);
-    }
+        await base.OnInitializedAsync();
+        lblBack = Translater.Instant("Pages.Report.Buttons.Back");
+        lblClose = Translater.Instant("Labels.Close");
+        var jsObjectReference = await jsRuntime.InvokeAsync<IJSObjectReference>("import",
+            $"./Pages/Reporting/Reporting.razor.js?v={Globals.Version}");
+        jsReports = await jsObjectReference.InvokeAsync<IJSObjectReference>("createReporting",
+            [DotNetObjectReference.Create(this)]);
 
-    private async Task<bool> EditOld(ReportDefinition rd)
-    {
+        var result = await HttpHelper.Get<ReportDefinition>($"/api/report/definition/{Uid}");
+        if (result.Success == false)
+        {
+            Toast.ShowError(Translater.TranslateIfNeeded(result.Body?.EmptyAsNull() ??
+                                                         "Pages.Report.Messages.FailedToFindReport"));
+            NavigationManager.NavigateTo("/reporting");
+            return;
+        }
+
+        var rd = result.Data;
+        this.ReportName = rd.Name;
+
         // clone the fields as they get wiped
         var fields = new List<ElementField>();
         Blocker.Show();
         this.StateHasChanged();
-        Data.Clear();
 
-
-        IDictionary<string, object> model = new ExpandoObject() as IDictionary<string, object>;
+        Model = new ExpandoObject();
+        var model = Model as IDictionary<string, object>;
         try
         {
             var flowsResult = await HttpHelper.Get<Dictionary<Guid, string>>($"/api/flow/basic-list");
@@ -44,7 +119,7 @@ public partial class Reporting
 
             var librariesResult = await HttpHelper.Get<Dictionary<Guid, string>>($"/api/library/basic-list");
             var libraries = librariesResult.Success ? librariesResult.Data ?? new() : new();
-            
+
             var nodesResult = await HttpHelper.Get<Dictionary<Guid, string>>($"/api/node/basic-list");
             var nodes = nodesResult.Success ? nodesResult.Data ?? new() : new();
 
@@ -53,7 +128,7 @@ public partial class Reporting
                 if (InputDateRange.DateRanges.TryGetValue(
                         Translater.Instant($"Labels.DateRanges.{rd.DefaultReportPeriod.Value}"), out var period))
                     model["Period"] = period;
-                
+
                 fields.Add(new ElementField()
                 {
                     InputType = FormInputType.DateRange,
@@ -66,7 +141,7 @@ public partial class Reporting
                 InputType = FormInputType.Text,
                 Name = "Email"
             });
-            
+
             AddSelectField("Flow", flows, rd.FlowSelection, ref fields, model);
             AddSelectField("Library", libraries, rd.LibrarySelection, ref fields, model);
             AddSelectField("Node", nodes, rd.NodeSelection, ref fields, model);
@@ -90,7 +165,7 @@ public partial class Reporting
                     {
                         InputType = FormInputType.Select,
                         Name = tf.Name,
-                        Parameters = new ()
+                        Parameters = new()
                         {
                             { "Options", listOptions }
                         }
@@ -110,59 +185,90 @@ public partial class Reporting
             this.StateHasChanged();
         }
 
-        if (fields.Count == 0)
-        {
-            // go straight to execution
-            var htmlResult = await GenerateReportHtml(rd.Uid, null);
-            if (htmlResult.Failed(out var error))
+        Fields = fields;
+        Buttons =
+        [
+            new ()
             {
-                Toast.ShowError(error);
-                return false;
+                Label = "Pages.Report.Button.Generate",
+                Clicked = (_, _) => _ = Generate()
+            },
+            new ()
+            {
+                Label = "Pages.Report.Button.Back",
+                Clicked = (_, _) => GoBack()
             }
-            await ShowReport(rd.Name, htmlResult.Value);
-        }
-        else
-        {
-            await ReportFormEditor.Open(new()
-            {
-                TypeName = "Pages.Report", Title = rd.Name, Fields = fields, Model = model,
-                SaveLabel = "Labels.Run", CancelLabel = "Labels.Close", Large = true,
-                SaveCallback = async (model) =>
-                {
-                    if (model is IDictionary<string, object> dict && dict.TryGetValue("Email", out var oEmail) && oEmail is string email )
-                    {
-                        _ = HttpHelper.Post<string>($"/api/report/generate/{rd.Uid}", model);
-                        Toast.ShowInfo(Translater.Instant("Pages.Report.Messages.ReportEmailed",
-                            new { email }));
-                        return true; // email reports we do close
-                    }
-                    var htmlResult = await GenerateReportHtml(rd.Uid, model);
-                    if (htmlResult.Failed(out var error))
-                    {
-                        Toast.ShowError(error);
-                        return false;
-                    }
-                    await ShowReport(rd.Name, htmlResult.Value);
-                    // we dont close the report field, this way the user can re-run the report with slightly modified parameters
-                    return false;
-                }
-            });
-        }
-
-        return false; // we don't need to reload the list
+        ];
+        Loaded = true;
+        StateHasChanged();
     }
 
-    private async Task<Result<string>> GenerateReportHtml(Guid uid, object? model)
+    /// <inheritdoc />
+    protected override Task OnAfterRenderAsync(bool firstRender)
     {
+        _needsRendering = false;
+        return base.OnAfterRenderAsync(firstRender);
+    }
+    /// <summary>
+    /// The back button was clicked
+    /// </summary>
+    private void GoBack()
+    {
+        if (ShowReportOutput)
+        {
+            Html = string.Empty;
+            ShowReportOutput = false;
+            return;
+        }
+        NavigationManager.NavigateTo("/reporting");
+    }
+    
+    /// <summary>
+    /// The close button was clicked
+    /// </summary>
+    private void Close()
+    {
+        NavigationManager.NavigateTo("/reporting");
+    }
+    
+    /// <summary>
+    /// Waits for the component to render
+    /// </summary>
+    protected async Task WaitForRender()
+    {
+        _needsRendering = true;
+        StateHasChanged();
+        while (_needsRendering)
+        {
+            await Task.Delay(50);
+        }
+    }
+    
+    /// <summary>
+    /// Generates the report
+    /// </summary>
+    private async Task Generate()
+    {
+        bool valid = await Editor.Validate();
+        if (valid == false)
+            return;
+        
         Blocker.Show("Generating Report");
         this.StateHasChanged();
         try
         {
-            var result = await HttpHelper.Post<string>($"/api/report/generate/{uid}", model);
+            var result = await HttpHelper.Post<string>($"/api/report/generate/{Uid}", Model);
             if (result.Success == false)
-                return Result<string>.Fail(result.Body?.EmptyAsNull() ?? "Failed generating report");
+            {
+                Toast.ShowError(result.Body?.EmptyAsNull() ?? "Failed generating report");
+                return;
+            }
 
-            return result.Data;
+            Html = result.Data;
+            ShowReportOutput = true;
+            StateHasChanged();
+            await WaitForRender();
+            await jsReports.InvokeVoidAsync("initCharts");
         }
         finally
         {
@@ -185,24 +291,26 @@ public partial class Reporting
             Toast.ShowWarning("No matching data found.");
             return;
         }
-        var task = Editor.Open(new()
-        {
-            TypeName = "ReportRender", Title = name, Model = new { Html = $"<div class=\"report-output\">{html}</div>" },
-            Large = true, ReadOnly = true,
-            Fields =
-            [
-                new()
-                {
-                    InputType = FormInputType.Html,
-                    Name = "Html"
-                }
-            ]
-        });
 
-        await Task.Delay(50);
-        await jsReports.InvokeVoidAsync("initCharts");
+        await Task.CompletedTask;
+        // var task = Editor.Open(new()
+        // {
+        //     TypeName = "ReportRender", Title = name, Model = new { Html = $"<div class=\"report-output\">{html}</div>" },
+        //     Large = true, ReadOnly = true,
+        //     Fields =
+        //     [
+        //         new()
+        //         {
+        //             InputType = FormInputType.Html,
+        //             Name = "Html"
+        //         }
+        //     ]
+        // });
 
-        await task;
+        // await Task.Delay(50);
+        // await jsReports.InvokeVoidAsync("initCharts");
+        //
+        // await task;
     }
 
     /// <summary>
