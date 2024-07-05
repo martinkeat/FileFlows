@@ -310,6 +310,9 @@ export class Reporting {
                 chart: {
                     type: 'treemap'
                 },
+                dataLabels: {
+                    format:  "truncate"
+                },
                 colors: ['#33b2df'],
                 stroke:{
                     colors:['#33b2df']
