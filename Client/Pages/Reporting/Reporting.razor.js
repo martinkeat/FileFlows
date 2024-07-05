@@ -30,82 +30,10 @@ export class Reporting {
     initCharts() {
         this.initPieCharts();
         this.initBarCharts();
-        this.initPieJsCharts();
-        this.initBarJsCharts();
-        this.initLineJsCharts();
+        this.initLineCharts();
+        this.initTreeMaps();
     }
-    
     initPieCharts()
-    {
-        let pieCharts = document.querySelectorAll('.report-output svg.pie-chart');
-
-        for (let pie of pieCharts) {
-            console.log('pie', pie);
-            let slices = pie.querySelectorAll('.slice');
-
-            for (let slice of slices) {
-                slice.addEventListener('mouseover', () => {
-                    // Get tooltip content from data-tooltip attribute
-                    let tooltipText = slice.getAttribute('data-title');
-
-                    // Create a tooltip element
-                    let tooltip = document.createElement('div');
-                    tooltip.classList.add('svg-tooltip');
-                    tooltip.textContent = tooltipText;
-
-                    // Position the tooltip relative to the slice
-                    let rect = slice.getBoundingClientRect();
-                    tooltip.style.left = rect.left + rect.width / 2 + 'px';
-                    tooltip.style.top = rect.top + rect.height / 2 + 'px';
-
-                    // Append tooltip to the body or another container
-                    document.body.appendChild(tooltip);
-                });
-
-                slice.addEventListener('mouseout', () => {
-                    // Remove tooltip on mouse out
-                    let tooltip = document.querySelector('.svg-tooltip');
-                    if (tooltip) {
-                        tooltip.parentNode.removeChild(tooltip);
-                    }
-                });
-            }
-        }
-    }
-    initBarCharts()
-    {
-        let barChartBars = document.querySelectorAll('.report-output rect.bar-chart-bar');
-
-        for (let bar of barChartBars) {
-            bar.addEventListener('mouseover', () => {
-                // Get tooltip content from data-tooltip attribute
-                let tooltipText = bar.getAttribute('data-title');
-
-                // Create a tooltip element
-                let tooltip = document.createElement('div');
-                tooltip.classList.add('svg-tooltip');
-                tooltip.textContent = tooltipText;
-
-                // Position the tooltip relative to the slice
-                let rect = bar.getBoundingClientRect();
-                tooltip.style.left = rect.left + rect.width / 2 + 'px';
-                tooltip.style.top = rect.top + rect.height / 2 + 'px';
-
-                // Append tooltip to the body or another container
-                document.body.appendChild(tooltip);
-            });
-
-            bar.addEventListener('mouseout', () => {
-                // Remove tooltip on mouse out
-                let tooltip = document.querySelector('.svg-tooltip');
-                if (tooltip) {
-                    tooltip.parentNode.removeChild(tooltip);
-                }
-            });
-        }        
-    }
-    
-    initPieJsCharts()
     {
         let hidden = document.querySelectorAll('.report-output .report-pie-chart-data');
         for(let hPid of hidden)
@@ -175,7 +103,7 @@ export class Reporting {
 
         return `${num.toFixed(decimalPlaces)} ${sizes[order]}`;
     }
-    initBarJsCharts()
+    initBarCharts()
     {
         let hidden = document.querySelectorAll('.report-output .report-bar-chart-data');
         for(let hPid of hidden)
@@ -224,8 +152,7 @@ export class Reporting {
         }
     }
 
-
-    initLineJsCharts()
+    initLineCharts()
     {
         let hidden = document.querySelectorAll('.report-output .report-line-chart-data');
         for(let hPid of hidden)
@@ -338,6 +265,50 @@ export class Reporting {
             this.createChart(ele, options)
         }
     }
+
+    initTreeMaps()
+    {
+        let hidden = document.querySelectorAll('.report-output .report-tree-map-data');
+        for(let hPid of hidden)
+        {
+            let ele = document.createElement('div');
+            ele.classList.add('apex-tree-map');
+            hPid.insertAdjacentElement('afterend', ele);
+
+            let data = JSON.parse(hPid.value);
+
+            let results = [];
+            Object.keys(data).forEach(x => {
+                let name = x;
+                if (name=== 'mpeg2video')
+                    name = 'mpeg2'; // too long
+                results.push({
+                    x: name,
+                    y: data[x]
+                })
+            });
+
+            let options = {
+                chart: {
+                    type: 'treemap'
+                },
+                colors: ['#33b2df'],
+                stroke:{
+                    colors:['#33b2df']
+                },
+                grid: {
+                    borderColor: '#90A4AE33'
+                },
+                series: [{
+                    data:results
+                }]
+            };
+
+            this.createChart(ele, options)
+        }
+    }
+    
+    
     createChart(ele, options){
         ele.style.margin = '0';
         let defaultOptions = {

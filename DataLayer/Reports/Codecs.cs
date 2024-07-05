@@ -3,6 +3,7 @@ using System.Text.Json;
 using FileFlows.DataLayer.Reports.Charts;
 using FileFlows.DataLayer.Reports.Helpers;
 using FileFlows.Plugin;
+using FileFlows.Shared.Models;
 using FileFlows.Shared.Widgets;
 
 namespace FileFlows.DataLayer.Reports;
@@ -20,6 +21,8 @@ public class Codecs : Report
     public override string Description => "Shows the different codecs processed through FileFlows.";
     /// <inheritdoc />
     public override string Icon => "fas fa-photo-video";
+    /// <inheritdoc />
+    public override ReportPeriod? DefaultReportPeriod => ReportPeriod.Last31Days;
     //
     // /// <summary>
     // /// Gets or sets the stream type
@@ -37,6 +40,10 @@ public class Codecs : Report
         var streamType = GetEnumValue<StreamType>(model, nameof(Type)); 
         var direction = GetEnumValue<IODirection>(model, nameof(Direction)); 
 
+        (DateTime? minDateUtc, DateTime? maxDateUtc) = GetPeriod(model);
+        minDateUtc ??= DateTime.MinValue;
+        maxDateUtc ??= DateTime.MaxValue;
+        
         using var db = await GetDb();
         string sql =
             $"select {Wrap(direction == IODirection.Input ? "OriginalMetadata" : "FinalMetadata")} as {Wrap("Metadata")} from {Wrap("LibraryFile")} where {Wrap("Status")} = 1";
@@ -91,7 +98,14 @@ public class Codecs : Report
             .Select(x => new { Codec = x.Key, Count = x.Value })
             .ToList();
 
-        var builder = new StringBuilder();
+        var builder = new ReportBuilder();
+        builder.StartRow(4);
+        builder.AddPeriodSummaryBox(minDateUtc.Value, maxDateUtc.Value);
+        builder.AddSummaryBox("Video Codecs", dataVideo.Count.ToString("N0"), ReportSummaryBox.IconType.Video, ReportSummaryBox.BoxColor.Info);
+        builder.AddSummaryBox("Audio Codecs", dataAudio.Count.ToString("N0"), ReportSummaryBox.IconType.VolumeUp, ReportSummaryBox.BoxColor.Info);
+        builder.AddSummaryBox("Subtitle Codecs", dataSubtitle.Count.ToString("N0"), ReportSummaryBox.IconType.ClosedCaptioning, ReportSummaryBox.BoxColor.Info);
+        builder.EndRow();
+        
         foreach (var codec in new[]
                  {
                      ("Video", dataVideo, ReportSummaryBox.IconType.Video),
@@ -106,23 +120,23 @@ public class Codecs : Report
             var top = codec.Item2.OrderByDescending(kv => kv.Count).First().Codec;
             int averageCount = (int)Math.Round(codec.Item2.Average(x => x.Count));
         
-            builder.AppendLine("<div class=\"report-row report-row-4\">");
-            builder.AppendLine(ReportSummaryBox.Generate(codec.Item1 + " Codecs", codec.Item2.Count.ToString("N0"), codec.Item3, ReportSummaryBox.BoxColor.Info));
-            builder.AppendLine(ReportSummaryBox.Generate("Top Codec", top, ReportSummaryBox.IconType.ArrowAltCircleUp,
-                ReportSummaryBox.BoxColor.Success));
-            builder.AppendLine(ReportSummaryBox.Generate("Least Codec", fewest, ReportSummaryBox.IconType.ArrowAltCircleDown,
-                ReportSummaryBox.BoxColor.Warning));
-            builder.AppendLine(ReportSummaryBox.Generate("Average", averageCount.ToString("N0"), ReportSummaryBox.IconType.BalanceScale,
-                ReportSummaryBox.BoxColor.Error));
-            builder.AppendLine("</div>");
+            builder.StartRow(3);
+            //builder.AppendLine(ReportSummaryBox.Generate(codec.Item1 + " Codecs", codec.Item2.Count.ToString("N0"), codec.Item3, ReportSummaryBox.BoxColor.Info));
+            builder.AddSummaryBox($"Top {codec.Item1} Codec", top, ReportSummaryBox.IconType.ArrowAltCircleUp,
+                ReportSummaryBox.BoxColor.Success);
+            builder.AddSummaryBox($"Least {codec.Item1} Codec", fewest, ReportSummaryBox.IconType.ArrowAltCircleDown,
+                ReportSummaryBox.BoxColor.Warning);
+            builder.AddSummaryBox("Average Times", averageCount.ToString("N0"), ReportSummaryBox.IconType.BalanceScale,
+                ReportSummaryBox.BoxColor.Error);
+            builder.EndRow();
             
-            builder.AppendLine("<div class=\"report-row report-row-2\">");
+            builder.StartRow(2);
             
             builder.AppendLine(TreeMap.Generate(new()
             {
                 Data = codec.Item2.ToDictionary(x => x.Codec, x => x.Count),
                 Title = "Codecs"
-            }));
+            }, generateSvg: emailing));
             builder.AppendLine(TableGenerator.GenerateMinimumTable("Top Codecs", ["Codec", "Count"], codec.Item2
                 .OrderByDescending(x => x.Count).Select(x => new object[]
                 {
@@ -130,7 +144,7 @@ public class Codecs : Report
                     x.Count.ToString("N0")
                 }).Take(TableGenerator.MIN_TABLE_ROWS).ToArray()));
             
-            builder.AppendLine("</div>");
+            builder.EndRow();
         }
         
         return builder.ToString();

@@ -133,9 +133,10 @@ public class ProcessingSummary: Report
             ldTime[date] += (int)(file.ProcessingEnded - file.ProcessingStarted).TotalSeconds;
         }
 
-        StringBuilder output = new();
+        ReportBuilder builder = new();
 
-        output.AppendLine("<div class=\"report-row report-row-3\">");
+        builder.StartRow(3);
+        builder.AddPeriodSummaryBox(minDateUtc.Value, maxDateUtc.Value);
         foreach (var sum in new[]
                  {
                      ("Period", minDateUtc.Value.ToLocalTime().ToString("d MMM") +" - " + maxDateUtc.Value.ToLocalTime().ToString("d MMM"), ReportSummaryBox.IconType.Clock, ReportSummaryBox.BoxColor.Info),
@@ -143,9 +144,9 @@ public class ProcessingSummary: Report
                      ("Failed Files", failedFiles.ToString("N0"), ReportSummaryBox.IconType.ExclamationCircle, ReportSummaryBox.BoxColor.Error),
                  })
         {
-            output.AppendLine(ReportSummaryBox.Generate(sum.Item1, sum.Item2, sum.Item3, sum.Item4));
+            builder.AddSummaryBox(sum.Item1, sum.Item2, sum.Item3, sum.Item4);
         }
-        output.AppendLine("</div>");
+        builder.EndRow();
 
         SummaryRow[] summaryRows =
         [
@@ -166,11 +167,10 @@ public class ProcessingSummary: Report
 
         foreach (var sumRow in summaryRows)
         {
-            AddSummaryRow(output, sumRow, labels, emailing);
+            AddSummaryRow(builder, sumRow, labels, emailing);
         }
-
         
-        output.AppendLine("<div class=\"report-row report-row-3\">");
+        builder.StartRow(3);
         foreach (var sum in new[]
                  {
                      //("Processing Time", TimeSpan.FromSeconds(totalSeconds).Humanize(1), "far fa-clock", ""),
@@ -179,11 +179,11 @@ public class ProcessingSummary: Report
                      ("Storage Sized", FileSizeFormatter.Format(totalSavedBytes), ReportSummaryBox.IconType.HardDrive, totalSavedBytes > 0 ? ReportSummaryBox.BoxColor.Success : ReportSummaryBox.BoxColor.Error),
                  })
         {
-            output.AppendLine(ReportSummaryBox.Generate(sum.Item1, sum.Item2, sum.Item3, sum.Item4));
+            builder.AddSummaryBox(sum.Item1, sum.Item2, sum.Item3, sum.Item4);
         }
-        output.AppendLine("</div>");
+        builder.EndRow();
         
-        AddSummaryRow(output, new ()
+        AddSummaryRow(builder, new ()
         {
             TableTitle = "Biggest Savings",
             TableUnitColumn = "Savings",
@@ -198,7 +198,7 @@ public class ProcessingSummary: Report
             ChartYAxisFormatter = "filesize"
         }, labels, emailing);
 
-        output.AppendLine("<div class=\"report-row report-row-4\">");
+        builder.StartRow(4);
         foreach (var sum in new[]
                  {
                      ("Processing Time", TimeSpan.FromSeconds(totalSeconds).Humanize(1), ReportSummaryBox.IconType.Clock, ReportSummaryBox.BoxColor.Info),
@@ -207,11 +207,11 @@ public class ProcessingSummary: Report
                      ("Longest Time", files.Max(x =>x.ProcessingEnded - x.ProcessingStarted).Humanize(1), ReportSummaryBox.IconType.HourglassStart, ReportSummaryBox.BoxColor.Error),
                  })
         {
-            output.AppendLine(ReportSummaryBox.Generate(sum.Item1, sum.Item2, sum.Item3, sum.Item4));
+            builder.AddSummaryBox(sum.Item1, sum.Item2, sum.Item3, sum.Item4);
         }
-        output.AppendLine("</div>");
+        builder.EndRow();
         
-        AddSummaryRow(output, new()
+        AddSummaryRow(builder, new()
         {
             TableTitle = "Longest Running",
             TableUnitColumn = "Time",
@@ -246,7 +246,7 @@ public class ProcessingSummary: Report
                      }
                  })
         {
-            output.AppendLine("<div class=\"report-row report-row-2\">");
+            builder.StartRow(2);
             var t = libDataCount.ToDictionary(x => x.Key,
                 x =>
                 {
@@ -255,7 +255,7 @@ public class ProcessingSummary: Report
                         count += (int)v;
                     return count;
                 }).OrderByDescending(x => x.Value).ToDictionary(x => x.Key, x => x.Value);
-            output.AppendLine(PieChart.Generate(new()
+            builder.AppendLine(PieChart.Generate(new()
             {
                 Title = "Libraries",
                 Data = t
@@ -282,7 +282,7 @@ public class ProcessingSummary: Report
                         return count;
                     }).OrderByDescending(x => x.Value).ToDictionary(x => x.Key, x => x.Value);
                 
-                output.AppendLine(BarChart.Generate(new BarChartData()
+                builder.AppendLine(BarChart.Generate(new BarChartData()
                 {
                     Title = chart.Item1,
                     Data = t2,
@@ -290,19 +290,18 @@ public class ProcessingSummary: Report
                 }, generateSvg: emailing));
             }
 
-            output.AppendLine("</div>");
+            builder.EndRow();
         }
 
-        return output.ToString();
+        return builder.ToString();
     }
-    
 
-    private void AddSummaryRow(StringBuilder output, SummaryRow sumRow, DateTime[] labels, bool emailing)
+
+    private void AddSummaryRow(ReportBuilder builder, SummaryRow sumRow, DateTime[] labels, bool emailing)
     {
-        
-        output.AppendLine("<div class=\"report-row report-row-2\">");
+        builder.StartRow(2);
             
-        output.AppendLine(MultiLineChart.Generate(new MultilineChartData
+        builder.AppendLine(MultiLineChart.Generate(new MultilineChartData
         {
             Title = sumRow.ChartTitle,
             Labels = labels,
@@ -314,12 +313,12 @@ public class ProcessingSummary: Report
             }).ToArray()
         }, generateSvg: emailing));
             
-        output.AppendLine(TableGenerator.GenerateMinimumTable(sumRow.TableTitle,
+        builder.AppendLine(TableGenerator.GenerateMinimumTable(sumRow.TableTitle,
             ["Name", sumRow.TableUnitColumn],
             sumRow.TableData
         ));
             
-        output.AppendLine("</div>");
+        builder.EndRow();
     }
 
 

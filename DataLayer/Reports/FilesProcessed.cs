@@ -1,7 +1,9 @@
 using FileFlows.DataLayer.Reports.Helpers;
 using FileFlows.Plugin;
+using FileFlows.ServerShared;
 using FileFlows.Shared.Formatters;
 using FileFlows.Shared.Models;
+using Humanizer;
 
 namespace FileFlows.DataLayer.Reports;
 
@@ -41,7 +43,7 @@ public class FilesProcessed : Report
 
         using var db = await GetDb();
         string sql =
-            $"select {Wrap("NodeUid")}, {Wrap("NodeName")}, {Wrap("OriginalSize")}, " +
+            $"select {Wrap("Name")}, {Wrap("NodeUid")}, {Wrap("NodeName")}, {Wrap("OriginalSize")}, " +
             $"{Wrap("FinalSize")}, {Wrap("ProcessingStarted")}, {Wrap("ProcessingEnded")} " +
             $"from {Wrap("LibraryFile")} where {Wrap("Status")} = 1";
 
@@ -57,21 +59,19 @@ public class FilesProcessed : Report
         minDateUtc ??= files.Min(x => x.ProcessingStarted);
         maxDateUtc ??= files.Max(x => x.ProcessingStarted);
         
-        Func<double, string>? formatter = statistic switch
-        {
-            ProcessedStatistic.Size => (dbl) => FileSizeFormatter.Format(dbl, 2),
-            ProcessedStatistic.Duration => TimeFormatter.Format,
-            _ => null
-        };
-        var yAxisFormatter = statistic switch
-        {
-            ProcessedStatistic.Size => "filesize",
-            _ => null
-        };
+        double totalSeconds = 0, totalBytes = 0, totalSavedBytes = 0;
+        int totalFiles = 0;
 
-        Dictionary<string, Dictionary<DateTime, long>> data = new();
+        Dictionary<string, Dictionary<DateTime, long>> dataCount = new();
+        Dictionary<string, Dictionary<DateTime, long>> dataSize = new();
+        Dictionary<string, Dictionary<DateTime, long>> dataTime = new();
         foreach (var file in files)
         {
+            totalFiles++;
+            totalBytes += file.OriginalSize;
+            totalSavedBytes += (file.OriginalSize - file.FinalSize);
+            totalSeconds += (int)(file.ProcessingEnded - file.ProcessingStarted).TotalSeconds;
+            
             var date = file.ProcessingStarted.ToLocalTime();
             date = new DateTime(date.Year, date.Month, date.Day);
             string name;
@@ -80,41 +80,82 @@ public class FilesProcessed : Report
             else
                 name = string.Empty;
 
-            data.TryAdd(name, new Dictionary<DateTime, long>());
-            var d = data[name];
-            d.TryAdd(date, 0);
+            dataCount.TryAdd(name, new Dictionary<DateTime, long>());
+            var dCount = dataCount[name];
+            dCount.TryAdd(date, 0);
+            dCount[date] += 1;
             
-            switch (statistic)
-            {
-                case ProcessedStatistic.Count:
-                    d[date] += 1;
-                    break;
-                case ProcessedStatistic.Size:
-                    d[date] += file.OriginalSize;
-                    break;
-                case ProcessedStatistic.Duration:
-                    d[date] += (int)(file.ProcessingEnded - file.ProcessingStarted).TotalSeconds;
-                    break;
-            }
+            dataSize.TryAdd(name, new Dictionary<DateTime, long>());
+            var dSize = dataSize[name];
+            dSize.TryAdd(date, 0);
+            dSize[date] += file.OriginalSize;
+            
+            dataTime.TryAdd(name, new Dictionary<DateTime, long>());
+            var dTime = dataTime[name];
+            dTime.TryAdd(date, 0);
+            dTime[date] += (int)(file.ProcessingEnded - file.ProcessingStarted).TotalSeconds;
         }
 
-        if (data.Count == 0)
+        if (dataCount.Count == 0)
             return string.Empty;
-        
-        string html = DateBasedChartHelper.Generate(minDateUtc.Value, maxDateUtc.Value, data, emailing,
-            tableDataFormatter: formatter, yAxisFormatter: yAxisFormatter);
 
-        return html;
+        ReportBuilder builder = new();
+        
+        builder.StartRow(4);
+        builder.AddPeriodSummaryBox(minDateUtc.Value, maxDateUtc.Value);
+        builder.AddSummaryBox("Total Files", totalFiles, ReportSummaryBox.IconType.File, ReportSummaryBox.BoxColor.Info);
+        builder.AddSummaryBox("Total Size", FileSizeFormatter.Format(totalBytes), ReportSummaryBox.IconType.HardDrive, ReportSummaryBox.BoxColor.Info);
+        builder.AddSummaryBox("Total Time", TimeSpan.FromSeconds(totalSeconds).Humanize(1), ReportSummaryBox.IconType.Clock, ReportSummaryBox.BoxColor.Info);
+        builder.EndRow();
+        
+            
+        builder.StartRow(2);
+        builder.AppendLine(DateBasedChartHelper.Generate(minDateUtc.Value, maxDateUtc.Value, dataCount, emailing, generateTable: false));
+        builder.AppendLine(TableGenerator.GenerateMinimumTable("Most Files", ["Node", "Count"],
+            files.GroupBy(x => x.NodeName).Select(x => new { Node = x.Key == Globals.InternalNodeName ? "Internal Processing Node" : x.Key, Count = x.Count()})
+                .OrderByDescending(x => x.Count)
+                .Select(x => new object[] { x.Node, x.Count})
+                .Take(TableGenerator.MIN_TABLE_ROWS).ToArray()
+        ));
+        builder.EndRow();
+        
+        builder.StartRow(2);
+        builder.AppendLine(DateBasedChartHelper.Generate(minDateUtc.Value, maxDateUtc.Value, dataSize, emailing,
+            tableDataFormatter: (dbl) => FileSizeFormatter.Format(dbl, 2), yAxisFormatter: "filesize", generateTable: false));
+        builder.AppendLine(TableGenerator.GenerateMinimumTable("Largest Files", ["Name", "Node", "Size"],
+            files.OrderByDescending(x => x.OriginalSize).Select(x => new object[] { x.Name, 
+                    x.NodeName == Globals.InternalNodeName ? "Internal Node" : x.NodeName,
+                    FileSizeFormatter.Format(x.OriginalSize)})
+                .Take(TableGenerator.MIN_TABLE_ROWS).ToArray()
+            , widths: ["", "10rem", ""]));
+        builder.EndRow();
+        
+        builder.StartRow(2);
+        builder.AppendLine(DateBasedChartHelper.Generate(minDateUtc.Value, maxDateUtc.Value, dataTime, emailing,
+            tableDataFormatter: TimeFormatter.Format, generateTable: false));
+        builder.AppendLine(TableGenerator.GenerateMinimumTable("Longest Time Taken", ["Name", "Node", "Size"],
+            files.OrderByDescending(x => x.OriginalSize).Select(x => new object[]
+                {
+                    x.Name, 
+                    x.NodeName == Globals.InternalNodeName ? "Internal Node" : x.NodeName,
+                    FileSizeFormatter.Format(x.OriginalSize)
+                })
+                .Take(TableGenerator.MIN_TABLE_ROWS).ToArray()
+        , widths: ["", "10rem", ""]));
+        builder.EndRow();
+
+        return builder.ToString();
     }
     
     /// <summary>
     /// Represents the data for a node in the processing system.
     /// </summary>
+    /// <param name="Name">The name of the file.</param>
     /// <param name="NodeUid">The unique identifier of the node.</param>
     /// <param name="NodeName">The name of the node.</param>
     /// <param name="OriginalSize">The original size of the data before processing.</param>
     /// <param name="FinalSize">The final size of the data after processing.</param>
     /// <param name="ProcessingStarted">The date and time when processing started.</param>
     /// <param name="ProcessingEnded">The date and time when processing ended.</param>
-    public record NodeData(Guid NodeUid, string NodeName, long OriginalSize, long FinalSize, DateTime ProcessingStarted, DateTime ProcessingEnded);
+    public record NodeData(string Name, Guid NodeUid, string NodeName, long OriginalSize, long FinalSize, DateTime ProcessingStarted, DateTime ProcessingEnded);
 }

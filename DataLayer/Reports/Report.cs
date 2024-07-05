@@ -3,6 +3,7 @@ using System.Text;
 using System.Text.Json;
 using System.Web;
 using FileFlows.DataLayer.DatabaseConnectors;
+using FileFlows.DataLayer.Reports.Helpers;
 using FileFlows.Plugin;
 using FileFlows.Shared.Models;
 using Humanizer;

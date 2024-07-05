@@ -9,8 +9,9 @@ namespace FileFlows.DataLayer.Reports.Charts;
 /// </summary>
 public class TreeMap : Chart
 {
-    private static readonly (int R, int G, int B, double A) BaseColor = (54, 169, 210, 0.85);
-    private const double MaxDarkeningFactor = 0.8;
+    //private static readonly (int R, int G, int B, double A) BaseColor = (54, 169, 210, 0.85);
+    private static readonly (int R, int G, int B, double A) BaseColor = (23, 162, 184, 0.85);
+    private const double MaxDarkeningFactor = 0.4;
 
     /// <summary>
     /// Generates a tree map chart
@@ -66,10 +67,10 @@ public class TreeMap : Chart
                 $"<rect x=\"{rect.X}\" y=\"{rect.Y}\" width=\"{rect.Width}\" height=\"{rect.Height}\" fill=\"{color}\" data-title=\"{System.Net.WebUtility.HtmlEncode(tooltip)}\" class=\"tree-map-rect\"></rect>");
             
             builder.AppendLine(
-                $"<rect x=\"{rect.X + 2}\" y=\"{rect.Y + 2}\" width=\"{rect.Width - 4}\" height=\"{rect.Height - 4}\" fill=\"none\" stroke=\"{borderColor}\" stroke-width=\"2\" />");
+                $"<rect x=\"{rect.X + 1}\" y=\"{rect.Y + 1}\" width=\"{rect.Width - 2}\" height=\"{rect.Height - 2}\" fill=\"none\" stroke=\"{borderColor}\" stroke-width=\"2\" />");
 
             builder.AppendLine(
-                $"<text x=\"{rect.X + 5}\" y=\"{rect.Y + 15}\" font-size=\"12\" fill=\"#fff\">{label}</text>");
+                $"<text x=\"{rect.X + 5}\" y=\"{rect.Y + 25}\" font-size=\"14\" fill=\"#fff\">{label}</text>");
         }
 
         builder.AppendLine("</svg>");

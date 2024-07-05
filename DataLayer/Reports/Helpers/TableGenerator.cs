@@ -166,8 +166,9 @@ public class TableGenerator
     /// <param name="title">the title of the table</param>
     /// <param name="columns">the name of the columns</param>
     /// <param name="data">The collection of data to generate the HTML table from.</param>
+    /// <param name="widths">Optional custom widths for the columns</param>
     /// <returns>An HTML string representing the table.</returns>
-    public static string GenerateMinimumTable(string title, string[] columns, object[][] data)
+    public static string GenerateMinimumTable(string title, string[] columns, object[][] data, string[]? widths = null)
     {
         if (data.Any() != true)
             return string.Empty;
@@ -180,10 +181,15 @@ public class TableGenerator
         // Add table headers
         sb.Append("<thead>");
         sb.Append("<tr>");
-        foreach(var column in columns)
+        for(int i=0;i<columns.Length;i++)
         {
-            sb.AppendFormat("<th><span>{0}</span></th>",
-                System.Net.WebUtility.HtmlEncode(column));
+            var column = columns[i];
+            if (widths != null && string.IsNullOrWhiteSpace(widths[i]) == false)
+                sb.AppendFormat("<th style=\"width:{1}\"><span>{0}</span></th>",
+                    System.Net.WebUtility.HtmlEncode(column), widths[i]);
+            else
+                sb.AppendFormat("<th><span>{0}</span></th>",
+                    System.Net.WebUtility.HtmlEncode(column));
         }
 
         sb.Append("</tr>");

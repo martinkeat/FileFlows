@@ -19,19 +19,24 @@ public static class DateBasedChartHelper
     /// <param name="emailing">if the report is being emailed and should generate SVG instead of javascript chart</param>
     /// <param name="tableDataFormatter">Optional formatter to use in the table data</param>
     /// <param name="yAxisFormatter">Optional formatter to use on the client for the y-axis value</param>
+    /// <param name="generateTable">If the table should be generated</param>
+    /// <param name="generateChart">If the chart should be generated</param>
     /// <returns>A string containing the HTML for the table and chart.</returns>
     public static string Generate(DateTime minDateUtc, DateTime maxDateUtc, 
         Dictionary<string, Dictionary<DateTime, long>> data, bool emailing,
         Func<double, string>? tableDataFormatter = null,
-        string? yAxisFormatter = null)
+        string? yAxisFormatter = null, bool generateTable = true, bool generateChart = true)
     {
         var (labels, tableData) = GenerateTableData(minDateUtc, maxDateUtc, data, tableDataFormatter);
 
         // Ensure line chart labels are at daily intervals
         var dailyLabels = DateTimeLabelHelper.Generate(minDateUtc, maxDateUtc);
 
-        var table = TableGenerator.Generate(new[] { "Date" }.Union(data.Keys).ToArray(), tableData.ToArray());
-        var chart = MultiLineChart.Generate(new MultilineChartData
+        string result = "";
+        if(generateTable)
+            result += TableGenerator.Generate(new[] { "Date" }.Union(data.Keys).ToArray(), tableData.ToArray()) ?? string.Empty;
+        if(generateChart)
+        result += MultiLineChart.Generate(new MultilineChartData
         {
             //Labels = dailyLabels.Select(label => label.ToString("yyyy-MM-dd")).ToArray(), // Convert DateTime to string here
             Labels = dailyLabels, // Convert DateTime to string here
@@ -41,9 +46,9 @@ public static class DateBasedChartHelper
                 Name = seriesItem.Key,
                 Data = dailyLabels.Select(label => (double)seriesItem.Value.GetValueOrDefault(label, 0)).ToArray()
             }).ToArray()
-        }, generateSvg: emailing);
+        }, generateSvg: emailing) ?? string.Empty;
 
-        return (table ?? string.Empty) + (chart ?? string.Empty);
+        return result;
     }
 
 

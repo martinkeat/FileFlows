@@ -41,6 +41,15 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+.report-output.emailed .tree-map {
+  padding: 0 0.5rem 0.5rem;
+  width: calc(100% - 1rem) !important;
+}
+.report-output.emailed .tree-map text {
+  fill: white;
+  font-size: 15px !important;
+  font-weight: 600;
+}
 .report-output h2 {
   font-size: 1.25rem;
 }
@@ -244,4 +253,7 @@
 }
 .report-output .apexcharts-legend-series {
   text-align: left;
+}
+.report-output .apex-tree-map {
+  padding-left: 0.8rem;
 }
