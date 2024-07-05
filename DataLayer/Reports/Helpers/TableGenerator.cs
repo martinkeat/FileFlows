@@ -11,6 +11,11 @@ namespace FileFlows.DataLayer.Reports.Helpers;
 public class TableGenerator
 {
     /// <summary>
+    /// The rows that can appear in a minimum table
+    /// </summary>
+    public const int MIN_TABLE_ROWS = 6;
+    
+    /// <summary>
     /// Generates an HTML table from a collection of data.
     /// </summary>
     /// <param name="columns">the name of the columns</param>

@@ -71,7 +71,7 @@ public class Codecs : Report
                     continue;
                 var codecs = key.ToLowerInvariant().StartsWith("video") ? videoCodecs :
                     key.ToLowerInvariant().StartsWith("audio") ? audioCodecs :
-                    key.ToLowerInvariant().StartsWith("subtitle") ? audioCodecs :
+                    key.ToLowerInvariant().StartsWith("subtitle") ? subtitleCodecs :
                     null;
                 if (codecs == null)
                     continue;
@@ -117,7 +117,7 @@ public class Codecs : Report
             builder.AppendLine("</div>");
             
             builder.AppendLine("<div class=\"report-row report-row-2\">");
-
+            
             builder.AppendLine(TreeMap.Generate(new()
             {
                 Data = codec.Item2.ToDictionary(x => x.Codec, x => x.Count),
@@ -128,7 +128,7 @@ public class Codecs : Report
                 {
                     x.Codec,
                     x.Count.ToString("N0")
-                }).ToArray()));
+                }).Take(TableGenerator.MIN_TABLE_ROWS).ToArray()));
             
             builder.AppendLine("</div>");
         }

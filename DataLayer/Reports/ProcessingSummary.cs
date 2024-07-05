@@ -76,13 +76,12 @@ public class ProcessingSummary: Report
 
         double totalSeconds = 0, totalBytes = 0, totalSavedBytes = 0;
         int totalFiles = 0;
-        const int NUM_FILES = 6;
 
-        List<FileData> largestFiles = files.OrderByDescending(x => x.OriginalSize).Take(NUM_FILES).ToList();
+        List<FileData> largestFiles = files.OrderByDescending(x => x.OriginalSize).Take(TableGenerator.MIN_TABLE_ROWS).ToList();
         List<FileData> mostSaved = files.Where(x => x.OriginalSize >= x.FinalSize)
             .OrderByDescending(x => x.OriginalSize - x.FinalSize)
-            .Take(NUM_FILES).ToList();
-        List<FileData> longestRunning = files.OrderByDescending(x => x.ProcessingEnded - x.ProcessingStarted).Take(NUM_FILES).ToList();
+            .Take(TableGenerator.MIN_TABLE_ROWS).ToList();
+        List<FileData> longestRunning = files.OrderByDescending(x => x.ProcessingEnded - x.ProcessingStarted).Take(TableGenerator.MIN_TABLE_ROWS).ToList();
         
         foreach (var file in files)
         {
