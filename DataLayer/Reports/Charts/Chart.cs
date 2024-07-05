@@ -6,6 +6,15 @@ namespace FileFlows.DataLayer.Reports.Charts;
 public class Chart
 {
     /// <summary>
+    /// The width for emailed charts
+    /// </summary>
+    protected const int EmailChartWidth = 590;
+    /// <summary>
+    /// The height for emailed charts
+    /// </summary>
+    protected const int EmailChartHeight = 210;
+    
+    /// <summary>
     /// The colors to show on the chart
     /// </summary>
     protected static readonly string[] COLORS =

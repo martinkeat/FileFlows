@@ -41,19 +41,16 @@ public class TreeMap : Chart
         if (chartData.Data?.Any() != true)
             return string.Empty;
 
-        const int chartWidth = 450;
-        const int chartHeight = 300;
-
         double total = chartData.Data.Sum(item => (double)item.Value);
         var sortedData = chartData.Data.OrderByDescending(item => item.Value).ToList();
         double maxValue = sortedData.First().Value;
 
-        var rectangles = CalculateRectangles(sortedData, total, 0, 0, chartWidth, chartHeight);
+        var rectangles = CalculateRectangles(sortedData, total, 0, 0, EmailChartWidth, EmailChartHeight);
 
         StringBuilder builder = new StringBuilder();
         builder.AppendLine("<div class=\"chart tree-map\">");
         builder.AppendLine(
-            $"<svg class=\"tree-map\" width=\"100%\" height=\"100%\" viewBox=\"0 0 {chartWidth} {chartHeight}\" preserveAspectRatio=\"none\" xmlns=\"http://www.w3.org/2000/svg\">");
+            $"<svg class=\"tree-map\" width=\"100%\" height=\"100%\" viewBox=\"0 0 {EmailChartWidth} {EmailChartHeight}\" preserveAspectRatio=\"none\" xmlns=\"http://www.w3.org/2000/svg\">");
 
         foreach (var rect in rectangles)
         {

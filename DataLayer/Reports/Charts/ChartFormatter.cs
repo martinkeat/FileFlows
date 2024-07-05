@@ -13,14 +13,15 @@ public static class ChartFormatter
     /// </summary>
     /// <param name="value">the value</param>
     /// <param name="formatter">the formatter</param>
+    /// <param name="axis">if the value being formatted is on the axis</param>
     /// <returns>the formatted value</returns>
-    internal static string Format(object value, string? formatter)
+    internal static string Format(object value, string? formatter, bool axis = false)
     {
         if (value == null)
             return string.Empty;
 
         if (formatter?.ToLowerInvariant() == "filesize")
-            return FileSizeFormatter.Format(Convert.ToDouble(value));
+            return FileSizeFormatter.Format(Convert.ToDouble(value), decimalPoints: axis ? 0 : 2);
 
         if (value is int or long)
             return $"{value:N0}"!; // Format with thousands separator, no decimals

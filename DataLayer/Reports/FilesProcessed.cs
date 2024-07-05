@@ -59,7 +59,7 @@ public class FilesProcessed : Report
         
         Func<double, string>? formatter = statistic switch
         {
-            ProcessedStatistic.Size => FileSizeFormatter.Format,
+            ProcessedStatistic.Size => (dbl) => FileSizeFormatter.Format(dbl, 2),
             ProcessedStatistic.Duration => TimeFormatter.Format,
             _ => null
         };

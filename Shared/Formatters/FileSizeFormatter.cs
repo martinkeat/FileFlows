@@ -50,8 +50,9 @@ public class FileSizeFormatter : Formatter
     /// Formats a byte value as a string
     /// </summary>
     /// <param name="size">The size in bytes</param>
+    /// <param name="decimalPoints">the number of decimal points</param>
     /// <returns>The size in a formatted string</returns>
-    public static string Format(double size)
+    public static string Format(double size, int decimalPoints = 2)
     {
         int order = 0;
         double num = size;
@@ -60,6 +61,9 @@ public class FileSizeFormatter : Formatter
             order++;
             num /= 1000;  // 1024 would be a kibibyte.  I'm trying to embrace the proper metric meaning....
         }
-        return $"{num:0.##} {sizes[order]}";
+        if (decimalPoints == 0)
+            return $"{num:0} {sizes[order]}";
+        return $"{num.ToString($"F{decimalPoints}")} {sizes[order]}";
+
     }
 }

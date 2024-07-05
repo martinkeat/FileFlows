@@ -6,13 +6,40 @@
   font-family: sans-serif;
   font-size: 14px;
   text-align: center;
+  width: min(1200px, 100vw);
+  padding: 1rem;
+  margin: auto;
+  line-height: 1.6rem;
 }
 .report-output.emailed .chart {
+  display: flex;
+  flex-direction: column;
   padding: 0;
 }
-.report-output.emailed .chart svg {
+.report-output.emailed .chart > svg {
   width: 100%;
-  height: 10rem;
+  min-height: 13rem;
+  flex-grow: 1;
+}
+.report-output.emailed .report-row > div .title {
+  font-size: 1.1rem !important;
+}
+.report-output.emailed .report-summary-box .icon {
+  width: 4rem;
+}
+.report-output.emailed .pie-chat {
+  display: flex;
+}
+.report-output.emailed .pie-chat .legend {
+  width: 20rem;
+  overflow: auto;
+  margin: 0 !important;
+  font-size: 0.7rem !important;
+}
+.report-output.emailed .pie-chat .legend .series {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .report-output h2 {
   font-size: 1.25rem;
@@ -75,7 +102,7 @@
   font-size: clamp(1rem, 2vw, 2rem);
 }
 .report-output .report-summary-box.warning .icon svg {
-  fill: var(--yellow, #FFC107);
+  fill: var(--yellow, #ffa400);
 }
 .report-output .report-summary-box.error .icon svg {
   fill: var(--red, #DC3545);

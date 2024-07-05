@@ -49,51 +49,64 @@ public class MultiLineChart : Chart
     {
         string? yAxisLabel = null;
 
+        int longestYLabel = 0;
+        const int yAxisLabelFrequency = 4; // Change as needed to control the number of labels
+
+        // Convert values to double for processing
+        double maxValue = chartData.Series.SelectMany(x => x.Data).Max(item => item);
+        
+        for (int i = 0; i <= yAxisLabelFrequency; i++)
+        {
+            double value = (maxValue / yAxisLabelFrequency) * i;
+            object yValue = string.IsNullOrWhiteSpace(chartData.YAxisFormatter) ? (object)Convert.ToInt64(value) : (object)value;
+            string yLabel = ChartFormatter.Format(yValue, chartData.YAxisFormatter, axis: true);
+            longestYLabel = Math.Max(longestYLabel, yLabel.Length);
+        }
+
         // Constants and initial setup
-        const int chartWidth = 800; // Increased chart width
-        const int chartHeight = 400; // Increased chart height
         const int lineThickness = 2;
-        int chartStartX = string.IsNullOrWhiteSpace(yAxisLabel) ? 100 : 140; // Adjusted based on yAxisLabel presence
+        int chartStartX = string.IsNullOrWhiteSpace(yAxisLabel) ? 12 : 100; // Adjusted based on yAxisLabel presence
+        chartStartX += (longestYLabel * 10);
+        int chartEndX = 20;
         const int chartStartY = 20; // The top of the y-axis where it starts, from the top
         int xAxisLabelOffset =
             string.IsNullOrWhiteSpace(yAxisLabel) ? 40 : 80; // Adjusted based on yAxisLabel presence
         const int yAxisLabelOffset = 10; // Fixed offset when yAxisLabel is present
-        const int yAxisLabelFrequency = 10; // Change as needed to control the number of labels
+        
+        
         
         //if dark
         // const string backgroundColor = "#161616"; // Dark background color
         // const string foregroundColor = "#fff";
         // if light
-        const string backgroundColor = "#fafafa"; // Dark background color
+        const string backgroundColor = "#e4e4e4"; 
         const string foregroundColor = "#000";
-
-        // Convert values to double for processing
-        double maxValue = chartData.Series.SelectMany(x => x.Data).Max(item => item);
+        const string lineColor = "#afafaf";
 
         // Start building SVG content
         StringBuilder builder = new StringBuilder();
         builder.AppendLine("<div class=\"chart line-chart\">");
         builder.AppendLine(
-            $"<svg class=\"line-chart\" width=\"{chartWidth}\" height=\"{chartHeight}\" viewBox=\"0 0 {chartWidth} {chartHeight}\" xmlns=\"http://www.w3.org/2000/svg\">");
+            $"<svg class=\"line-chart\" width=\"100%\" height=\"100%\" viewBox=\"0 0 {EmailChartWidth} {EmailChartHeight}\" xmlns=\"http://www.w3.org/2000/svg\">");
 
         // Draw background
         builder.AppendLine(
-            $"<rect x=\"{chartStartX}\" y=\"{chartStartY}\" width=\"{chartWidth - 2 * chartStartX}\" height=\"{chartHeight - chartStartY - xAxisLabelOffset}\" fill=\"{backgroundColor}\" />");
+            $"<rect x=\"{chartStartX}\" y=\"{chartStartY}\" width=\"{EmailChartWidth - chartStartX - chartEndX}\" height=\"{EmailChartHeight - chartStartY - xAxisLabelOffset}\" fill=\"{backgroundColor}\" />");
 
         // Draw y-axis labels and grid lines
-        int yAxisHeight = chartHeight - xAxisLabelOffset - chartStartY;
+        int yAxisHeight = EmailChartHeight - xAxisLabelOffset - chartStartY;
         for (int i = 0; i <= yAxisLabelFrequency; i++)
         {
             double value = (maxValue / yAxisLabelFrequency) * i;
-            int y = chartHeight - xAxisLabelOffset - (int)((value / maxValue) * yAxisHeight);
+            int y = EmailChartHeight - xAxisLabelOffset - (int)((value / maxValue) * yAxisHeight);
 
             // Draw grid line
             builder.AppendLine(
-                $"<line x1=\"{chartStartX}\" y1=\"{y}\" x2=\"{chartWidth - chartStartX}\" y2=\"{y}\" stroke=\"#555\" />");
+                $"<line x1=\"{chartStartX}\" y1=\"{y}\" x2=\"{EmailChartWidth - chartEndX}\" y2=\"{y}\" stroke=\"{lineColor}\" />");
 
             // Format y-axis label
             object yValue = string.IsNullOrWhiteSpace(chartData.YAxisFormatter) ? (object)Convert.ToInt64(value) : (object)value;
-            string yLabel = ChartFormatter.Format(yValue, chartData.YAxisFormatter);
+            string yLabel = ChartFormatter.Format(yValue, chartData.YAxisFormatter, axis: true);
 
             // Draw y-axis label
             builder.AppendLine(
@@ -101,19 +114,19 @@ public class MultiLineChart : Chart
 
             // Draw y-axis tick
             builder.AppendLine(
-                $"<line x1=\"{chartStartX - 5}\" y1=\"{y}\" x2=\"{chartStartX}\" y2=\"{y}\" stroke=\"{foregroundColor}\" />");
+                $"<line x1=\"{chartStartX - 5}\" y1=\"{y}\" x2=\"{chartStartX}\" y2=\"{y}\" stroke=\"{lineColor}\" />");
         }
 
         // Draw y-axis main label if provided
         if (!string.IsNullOrEmpty(yAxisLabel))
         {
             builder.AppendLine(
-                $"<text x=\"{chartStartX - yAxisLabelOffset - 30}\" y=\"{chartHeight / 2}\" text-anchor=\"middle\" fill=\"{foregroundColor}\">{yAxisLabel}</text>");
+                $"<text x=\"{chartStartX - yAxisLabelOffset - 30}\" y=\"{EmailChartHeight / 2}\" text-anchor=\"middle\" fill=\"{foregroundColor}\">{yAxisLabel}</text>");
         }
 
         // Calculate the total width needed by the lines and spacing
         int totalLines = chartData.Series.Max(x => x.Data.Length);
-        int availableWidth = chartWidth - 2 * chartStartX;
+        int availableWidth = EmailChartWidth - chartStartX - chartEndX;
         double xStep = (double)availableWidth / (totalLines - 1);
 
         // Draw series lines
@@ -127,7 +140,7 @@ public class MultiLineChart : Chart
             for (int i = 0; i < series.Data.Length; i++)
             {
                 int x = chartStartX + (int)(i * xStep);
-                int y = chartHeight - xAxisLabelOffset - (int)((series.Data[i] / maxValue) * yAxisHeight);
+                int y = EmailChartHeight - xAxisLabelOffset - (int)((series.Data[i] / maxValue) * yAxisHeight);
                 pointsBuilder.Append($"{x},{y} ");
             }
 
@@ -159,11 +172,11 @@ public class MultiLineChart : Chart
 
             // Draw x-axis label
             builder.AppendLine(
-                $"<text x=\"{x}\" y=\"{chartHeight - xAxisLabelOffset + 25}\" text-anchor=\"middle\" fill=\"{foregroundColor}\">{label}</text>");
+                $"<text x=\"{x}\" y=\"{EmailChartHeight - xAxisLabelOffset + 25}\" text-anchor=\"middle\" fill=\"{foregroundColor}\">{label}</text>");
 
             // Draw x-axis tick
             builder.AppendLine(
-                $"<line x1=\"{x}\" y1=\"{chartHeight - xAxisLabelOffset}\" x2=\"{x}\" y2=\"{chartHeight - xAxisLabelOffset + 5}\" stroke=\"{foregroundColor}\" />");
+                $"<line x1=\"{x}\" y1=\"{EmailChartHeight - xAxisLabelOffset}\" x2=\"{x}\" y2=\"{EmailChartHeight - xAxisLabelOffset + 5}\" stroke=\"{lineColor}\" />");
         }
 
         // Close SVG tag

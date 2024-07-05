@@ -39,15 +39,9 @@ public class PieChart : Chart
         if (chartData.Data?.Any() != true)
             return string.Empty;
         
-        const int chartWidth = 600;
-        const int chartHeight = 500;
-        const int radius = 200;
-        const int centerX = (chartWidth - 100) / 2;
-        const int centerY = chartHeight / 2;
-        const int legendX = chartWidth - 120; // Positioning the legend to the right of the pie chart
-        const int legendY = 20;
-        const int legendSpacing = 20;
-        const int legendColorBoxSize = 10;
+        int radius = Math.Min(EmailChartWidth, EmailChartHeight) / 2;
+        const int centerX = EmailChartWidth / 2;
+        const int centerY = EmailChartHeight / 2;
 
         double total = chartData.Data.Sum(item => (double)item.Value);
         double startAngle = 270;
@@ -55,7 +49,7 @@ public class PieChart : Chart
         StringBuilder builder = new StringBuilder();
         builder.AppendLine("<div class=\"chart pie-chart\">");
         builder.AppendLine(
-            $"<svg class=\"pie-chart\" width=\"{chartWidth + 200}\" height=\"{chartHeight}\" viewBox=\"0 0 {chartWidth + 200} {chartHeight}\" xmlns=\"http://www.w3.org/2000/svg\">");
+            $"<svg class=\"pie-chart\" width=\"100%\" height=\"100%\" viewBox=\"0 0 {EmailChartWidth} {EmailChartHeight}\" xmlns=\"http://www.w3.org/2000/svg\">");
 
 
         var legendEntries = new List<(string Label, string Color, double Percentage)>();
@@ -93,18 +87,22 @@ public class PieChart : Chart
             ++count;
         }
 
+        builder.AppendLine("</svg>");
         // Add legend
-        int legendYPosition = legendY;
+        builder.AppendLine("<div class=\"legend\">");
         foreach (var entry in legendEntries)
         {
-            builder.AppendLine(
-                $"<rect x=\"{legendX}\" y=\"{legendYPosition}\" width=\"{legendColorBoxSize}\" height=\"{legendColorBoxSize}\" fill=\"{entry.Color}\" />");
-            builder.AppendLine(
-                $"<text x=\"{legendX + legendColorBoxSize + 5}\" y=\"{legendYPosition + legendColorBoxSize}\">{entry.Label} ({entry.Percentage:F2}%)</text>");
-            legendYPosition += legendSpacing;
+            builder.AppendLine("<span class=\"series\">");
+            builder.AppendLine($"<svg width=\"12\" height=\"12\">" +
+                               $"<circle cx=\"6\" cy=\"6\" r=\"5\" fill=\"{entry.Color}\" />" +
+                               $"</svg>");
+            //builder.AppendLine($"<span class=\"legend-label\">{HttpUtility.HtmlEncode(entry.Label)} ({entry.Percentage:F2}%)</span>");
+            builder.AppendLine($"<span class=\"legend-label\">{HttpUtility.HtmlEncode(entry.Label)}</span>");
+            builder.AppendLine("</span>");
         }
 
-        builder.AppendLine("</svg>");
+        builder.AppendLine("</div>");
+
         builder.AppendLine("</div>");
         return builder.ToString();
     }

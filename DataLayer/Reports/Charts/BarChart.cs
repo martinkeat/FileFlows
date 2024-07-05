@@ -45,26 +45,41 @@ public class BarChart : Chart
             return string.Empty;
 
         string? yAxisLabel = null;
-        
-        const int chartWidth = 600;
-        const int chartHeight = 500;
-        const int barWidth = 40;
-        const int barSpacing = 20;
-        int chartStartX = string.IsNullOrWhiteSpace(yAxisLabel) ? 60 : 100; // Adjusted based on yAxisLabel presence
-        const int chartStartY = 20; // The top of the y-axis where it starts, from the top
-        int xAxisLabelOffset =
-            string.IsNullOrWhiteSpace(yAxisLabel) ? 110 : 150; // Adjusted based on yAxisLabel presence
-        const int yAxisLabelOffset = 40; // Fixed offset when yAxisLabel is present
-        const int yAxisLabelFrequency = 10; // Change as needed to control the number of labels
-        const string backgroundColor = "#161616"; // Dark background color
+
+        int longestYLabel = 0;
+        const int yAxisLabelFrequency = 4; // Change as needed to control the number of labels
 
         // Convert values to double for processing
-        //double ConvertToDouble(T value) => Convert.ToDouble(value);
         double maxValue = chartData.Data.Max(x => x.Value);
+        
+        for (int i = 0; i <= yAxisLabelFrequency; i++)
+        {
+            double value = (maxValue / yAxisLabelFrequency) * i;
+            object yValue = string.IsNullOrWhiteSpace(chartData.YAxisFormatter) ? (object)Convert.ToInt64(value) : (object)value;
+            string yLabel = ChartFormatter.Format(yValue, chartData.YAxisFormatter, axis: true);
+            longestYLabel = Math.Max(longestYLabel, yLabel.Length);
+        }
+
+        // Constants and initial setup
+        int chartStartX = string.IsNullOrWhiteSpace(yAxisLabel) ? 12 : 100; // Adjusted based on yAxisLabel presence
+        chartStartX += (longestYLabel * 10);
+        int chartEndX = 20;
+        const int chartStartY = 20; // The top of the y-axis where it starts, from the top
+        int xAxisLabelOffset =
+            string.IsNullOrWhiteSpace(yAxisLabel) ? 40 : 80; // Adjusted based on yAxisLabel presence
+        const int yAxisLabelOffset = 10; // Fixed offset when yAxisLabel is present
+
+        
+        const int barWidth = 40;
+        const int barSpacing = 80;
+        const string backgroundColor = "#e4e4e4"; 
+        const string foregroundColor = "#000";
+        const string lineColor = "#afafaf";
+
 
         // Calculate bar width based on available space and number of bars
         int totalBars = chartData.Data.Count;
-        int availableWidth = chartWidth - 2 * chartStartX;
+        int availableWidth = EmailChartWidth - 2 * chartStartX;
         int actualBarWidth = Math.Min(barWidth, (availableWidth - (totalBars - 1) * barSpacing) / totalBars);
 
         // Calculate the total width needed by the bars and spacing
@@ -73,43 +88,48 @@ public class BarChart : Chart
 
         StringBuilder builder = new StringBuilder();
         builder.AppendLine(
-            $"<svg class=\"bar-chart\" width=\"{chartWidth}\" height=\"{chartHeight}\" viewBox=\"0 0 {chartWidth} {chartHeight}\" xmlns=\"http://www.w3.org/2000/svg\">");
+            $"<svg class=\"bar-chart\" width=\"100%\" height=\"100%\" viewBox=\"0 0 {EmailChartWidth} {EmailChartHeight}\" xmlns=\"http://www.w3.org/2000/svg\">");
 
         // Draw background
         builder.AppendLine(
-            $"<rect x=\"{chartStartX}\" y=\"{chartStartY}\" width=\"{chartWidth - 2 * chartStartX}\" height=\"{chartHeight - chartStartY - xAxisLabelOffset}\" fill=\"{backgroundColor}\" />");
+            $"<rect x=\"{chartStartX}\" y=\"{chartStartY}\" width=\"{EmailChartWidth - chartStartX - chartEndX}\" height=\"{EmailChartHeight - chartStartY - xAxisLabelOffset}\" fill=\"{backgroundColor}\" />");
 
         // Draw y-axis labels and grid lines
-        int yAxisHeight = chartHeight - xAxisLabelOffset - chartStartY;
+        int yAxisHeight = EmailChartHeight - xAxisLabelOffset - chartStartY;
         for (int i = 0; i <= yAxisLabelFrequency; i++)
         {
             double value = (maxValue / yAxisLabelFrequency) * i;
-            int y = chartHeight - xAxisLabelOffset - (int)((value / maxValue) * yAxisHeight);
+            int y = EmailChartHeight - xAxisLabelOffset - (int)((value / maxValue) * yAxisHeight);
 
             // Draw grid line
             builder.AppendLine(
-                $"<line x1=\"{chartStartX}\" y1=\"{y}\" x2=\"{chartWidth - chartStartX}\" y2=\"{y}\" stroke=\"#555\" />");
+                $"<line x1=\"{chartStartX}\" y1=\"{y}\" x2=\"{EmailChartWidth - chartEndX}\" y2=\"{y}\" stroke=\"{lineColor}\" />");
 
-            //string yLabel = yAxisFormatter == null ? $"{value:F0}" : yAxisFormatter(value);
-            string yLabel = $"{value:F0}";
-            
+            // Format y-axis label
+            object yValue = string.IsNullOrWhiteSpace(chartData.YAxisFormatter) ? Convert.ToInt64(value) : value;
+            string yLabel = ChartFormatter.Format(yValue, chartData.YAxisFormatter, axis: true);
+
             // Draw y-axis label
             builder.AppendLine(
-                $"<text x=\"{chartStartX - yAxisLabelOffset + 30}\" y=\"{y + 5}\" text-anchor=\"end\" fill=\"#fff\">{yLabel}</text>");
+                $"<text x=\"{chartStartX - yAxisLabelOffset}\" y=\"{y + 5}\" text-anchor=\"end\" fill=\"{foregroundColor}\">{yLabel}</text>");
 
             // Draw y-axis tick
             builder.AppendLine(
-                $"<line x1=\"{chartStartX - 5}\" y1=\"{y}\" x2=\"{chartStartX}\" y2=\"{y}\" stroke=\"#fff\" />");
+                $"<line x1=\"{chartStartX - 5}\" y1=\"{y}\" x2=\"{chartStartX}\" y2=\"{y}\" stroke=\"{lineColor}\" />");
         }
 
         // Draw y-axis main label if provided, rotated 90 degrees
         if (!string.IsNullOrEmpty(yAxisLabel))
         {
             builder.AppendLine(
-                $"<text x=\"{chartStartX - yAxisLabelOffset - 30}\" y=\"{chartHeight / 2}\" text-anchor=\"middle\" fill=\"#fff\" transform=\"rotate(-90, {chartStartX - yAxisLabelOffset - 30}, {chartHeight / 2})\">{yAxisLabel}</text>");
+                $"<text x=\"{chartStartX - yAxisLabelOffset - 30}\" y=\"{EmailChartHeight / 2}\" text-anchor=\"middle\" fill=\"#fff\" transform=\"rotate(-90, {chartStartX - yAxisLabelOffset - 30}, {EmailChartHeight / 2})\">{yAxisLabel}</text>");
         }
 
         // Draw bars
+        // Assuming a rough average width of a character based on font size
+        const double averageCharWidth = 12 * 0.6; 
+        const int maxChars = (int)((averageCharWidth * 16) / averageCharWidth);
+        
         int x = startX;
         int labelInterval = Math.Max(1, totalBars / 20); // Show approximately 20 labels on the x-axis
         int count = 0;
@@ -120,7 +140,7 @@ public class BarChart : Chart
             int barHeight = (int)((value / maxValue) * yAxisHeight);
 
             // Bar coordinates
-            int y = chartHeight - xAxisLabelOffset - barHeight;
+            int y = EmailChartHeight - xAxisLabelOffset - barHeight;
 
             // Bar color
             string color = "#007bff"; // Blue color
@@ -135,14 +155,25 @@ public class BarChart : Chart
             // Label below the bar (rotated 90 degrees)
             if (count % labelInterval == 0)
             {
+
+                string truncatedText = label;
+                if (label.Length > maxChars)
+                {
+                    truncatedText = label[..(maxChars - 3)] + "...";
+                }
+                
+                // Draw x-axis label
                 builder.AppendLine(
-                    $"<g transform=\"translate({x + actualBarWidth / 2}, {chartHeight - xAxisLabelOffset + 10})\">" +
-                    $"<text transform=\"rotate(90)\" dy=\"0.4em\" fill=\"#fff\">{label}</text>" +
-                    "</g>");
+                    $"<text x=\"{x + actualBarWidth / 2}\" y=\"{EmailChartHeight - xAxisLabelOffset + 25}\" text-anchor=\"middle\" " +
+                    $"fill=\"{foregroundColor}\" clip-path=\"url(#clipPath)\">{truncatedText}</text>");
+                // builder.AppendLine(
+                //     $"<g transform=\"translate({x + actualBarWidth / 2}, {EmailChartHeight - xAxisLabelOffset + 10})\">" +
+                //     $"<text fill=\"{foregroundColor}\">{label}</text>" +
+                //     "</g>");
 
                 // Draw x-axis tick
                 builder.AppendLine(
-                    $"<line x1=\"{x + actualBarWidth / 2}\" y1=\"{chartHeight - xAxisLabelOffset}\" x2=\"{x + actualBarWidth / 2}\" y2=\"{chartHeight - xAxisLabelOffset + 5}\" stroke=\"#fff\" />");
+                    $"<line x1=\"{x + actualBarWidth / 2}\" y1=\"{EmailChartHeight - xAxisLabelOffset}\" x2=\"{x + actualBarWidth / 2}\" y2=\"{EmailChartHeight - xAxisLabelOffset + 5}\" stroke=\"{lineColor}\" />");
             }
 
             x += actualBarWidth + barSpacing;
