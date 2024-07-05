@@ -23,24 +23,13 @@ public class FilesProcessed : Report
 
     /// <inheritdoc />
     public override ReportPeriod? DefaultReportPeriod => ReportPeriod.Last31Days;
-
-    /// <summary>
-    /// Gets or sets the statistic to report on
-    /// </summary>
-    public ProcessedStatistic Statistic { get; set; }
     
     /// <inheritdoc />
     public override ReportSelection LibrarySelection => ReportSelection.Any;
-    
-    /// <inheritdoc />
-    public override ReportSelection NodeSelection => ReportSelection.AnyOrAll;
-
 
     /// <inheritdoc />
     public override async Task<Result<string>> Generate(Dictionary<string, object> model, bool emailing)
     {
-        var statistic = GetEnumValue<ProcessedStatistic>(model, nameof(Statistic));
-
         using var db = await GetDb();
         string sql =
             $"select {Wrap("Name")}, {Wrap("NodeUid")}, {Wrap("NodeName")}, {Wrap("OriginalSize")}, " +
@@ -105,7 +94,7 @@ public class FilesProcessed : Report
         builder.AddPeriodSummaryBox(minDateUtc.Value, maxDateUtc.Value);
         builder.AddSummaryBox("Total Files", totalFiles, ReportSummaryBox.IconType.File, ReportSummaryBox.BoxColor.Info);
         builder.AddSummaryBox("Total Size", FileSizeFormatter.Format(totalBytes), ReportSummaryBox.IconType.HardDrive, ReportSummaryBox.BoxColor.Info);
-        builder.AddSummaryBox("Total Time", TimeSpan.FromSeconds(totalSeconds).Humanize(1), ReportSummaryBox.IconType.Clock, ReportSummaryBox.BoxColor.Info);
+        builder.AddSummaryBox("Total Time", TimeSpan.FromSeconds(totalSeconds).Humanize(2), ReportSummaryBox.IconType.Clock, ReportSummaryBox.BoxColor.Info);
         builder.EndRow();
         
             
@@ -123,7 +112,8 @@ public class FilesProcessed : Report
         builder.AppendLine(DateBasedChartHelper.Generate(minDateUtc.Value, maxDateUtc.Value, dataSize, emailing,
             tableDataFormatter: (dbl) => FileSizeFormatter.Format(dbl, 2), yAxisFormatter: "filesize", generateTable: false));
         builder.AppendLine(TableGenerator.GenerateMinimumTable("Largest Files", ["Name", "Node", "Size"],
-            files.OrderByDescending(x => x.OriginalSize).Select(x => new object[] { x.Name, 
+            files.OrderByDescending(x => x.OriginalSize).Select(x => new object[] { 
+                    FileNameFormatter.Format(x.Name), 
                     x.NodeName == Globals.InternalNodeName ? "Internal Node" : x.NodeName,
                     FileSizeFormatter.Format(x.OriginalSize)})
                 .Take(TableGenerator.MIN_TABLE_ROWS).ToArray()
@@ -136,7 +126,7 @@ public class FilesProcessed : Report
         builder.AppendLine(TableGenerator.GenerateMinimumTable("Longest Time Taken", ["Name", "Node", "Size"],
             files.OrderByDescending(x => x.OriginalSize).Select(x => new object[]
                 {
-                    x.Name, 
+                    FileNameFormatter.Format(x.Name), 
                     x.NodeName == Globals.InternalNodeName ? "Internal Node" : x.NodeName,
                     FileSizeFormatter.Format(x.OriginalSize)
                 })
