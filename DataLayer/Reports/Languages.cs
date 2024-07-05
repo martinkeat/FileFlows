@@ -68,17 +68,17 @@ public class Languages : Report
                     continue;
                 lang = LanguageHelper.GetEnglishFor(lang);
 
-                if (key.ToLowerInvariant().StartsWith("video") == false)
+                if (key.ToLowerInvariant().StartsWith("video"))
                 {
                     if (dataVideo.TryAdd(lang, 1) == false)
                         dataVideo[lang] += 1;
                 }
-                else if (key.ToLowerInvariant().StartsWith("audio") == false)
+                else if (key.ToLowerInvariant().StartsWith("audio"))
                 {
                     if (dataAudio.TryAdd(lang, 1) == false)
                         dataAudio[lang] += 1;
                 }
-                else if (key.ToLowerInvariant().StartsWith("subtitle") == false)
+                else if (key.ToLowerInvariant().StartsWith("subtitle"))
                 {
                     if (dataSubtitle.TryAdd(lang, 1) == false)
                         dataSubtitle[lang] += 1;
