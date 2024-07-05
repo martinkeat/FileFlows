@@ -276,4 +276,48 @@
   .apex-tree-map {
     padding-left:0.8rem;
   }
+  
+  .report-flex-data {
+    display:flex;
+    flex-direction: row;
+    
+    .title {
+      margin: 0 0 0 1rem !important;
+      align-content: center;
+      flex-grow: 1;
+      text-align: left;
+    }
+    .icon {
+      width:4rem;
+      height:4rem;
+      &.warning svg {
+        fill:var(--yellow, #ffa400);
+      }
+      &.error svg {
+        fill:var(--red, #DC3545);
+      }
+      &.info svg {
+        fill: var(--info, #17A2B8);
+      }
+      &.success svg {
+        fill:var(--green, #28A745);
+      }
+    }
+    .info-box {
+      width: 15rem;
+      display: flex;
+      flex-direction: column;
+      text-align: center;
+      padding: 0 1rem;
+      .ib-title {
+        font-weight: var(--bold, 600);
+      }
+      .ib-value {
+        font-size:1.3rem;
+      }
+    }
+    .percentage {
+      width:14rem;
+    }
+  }
 }

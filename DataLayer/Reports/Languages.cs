@@ -1,4 +1,3 @@
-using System.Collections.Immutable;
 using System.Text.Json;
 using FileFlows.DataLayer.Reports.Charts;
 using FileFlows.DataLayer.Reports.Helpers;
@@ -20,11 +19,6 @@ public class Languages : Report
     public override string Description => "Shows the different languages processed through FileFlows.";
     /// <inheritdoc />
     public override string Icon => "fas fa-comments";
-    
-    /// <summary>
-    /// Gets or sets the stream type
-    /// </summary>
-    public StreamType Type { get; set; }
     
     /// <summary>
     /// Gets or sets the direction

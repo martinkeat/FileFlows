@@ -189,7 +189,7 @@ public partial class Plugins : ListPage<Guid, PluginInfoModel>
                         { nameof(InputChecklist.ListOnly), true },
                         {
                             nameof(InputChecklist.Options),
-                            plugin.Elements?.Select(x => new ListOption { Label = x.Name, Value = x })?.ToList() ??
+                            plugin.Elements?.OrderBy(x =>x.Name?.ToLowerInvariant())?.Select(x => new ListOption { Label = x.Name, Value = x })?.ToList() ??
                             new List<ListOption>()
                         }
                     }

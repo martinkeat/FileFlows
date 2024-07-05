@@ -1,6 +1,8 @@
+using System.Web;
 using FileFlows.DataLayer.Reports.Helpers;
 using FileFlows.Plugin;
 using FileFlows.Plugin.Formatters;
+using FileFlows.Shared.Formatters;
 using FileFlows.Shared.Models;
 
 namespace FileFlows.DataLayer.Reports;
@@ -31,12 +33,16 @@ public class LibrarySavings : Report
         
         AddLibrariesToSql(model, ref sql);
         AddPeriodToSql(model, ref sql);
+        (DateTime? minDateUtc, DateTime? maxDateUtc) = GetPeriod(model);
 
-        var libraries = await db.Db.FetchAsync<LibrarySavingsData>(sql);
+        var files = await db.Db.FetchAsync<LibrarySavingsData>(sql);
+        var totalFinal = files.Sum(x => x.FinalSize);
+        var totalOriginal = files.Sum(x => x.OriginalSize);
+        var totalSavings = totalOriginal - totalFinal;
 
         var formatter = new SizeFormatter();
         // Group by LibraryUid and calculate savings
-        var groupedSavings = libraries
+        var librarySavings = files
             .GroupBy(lib => lib.LibraryUid)
             .Select(group =>
             {
@@ -47,17 +53,59 @@ public class LibrarySavings : Report
 
                 return new
                 {
+                    TotalFiles = group.Count(),
                     Library = group.First().LibraryName,
                     OriginalSize = formatter.Format(originalSize, null!),
                     FinalSize = formatter.Format(finalSize, null!),
-                    Savings = formatter.Format(savings, null!),
+                    Savings = formatter.Format(Math.Abs(savings), null!),
                     Percentage = savingsPercentage * 100
                 };
             })
             .OrderBy(x => x.Library.ToLowerInvariant())
             .ToList();
+        
+        if (librarySavings.Count == 0)
+            return string.Empty;
 
-        return TableGenerator.Generate(groupedSavings, dontWrap: true);
+        ReportBuilder builder = new();
+        
+        builder.StartRow(3);
+        builder.AddPeriodSummaryBox(minDateUtc ?? DateTime.MinValue, maxDateUtc ?? DateTime.MaxValue);
+        builder.AddSummaryBox("Total Files", files.Count, ReportSummaryBox.IconType.File, ReportSummaryBox.BoxColor.Info);
+        if(totalSavings >= 0)
+            builder.AddSummaryBox("Total Savings", FileSizeFormatter.Format(totalSavings), ReportSummaryBox.IconType.HardDrive, ReportSummaryBox.BoxColor.Success);
+        else
+            builder.AddSummaryBox("Total Loss", FileSizeFormatter.Format(Math.Abs(totalSavings)), ReportSummaryBox.IconType.HardDrive, ReportSummaryBox.BoxColor.Error);
+        
+        builder.EndRow();
+        
+        foreach (var lib in librarySavings)
+        {
+            var iconClass = lib.Percentage switch
+            {
+                > 100 => "error",
+                > 60 => "warning", 
+                _ => "success"
+            };
+            builder.StartRow(1);
+            builder.AppendLine("<div class=\"report-flex-data\">" +
+                               $"<div class=\"icon {iconClass}\">{ReportSummaryBox.GetIcon(ReportSummaryBox.IconType.Folder)}</div>" + 
+                               $"<div class=\"title\">{HttpUtility.HtmlEncode(lib.Library)}</div>" +
+                               $"<div class=\"info-box\"><span class=\"ib-title\">Total Files</span><span class=\"ib-value\">{lib.TotalFiles:N0}</span></div>" +
+                               (lib.Percentage > 100
+                                   ? $"<div class=\"info-box\"><span class=\"ib-title\">Storage Lost</span><span class=\"ib-value\">{lib.Savings}</span></div>"
+                                   : $"<div class=\"info-box\"><span class=\"ib-title\">Storage Saved</span><span class=\"ib-value\">{lib.Savings}</span></div>"
+                               ) +
+                               builder.GetProgressBarHtml(lib.Percentage) +
+                               "</div>");
+            // builder.AddSummaryBox(lib.Library + " Files", lib.TotalFiles, ReportSummaryBox.IconType.File, ReportSummaryBox.BoxColor.Info);
+            // builder.AddSummaryBox("Savings", lib.Savings, ReportSummaryBox.IconType.HardDrive, lib.Percentage > 100 ?  ReportSummaryBox.BoxColor.Error : ReportSummaryBox.BoxColor.Success);
+            // builder.AddProgressBar(lib.Percentage);
+            builder.EndRow();
+        }
+
+        //return TableGenerator.Generate(librarySavings, dontWrap: true);
+        return builder.ToString();
     }
 
     /// <summary>

@@ -70,6 +70,24 @@ public class ReportBuilder
         ReportSummaryBox.BoxColor color)
         => _builder.AppendLine(ReportSummaryBox.Generate(title, value.ToString("N0"), icon, color));
 
+    /// <summary>
+    /// Adds a progress bar
+    /// </summary>
+    /// <param name="percent">the percent, 100 based, so 100% == 100</param>
+    public void AddProgressBar(double percent)
+        => _builder.AppendLine(GetProgressBarHtml(percent));
+
+    /// <summary>
+    /// Gets the progress bar HTML
+    /// </summary>
+    /// <param name="percent">the percent, 100 based, so 100% == 100</param>
+    /// <returns>the progress bar HTML</returns>
+    public string GetProgressBarHtml(double percent)
+        => $"<div class=\"percentage {(percent > 100 ? "over-100" : "")}\">" +
+           $"<div class=\"bar\" style=\"width:{Math.Min(percent, 100)}%\"></div>" +
+           $"<span class=\"label\">{(percent / 100):P1}<span>" +
+           "</div>";
+    
     /// <inheritdoc />
     public override string ToString()
         => _builder.ToString();

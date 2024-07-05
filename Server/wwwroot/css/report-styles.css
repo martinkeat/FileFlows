@@ -257,3 +257,45 @@
 .report-output .apex-tree-map {
   padding-left: 0.8rem;
 }
+.report-output .report-flex-data {
+  display: flex;
+  flex-direction: row;
+}
+.report-output .report-flex-data .title {
+  margin: 0 0 0 1rem !important;
+  align-content: center;
+  flex-grow: 1;
+  text-align: left;
+}
+.report-output .report-flex-data .icon {
+  width: 4rem;
+  height: 4rem;
+}
+.report-output .report-flex-data .icon.warning svg {
+  fill: var(--yellow, #ffa400);
+}
+.report-output .report-flex-data .icon.error svg {
+  fill: var(--red, #DC3545);
+}
+.report-output .report-flex-data .icon.info svg {
+  fill: var(--info, #17A2B8);
+}
+.report-output .report-flex-data .icon.success svg {
+  fill: var(--green, #28A745);
+}
+.report-output .report-flex-data .info-box {
+  width: 15rem;
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  padding: 0 1rem;
+}
+.report-output .report-flex-data .info-box .ib-title {
+  font-weight: var(--bold, 600);
+}
+.report-output .report-flex-data .info-box .ib-value {
+  font-size: 1.3rem;
+}
+.report-output .report-flex-data .percentage {
+  width: 14rem;
+}

@@ -135,7 +135,7 @@ public class ProcessingSummary: Report
 
         ReportBuilder builder = new();
 
-        builder.StartRow(3);
+        builder.StartRow(4);
         builder.AddPeriodSummaryBox(minDateUtc.Value, maxDateUtc.Value);
         foreach (var sum in new[]
                  {
