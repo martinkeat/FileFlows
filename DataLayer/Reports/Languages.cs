@@ -90,9 +90,10 @@ public class Languages : Report
             return string.Empty;
 
         ReportBuilder builder = new();
-        builder.StartRow(4);
+        builder.StartRow(dataVideo.Count > 0 ? 4 : 3);
         builder.AddPeriodSummaryBox(minDateUtc ?? DateTime.MinValue, maxDateUtc ?? DateTime.MaxValue);
-        builder.AddSummaryBox("Video Languages", dataVideo.Count, ReportSummaryBox.IconType.Video, ReportSummaryBox.BoxColor.Info);
+        if(dataVideo.Count > 0)
+            builder.AddSummaryBox("Video Languages", dataVideo.Count, ReportSummaryBox.IconType.Video, ReportSummaryBox.BoxColor.Info);
         builder.AddSummaryBox("Audio Languages", dataAudio.Count, ReportSummaryBox.IconType.VolumeUp, ReportSummaryBox.BoxColor.Info);
         builder.AddSummaryBox("Subtitle Languages", dataSubtitle.Count, ReportSummaryBox.IconType.ClosedCaptioning, ReportSummaryBox.BoxColor.Info);
         builder.EndRow();

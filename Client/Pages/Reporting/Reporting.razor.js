@@ -287,6 +287,24 @@ export class Reporting {
                     y: data[x]
                 })
             });
+            
+            // Define the threshold for the maximum number of individual entries
+            const threshold = 10;
+
+            // Sort the data in descending order
+            results.sort((a, b) => b.y - a.y);
+
+            // Separate the top entries and the rest
+            let topEntries = results.slice(0, threshold);
+            let otherEntries = results.slice(threshold);
+
+            // Sum the values of the smaller entries
+            let otherValue = otherEntries.reduce((sum, entry) => sum + entry.y, 0);
+
+            // Add the "Other" category
+            if (otherValue > 0) {
+                topEntries.push({ x: 'Other', y: otherValue });
+            }
 
             let options = {
                 chart: {
@@ -300,7 +318,7 @@ export class Reporting {
                     borderColor: '#90A4AE33'
                 },
                 series: [{
-                    data:results
+                    data:topEntries
                 }]
             };
 
