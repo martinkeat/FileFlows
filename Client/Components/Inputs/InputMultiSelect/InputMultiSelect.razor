@@ -29,7 +29,7 @@
             {
                 <li>
                     <label>
-                        <input type="checkbox" checked="@Value.Contains(opt.Value)" @onchange="(e) => ToggleSelection(opt.Value)">
+                        <input type="checkbox" checked="@Value?.Contains(opt.Value)" @onchange="(e) => ToggleSelection(opt.Value)">
                         <span>@opt.Label</span>
                     </label>
                 </li>
