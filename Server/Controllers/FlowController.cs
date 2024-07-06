@@ -51,7 +51,7 @@ public class FlowController : BaseController
     /// </summary>
     /// <returns>flow list</returns>
     [HttpGet("basic-list")]
-    [FileFlowsAuthorize(UserRole.Flows | UserRole.Libraries)]
+    [FileFlowsAuthorize(UserRole.Flows | UserRole.Libraries | UserRole.Reports)]
     public async Task<Dictionary<Guid, string>> GetFlowList([FromQuery] FlowType? type = null)
     {
         IEnumerable<Flow> items = await new FlowService().GetAllAsync();

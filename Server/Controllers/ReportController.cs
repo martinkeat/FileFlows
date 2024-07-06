@@ -1,4 +1,3 @@
-using FileFlows.Client.Components;
 using FileFlows.Managers;
 using FileFlows.Server.Authentication;
 using FileFlows.Server.Helpers;
@@ -12,7 +11,7 @@ namespace FileFlows.Server.Controllers;
 /// Controller for the Reports
 /// </summary>
 [Route("/api/report")]
-[FileFlowsAuthorize(UserRole.Admin)]
+[FileFlowsAuthorize(UserRole.Reports)]
 public class ReportController : BaseController
 {
     /// <summary>
@@ -23,7 +22,7 @@ public class ReportController : BaseController
     public IActionResult GetReportDefinitions()
     {
         if (LicenseHelper.IsLicensed(LicenseFlags.Reporting) == false)
-            return NotFound();
+            return BadRequest("Not licensed");
         
         var results = new ReportManager().GetReports();
         return Ok(results.OrderBy(x => x.Name.ToLowerInvariant()));
@@ -38,7 +37,7 @@ public class ReportController : BaseController
     public IActionResult GetReportDefinition([FromRoute] Guid uid)
     {
         if (LicenseHelper.IsLicensed(LicenseFlags.Reporting) == false)
-            return NotFound();
+            return BadRequest("Not licensed");
         
         var result = new ReportManager().GetReports().FirstOrDefault(x => x.Uid == uid);
         if (result == null)
@@ -56,7 +55,7 @@ public class ReportController : BaseController
     public async Task<IActionResult> Generate([FromRoute] Guid uid, [FromBody] Dictionary<string, object> model)
     {
         if (LicenseHelper.IsLicensed(LicenseFlags.Reporting) == false)
-            return NotFound();
+            return BadRequest("Not licensed");
 
         string? email = null;
         if (model.TryGetValue("Email", out var value) && value is JsonElement je )

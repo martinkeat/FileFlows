@@ -56,6 +56,11 @@ public abstract class Report
     public virtual ReportSelection NodeSelection => ReportSelection.None;
 
     /// <summary>
+    /// Gets if the IO Direction is shown in this report
+    /// </summary>
+    public virtual bool Direction => false;
+
+    /// <summary>
     /// Gets all reports in the system
     /// </summary>
     /// <returns>all reports in the system</returns>
@@ -169,18 +174,32 @@ public abstract class Report
     }
 
     /// <summary>
-    /// Gets the period
+    /// Gets the report direction
     /// </summary>
     /// <param name="model">the model passed into the report</param>
-    /// <returns>the period</returns>
-    protected T? GetEnumValue<T>(Dictionary<string, object> model, string name) where T : Enum
+    /// <returns>the report direction</returns>
+    protected ReportDirection GetDirection(Dictionary<string, object> model)
     {
-        if (model.TryGetValue(name, out var value) == false || value is not JsonElement je)
+        if (model.TryGetValue("Direction", out var value) == false || value is not JsonElement je)
             return default;
         if (je.ValueKind == JsonValueKind.Number)
-            return (T)(object)je.GetInt32();
+            return (ReportDirection)(object)je.GetInt32();
         return default;
     }
+    
+    // /// <summary>
+    // /// Gets an enum
+    // /// </summary>
+    // /// <param name="model">the model passed into the report</param>
+    // /// <returns>the period</returns>
+    // protected T? GetEnumValue<T>(Dictionary<string, object> model, string name) where T : Enum
+    // {
+    //     if (model.TryGetValue(name, out var value) == false || value is not JsonElement je)
+    //         return default;
+    //     if (je.ValueKind == JsonValueKind.Number)
+    //         return (T)(object)je.GetInt32();
+    //     return default;
+    // }
 
     /// <summary>
     /// Gets the selected library UIDs

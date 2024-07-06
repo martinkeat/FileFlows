@@ -36,9 +36,28 @@ public partial class FlowSkyBox<TItem>
     /// Gets or sets event that is called when a skybox item is selected
     /// </summary>
     [Parameter] public EventCallback<FlowSkyBoxItem<TItem>> OnSelected { get; set; }
+    
+    /// <summary>
+    /// Gets or sets if this sky box does not show a count
+    /// </summary>
+    [Parameter] public bool NoCount { get; set; }
 
+    /// <summary>
+    /// Gets or sets the selected item
+    /// </summary>
     public FlowSkyBoxItem<TItem> SelectedItem { get; set; }
 
+    /// <inheritdoc />
+    protected override void OnInitialized()
+    {
+        if(Items?.Any() == true)
+            SelectedItem = Items.First();
+    }
+
+    /// <summary>
+    /// Sets the selected item
+    /// </summary>
+    /// <param name="item">the item to select</param>
     void SetSelected(FlowSkyBoxItem<TItem> item)
     {
         this.SelectedItem = item;
@@ -57,7 +76,7 @@ public partial class FlowSkyBox<TItem>
         if(items.Any() == true)
             this._Items.AddRange(items.Where(x => x != null));
         if(selected != null)
-            this.SelectedItem = items.Where(x => x.Value.Equals(selected)).FirstOrDefault();
+            this.SelectedItem = items.FirstOrDefault(x => x.Value.Equals(selected));
         else
             this.SelectedItem = items.FirstOrDefault();
         this.StateHasChanged();
@@ -69,7 +88,7 @@ public partial class FlowSkyBox<TItem>
     /// <param name="value">the value to set active</param>
     public void SetSelectedValue(TItem value)
     {
-        this.SelectedItem = this.Items.Where(x => x.Value.Equals(value)).FirstOrDefault();
+        this.SelectedItem = this.Items.FirstOrDefault(x => x.Value.Equals(value));
         this.StateHasChanged();
     }
 }
@@ -82,17 +101,17 @@ public class FlowSkyBoxItem<TItem>
     /// <summary>
     /// Gets or sets the icon
     /// </summary>
-    public string Icon { get; set; } = string.Empty;
+    public string Icon { get; init; } = string.Empty;
 
     /// <summary>
     /// Gets or sets the class name
     /// </summary>
-    public string ClassName { get; set; } = string.Empty;
+    public string ClassName { get; init; } = string.Empty;
 
     /// <summary>
     /// Gets or sets the name
     /// </summary>
-    public string Name { get; set; } = string.Empty;
+    public string Name { get; init; } = string.Empty;
     
     /// <summary>
     /// Gets or sets the count 
@@ -102,5 +121,5 @@ public class FlowSkyBoxItem<TItem>
     /// <summary>
     /// Gets or sets the value
     /// </summary>
-    public TItem Value { get; set; }
+    public TItem Value { get; init; }
 }

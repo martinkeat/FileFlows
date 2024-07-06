@@ -30,6 +30,9 @@
 .skybox .skybox-item .name {
   display: none;
 }
+.skybox .skybox-item.no-count .name {
+  display: unset !important;
+}
 
 @media screen and (min-width: 1200.001px) {
   .skybox {
@@ -65,6 +68,13 @@
     font-size: 0.8rem;
     display: unset;
   }
+  .skybox .skybox-item.no-count {
+    display: flex;
+    align-items: center;
+  }
+  .skybox .skybox-item.no-count .name {
+    font-size: 1.5rem;
+  }
 }
 @media screen and (max-width: 400px) {
   .skybox .icon {
@@ -72,5 +82,3 @@
     margin: auto auto 0.5rem !important;
   }
 }
-
-/*# sourceMappingURL=FlowSkyBox.razor.css.map */

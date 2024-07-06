@@ -23,22 +23,13 @@ public class Codecs : Report
     public override string Icon => "fas fa-photo-video";
     /// <inheritdoc />
     public override ReportPeriod? DefaultReportPeriod => ReportPeriod.Last31Days;
-    //
-    // /// <summary>
-    // /// Gets or sets the stream type
-    // /// </summary>
-    // public StreamType Type { get; set; }
-    
-    /// <summary>
-    /// Gets or sets the direction
-    /// </summary>
-    public IODirection Direction { get; set; }
+    /// <inheritdoc />
+    public override bool Direction => true;
 
     /// <inheritdoc />
     public override async Task<Result<string>> Generate(Dictionary<string, object> model, bool emailing)
     {
-        var streamType = GetEnumValue<StreamType>(model, nameof(Type)); 
-        var direction = GetEnumValue<IODirection>(model, nameof(Direction)); 
+        var direction = GetDirection(model); 
 
         (DateTime? minDateUtc, DateTime? maxDateUtc) = GetPeriod(model);
         minDateUtc ??= DateTime.MinValue;
@@ -46,7 +37,7 @@ public class Codecs : Report
         
         using var db = await GetDb();
         string sql =
-            $"select {Wrap(direction == IODirection.Input ? "OriginalMetadata" : "FinalMetadata")} as {Wrap("Metadata")} from {Wrap("LibraryFile")} where {Wrap("Status")} = 1";
+            $"select {Wrap(direction == ReportDirection.Input ? "OriginalMetadata" : "FinalMetadata")} as {Wrap("Metadata")} from {Wrap("LibraryFile")} where {Wrap("Status")} = 1";
         AddLibrariesToSql(model, ref sql);
         AddPeriodToSql(model, ref sql);
 

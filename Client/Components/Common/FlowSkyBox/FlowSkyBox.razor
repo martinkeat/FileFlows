@@ -6,11 +6,14 @@
 <div class="skybox">
     @foreach (var item in Items)
     {
-        <div class="skybox-item @item.ClassName @(item == SelectedItem ? "active" : "") @item.Name.Dehumanize()"
+        <div class="skybox-item @(NoCount ? "no-count": "") @item.ClassName @(item == SelectedItem ? "active" : "") @item.Name.Dehumanize()"
              @onclick="() => SetSelected(item)">
             
             <span class="icon @item.Icon"></span>
-            <span class="count">@item.Count.ToString("N0")</span>
+            @if (NoCount == false)
+            {
+                <span class="count">@item.Count.ToString("N0")</span>
+            }
             <span class="name">@item.Name</span>
         </div>
     }

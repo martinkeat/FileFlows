@@ -28,6 +28,11 @@
     .name {
       display:none;
     }
+    &.no-count {
+      .name {
+        display:unset !important;
+      }
+    }
   }
 }
 
@@ -63,6 +68,13 @@
         margin-left: 5.5rem;
         font-size:0.8rem;
         display: unset;
+      }
+      &.no-count {
+        display: flex;
+        align-items: center;
+        .name {
+          font-size: 1.5rem;
+        }
       }
     }
   }

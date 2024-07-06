@@ -90,6 +90,10 @@ public enum UserRole
     /// </summary>
     DockerMods = 4096,
     /// <summary>
+    /// Reports
+    /// </summary>
+    Reports = 8192,
+    /// <summary>
     /// Administrator
     /// </summary>
     Admin = 65535

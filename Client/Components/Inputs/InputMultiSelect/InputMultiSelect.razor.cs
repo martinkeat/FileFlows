@@ -120,7 +120,7 @@ public partial class InputMultiSelect: Input<List<object?>>
     /// <summary>
     /// Gets if all are selected
     /// </summary>
-    private bool IsAllSelected => Value.Count(x => x != null) == Options.Count;
+    private bool IsAllSelected => Value?.Count(x => x != null) == Options.Count;
 
     /// <summary>
     /// Gets if any are selected
@@ -191,7 +191,7 @@ public partial class InputMultiSelect: Input<List<object?>>
     /// <returns></returns>
     private string SelectedLabel()
     {
-        if (Value.Count == 0)
+        if (Value == null || Value.Count == 0)
             return "Select...";
         if (Value is [null])
             return lblAny;

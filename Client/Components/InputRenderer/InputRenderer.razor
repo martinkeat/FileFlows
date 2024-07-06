@@ -17,7 +17,8 @@
 
     bool readOnly = GetParameter<bool>(field, "ReadOnly");
     bool hideLabel = GetParameter<bool>(field, "HideLabel");
-    switch (field.InputType)
+
+    @switch (field.InputType)
     {
         case FormInputType.Button:
             {
@@ -365,6 +366,8 @@
             {
                 <div class="input-horizontal-rule"></div>
             }
+            break;
+        case FormInputType.Hidden:
             break;
         default:
             {

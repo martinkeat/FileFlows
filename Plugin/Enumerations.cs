@@ -171,7 +171,11 @@ public enum FormInputType
     /// <summary>
     /// Raw HTML renderer
     /// </summary>
-    Html = 38
+    Html = 38,
+    /// <summary>
+    /// Hidden element
+    /// </summary>
+    Hidden = 39
 }
 
 

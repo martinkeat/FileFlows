@@ -89,7 +89,7 @@ public partial class Report : ComponentBase
         lblBack = Translater.Instant("Pages.Report.Buttons.Back");
         lblClose = Translater.Instant("Labels.Close");
         var jsObjectReference = await jsRuntime.InvokeAsync<IJSObjectReference>("import",
-            $"./Pages/Reporting/Reporting.razor.js?v={Globals.Version}");
+            $"./Pages/Report/Report.razor.js?v={Globals.Version}");
         jsReports = await jsObjectReference.InvokeAsync<IJSObjectReference>("createReporting",
             [DotNetObjectReference.Create(this)]);
 
@@ -145,6 +145,26 @@ public partial class Report : ComponentBase
             AddSelectField("Flow", flows, rd.FlowSelection, ref fields, model);
             AddSelectField("Library", libraries, rd.LibrarySelection, ref fields, model);
             AddSelectField("Node", nodes, rd.NodeSelection, ref fields, model);
+
+            if (rd.Direction)
+            {
+                fields.Add(new ElementField()
+                {
+                    InputType = FormInputType.Select,
+                    Name = "Direction",
+                    Parameters = new()
+                    {
+                        {
+                            "Options", new List<ListOption>()
+                            {
+                                new() { Label = Translater.Instant("Enums.ReportDirection.Inbound"), Value = 0 },
+                                new() { Label = Translater.Instant("Enums.ReportDirection.Outbound"), Value = 1 },
+                            }
+                        }
+                    },
+                });
+                model["Direction"] = 0;
+            }
 
             foreach (var tf in rd.Fields ?? [])
             {
@@ -288,41 +308,6 @@ public partial class Report : ComponentBase
             this.StateHasChanged();
         }
         
-    }
-
-    /// <summary>
-    /// Shows the generated report
-    /// </summary>
-    /// <param name="name">the name of the report</param>
-    /// <param name="html">the HTML of the report</param>
-    /// <returns>the task to await for the opened report</returns>
-    private async Task ShowReport(string name, string html)
-    {
-        if (string.IsNullOrWhiteSpace(html))
-        {
-            Toast.ShowWarning("No matching data found.");
-            return;
-        }
-
-        await Task.CompletedTask;
-        // var task = Editor.Open(new()
-        // {
-        //     TypeName = "ReportRender", Title = name, Model = new { Html = $"<div class=\"report-output\">{html}</div>" },
-        //     Large = true, ReadOnly = true,
-        //     Fields =
-        //     [
-        //         new()
-        //         {
-        //             InputType = FormInputType.Html,
-        //             Name = "Html"
-        //         }
-        //     ]
-        // });
-
-        // await Task.Delay(50);
-        // await jsReports.InvokeVoidAsync("initCharts");
-        //
-        // await task;
     }
 
     /// <summary>

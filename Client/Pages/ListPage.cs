@@ -75,6 +75,7 @@ public abstract class ListPage<U, T> : ComponentBase where T : IUniqueObject<U>
         set => _Data = value ?? new ();
     }
 
+    /// <inheritdoc />
     protected override async Task OnInitializedAsync()
     {
         Profile = await ProfileService.Get();
@@ -190,12 +191,19 @@ public abstract class ListPage<U, T> : ComponentBase where T : IUniqueObject<U>
     }
 
 
+    /// <summary>
+    /// Event called when a user double-clicks on a item
+    /// </summary>
+    /// <param name="item">the item that was double-clicked</param>
     protected async Task OnDoubleClick(T item)
     {
         await Edit(item);
     }
 
 
+    /// <summary>
+    /// Edits an item
+    /// </summary>
     public async Task Edit()
     {
         var items = Table?.GetSelected()?.ToList();
@@ -209,6 +217,11 @@ public abstract class ListPage<U, T> : ComponentBase where T : IUniqueObject<U>
             await this.Load(selected.Uid);
     }
 
+    /// <summary>
+    /// Edit a specific item
+    /// </summary>
+    /// <param name="item">the item to edit</param>
+    /// <returns>true if the item was changed</returns>
     public abstract Task<bool> Edit(T item);
 
     /// <summary>

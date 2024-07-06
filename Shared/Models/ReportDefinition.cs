@@ -44,6 +44,11 @@ public class ReportDefinition : IUniqueObject<Guid>
     /// Gets the node selection for this report
     /// </summary>
     public ReportSelection NodeSelection { get; set; }
+
+    /// <summary>
+    /// Gets or sets if the IO Direction is shown
+    /// </summary>
+    public bool Direction { get; set; }
     
     /// <summary>
     /// Gets or sets the fields in this template

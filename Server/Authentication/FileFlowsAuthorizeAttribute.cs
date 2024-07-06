@@ -71,12 +71,11 @@ public class FileFlowsAuthorizeAttribute : Attribute, IAsyncAuthorizationFilter
         if ((int)roleToTest == 0)
             return Task.CompletedTask; // any role
         
+        if(user.Role == UserRole.Admin)
+            return Task.CompletedTask; // admins allow all access
+        
         if(roleToTest == UserRole.Admin)
-        {
-            if(user.Role != UserRole.Admin)
-                context.Result = new UnauthorizedResult();
-            return Task.CompletedTask;
-        }
+            context.Result = new UnauthorizedResult(); // theyre not admin, otherwise the previous check would have returned
         
         if ((user.Role & roleToTest) == 0) // they require any of the enums
         {

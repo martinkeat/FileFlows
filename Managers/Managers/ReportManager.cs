@@ -27,7 +27,8 @@ public class ReportManager
             rd.DefaultReportPeriod = report.DefaultReportPeriod;
             rd.FlowSelection = report.FlowSelection;
             rd.LibrarySelection = report.LibrarySelection;
-            rd.NodeSelection = report.NodeSelection;
+            rd.NodeSelection = report.NodeSelection;;
+            rd.Direction = report.Direction;
             rd.Fields = new();
             var props = report.GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public);
             foreach (var prop in props)

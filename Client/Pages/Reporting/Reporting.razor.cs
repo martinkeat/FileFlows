@@ -1,4 +1,5 @@
 using FileFlows.Client.Components;
+using FileFlows.Client.Components.Common;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 
@@ -7,39 +8,60 @@ namespace FileFlows.Client.Pages;
 /// <summary>
 /// Page for reports
 /// </summary>
-public partial class Reporting  : ListPage<Guid, ReportDefinition>
+public partial class Reporting  : ComponentBase
 {
     /// <summary>
-    /// Gets or sets the JS Runtime
+    /// Gets or sets the navigation manager
     /// </summary>
-    [Inject] public IJSRuntime jsRuntime { get; set; }
+    [Inject] public NavigationManager NavigationManager { get; set; }
+
+    /// <summary>
+    /// Gets or sets the profile service
+    /// </summary>
+    [Inject] protected ProfileService ProfileService { get; set; }
+
+    /// <summary>
+    /// If scheduled reports is selected
+    /// </summary>
+    private bool ScheduledReportsSelected;
     
     /// <summary>
-    /// Gets or sets the report form editor component
+    /// The sky box items
     /// </summary>
-    private Editor ReportFormEditor { get; set; }
+    private List<FlowSkyBoxItem<bool>> SkyboxItems;
     
-    /// <inheritdoc />
-    public override string ApiUrl => "/api/report";
-
-    /// <inheritdoc />
-    public override string FetchUrl => $"{ApiUrl}/definitions";
-
-    /// <inheritdoc />
-    protected override bool Licensed()
-        => Profile.LicensedFor(LicenseFlags.Reporting);
-    
-    /// <summary>
-    /// Reference to JS Report class
-    /// </summary>
-    private IJSObjectReference jsReports;
-
 
     /// <inheritdoc />
     protected override async Task OnInitializedAsync()
     {
-        await base.OnInitializedAsync();
-        var jsObjectReference = await jsRuntime.InvokeAsync<IJSObjectReference>("import", $"./Pages/Reporting/Reporting.razor.js?v={Globals.Version}");
-        jsReports = await jsObjectReference.InvokeAsync<IJSObjectReference>("createReporting", [DotNetObjectReference.Create(this)]);
+        var profile = await ProfileService.Get();
+        if (profile.LicensedFor(LicenseFlags.Reporting) == false)
+        {
+            NavigationManager.NavigateTo("/");
+            return;
+        }
+        
+        SkyboxItems = new()
+        {
+            new()
+            {
+                Name = Translater.Instant("Pages.Reporting.Labels.Reports"),
+                Value = false,
+                Icon = "fas fa-chart-pie"
+            },
+            new()
+            {
+                Name = Translater.Instant("Pages.Reporting.Labels.ScheduledReports"),
+                Value = true,
+                Icon = "fas fa-clock"
+            },
+        };
+    }
+    
+    
+    private void SetSelected(FlowSkyBoxItem<bool> item)
+    {
+        ScheduledReportsSelected = item.Value;
+        this.StateHasChanged();
     }
 }

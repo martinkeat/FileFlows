@@ -1,7 +1,8 @@
 @namespace FileFlows.Client.Components.Common
 
 <span class="icon">
-    @if(string.IsNullOrWhiteSpace(Icon))
+    
+    @if (string.IsNullOrWhiteSpace(Icon))
     {
         <i class="icon @DefaultIcon"></i>
     }
@@ -11,7 +12,7 @@
     }
     else if (Icon.StartsWith("data:") || Icon.EndsWith(".svg"))
     {
-        <img src="@Icon" />
+        <img src="@Icon"/>
     }
     else
     {

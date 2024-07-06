@@ -2,9 +2,9 @@ namespace FileFlows.DataLayer.Reports;
 
 
 /// <summary>
-/// Input Output direction
+/// Report direction
 /// </summary>
-public enum IODirection
+public enum ReportDirection
 {
     /// <summary>
     /// Input

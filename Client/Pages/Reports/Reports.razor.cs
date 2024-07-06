@@ -1,17 +1,25 @@
-using System.Text.Json;
 using FileFlows.Client.Components;
-using FileFlows.Client.Components.Inputs;
-using FileFlows.Plugin;
-using FileFlows.Shared.Validators;
+using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 
 namespace FileFlows.Client.Pages;
 
 /// <summary>
-/// The editor for a report
+/// Page for reports
 /// </summary>
-public partial class Reporting
+public partial class Reports : ListPage<Guid, ReportDefinition>
 {
+    /// <summary>
+    /// Gets or sets the report form editor component
+    /// </summary>
+    private Editor ReportFormEditor { get; set; }
+    
+    /// <inheritdoc />
+    public override string ApiUrl => "/api/report";
+
+    /// <inheritdoc />
+    public override string FetchUrl => $"{ApiUrl}/definitions";
+    
     /// <summary>
     /// Launches the report
     /// </summary>

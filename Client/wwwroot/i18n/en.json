@@ -318,6 +318,15 @@
       "OutOfSchedule": "Out Of Schedule",
       "VersionMismatch": "Version Mismatch"
     },
+    "ReportDirection": {
+      "Inbound": "Inbound",
+      "Outbound": "Outbound"
+    },
+    "ReportSchedule": {
+      "Daily": "Daily",
+      "Weekly" : "Weekly",
+      "Monthly": "Monthly"
+    },
     "SecurityMode": {
       "Off": "None",
       "Local": "Local Users",
@@ -827,7 +836,11 @@
       }
     },
     "Reporting": {
-      "Title": "Reporting"
+      "Title": "Reporting",
+      "Labels": {
+        "Reports": "Reports",
+        "ScheduledReports": "Scheduled"
+      }
     },
     "Report": {
       "Buttons": {
@@ -852,6 +865,28 @@
         "Email-Placeholder": "Enter an email address",
         "Statistic": "Statistic",
         "Node": "Node"
+      }
+    },
+    "ScheduledReport": {
+      "Title": "Scheduled Report",
+      "Fields": {
+        "Name-Help": "The name of the report, this will appear in the subject of the email sent.",
+        "Report": "Report",
+        "Report-Help": "The report that will be sent.",
+        "Recipients": "Recipients",
+        "Recipients-Help": "A list of email addresses that will receive this report when it executes.",
+        "Schedule": "Schedule",
+        "Schedule-Help": "When this report will be generated and emailed to the recipients.",
+        "Enabled": "Enabled",
+        "Enabled-Help": "This scheduled report will only run if it is enabled.",
+        "DayOfMonth": "Day Of Month",
+        "DayOfMonth-Help": "The day of the month to run this report. If the selected day is outside the month (e.g., 31 in February), the report will be run on the last day of the month.",
+        "DayOfWeek": "Day Of Week",
+        "DayOfWeek-Help": "The day of the week to send this scheduled report. This will include data for the 7 days before this day.",
+        "Direction": "Direction",
+        "Nodes": "Nodes",
+        "Libraries": "Libraries",
+        "Flows": "Flows"
       }
     },
     "Widget":{

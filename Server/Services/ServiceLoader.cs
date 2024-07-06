@@ -42,6 +42,7 @@ public static class ServiceLoader
             .AddSingleton<DockerModService>()
             .AddSingleton<RepositoryService>()
             .AddSingleton<NotificationService>()
+            .AddSingleton<ScheduledReportService>()
             .AddSingleton<FileDisplayNameService>()
             .BuildServiceProvider(); // Build the service provider
     }

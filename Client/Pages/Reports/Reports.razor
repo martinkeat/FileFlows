@@ -1,0 +1,52 @@
+@using FileFlows.Shared.Models
+@inherits ListPage<Guid, ReportDefinition>
+
+@namespace FileFlows.Client.Pages
+
+<FlowTable @ref="Table" Data="@Data" TItem="ReportDefinition" Selection="SelectionMode.Single"
+           TableIdentifier="Reports" DoubleClick="Launch" >
+    <ToolBar>
+        <FlowTableButton Clicked=Edit SelectedOne="true" Icon="fas fa-running" Label="Labels.Run" />
+    </ToolBar>
+
+    <Columns>
+        <FlowTableColumn TItem="ReportDefinition" NoHeight="true">
+            <Header>
+                @Globals.lblName
+            </Header>
+            <Cell Context="item">
+                <div class="table-item">
+                    <span class="icon">
+                        @if(string.IsNullOrWhiteSpace(item.Icon))
+                        {
+                            <i class="icon fas fa-puzzle-piece"></i>
+                        }
+                        else if (item.Icon.StartsWith("svg:"))
+                        {
+                            <img src="/icons/@(item.Icon[4..]).svg"/>
+                        }
+                        else
+                        {
+                            var parts = item.Icon.Split(':');
+                            if (parts.Length == 2)
+                            {
+                                <i class="icon @parts[0]" style="color:@parts[1]"></i>
+                            }
+                            else
+                            {
+                                <i class="icon @item.Icon"></i>
+                            }
+                        }
+                    </span>
+                    <div class="center">
+                        <span class="name"><span>@item.Name</span></span>
+                        <span class="description"><span>@item.Description</span></span>
+                    </div>
+                    <div class="right">
+                    </div>
+                </div>
+
+            </Cell>
+        </FlowTableColumn>
+    </Columns>
+</FlowTable>

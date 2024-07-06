@@ -175,7 +175,7 @@ public class ElementField
     /// </summary>
     /// <param name="condition">the condition to invokte</param>
     /// <param name="state">the condition state</param>
-    internal void InvokeChange(Condition condition, bool state)
+    public void InvokeChange(Condition condition, bool state)
     {
         if(this.DisabledConditions?.Any(x => x == condition) == true)
             this.DisabledChange?.Invoke(state);

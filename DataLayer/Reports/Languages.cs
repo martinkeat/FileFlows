@@ -3,6 +3,7 @@ using FileFlows.DataLayer.Reports.Charts;
 using FileFlows.DataLayer.Reports.Helpers;
 using FileFlows.Plugin;
 using FileFlows.Shared.Models;
+using Humanizer;
 
 namespace FileFlows.DataLayer.Reports;
 
@@ -20,22 +21,20 @@ public class Languages : Report
     /// <inheritdoc />
     public override string Icon => "fas fa-comments";
     
-    /// <summary>
-    /// Gets or sets the direction
-    /// </summary>
-    public IODirection Direction { get; set; }
-    
     /// <inheritdoc />
     public override ReportSelection LibrarySelection => ReportSelection.Any;
+    
+    /// <inheritdoc />
+    public override bool Direction => true;
 
     /// <inheritdoc />
     public override async Task<Result<string>> Generate(Dictionary<string, object> model, bool emailing)
     {
-        var direction = GetEnumValue<IODirection>(model, nameof(Direction)); 
+        var direction = GetDirection(model); 
 
         using var db = await GetDb();
         string sql =
-            $"select {Wrap(direction == IODirection.Input ? "OriginalMetadata" : "FinalMetadata")} as {Wrap("Metadata")} from {Wrap("LibraryFile")} where {Wrap("Status")} = 1";
+            $"select {Wrap(direction == ReportDirection.Input ? "OriginalMetadata" : "FinalMetadata")} as {Wrap("Metadata")} from {Wrap("LibraryFile")} where {Wrap("Status")} = 1";
         AddLibrariesToSql(model, ref sql);
         AddPeriodToSql(model, ref sql);
 

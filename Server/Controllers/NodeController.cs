@@ -79,7 +79,7 @@ public class NodeController : BaseController
     /// </summary>
     /// <returns>flow list</returns>
     [HttpGet("basic-list")]
-    [FileFlowsAuthorize(UserRole.Nodes | UserRole.Admin)]
+    [FileFlowsAuthorize(UserRole.Nodes | UserRole.Admin | UserRole.Reports)]
     public async Task<Dictionary<Guid, string>> GetNodeList()
     {
         var items = await new NodeService().GetAllAsync();

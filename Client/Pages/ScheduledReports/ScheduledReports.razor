@@ -1,0 +1,52 @@
+@using FileFlows.Shared.Models
+@inherits ListPage<Guid, ScheduledReport>
+
+@namespace FileFlows.Client.Pages
+
+<FlowTable @ref="Table" Data="@Data" TItem="ScheduledReport" Selection="SelectionMode.Multiple"
+           DoubleClick="@OnDoubleClick" TableIdentifier="Tasks" DisableColumn="(item) => !item.Enabled">
+    <ToolBar>
+        <FlowTableButton Clicked=Add Icon="fas fa-plus" Label="Labels.Add" />
+        <FlowTableButton Clicked=Edit SelectedOne="true" Icon="fas fa-edit" Label="Labels.Edit" />
+        <FlowTableButton Clicked=Delete SelectedOneOrMore="true" Icon="fas fa-trash" Label="Labels.Delete" />
+        @if (Profile != null && Profile.LicensedFor(LicenseFlags.Auditing) && Profile.HasRole(UserRole.Admin))
+        {
+            <FlowTableButtonSeparator />
+            <FlowTableButton Clicked=AuditLog SelectedOne="true" Icon="fas fa-clipboard-list" Label="Labels.Audit" />
+        }
+        <FlowTableButtonSeparator />
+        <FlowTableHelpButton HelpUrl="reporting/scheduled" />
+    </ToolBar>
+
+    <Columns>
+        <FlowTableColumn TItem="ScheduledReport" NoHeight="true">
+            <Header>
+                @Globals.lblName
+            </Header>
+            <Cell Context="item">
+                @{
+                    var rd = ReportDefinitions.FirstOrDefault(x => x.Uid == item.Report.Uid) ?? new()
+                    {
+                        Name = "Unknown",
+                        Icon = "fas fa-chart-pie"
+                    };
+                }
+                <div class="table-item">
+                    <TableItemIcon Icon="@rd.Icon" DefaultIcon="fas fa-pie-chart"/>
+                    <div class="center">
+                        <span class="name"><span>@item.Name</span></span>
+                        <span class="description"><span>@rd.Description</span></span>
+                        <div class="info">
+                            <IconValue Color="IconValueColor.Blue" Icon="fas fa-chart-pie" Value="@item.Report.Name" />
+                        </div>
+                    </div>
+                    <div class="right">
+                        <span class="top-right">@GetScheduleText(item.Schedule)</span>
+                        <FlowSwitch Value="@item.Enabled" ValueChanged="@(args => { item.Enabled = args; Enable(args, item); })"/>
+                    </div>
+                </div>
+
+            </Cell>
+        </FlowTableColumn>
+    </Columns>
+</FlowTable>

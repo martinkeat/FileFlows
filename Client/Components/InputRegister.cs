@@ -7,14 +7,14 @@ public abstract class InputRegister:ComponentBase
 {
     protected readonly Dictionary<Guid, Inputs.IInput> RegisteredInputs = new();
 
-
+    /// <summary>
+    /// Registers an input
+    /// </summary>
+    /// <param name="uid">the UID of the input</param>
+    /// <param name="input">the Input control</param>
+    /// <typeparam name="T">the type of input</typeparam>
     internal void RegisterInput<T>(Guid uid, Input<T> input)
-    {
-        if (this.RegisteredInputs.ContainsKey(uid) == false)
-            this.RegisteredInputs.Add(uid, input);
-        else
-            this.RegisteredInputs[uid] = input;
-    }
+        => RegisteredInputs[uid] = input;
 
     // internal void RemoveRegisteredInputs(params string[] except)
     // {

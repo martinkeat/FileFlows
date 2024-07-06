@@ -107,6 +107,9 @@ public partial class Users: ListPage<Guid, User>
         {
             if (role == UserRole.Admin)
                 continue;
+            if (role == UserRole.Reports && Profile.LicensedFor(LicenseFlags.Reporting) == false)
+                continue;
+            
             roleOptions.Add(new ListOption()
             {
                 Label = Translater.Instant($"Enums.{nameof(UserRole)}.{role}"),
