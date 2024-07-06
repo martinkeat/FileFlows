@@ -2880,9 +2880,9 @@ body.photino .paused-indicator {
 }
 .report-output .report-flex-data .title {
   margin: 0 0 0 1rem !important;
-  align-content: center;
   flex-grow: 1;
   text-align: left;
+  align-self: center;
 }
 .report-output .report-flex-data .icon {
   width: 4rem;
@@ -2915,6 +2915,7 @@ body.photino .paused-indicator {
 }
 .report-output .report-flex-data .percentage {
   width: 14rem;
+  height: 3rem;
 }
 
 @font-face {

@@ -42,6 +42,9 @@ public class ReportBuilder
     {
         string periodText = minDateUtc.ToLocalTime().ToString("d MMM") + " - " +
                             maxDateUtc.ToLocalTime().ToString("d MMM");
+        if (minDateUtc.Year < 2000 && maxDateUtc.Year > DateTime.Now.Year + 10)
+            periodText = "All Time";
+        
         _builder.AppendLine(ReportSummaryBox.Generate("Period", periodText, ReportSummaryBox.IconType.Clock,
             ReportSummaryBox.BoxColor.Info));
     }
