@@ -1,3 +1,4 @@
+using FileFlows.Client.Components;
 using FileFlows.Managers;
 using FileFlows.Server.Authentication;
 using FileFlows.Server.Helpers;
@@ -63,6 +64,11 @@ public class ReportController : BaseController
 
         bool emailing = string.IsNullOrWhiteSpace(email) == false;
 
+        var manager = new ReportManager();
+        string? name = manager.GetReportName(uid);
+        if (name == null)
+            return BadRequest("Report not found.");
+
         if (emailing)
         {
             _ = Task.Run(async () =>
@@ -71,7 +77,14 @@ public class ReportController : BaseController
                 if (result.Failed(out var rError))
                 {
                     _ = ServiceLoader.Load<NotificationService>()
-                        .Record(NotificationSeverity.Warning, "Report Failed to generate", rError);
+                        .Record(NotificationSeverity.Warning, $"Report '{name}' failed to generate", rError);
+                    return;
+                }
+
+                if (string.IsNullOrWhiteSpace(result.Value))
+                {
+                    _ = ServiceLoader.Load<NotificationService>()
+                        .Record(NotificationSeverity.Warning, $"Report '{name}' had not matching data", rError);
                     return;
                 }
 
@@ -87,6 +100,8 @@ public class ReportController : BaseController
         var result = await new ReportManager().Generate(uid, emailing, model);
         if (result.Failed(out var error))
             return BadRequest(error);
+        if (string.IsNullOrWhiteSpace(result.Value))
+            return BadRequest("Pages.Report.Messages.NoMatchingData");
         return Ok(result.Value);
     }
 

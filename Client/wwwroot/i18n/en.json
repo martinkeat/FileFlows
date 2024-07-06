@@ -836,6 +836,8 @@
       },
       "Messages": {
         "FailedToFindReport": "Failed to find the report.",
+        "FailedToGenerateReport": "Failed to generate the report.",
+        "NoMatchingData": "No matching data",
         "ReportEmailed": "The report will be emailed to ''{email}'' once generated."
       },
       "Labels": {
@@ -844,6 +846,7 @@
       "Fields": {
         "Library": "Library",
         "Period": "Period",
+        "Direction": "Direction",
         "Flow": "Flow",
         "Email": "Email",
         "Email-Placeholder": "Enter an email address",

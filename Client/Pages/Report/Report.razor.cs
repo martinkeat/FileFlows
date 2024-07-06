@@ -190,12 +190,12 @@ public partial class Report : ComponentBase
         [
             new ()
             {
-                Label = "Pages.Report.Button.Generate",
+                Label = "Pages.Report.Buttons.Generate",
                 Clicked = (_, _) => _ = Generate()
             },
             new ()
             {
-                Label = "Pages.Report.Button.Back",
+                Label = "Pages.Report.Buttons.Back",
                 Clicked = (_, _) => GoBack()
             }
         ];
@@ -257,10 +257,22 @@ public partial class Report : ComponentBase
         this.StateHasChanged();
         try
         {
+            var dict = Model as IDictionary<string, object>;
+            object? oEmail = null;
+            dict?.TryGetValue("Email", out oEmail);
+            bool emailing = string.IsNullOrWhiteSpace(oEmail?.ToString()) == false;
             var result = await HttpHelper.Post<string>($"/api/report/generate/{Uid}", Model);
             if (result.Success == false)
             {
-                Toast.ShowError(result.Body?.EmptyAsNull() ?? "Failed generating report");
+                Toast.ShowError(result.Body?.EmptyAsNull() ?? "Pages.Report.Messages.FailedToGenerateReport");
+                return;
+            }
+
+            if (emailing)
+            {
+                Toast.ShowSuccess(Translater.Instant("Pages.Report.Messages.ReportEmailed",
+                    new { email = oEmail.ToString() }));
+                GoBack();
                 return;
             }
 

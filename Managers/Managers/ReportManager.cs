@@ -81,4 +81,12 @@ public class ReportManager
         
         return await report.Generate(model, emailing: emailing);
     }
+
+    /// <summary>
+    /// Gets the reports name
+    /// </summary>
+    /// <param name="uid">the UID of the reprot</param>
+    /// <returns>the reports name, or null if not found</returns>
+    public string? GetReportName(Guid uid)
+        => Report.GetReports().FirstOrDefault(x => x.Uid == uid)?.Name;
 }
