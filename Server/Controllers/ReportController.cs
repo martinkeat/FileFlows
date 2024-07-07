@@ -87,9 +87,7 @@ public class ReportController : BaseController
                     return;
                 }
 
-                string css = GetCss();
-                string html = css + "<div class=\"report-output emailed\">" + result.Value + "</div>";
-                await Emailer.Send([email], "FileFlows Report", html, isHtml: true);
+                _ = ServiceLoader.Load<ScheduledReportService>().Email([email], "FileFlows Report", result.Value);
             });
             
             // email reports we just exit early
@@ -103,65 +101,5 @@ public class ReportController : BaseController
             return BadRequest("Pages.Report.Messages.NoMatchingData");
         return Ok(result.Value);
     }
-
-    /// <summary>
-    /// Gets the CSS 
-    /// </summary>
-    /// <returns>the CSS</returns>
-    private string GetCss()
-    {
-#if (DEBUG)
-        var dir = "wwwroot/css";
-#else
-        var dir = Path.Combine(DirectoryHelper.BaseDirectory, "Server/wwwroot/css");
-#endif
-        string file = Path.Combine(dir, "report-styles.css");
-        if (System.IO.File.Exists(file))
-            return "<style>\n" + System.IO.File.ReadAllText(file) + "\n</style>\n";
-        return string.Empty;
-    }
-
-
-    /// <summary>
-    /// The CSS for the reports 
-    /// </summary>
-    private const string CSS = @"
-<style>
-.report-output {
-    font-family: sans-serif;
-    font-size:12px;
-    text-align:center;
-}
-table {
-    width: 100%;
-    font-size:12px;
-    border-collapse: collapse;
-    text-align: left;
-    margin: 0;
-    table-layout: fixed;
-    min-width: min(100vw, 40rem);
-    margin: auto;
-}
-table thead > tr {
-    background:#e0e0e0;
-
-}
-table th, table td {
-  border: solid 1px black;
-  user-select: none;
-  padding: 0 0.25rem 0 0.7rem;
-  line-height: 1.75rem;
-}
-table td:not(:first-child) {
-  border-left: none;
-}
-table td:not(:last-child) {
-  border-right: none;
-}
-div.chart {
-    text-align: center;
-}
-</style>
-";
 
 }

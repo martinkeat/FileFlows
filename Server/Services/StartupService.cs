@@ -177,7 +177,8 @@ public class StartupService
             new FlowRunnerMonitor(),
             new ObjectReferenceUpdater(),
             new FileFlowsTasksWorker(),
-            new RepositoryUpdaterWorker()
+            new RepositoryUpdaterWorker(),
+            new ScheduledReportWorker()
             //new LibraryFileServiceUpdater()
         );
     }

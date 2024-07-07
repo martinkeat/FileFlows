@@ -23,6 +23,11 @@ public class ScheduledReport: FileFlowObject
     public ReportSchedule Schedule { get; set; }
     
     /// <summary>
+    /// Gets or sets the date the report was last sent
+    /// </summary>
+    public DateTime LastSentUtc { get; set; }
+    
+    /// <summary>
     /// Gets or sets the interval for this schedule.
     /// If Monthly, this is the day of the month.
     /// If Weekly, this is the day of the week.

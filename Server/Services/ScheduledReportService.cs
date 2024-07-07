@@ -1,5 +1,6 @@
 using FileFlows.Managers;
 using FileFlows.Plugin;
+using FileFlows.Server.Helpers;
 using FileFlows.ServerShared.Models;
 using FileFlows.Shared.Models;
 
@@ -43,4 +44,77 @@ public class ScheduledReportService
     /// <returns>a task to await</returns>
     public Task Delete(Guid[] uids, AuditDetails auditDetails)
         => new ScheduledReportManager().Delete(uids, auditDetails);
+
+
+    /// <summary>
+    /// Emails a report
+    /// </summary>
+    /// <param name="recipients">the recipients of the report</param>
+    /// <param name="subject">the subject of the report</param>
+    /// <param name="reportHtml">the HTML of the report</param>
+    public async Task Email(string[] recipients, string subject, string reportHtml)
+    {
+        string html = GetCss() + "<div class=\"report-output emailed\">" + reportHtml + "</div>";
+        await Emailer.Send(recipients, subject, html, isHtml: true);
+    }
+    
+    /// <summary>
+    /// Gets the CSS 
+    /// </summary>
+    /// <returns>the CSS</returns>
+    private string GetCss()
+    {
+#if (DEBUG)
+        var dir = "wwwroot/css";
+#else
+        var dir = Path.Combine(DirectoryHelper.BaseDirectory, "Server/wwwroot/css");
+#endif
+        string file = Path.Combine(dir, "report-styles.css");
+        if (System.IO.File.Exists(file))
+            return "<style>\n" + System.IO.File.ReadAllText(file) + "\n</style>\n";
+        return string.Empty;
+    }
+
+
+    /// <summary>
+    /// The CSS for the reports 
+    /// </summary>
+    private const string CSS = @"
+<style>
+.report-output {
+    font-family: sans-serif;
+    font-size:12px;
+    text-align:center;
+}
+table {
+    width: 100%;
+    font-size:12px;
+    border-collapse: collapse;
+    text-align: left;
+    margin: 0;
+    table-layout: fixed;
+    min-width: min(100vw, 40rem);
+    margin: auto;
+}
+table thead > tr {
+    background:#e0e0e0;
+
+}
+table th, table td {
+  border: solid 1px black;
+  user-select: none;
+  padding: 0 0.25rem 0 0.7rem;
+  line-height: 1.75rem;
+}
+table td:not(:first-child) {
+  border-left: none;
+}
+table td:not(:last-child) {
+  border-right: none;
+}
+div.chart {
+    text-align: center;
+}
+</style>
+";
 }
