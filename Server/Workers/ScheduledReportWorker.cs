@@ -3,15 +3,22 @@ using FileFlows.Managers;
 using FileFlows.Server.Helpers;
 using FileFlows.Server.Services;
 using FileFlows.Shared.Models;
-using ServiceLoader = FileFlows.RemoteServices.ServiceLoader;
 
 namespace FileFlows.Server.Workers;
 
 /// <summary>
 /// Worker that sends the scheduled reports
 /// </summary>
-public class ScheduledReportWorker() : ServerWorker(ScheduleType.Hourly, 1)
+public class ScheduledReportWorker:ServerWorker
 {
+    /// <summary>
+    /// Initializes a new instance of the scheduled report worker
+    /// </summary>
+    public ScheduledReportWorker() : base (ScheduleType.Hourly, 1)
+    {
+        Trigger();
+    }
+    
     /// <inheritdoc />
     protected override void ExecuteActual(Settings settings)
     {
@@ -29,6 +36,7 @@ public class ScheduledReportWorker() : ServerWorker(ScheduleType.Hourly, 1)
             return;
             
         var manager = new ReportManager();
+        DateTime startLocal, endLocal;
 
         foreach (var report in reports)
         {
@@ -40,10 +48,15 @@ public class ScheduledReportWorker() : ServerWorker(ScheduleType.Hourly, 1)
             switch (report.Schedule)
             {
                 case ReportSchedule.Daily:
+                    startLocal = DateTime.Now.Date.AddDays(-1);
+                    endLocal = DateTime.Now.Date.AddMilliseconds(-1);
                     break;
                 case ReportSchedule.Weekly:
                     if ((int)DateTime.Now.DayOfWeek != report.ScheduleInterval)
                         continue;
+                    
+                    startLocal = DateTime.Now.Date.AddDays(-71);
+                    endLocal = DateTime.Now.Date.AddMilliseconds(-1);
                     break;
                 case ReportSchedule.Monthly:
                     int currentDay = DateTime.Now.Day;
@@ -61,7 +74,27 @@ public class ScheduledReportWorker() : ServerWorker(ScheduleType.Hourly, 1)
                         if (currentDay != daysInMonth)
                             continue;
                     }
+                    
+                    int currentYear = DateTime.Now.Year;
+                    int currentMonth = DateTime.Now.Month;
+                    int previousMonth = currentMonth - 1;
+                    if (previousMonth == 0) {
+                        previousMonth = 12;
+                        currentYear--;
+                    }
+
+                    int daysInPreviousMonth = DateTime.DaysInMonth(currentYear, previousMonth);
+                    int daysInCurrentMonth = DateTime.DaysInMonth(DateTime.Now.Year, currentMonth);
+
+                    int scheduleDay = Math.Min(report.ScheduleInterval, daysInPreviousMonth);
+                    startLocal = new DateTime(currentYear, previousMonth, scheduleDay);
+
+                    scheduleDay = Math.Min(report.ScheduleInterval, daysInCurrentMonth);
+                    endLocal = new DateTime(DateTime.Now.Year, currentMonth, scheduleDay).AddMilliseconds(-1);
+                    
                     break;
+                default:
+                    continue;
             }
 
             Dictionary<string, object> model = new();
@@ -69,6 +102,8 @@ public class ScheduledReportWorker() : ServerWorker(ScheduleType.Hourly, 1)
             model["Node"] = report.Nodes;
             model["Library"] = report.Libraries;
             model["Direction"] = report.Direction;
+            model["StartUtc"] = startLocal.ToUniversalTime();
+            model["EndUtc"] = endLocal.ToUniversalTime();
 
             try
             {

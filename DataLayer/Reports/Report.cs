@@ -163,6 +163,10 @@ public abstract class Report
     /// <returns>the period</returns>
     protected (DateTime? StartUtc, DateTime? EndUtc) GetPeriod(Dictionary<string, object> model)
     {
+        if(model.TryGetValue("StartUtc", out var oStartUtc) && oStartUtc is DateTime startUtc &&
+           model.TryGetValue("EndUtc", out var oEndUtc) && oEndUtc is DateTime endUtc)
+            return (startUtc, endUtc);
+        
         if (model.TryGetValue("Period", out var period) == false || period is not JsonElement jsonElement)
             return (null, null);
         if (jsonElement.ValueKind != JsonValueKind.Object)
