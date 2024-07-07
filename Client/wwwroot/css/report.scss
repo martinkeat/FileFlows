@@ -1,6 +1,6 @@
 .report-output
 {
-  &.emailed {
+  &.emailed {    
     font-family: sans-serif;
     font-size:14px;
     text-align:center;
@@ -8,6 +8,27 @@
     padding:1rem;
     margin: auto;
     line-height: 1.6rem;
+    .report-header {
+      display: flex;
+      flex-direction: row;
+      margin-bottom: 1rem;
+      border-bottom: solid 3px #eee;
+      padding-bottom: 0.5rem;
+      align-items: baseline;
+      .fileflows-logo {
+        svg {
+          height: 3rem;
+          width: 100%;
+        }
+      }
+
+      .report-name {
+        font-size: 1.15rem;
+        margin-left: 0.75rem;
+        position: relative;
+        bottom: 0.5rem;
+      }
+    }
     .chart
     { 
       display:flex;

@@ -1,3 +1,4 @@
+using System.Web;
 using FileFlows.Managers;
 using FileFlows.Plugin;
 using FileFlows.Server.Helpers;
@@ -49,13 +50,34 @@ public class ScheduledReportService
     /// <summary>
     /// Emails a report
     /// </summary>
+    /// <param name="reportName">the name of the report</param>
     /// <param name="recipients">the recipients of the report</param>
     /// <param name="subject">the subject of the report</param>
     /// <param name="reportHtml">the HTML of the report</param>
-    public async Task Email(string[] recipients, string subject, string reportHtml)
+    public async Task Email(string reportName, string[] recipients, string subject, string reportHtml)
     {
-        string html = GetCss() + "<div class=\"report-output emailed\">" + reportHtml + "</div>";
+        string html = GetCss() + "<div class=\"report-output emailed\">\n" +
+                               "<div class=\"report-header\"><div class=\"fileflows-logo\">" + GetLogoSvg() + "</div>\n" + 
+                               "<div class=\"report-name\">" + HttpUtility.HtmlEncode(reportName) + "</div></div>\n" +
+                               reportHtml +
+                               "</div>";
         await Emailer.Send(recipients, subject, html, isHtml: true);
+    }
+    /// <summary>
+    /// Gets Logo SVG 
+    /// </summary>
+    /// <returns>the Logo SVG</returns>
+    private string GetLogoSvg()
+    {
+#if (DEBUG)
+        var dir = "wwwroot";
+#else
+        var dir = Path.Combine(DirectoryHelper.BaseDirectory, "Server/wwwroot");
+#endif
+        string file = Path.Combine(dir, "logo.svg"); //"logo-color-full.svg");
+        if (File.Exists(file))
+            return File.ReadAllText(file);
+        return string.Empty;
     }
     
     /// <summary>

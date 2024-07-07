@@ -124,7 +124,7 @@ public class ScheduledReportWorker:ServerWorker
                     return;
                 }
 
-                _ = service.Email(report.Recipients, report.Name, result.Value);
+                _ = service.Email(report.Report.Name, report.Recipients, report.Name, result.Value);
             }
             catch (Exception ex)
             {

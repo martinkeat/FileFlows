@@ -11,6 +11,24 @@
   margin: auto;
   line-height: 1.6rem;
 }
+.report-output.emailed .report-header {
+  display: flex;
+  flex-direction: row;
+  margin-bottom: 1rem;
+  border-bottom: solid 3px #eee;
+  padding-bottom: 0.5rem;
+  align-items: baseline;
+}
+.report-output.emailed .report-header .fileflows-logo svg {
+  height: 3rem;
+  width: 100%;
+}
+.report-output.emailed .report-header .report-name {
+  font-size: 1.15rem;
+  margin-left: 0.75rem;
+  position: relative;
+  bottom: 0.5rem;
+}
 .report-output.emailed .chart {
   display: flex;
   flex-direction: column;

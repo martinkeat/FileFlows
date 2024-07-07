@@ -77,7 +77,8 @@ public partial class ScheduledReports : ListPage<Guid, ScheduledReport>
         await Edit(new ScheduledReport()
         {
             Schedule = ReportSchedule.Weekly,
-            Enabled = true
+            Enabled = true,
+            Recipients = string.IsNullOrWhiteSpace(Profile?.Email) == false ? [Profile.Email] : []
         });
     }
 

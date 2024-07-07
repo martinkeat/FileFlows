@@ -34,6 +34,7 @@ public class ProfileController : Controller
             profile.Role = user.Role;
             profile.Name = user.Name;
             profile.Uid = user.Uid;
+            profile.Email = user.Email;
         }
 
         profile.ServerOS = PlatformHelper.GetOperatingSystemType();

@@ -14,6 +14,10 @@ public class Profile
     /// </summary>
     public string? Name { get; set; }
     /// <summary>
+    /// Gets or sets the users email
+    /// </summary>
+    public string? Email { get; set; }
+    /// <summary>
     /// Gets or sets the users role
     /// </summary>
     public UserRole Role { get; set; }
