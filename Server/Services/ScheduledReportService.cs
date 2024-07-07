@@ -57,7 +57,7 @@ public class ScheduledReportService
     public async Task Email(string reportName, string[] recipients, string subject, string reportHtml)
     {
         string html = 
-            "<html>\n" +
+            "<html lang=\"en\">\n" +
             "<head><title>" + HttpUtility.HtmlEncode(subject) + "</title>\n" +
             GetCss() + "\n" +
             "</head>\n<body>\n" +
@@ -67,7 +67,7 @@ public class ScheduledReportService
             reportHtml +
             "</div>" +
             "</body>" + 
-            "M/html>";
+            "</html>";
         await Emailer.Send(recipients, subject, html, isHtml: true);
     }
     /// <summary>
