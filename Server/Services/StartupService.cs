@@ -104,6 +104,8 @@ public class StartupService
 
             LibraryWorker.ResetProcessing(internalOnly: true);
 
+            DataLayerDelegates.Setup();
+            
             StartupWorkers();
 
             Complete(settings, serverUrl);

@@ -47,6 +47,49 @@ public class MultiLineChart : Chart
     /// <returns>An SVG string representing the line chart.</returns>
     private static string Svg(MultilineChartData chartData)
     {
+        // Start building SVG content
+        StringBuilder builder = new StringBuilder();
+
+
+        builder = new();
+        builder.AppendLine("<div class=\"chart line-chart\">");
+
+
+        // string image = GenerateImage(chartData);
+        // var imageTag =
+        //     FileFlows.DataLayer.Helpers.DelegateHelpers.SvgToImageTag?.Invoke(svg, EmailChartWidth, EmailChartHeight);
+        var imageTag = FileFlows.DataLayer.Helpers.DelegateHelpers.GenerateMultilineChart?.Invoke(chartData);
+        if (string.IsNullOrEmpty(imageTag) == false)
+            builder.AppendLine(imageTag);
+
+        if (chartData.Series.Length > 1) // only show legend if more than one series
+        {
+            builder.AppendLine("<div class=\"legend\">");
+            for (int seriesIndex = 0; seriesIndex < chartData.Series.Length; seriesIndex++)
+            {
+                var series = chartData.Series[seriesIndex];
+                string color = COLORS[seriesIndex % COLORS.Length]; // Cycling through COLORS array
+
+                builder.AppendLine(
+                    $"<span style=\"display: inline-block; margin: 0 10px;\">" +
+                    $"<svg width=\"12\" height=\"12\">" +
+                    $"<circle cx=\"6\" cy=\"6\" r=\"5\" fill=\"{color}\" />" +
+                    $"</svg>" +
+                    $"<span style=\"color: #000; margin-left: 5px;\">{series.Name}</span>" +
+                    $"</span>");
+            }
+
+            builder.AppendLine("</div>");
+        }
+
+        builder.AppendLine("</div>");
+        
+
+        return builder.ToString();
+    }
+
+    private static string GenerateImage(MultilineChartData chartData)
+    {
         string? yAxisLabel = null;
 
         int longestYLabel = 0;
@@ -82,10 +125,8 @@ public class MultiLineChart : Chart
         const string backgroundColor = "#e4e4e4"; 
         const string foregroundColor = "#000";
         const string lineColor = "#afafaf";
-
-        // Start building SVG content
-        StringBuilder builder = new StringBuilder();
-        builder.AppendLine("<div class=\"chart line-chart\">");
+        
+        StringBuilder builder = new();
         builder.AppendLine(
             $"<svg class=\"line-chart\" width=\"100%\" height=\"100%\" viewBox=\"0 0 {EmailChartWidth} {EmailChartHeight}\" xmlns=\"http://www.w3.org/2000/svg\">");
 
@@ -181,30 +222,6 @@ public class MultiLineChart : Chart
 
         // Close SVG tag
         builder.AppendLine("</svg>");
-
-        if (chartData.Series.Length > 1) // only show legend if more than one series
-        {
-            builder.AppendLine("<div class=\"legend\">");
-            for (int seriesIndex = 0; seriesIndex < chartData.Series.Length; seriesIndex++)
-            {
-                var series = chartData.Series[seriesIndex];
-                string color = COLORS[seriesIndex % COLORS.Length]; // Cycling through COLORS array
-
-                builder.AppendLine(
-                    $"<span style=\"display: inline-block; margin: 0 10px;\">" +
-                    $"<svg width=\"12\" height=\"12\">" +
-                    $"<circle cx=\"6\" cy=\"6\" r=\"5\" fill=\"{color}\" />" +
-                    $"</svg>" +
-                    $"<span style=\"color: {foregroundColor}; margin-left: 5px;\">{series.Name}</span>" +
-                    $"</span>");
-            }
-
-            builder.AppendLine("</div>");
-        }
-
-        builder.AppendLine("</div>");
-        
-
         return builder.ToString();
     }
 }

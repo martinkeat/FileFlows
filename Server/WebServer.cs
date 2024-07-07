@@ -3,6 +3,7 @@ using System.Text.RegularExpressions;
 using Microsoft.OpenApi.Models;
 using System.Runtime.InteropServices;
 using FileFlows.Client.Services;
+using FileFlows.FlowRunner.Helpers;
 using FileFlows.Plugin;
 using FileFlows.Server.Authentication;
 using FileFlows.Server.Filters;

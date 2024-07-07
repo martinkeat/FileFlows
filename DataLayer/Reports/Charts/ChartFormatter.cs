@@ -15,7 +15,7 @@ public static class ChartFormatter
     /// <param name="formatter">the formatter</param>
     /// <param name="axis">if the value being formatted is on the axis</param>
     /// <returns>the formatted value</returns>
-    internal static string Format(object value, string? formatter, bool axis = false)
+    public static string Format(object value, string? formatter, bool axis = false)
     {
         if (value == null)
             return string.Empty;
