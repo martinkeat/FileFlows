@@ -1,4 +1,5 @@
 using System.Web;
+using FileFlows.FlowRunner.Helpers;
 using FileFlows.Managers;
 using FileFlows.Plugin;
 using FileFlows.Server.Helpers;
@@ -81,10 +82,8 @@ public class ScheduledReportService
 #else
         var dir = Path.Combine(DirectoryHelper.BaseDirectory, "Server/wwwroot");
 #endif
-        string file = Path.Combine(dir, "logo.svg"); //"logo-color-full.svg");
-        if (File.Exists(file))
-            return File.ReadAllText(file);
-        return string.Empty;
+        
+        return GetImageBase64(dir, "report-logo.png");
     }
     
     /// <summary>
@@ -146,4 +145,40 @@ div.chart {
 }
 </style>
 ";
+    /// <summary>
+    /// Converts an image file to a Base64 encoded string and returns it as an HTML img tag.
+    /// </summary>
+    /// <param name="dir">The directory where the image file is located.</param>
+    /// <param name="fileName">The name of the image file.</param>
+    /// <returns>An HTML img tag with the Base64 encoded image, or an empty string if the file does not exist.</returns>
+    public static string GetImageBase64(string dir, string fileName)
+    {
+        string filePath = Path.Combine(dir, fileName);
+        if (File.Exists(filePath))
+        {
+            byte[] fileBytes = File.ReadAllBytes(filePath);
+            string base64String = Convert.ToBase64String(fileBytes);
+            string mimeType = GetMimeType(Path.GetExtension(filePath));
+            return $"<img src=\"data:{mimeType};base64,{base64String}\" alt=\"Logo\">";
+        }
+        return string.Empty;
+    }
+
+    /// <summary>
+    /// Gets the MIME type based on the file extension.
+    /// </summary>
+    /// <param name="extension">The file extension.</param>
+    /// <returns>The MIME type as a string.</returns>
+    private static string GetMimeType(string extension)
+    {
+        return extension.ToLower() switch
+        {
+            ".png" => "image/png",
+            ".jpg" => "image/jpeg",
+            ".jpeg" => "image/jpeg",
+            ".gif" => "image/gif",
+            ".svg" => "image/svg+xml",
+            _ => "application/octet-stream"
+        };
+    }
 }

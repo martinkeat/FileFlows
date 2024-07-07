@@ -19,10 +19,6 @@
   padding-bottom: 0.5rem;
   align-items: baseline;
 }
-.report-output.emailed .report-header .fileflows-logo svg {
-  height: 3rem;
-  width: 100%;
-}
 .report-output.emailed .report-header .report-name {
   font-size: 1.15rem;
   margin-left: 0.75rem;
@@ -92,6 +88,7 @@
   grid-template-columns: repeat(4, 1fr);
 }
 .report-output .report-row > div {
+  background: #eee;
   background: var(--widget-background);
   border-radius: 0.5rem;
   overflow: hidden;
@@ -175,6 +172,7 @@
   position: relative;
   margin-bottom: 2rem;
   min-height: 26rem;
+  background: #eee;
   background: var(--widget-background);
 }
 .report-output .table-container table {
@@ -201,7 +199,8 @@
   left: 0;
   right: 0;
   bottom: 0;
-  border: solid 1px var(--input-background, #313131);
+  border: solid 1px #313131;
+  border-color: var(--input-background, #313131);
   padding-left: 0.5rem;
   white-space: nowrap;
   overflow: hidden;

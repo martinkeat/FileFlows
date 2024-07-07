@@ -16,10 +16,6 @@
       padding-bottom: 0.5rem;
       align-items: baseline;
       .fileflows-logo {
-        svg {
-          height: 3rem;
-          width: 100%;
-        }
       }
 
       .report-name {
@@ -103,6 +99,7 @@
     grid-template-columns: repeat(4, 1fr);
   }
   .report-row > div {
+    background:#eee;
     background: var(--widget-background);
     border-radius: 0.5rem;
     overflow: hidden;
@@ -190,6 +187,7 @@
     position: relative;
     margin-bottom: 2rem;
     min-height: 26rem;
+    background:#eee;
     background: var(--widget-background);
 
     table {
@@ -214,7 +212,8 @@
           left:0;
           right:0;
           bottom:0;
-          border:solid 1px var(--input-background, #313131);
+          border: solid 1px #313131;
+          border-color: var(--input-background, #313131);
           padding-left: 0.5rem;
           white-space: nowrap;
           overflow: hidden;
