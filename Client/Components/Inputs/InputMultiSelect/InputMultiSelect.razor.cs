@@ -9,7 +9,6 @@ namespace FileFlows.Client.Components.Inputs;
 /// </summary>
 public partial class InputMultiSelect: Input<List<object?>>
 {
-
     /// <summary>
     /// Gets or sets the options of the checklist
     /// </summary>
@@ -50,7 +49,7 @@ public partial class InputMultiSelect: Input<List<object?>>
             Value = new List<object?>();
         else if(Options != null)
         {
-            this.Value = this.Value.Select(x =>
+            var allowed  = this.Value.Select(x =>
             {
                 foreach (var opt in this.Options)
                 {
@@ -71,13 +70,17 @@ public partial class InputMultiSelect: Input<List<object?>>
                 }
                 return x;
             }).ToList();
+            
+            this.Value.Clear();
+            if(allowed.Count > 0)
+                this.Value.AddRange(allowed);
         }
     }
-
+    
     /// <inheritdoc />
     public override Task<bool> Validate()
     {
-        if (Value?.Any() == true)
+        if (Value.Any() == true)
             return Task.FromResult(true);
         ErrorMessage = Translater.Instant("Validators.Required");
         return Task.FromResult(false);
@@ -150,6 +153,7 @@ public partial class InputMultiSelect: Input<List<object?>>
             foreach (var opt in Options)
                 Value.Add(opt.Value);
         }
+        ValueUpdated();
     }
 
     /// <summary>
@@ -166,6 +170,7 @@ public partial class InputMultiSelect: Input<List<object?>>
             Value.Clear();
             Value.Add(null);
         }
+        ValueUpdated();
     }
 
     /// <summary>
@@ -183,6 +188,7 @@ public partial class InputMultiSelect: Input<List<object?>>
             Value.Remove(null);
             Value.Add(optionValue);
         }
+        ValueUpdated();
     }
 
     /// <summary>

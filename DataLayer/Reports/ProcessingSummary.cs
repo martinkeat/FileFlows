@@ -115,8 +115,7 @@ public class ProcessingSummary: Report
             ndTime[date] += (int)(file.ProcessingEnded - file.ProcessingStarted).TotalSeconds;
             
             
-
-            string libraryName = libraryUids.Count > 0 ? file.LibraryName : string.Empty;
+            string libraryName = libraryUids.Count > 0 ? file.LibraryName : "All Libraries";
             libDataCount.TryAdd(libraryName, new Dictionary<DateTime, long>());
             var ldCount = libDataCount[libraryName];
             ldCount.TryAdd(date, 0);

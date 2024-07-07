@@ -330,9 +330,9 @@ public partial class ScheduledReports : ListPage<Guid, ScheduledReport>
             item.Report,
             item.Recipients,
             item.Enabled,
-            Nodes = rd == null ? null : GetUidValues(rd.NodeSelection, item.Nodes),
-            Flows = rd == null ? null : GetUidValues(rd.FlowSelection, item.Flows),
-            Libraries = rd == null ? null : GetUidValues(rd.LibrarySelection, item.Libraries),
+            Nodes = GetUidValues(rd?.NodeSelection, item.Nodes),
+            Flows = GetUidValues(rd?.FlowSelection, item.Flows),
+            Libraries = GetUidValues(rd?.LibrarySelection, item.Libraries),
             item.Direction,
             DayOfWeek = dayOfWeek,
             DayOfMonth = dayOfMonth,
@@ -349,15 +349,15 @@ public partial class ScheduledReports : ListPage<Guid, ScheduledReport>
     /// <param name="selection">the selection</param>
     /// <param name="uids">the UIDs</param>
     /// <returns>the UIDs value</returns>
-    private object GetUidValues(ReportSelection selection, Guid[] uids)
+    private List<object> GetUidValues(ReportSelection? selection, Guid[] uids)
     {
-        if (selection == ReportSelection.None)
-            return null;
+        if (selection is null or ReportSelection.None)
+            return new();
         if (uids == null)
-            return null;
+            return new();
         if (uids.Length == 0)
-            return new object[] { null}; // this is any
-        return uids;
+            return new List<object> { null }; // this is any
+        return uids.Select(x => (object)x).ToList();
     }
 
     /// <summary>

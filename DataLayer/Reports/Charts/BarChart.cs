@@ -143,7 +143,7 @@ public class BarChart : Chart
             int y = EmailChartHeight - xAxisLabelOffset - barHeight;
 
             // Bar color
-            string color = "#007bff"; // Blue color
+            string color = COLORS[0]; // Blue color
 
             // Tooltip
             string tooltip = $"{label}: {value}";

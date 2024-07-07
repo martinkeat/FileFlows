@@ -77,9 +77,19 @@ public class PieChart : Chart
             string color = COLORS[count % COLORS.Length];
             string tooltip = $"{label}: {value} ({percentage:F2}%)";
 
-            builder.AppendLine(
-                $"<path data-title=\"{System.Net.WebUtility.HtmlEncode(tooltip)}\" class=\"slice\" d=\"M{centerX},{centerY} L{x1},{y1} A{radius},{radius} 0 {largeArcFlag},1 {x2},{y2} Z\" fill=\"{color}\">" +
-                "</path>");
+            if (chartData.Data.Count == 1)
+            {
+                // Special case for a single item
+                builder.AppendLine(
+                    $"<circle data-title=\"{System.Net.WebUtility.HtmlEncode(tooltip)}\" class=\"slice\" cx=\"{centerX}\" cy=\"{centerY}\" r=\"{radius}\" fill=\"{color}\">" +
+                    "</circle>");
+            }
+            else
+            {
+                builder.AppendLine(
+                    $"<path data-title=\"{System.Net.WebUtility.HtmlEncode(tooltip)}\" class=\"slice\" d=\"M{centerX},{centerY} L{x1},{y1} A{radius},{radius} 0 {largeArcFlag},1 {x2},{y2} Z\" fill=\"{color}\">" +
+                    "</path>");
+            }
 
             legendEntries.Add((label, color, percentage));
 
