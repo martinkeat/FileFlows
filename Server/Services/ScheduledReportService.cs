@@ -56,11 +56,18 @@ public class ScheduledReportService
     /// <param name="reportHtml">the HTML of the report</param>
     public async Task Email(string reportName, string[] recipients, string subject, string reportHtml)
     {
-        string html = GetCss() + "<div class=\"report-output emailed\">\n" +
-                               "<div class=\"report-header\"><div class=\"fileflows-logo\">" + GetLogoSvg() + "</div>\n" + 
-                               "<div class=\"report-name\">" + HttpUtility.HtmlEncode(reportName) + "</div></div>\n" +
-                               reportHtml +
-                               "</div>";
+        string html = 
+            "<html>\n" +
+            "<head><title>" + HttpUtility.HtmlEncode(subject) + "</title>\n" +
+            GetCss() + "\n" +
+            "</head>\n<body>\n" +
+            "<div class=\"report-output emailed\">\n" +
+            "<div class=\"report-header\"><div class=\"fileflows-logo\">" + GetLogoSvg() + "</div>\n" +
+            "<div class=\"report-name\">" + HttpUtility.HtmlEncode(reportName) + "</div></div>\n" +
+            reportHtml +
+            "</div>" +
+            "</body>" + 
+            "M/html>";
         await Emailer.Send(recipients, subject, html, isHtml: true);
     }
     /// <summary>
