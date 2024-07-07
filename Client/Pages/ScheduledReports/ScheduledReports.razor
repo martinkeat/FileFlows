@@ -38,6 +38,14 @@
                         <span class="description"><span>@rd.Description</span></span>
                         <div class="info">
                             <IconValue Color="IconValueColor.Blue" Icon="fas fa-chart-pie" Value="@item.Report.Name" />
+                            @if(item.LastSentUtc.Year < 2020)
+                            {
+                                <IconValue Color="IconValueColor.Orange" Icon="fas fa-clock" Value="@lblNever" Tooltip="@lblLastSent"/>
+                            }
+                            else
+                            {
+                                <IconValue Color="IconValueColor.Green" Icon="fas fa-clock" Value="@item.LastSentUtc.ToString("d MMMM")" Tooltip="@lblLastSent"/>
+                            }
                         </div>
                     </div>
                     <div class="right">

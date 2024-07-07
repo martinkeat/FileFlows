@@ -869,6 +869,10 @@
     },
     "ScheduledReport": {
       "Title": "Scheduled Report",
+      "Labels": {
+        "LastSent": "Last Sent",
+        "Never": "Never"
+      },
       "Fields": {
         "Name-Help": "The name of the report, this will appear in the subject of the email sent.",
         "Report": "Report",

@@ -25,11 +25,6 @@ public class ScheduledReportWorker:ServerWorker
         if (LicenseHelper.IsLicensed(LicenseFlags.Reporting) == false)
             return; // not licensed
         
-        #if(!DEBUG)
-        if (DateTime.Now.Hour != 1)
-            return; // only run this at 1 am
-        #endif
-
         var service = ServiceLoader.Load<ScheduledReportService>();
         var reports = service.GetAll().Result.Where(x => x.Enabled).ToList();
         if (reports.Count == 0)
@@ -44,12 +39,14 @@ public class ScheduledReportWorker:ServerWorker
             if (report.LastSentUtc > DateTime.UtcNow.AddHours(-12))
                 continue; // prevent the system being reboot and sending the same report multiple times
 #endif
+            bool forceSend = false;
             
             switch (report.Schedule)
             {
                 case ReportSchedule.Daily:
                     startLocal = DateTime.Now.Date.AddDays(-1);
                     endLocal = DateTime.Now.Date.AddMilliseconds(-1);
+                    forceSend = report.LastSentUtc < DateTime.Now.AddDays(-1);
                     break;
                 case ReportSchedule.Weekly:
                     if ((int)DateTime.Now.DayOfWeek != report.ScheduleInterval)
@@ -57,6 +54,7 @@ public class ScheduledReportWorker:ServerWorker
                     
                     startLocal = DateTime.Now.Date.AddDays(-71);
                     endLocal = DateTime.Now.Date.AddMilliseconds(-1);
+                    forceSend = report.LastSentUtc < startLocal.ToUniversalTime().AddDays(-1);
                     break;
                 case ReportSchedule.Monthly:
                     int currentDay = DateTime.Now.Day;
@@ -91,11 +89,16 @@ public class ScheduledReportWorker:ServerWorker
 
                     scheduleDay = Math.Min(report.ScheduleInterval, daysInCurrentMonth);
                     endLocal = new DateTime(DateTime.Now.Year, currentMonth, scheduleDay).AddMilliseconds(-1);
+                    forceSend = report.LastSentUtc < startLocal.ToUniversalTime().AddDays(-1);
                     
                     break;
                 default:
                     continue;
             }
+#if(!DEBUG)
+            if (forceSend == false && DateTime.Now.Hour != 1)
+                return; // only run this at 1 am
+#endif
 
             Dictionary<string, object> model = new();
             model["Flow"] = report.Flows;

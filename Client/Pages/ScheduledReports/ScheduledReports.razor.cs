@@ -1,8 +1,6 @@
 using FileFlows.Client.Components;
 using FileFlows.Client.Components.Inputs;
 using FileFlows.Plugin;
-using Humanizer;
-using Microsoft.AspNetCore.Authorization;
 
 namespace FileFlows.Client.Pages;
 
@@ -20,7 +18,7 @@ public partial class ScheduledReports : ListPage<Guid, ScheduledReport>
     public override string ApiUrl => "/api/scheduled-report";
 
     private List<ReportDefinition> ReportDefinitions;
-    private string lblDaily, lblWeekly, lblMonthly;
+    private string lblDaily, lblWeekly, lblMonthly, lblLastSent, lblNever;
 
     /// <summary>
     /// The types we can show in the report editor
@@ -57,6 +55,9 @@ public partial class ScheduledReports : ListPage<Guid, ScheduledReport>
         lblDaily = Translater.Instant($"Enums.{nameof(ReportSchedule)}.{nameof(ReportSchedule.Daily)}");
         lblWeekly = Translater.Instant($"Enums.{nameof(ReportSchedule)}.{nameof(ReportSchedule.Weekly)}");
         lblMonthly = Translater.Instant($"Enums.{nameof(ReportSchedule)}.{nameof(ReportSchedule.Monthly)}");
+
+        lblLastSent = Translater.Instant("Pages.ScheduledReport.Labels.LastSent");
+        lblNever = Translater.Instant("Pages.ScheduledReport.Labels.Never");
     }
 
     /// <inheritdoc />
