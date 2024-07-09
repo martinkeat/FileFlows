@@ -76,6 +76,21 @@ public abstract class ImageChart
         Font = family.CreateFont(11 * Scale, FontStyle.Regular);
     }
 
+    /// <summary>
+    /// Gets the image size to use
+    /// </summary>
+    /// <param name="customWidth">the custom width</param>
+    /// <param name="customHeight">the custom height</param>
+    /// <returns>the image size</returns>
+    protected (int Width, int Height) GetImageSize(int? customWidth, int? customHeight)
+    {
+        float width = customWidth ?? EmailChartWidth;
+        float height = customHeight ?? EmailChartHeight;
+        width *= Scale;
+        height *= Scale;
+        return ((int)Math.Round(width), (int)Math.Round(height));
+    }
+
 
     /// <summary>
     /// Converts an Image object to a base64-encoded PNG and returns an HTML img tag.
