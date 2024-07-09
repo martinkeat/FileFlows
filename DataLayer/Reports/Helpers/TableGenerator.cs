@@ -167,16 +167,25 @@ public class TableGenerator
     /// <param name="columns">the name of the columns</param>
     /// <param name="data">The collection of data to generate the HTML table from.</param>
     /// <param name="widths">Optional custom widths for the columns</param>
+    /// <param name="emailing">If the table will be emailed</param>
     /// <returns>An HTML string representing the table.</returns>
-    public static string GenerateMinimumTable(string title, string[] columns, object[][] data, string[]? widths = null)
+    public static string GenerateMinimumTable(string title, string[] columns, object[][] data, string[]? widths = null, bool emailing = false)
     {
         if (data.Any() != true)
             return string.Empty;
 
         var sb = new StringBuilder();
-        sb.AppendLine("<div class=\"min-table\">");
-        sb.AppendLine($"<span class=\"title\">{HttpUtility.HtmlEncode(title)}</span>");
-        sb.AppendLine("<table class=\"table\">");
+        if (emailing)
+        {
+            sb.AppendLine("<div>");
+            sb.AppendLine($"<span style=\"{ReportBuilder.EmailTitleStyling}\">{HttpUtility.HtmlEncode(title)}</span>");
+            sb.AppendLine("<table style=\"width:100%;text-align:left\">");
+            
+        }else{
+            sb.AppendLine("<div class=\"min-table\">");
+            sb.AppendLine($"<span class=\"title\">{HttpUtility.HtmlEncode(title)}</span>");
+            sb.AppendLine("<table class=\"table\">");
+        }
 
         // Add table headers
         sb.Append("<thead>");
@@ -185,11 +194,12 @@ public class TableGenerator
         {
             var column = columns[i];
             if (widths != null && string.IsNullOrWhiteSpace(widths[i]) == false)
-                sb.AppendFormat("<th style=\"width:{1}\"><span>{0}</span></th>",
-                    System.Net.WebUtility.HtmlEncode(column), widths[i]);
+                sb.AppendFormat("<th style=\"width:{1}{2}\"><span>{0}</span></th>",
+                    System.Net.WebUtility.HtmlEncode(column), widths[i], emailing && i > 0 ? "text-align:center" : string.Empty);
             else
-                sb.AppendFormat("<th><span>{0}</span></th>",
-                    System.Net.WebUtility.HtmlEncode(column));
+                sb.AppendFormat("<th{1}><span>{0}</span></th>",
+                    System.Net.WebUtility.HtmlEncode(column),
+                    emailing && i > 0 ? " style=\"text-align:center\"" : string.Empty);
         }
 
         sb.Append("</tr>");
@@ -201,24 +211,35 @@ public class TableGenerator
         foreach (var row in data)
         {
             sb.Append("<tr>");
-            foreach (var col in row)
+            
+            for(int i=0;i<row.Length;i++)
             {
+                var col = row[i];
+                sb.Append("<td");
+                if (emailing)
+                {
+                    sb.Append(" style=\"line-height:24px;");
+                    if (i > 0)
+                        sb.Append("text-align:center");
+                    sb.Append('"');
+                }
+                sb.Append('>');
                 if (col is int or long)
                 {
-                    sb.AppendFormat("<td>{0:N0}</td>", col); // Format with thousands separator, no decimals
+                    sb.AppendFormat("{0:N0}</td>", col); // Format with thousands separator, no decimals
                 }
                 else if (col is DateTime dt)
                 {
-                    sb.AppendFormat("<td>{0:d MMMM yyyy}</td>", dt);
+                    sb.AppendFormat("{0:d MMMM yyyy}</td>", dt);
                 }
                 else if (col is IFormattable numericValue)
                 {
                     // Format numeric value with thousands separator in current culture
-                    sb.AppendFormat("<td>{0}</td>", numericValue.ToString("N", CultureInfo.CurrentCulture));
+                    sb.AppendFormat("{0}</td>", numericValue.ToString("N", CultureInfo.CurrentCulture));
                 }
                 else
                 {
-                    sb.AppendFormat("<td>{0}</td>", System.Net.WebUtility.HtmlEncode(col.ToString()));
+                    sb.AppendFormat("{0}</td>", System.Net.WebUtility.HtmlEncode(col.ToString()));
                 }
             }
 

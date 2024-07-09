@@ -1,5 +1,5 @@
+using System.Text.RegularExpressions;
 using System.Web;
-using FileFlows.FlowRunner.Helpers;
 using FileFlows.Managers;
 using FileFlows.Plugin;
 using FileFlows.Server.Helpers;
@@ -57,33 +57,30 @@ public class ScheduledReportService
     /// <param name="reportHtml">the HTML of the report</param>
     public async Task Email(string reportName, string[] recipients, string subject, string reportHtml)
     {
-        string html = 
-            "<html lang=\"en\">\n" +
-            "<head><title>" + HttpUtility.HtmlEncode(subject) + "</title>\n" +
-            GetCss() + "\n" +
-            "</head>\n<body>\n" +
-            "<div class=\"report-output emailed\">\n" +
-            "<div class=\"report-header\"><div class=\"fileflows-logo\">" + GetLogoSvg() + "</div>\n" +
-            "<div class=\"report-name\">" + HttpUtility.HtmlEncode(reportName) + "</div></div>\n" +
-            reportHtml +
-            "</div>" +
-            "</body>" + 
-            "</html>";
+        string html = @$"
+<html lang=""en"">
+<head>
+    <title>{HttpUtility.HtmlEncode(subject)}</title>
+</head>
+<body>
+    <div class=""report-output emailed"" style=""font-family: sans-serif; font-size:12px; text-align:center;max-width:1200px;margin:auto"">
+        <table style=""width: 100%;border-bottom:solid 3px #999;margin-bottom:10px"">
+            <tr>
+                <td style=""width:260px"">
+                    <img src=""logo.png"" />
+                </td>
+                <td style=""text-align:left;font-size:17px"">
+                    <div style=""padding-top: 14px;"">{HttpUtility.HtmlEncode(reportName)}</div>
+                </td>
+            </tr>
+        </table>
+        <br />
+        {reportHtml}
+    </div>
+</body>
+</html>";
+
         await Emailer.Send(recipients, subject, html, isHtml: true);
-    }
-    /// <summary>
-    /// Gets Logo SVG 
-    /// </summary>
-    /// <returns>the Logo SVG</returns>
-    private string GetLogoSvg()
-    {
-#if (DEBUG)
-        var dir = "wwwroot";
-#else
-        var dir = Path.Combine(DirectoryHelper.BaseDirectory, "Server/wwwroot");
-#endif
-        
-        return GetImageBase64(dir, "report-logo.png");
     }
     
     /// <summary>
@@ -98,9 +95,21 @@ public class ScheduledReportService
         var dir = Path.Combine(DirectoryHelper.BaseDirectory, "Server/wwwroot/css");
 #endif
         string file = Path.Combine(dir, "report-styles.css");
-        if (System.IO.File.Exists(file))
-            return "<style>\n" + System.IO.File.ReadAllText(file) + "\n</style>\n";
-        return string.Empty;
+        if (File.Exists(file) == false)
+            return string.Empty;
+        var css = File.ReadAllText(file);
+
+        var index = css.IndexOf(".report-output.onscreen", StringComparison.Ordinal);
+        if (index > 0)
+            css = css[0..index].Trim();
+            
+        // Regex to remove all CSS variable declarations
+        css = Regex.Replace(css, @"--[^:]+:[^;]+;", "");
+
+        // Regex to replace all instances of var(...) with their fallback values
+        css = Regex.Replace(css, @"var\(--[^,]+, ([^)]+)\)", "$1");
+        
+        return"<style>\n" + css + "\n</style>\n";
     }
 
 

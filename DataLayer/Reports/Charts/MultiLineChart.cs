@@ -14,12 +14,19 @@ public class MultiLineChart : Chart
     /// </summary>
     /// <param name="data">The data for the chart.</param>
     /// <param name="yAxisFormatter">Optional formatter for the y-axis labels</param>
-    /// <param name="generateSvg">If the image generated should be an SVG image, else the image will require javascript to render</param>
+    /// <param name="emailing">If the image generated is being emailed</param>
     /// <returns>The chart content</returns>
-    public static string Generate(MultilineChartData data, string? yAxisFormatter = null, bool generateSvg = false)
-        => $"<div class=\"chart\"><h2 class=\"title\">{data.Title}</h2>" +
-           (generateSvg ? Svg(data) : JavaScript(data, yAxisFormatter))
-           + "</div>";
+    public static string Generate(MultilineChartData data, string? yAxisFormatter = null, bool emailing = false)
+    {
+        if (emailing == false)
+            return $"<div class=\"chart\"><h2 class=\"title\">{HttpUtility.HtmlEncode(data.Title)}</h2>{JavaScript(data, yAxisFormatter)}</div>";
+        
+        return @$"
+<div>
+    <span style=""{ReportBuilder.EmailTitleStyling}"">{HttpUtility.HtmlEncode(data.Title)}</span>
+    {Svg(data)}
+</div>";
+    }
 
     /// <summary>
     /// Generates an multi line chart using javascript

@@ -46,7 +46,7 @@ public static class DateBasedChartHelper
                 Name = seriesItem.Key,
                 Data = dailyLabels.Select(label => (double)seriesItem.Value.GetValueOrDefault(label, 0)).ToArray()
             }).ToArray()
-        }, generateSvg: emailing) ?? string.Empty;
+        }, emailing: emailing) ?? string.Empty;
 
         return result;
     }

@@ -82,7 +82,7 @@ public class Languages : Report
         if (dataAudio.Count == 0 && dataSubtitle.Count == 0 && dataVideo.Count == 0)
             return string.Empty;
 
-        ReportBuilder builder = new();
+        ReportBuilder builder = new(emailing);
         builder.StartRow(dataVideo.Count > 0 ? 4 : 3);
         builder.AddPeriodSummaryBox(minDateUtc ?? DateTime.MinValue, maxDateUtc ?? DateTime.MaxValue);
         if(dataVideo.Count > 0)
@@ -94,45 +94,45 @@ public class Languages : Report
         if (dataVideo.Count > 0)
         {
             builder.StartRow(2);
-            builder.AppendLine(TreeMap.Generate(new ()
+            builder.AddRowItem(TreeMap.Generate(new ()
             {
                 Title = "Video Languages",
                 Data = dataVideo,
             }, emailing));
-            builder.AppendLine(TableGenerator.GenerateMinimumTable("Top Video Languages", ["Language", "Count"], 
+            builder.AddRowItem(TableGenerator.GenerateMinimumTable("Top Video Languages", ["Language", "Count"], 
                 dataVideo.OrderByDescending(x => x.Value).Select(x => new object[] { x.Key, x.Value })
                     .Take(TableGenerator.MIN_TABLE_ROWS).ToArray()
-                ));
+                , emailing: emailing));
             builder.EndRow();
         }
             
         if (dataAudio.Count > 0)
         {
             builder.StartRow(2);
-            builder.AppendLine(TreeMap.Generate(new ()
+            builder.AddRowItem(TreeMap.Generate(new ()
             {
                 Title = "Audio Languages",
                 Data = dataAudio,
             }, emailing));
-            builder.AppendLine(TableGenerator.GenerateMinimumTable("Top Audio Languages", ["Language", "Count"], 
+            builder.AddRowItem(TableGenerator.GenerateMinimumTable("Top Audio Languages", ["Language", "Count"], 
                 dataAudio.OrderByDescending(x => x.Value).Select(x => new object[] { x.Key, x.Value })
                     .Take(TableGenerator.MIN_TABLE_ROWS).ToArray()
-            ));
+                , emailing: emailing));
             builder.EndRow();
         }
         
         if (dataSubtitle.Count > 0)
         {
             builder.StartRow(2);
-            builder.AppendLine(TreeMap.Generate(new ()
+            builder.AddRowItem(TreeMap.Generate(new ()
             {
                 Title = "Subtitle Languages",
                 Data = dataSubtitle,
             }, emailing));
-            builder.AppendLine(TableGenerator.GenerateMinimumTable("Top Subtitle Languages", ["Language", "Count"], 
+            builder.AddRowItem(TableGenerator.GenerateMinimumTable("Top Subtitle Languages", ["Language", "Count"], 
                 dataSubtitle.OrderByDescending(x => x.Value).Select(x => new object[] { x.Key, x.Value })
                     .Take(TableGenerator.MIN_TABLE_ROWS).ToArray()
-            ));
+                , emailing: emailing));
             builder.EndRow();
         }
 

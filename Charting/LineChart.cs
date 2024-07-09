@@ -7,7 +7,7 @@ using SixLabors.ImageSharp.Processing;
 
 namespace FileFlows.Server.Charting;
 
-public class LineChart : ImageChart 
+public class LineChart : ImageChart
 {
     /// <summary>
     /// Generates an ImageSharp image based on MultilineChartData.
@@ -20,12 +20,14 @@ public class LineChart : ImageChart
     {
         var width = customWidth ?? EmailChartWidth;
         var height = customHeight ?? EmailChartHeight;
+        width *= 2;
+        height *= 2;
         // Initialize ImageSharp Image
-        using var image = new Image<Rgba32>(width, height);
+        using var image = new Image<Rgba32>(width, height); //, Rgba32.ParseHex("#eeeeee"));
 
         // Define chart dimensions and positions
         int chartStartX = 50;
-        int chartStartY = 50;
+        int chartStartY = 10;
         int chartEndX = 20;
         int chartWidth = width - chartStartX - chartEndX;
         int chartHeight = height - chartStartY - 40; // Adjusted for x-axis label
@@ -36,6 +38,10 @@ public class LineChart : ImageChart
         // Draw chart elements using Mutate()
         image.Mutate(ctx =>
         {
+            ctx.SetGraphicsOptions(options =>
+            {
+                options.Antialias = true;
+            });
             // Draw background
             ctx.Fill(Rgba32.ParseHex("#e4e4e4"), new Rectangle(chartStartX, chartStartY, chartWidth, chartHeight));
 
@@ -56,29 +62,37 @@ public class LineChart : ImageChart
     {
         const int yAxisLabelFrequency = 4;
         const int yAxisLabelOffset = 10;
-        const string lineColor = "#afafaf";
-        const string foregroundColor = "#000";
 
-        int yAxisHeight = chartHeight;
+        int yAxisHeight = chartHeight;// Define font options with right alignment
+
         for (int i = 0; i <= yAxisLabelFrequency; i++)
         {
             double value = (maxValue / yAxisLabelFrequency) * i;
             int y = chartStartY + chartHeight - (int)((value / maxValue) * yAxisHeight);
 
             // Draw grid line
-            ctx.DrawLine(Rgba32.ParseHex(lineColor), 1, new PointF(chartStartX, y), new PointF(chartStartX + chartWidth, y));
+            ctx.DrawLine(LineColor, 1 * Scale, new PointF(chartStartX, y), new PointF(chartStartX + chartWidth, y));
 
+            if (i == 0)
+                continue; // don't draw the first y-axis label it overlaps the x tick label
+
+            // Draw y-axis tick
+            ctx.DrawLine(LineColor, 1 * Scale, new PointF(chartStartX - 5, y), new PointF(chartStartX, y));
+            
             // Format y-axis label
             object yValue = string.IsNullOrWhiteSpace(chartData.YAxisFormatter) ? (object)Convert.ToInt64(value) : (object)value;
             string yLabel = ChartFormatter.Format(yValue, chartData.YAxisFormatter, axis: true);
 
-            // Draw y-axis label
-            ctx.DrawText(yLabel, Font, Rgba32.ParseHex(foregroundColor), new PointF(chartStartX - yAxisLabelOffset, y - 5));
-            
-            // Draw y-axis tick
-            ctx.DrawLine(Rgba32.ParseHex(lineColor), 1, new PointF(chartStartX - 5, y), new PointF(chartStartX, y));
-        }
+            // Measure the size of the text
+            var textOptions = new TextOptions(Font);
+            var textSize = TextMeasurer.MeasureSize(yLabel, textOptions);
 
+            // Calculate the position for right-aligned text
+            var labelPosition = new PointF(chartStartX - yAxisLabelOffset - textSize.Width, y - textSize.Height / 2 - 2);
+            
+            // Draw y-axis label
+            ctx.DrawText(yLabel, Font, TextBrush, TextPen, labelPosition);
+        }
         // Draw y-axis main label if provided
         // if (!string.IsNullOrEmpty(chartData.YAxisLabel))
         // {
@@ -91,9 +105,7 @@ public class LineChart : ImageChart
         int totalLines = chartData.Labels.Length;
         int maxLabels = 10;
         int step = Math.Max(totalLines / maxLabels, 1);
-        int xAxisLabelOffset = 40;
-        const string lineColor = "#afafaf";
-        const string foregroundColor = "#000";
+        int xAxisLabelOffset = 10;
 
         // Calculate the total width needed by the lines and spacing
         double xStep = (double)chartWidth / (totalLines - 1);
@@ -108,18 +120,25 @@ public class LineChart : ImageChart
             xAxisFormat = "{0:HH}:00";
         else if (totalDays <= 180)
             xAxisFormat = "{0:%d} {0:MMM}";
-
+        
         // Draw x-axis labels and ticks
         for (int i = 0; i < totalLines; i += step)
         {
             string label = string.Format(xAxisFormat, chartData.Labels[i].ToLocalTime());
             int x = chartStartX + (int)(i * xStep);
 
-            // Draw x-axis label
-            ctx.DrawText(label, Font, Rgba32.ParseHex(foregroundColor), new PointF(x, chartStartY + chartHeight + xAxisLabelOffset));
-
             // Draw x-axis tick
-            ctx.DrawLine(Rgba32.ParseHex(lineColor), 1, new PointF(x, chartStartY + chartHeight), new PointF(x, chartStartY + chartHeight + 5));
+            ctx.DrawLine(LineColor, 1 * Scale, new PointF(x, chartStartY + chartHeight), new PointF(x, chartStartY + chartHeight + 5));
+            
+            // Measure the size of the text
+            var textOptions = new TextOptions(Font);
+            var textSize = TextMeasurer.MeasureSize(label, textOptions);
+
+            // Calculate the position for right-aligned text
+            var labelPosition = new PointF(x - (textSize.Width / 2), chartStartY + chartHeight + xAxisLabelOffset);
+            
+            // Draw x-axis label
+            ctx.DrawText(label, Font, TextBrush, TextPen, labelPosition);
         }
     }
 
@@ -149,7 +168,7 @@ public class LineChart : ImageChart
             // Draw polyline for the series
             for (int i = 1; i < points.Count; i++)
             {
-                ctx.DrawLine(Rgba32.ParseHex(color), lineThickness, points[i - 1], points[i]);
+                ctx.DrawLine(Rgba32.ParseHex(color), lineThickness * Scale, points[i - 1], points[i]);
             }
 
         }

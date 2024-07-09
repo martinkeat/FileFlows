@@ -1,6 +1,7 @@
 using System.Text;
 using SixLabors.Fonts;
 using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Drawing.Processing;
 using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.ImageSharp.PixelFormats;
 
@@ -11,11 +12,24 @@ public abstract class ImageChart
     /// <summary>
     /// The width for emailed charts
     /// </summary>
-    public const int EmailChartWidth = 590;
+    public const int EmailChartWidth = 560;
     /// <summary>
     /// The height for emailed charts
     /// </summary>
-    public const int EmailChartHeight = 210;
+    public const int EmailChartHeight = 200;
+    
+    /// <summary>
+    /// The brush used for text
+    /// </summary>
+    protected readonly SolidBrush TextBrush = new SolidBrush(Color.Black);
+    /// <summary>
+    /// The pen used for text
+    /// </summary>
+    protected readonly Pen TextPen = Pens.Solid(Color.Black, 1);
+    /// <summary>
+    /// The color used for lines on the chart
+    /// </summary>
+    protected Rgba32 LineColor = Rgba32.ParseHex("#afafaf");
     
     /// <summary>
     /// The colors to show on the chart
@@ -33,22 +47,37 @@ public abstract class ImageChart
         "#daa520", "#5f9ea0", "#7f007f", "#808000", "#3cb371"
     ];
     protected static Font Font;
+
+    /// <summary>
+    /// Get the scaling of the image, so we draw larger for better quality
+    /// </summary>
+    protected const float Scale = 2f;
+
+    protected static string BaseDirectory;
     
     static ImageChart ()
     {
+        if (string.IsNullOrEmpty(BaseDirectory))
+        {
+            var dllDir = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+            if (string.IsNullOrEmpty(dllDir))
+                throw new Exception("Failed to find DLL directory");
+            BaseDirectory = new DirectoryInfo(dllDir).Parent?.FullName ?? string.Empty;
+        }
+        
         if (Font != null)
             return;
         
 #if (DEBUG)
         var dir = "wwwroot";
 #else
-        var dir = Path.Combine(DirectoryHelper.BaseDirectory, "Server/wwwroot");
+        var dir = Path.Combine(BaseDirectory, "Server/wwwroot");
 #endif
-        string font = Path.Combine(dir, "font.ttf");
+        string font = Path.Combine(dir, "report-font.ttf");
         FontCollection collection = new();
         var family = collection.Add(font);
         // collection.TryGet("Font Name", out FontFamily font);
-        Font = family.CreateFont(12, FontStyle.Regular);
+        Font = family.CreateFont(10 * Scale, FontStyle.Regular);
     }
 
 
@@ -70,8 +99,7 @@ public abstract class ImageChart
         StringBuilder imgTagBuilder = new StringBuilder();
         imgTagBuilder.Append("<img ");
         imgTagBuilder.Append($"src=\"data:image/png;base64,{base64Image}\" ");
-        imgTagBuilder.Append($"width=\"{image.Width}\" ");
-        imgTagBuilder.Append($"height=\"{image.Height}\" ");
+        imgTagBuilder.Append($"style=\"width:100%;height:auto\" ");
         imgTagBuilder.Append("/>");
 
         return imgTagBuilder.ToString();

@@ -1,6 +1,3 @@
-using System.Numerics;
-using System.Text;
-using System.Web;
 using FileFlows.DataLayer.Reports.Charts;
 using FileFlows.DataLayer.Reports.Helpers;
 using FileFlows.Plugin;
@@ -132,13 +129,12 @@ public class ProcessingSummary: Report
             ldTime[date] += (int)(file.ProcessingEnded - file.ProcessingStarted).TotalSeconds;
         }
 
-        ReportBuilder builder = new();
+        ReportBuilder builder = new(emailing);
 
-        builder.StartRow(4);
+        builder.StartRow(3);
         builder.AddPeriodSummaryBox(minDateUtc.Value, maxDateUtc.Value);
         foreach (var sum in new[]
                  {
-                     ("Period", minDateUtc.Value.ToLocalTime().ToString("d MMM") +" - " + maxDateUtc.Value.ToLocalTime().ToString("d MMM"), ReportSummaryBox.IconType.Clock, ReportSummaryBox.BoxColor.Info),
                      ("Total Files", totalFiles.ToString("N0"), ReportSummaryBox.IconType.File, ReportSummaryBox.BoxColor.Info),
                      ("Failed Files", failedFiles.ToString("N0"), ReportSummaryBox.IconType.ExclamationCircle, ReportSummaryBox.BoxColor.Error),
                  })
@@ -254,7 +250,7 @@ public class ProcessingSummary: Report
                         count += (int)v;
                     return count;
                 }).OrderByDescending(x => x.Value).ToDictionary(x => x.Key, x => x.Value);
-            builder.AppendLine(PieChart.Generate(new()
+            builder.AddRowItem(PieChart.Generate(new()
             {
                 Title = "Libraries",
                 Data = t
@@ -281,7 +277,7 @@ public class ProcessingSummary: Report
                         return count;
                     }).OrderByDescending(x => x.Value).ToDictionary(x => x.Key, x => x.Value);
                 
-                builder.AppendLine(BarChart.Generate(new BarChartData()
+                builder.AddRowItem(BarChart.Generate(new BarChartData()
                 {
                     Title = chart.Item1,
                     Data = t2,
@@ -300,7 +296,7 @@ public class ProcessingSummary: Report
     {
         builder.StartRow(2);
             
-        builder.AppendLine(MultiLineChart.Generate(new MultilineChartData
+        builder.AddRowItem(MultiLineChart.Generate(new MultilineChartData
         {
             Title = sumRow.ChartTitle,
             Labels = labels,
@@ -310,12 +306,14 @@ public class ProcessingSummary: Report
                 Name = seriesItem.Key,
                 Data = labels.Select(label => (double)seriesItem.Value.GetValueOrDefault(label, 0)).ToArray()
             }).ToArray()
-        }, generateSvg: emailing));
-            
-        builder.AppendLine(TableGenerator.GenerateMinimumTable(sumRow.TableTitle,
+        }, emailing: emailing));
+
+        var table = TableGenerator.GenerateMinimumTable(sumRow.TableTitle,
             ["Name", sumRow.TableUnitColumn],
-            sumRow.TableData
-        ));
+            sumRow.TableData, emailing: emailing
+        );
+            
+        builder.AddRowItem(table);
             
         builder.EndRow();
     }

@@ -49,7 +49,7 @@ public static class DataLayerDelegates
 #else
         var dir = Path.Combine(DirectoryHelper.BaseDirectory, "Server/wwwroot");
 #endif
-        string font = Path.Combine(dir, "font.ttf");
+        string font = Path.Combine(dir, "report-font.ttf");
         FontCollection collection = new();
         var family = collection.Add(font);
         // collection.TryGet("Font Name", out FontFamily font);

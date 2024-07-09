@@ -67,7 +67,7 @@ public class LibrarySavings : Report
         if (librarySavings.Count == 0)
             return string.Empty;
 
-        ReportBuilder builder = new();
+        ReportBuilder builder = new(emailing);
         
         builder.StartRow(3);
         builder.AddPeriodSummaryBox(minDateUtc ?? DateTime.MinValue, maxDateUtc ?? DateTime.MaxValue);
@@ -88,7 +88,7 @@ public class LibrarySavings : Report
                 _ => "success"
             };
             builder.StartRow(1);
-            builder.AppendLine("<div class=\"report-flex-data\">" +
+            builder.AddRowItem("<div class=\"report-flex-data\">" +
                                $"<div class=\"icon {iconClass}\">{ReportSummaryBox.GetIcon(ReportSummaryBox.IconType.Folder)}</div>" + 
                                $"<div class=\"title\">{HttpUtility.HtmlEncode(lib.Library)}</div>" +
                                $"<div class=\"info-box\"><span class=\"ib-title\">Total Files</span><span class=\"ib-value\">{lib.TotalFiles:N0}</span></div>" +

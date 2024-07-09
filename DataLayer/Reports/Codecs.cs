@@ -89,7 +89,7 @@ public class Codecs : Report
             .Select(x => new { Codec = x.Key, Count = x.Value })
             .ToList();
 
-        var builder = new ReportBuilder();
+        var builder = new ReportBuilder(emailing);
         builder.StartRow(4);
         builder.AddPeriodSummaryBox(minDateUtc.Value, maxDateUtc.Value);
         builder.AddSummaryBox("Video Codecs", dataVideo.Count.ToString("N0"), ReportSummaryBox.IconType.Video, ReportSummaryBox.BoxColor.Info);
@@ -123,17 +123,17 @@ public class Codecs : Report
             
             builder.StartRow(2);
             
-            builder.AppendLine(TreeMap.Generate(new()
+            builder.AddRowItem(TreeMap.Generate(new()
             {
                 Data = codec.Item2.ToDictionary(x => x.Codec, x => x.Count),
                 Title = "Codecs"
             }, generateSvg: emailing));
-            builder.AppendLine(TableGenerator.GenerateMinimumTable("Top Codecs", ["Codec", "Count"], codec.Item2
+            builder.AddRowItem(TableGenerator.GenerateMinimumTable("Top Codecs", ["Codec", "Count"], codec.Item2
                 .OrderByDescending(x => x.Count).Select(x => new object[]
                 {
                     x.Codec,
                     x.Count.ToString("N0")
-                }).Take(TableGenerator.MIN_TABLE_ROWS).ToArray()));
+                }).Take(TableGenerator.MIN_TABLE_ROWS).ToArray(), emailing: emailing));
             
             builder.EndRow();
         }
