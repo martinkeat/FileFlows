@@ -1,11 +1,7 @@
 using System.Text;
-using SixLabors.Fonts;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Drawing.Processing;
 using SixLabors.ImageSharp.Formats.Png;
-using SixLabors.ImageSharp.PixelFormats;
 
-namespace FileFlows.Server.Charting;
+namespace FileFlows.Charting;
 
 public abstract class ImageChart
 {
@@ -59,7 +55,7 @@ public abstract class ImageChart
     {
         if (string.IsNullOrEmpty(BaseDirectory))
         {
-            var dllDir = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+            var dllDir = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
             if (string.IsNullOrEmpty(dllDir))
                 throw new Exception("Failed to find DLL directory");
             BaseDirectory = new DirectoryInfo(dllDir).Parent?.FullName ?? string.Empty;
@@ -71,9 +67,9 @@ public abstract class ImageChart
 #if (DEBUG)
         var dir = "wwwroot";
 #else
-        var dir = Path.Combine(BaseDirectory, "Server/wwwroot");
+        var dir = System.IO.Path.Combine(BaseDirectory, "Server/wwwroot");
 #endif
-        string font = Path.Combine(dir, "report-font.ttf");
+        string font = System.IO.Path.Combine(dir, "report-font.ttf");
         FontCollection collection = new();
         var family = collection.Add(font);
         // collection.TryGet("Font Name", out FontFamily font);

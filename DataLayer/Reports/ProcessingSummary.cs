@@ -282,7 +282,7 @@ public class ProcessingSummary: Report
                     Title = chart.Item1,
                     Data = t2,
                     YAxisFormatter = "filesize"
-                }, generateSvg: emailing));
+                }, emailing: emailing));
             }
 
             builder.EndRow();
@@ -296,7 +296,7 @@ public class ProcessingSummary: Report
     {
         builder.StartRow(2);
             
-        builder.AddRowItem(MultiLineChart.Generate(new MultilineChartData
+        builder.AddRowItem(MultiLineChart.Generate(new LineChartData
         {
             Title = sumRow.ChartTitle,
             Labels = labels,

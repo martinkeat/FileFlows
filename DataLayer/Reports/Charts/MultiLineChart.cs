@@ -15,7 +15,7 @@ public class MultiLineChart : Chart
     /// <param name="yAxisFormatter">Optional formatter for the y-axis labels</param>
     /// <param name="emailing">If the image generated is being emailed</param>
     /// <returns>The chart content</returns>
-    public static string Generate(MultilineChartData data, string? yAxisFormatter = null, bool emailing = false)
+    public static string Generate(LineChartData data, string? yAxisFormatter = null, bool emailing = false)
     {
         if (emailing == false)
             return $"<div class=\"chart\"><h2 class=\"title\">{HttpUtility.HtmlEncode(data.Title)}</h2>{JavaScript(data, yAxisFormatter)}</div>";
@@ -23,7 +23,7 @@ public class MultiLineChart : Chart
         return @$"
 <div>
     <span style=""{ReportBuilder.EmailTitleStyling}"">{HttpUtility.HtmlEncode(data.Title)}</span>
-    {FileFlows.DataLayer.Helpers.DelegateHelpers.GenerateMultilineChart?.Invoke(data)}
+    {FileFlows.DataLayer.Helpers.DelegateHelpers.GenerateLineChart?.Invoke(data)}
 </div>";
     }
 
@@ -33,7 +33,7 @@ public class MultiLineChart : Chart
     /// <param name="data">The data for the chart.</param>
     /// <param name="yAxisFormatter">Optional formatter for the y-axis labels</param>
     /// <returns>An HTML input to be parsed by javascript</returns>
-    private static string JavaScript(MultilineChartData data, string? yAxisFormatter)
+    private static string JavaScript(LineChartData data, string? yAxisFormatter)
         => "<input type=\"hidden\" class=\"report-line-chart-data\" value=\"" + HttpUtility.HtmlEncode(
             JsonSerializer.Serialize(
                 new
@@ -50,7 +50,7 @@ public class MultiLineChart : Chart
 /// <summary>
 /// Multi line chart data
 /// </summary>
-public class MultilineChartData
+public class LineChartData
 {
     /// <summary>
     /// Gets or sets the title

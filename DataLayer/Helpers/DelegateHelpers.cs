@@ -8,13 +8,14 @@ namespace FileFlows.DataLayer.Helpers;
 public static class DelegateHelpers
 {
     /// <summary>
-    /// Converts a SVG into an image tag
+    /// Generates a line chart image tag
     /// </summary>
-    public static Func<string, int, int, string>? SvgToImageTag { get; set; }
+    /// <returns>the line chart image tag</returns>
+    public static Func<LineChartData, string>? GenerateLineChart { get; set; }
 
     /// <summary>
-    /// Generates a multi-line chart iage tag
+    /// Generates a bar chart image tag
     /// </summary>
-    /// <returns>the multi-line chart image tag</returns>
-    public static Func<MultilineChartData, string>? GenerateMultilineChart { get; set; }
+    /// <returns>the bar chart image tag</returns>
+    public static Func<BarChartData, string>? GenerateBarChart { get; set; }
 }

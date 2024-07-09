@@ -36,7 +36,7 @@ public static class DateBasedChartHelper
         if(generateTable)
             result += TableGenerator.Generate(new[] { "Date" }.Union(data.Keys).ToArray(), tableData.ToArray()) ?? string.Empty;
         if(generateChart)
-        result += MultiLineChart.Generate(new MultilineChartData
+        result += MultiLineChart.Generate(new LineChartData
         {
             //Labels = dailyLabels.Select(label => label.ToString("yyyy-MM-dd")).ToArray(), // Convert DateTime to string here
             Labels = dailyLabels, // Convert DateTime to string here

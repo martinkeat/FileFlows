@@ -1,23 +1,21 @@
-using FileFlows.DataLayer.Reports.Charts;
-using SixLabors.Fonts;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Drawing;
-using SixLabors.ImageSharp.Drawing.Processing;
-using SixLabors.ImageSharp.PixelFormats;
-using SixLabors.ImageSharp.Processing;
+namespace FileFlows.Charting;
 
-namespace FileFlows.Server.Charting;
-
+/// <summary>
+/// Line chart
+/// </summary>
 public class LineChart : ImageChart
 {
+    const int yAxisLabelFrequency = 4;
+    const int yAxisLabelOffset = 10;
+    
     /// <summary>
-    /// Generates an ImageSharp image based on MultilineChartData.
+    /// Generates an line chart.
     /// </summary>
     /// <param name="chartData">The chart data.</param>
     /// <param name="customWidth">The width of the image.</param>
     /// <param name="customHeight">The height of the image.</param>
     /// <returns>The base64 encoded image tag.</returns>
-    public string GenerateImage(MultilineChartData chartData, int? customWidth = null, int? customHeight = null)
+    public string GenerateImage(LineChartData chartData, int? customWidth = null, int? customHeight = null)
     {
         var width = customWidth ?? EmailChartWidth;
         var height = customHeight ?? EmailChartHeight;
@@ -26,12 +24,6 @@ public class LineChart : ImageChart
         // Initialize ImageSharp Image
         using var image = new Image<Rgba32>(width, height); //, Rgba32.ParseHex("#eeeeee"));
 
-        // Define chart dimensions and positions
-        int chartStartX = 60;
-        int chartStartY = 10;
-        int chartEndX = 20;
-        int chartWidth = width - chartStartX - chartEndX;
-        int chartHeight = height - chartStartY - 40; // Adjusted for x-axis label
 
         // Calculate maximum value from series data
         double maxValue = chartData.Series.SelectMany(s => s.Data).Max();
@@ -39,6 +31,14 @@ public class LineChart : ImageChart
         // Draw chart elements using Mutate()
         image.Mutate(ctx =>
         {
+            // Define chart dimensions and positions
+            int chartStartX = CalculateXAxisStart(ctx, chartData, maxValue);
+            int chartStartY = 10;
+            int chartEndX = 20;
+            int chartWidth = width - chartStartX - chartEndX;
+            int chartHeight = height - chartStartY - 40; // Adjusted for x-axis label
+            
+            
             chartHeight -= DrawLegend(ctx, chartData.Series.Select(x =>x.Name).ToArray(), width, height);
             
             // Draw background
@@ -57,10 +57,38 @@ public class LineChart : ImageChart
         return ImageToBase64ImgTag(image);
     }
 
-    private void DrawYAxis(IImageProcessingContext ctx, MultilineChartData chartData, int chartStartX, int chartStartY, int chartWidth, int chartHeight, double maxValue)
+    /// <summary>
+    /// Calculates the width needed for the y-axis labels and where the x-axis should start
+    /// </summary>
+    /// <param name="ctx">the image context</param>
+    /// <param name="chartData">the chart data</param>
+    /// <param name="maxValue">the maximum value</param>
+    /// <returns>the X start position</returns>
+    private int CalculateXAxisStart(IImageProcessingContext ctx, LineChartData chartData, double maxValue)
     {
-        const int yAxisLabelFrequency = 4;
-        const int yAxisLabelOffset = 10;
+        float width = 0;
+        for (int i = 0; i <= yAxisLabelFrequency; i++)
+        {
+            double value = (maxValue / yAxisLabelFrequency) * i;
+
+            // Format y-axis label
+            object yValue = string.IsNullOrWhiteSpace(chartData.YAxisFormatter)
+                ? (object)Convert.ToInt64(value)
+                : (object)value;
+            string yLabel = ChartFormatter.Format(yValue, chartData.YAxisFormatter, axis: true);
+            
+            // Measure the size of the text
+            var textOptions = new TextOptions(Font);
+            var textSize = TextMeasurer.MeasureSize(yLabel, textOptions);
+
+            width = Math.Max(width, textSize.Width);
+        }
+
+        return (int)width + 10;
+    }
+
+    private void DrawYAxis(IImageProcessingContext ctx, LineChartData chartData, int chartStartX, int chartStartY, int chartWidth, int chartHeight, double maxValue)
+    {
 
         int yAxisHeight = chartHeight;// Define font options with right alignment
 
@@ -99,7 +127,7 @@ public class LineChart : ImageChart
         // }
     }
 
-    private void DrawXAxis(IImageProcessingContext ctx, MultilineChartData chartData, int chartStartX, int chartStartY, int chartWidth, int chartHeight)
+    private void DrawXAxis(IImageProcessingContext ctx, LineChartData chartData, int chartStartX, int chartStartY, int chartWidth, int chartHeight)
     {
         int totalLines = chartData.Labels.Length;
         int maxLabels = 10;
@@ -141,7 +169,7 @@ public class LineChart : ImageChart
         }
     }
 
-    private void DrawSeriesLines(IImageProcessingContext ctx, MultilineChartData chartData, int chartStartX, int chartStartY, int chartWidth, int chartHeight, double maxValue)
+    private void DrawSeriesLines(IImageProcessingContext ctx, LineChartData chartData, int chartStartX, int chartStartY, int chartWidth, int chartHeight, double maxValue)
     {
         const int lineThickness = 2;
 
