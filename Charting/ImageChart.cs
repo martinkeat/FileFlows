@@ -77,7 +77,7 @@ public abstract class ImageChart
         FontCollection collection = new();
         var family = collection.Add(font);
         // collection.TryGet("Font Name", out FontFamily font);
-        Font = family.CreateFont(10 * Scale, FontStyle.Regular);
+        Font = family.CreateFont(11 * Scale, FontStyle.Regular);
     }
 
 

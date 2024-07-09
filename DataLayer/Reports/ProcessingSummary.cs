@@ -48,7 +48,6 @@ public class ProcessingSummary: Report
 
         var nodeUids = GetUids("Node", model).Where(x => x != null).ToList();
         var libraryUids = GetUids("Library", model).Where(x => x != null).ToList();
-        var flowUids = GetUids("Flow", model).Where(x => x != null).ToList();
         
         var files = await db.Db.FetchAsync<FileData>(sql);
         if (files.Count < 1)
@@ -79,54 +78,66 @@ public class ProcessingSummary: Report
             .OrderByDescending(x => x.OriginalSize - x.FinalSize)
             .Take(TableGenerator.MIN_TABLE_ROWS).ToList();
         List<FileData> longestRunning = files.OrderByDescending(x => x.ProcessingEnded - x.ProcessingStarted).Take(TableGenerator.MIN_TABLE_ROWS).ToList();
-        
-        foreach (var file in files)
-        {
-            totalFiles++;
-            totalBytes += file.OriginalSize;
-            totalSavedBytes += (file.OriginalSize - file.FinalSize);
-            totalSeconds += (int)(file.ProcessingEnded - file.ProcessingStarted).TotalSeconds;
-            var date = file.ProcessingStarted.ToLocalTime();
-            date = hourly ?  new DateTime(date.Year, date.Month, date.Day, date.Hour, 0, 0) :  new DateTime(date.Year, date.Month, date.Day);
-            
-            string nodeName;
-            if (nodeUids.Count > 0)
-                nodeName = file.NodeName == "FileFlowsServer" ? "Internal Processing Node" : file.NodeName;
-            else
-                nodeName = string.Empty;
-            
 
-            nodeDataCount.TryAdd(nodeName, new Dictionary<DateTime, long>());
-            var ndCount = nodeDataCount[nodeName];
-            ndCount.TryAdd(date, 0);
-            ndCount[date] += 1;
-            
-            nodeDataSize.TryAdd(nodeName, new Dictionary<DateTime, long>());
-            var ndSize = nodeDataSize[nodeName];
-            ndSize.TryAdd(date, 0);
-            ndSize[date] += file.OriginalSize;
-            
-            nodeDataTime.TryAdd(nodeName, new Dictionary<DateTime, long>());
-            var ndTime = nodeDataTime[nodeName];
-            ndTime.TryAdd(date, 0);
-            ndTime[date] += (int)(file.ProcessingEnded - file.ProcessingStarted).TotalSeconds;
-            
-            
-            string libraryName = libraryUids.Count > 0 ? file.LibraryName : "All Libraries";
-            libDataCount.TryAdd(libraryName, new Dictionary<DateTime, long>());
-            var ldCount = libDataCount[libraryName];
-            ldCount.TryAdd(date, 0);
-            ldCount[date] += 1;
-            
-            libDataSize.TryAdd(libraryName, new Dictionary<DateTime, long>());
-            var ldSize = libDataSize[libraryName];
-            ldSize.TryAdd(date, 0);
-            ldSize[date] += file.OriginalSize;
-            
-            libDataTime.TryAdd(libraryName, new Dictionary<DateTime, long>());
-            var ldTime = libDataTime[libraryName];
-            ldTime.TryAdd(date, 0);
-            ldTime[date] += (int)(file.ProcessingEnded - file.ProcessingStarted).TotalSeconds;
+        foreach (var forcedNodeName in new[]
+                 {
+                     "Internal Processing Node", "Linux Node", "Windows Node",
+                     "Apple Mac Mini Node", "Unraid Docker NVIDIA Node", "TrueNAS Intel CPU Node"
+                 })
+        {
+            foreach (var file in files)
+            {
+                totalFiles++;
+                totalBytes += file.OriginalSize;
+                totalSavedBytes += (file.OriginalSize - file.FinalSize);
+                totalSeconds += (int)(file.ProcessingEnded - file.ProcessingStarted).TotalSeconds;
+                var date = file.ProcessingStarted.ToLocalTime();
+                date = hourly
+                    ? new DateTime(date.Year, date.Month, date.Day, date.Hour, 0, 0)
+                    : new DateTime(date.Year, date.Month, date.Day);
+
+                string nodeName;
+                if (nodeUids.Count > 0)
+                    nodeName = file.NodeName == "FileFlowsServer" ? "Internal Processing Node" : file.NodeName;
+                else
+                    nodeName = string.Empty;
+                #if(DEBUG)
+                nodeName = forcedNodeName;
+                #endif
+
+
+                nodeDataCount.TryAdd(nodeName, new Dictionary<DateTime, long>());
+                var ndCount = nodeDataCount[nodeName];
+                ndCount.TryAdd(date, 0);
+                ndCount[date] += 1;
+
+                nodeDataSize.TryAdd(nodeName, new Dictionary<DateTime, long>());
+                var ndSize = nodeDataSize[nodeName];
+                ndSize.TryAdd(date, 0);
+                ndSize[date] += file.OriginalSize;
+
+                nodeDataTime.TryAdd(nodeName, new Dictionary<DateTime, long>());
+                var ndTime = nodeDataTime[nodeName];
+                ndTime.TryAdd(date, 0);
+                ndTime[date] += (int)(file.ProcessingEnded - file.ProcessingStarted).TotalSeconds;
+
+
+                string libraryName = libraryUids.Count > 0 ? file.LibraryName : "All Libraries";
+                libDataCount.TryAdd(libraryName, new Dictionary<DateTime, long>());
+                var ldCount = libDataCount[libraryName];
+                ldCount.TryAdd(date, 0);
+                ldCount[date] += 1;
+
+                libDataSize.TryAdd(libraryName, new Dictionary<DateTime, long>());
+                var ldSize = libDataSize[libraryName];
+                ldSize.TryAdd(date, 0);
+                ldSize[date] += file.OriginalSize;
+
+                libDataTime.TryAdd(libraryName, new Dictionary<DateTime, long>());
+                var ldTime = libDataTime[libraryName];
+                ldTime.TryAdd(date, 0);
+                ldTime[date] += (int)(file.ProcessingEnded - file.ProcessingStarted).TotalSeconds;
+            }
         }
 
         ReportBuilder builder = new(emailing);
