@@ -178,7 +178,7 @@ public class TableGenerator
         if (emailing)
         {
             sb.AppendLine("<div>");
-            sb.AppendLine($"<span style=\"{ReportBuilder.EmailTitleStyling}\">{HttpUtility.HtmlEncode(title)}</span>");
+            sb.AppendLine($"<span class=\"table-title\" style=\"{ReportBuilder.EmailTitleStyling}\">{HttpUtility.HtmlEncode(title)}</span>");
             sb.AppendLine("<table style=\"width:100%;text-align:left\">");
             
         }else{
@@ -218,7 +218,7 @@ public class TableGenerator
                 sb.Append("<td");
                 if (emailing)
                 {
-                    sb.Append(" style=\"line-height:24px;");
+                    sb.Append(" class=\"min-table-td\" style=\"line-height:24px;");
                     if (i > 0)
                         sb.Append("text-align:center");
                     sb.Append('"');

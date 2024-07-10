@@ -19,6 +19,11 @@ public class ReportBuilder(bool emailing)
     /// </summary>
     public const string EmailTitleStyling = "font-weight:600;font-size:16px";
 
+    /// <summary>
+    /// The background color of the box
+    /// </summary>
+    public const string BoxBackground = "#222426";
+
 
     // /// <summary>
     // /// Appends a line to the report
@@ -36,14 +41,15 @@ public class ReportBuilder(bool emailing)
     /// Starts a row
     /// </summary>
     /// <param name="columns">the number of columns</param>
-    public void StartRow(int columns)
+    /// <param name="className">Optional class name to add to the table when emailing</param>
+    public void StartRow(int columns, string? className = null)
     {
         currentRowColumnCount = columns;
         if(emailing == false)
             _builder.AppendLine($"<div class=\"report-row report-row-{columns}\">");
         else 
             _builder.AppendLine($@"
-<table style=""width:100%;table-layout: fixed;"" cellpadding=""0"" cellspacing=""10"" border=""0"">
+<table class=""{(className ?? string.Empty)}"" style=""width:100%;table-layout: fixed;"" cellpadding=""0"" cellspacing=""10"" border=""0"">
     <tr>");
     }
 
@@ -73,7 +79,7 @@ public class ReportBuilder(bool emailing)
         {
             float percent = 100f / currentRowColumnCount;
             _builder.AppendLine(
-                $"<td width=\"{percent}%\" style=\"border-radius:10px;background:#eee;padding:10px;vertical-align: top;\">{html}</td>");
+                $"<td width=\"{percent}%\" style=\"border-radius:10px;background:{BoxBackground} !important;padding:10px;vertical-align:top;overflow:hidden\">{html}</td>");
         }
 
     }
@@ -140,4 +146,10 @@ public class ReportBuilder(bool emailing)
     /// <inheritdoc />
     public override string ToString()
         => _builder.ToString();
+
+    /// <summary>
+    /// Stats a chart table row
+    /// </summary>
+    public void StartChartTableRow()
+        => StartRow(2, "chart-table");
 }

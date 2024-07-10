@@ -17,11 +17,11 @@ public abstract class ImageChart
     /// <summary>
     /// The brush used for text
     /// </summary>
-    protected readonly SolidBrush TextBrush = new SolidBrush(Color.Black);
+    protected readonly SolidBrush TextBrush = new (Color.White);
     /// <summary>
     /// The pen used for text
     /// </summary>
-    protected readonly Pen TextPen = Pens.Solid(Color.Black, 1);
+    protected readonly Pen TextPen = Pens.Solid(Color.White, 1);
     /// <summary>
     /// The color used for lines on the chart
     /// </summary>

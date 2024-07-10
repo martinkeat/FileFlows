@@ -1,12 +1,5 @@
-using System.Text;
 using System.Web;
 using FileFlows.DataLayer.Reports.Charts;
-using SixLabors.Fonts;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Drawing.Processing;
-using SixLabors.ImageSharp.Formats.Png;
-using SixLabors.ImageSharp.PixelFormats;
-using SixLabors.ImageSharp.Processing;
 
 namespace FileFlows.Server.Helpers;
 
@@ -22,8 +15,14 @@ public static class DataLayerDelegates
     {
         DataLayer.Helpers.DelegateHelpers.GenerateLineChart = GenerateLineChart;
         DataLayer.Helpers.DelegateHelpers.GenerateBarChart = GenerateBarChart;
+        DataLayer.Helpers.DelegateHelpers.GeneratePieChart = GeneratePieChart;
     }
     
+    /// <summary>
+    /// Generates a line chart
+    /// </summary>
+    /// <param name="chartData">the chart data</param>
+    /// <returns>the HTML of the image tag</returns>
     static string GenerateLineChart(LineChartData chartData)
     {
         try
@@ -36,6 +35,11 @@ public static class DataLayerDelegates
         }
     }
 
+    /// <summary>
+    /// Generates a bar chart
+    /// </summary>
+    /// <param name="chartData">the chart data</param>
+    /// <returns>the HTML of the image tag</returns>
     static string GenerateBarChart(BarChartData chartData)
     {
         try
@@ -49,27 +53,19 @@ public static class DataLayerDelegates
     }
     
     /// <summary>
-    /// Converts an Image object to a base64-encoded PNG and returns an HTML img tag.
+    /// Generates a pie chart
     /// </summary>
-    /// <param name="image">The Image object to convert.</param>
-    /// <returns>An HTML img tag with base64-encoded PNG.</returns>
-    public static string ImageToBase64ImgTag(Image<Rgba32> image)
+    /// <param name="chartData">the chart data</param>
+    /// <returns>the HTML of the image tag</returns>
+    static string GeneratePieChart(PieChartData chartData)
     {
-        using MemoryStream memoryStream = new MemoryStream();
-        // Save the Image to the memory stream as PNG
-        image.Save(memoryStream, new PngEncoder());
-
-        // Convert the image to base64
-        string base64Image = Convert.ToBase64String(memoryStream.ToArray());
-
-        // Construct the img tag
-        StringBuilder imgTagBuilder = new StringBuilder();
-        imgTagBuilder.Append("<img ");
-        imgTagBuilder.Append($"src=\"data:image/png;base64,{base64Image}\" ");
-        imgTagBuilder.Append($"width=\"{image.Width}\" ");
-        imgTagBuilder.Append($"height=\"{image.Height}\" ");
-        imgTagBuilder.Append("/>");
-
-        return imgTagBuilder.ToString();
+        try
+        {
+            return new Charting.PieChart().GenerateImage(chartData);
+        }
+        catch (Exception ex)
+        {
+            return $"<span>Failed generating image: {HttpUtility.HtmlEncode(ex.Message)}</span>";
+        }
     }
 }

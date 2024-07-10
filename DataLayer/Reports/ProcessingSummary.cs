@@ -254,7 +254,7 @@ public class ProcessingSummary: Report
             {
                 Title = "Libraries",
                 Data = t
-            }, generateSvg: emailing));
+            }, emailing: emailing));
             foreach (var chart in group)
             {
                 // output.AppendLine(MultiLineChart.Generate(new MultilineChartData
@@ -294,7 +294,7 @@ public class ProcessingSummary: Report
 
     private void AddSummaryRow(ReportBuilder builder, SummaryRow sumRow, DateTime[] labels, bool emailing)
     {
-        builder.StartRow(2);
+        builder.StartChartTableRow();
             
         builder.AddRowItem(MultiLineChart.Generate(new LineChartData
         {

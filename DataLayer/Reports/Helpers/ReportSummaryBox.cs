@@ -28,11 +28,11 @@ public class ReportSummaryBox
         return $@"
 <table style=""width:100%;"">
     <tr>
-        <td rowspan=""2"" style=""width:60px"">{GetEmailIcon(icon, color)}</td>
-        <td style=""{ReportBuilder.EmailTitleStyling}"">{HttpUtility.HtmlEncode(title)}</td>
+        <td class=""rsb-icon"" rowspan=""2"" style=""width:60px"">{GetEmailIcon(icon, color)}</td>
+        <td class=""rsb-title"" style=""{ReportBuilder.EmailTitleStyling}"">{HttpUtility.HtmlEncode(title)}</td>
     </tr>
     <tr>
-        <td style=""font-size:22px"">{HttpUtility.HtmlEncode(value)}</td>
+        <td class=""rsb-value"" style=""font-size:22px"">{HttpUtility.HtmlEncode(value)}</td>
     </tr>
 </table>";
     }

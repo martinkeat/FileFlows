@@ -87,7 +87,7 @@ public class ReportController : BaseController
                     return;
                 }
 
-                _ = ServiceLoader.Load<ScheduledReportService>().Email(name, [email], "FileFlows Report", result.Value);
+                _ = ServiceLoader.Load<ScheduledReportService>().Email(name, [email], "FileFlows: " + name, result.Value);
             });
             
             // email reports we just exit early

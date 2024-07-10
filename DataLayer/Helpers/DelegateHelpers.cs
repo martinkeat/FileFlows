@@ -18,4 +18,10 @@ public static class DelegateHelpers
     /// </summary>
     /// <returns>the bar chart image tag</returns>
     public static Func<BarChartData, string>? GenerateBarChart { get; set; }
+
+    /// <summary>
+    /// Generates a pie chart image tag
+    /// </summary>
+    /// <returns>the pie chart image tag</returns>
+    public static Func<PieChartData, string>? GeneratePieChart { get; set; }
 }

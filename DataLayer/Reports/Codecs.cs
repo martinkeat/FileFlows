@@ -121,13 +121,13 @@ public class Codecs : Report
                 ReportSummaryBox.BoxColor.Error);
             builder.EndRow();
             
-            builder.StartRow(2);
+            builder.StartChartTableRow();
             
             builder.AddRowItem(TreeMap.Generate(new()
             {
                 Data = codec.Item2.ToDictionary(x => x.Codec, x => x.Count),
                 Title = "Codecs"
-            }, generateSvg: emailing));
+            }, emailing: emailing));
             builder.AddRowItem(TableGenerator.GenerateMinimumTable("Top Codecs", ["Codec", "Count"], codec.Item2
                 .OrderByDescending(x => x.Count).Select(x => new object[]
                 {

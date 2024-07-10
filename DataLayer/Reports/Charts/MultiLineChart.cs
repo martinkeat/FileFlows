@@ -22,7 +22,7 @@ public class MultiLineChart : Chart
         
         return @$"
 <div>
-    <span style=""{ReportBuilder.EmailTitleStyling}"">{HttpUtility.HtmlEncode(data.Title)}</span>
+    <span class=""chart-title"" style=""{ReportBuilder.EmailTitleStyling}"">{HttpUtility.HtmlEncode(data.Title)}</span>
     {FileFlows.DataLayer.Helpers.DelegateHelpers.GenerateLineChart?.Invoke(data)}
 </div>";
     }

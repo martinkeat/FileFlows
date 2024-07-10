@@ -169,8 +169,7 @@
   align-self: center;
 }
 .report-output .report-flex-data .icon {
-  width: 4rem;
-  height: 4rem;
+  font-size: 3rem;
 }
 .report-output .report-flex-data .info-box {
   width: 15rem;

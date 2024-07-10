@@ -10,6 +10,10 @@ public class XYChart: ImageChart
     /// THe offset of the yAxis labels
     /// </summary>
     protected const int yAxisLabelOffset = 10;
+    /// <summary>
+    /// The background color in the area of the chart
+    /// </summary>
+    protected Rgba32 ChartAreaBackgroundColor = Rgba32.ParseHex("#3b3e41");
 
     /// <summary>
     /// Calculates the width needed for the y-axis labels and where the x-axis should start

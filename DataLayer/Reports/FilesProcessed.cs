@@ -98,7 +98,7 @@ public class FilesProcessed : Report
         builder.EndRow();
         
             
-        builder.StartRow(2);
+        builder.StartChartTableRow();
         builder.AddRowItem(DateBasedChartHelper.Generate(minDateUtc.Value, maxDateUtc.Value, dataCount, emailing, generateTable: false));
         builder.AddRowItem(TableGenerator.GenerateMinimumTable("Most Files", ["Node", "Count"],
             files.GroupBy(x => x.NodeName).Select(x => new { Node = x.Key == Globals.InternalNodeName ? "Internal Processing Node" : x.Key, Count = x.Count()})
@@ -108,7 +108,7 @@ public class FilesProcessed : Report
             , emailing: emailing));
         builder.EndRow();
         
-        builder.StartRow(2);
+        builder.StartChartTableRow();
         builder.AddRowItem(DateBasedChartHelper.Generate(minDateUtc.Value, maxDateUtc.Value, dataSize, emailing,
             tableDataFormatter: (dbl) => FileSizeFormatter.Format(dbl, 2), yAxisFormatter: "filesize", generateTable: false));
         builder.AddRowItem(TableGenerator.GenerateMinimumTable("Largest Files", ["Name", "Node", "Size"],
@@ -120,7 +120,7 @@ public class FilesProcessed : Report
             , widths: ["", "10rem", ""], emailing: emailing));
         builder.EndRow();
         
-        builder.StartRow(2);
+        builder.StartChartTableRow();
         builder.AddRowItem(DateBasedChartHelper.Generate(minDateUtc.Value, maxDateUtc.Value, dataTime, emailing,
             tableDataFormatter: TimeFormatter.Format, generateTable: false));
         builder.AddRowItem(TableGenerator.GenerateMinimumTable("Longest Time Taken", ["Name", "Node", "Size"],

@@ -93,7 +93,7 @@ public class Languages : Report
 
         if (dataVideo.Count > 0)
         {
-            builder.StartRow(2);
+            builder.StartChartTableRow();
             builder.AddRowItem(TreeMap.Generate(new ()
             {
                 Title = "Video Languages",
@@ -108,7 +108,7 @@ public class Languages : Report
             
         if (dataAudio.Count > 0)
         {
-            builder.StartRow(2);
+            builder.StartChartTableRow();
             builder.AddRowItem(TreeMap.Generate(new ()
             {
                 Title = "Audio Languages",
@@ -123,7 +123,7 @@ public class Languages : Report
         
         if (dataSubtitle.Count > 0)
         {
-            builder.StartRow(2);
+            builder.StartChartTableRow();
             builder.AddRowItem(TreeMap.Generate(new ()
             {
                 Title = "Subtitle Languages",

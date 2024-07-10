@@ -32,7 +32,7 @@ public class BarChart : XYChart
             int chartHeight = height - chartStartY - 40; // Adjusted for x-axis label
             
             // Draw background
-            ctx.Fill(Rgba32.ParseHex("#e4e4e4"), new Rectangle(chartStartX, chartStartY, chartWidth, chartHeight));
+            ctx.Fill(ChartAreaBackgroundColor, new Rectangle(chartStartX, chartStartY, chartWidth, chartHeight));
 
             // Draw y-axis labels and grid lines
             DrawYAxis(ctx, chartStartX, chartStartY, chartWidth, chartHeight, maxValue, chartData.YAxisFormatter);

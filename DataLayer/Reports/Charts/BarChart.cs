@@ -23,7 +23,7 @@ public class BarChart : Chart
 
         return @$"
 <div>
-    <span style=""{ReportBuilder.EmailTitleStyling}"">{HttpUtility.HtmlEncode(data.Title)}</span>
+    <span class=""chart-title"" style=""{ReportBuilder.EmailTitleStyling}"">{HttpUtility.HtmlEncode(data.Title)}</span>
     {FileFlows.DataLayer.Helpers.DelegateHelpers.GenerateBarChart?.Invoke(data)}
 </div>";
     }

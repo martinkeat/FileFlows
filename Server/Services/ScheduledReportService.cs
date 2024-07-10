@@ -61,9 +61,80 @@ public class ScheduledReportService
 <html lang=""en"">
 <head>
     <title>{HttpUtility.HtmlEncode(subject)}</title>
+    <style>
+        .rsb-title {{
+            white-space: nowrap;
+        }} 
+        .rsb-value {{
+            white-space: nowrap;
+        }}
+        .min-table-td {{
+            white-space: nowrap;
+            overflow:hidden;
+            text-overflow:ellipsis;
+        }}
+        @media screen and (max-width:1200px){{
+            .rsb-title, .table-title, .chart-title {{
+                font-size: 14px !important;
+            }}
+            .rsb-value {{
+                font-size: 18px !important;
+            }}
+            .min-table-td {{
+                line-height: 20px !important;
+            }}
+        }}
+        @media screen and (max-width:1000px){{
+            .rsb-title, .table-title, .chart-title {{
+                font-size: 12px !important;
+            }}
+            .rsb-value {{
+                font-size: 15px !important;
+            }}
+            .rsb-icon img {{
+                width: 28px !important;
+                height: 28px !important;
+                padding-top: 11px !important;
+            }}
+            .min-table-td {{
+                line-height: 18px !important;
+            }}
+        }}
+
+        /* samsung fold phones */
+        @media screen and (max-width:900px){{
+            .table-title, .chart-title
+            {{
+                font-size: 13px !important;
+            }}
+            .rsb-title {{
+                font-size: 10px !important;
+            }}
+            .rsb-value {{
+                font-size: 13px !important;
+            }}
+
+            .chart-table {{
+              display: block;
+              width: 100%;
+            }}
+            .chart-table > tr, .chart-table > tbody > tr {{
+              display: block;
+              width: 100%;
+            }}
+            .chart-table > tr > td, .chart-table > tbody > tr > td {{
+              display: block;
+              width: 100%;
+              box-sizing: border-box;
+            }}
+            .chart-table > tr > td:first-child, .chart-table > tbody > tr > td:first-child {{
+                padding-top:10px;
+            }}
+        }}
+    </style>
 </head>
-<body>
-    <div class=""report-output emailed"" style=""font-family: sans-serif; font-size:12px; text-align:center;max-width:1200px;margin:auto"">
+<body style=""background:#181a1b !important; color: #fff !important"">
+    <div class=""report-output emailed"" style=""font-family: sans-serif; font-size:12px; text-align:center;max-width:1200px;margin:auto;padding:2rem 0"">
         <table style=""width: 100%;border-bottom:solid 3px #999;margin-bottom:10px"">
             <tr>
                 <td style=""width:260px"">
