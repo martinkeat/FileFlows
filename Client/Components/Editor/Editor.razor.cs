@@ -359,6 +359,9 @@ public partial class Editor : EditorBase, IDisposable
         this.OnClosed?.Invoke();
     }
 
+    /// <summary>
+    /// Opens the help URL if set
+    /// </summary>
     protected void OpenHelp()
     {
         if (string.IsNullOrWhiteSpace(HelpUrl))

@@ -9,19 +9,23 @@
             <button @onclick="GoBack">@lblBack</button>
             <button @onclick="Close">@lblClose</button>
         }
+        else if(string.IsNullOrWhiteSpace(HelpUrl) == false)
+        {
+            <button @onclick="OpenHelp">@lblHelp</button>
+        }
     </Head>
 
     <Body>
         @if (Loaded)
         {
             <div class="@(ShowReportOutput ? "mode-output" : "mode-form")">
-                @if (string.IsNullOrEmpty(ReportDescription) == false)
-                {
-                    <p class="report-description">@ReportDescription</p>
-                }
                 <div class="report-form">
+                    @if (string.IsNullOrEmpty(ReportDescription) == false)
+                    {
+                        <p class="report-description">@ReportDescription</p>
+                    }
                     <InlineEditor @ref="Editor" TypeName="Pages.Report" Model="Model"
-                                  Fields="Fields" Buttons="Buttons" SubmitCallback="Generate"></InlineEditor>
+                                  Fields="Fields" Buttons="Buttons" SubmitCallback="Generate" />
                 </div>
                 @if (ShowReportOutput)
                 {

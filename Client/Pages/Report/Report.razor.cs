@@ -3,6 +3,7 @@ using FileFlows.Client.Components;
 using FileFlows.Client.Components.Inputs;
 using FileFlows.Plugin;
 using FileFlows.Shared.Validators;
+using Humanizer;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 
@@ -90,7 +91,15 @@ public partial class Report : ComponentBase
     /// </summary>
     private bool _needsRendering = false;
 
-    private string lblBack = null!, lblClose = null!;
+    /// <summary>
+    /// The labels for buttons
+    /// </summary>
+    private string lblBack = null!, lblClose = null!, lblHelp = null!;
+    
+    /// <summary>
+    /// Gets or sets the URL to the help page for this report
+    /// </summary>
+    private string HelpUrl { get; set; }
 
     /// <inheritdoc />
     protected override async Task OnInitializedAsync()
@@ -98,6 +107,7 @@ public partial class Report : ComponentBase
         await base.OnInitializedAsync();
         lblBack = Translater.Instant("Pages.Report.Buttons.Back");
         lblClose = Translater.Instant("Labels.Close");
+        lblHelp = Translater.Instant("Labels.Help");
         var jsObjectReference = await jsRuntime.InvokeAsync<IJSObjectReference>("import",
             $"./Pages/Report/Report.razor.js?v={Globals.Version}");
         jsReports = await jsObjectReference.InvokeAsync<IJSObjectReference>("createReporting",
@@ -116,6 +126,7 @@ public partial class Report : ComponentBase
         ReportName = rd.Name;
         ReportDescription = rd.Description;
         ReportIcon = rd.Icon;
+        HelpUrl = $"https://fileflows.com/docs/webconsole/admin/reporting/{rd.Name.Kebaberize()}";
 
         // clone the fields as they get wiped
         var fields = new List<ElementField>();
@@ -274,6 +285,16 @@ public partial class Report : ComponentBase
         {
             await Task.Delay(50);
         }
+    }
+    
+    /// <summary>
+    /// Opens the help URL if set
+    /// </summary>
+    protected void OpenHelp()
+    {
+        if (string.IsNullOrWhiteSpace(HelpUrl))
+            return;
+        _ = App.Instance.OpenHelp(HelpUrl.ToLowerInvariant());
     }
     
     /// <summary>
