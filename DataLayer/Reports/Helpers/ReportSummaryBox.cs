@@ -107,10 +107,12 @@ public class ReportSummaryBox
         return string.Empty;
     }
 
+#if (!DEBUG)
     /// <summary>
     /// The base directory of the application
     /// </summary>
     private static string? _BaseDirectory; 
+#endif
 
     /// <summary>
     /// Gets the email icon
