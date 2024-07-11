@@ -86,8 +86,9 @@ public class TableGenerator
     /// </summary>
     /// <param name="data">The collection of data to generate the HTML table from.</param>
     /// <param name="dontWrap">If the table should not be wrapped with a table-container class</param>
+    /// <param name="emailing">If this table is being emailed</param>
     /// <returns>An HTML string representing the table.</returns>
-    public static string Generate(IEnumerable<dynamic> data, bool dontWrap = false)
+    public static string Generate(IEnumerable<dynamic> data, bool dontWrap = false, bool emailing = false)
     {
         var list = data?.ToList();
         if (list?.Any() != true)
@@ -95,67 +96,80 @@ public class TableGenerator
 
         var sb = new StringBuilder();
         if(dontWrap == false)
-            sb.Append("<div class=\"table-container\">");
-        sb.Append("<table class=\"report-table table\">");
+            sb.AppendLine("<div class=\"table-container\">");
+        
+        if(emailing)
+            sb.AppendLine("<table class=\"report-table large-table\">");
+        else
+            sb.AppendLine("<table class=\"report-table table large-table\">");
 
         // Add table headers
-        sb.Append("<thead>");
-        sb.Append("<tr>");
+        sb.AppendLine("<thead>");
+        sb.AppendLine("<tr>");
         var firstItem = list.FirstOrDefault();
         if (firstItem != null)
         {
             var properties = ((Type)firstItem.GetType()).GetProperties();
+            int count = 0;
             foreach (var prop in properties)
             {
-                sb.AppendFormat("<th><span>{0}</span></th>",
-                    System.Net.WebUtility.HtmlEncode(prop.Name.Humanize(LetterCasing.Title)));
+                sb.AppendFormat("<th{1}><span>{0}</span></th>",
+                    System.Net.WebUtility.HtmlEncode(prop.Name.Humanize(LetterCasing.Title)),
+                    emailing && count == 0 ? " style=\"text-align:left\"" : string.Empty);
+                ++count;
             }
         }
 
-        sb.Append("</tr>");
-        sb.Append("</thead>");
-        sb.Append("<tbody>");
+        sb.AppendLine("</tr>");
+        sb.AppendLine("</thead>");
+        sb.AppendLine("<tbody>");
 
         // Add table rows
         foreach (var item in list)
         {
-            sb.Append("<tr>");
+            sb.AppendLine("<tr>");
             var properties = ((Type)item.GetType()).GetProperties();
+            int count = 0;
             foreach (var prop in properties)
             {
                 var value = prop.GetValue(item, null) ?? string.Empty;
+                sb.Append("<td");
+                if (emailing && count == 0)
+                    sb.Append(" style=\"text-align:left\"");
+                sb.Append('>');
                 if (prop.Name.Contains("Percentage"))
                 {
                     var percent = (double)value;
-                    sb.Append("<td>");
                     sb.Append($"<div class=\"percentage {(percent > 100 ? "over-100" : "")}\">");
                     sb.Append($"<div class=\"bar\" style=\"width:{Math.Min(percent, 100)}%\"></div>");
                     sb.Append($"<span class=\"label\">{(percent / 100).ToString("P1")}<span>");
                     sb.Append("</div>");
-                    sb.Append("</td>");
                 }
                 else if (value is int or long)
                 {
-                    sb.AppendFormat("<td>{0:N0}</td>", value); // Format with thousands separator, no decimals
+                    sb.Append(string.Format("{0:N0}", value)); // Format with thousands separator, no decimals
                 }
                 else if (value is IFormattable numericValue)
                 {
                     // Format numeric value with thousands separator in current culture
-                    sb.AppendFormat("<td>{0}</td>", numericValue.ToString("N", CultureInfo.CurrentCulture));
+                    sb.Append($"{numericValue.ToString("N", CultureInfo.CurrentCulture)}");
                 }
                 else
                 {
-                    sb.AppendFormat("<td>{0}</td>", System.Net.WebUtility.HtmlEncode(value.ToString()));
+                    sb.Append(System.Net.WebUtility.HtmlEncode(value.ToString()));
                 }
+                sb.AppendLine("</td>");
+
+                ++count;
             }
 
-            sb.Append("</tr>");
+            sb.AppendLine("</tr>");
         }
 
-        sb.Append("</tbody>");
-        sb.Append("</table>");
+        sb.AppendLine("</tbody>");
+        sb.AppendLine("</table>");
         if(dontWrap == false)
-            sb.Append("</div>");
+            sb.AppendLine("</div>");
         return sb.ToString();
     }
     

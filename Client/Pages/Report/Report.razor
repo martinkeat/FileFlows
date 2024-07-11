@@ -1,7 +1,7 @@
 @namespace FileFlows.Client.Pages
 @page "/report/{uid:guid}"
 
-<PageView ClassName="flex" Title="@ReportName">
+<PageView ClassName="flex" Title="@ReportName" Icon="@ReportIcon">
 
     <Head>
         @if (ShowReportOutput)
@@ -15,10 +15,13 @@
         @if (Loaded)
         {
             <div class="@(ShowReportOutput ? "mode-output" : "mode-form")">
+                @if (string.IsNullOrEmpty(ReportDescription) == false)
+                {
+                    <p class="report-description">@ReportDescription</p>
+                }
                 <div class="report-form">
                     <InlineEditor @ref="Editor" TypeName="Pages.Report" Model="Model"
-                                  Fields="Fields" Buttons="Buttons" SubmitCallback="Generate"
-                    ></InlineEditor>
+                                  Fields="Fields" Buttons="Buttons" SubmitCallback="Generate"></InlineEditor>
                 </div>
                 @if (ShowReportOutput)
                 {

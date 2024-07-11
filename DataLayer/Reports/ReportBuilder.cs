@@ -130,26 +130,41 @@ public class ReportBuilder(bool emailing)
     /// </summary>
     /// <param name="percent">the percent, 100 based, so 100% == 100</param>
     public void AddProgressBar(double percent)
-        => _builder.AppendLine(GetProgressBarHtml(percent));
+        => _builder.AppendLine(GetProgressBarHtml(percent, emailing));
 
     /// <summary>
     /// Gets the progress bar HTML
     /// </summary>
     /// <param name="percent">the percent, 100 based, so 100% == 100</param>
+    /// <param name="emailing">if the report is being emailed</param>
     /// <returns>the progress bar HTML</returns>
-    public string GetProgressBarHtml(double percent)
-        => $"<div class=\"percentage {(percent > 100 ? "over-100" : "")}\">" +
-           $"<div class=\"bar\" style=\"width:{Math.Min(percent, 100)}%\"></div>" +
-           $"<span class=\"label\">{(percent / 100):P1}<span>" +
-           "</div>";
-    
+    public string GetProgressBarHtml(double percent, bool emailing)
+    {
+        if(emailing == false)
+            return $"<div class=\"percentage {(percent > 100 ? "over-100" : "")}\">" +
+            $"<div class=\"bar\" style=\"width:{Math.Min(percent, 100)}%\"></div>" +
+            $"<span class=\"label\">{(percent / 100):P1}</span>" +
+            "</div>";
+        return @$"
+<div class=""percentage {(percent > 100 ? "over-100" : "")}"" 
+style=""background: linear-gradient(to right, rgba(51, 178, 223, 0.25) 0%, rgba(51, 178, 223, 0.5) {Math.Clamp(percent, 0, 100)}%, #181a1b {Math.Clamp(percent, 0, 100)}%) !important;"">
+    <span style=""font-weight: 600;vertical-align: middle;line-height: normal;text-align: center;line-height: 48px;font-size: 15px;"">{(percent / 100):P1}</span>
+</div>"; 
+    }
+
     /// <inheritdoc />
     public override string ToString()
         => _builder.ToString();
 
     /// <summary>
-    /// Stats a chart table row
+    /// Starts a chart table row
     /// </summary>
     public void StartChartTableRow()
         => StartRow(2, "chart-table");
+    
+    /// <summary>
+    /// Starts a large table row
+    /// </summary>
+    public void StartLargeTableRow()
+        => StartRow(1, "large-table");
 }

@@ -40,7 +40,12 @@ public class FlowElementExecution : Report
             .OrderByDescending(x => x.Count)
             .Select(x => new { Name = x.NodeName, x.Count});
 
-
-        return TableGenerator.Generate(nodeCounts);
+        var builder = new ReportBuilder(emailing);
+        
+        builder.StartLargeTableRow();
+        builder.AddRowItem(TableGenerator.Generate(nodeCounts, emailing: emailing));
+        builder.EndRow();
+        
+        return builder.ToString();
     }
 }

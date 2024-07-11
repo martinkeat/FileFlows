@@ -87,17 +87,41 @@ public class LibrarySavings : Report
                 > 60 => "warning", 
                 _ => "success"
             };
+            var iconColor = lib.Percentage switch
+            {
+                > 100 => ReportSummaryBox.BoxColor.Error,
+                > 60 => ReportSummaryBox.BoxColor.Warning,
+                _ => ReportSummaryBox.BoxColor.Success
+            };
             builder.StartRow(1);
-            builder.AddRowItem("<div class=\"report-flex-data\">" +
-                               $"<div class=\"icon {iconClass}\">{ReportSummaryBox.GetIcon(ReportSummaryBox.IconType.Folder)}</div>" + 
-                               $"<div class=\"title\">{HttpUtility.HtmlEncode(lib.Library)}</div>" +
-                               $"<div class=\"info-box\"><span class=\"ib-title\">Total Files</span><span class=\"ib-value\">{lib.TotalFiles:N0}</span></div>" +
-                               (lib.Percentage > 100
-                                   ? $"<div class=\"info-box\"><span class=\"ib-title\">Storage Lost</span><span class=\"ib-value\">{lib.Savings}</span></div>"
-                                   : $"<div class=\"info-box\"><span class=\"ib-title\">Storage Saved</span><span class=\"ib-value\">{lib.Savings}</span></div>"
-                               ) +
-                               builder.GetProgressBarHtml(lib.Percentage) +
-                               "</div>");
+
+            string savedLabel = lib.Percentage > 100 ? "Storage Lost" : "Storage Saved";
+            if (emailing == false)
+            {
+                builder.AddRowItem("<div class=\"report-flex-data\">" +
+                                   $"<div class=\"icon {iconClass}\">{(emailing ? ReportSummaryBox.GetEmailIcon(ReportSummaryBox.IconType.Folder, iconColor) :
+                                       ReportSummaryBox.GetIcon(ReportSummaryBox.IconType.Folder))}</div>" +
+                                   $"<div class=\"title\">{HttpUtility.HtmlEncode(lib.Library)}</div>" +
+                                   $"<div class=\"info-box\"><span class=\"ib-title\">Total Files</span><span class=\"ib-value\">{lib.TotalFiles:N0}</span></div>" +
+                                   $"<div class=\"info-box\"><span class=\"ib-title\">{savedLabel}</span><span class=\"ib-value\">{lib.Savings}</span></div>" + 
+                                   builder.GetProgressBarHtml(lib.Percentage, emailing) +
+                                   "</div>");
+            }
+            else
+            {
+                builder.AddRowItem($@"
+<table class=""report-flex-data"" style=""width:100%"">
+    <tr>
+        <td class=""icon {iconClass}"">{ReportSummaryBox.GetEmailIcon(ReportSummaryBox.IconType.Folder, iconColor)}</td>
+        <td class=""title"">{HttpUtility.HtmlEncode(lib.Library)}</td>
+        <td class=""info-box""><span class=""ib-title"">Total Files</span><span class=""ib-value"">{lib.TotalFiles:N0}</span></td>
+        <td class=""info-box""><span class=""ib-title"">{savedLabel}</span><span class=""ib-value"">{lib.Savings}</span></td>
+        <td class=""percent"">{builder.GetProgressBarHtml(lib.Percentage, emailing)}</td>
+    </tr>
+</table>");
+                
+            }
+
             // builder.AddSummaryBox(lib.Library + " Files", lib.TotalFiles, ReportSummaryBox.IconType.File, ReportSummaryBox.BoxColor.Info);
             // builder.AddSummaryBox("Savings", lib.Savings, ReportSummaryBox.IconType.HardDrive, lib.Percentage > 100 ?  ReportSummaryBox.BoxColor.Error : ReportSummaryBox.BoxColor.Success);
             // builder.AddProgressBar(lib.Percentage);

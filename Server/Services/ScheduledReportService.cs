@@ -73,6 +73,57 @@ public class ScheduledReportService
             overflow:hidden;
             text-overflow:ellipsis;
         }}
+        .large-table {{
+          width: 100%;
+          text-align: center;
+          line-height: 1.8rem;
+          border-collapse: collapse;
+          font-size: 0.9rem;
+        }}
+        .large-table th {{
+          border-bottom: solid 1px #181a1b !important;
+          font-size:1rem;
+        }}
+        .percentage {{    
+            width: 14rem;
+            height: 3rem;
+            position: relative;
+            background: #181a1b;
+            border-radius: 10px;
+            overflow: hidden;
+        }}
+
+        .report-flex-data .title {{
+          margin: 0 0 0 1rem !important;
+          text-align: left;
+          font-size: 1.5rem;
+        }}
+        .report-flex-data .icon {{
+          width:4rem;
+        }}
+        .report-flex-data .icon img {{
+          padding-top:10px !important
+        }}
+        .report-flex-data .info-box {{
+          padding: 0 1rem;
+          width:10rem;  
+        }}
+        .report-flex-data .info-box .ib-title {{
+          font-weight: 600;
+          display:block;
+        }}
+        .report-flex-data .info-box .ib-value {{
+          font-size: 1.3rem;
+          display:block;
+        }}
+        .report-flex-data .percent {{
+            width:14rem;
+        }}
+        .report-flex-data .percentage {{
+          width: 100%;
+          height: 3rem;
+        }}
+
         @media screen and (max-width:1200px){{
             .rsb-title, .table-title, .chart-title {{
                 font-size: 14px !important;
@@ -113,7 +164,6 @@ public class ScheduledReportService
             .rsb-value {{
                 font-size: 13px !important;
             }}
-
             .chart-table {{
               display: block;
               width: 100%;
@@ -129,6 +179,27 @@ public class ScheduledReportService
             }}
             .chart-table > tr > td:first-child, .chart-table > tbody > tr > td:first-child {{
                 padding-top:10px;
+            }}
+            .report-flex-data .title {{
+                font-size:1rem;
+            }}
+            .report-flex-data .icon img {{
+              width: 32px;
+              height: 32px;
+              padding-top: 0 !important;
+            }}
+            .report-flex-data .percent {{
+                width:8rem;
+            }}
+            .report-flex-data .info-box {{
+              width:5rem;  
+            }}
+            .report-flex-data .info-box .ib-title {{
+              font-size:0.7rem;
+            }}
+            .report-flex-data .info-box .ib-value {{
+              font-size: 1rem;
+              padding-top: 0.5rem;
             }}
         }}
     </style>

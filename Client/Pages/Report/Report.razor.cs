@@ -55,6 +55,16 @@ public partial class Report : ComponentBase
     /// Gets or sets the report name
     /// </summary>
     private string ReportName { get; set; }
+    
+    /// <summary>
+    /// Gets or sets the report description
+    /// </summary>
+    private string ReportDescription { get; set; }
+    
+    /// <summary>
+    /// Gets or sets the icon for the report
+    /// </summary>
+    public string ReportIcon { get; set; }
 
     /// <summary>
     /// The buttons for the form
@@ -103,7 +113,9 @@ public partial class Report : ComponentBase
         }
 
         var rd = result.Data;
-        this.ReportName = rd.Name;
+        ReportName = rd.Name;
+        ReportDescription = rd.Description;
+        ReportIcon = rd.Icon;
 
         // clone the fields as they get wiped
         var fields = new List<ElementField>();
