@@ -108,6 +108,11 @@ public class ReportSummaryBox
     }
 
     /// <summary>
+    /// The base directory of the application
+    /// </summary>
+    private static string? _BaseDirectory; 
+
+    /// <summary>
     /// Gets the email icon
     /// </summary>
     /// <param name="icon">the icon</param>
@@ -118,7 +123,24 @@ public class ReportSummaryBox
 #if (DEBUG)
         var dir = "wwwroot/report-icons";
 #else
-        var dir = Path.Combine(DirectoryHelper.BaseDirectory, "Server/wwwroot/report-icons");
+        string dir;
+        if (_BaseDirectory == null)
+        {
+            var dllDir = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+            if (string.IsNullOrEmpty(dllDir) == false)
+            {
+                _BaseDirectory = new DirectoryInfo(dllDir).Parent?.FullName ?? string.Empty;
+                dir = Path.Combine(_BaseDirectory, "Server/wwwroot/report-icons");
+            }
+            else
+            {
+                dir = "Server/wwwroot/report-icons";
+            }
+        }
+        else
+        {
+            dir =  Path.Combine(_BaseDirectory, "Server/wwwroot/report-icons");
+        }
 #endif
         string filePath = Path.Combine(dir, icon.ToString().Kebaberize() + "-" + color.ToString().ToLowerInvariant() + ".png");
         if (File.Exists(filePath) == false)

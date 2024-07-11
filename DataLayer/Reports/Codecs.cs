@@ -1,10 +1,8 @@
-using System.Text;
 using System.Text.Json;
 using FileFlows.DataLayer.Reports.Charts;
 using FileFlows.DataLayer.Reports.Helpers;
 using FileFlows.Plugin;
 using FileFlows.Shared.Models;
-using FileFlows.Shared.Widgets;
 
 namespace FileFlows.DataLayer.Reports;
 
@@ -21,8 +19,6 @@ public class Codecs : Report
     public override string Description => "Shows the different codecs processed through FileFlows.";
     /// <inheritdoc />
     public override string Icon => "fas fa-photo-video";
-    /// <inheritdoc />
-    public override ReportPeriod? DefaultReportPeriod => ReportPeriod.Last31Days;
     /// <inheritdoc />
     public override bool Direction => true;
 

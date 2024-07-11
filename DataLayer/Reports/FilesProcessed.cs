@@ -20,9 +20,6 @@ public class FilesProcessed : Report
     public override string Description => "Reports on the files processed over a given period.";
     /// <inheritdoc />
     public override string Icon => "fas fa-file-powerpoint";
-
-    /// <inheritdoc />
-    public override ReportPeriod? DefaultReportPeriod => ReportPeriod.Last31Days;
     
     /// <inheritdoc />
     public override ReportSelection LibrarySelection => ReportSelection.Any;

@@ -35,7 +35,7 @@ public abstract class Report
     /// <summary>
     /// Gets the default report period for this report if it supports a period
     /// </summary>
-    public virtual ReportPeriod? DefaultReportPeriod => ReportPeriod.Any;
+    public virtual ReportPeriod? DefaultReportPeriod => ReportPeriod.Last31Days;
 
     /// <summary>
     /// Gets if this report supports flow selection

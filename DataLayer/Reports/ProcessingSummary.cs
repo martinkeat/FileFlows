@@ -26,8 +26,6 @@ public class ProcessingSummary: Report
     public override ReportSelection NodeSelection => ReportSelection.AnyOrAll;
     /// <inheritdoc />
     public override ReportSelection FlowSelection  => ReportSelection.Any;
-    /// <inheritdoc />
-    public override ReportPeriod? DefaultReportPeriod => ReportPeriod.Last7Days;
 
     /// <inheritdoc />
     public override async Task<Result<string>> Generate(Dictionary<string, object> model, bool emailing)
