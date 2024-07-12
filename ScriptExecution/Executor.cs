@@ -100,6 +100,8 @@ public class Executor
                 GetIso2Code = new Func<string, string>(LanguageHelper.GetIso2Code),
                 AreSame = new Func<string, string, bool>(LanguageHelper.AreSame)
             };
+
+            AdjustVariables(Variables);
             
             // replace Variables. with dictionary notation
             string tcode = Code;
@@ -258,6 +260,8 @@ public class Executor
             {
             }
 
+            AdjustVariables(Variables);
+
             return true;
         }
         catch(JavaScriptException ex)
@@ -286,6 +290,49 @@ public class Executor
             if(ex is MissingVariableException == false)
                 Logger.ELog("Failed executing script: " + ex.Message + Environment.NewLine + ex.StackTrace);
             return false;
+        }
+    }
+
+
+    /// <summary>
+    /// Adjusts the varaibles to remove any JsonElements
+    /// </summary>
+    /// <param name="variables">the varaibles</param>
+    private void AdjustVariables(Dictionary<string, object> variables)
+    {
+        foreach (var key in variables.Keys)
+        {
+            var obj = variables[key];
+            if (obj == null)
+                continue;
+            if (obj is JsonElement je == false)
+                continue;
+            if (je.ValueKind == JsonValueKind.False)
+            {
+                Logger?.ILog($"Adjust variable '{key}' to: false");
+                variables[key] = false;
+                continue;
+            }
+            if (je.ValueKind == JsonValueKind.True)
+            {
+                Logger?.ILog($"Adjust variable '{key}' to: true");
+                variables[key] = true;
+                continue;
+            }
+            if (je.ValueKind == JsonValueKind.String)
+            {
+                string sValue = je.GetString() ?? string.Empty;
+                variables[key] = sValue;
+                Logger?.ILog($"Adjust variable '{key}' to: '{sValue}'");
+                continue;
+            }
+            if (je.ValueKind == JsonValueKind.Number)
+            {
+                int iValue = je.GetInt32();
+                variables[key] = iValue;
+                Logger?.ILog($"Adjust variable '{key}' to: {iValue}");
+                continue;
+            }
         }
     }
 }
