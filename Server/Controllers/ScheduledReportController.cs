@@ -66,6 +66,9 @@ public class ScheduledReportController : BaseController
     [HttpPut("state/{uid}")]
     public async Task<IActionResult> SetState([FromRoute] Guid uid, [FromQuery] bool? enable)
     {
+        if (LicenseHelper.IsLicensed(LicenseFlags.Reporting) == false)
+            return BadRequest("Not licensed");
+        
         var service = ServiceLoader.Load<ScheduledReportService>();
         var item = await service.GetByUid(uid);
         if (item == null)
@@ -80,13 +83,19 @@ public class ScheduledReportController : BaseController
         }
         return Ok(item);
     }
-    
+
     /// <summary>
     /// Delete scheduled tasks from the system
     /// </summary>
     /// <param name="model">A reference model containing UIDs to delete</param>
     /// <returns>an awaited task</returns>
     [HttpDelete]
-    public async Task Delete([FromBody] ReferenceModel<Guid> model)
-        => await ServiceLoader.Load<ScheduledReportService>().Delete(model.Uids, await GetAuditDetails());
+    public async Task<IActionResult> Delete([FromBody] ReferenceModel<Guid> model)
+    {
+        if (LicenseHelper.IsLicensed(LicenseFlags.Reporting) == false)
+            return BadRequest("Not licensed");
+                
+        await ServiceLoader.Load<ScheduledReportService>().Delete(model.Uids, await GetAuditDetails());
+        return Ok();
+    }
 }
