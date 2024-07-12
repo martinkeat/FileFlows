@@ -20,7 +20,8 @@ public class LibraryFileFilter
     /// <summary>
     /// Gets or sets a list of libraries that are allowed, or null if any are allowed
     /// </summary>
-    public List<Guid> AllowedLibraries { get; set; } = new();
+    public List<Guid>? AllowedLibraries { get; set; }
+    
     /// <summary>
     /// Gets or sets the maximum size in MBs of the file to be returned
     /// </summary>
@@ -29,7 +30,7 @@ public class LibraryFileFilter
     /// <summary>
     /// Gets or sets UIDs of files to be ignored
     /// </summary>
-    public List<Guid> ExclusionUids { get; set; } = new();
+    public List<Guid>? ExclusionUids { get; set; }
     /// <summary>
     /// Gets or sets if only forced files should be returned
     /// </summary>

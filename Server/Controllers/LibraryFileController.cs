@@ -44,7 +44,6 @@ public class LibraryFileController : Controller //ControllerStore<LibraryFile>
         var lfStatus = await service.GetStatus();
         var libraries = await ServiceLoader.Load<LibraryService>().GetAllAsync();
         
-        
         var allLibraries = (await ServiceLoader.Load<LibraryService>().GetAllAsync());
         
         var sysInfo = new LibraryFilterSystemInfo()
