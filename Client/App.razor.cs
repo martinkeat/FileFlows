@@ -8,8 +8,14 @@ using Microsoft.JSInterop;
 
 namespace FileFlows.Client;
 
+/// <summary>
+/// The main Application
+/// </summary>
 public partial class App : ComponentBase
 {
+    /// <summary>
+    /// The instance of the application
+    /// </summary>
     public static App Instance { get; private set; }
     public delegate void DocumentClickDelegate();
     public event DocumentClickDelegate OnDocumentClick;
