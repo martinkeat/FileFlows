@@ -416,56 +416,41 @@ public class ImageMagickHelper
     {
         try
         {
-            // Execute ImageMagick command for resizing
-            ProcessStartInfo startInfo = new ProcessStartInfo
+            // Ensure destination directory exists
+            Directory.CreateDirectory(destination);
+
+            // Get total number of pages in the PDF
+            var totalPagesResult = GetTotalPdfPages(pdf);
+            if (totalPagesResult.Failed(out var error))
+                return Result<bool>.Fail(error);
+            var totalPages = totalPagesResult;
+
+            for (int i = 0; i < totalPages; i++)
             {
-                FileName = EXE_CONVERT, // ImageMagick's convert command
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false,
-                CreateNoWindow = true
-            };
-            startInfo.ArgumentList.Add("-density");
-            startInfo.ArgumentList.Add("300");
-            startInfo.ArgumentList.Add(pdf);
-            startInfo.ArgumentList.Add("-quality");
-            startInfo.ArgumentList.Add("100");
-            startInfo.ArgumentList.Add(Path.Combine(destination, "output-%04d.png"));
-            
-            using Process? process = Process.Start(startInfo);
-            string output = process.StandardOutput.ReadToEnd();
-            string error = process.StandardError.ReadToEnd();
-            process.WaitForExit();
-            if (process.ExitCode != 0)
-                return Result<bool>.Fail("Failed to extract images from PDF using ImageMagick: " + (error?.EmptyAsNull() ?? output));
-            
-            // // Use identify command to determine original formats and rename files
-            // ProcessStartInfo identifyStartInfo = new ProcessStartInfo
-            // {
-            //     FileName = EXE_IDENTIFY,
-            //     RedirectStandardOutput = true,
-            //     RedirectStandardError = true,
-            //     UseShellExecute = false,
-            //     CreateNoWindow = true
-            // };
-            // identifyStartInfo.ArgumentList.Add(Path.Combine(destination, "*"));
-            //
-            // using Process? identifyProcess = Process.Start(identifyStartInfo);
-            // string identifyOutput = identifyProcess.StandardOutput.ReadToEnd();
-            // string identifyError = identifyProcess.StandardError.ReadToEnd();
-            // identifyProcess.WaitForExit();
-            // if (identifyProcess.ExitCode != 0)
-            //     return Result<bool>.Fail("Failed to identify image formats using ImageMagick: " + (identifyError?.EmptyAsNull() ?? identifyOutput));
-            //
-            // string[] lines = identifyOutput.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
-            // foreach (string line in lines)
-            // {
-            //     string[] parts = line.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-            //     string filename = parts[0];
-            //     string format = parts[1];
-            //     string newFilename = Path.ChangeExtension(filename, format.ToLower());
-            //     File.Move(filename, newFilename);
-            // }
+                // Execute ImageMagick command for resizing
+                ProcessStartInfo startInfo = new ProcessStartInfo
+                {
+                    FileName = EXE_CONVERT, // ImageMagick's convert command
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                };
+                startInfo.ArgumentList.Add("-density");
+                startInfo.ArgumentList.Add("300");
+                startInfo.ArgumentList.Add($"{pdf}[{i}]");
+                startInfo.ArgumentList.Add("-quality");
+                startInfo.ArgumentList.Add("100");
+                startInfo.ArgumentList.Add(Path.Combine(destination, $"output-{i:D4}.png"));
+
+                using Process? process = Process.Start(startInfo);
+                string output = process.StandardOutput.ReadToEnd();
+                error = process.StandardError.ReadToEnd();
+                process.WaitForExit();
+                if (process.ExitCode != 0)
+                    return Result<bool>.Fail("Failed to extract images from PDF using ImageMagick: " +
+                                             (error?.EmptyAsNull() ?? output));
+            }
 
             return Result<bool>.Success(true);
         }
@@ -512,5 +497,40 @@ public class ImageMagickHelper
         {
             return Result<bool>.Fail(ex.Message);
         }
+    }
+    
+    /// <summary>
+    /// Gets the total number of pages in a PDF file.
+    /// </summary>
+    /// <param name="pdf">The PDF file.</param>
+    /// <returns>The total number of pages.</returns>
+    public Result<int> GetTotalPdfPages(string pdf)
+    {
+        ProcessStartInfo startInfo = new ProcessStartInfo
+        {
+            FileName = EXE_IDENTIFY,
+            Arguments = $"{pdf}",
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            UseShellExecute = false,
+            CreateNoWindow = true
+        };
+
+        using Process? process = Process.Start(startInfo);
+        if (process == null)
+            return Result<int>.Fail("Failed to start the identify process.");
+
+        string output = process.StandardOutput.ReadToEnd();
+        string error = process.StandardError.ReadToEnd();
+        process.WaitForExit();
+
+        if (process.ExitCode != 0)
+            return Result<int>.Fail($"Failed to get PDF info using identify: {(string.IsNullOrEmpty(error) ? output : error)}");
+
+        // Count the number of pages based on the number of lines in the output
+        int pageCount = output.Split('\n').Length - 1;
+        if(pageCount < 1)
+            return Result<int>.Fail("Failed to get number of pages");
+        return pageCount;
     }
 }
