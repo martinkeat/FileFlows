@@ -532,6 +532,7 @@ public class FileServerController : Controller
             if (tempFileResult.Failed(out string error))
             {
                 log.AppendLine(error);
+                Logger.Instance?.ELog($"FileServer: Save: '{path}' (FAILED){Environment.NewLine}{log}");
                 return StatusCode(500, log.ToString());
             }
 
@@ -541,15 +542,19 @@ public class FileServerController : Controller
             log.AppendLine("Renaming temporary filename: " + tempFile);
             var tempFileInfo = new FileInfo(tempFile);
             log.AppendLine("Temporary file exists: " + tempFileInfo.Exists);
-            if(tempFileInfo.Exists == false)
+            if (tempFileInfo.Exists == false)
+            {
+                Logger.Instance?.ELog($"FileServer: Save: '{path}' (FAILED){Environment.NewLine}{log}");
                 return StatusCode(503, log.ToString());
-            
+            }
+
             var fileInfo = new FileInfo(path);
 
             log.AppendLine("Moving temp directory to final location: " + fileInfo.DirectoryName);
             if (_localFileService.FileMove(tempFile, path, true).Failed(out error))
             {
                 log.AppendLine("Failed to move file: " + error);
+                Logger.Instance?.ELog($"FileServer: Save: '{path}' (FAILED){Environment.NewLine}{log}");
                 return StatusCode(500, log.ToString());
             }
 
@@ -561,6 +566,7 @@ public class FileServerController : Controller
             }
 
             log.AppendLine("FileServer: Uploaded successfully: " + path);
+            Logger.Instance?.ILog($"FileServer: Save: '{path}' (OK){Environment.NewLine}{log}");
             return Ok(log.ToString());
         }
         catch (Exception ex)

@@ -135,9 +135,23 @@ public class ScriptService
         string codeToValidate = code;
         try
         {
+            // Replace single-line comments with whitespace
+            codeToValidate = Regex.Replace(codeToValidate, @"//.*$", match => new string(' ', match.Length), RegexOptions.Multiline);
+            
+            // Replace multi-line comments with spaces while preserving line breaks
+            codeToValidate = Regex.Replace(codeToValidate, @"/\*[\s\S]*?\*/", match =>
+            {
+                var replacement = new char[match.Length];
+                for (int i = 0; i < match.Length; i++)
+                {
+                    replacement[i] = match.Value[i] == '\n' ? '\n' : ' ';
+                }
+                return new string(replacement);
+            });
 
             // Split code into lines
-            var lines = code.Replace("\r\n", "\n").Split(new[] { '\n' }, StringSplitOptions.None);
+            var lines = codeToValidate.Replace("\r\n", "\n").Split(new[] { '\n' }, StringSplitOptions.None);
+
 
             bool inFunction = false;
             // Detect top-level return statements and wrap them
@@ -159,7 +173,7 @@ public class ScriptService
 
             // Join lines back into a single string
             codeToValidate = string.Join("\n", lines);
-            
+
             var parser = new JavaScriptParser();
             parser.ParseScript(codeToValidate);
             return true;

@@ -380,12 +380,20 @@ public class RemoteFileService : IFileService
     {
         if (FileIsLocal(PreparePath(ref path)))
         {
-            if(FileIsLocal(PreparePath(ref destination)))
+            logger.ILog("File is local: " + path);
+            if (FileIsLocal(PreparePath(ref destination)))
+            {
+                logger.ILog("Moving to local destination: " + destination);
                 return _localFileService.FileMove(path, destination, overwrite);
+            }
+
+            logger.ILog("Uploading to remote destination: " + destination);
             var result = new FileUploader(logger, serverUrl, executorUid, AccessToken, RemoteNodeUid)
                 .UploadFile(path, destination).Result;
             if (result.Success == false)
                 return Result<bool>.Fail(result.Error);
+
+            logger.ILog("Upload was successful, deleting old file: " + path);
             FileDelete(path);
             return true;
         }
