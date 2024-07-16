@@ -20,6 +20,8 @@ public class LibraryFileController : Controller
     /// The semaphore to ensure only one file is requested at a time
     /// </summary>
     private static FairSemaphore nextFileSemaphore = new (1);
+
+    private static Logger NextFileLogger;
     
     /// <summary>
     /// Get a specific library file
@@ -53,8 +55,13 @@ public class LibraryFileController : Controller
         await nextFileSemaphore.WaitAsync();
         try
         {
+            if (NextFileLogger == null)
+            {
+                NextFileLogger = new();
+                NextFileLogger.RegisterWriter(new FileLogger(DirectoryHelper.LoggingDirectory, "FileProcessRequest", false));
+            }
             var service = ServiceLoader.Load<LibraryFileService>();
-            var result = await service.GetNext(args.NodeName, args.NodeUid, args.NodeVersion, args.WorkerUid);
+            var result = await service.GetNext(NextFileLogger, args.NodeName, args.NodeUid, args.NodeVersion, args.WorkerUid);
             if (result == null)
                 return result;
 

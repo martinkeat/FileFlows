@@ -87,19 +87,33 @@ public class LibraryFileService
         return await new LibraryFileManager().GetTotalMatchingItems(filter);
     }
 
-    /// <inheritdoc />
-    public async Task<NextLibraryFileResult> GetNext(string nodeName, Guid nodeUid, string nodeVersion, Guid workerUid)
+    /// <summary>
+    /// Gets the next file to process
+    /// </summary>
+    /// <param name="logger">the logger to use for this</param>
+    /// <param name="nodeName">the name of the node</param>
+    /// <param name="nodeUid">the UID of the node</param>
+    /// <param name="nodeVersion">the version of the node</param>
+    /// <param name="workerUid">the UID of the worker service making this request</param>
+    /// <returns>the result of the next file</returns>
+    public async Task<NextLibraryFileResult> GetNext(FileFlows.Plugin.ILogger logger, string nodeName, Guid nodeUid, string nodeVersion, Guid workerUid)
     {
         var nodeService = ServiceLoader.Load<NodeService>();
         await nodeService.UpdateLastSeen(nodeUid);
-        
+
         if (UpdaterWorker.UpdatePending)
-            return NextFileResult (NextLibraryFileStatus.UpdatePending); // if an update is pending, stop providing new files to process
+        {
+            logger.ILog("Update pending. No file.");
+            return NextFileResult(NextLibraryFileStatus.UpdatePending); // if an update is pending, stop providing new files to process
+        }
 
         var settings = await ServiceLoader.Load<ISettingsService>().Get();
         if (settings.IsPaused)
+        {
+            logger.ILog("System is paused.  No file.");
             return NextFileResult(NextLibraryFileStatus.SystemPaused);
-        
+        }
+
         var node = await nodeService.GetByUidAsync(nodeUid);
         if (node != null && node.Version != nodeVersion)
         {
@@ -110,26 +124,38 @@ public class LibraryFileService
         if (nodeUid != Globals.InternalNodeUid) // dont test version number for internal processing node
         {
             if (Version.TryParse(nodeVersion, out var nVersion) == false)
+            {
+                logger.WLog($"Invalid version '{nodeVersion}'.");
                 return NextFileResult(NextLibraryFileStatus.InvalidVersion);
+            }
 
             if (nVersion < Globals.MinimumNodeVersion)
             {
-                Logger.Instance.ILog(
+                logger.WLog(
                     $"Node '{nodeName}' version '{nVersion}' is less than minimum supported version '{Globals.MinimumNodeVersion}'");
                 return NextFileResult(NextLibraryFileStatus.VersionMismatch);
             }
         }
 
-        if(settings.EulaAccepted == false)
+        if (settings.EulaAccepted == false)
+        {
+            logger.WLog($"EULA not accepted.  No file.");
             return NextFileResult(NextLibraryFileStatus.SystemPaused);
-        
-        if (await NodeEnabled(node) == false)
-            return NextFileResult(NextLibraryFileStatus.NodeNotEnabled);
+        }
 
-        var file = await GetNextLibraryFile(node, workerUid);
-        if(file == null)
+        if (await NodeEnabled(node) == false)
+        {
+            logger.ILog($"Node '{node.Name}' not enabled.  No file.");
+            return NextFileResult(NextLibraryFileStatus.NodeNotEnabled);
+        }
+
+        var file = await GetNextLibraryFile(logger, node, workerUid);
+        if (file == null)
+        {
+            logger.ILog($"No file found to process.");
             return NextFileResult(NextLibraryFileStatus.NoFile, file);
-    
+        }
+
         #region reset the file for processing
         try
         {
@@ -138,11 +164,12 @@ public class LibraryFileService
         }
         catch (Exception)
         {
+            logger.WLog($"Failed to delete old log file for file[{file.Uid}]: {file.Name}");
         }
 
         var library = await ServiceLoader.Load<LibraryService>().GetByUidAsync(file.LibraryUid!.Value);
 
-        Logger.Instance.ILog("Resetting file info for: " + file.Name);
+        logger.ILog("Resetting file info for: " + file.Name);
         file.FinalSize = 0;
         file.FailureReason = string.Empty;
         file.OutputPath = string.Empty;
@@ -153,6 +180,7 @@ public class LibraryFileService
         file.OriginalMetadata= new();
         await new LibraryFileManager().ResetFileInfoForProcessing(file.Uid, library?.Flow?.Uid, library?.Flow?.Name);
         #endregion
+        logger.ILog($"File found to process: {file.Name}");
         
         return NextFileResult(NextLibraryFileStatus.Success, file);
     }
@@ -262,10 +290,11 @@ public class LibraryFileService
     /// <summary>
     /// Gets the next library file queued for processing
     /// </summary>
+    /// <param name="logger">the logger to use</param>
     /// <param name="node">The node doing the processing</param>
     /// <param name="workerUid">The UID of the worker on the node</param>
     /// <returns>If found, the next library file to process, otherwise null</returns>
-    public async Task<LibraryFile?> GetNextLibraryFile(ProcessingNode node, Guid workerUid)
+    public async Task<LibraryFile?> GetNextLibraryFile(Plugin.ILogger logger, ProcessingNode node, Guid workerUid)
     {
         var nodeLibraries = node?.Libraries?.Select(x => x.Uid)?.ToList() ?? new List<Guid>();
 
@@ -290,7 +319,7 @@ public class LibraryFileService
                 if (x.MaxRunners > 0 && executingLibraries.TryGetValue(x.Uid, out var currentRunners)
                                      && x.MaxRunners >= currentRunners)
                 {
-                    Logger.Instance.ILog($"Library '{x.Name}' at maximum runners '{currentRunners}' out of '{x.MaxRunners}'");
+                    logger.ILog($"Library '{x.Name}' at maximum runners '{currentRunners}' out of '{x.MaxRunners}'");
                     return false;
                 }
 
@@ -308,7 +337,7 @@ public class LibraryFileService
                     x.ProcessOnNodeUid == node.Uid);
             
             if(waitingForReprocess != null)
-                Logger.Instance.ILog($"File waiting for reprocessing [{node.Name}]: " + waitingForReprocess.Name);
+                logger.ILog($"File waiting for reprocessing [{node.Name}]: " + waitingForReprocess.Name);
 
             var nextFile = waitingForReprocess ?? (await manager.GetAll(new ()
                 {
@@ -323,7 +352,7 @@ public class LibraryFileService
 
             if (waitingForReprocess == null && await HigherPriorityWaiting(node, nextFile, allLibraries))
             {
-                Logger.Instance.ILog("Higher priority node waiting to process file");
+                logger.ILog("Higher priority node waiting to process file");
                 return null; // a higher priority node should process this file
             }
 
