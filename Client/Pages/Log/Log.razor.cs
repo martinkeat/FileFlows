@@ -52,12 +52,7 @@ public partial class Log : ComponentBase
     /// The active log file
     /// </summary>
     private LogFile? SearchFile;
-
-    /// <summary>
-    /// Gets the current file being viewed
-    /// </summary>
-    private string? CurrentFile;
-
+    
     /// <summary>
     /// Gets the current log text
     /// </summary>
@@ -95,7 +90,7 @@ public partial class Log : ComponentBase
     /// Translation strings
     /// </summary>
     private string lblDownload, lblSearch, lblSearching, lblInfo, lblWarning, lblError, lblDebug, lblText, 
-        lblIncludeHigherSeverity, lblSource, lblFile, lblSeverity, lblNodes;
+        lblIncludeHigherSeverity, lblSource, lblFile, lblSeverity, lblNodes, lblNoMatchingData, lblTitle;
     
     protected override void OnInitialized()
     {
@@ -118,6 +113,8 @@ public partial class Log : ComponentBase
         lblFile = Translater.Instant("Pages.Log.Fields.File");
         lblSeverity = Translater.Instant("Pages.Log.Fields.Severity");
         lblNodes = Translater.Instant("Pages.Log.Fields.Nodes");
+        lblNoMatchingData = Translater.Instant("Pages.Log.Labels.NoMatchingData");
+        lblTitle = Translater.Instant("Pages.Log.Title");
 #if (DEBUG)
         this.DownloadUrl = "http://localhost:6868/api/fileflows-log/download";
 #else
@@ -244,7 +241,6 @@ public partial class Log : ComponentBase
         {
             HasError = false;
             ErrorMessage = null;
-            CurrentFile = ActiveSearchModel.ActiveFile.FileName;
             bool nearBottom = filter == CurrentFilter && ActiveSearchModel.ActiveFile.Active && LogEntries?.Any() == true && 
                               await jsRuntime.InvokeAsync<bool>("ff.nearBottom", [".log-view .log"]);
             var response = await HttpHelper.Get<string>("/api/fileflows-log/download?source=" +

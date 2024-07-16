@@ -801,7 +801,8 @@
       "Title": "Log",
       "Labels":{
         "AutoRefresh":"Auto Refresh",
-        "FailedToDownloadLog": "Failed to download log."
+        "FailedToDownloadLog": "Failed to download log.",
+        "NoMatchingData": "No matching data"
       },
       "Fields": {
         "Text": "Text",
