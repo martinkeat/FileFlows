@@ -60,7 +60,7 @@ public class LoggingMiddleware
             {
                 if (WebServer.FullyStarted && SettingsService.Get().Result.LogEveryRequest)
                 {
-                    _ = RequestLogger.Log((LogType) 999,
+                    _ = RequestLogger.Log(LogType.Info,
                         $"REQUEST [{context.Request?.Method}] [{context.Response?.StatusCode}]: {context.Request?.Path.Value}");
                 }
             }

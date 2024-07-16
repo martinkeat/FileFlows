@@ -54,18 +54,26 @@ public class WatchedLibrary:IDisposable
 
     private readonly System.Timers.Timer QueueTimer;
 
+    private static Logger Logger;
+
     /// <summary>
     /// Constructs a instance of a Watched Library
     /// </summary>
     /// <param name="library">The library to watch</param>
     public WatchedLibrary(Library library)
     {
+        if (Logger == null)
+        {
+            Logger = new();
+            Logger.RegisterWriter(new FileLogger(DirectoryHelper.LoggingDirectory, "Library", false));
+        }
+
         this.Library = library;
         this.UseScanner = library.Scan;
 
         if (Directory.Exists(library.Path) == false)
         {
-            Logger.Instance.WLog("Library does not exist, falling back to scanner: " + library.Path);
+            Logger.WLog("Library does not exist, falling back to scanner: " + library.Path);
             this.UseScanner = true;
         }
 
@@ -89,7 +97,7 @@ public class WatchedLibrary:IDisposable
         if (settings?.LogQueueMessages != true)
             return;
         
-        Logger.Instance.DLog(message);
+        Logger.DLog(message);
     }
 
     /// <summary>
@@ -162,7 +170,7 @@ public class WatchedLibrary:IDisposable
 
             if (CheckExists(fullpath) == false)
             {
-                Logger.Instance.DLog($"{Library.Name} file does not exist: {fullpath}");
+                Logger.DLog($"{Library.Name} file does not exist: {fullpath}");
                 return;
             }
 
@@ -209,7 +217,7 @@ public class WatchedLibrary:IDisposable
                         var lastWriteTime = files.Select(x => x.LastWriteTimeUtc).Max();
                         if (lastWriteTime > DateTime.UtcNow.AddSeconds(-Library.WaitTimeSeconds))
                         {
-                            Logger.Instance.ILog(
+                            Logger.ILog(
                                 $"Changes recently written to folder '{di.FullName}' cannot add to library yet");
                             Thread.Sleep(2000);
                             QueueItem(fullpath);
@@ -219,7 +227,7 @@ public class WatchedLibrary:IDisposable
                 }
                 catch (Exception ex)
                 {
-                    Logger.Instance.ILog(
+                    Logger.ILog(
                         $"Error reading folder '{di.FullName}' cannot add to library yet, will try again: " +
                         ex.Message);
                     Thread.Sleep(2000);
@@ -228,12 +236,12 @@ public class WatchedLibrary:IDisposable
                 }
             }
 
-            Logger.Instance.DLog($"New unknown {type}: {fullpath}");
+            Logger.DLog($"New unknown {type}: {fullpath}");
 
             if (Library.SkipFileAccessTests == false && Library.Folders == false &&
                 CanAccess((FileInfo)fsInfo, Library.FileSizeDetectionInterval).Result == false)
             {
-                Logger.Instance.WLog($"Failed access checks for file: " + fullpath +"\n" +
+                Logger.WLog($"Failed access checks for file: " + fullpath +"\n" +
                                      "These checks can be disabled in library settings, but ensure the flow can read and write to the library.");
 
                 _ = ServiceLoader.Load<NotificationService>().Record(NotificationSeverity.Information,
@@ -280,7 +288,7 @@ public class WatchedLibrary:IDisposable
             if (result != null && result.Uid != Guid.Empty)
             {
                 SystemEvents.TriggerFileAdded(result, Library);
-                Logger.Instance.DLog(
+                Logger.DLog(
                     $"Time taken \"{(DateTime.UtcNow.Subtract(dtTotal))}\" to successfully add new library file: \"{fullpath}\"");
                 
                 if (ServiceLoader.Load<ISettingsService>().Get()?.Result?.ShowFileAddedNotifications == true)
@@ -288,13 +296,13 @@ public class WatchedLibrary:IDisposable
             }
             else
             {
-                Logger.Instance.ELog(
+                Logger.ELog(
                     $"Time taken \"{(DateTime.UtcNow.Subtract(dtTotal))}\" to fail to add new library file: \"{fullpath}\"");
             }
         }
         catch (Exception ex)
         {
-            Logger.Instance.ELog("Error in queue: " + ex.Message + Environment.NewLine + ex.StackTrace);
+            Logger.ELog("Error in queue: " + ex.Message + Environment.NewLine + ex.StackTrace);
         }
     }
 
@@ -363,7 +371,7 @@ public class WatchedLibrary:IDisposable
         {
             if (Library.DownloadsDirectory && knownFile.Status == FileStatus.Processed)
             {
-                Logger.Instance.DLog("Processed file found in download library, reprocessing: " + fullpath);
+                Logger.DLog("Processed file found in download library, reprocessing: " + fullpath);
                 knownFile.Status = FileStatus.Unprocessed;
                 knownFile.HoldUntil = Library.HoldMinutes > 0
                     ? DateTime.UtcNow.AddMinutes(Library.HoldMinutes)
@@ -391,7 +399,7 @@ public class WatchedLibrary:IDisposable
                     // 2. final fingerprint = if the user chose to replace original, the original file now should have 
                     //    the final fingerprint as its fingerprint
                     // so this file doesnt match either fingerprints, therefore, we must reprocess it.
-                    Logger.Instance.ILog(
+                    Logger.ILog(
                         $"File '{fullpath}' has been modified since last was processed by FileFlows, marking for reprocessing");
                     needsReprocessing = true;
                 }
@@ -406,7 +414,7 @@ public class WatchedLibrary:IDisposable
                     return (true, null, null);
                 }
 
-                Logger.Instance.DLog(
+                Logger.DLog(
                     $"{Library.Name} file '{fullpath}' creation time has changed, reprocessing file '{fsInfo.CreationTimeUtc}' vs '{knownFile.CreationTime}'");
             }
 
@@ -535,7 +543,7 @@ public class WatchedLibrary:IDisposable
         }
         catch (Exception ex)
         {
-            Logger.Instance.ELog($"Failed to create file system watcher for '{Library.Path}': {ex.Message}");
+            Logger.ELog($"Failed to create file system watcher for '{Library.Path}': {ex.Message}");
             DisposeWatcher();
             this.UseScanner = true;
         }
@@ -660,20 +668,20 @@ public class WatchedLibrary:IDisposable
         }
         else if (UseScanner && library.Scan == false)
         {
-            Logger.Instance.ILog($"WatchedLibrary: Library '{library.Name}' switched to watched mode, starting watcher");
+            Logger.ILog($"WatchedLibrary: Library '{library.Name}' switched to watched mode, starting watcher");
             UseScanner = true;
             SetupWatcher();
         }
         else if(UseScanner == false && library.Scan == true)
         {
-            Logger.Instance.ILog($"WatchedLibrary: Library '{library.Name}' switched to scan mode, disposing watcher");
+            Logger.ILog($"WatchedLibrary: Library '{library.Name}' switched to scan mode, disposing watcher");
             UseScanner = false;
             DisposeWatcher();
         }
         else if(UseScanner == false && Watcher != null && Watcher.Path != library.Path)
         {
             // library path changed, need to change watcher
-            Logger.Instance.ILog($"WatchedLibrary: Library '{library.Name}' path changed, updating watched path");
+            Logger.ILog($"WatchedLibrary: Library '{library.Name}' path changed, updating watched path");
             SetupWatcher(); 
         }
 
@@ -709,7 +717,7 @@ public class WatchedLibrary:IDisposable
                 return;
             }
             
-            Logger.Instance.ILog($"WatchedLibrary: Scan started on '{Library.Name}': {Library.Path}");
+            Logger.ILog($"WatchedLibrary: Scan started on '{Library.Name}': {Library.Path}");
             
             int count = 0;
             if (Library.Folders)
@@ -759,7 +767,7 @@ public class WatchedLibrary:IDisposable
                 }
             }
 
-            Logger.Instance.ILog($"WatchedLibrary: Files queued for '{Library.Name}': {count} / {QueueCount()}");
+            Logger.ILog($"WatchedLibrary: Files queued for '{Library.Name}': {count} / {QueueCount()}");
             ScanComplete = true;
             
             Library.LastScanned = DateTime.UtcNow;
@@ -770,7 +778,7 @@ public class WatchedLibrary:IDisposable
             while(ex.InnerException != null)
                 ex = ex.InnerException;
 
-            Logger.Instance.ELog("WatchedLibrary: Failed scanning for files: " + ex.Message + Environment.NewLine + ex.StackTrace);
+            Logger.ELog("WatchedLibrary: Failed scanning for files: " + ex.Message + Environment.NewLine + ex.StackTrace);
 
             _ = ServiceLoader.Load<NotificationService>().Record(NotificationSeverity.Warning,
                 $"'{Library.Name}' failed scanning for files",
@@ -778,7 +786,7 @@ public class WatchedLibrary:IDisposable
         }
         finally
         {
-            Logger.Instance.ILog($"WatchedLibrary: Scan finished on '{Library.Name}': {Library.Path} ({DateTime.UtcNow.Subtract(start)})");
+            Logger.ILog($"WatchedLibrary: Scan finished on '{Library.Name}': {Library.Path} ({DateTime.UtcNow.Subtract(start)})");
             ScanMutex.ReleaseMutex();
         }
     }
@@ -825,7 +833,7 @@ public class WatchedLibrary:IDisposable
 
                 if (fs != file.Length)
                 {
-                    Logger.Instance.ILog("WatchedLibrary: File size has changed, skipping for now: " + file.FullName);
+                    Logger.ILog("WatchedLibrary: File size has changed, skipping for now: " + file.FullName);
                     return false; // file size has changed, could still be being written too
                 }
             }
@@ -836,13 +844,13 @@ public class WatchedLibrary:IDisposable
             {
                 if(fs.CanRead == false)
                 {
-                    Logger.Instance.ILog("Cannot read file: " + file.FullName);
+                    Logger.ILog("Cannot read file: " + file.FullName);
                     return false;
                 }
                 canRead = true;
                 if (fs.CanWrite == false)
                 {
-                    Logger.Instance.ILog("Cannot write file: " + file.FullName);
+                    Logger.ILog("Cannot write file: " + file.FullName);
                     return false;
                 }
 
@@ -856,9 +864,9 @@ public class WatchedLibrary:IDisposable
             if (checkedAccess)
             {
                 if (canRead == false)
-                    Logger.Instance.ILog("Cannot read file: " + file.FullName);
+                    Logger.ILog("Cannot read file: " + file.FullName);
                 if (canWrite == false)
-                    Logger.Instance.ILog("Cannot write file: " + file.FullName);
+                    Logger.ILog("Cannot write file: " + file.FullName);
             }
 
             return false;
@@ -940,7 +948,7 @@ public class WatchedLibrary:IDisposable
     {
         if (MatchesDetection(fullPath) == false)
         {
-            Logger.Instance.DLog($"{Library.Name} file failed file detection: {fullPath}");
+            Logger.DLog($"{Library.Name} file failed file detection: {fullPath}");
             return;
         }
         
