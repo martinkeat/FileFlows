@@ -56,7 +56,7 @@ public class FileServerController : Controller
             .Where(x => string.IsNullOrWhiteSpace(x) == false)
             .Distinct()
             .ToArray();
-        Logger.Instance.DLog("Allowed File Server Paths: \n" + string.Join("\n", allowedPaths));
+        Logger.Instance.ILog("Allowed File Server Paths: \n" + string.Join("\n", allowedPaths));
         lfsLogger = new StringLogger();
         _localFileService = new LocalFileService()
         {
@@ -66,8 +66,8 @@ public class FileServerController : Controller
             PermissionsFolder = settings.FileServerFolderPermissions is < 1 or > 777 ? Globals.DefaultPermissionsFolder : settings.FileServerFolderPermissions,
             Logger = lfsLogger
         };
-        Logger.Instance.DLog("FileService Directory Permissions: " + _localFileService.PermissionsFolder);
-        Logger.Instance.DLog("FileService File Permissions: " + _localFileService.PermissionsFile);
+        Logger.Instance.ILog("FileService Directory Permissions: " + _localFileService.PermissionsFolder);
+        Logger.Instance.ILog("FileService File Permissions: " + _localFileService.PermissionsFile);
 
         FileHelper.Permissions = _localFileService.PermissionsFile.Value;
         FileHelper.PermissionsFolders = _localFileService.PermissionsFolder.Value;
@@ -84,6 +84,7 @@ public class FileServerController : Controller
         if (HttpContext.Request.Headers.TryGetValue("x-executor", out var executorHeaderValue) == false)
         {
             message = "No executor identifier given.";
+            Logger.ELog(message);
             return false;
         }
 
@@ -91,12 +92,14 @@ public class FileServerController : Controller
         if (Guid.TryParse(executorHeaderValue, out Guid executorUid) == false)
         {
             message = "Invalid executor identifier given.";
+            Logger.ELog(message);
             return false;
         }
 
         if (FlowRunnerService.Executors.ContainsKey(executorUid) == false)
         {
             message = "Unknown executor identifier given.";
+            Logger.ELog(message);
             return false;
         }
 #endif
@@ -197,7 +200,7 @@ public class FileServerController : Controller
         
         
         string log = lfsLogger.ToString();
-        Logger.DLog("Remote Delete Directory: " + log);
+        Logger.ILog("Remote Delete Directory: " + log);
         return Ok(log);
     }
 
@@ -216,7 +219,7 @@ public class FileServerController : Controller
             return StatusCode(500, result.Error);
         
         string log = lfsLogger.ToString();
-        Logger.DLog("Remote Move Directory: " + log);
+        Logger.ILog("Remote Move Directory: " + log);
         return Ok(log);
     }
 
@@ -234,7 +237,7 @@ public class FileServerController : Controller
         if (result.IsFailed)
             return StatusCode(500, result.Error);
         string log = lfsLogger.ToString();
-        Logger.DLog("Remote Create Directory: " + log);
+        Logger.ILog("Remote Create Directory: " + log);
         return Ok(log);
     }
 
@@ -252,6 +255,7 @@ public class FileServerController : Controller
         var result = _localFileService.FileExists(path);
         if (result.IsFailed)
             return StatusCode(500, result.Error);
+        Logger.ILog($"File Exists '{path.Path}': {result.Value}");
         return Ok(result.Value);
     }
 
@@ -268,6 +272,7 @@ public class FileServerController : Controller
         var result = _localFileService.Touch(path);
         if (result.IsFailed)
             return StatusCode(500, result.Error);
+        Logger.ILog($"Touched: '{path.Path}'");
         return Ok(result.Value);
     }
 
@@ -304,7 +309,7 @@ public class FileServerController : Controller
             return StatusCode(500, "Failed to delete");
         
         string log = lfsLogger.ToString();
-        Logger.DLog("Remote Deleted File: " + log);
+        Logger.ILog("Remote Deleted File: " + log);
         return Ok(log);
     }
 
@@ -373,7 +378,7 @@ public class FileServerController : Controller
             return StatusCode(500, "Failed to move file");
         
         string log = lfsLogger.ToString();
-        Logger.DLog("Remote Move File: " + log);
+        Logger.ILog("Remote Move File: " + log);
         return Ok(log);
     }
 
@@ -394,7 +399,7 @@ public class FileServerController : Controller
             return StatusCode(500, "Failed to copy file");
         
         string log = lfsLogger.ToString();
-        Logger.DLog("Remote Copy File: " + log);
+        Logger.ILog("Remote Copy File: " + log);
         return Ok(log);
     }
 
@@ -406,6 +411,7 @@ public class FileServerController : Controller
         var result = _localFileService.FileAppendAllText(request.Path, request.Text);
         if (result.IsFailed)
             return StatusCode(500, result.Error);
+        Logger.ILog($"Appended '{request.Path}': {request.Text}");
         return Ok(result.Value);
     }
 
@@ -417,6 +423,7 @@ public class FileServerController : Controller
         var result = _localFileService.SetCreationTimeUtc(request.Path, request.Date);
         if (result.IsFailed)
             return StatusCode(500, result.Error);
+        Logger.ILog($"Set File Creation Time '{request.Path}': {request.Date}");
         return Ok(result.Value);
     }
 
@@ -428,6 +435,7 @@ public class FileServerController : Controller
         var result = _localFileService.SetLastWriteTimeUtc(request.Path, request.Date);
         if (result.IsFailed)
             return StatusCode(500, result.Error);
+        Logger.ILog($"Set File Write Time '{request.Path}': {request.Date}");
         return Ok(result.Value);
     }
 
@@ -451,7 +459,7 @@ public class FileServerController : Controller
     //     {
     //         // Calculate file hash for the entire file if no range specified
     //         var hash = await FileHasher.Hash(filePath);
-    //         Logger.DLog("File: " + filePath + "\nHash: " + hash);
+    //         Logger.ILog("File: " + filePath + "\nHash: " + hash);
     //         return Content(hash);
     //     }
     //     catch(Exception ex)
@@ -530,7 +538,7 @@ public class FileServerController : Controller
         if (ValidateRequest(out string message) == false)
             return StatusCode(503, message?.EmptyAsNull() ?? "File service is currently disabled.");
 
-        Logger.Instance?.ILog("FileServer: Save: " + path);
+        Logger.ILog("FileServer: Save: " + path);
 
         StringBuilder log = new StringBuilder(); 
         try
@@ -539,7 +547,7 @@ public class FileServerController : Controller
 
             if (stream == null || stream.CanRead == false)
             {
-                Logger.Instance?.WLog("FileServer: No File specified for upload.");
+                Logger.WLog("FileServer: No File specified for upload.");
                 return StatusCode(503, "No File specified for upload.");
             }
 
@@ -547,7 +555,7 @@ public class FileServerController : Controller
             if (tempFileResult.Failed(out string error))
             {
                 log.AppendLine(error);
-                Logger.Instance?.ELog($"FileServer: Save: '{path}' (FAILED){Environment.NewLine}{log}");
+                Logger.ELog($"FileServer: Save: '{path}' (FAILED){Environment.NewLine}{log}");
                 return StatusCode(500, log.ToString());
             }
 
@@ -559,7 +567,7 @@ public class FileServerController : Controller
             log.AppendLine("Temporary file exists: " + tempFileInfo.Exists);
             if (tempFileInfo.Exists == false)
             {
-                Logger.Instance?.ELog($"FileServer: Save: '{path}' (FAILED){Environment.NewLine}{log}");
+                Logger.ELog($"FileServer: Save: '{path}' (FAILED){Environment.NewLine}{log}");
                 return StatusCode(503, log.ToString());
             }
 
@@ -569,7 +577,7 @@ public class FileServerController : Controller
             if (_localFileService.FileMove(tempFile, path, true).Failed(out error))
             {
                 log.AppendLine("Failed to move file: " + error);
-                Logger.Instance?.ELog($"FileServer: Save: '{path}' (FAILED){Environment.NewLine}{log}");
+                Logger.ELog($"FileServer: Save: '{path}' (FAILED){Environment.NewLine}{log}");
                 return StatusCode(500, log.ToString());
             }
 
@@ -581,14 +589,14 @@ public class FileServerController : Controller
             }
 
             log.AppendLine("FileServer: Uploaded successfully: " + path);
-            Logger.Instance?.ILog($"FileServer: Save: '{path}' (OK){Environment.NewLine}{log}");
+            Logger.ILog($"FileServer: Save: '{path}' (OK){Environment.NewLine}{log}");
             return Ok(log.ToString());
         }
         catch (Exception ex)
         {
             // Log the exception
             log.AppendLine($"FileServer: An error occurred: {ex.Message}" + Environment.NewLine + ex.StackTrace);
-            Logger.Instance?.ELog($"FileServer: An error occurred: {ex.Message}" + Environment.NewLine + ex.StackTrace);
+            Logger.ELog($"FileServer: An error occurred: {ex.Message}" + Environment.NewLine + ex.StackTrace);
             return StatusCode(500, log.ToString());
         }
     }
@@ -718,7 +726,7 @@ public class FileServerController : Controller
     //
     // public static bool RecursiveDelete(string[] IncludePatterns, string root, string path, bool deleteSubFolders, List<string> messages)
     // {
-    //     Logger.Instance?.ILog("Checking directory to delete: " + path);
+    //     Logger.ILog("Checking directory to delete: " + path);
     //     DirectoryInfo dir = new DirectoryInfo(path);
     //     if (string.Equals(dir.FullName, root, StringComparison.CurrentCultureIgnoreCase))
     //     {
