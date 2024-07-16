@@ -193,7 +193,7 @@ public class Application
 
     private void WriteLogHeader(string[] args)
     {
-        Logger.Instance.ILog(new string('=', 50));
+        Logger.Instance.ILog(new string('=', 100));
         Thread.Sleep(1); // so log message can be written
         Logger.Instance.ILog("Starting FileFlows " + Globals.Version);
         Thread.Sleep(1); // so log message can be written
@@ -213,7 +213,7 @@ public class Application
         }
 
         Thread.Sleep(1); // so log message can be written
-        Logger.Instance.ILog(new string('=', 50));
+        Logger.Instance.ILog(new string('=', 100));
         Thread.Sleep(1); // so log message can be written
     }
 

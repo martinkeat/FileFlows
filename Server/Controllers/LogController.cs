@@ -65,6 +65,9 @@ public class LogController : Controller
                 ShortName = revision == 0 ?  $"{date:d MMM}" : $"{date:d MMM} [{revision:00}]"
             };
 
+            if (source == "FileFlowsHTTP")
+                source = "Web Requests";
+
             if (files.TryGetValue(source, out var list) == false)
             {
                 list = new();
