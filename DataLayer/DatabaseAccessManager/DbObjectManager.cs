@@ -377,7 +377,15 @@ internal  class DbObjectManager : BaseManager
                     $" where JSON_EXTRACT({dataColumnName},'$.{property}.Uid') = '{uid}'";
         
         using var db = await DbConnector.GetDb();
-        return await db.Db.ExecuteAsync(sql, name) > 0;
+        try
+        {
+            return await db.Db.ExecuteAsync(sql, name) > 0;
+        }
+        catch (Exception ex)
+        {
+            Logger.ELog($"{ex.Message}: SQL: {sql}");
+            return false;
+        }
 
     }
 }
