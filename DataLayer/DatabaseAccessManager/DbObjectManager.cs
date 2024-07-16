@@ -370,8 +370,8 @@ internal  class DbObjectManager : BaseManager
             sql += $" {dataColumnName} = json_modify({dataColumnName}, '$.{property}.Name', @0) " + 
                    $" where JSON_VALUE({dataColumnName}, '$.{property}.Uid') = '{uid}";
         else if (DbType == DatabaseType.Postgres)
-            sql = $" {dataColumnName} = jsonb_set({dataColumnName}::jsonb, '{{{property}.Name}}', @0::jsonb)::text " +
-                  $" where {dataColumnName}::json->>{property}->>'Uid' = '{uid}'";
+            sql = $" {dataColumnName} = jsonb_set({dataColumnName}::jsonb, '{{{property},Name}}', to_jsonb(@0::text)::jsonb)::text " +
+                  $" where {dataColumnName}::jsonb->'{property}'->>'Uid' = '{uid}'";
         else // mysql and sqlite are the same
             sql += $" {dataColumnName} = json_set({dataColumnName}, '$.{property}.Name', @0) " + 
                     $" where JSON_EXTRACT({dataColumnName},'$.{property}.Uid') = '{uid}'";

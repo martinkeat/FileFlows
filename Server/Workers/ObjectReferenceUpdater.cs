@@ -18,8 +18,9 @@ public class ObjectReferenceUpdater:ServerWorker
     /// <summary>
     /// Creates a new instance of the Object Reference Updater 
     /// </summary>
-    public ObjectReferenceUpdater() : base(ScheduleType.Daily, 1)
+    public ObjectReferenceUpdater() : base(ScheduleType.Minute, 5) //base(ScheduleType.Daily, 1)
     {
+        Run();
     }
 
     /// <inheritdoc />
