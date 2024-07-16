@@ -1,7 +1,6 @@
+using System.Text.RegularExpressions;
+using FileFlows.Plugin;
 using FileFlows.Server.Authentication;
-using FileFlows.Server.Services;
-using FileFlows.Server.Utils;
-using FileFlows.ServerShared.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FileFlows.Server.Controllers.RemoteControllers;
@@ -14,8 +13,20 @@ namespace FileFlows.Server.Controllers.RemoteControllers;
 [ApiExplorerSettings(IgnoreApi = true)]
 public class LogController : Controller
 {
-    
-    private readonly Dictionary<string, Guid> ClientUids = new (); 
+    /// <summary>
+    /// The client UIDs
+    /// </summary>
+    private readonly Dictionary<string, Guid> ClientUids = new ();
+
+    /// <summary>
+    /// The loggers
+    /// </summary>
+    private static Dictionary<string, FileLogger> Loggers = new ();
+
+    /// <summary>
+    /// The semaphore to allow the loggers to be thread safe
+    /// </summary>
+    private static FairSemaphore _semaphoreSlim = new (1);
         
 
     /// <summary>
@@ -29,32 +40,67 @@ public class LogController : Controller
             return;
         if (string.IsNullOrEmpty(message.NodeAddress))
             return;
+        
+        // if(ClientUids.TryGetValue(message.NodeAddress.ToLower(), out Guid clientUid) == false)
+        // {
+        //     var nodes = await new NodeService().GetAllAsync();
+        //     foreach (var node in nodes)
+        //     {
+        //         if (string.Equals(node.Address, message.NodeAddress, StringComparison.CurrentCultureIgnoreCase))
+        //             clientUid = node.Uid;
+        //         if (string.IsNullOrEmpty(node.Address) == false &&
+        //             ClientUids.ContainsKey(node.Address.ToLower()) == false)
+        //         {
+        //             ClientUids.Add(node.Address.ToLower(), node.Uid);
+        //         }
+        //     }
+        // }
+        //
+        // if (clientUid == Guid.Empty)
+        // {
+        //     Logger.Instance.ILog($"Failed to find client '{message.NodeAddress}', could not log message");
+        //     return;
+        // }
 
-        if(ClientUids.TryGetValue(message.NodeAddress.ToLower(), out Guid clientUid) == false)
+        await _semaphoreSlim.WaitAsync();
+        try
         {
-            var nodes = await new NodeService().GetAllAsync();
-            foreach (var node in nodes)
+            if (Loggers.TryGetValue(message.NodeAddress, out var logger) == false)
             {
-                if (string.Equals(node.Address, message.NodeAddress, StringComparison.CurrentCultureIgnoreCase))
-                    clientUid = node.Uid;
-                if (string.IsNullOrEmpty(node.Address) == false &&
-                    ClientUids.ContainsKey(node.Address.ToLower()) == false)
-                {
-                    ClientUids.Add(node.Address.ToLower(), node.Uid);
-                }
+                string name = message.NodeAddress;
+                if (IsValidFileName(name) == false)
+                    return;
+                
+                Loggers[message.NodeAddress] = new (DirectoryHelper.LoggingDirectory, name, false);
+                logger = Loggers[message.NodeAddress];
             }
-        }
 
-        if (clientUid == Guid.Empty)
+            await logger.Log(message.Type, message.Arguments);
+        }
+        finally
         {
-            Logger.Instance.ILog($"Failed to find client '{message.NodeAddress}', could not log message");
-            return;
+            _semaphoreSlim.Release();
         }
 
         // if (Logger.Instance.TryGetLogger(out DatabaseLogger logger))
         // {
         //     await logger.Log(clientUid, message.Type, message.Arguments);
         // }
+    }
+    /// <summary>
+    /// Checks if a file name is valid.
+    /// </summary>
+    /// <param name="fileName">The file name to validate.</param>
+    /// <returns>True if the file name is valid; otherwise, false.</returns>
+    /// <remarks>
+    /// Valid file names consist only of alphanumeric characters, hyphens, and underscores.
+    /// They do not contain sequences like '..' or '/' to prevent directory traversal.
+    /// </remarks>
+    public bool IsValidFileName(string fileName)
+    {
+        // Match only alphanumeric characters, hyphen, and underscore
+        // Ensure it does not contain '..' or '/'
+        return Regex.IsMatch(fileName, @"^[a-zA-Z0-9-_]+$") && fileName.Contains("..") == false && fileName.Contains("/") == false;
     }
 
 }
