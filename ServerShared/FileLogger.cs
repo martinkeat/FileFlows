@@ -57,12 +57,16 @@ public class FileLogger : ILogWriter
                 _ => ""
             };
 
-            string message = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff") + prefix + " -> " + string.Join(
+            string text = string.Join(
                 ", ", args.Select(x =>
                     x == null ? "null" :
                     x.GetType().IsPrimitive ? x.ToString() :
                     x is string ? x.ToString() :
                     System.Text.Json.JsonSerializer.Serialize(x)));
+            if (text.StartsWith('"') && text.EndsWith('"'))
+                text = text[1..^1];
+
+            string message = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff") + prefix + " -> " + text;
             if (message.IndexOf((char)0) >= 0)
             {
                 message = message.Replace(new string((char)0, 1), string.Empty);
