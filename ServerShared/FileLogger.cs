@@ -81,10 +81,7 @@ public class FileLogger : ILogWriter
                     }
 
                     return JsonSerializer.Serialize(x);
-                })).Trim();
-            
-            if (text.StartsWith('"') && text.EndsWith('"'))
-                text = text[1..^1];
+                }));
 
             string message = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff") + prefix + " -> " + text;
             if (message.IndexOf((char)0) >= 0)
