@@ -28,10 +28,10 @@
             <div class="search-field input">
                 <div class="label">Source</div>
                 <div class="value">
-                    <select @bind="SelectedSource">
+                    <select @onchange="HandleSourceSelection">
                         @foreach (var key in LoggingSources.Keys)
                         {
-                            <option value="@key">@key</option>
+                            <option selected="@(key == SelectedSource ? "selected" : null)" value="@key">@key</option>
                         }
                     </select>
                 </div>
@@ -40,11 +40,13 @@
                 <div class="label">Source</div>
                 <div class="value">
                     <div class="select-button">
-                        
                         <select @onchange="HandleSelection">
-                            @foreach (var file in LoggingSources[SelectedSource])
+                            @if (SelectedSource != null && LoggingSources.TryGetValue(SelectedSource, out var list))
                             {
-                                <option selected="@(file.FileName == SearchFile?.FileName == true ? "selected " : null)" value="@file.FileName">@file.ShortName</option>
+                                foreach (var file in list)
+                                {
+                                    <option selected="@(file.FileName == SearchFile?.FileName == true ? "selected " : null)" value="@file.FileName">@file.ShortName</option>
+                                }
                             }
                         </select>
                         

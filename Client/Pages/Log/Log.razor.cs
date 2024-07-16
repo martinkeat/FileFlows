@@ -293,6 +293,19 @@ public partial class Log : ComponentBase
         SearchFile = LoggingSources.SelectMany(kv => kv.Value)
             .FirstOrDefault(file => file.FileName == args.Value?.ToString());
     }
+    /// <summary>
+    /// Handles the source selection chaning
+    /// </summary>
+    /// <param name="args">the change event arguments</param>
+    private void HandleSourceSelection(ChangeEventArgs args)
+    {
+        if (LoggingSources.TryGetValue(args.Value?.ToString(), out var list) == false)
+            return;
+        
+        // Find the LogFile object corresponding to the selected ShortName
+        SearchFile = list.FirstOrDefault();
+    }
+
     
     /// <summary>
     /// Downloads the log
