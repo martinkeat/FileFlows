@@ -32,6 +32,34 @@
   margin: 0 0 1rem;
   width: 100%;
 }
+.side-search select {
+  border: none;
+  background: var(--input-background);
+}
+.side-search .select-button {
+  display: flex;
+  flex-direction: row;
+  background: var(--input-background);
+  height: var(--input-height);
+  border: solid 1px transparent;
+}
+.side-search .select-button:focus-within {
+  border-color: var(--accent);
+}
+.side-search .select-button select {
+  outline: none;
+  height: calc(var(--input-height) - 2px);
+}
+.side-search .select-button button {
+  width: 3rem;
+  margin-left: 0.5rem;
+  background: var(--base-lightest);
+  border: none;
+  height: calc(var(--input-height) - 2px);
+}
+.side-search .include-higher {
+  margin-bottom: 0 !important;
+}
 
 .log ::deep .row {
   white-space: pre;
@@ -55,10 +83,6 @@ button {
   top: 3px;
 }
 
-.sel-file {
-  width: 14rem;
-}
-
 .log pre {
   color: var(--color);
   margin: 0;
@@ -67,11 +91,11 @@ button {
 }
 
 .language-log {
-  font-family: monospace; /* Ensures consistent font for log display */
+  font-family: monospace;
 }
 
 .log-date {
-  color: #888; /* Gray color for date */
+  color: var(--pink);
 }
 
 .log-severity {
@@ -81,11 +105,11 @@ button {
   color: var(--info);
 }
 .log-severity.warning {
-  color: var(--warning);
+  color: var(--yellow);
 }
 .log-severity.error {
-  color: var(--error);
+  color: var(--red);
 }
 .log-severity.debug {
-  color: var(--success);
+  color: var(--green);
 }

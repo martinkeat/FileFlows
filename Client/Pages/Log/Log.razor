@@ -5,6 +5,13 @@
 <div class="log-view">
     
     <div class="log html-log">
+        @if (HasError)
+        {
+            <div class="error-message">@ErrorMessage</div>
+        }else if (FilteredLogEntries.Count == 0)
+        {
+            <div class="no-matching-data">No matching data</div>
+        }
         <Virtualize Items="@FilteredLogEntries" Context="logLine" OverscanCount="10">
             <div>
                 <pre class="language-log"><span class="log-date">@logLine.Date</span> [<span class="log-severity @(logLine.Severity.ToString().ToLowerInvariant())">@logLine.SeverityText</span>] <span class="log-message">@logLine.Message</span></pre>
@@ -21,23 +28,37 @@
             <div class="search-field input">
                 <div class="label">Source</div>
                 <div class="value">
-                    <select @onchange="HandleSelection">
+                    <select @bind="SelectedSource">
                         @foreach (var key in LoggingSources.Keys)
                         {
-                            <optgroup label="@key">
-                                @foreach (var file in LoggingSources[key])
-                                {
-                                    <option selected="@(file.FileName == ActiveFile?.FileName == true? "selected " : null)" value="@file.FileName">@file.ShortName</option>
-                                }
-                            </optgroup>
+                            <option value="@key">@key</option>
                         }
                     </select>
                 </div>
             </div>
             <div class="search-field input">
+                <div class="label">Source</div>
+                <div class="value">
+                    <div class="select-button">
+                        
+                        <select @onchange="HandleSelection">
+                            @foreach (var file in LoggingSources[SelectedSource])
+                            {
+                                <option selected="@(file.FileName == SearchFile?.FileName == true ? "selected " : null)" value="@file.FileName">@file.ShortName</option>
+                            }
+                        </select>
+                        
+                        <button @onclick="DownloadLog">
+                            <i class="fas fa-download" />
+                        </button>
+
+                    </div>
+                </div>
+            </div>
+            <div class="search-field input">
                 <div class="label">Severity</div>
                 <div class="value">
-                    <select @bind="SearchModel.Type">
+                    <select @bind="SearchType">
                         <option value=@LogType.Error>Error</option>
                         <option value=@LogType.Warning>Warning</option>
                         <option value=@LogType.Info>Info</option>
@@ -45,21 +66,20 @@
                     </select>
                 </div>
             </div>
-            <div class="search-field input">
+            <div class="search-field input include-higher">
                 <div class="label">
-                    <FlowSwitch @bind-Value=@SearchModel.TypeIncludeHigherSeverity/>
+                    <FlowSwitch @bind-Value=@SearchIncludeHigherSeverity/>
                     Include Higher Severity
                 </div>
             </div>
             <div class="search-field input">
                 <div class="label">Text</div>
                 <div class="value">
-                    <input type="text" @bind="SearchModel.Message">
+                    <input type="text" @bind="SearchText">
                 </div>
             </div>
         </div>
 
         <button @onclick="Search">@lblSearch</button>
-        <button @onclick="DownloadLog">@lblDownload</button>
     </div>
 </div>

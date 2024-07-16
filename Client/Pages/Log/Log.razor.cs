@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Components;
 using FileFlows.Client.Components;
 using System.Timers;
 using System.Web;
-using FileFlows.Client.Helpers;
 using Microsoft.JSInterop;
 
 namespace FileFlows.Client.Pages;
@@ -36,6 +35,10 @@ public partial class Log : ComponentBase
     
     private Dictionary<string, List<LogFile>> LoggingSources = new ();
     /// <summary>
+    /// The selected source/key from the Logging Sources
+    /// </summary>
+    private string SelectedSource { get; set; }
+    /// <summary>
     /// Gets or sets the log entries in the current log file being viewed
     /// </summary>
     private List<LogEntry> LogEntries { get; set; } = new();
@@ -47,7 +50,7 @@ public partial class Log : ComponentBase
     /// <summary>
     /// The active log file
     /// </summary>
-    private LogFile? ActiveFile;
+    private LogFile? SearchFile;
 
     /// <summary>
     /// Gets the current file being viewed
@@ -59,16 +62,42 @@ public partial class Log : ComponentBase
     /// </summary>
     private string? CurrentLogText;
 
-    private readonly LogSearchModel SearchModel = new()
-    {
-        Message = string.Empty,
-        Type = LogType.Info,
-        TypeIncludeHigherSeverity = true
-    };
+    /// <summary>
+    /// Gets or sets the search text
+    /// </summary>
+    private string SearchText { get; set; } = string.Empty;
+    /// <summary>
+    /// Gets or sets if higher severity messages should be included
+    /// </summary>
+    public bool SearchIncludeHigherSeverity { get; set; } = true;
+    /// <summary>
+    /// Gets or sets the search type
+    /// </summary>
+    public LogType SearchType { get; set; } = LogType.Info;
 
+    /// <summary>
+    /// The active search model
+    /// </summary>
+    private LogSearchModel ActiveSearchModel;
+
+    /// <summary>
+    /// The error message if the search failed
+    /// </summary>
+    private string? ErrorMessage;
+
+    /// <summary>
+    /// If there is an error
+    /// </summary>
+    public bool HasError = false;
+    
     protected override void OnInitialized()
     {
-
+        ActiveSearchModel = new()
+        {
+            Message = SearchText,
+            Type = SearchType,
+            TypeIncludeHigherSeverity = SearchIncludeHigherSeverity
+        };
         this.lblSearch = Translater.Instant("Labels.Search");
         this.lblSearching = Translater.Instant("Labels.Searching");
         this.lblDownload = Translater.Instant("Labels.Download");
@@ -85,10 +114,11 @@ public partial class Log : ComponentBase
         Blocker.Show();
         LoggingSources = (await HttpHelper.Get<Dictionary<string, List<LogFile>>>("/api/fileflows-log/log-sources")).Data;
 
-        var firstKey = LoggingSources.Keys.FirstOrDefault();
-        if (string.IsNullOrEmpty(firstKey) == false)
+        SelectedSource = LoggingSources.Keys.FirstOrDefault();
+        if (string.IsNullOrEmpty(SelectedSource) == false)
         {
-            ActiveFile = LoggingSources[firstKey].First();
+            ActiveSearchModel.ActiveFile = LoggingSources[SelectedSource].First();
+            SearchFile = LoggingSources[SelectedSource].First();
         }
         NavigationManager.LocationChanged += NavigationManager_LocationChanged!;
         
@@ -152,7 +182,7 @@ public partial class Log : ComponentBase
     /// <param name="e">the event arguments</param>
     void AutoRefreshTimerElapsed(object sender, ElapsedEventArgs e)
     {
-        if (Searching || ActiveFile?.Active != true)
+        if (Searching || ActiveSearchModel.ActiveFile?.Active != true)
             return;
         
         _ = Refresh();
@@ -166,6 +196,11 @@ public partial class Log : ComponentBase
         this.Searching = true;
         try
         {
+            ActiveSearchModel.Message = SearchText;
+            ActiveSearchModel.Type = SearchType;
+            ActiveSearchModel.TypeIncludeHigherSeverity = SearchIncludeHigherSeverity;
+            ActiveSearchModel.ActiveFile = SearchFile;
+            
             Blocker.Show(lblSearching);
             await Refresh();
         }
@@ -179,19 +214,21 @@ public partial class Log : ComponentBase
 
     async Task Refresh(bool forceScrollToBottom = false)
     {
-        bool sameFile = CurrentFile == ActiveFile.FileName;
-        if (sameFile == false || ActiveFile?.Active == true)
+        bool sameFile = CurrentFile == ActiveSearchModel.ActiveFile.FileName;
+        if (sameFile == false || SearchFile?.Active == true)
         {
-            CurrentFile = ActiveFile.FileName;
-            bool nearBottom = sameFile && ActiveFile.Active && LogEntries?.Any() == true && 
+            HasError = false;
+            ErrorMessage = null;
+            CurrentFile = ActiveSearchModel.ActiveFile.FileName;
+            bool nearBottom = sameFile && ActiveSearchModel.ActiveFile.Active && LogEntries?.Any() == true && 
                               await jsRuntime.InvokeAsync<bool>("ff.nearBottom", [".log-view .log"]);
             var response = await HttpHelper.Get<string>("/api/fileflows-log/download?source=" +
-                                                        HttpUtility.UrlEncode(ActiveFile.FileName));
+                                                        HttpUtility.UrlEncode(ActiveSearchModel.ActiveFile.FileName));
             if (response.Success)
             {
-                if (sameFile && ActiveFile.Active)
+                if (sameFile && ActiveSearchModel.ActiveFile.Active)
                 {
-                    string log = response.Body.Substring(CurrentLogText.Length).TrimStart();
+                    string log = response.Body[CurrentLogText.Length..].TrimStart();
                     if (string.IsNullOrWhiteSpace(log) == false)
                     {
                         this.LogEntries.AddRange(SplitLog(log));
@@ -201,7 +238,7 @@ public partial class Log : ComponentBase
                 {
                     this.LogEntries = SplitLog(response.Data);
                 }
-                if(ActiveFile.Active)
+                if(ActiveSearchModel.ActiveFile.Active)
                     CurrentLogText = response.Body;
                 
                 ApplyFilter();
@@ -211,16 +248,8 @@ public partial class Log : ComponentBase
             }
             else
             {
-                LogEntries = new()
-                {
-                    new()
-                    {
-                        Date = "",
-                        Severity = LogType.Error,
-                        Message = response.Body,
-                        SeverityText = ""
-                    }
-                };
+                HasError = false;
+                ErrorMessage = response.Body;
             }
         }
         else
@@ -235,22 +264,22 @@ public partial class Log : ComponentBase
     /// </summary>
     private void ApplyFilter()
     {
-        bool hasSearchText = string.IsNullOrWhiteSpace(SearchModel.Message) == false;
+        bool hasSearchText = string.IsNullOrWhiteSpace(ActiveSearchModel.Message) == false;
         FilteredLogEntries = LogEntries.Where(x =>
         {
-            if (SearchModel.Type != null && x.Severity != SearchModel.Type)
+            if (x.Severity != ActiveSearchModel.Type)
             {
-                if (SearchModel.TypeIncludeHigherSeverity == false)
+                if (ActiveSearchModel.TypeIncludeHigherSeverity == false)
                     return false;
 
-                if ((int)x.Severity > (int)SearchModel.Type)
+                if ((int)x.Severity > (int)ActiveSearchModel.Type)
                     return false;
             }
 
             if (hasSearchText == false)
                 return true;
 
-            return x.Message.Contains(SearchModel.Message, StringComparison.InvariantCultureIgnoreCase);
+            return x.Message.Contains(ActiveSearchModel.Message, StringComparison.InvariantCultureIgnoreCase);
         }).ToList();
     }
 
@@ -261,7 +290,7 @@ public partial class Log : ComponentBase
     private void HandleSelection(ChangeEventArgs args)
     {
         // Find the LogFile object corresponding to the selected ShortName
-        ActiveFile = LoggingSources.SelectMany(kv => kv.Value)
+        SearchFile = LoggingSources.SelectMany(kv => kv.Value)
             .FirstOrDefault(file => file.FileName == args.Value?.ToString());
     }
     
@@ -270,14 +299,14 @@ public partial class Log : ComponentBase
     /// </summary>
     private async Task DownloadLog()
     {
-        var result = await HttpHelper.Get<string>(DownloadUrl + "?source=" + HttpUtility.UrlEncode(ActiveFile.FileName));
+        var result = await HttpHelper.Get<string>(DownloadUrl + "?source=" + HttpUtility.UrlEncode(SearchFile.FileName));
         if (result.Success == false)
         {
             Toast.ShowError(Translater.Instant("Pages.Log.Labels.FailedToDownloadLog"));
             return;
         }
 
-        await jsRuntime.InvokeVoidAsync("ff.saveTextAsFile", ActiveFile.FileName, result.Body);
+        await jsRuntime.InvokeVoidAsync("ff.saveTextAsFile", SearchFile.FileName, result.Body);
     }
     
     /// <summary>
@@ -310,7 +339,7 @@ public partial class Log : ComponentBase
                 var entry = new LogEntry
                 {
                     Date = entryMatch.Groups[1].Value.Trim()[11..], // remove date from string, only show time
-                    Severity = entryMatch.Groups[2].Value.Trim() switch
+                    Severity = entryMatch.Groups[2].Value.Trim().ToLowerInvariant() switch
                     {
                         "errr" => LogType.Error,
                         "warn" => LogType.Warning,
@@ -352,4 +381,34 @@ public partial class Log : ComponentBase
         /// </summary>
         public string Message { get; init; }
     }
+    
+    
+}
+
+
+
+
+/// <summary>
+/// A model used to search the log 
+/// </summary>
+public class LogSearchModel
+{
+    /// <summary>
+    /// Gets or sets the file being searched
+    /// </summary>
+    public LogFile ActiveFile { get; set; }
+    /// <summary>
+    /// Gets or sets what to search for in the message
+    /// </summary>
+    public string Message { get; set; }
+
+    /// <summary>
+    /// Gets or sets what log type to search for
+    /// </summary>
+    public LogType Type { get; set; }
+    
+    /// <summary>
+    /// Gets or sets if the search results should include log messages greater than the specified type
+    /// </summary>
+    public bool TypeIncludeHigherSeverity { get; set; }
 }
