@@ -36,6 +36,8 @@ public class FileServerController : Controller
     /// </summary>
     private static Logger Logger;
 
+    private static string[] AllowedPaths;
+
     /// <summary>
     /// Static consturctor
     /// </summary>
@@ -56,7 +58,11 @@ public class FileServerController : Controller
             .Where(x => string.IsNullOrWhiteSpace(x) == false)
             .Distinct()
             .ToArray();
-        Logger.ILog("Allowed File Server Paths: \n" + string.Join("\n", allowedPaths));
+
+        bool allowedPathsChanged = Shared.Helpers.ObjectHelper.AreEqual(AllowedPaths, allowedPaths) == false;
+        if(allowedPathsChanged)
+            AllowedPaths = allowedPaths;
+
         lfsLogger = new StringLogger();
         _localFileService = new LocalFileService()
         {
@@ -66,8 +72,13 @@ public class FileServerController : Controller
             PermissionsFolder = settings.FileServerFolderPermissions is < 1 or > 777 ? Globals.DefaultPermissionsFolder : settings.FileServerFolderPermissions,
             Logger = lfsLogger
         };
-        Logger.ILog("FileService Directory Permissions: " + _localFileService.PermissionsFolder);
-        Logger.ILog("FileService File Permissions: " + _localFileService.PermissionsFile);
+        
+        if(allowedPathsChanged)
+        {
+            Logger.ILog("Allowed File Server Paths: \n" + string.Join("\n", allowedPaths));
+            Logger.ILog("FileService Directory Permissions: " + _localFileService.PermissionsFolder);
+            Logger.ILog("FileService File Permissions: " + _localFileService.PermissionsFile);
+        }
 
         FileHelper.Permissions = _localFileService.PermissionsFile.Value;
         FileHelper.PermissionsFolders = _localFileService.PermissionsFolder.Value;

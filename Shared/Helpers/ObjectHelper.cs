@@ -36,6 +36,30 @@ public class ObjectHelper
     }
     
     /// <summary>
+    /// Compares two string arrays for equality, considering they may be null.
+    /// </summary>
+    /// <param name="array1">The first string array.</param>
+    /// <param name="array2">The second string array.</param>
+    /// <returns>True if the arrays are equal, otherwise false.</returns>
+    public static bool AreEqual(string[] array1, string[] array2)
+    {
+        // Check if both are null
+        if (array1 == null && array2 == null)
+            return true;
+
+        // Check if only one of them is null
+        if (array1 == null || array2 == null)
+            return false;
+
+        // Compare lengths
+        if (array1.Length != array2.Length)
+            return false;
+
+        // Compare elements
+        return array1.SequenceEqual(array2);
+    }
+    
+    /// <summary>
     /// Copies all properties from the source object to the destination object, excluding ignored properties.
     /// </summary>
     /// <typeparam name="T">The type of objects being copied.</typeparam>
