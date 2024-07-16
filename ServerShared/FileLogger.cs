@@ -1,4 +1,5 @@
-﻿using FileFlows.Plugin;
+﻿using System.Text.Json;
+using FileFlows.Plugin;
 using FileFlows.Shared;
 
 namespace FileFlows.ServerShared;
@@ -59,10 +60,29 @@ public class FileLogger : ILogWriter
 
             string text = string.Join(
                 ", ", args.Select(x =>
-                    x == null ? "null" :
-                    x.GetType().IsPrimitive ? x.ToString() :
-                    x is string ? x.ToString() :
-                    System.Text.Json.JsonSerializer.Serialize(x)));
+                {
+                    if (x == null)
+                        return "null";
+                    if (x.GetType().IsPrimitive)
+                        return x.ToString();
+                    if (x is string str)
+                        return str;
+                    if (x is JsonElement je)
+                    {
+                        if (je.ValueKind == JsonValueKind.True)
+                            return "true";
+                        if (je.ValueKind == JsonValueKind.False)
+                            return "false";
+                        if (je.ValueKind == JsonValueKind.String)
+                            return je.GetString();
+                        if (je.ValueKind == JsonValueKind.Number)
+                            return je.GetInt64().ToString();
+                        return je.ToString();
+                    }
+
+                    return JsonSerializer.Serialize(x);
+                })).Trim();
+            
             if (text.StartsWith('"') && text.EndsWith('"'))
                 text = text[1..^1];
 
