@@ -69,6 +69,8 @@ public class LogController : Controller
                 source = "Web Requests";
             else if (source == "FileServer")
                 source = "File Server";
+            else if (source == "FileProcessRequest")
+                source = "File Process Request";
 
             if (files.TryGetValue(source, out var list) == false)
             {
