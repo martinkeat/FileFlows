@@ -370,8 +370,6 @@ internal  class DbObjectManager : BaseManager
             sql += $" {dataColumnName} = json_modify({dataColumnName}, '$.{property}.Name', @0) " + 
                    $" where JSON_VALUE({dataColumnName}, '$.{property}.Uid') = '{uid}";
         else if (DbType == DatabaseType.Postgres)
-            // sql += $" {dataColumnName} = jsonb_set({dataColumnName}::jsonb, '{{{property}.Name}}', @0::jsonb)::text " +
-            //       $" where {dataColumnName}::json->>{property}->>'Uid' = '{uid}'";
             sql += $" {dataColumnName} = jsonb_set({dataColumnName}::jsonb, '{{{property},Name}}', to_jsonb(@0)::jsonb)::text " +
                    $" where {dataColumnName}::jsonb->'{property}'->>'Uid' = '{uid}'";
         else // mysql and sqlite are the same
@@ -382,7 +380,6 @@ internal  class DbObjectManager : BaseManager
         try
         {
             bool result = await db.Db.ExecuteAsync(sql, name) > 0;
-            Logger.WLog("All Object References update ran successfully: " + sql);
             return result;
         }
         catch (Exception ex)
