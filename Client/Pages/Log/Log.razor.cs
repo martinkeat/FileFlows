@@ -334,9 +334,10 @@ public partial class Log : ComponentBase
     /// <param name="args">the change event arguments</param>
     private void HandleSourceSelection(ChangeEventArgs args)
     {
-        if (LoggingSources.TryGetValue(args.Value?.ToString(), out var list) == false)
+        SelectedSource = args.Value?.ToString();
+        if (LoggingSources.TryGetValue(SelectedSource, out var list) == false)
             return;
-        
+
         // Find the LogFile object corresponding to the selected ShortName
         SearchFile = list.FirstOrDefault();
     }
