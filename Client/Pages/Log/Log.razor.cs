@@ -241,17 +241,21 @@ public partial class Log : ComponentBase
         {
             HasError = false;
             ErrorMessage = null;
-            bool nearBottom = filter == CurrentFilter && ActiveSearchModel.ActiveFile.Active && LogEntries?.Any() == true && 
-                              await jsRuntime.InvokeAsync<bool>("ff.nearBottom", [".log-view .log"]);
             var response = await HttpHelper.Get<string>("/api/fileflows-log/download?source=" +
                                                         HttpUtility.UrlEncode(ActiveSearchModel.ActiveFile.FileName));
             if (response.Success)
             {
-                if (sameFilter && ActiveSearchModel.ActiveFile.Active)
+                if (sameFilter && ActiveSearchModel.ActiveFile.Active && response.Body.Length >= CurrentLogText.Length)
                 {
+                    if (response.Body.Length == CurrentLogText.Length)
+                        return; // no more log, nothing extra to do 
+                    
                     string log = response.Body[CurrentLogText.Length..].TrimStart();
                     if (string.IsNullOrWhiteSpace(log) == false)
                     {
+                        bool nearBottom = filter == CurrentFilter && ActiveSearchModel.ActiveFile.Active && LogEntries?.Any() == true && 
+                                          await jsRuntime.InvokeAsync<bool>("ff.nearBottom", [".log-view .log"]);
+                        
                         var newLines = SplitLog(log);
                         var newFiltered = FilterData(newLines);
                         if (newFiltered.Count > 0)
