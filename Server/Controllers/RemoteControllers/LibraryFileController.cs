@@ -1,3 +1,4 @@
+using FileFlows.Plugin;
 using FileFlows.Server.Authentication;
 using FileFlows.Server.Helpers;
 using FileFlows.Server.Services;
@@ -15,6 +16,11 @@ namespace FileFlows.Server.Controllers.RemoteControllers;
 [ApiExplorerSettings(IgnoreApi = true)]
 public class LibraryFileController : Controller
 {
+    /// <summary>
+    /// The semaphore to ensure only one file is requested at a time
+    /// </summary>
+    private static FairSemaphore nextFileSemaphore = new (1);
+    
     /// <summary>
     /// Get a specific library file
     /// </summary>
@@ -44,17 +50,45 @@ public class LibraryFileController : Controller
     [HttpPost("next-file")]
     public async Task<NextLibraryFileResult> GetNextLibraryFile([FromBody] NextLibraryFileArgs args)
     {
-        var service = ServiceLoader.Load<LibraryFileService>();
-        var result = await service.GetNext(args.NodeName, args.NodeUid, args.NodeVersion, args.WorkerUid);
-        if (result == null)
-            return result;
-        
-        // don't add any logic here to clear the file etc.  
-        // the internal processing node bypasses this call and call the service directly (as does debug testing)
-        // only remote processing nodes make this call
+        await nextFileSemaphore.WaitAsync();
+        try
+        {
+            var service = ServiceLoader.Load<LibraryFileService>();
+            var result = await service.GetNext(args.NodeName, args.NodeUid, args.NodeVersion, args.WorkerUid);
+            if (result == null)
+                return result;
 
-        Logger.Instance.ILog($"GetNextFile for ['{args.NodeName}']({args.NodeUid}): {result.Status}");
-        return result;
+            // don't add any logic here to clear the file etc.  
+            // the internal processing node bypasses this call and call the service directly (as does debug testing)
+            // only remote processing nodes make this call
+
+            Logger.Instance.ILog($"GetNextFile for ['{args.NodeName}']({args.NodeUid}): {result.Status}");
+
+            if (result.File != null)
+            {
+                // record that this has started now, its not the complete start, but the flow runner has request it
+                // by recording this now, we add the flow running extremely early into the life cycle and we can 
+                // then limit the library runners, and wont have issues with "Unknown executor identifier" when using the file server
+                FlowRunnerService.Executors[result.File.Uid] = new()
+                {
+                    Uid = result.File.Uid,
+                    LibraryFile = result.File,
+                    NodeName = args.NodeName,
+                    NodeUid = args.NodeUid,
+                    IsRemote = args.NodeUid != Globals.InternalNodeUid,
+                    RelativeFile = result.File.RelativePath,
+                    Library = result.File.Library,
+                    IsDirectory = result.File.IsDirectory,
+                    StartedAt = DateTime.UtcNow
+                };
+            }
+
+            return result;
+        }
+        finally
+        {
+            nextFileSemaphore.Release();
+        }
     }
     
     /// <summary>

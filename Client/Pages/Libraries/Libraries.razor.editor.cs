@@ -1,6 +1,5 @@
 ﻿using FileFlows.Plugin;
 using FileFlows.Client.Components.Inputs;
-using FileFlows.Client.Components.Inputs.InputWidgetPreviews;
 
 namespace FileFlows.Client.Pages;
 
@@ -221,12 +220,11 @@ public partial class Libraries : ListPage<Guid, Library>
                 { "HideLabel", true }
             }
         });
-        // known issue, removing for now
-        // fields.Add(new ElementField()
-        // {
-        //     InputType = FormInputType.Int,
-        //     Name = nameof(library.MaxRunners)
-        // });
+        fields.Add(new ElementField()
+        {
+            InputType = FormInputType.Int,
+            Name = nameof(library.MaxRunners)
+        });
         return fields;
     }
 

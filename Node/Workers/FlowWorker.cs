@@ -262,7 +262,7 @@ public class FlowWorker : Worker
         var libFile = libFileResult.File;
 
         bool windows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
-        Guid processUid = Guid.NewGuid();
+        Guid processUid = libFile.Uid; // making this the library file UID.  Guid.NewGuid();
         AddExecutingRunner(processUid);
         var node2 = node;
         Task.Run(() =>
