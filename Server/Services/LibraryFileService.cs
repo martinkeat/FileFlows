@@ -231,7 +231,7 @@ public class LibraryFileService
         }
 
         Logger.Instance.ILog((libFile.IsDirectory ? "Directory" : "File") +
-                             (result == false ? " does not exist" : "exists") +
+                             (result == false ? " does not exist" : " exists") +
                              " on server: " + libFile.Name);
         
         return result;
