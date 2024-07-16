@@ -275,6 +275,12 @@
       "Failure": "Failure",
       "SubFlow": "Sub Flow"
     },
+    "LogType": {
+      "Debug": "Debug",
+      "Error": "Error",
+      "Info": "Info",
+      "Warning": "Warning"
+    },
     "MatchRange": {
       "Any": "Any",
       "GreaterThan": "Greater Than",
@@ -796,6 +802,14 @@
       "Labels":{
         "AutoRefresh":"Auto Refresh",
         "FailedToDownloadLog": "Failed to download log."
+      },
+      "Fields": {
+        "Text": "Text",
+        "IncludeHigherSeverity": "Include Higher Severity",
+        "Source": "Source",
+        "File": "File",
+        "Severity": "Severity",
+        "Nodes": "Nodes"
       }
     },
     "Login": {

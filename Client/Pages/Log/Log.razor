@@ -12,11 +12,12 @@
         {
             <div class="no-matching-data">No matching data</div>
         }
-        <Virtualize Items="@FilteredLogEntries" Context="logLine" OverscanCount="10">
-            <div>
-                <pre class="language-log"><span class="log-date">@logLine.Date</span> [<span class="log-severity @(logLine.Severity.ToString().ToLowerInvariant())">@logLine.SeverityText</span>] <span class="log-message">@logLine.Message</span></pre>
-            </div>
-        </Virtualize>
+        else
+        {
+            <Virtualize Items="@FilteredLogEntries" Context="logLine" OverscanCount="10">
+                <div><span class="log-date">@logLine.Date</span> [<span class="log-severity @(logLine.Severity.ToString().ToLowerInvariant())">@logLine.SeverityText</span>] <span class="log-message">@logLine.Message</span></div>
+            </Virtualize>
+        }
     </div>
 
     <div class="side-search">
@@ -26,7 +27,7 @@
         </div>
         <div class="search-fields">
             <div class="search-field input">
-                <div class="label">Source</div>
+                <div class="label">@lblSource</div>
                 <div class="value">
                     <select @onchange="HandleSourceSelection">
                         @{
@@ -44,7 +45,7 @@
 
                             if (hasNodes)
                             {
-                                <optgroup label="Nodes">
+                                <optgroup label="@lblNodes">
                                     @foreach (var key in LoggingSources.Keys)
                                     {
                                         if (key.StartsWith("Node-") == false)
@@ -61,7 +62,7 @@
                 </div>
             </div>
             <div class="search-field input">
-                <div class="label">Source</div>
+                <div class="label">@lblFile</div>
                 <div class="value">
                     <div class="select-button">
                         <select @onchange="HandleSelection">
@@ -74,7 +75,7 @@
                             }
                         </select>
                         
-                        <button @onclick="DownloadLog">
+                        <button @onclick="DownloadLog" title="@lblDownload">
                             <i class="fas fa-download" />
                         </button>
 
@@ -82,24 +83,24 @@
                 </div>
             </div>
             <div class="search-field input">
-                <div class="label">Severity</div>
+                <div class="label">@lblSeverity</div>
                 <div class="value">
                     <select @bind="SearchType">
-                        <option value=@LogType.Error>Error</option>
-                        <option value=@LogType.Warning>Warning</option>
-                        <option value=@LogType.Info>Info</option>
-                        <option value=@LogType.Debug>Debug</option>
+                        <option value=@LogType.Error>@lblError</option>
+                        <option value=@LogType.Warning>@lblWarning</option>
+                        <option value=@LogType.Info>@lblInfo</option>
+                        <option value=@LogType.Debug>@lblDebug</option>
                     </select>
                 </div>
             </div>
             <div class="search-field input include-higher">
                 <div class="label">
                     <FlowSwitch @bind-Value=@SearchIncludeHigherSeverity/>
-                    Include Higher Severity
+                    @lblIncludeHigherSeverity
                 </div>
             </div>
             <div class="search-field input">
-                <div class="label">Text</div>
+                <div class="label">@lblText</div>
                 <div class="value">
                     <input type="text" @bind="SearchText">
                 </div>

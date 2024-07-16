@@ -25,7 +25,6 @@ public partial class Log : ComponentBase
     /// Gets or sets the navigation manager
     /// </summary>
     [Inject] NavigationManager NavigationManager { get; set; }
-    private string lblDownload, lblSearch, lblSearching;
     private string DownloadUrl;
     private bool scrollToBottom = false;
 
@@ -89,6 +88,12 @@ public partial class Log : ComponentBase
     /// If there is an error
     /// </summary>
     public bool HasError = false;
+
+    /// <summary>
+    /// Translation strings
+    /// </summary>
+    private string lblDownload, lblSearch, lblSearching, lblInfo, lblWarning, lblError, lblDebug, lblText, 
+        lblIncludeHigherSeverity, lblSource, lblFile, lblSeverity, lblNodes;
     
     protected override void OnInitialized()
     {
@@ -101,6 +106,16 @@ public partial class Log : ComponentBase
         this.lblSearch = Translater.Instant("Labels.Search");
         this.lblSearching = Translater.Instant("Labels.Searching");
         this.lblDownload = Translater.Instant("Labels.Download");
+        lblInfo = Translater.Instant("Enums.LogType.Info");
+        lblWarning = Translater.Instant("Enums.LogType.Warning");
+        lblError = Translater.Instant("Enums.LogType.Error");
+        lblDebug = Translater.Instant("Enums.LogType.Debug"); 
+        lblText = Translater.Instant("Pages.Log.Fields.Text"); 
+        lblIncludeHigherSeverity = Translater.Instant("Pages.Log.Fields.IncludeHigherSeverity");
+        lblSource = Translater.Instant("Pages.Log.Fields.Source");
+        lblFile = Translater.Instant("Pages.Log.Fields.File");
+        lblSeverity = Translater.Instant("Pages.Log.Fields.Severity");
+        lblNodes = Translater.Instant("Pages.Log.Fields.Nodes");
 #if (DEBUG)
         this.DownloadUrl = "http://localhost:6868/api/fileflows-log/download";
 #else

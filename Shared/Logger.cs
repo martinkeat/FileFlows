@@ -90,21 +90,20 @@ public class Logger : ILogger
                     writer.Log(type, args).Wait();
                 else
                 {
-                    _ = Task.Run(async () =>
+                    try
                     {
-                        try
-                        {
-                            await writer.Log(type, args);
-                        }
-                        catch (Exception)
-                        {
-                        }
-                    });
+                        writer.Log(type, args).Wait();
+                    }
+                    catch (Exception)
+                    {
+                         // Ignored
+                    }
                 }
             }
         }
-        catch (Exception) // so cant crash
+        catch (Exception)
         {
+            // so cant crash
         }
     }
 }

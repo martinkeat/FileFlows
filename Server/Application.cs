@@ -194,27 +194,20 @@ public class Application
     private void WriteLogHeader(string[] args)
     {
         Logger.Instance.ILog(new string('=', 100));
-        Thread.Sleep(1); // so log message can be written
         Logger.Instance.ILog("Starting FileFlows " + Globals.Version);
-        Thread.Sleep(1); // so log message can be written
         if (Docker)
             Logger.Instance.ILog("Running inside docker container");
         if (string.IsNullOrWhiteSpace(Application.EntryPoint) == false)
             Logger.Instance.DLog("Entry Point: " + EntryPoint);
         if (string.IsNullOrWhiteSpace(Globals.CustomFileFlowsDotComUrl) == false)
             Logger.Instance.ILog("Custom FileFlows.com: " + Globals.CustomFileFlowsDotComUrl);
-        Thread.Sleep(1); // so log message can be written
         Logger.Instance.DLog("Arguments: " + (args?.Any() == true ? string.Join(" ", args) : "No arguments"));
-        Thread.Sleep(1); // so log message can be written
         foreach (DictionaryEntry var in Environment.GetEnvironmentVariables())
         {
             Logger.Instance.DLog($"ENV.{var.Key} = {var.Value}");
-            Thread.Sleep(1); // so log message can be written
         }
 
-        Thread.Sleep(1); // so log message can be written
         Logger.Instance.ILog(new string('=', 100));
-        Thread.Sleep(1); // so log message can be written
     }
 
 
