@@ -8,7 +8,6 @@ using FileFlows.Server.Services;
 using FileFlows.ServerShared.FileServices;
 using Microsoft.AspNetCore.Mvc;
 using FileHelper = FileFlows.Plugin.Helpers.FileHelper;
-using ILogger = FileFlows.Plugin.ILogger;
 
 namespace FileFlows.Server.Controllers;
 
@@ -478,6 +477,7 @@ public class FileServerController : Controller
 
         try
         {
+            Logger.ILog("File Download Request: " + path.Path);
             var fileInfo = new FileInfo(path);
             var totalLength = fileInfo.Length;
 
