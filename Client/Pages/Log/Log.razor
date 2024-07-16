@@ -14,9 +14,13 @@
         }
         else
         {
-            <Virtualize Items="@FilteredLogEntries" Context="logLine" OverscanCount="10">
-                <div><span class="log-date">@logLine.Date</span> [<span class="log-severity @(logLine.Severity.ToString().ToLowerInvariant())">@logLine.SeverityText</span>] <span class="log-message">@logLine.Message</span></div>
+            <Virtualize Items="@FilteredLines" Context="logLine" OverscanCount="10">
+                <div>@logLine</div>
             </Virtualize>
+            
+            @* <Virtualize Items="@FilteredLogEntries" Context="logLine" OverscanCount="10"> *@
+            @*     <div><span class="log-date">@logLine.Date</span> [<span class="log-severity @(logLine.Severity.ToString().ToLowerInvariant())">@logLine.SeverityText</span>] <span class="log-message">@logLine.Message</span></div> *@
+            @* </Virtualize> *@
         }
     </div>
 

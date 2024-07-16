@@ -46,6 +46,8 @@ public partial class Log : ComponentBase
     /// </summary>
     private List<LogEntry> FilteredLogEntries { get; set; } = new();
 
+    private List<MarkupString> FilteredLines = new();
+
     /// <summary>
     /// The active log file
     /// </summary>
@@ -227,38 +229,55 @@ public partial class Log : ComponentBase
         }
     }
 
+    /// <summary>
+    /// The current filter, used to determine if new log lines should be appended or replace the existin
+    /// </summary>
+    private string CurrentFilter = string.Empty;
+
     async Task Refresh(bool forceScrollToBottom = false)
     {
-        bool sameFile = CurrentFile == ActiveSearchModel.ActiveFile.FileName;
-        if (sameFile == false || SearchFile?.Active == true)
+        var filter =
+            $"{ActiveSearchModel.ActiveFile}|{ActiveSearchModel.Type}|{ActiveSearchModel.TypeIncludeHigherSeverity}|{ActiveSearchModel.Message}";
+        bool sameFilter = filter == CurrentFilter;
+        CurrentFilter = filter;
+        if (sameFilter || SearchFile?.Active == true)
         {
             HasError = false;
             ErrorMessage = null;
             CurrentFile = ActiveSearchModel.ActiveFile.FileName;
-            bool nearBottom = sameFile && ActiveSearchModel.ActiveFile.Active && LogEntries?.Any() == true && 
+            bool nearBottom = filter == CurrentFilter && ActiveSearchModel.ActiveFile.Active && LogEntries?.Any() == true && 
                               await jsRuntime.InvokeAsync<bool>("ff.nearBottom", [".log-view .log"]);
             var response = await HttpHelper.Get<string>("/api/fileflows-log/download?source=" +
                                                         HttpUtility.UrlEncode(ActiveSearchModel.ActiveFile.FileName));
             if (response.Success)
             {
-                if (sameFile && ActiveSearchModel.ActiveFile.Active)
+                if (sameFilter && ActiveSearchModel.ActiveFile.Active)
                 {
                     string log = response.Body[CurrentLogText.Length..].TrimStart();
                     if (string.IsNullOrWhiteSpace(log) == false)
                     {
-                        this.LogEntries.AddRange(SplitLog(log));
+                        var newLines = SplitLog(log);
+                        var newFiltered = FilterData(newLines);
+                        if (newFiltered.Count > 0)
+                        {
+                            FilteredLogEntries.AddRange(newFiltered);
+                            FilteredLines.AddRange(newFiltered.SelectMany(x => x.HtmlLines));
+                        }
+
+                        this.LogEntries.AddRange(newLines);
+                
+                        this.scrollToBottom = forceScrollToBottom || nearBottom;
                     }
                 }
                 else
                 {
                     this.LogEntries = SplitLog(response.Data);
+                    this.FilteredLogEntries = FilterData(LogEntries);
+                    FilteredLines = FilteredLogEntries.SelectMany(x => x.HtmlLines).ToList();
                 }
+                
                 if(ActiveSearchModel.ActiveFile.Active)
                     CurrentLogText = response.Body;
-                
-                ApplyFilter();
-
-                this.scrollToBottom = forceScrollToBottom || nearBottom;
                 this.StateHasChanged();
             }
             else
@@ -269,7 +288,8 @@ public partial class Log : ComponentBase
         }
         else
         {
-            ApplyFilter();
+            this.FilteredLogEntries = FilterData(this.LogEntries);
+            FilteredLines = FilteredLogEntries.SelectMany(x => x.HtmlLines).ToList();
             this.StateHasChanged();
         }
     }
@@ -277,10 +297,10 @@ public partial class Log : ComponentBase
     /// <summary>
     /// Applies the filter
     /// </summary>
-    private void ApplyFilter()
+    private List<LogEntry> FilterData(List<LogEntry> entries)
     {
         bool hasSearchText = string.IsNullOrWhiteSpace(ActiveSearchModel.Message) == false;
-        FilteredLogEntries = LogEntries.Where(x =>
+        return entries.Where(x =>
         {
             if (x.Severity != ActiveSearchModel.Type)
             {
@@ -361,6 +381,7 @@ public partial class Log : ComponentBase
                 // If a new log entry is found, add the current entry to the list
                 if (currentEntry != null)
                 {
+                    SetHtmlLines(currentEntry);
                     logEntries.Add(currentEntry);
                 }
 
@@ -388,10 +409,19 @@ public partial class Log : ComponentBase
         // Add the last entry to the list if it exists
         if (currentEntry != null)
         {
+            SetHtmlLines(currentEntry);
             logEntries.Add(currentEntry);
         }
 
         return logEntries;
+
+        void SetHtmlLines(LogEntry logLine)
+        {
+            string html = $@"<span class=""log-date"">{HttpUtility.HtmlEncode(logLine.Date)}</span> " +
+                          $@"[<span class=""log-severity {logLine.Severity.ToString().ToLowerInvariant()}"">" +
+                          $@"{logLine.SeverityText}</span>] <span class=""log-message"">{HttpUtility.HtmlEncode(logLine.Message.Replace("\r\n", "\n"))}</span>";
+            logLine.HtmlLines = html.Split('\n').Select(x => (MarkupString)x).ToArray();
+        }
     }
     
     /// <summary>
@@ -418,6 +448,11 @@ public partial class Log : ComponentBase
         /// Gets or sets the message content of the log entry.
         /// </summary>
         public string Message { get; set; }
+        
+        /// <summary>
+        /// Gets or sets the HTML lines
+        /// </summary>
+        public MarkupString[] HtmlLines { get; set; }
     }
     
     
