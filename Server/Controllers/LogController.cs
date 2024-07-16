@@ -48,7 +48,7 @@ public class LogController : Controller
     public IDictionary<string, List<LogFile>> GetLogSources()
     {
         var dir = DirectoryHelper.LoggingDirectory;
-        SortedDictionary<string, List<LogFile>> files = new();
+        Dictionary<string, List<LogFile>> files = new();
         foreach (var file in new DirectoryInfo(dir).GetFiles("*.log").OrderByDescending(x => x.CreationTime))
         {
             var parts = file.Name[..^4].Split('-');
@@ -86,7 +86,9 @@ public class LogController : Controller
             list.Add(lf);
         }
 
-        return files;
+        return files.OrderBy(x => x.Key == "FileFlows" ? 1 : 2)
+            .ThenBy(x => x.Key.ToLowerInvariant())
+            .ToDictionary(x => x.Key, x => x.Value);
     }
 
     /// <summary>
