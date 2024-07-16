@@ -318,25 +318,25 @@ public partial class Log : ComponentBase
     public List<LogEntry> SplitLog(string log)
     {
         var logEntries = new List<LogEntry>();
-
-        // Regex patterns
-        var messagePattern = @"^\s*(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3} \[[A-Z]+\] .*)$";
+    
+        // Regex pattern to match the beginning of a log entry
         var entryPattern = @"^(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3}) \[([A-Z]+)\] (.*)$";
+        var entryRegex = new Regex(entryPattern, RegexOptions.Multiline);
 
-        var messageRegex = new Regex(messagePattern, RegexOptions.Multiline);
-        var entryRegex = new Regex(entryPattern);
-
-        // Use Regex.Matches to find all log messages
-        var messageMatches = messageRegex.Matches(log);
-        foreach (Match messageMatch in messageMatches)
+        var lines = log.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+        LogEntry? currentEntry = null;
+        foreach (var line in lines)
         {
-            var message = messageMatch.Groups[1].Value.Trim();
-
-            // Use entry regex to extract date, severity, and message
-            var entryMatch = entryRegex.Match(message);
+            var entryMatch = entryRegex.Match(line);
             if (entryMatch.Success)
             {
-                var entry = new LogEntry
+                // If a new log entry is found, add the current entry to the list
+                if (currentEntry != null)
+                {
+                    logEntries.Add(currentEntry);
+                }
+
+                currentEntry = new LogEntry
                 {
                     Date = entryMatch.Groups[1].Value.Trim()[11..], // remove date from string, only show time
                     Severity = entryMatch.Groups[2].Value.Trim().ToLowerInvariant() switch
@@ -344,13 +344,23 @@ public partial class Log : ComponentBase
                         "errr" => LogType.Error,
                         "warn" => LogType.Warning,
                         "dbug" => LogType.Debug,
-                        _ => LogType.Info  
+                        _ => LogType.Info
                     },
                     SeverityText = entryMatch.Groups[2].Value.Trim(),
                     Message = entryMatch.Groups[3].Value.Trim()
                 };
-                logEntries.Add(entry);
             }
+            else if (currentEntry != null)
+            {
+                // Append the line to the current log entry's message
+                currentEntry.Message += "\n" + line.Trim();
+            }
+        }
+
+        // Add the last entry to the list if it exists
+        if (currentEntry != null)
+        {
+            logEntries.Add(currentEntry);
         }
 
         return logEntries;
@@ -379,7 +389,7 @@ public partial class Log : ComponentBase
         /// <summary>
         /// Gets or sets the message content of the log entry.
         /// </summary>
-        public string Message { get; init; }
+        public string Message { get; set; }
     }
     
     
