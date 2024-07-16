@@ -107,10 +107,12 @@ public class StartupService
 
             DataLayerDelegates.Setup();
             
-            StartupWorkers();
-
             Complete(settings, serverUrl);
 
+            // Start workers right at the end, so the ServerUrl is set in case the worker needs BaseServerUrl
+            StartupWorkers();
+            
+            WebServer.FullyStarted = true;
             return true;
         }
         catch (Exception ex)
