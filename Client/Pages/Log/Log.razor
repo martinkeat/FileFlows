@@ -33,7 +33,7 @@
                             bool hasNodes = false;
                             foreach (var key in LoggingSources.Keys)
                             {
-                                if (key.StartsWith("Node -"))
+                                if (key.StartsWith("Node-"))
                                 {
                                     hasNodes = true;
                                     continue;
@@ -47,11 +47,11 @@
                                 <optgroup label="Nodes">
                                     @foreach (var key in LoggingSources.Keys)
                                     {
-                                        if (key.StartsWith("Node - ") == false)
+                                        if (key.StartsWith("Node-") == false)
                                         {
                                             continue;
                                         }
-                                        <option selected="@(key == SelectedSource ? "selected" : null)" value="@key">@key[7..]</option>
+                                        <option selected="@(key == SelectedSource ? "selected" : null)" value="@key">@key[5..]</option>
                                     }
                                     
                                 </optgroup>
