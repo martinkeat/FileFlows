@@ -13,6 +13,12 @@ public interface ISettingsService
     /// </summary>
     /// <returns>the version of the server</returns>
     Task<Version> GetServerVersion();
+
+    /// <summary>
+    /// Getst he settings
+    /// </summary>
+    /// <returns>the settings</returns>
+    Task<Settings?> Get();
     
     /// <summary>
     /// Gets the current configuration revision number

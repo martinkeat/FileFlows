@@ -21,7 +21,7 @@ public abstract class ServerWorker : Worker
     /// <inheritdoc />
     protected override void Execute()
     {
-        var settings = ServiceLoader.Load<SettingsService>().Get().Result;
+        var settings = ServiceLoader.Load<ISettingsService>().Get().Result;
         if (settings.EulaAccepted == false)
         {
             Logger.Instance.ILog("EULA Not accepted cannot execute worker: " + GetType().Name);

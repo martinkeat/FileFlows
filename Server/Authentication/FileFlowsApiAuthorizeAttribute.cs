@@ -36,7 +36,7 @@ public class FileFlowsApiAuthorizeAttribute : Attribute, IAsyncAuthorizationFilt
         if (mode == SecurityMode.Off)
             return;
         
-        var settings = await ServiceLoader.Load<SettingsService>().Get();
+        var settings = await ServiceLoader.Load<ISettingsService>().Get();
         
         var token = context.HttpContext.Request.Headers["x-token"].ToString();
         

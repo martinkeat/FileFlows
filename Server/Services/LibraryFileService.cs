@@ -96,7 +96,7 @@ public class LibraryFileService
         if (UpdaterWorker.UpdatePending)
             return NextFileResult (NextLibraryFileStatus.UpdatePending); // if an update is pending, stop providing new files to process
 
-        var settings = await ServiceLoader.Load<SettingsService>().Get();
+        var settings = await ServiceLoader.Load<ISettingsService>().Get();
         if (settings.IsPaused)
             return NextFileResult(NextLibraryFileStatus.SystemPaused);
         

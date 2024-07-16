@@ -1,3 +1,5 @@
+using FileFlows.ServerShared.Services;
+
 namespace FileFlows.Server.Services;
 
 /// <summary>
@@ -21,7 +23,7 @@ public static class ServiceLoader
             .AddSingleton<AppSettingsService>()
             .AddSingleton<StartupService>()
             .AddSingleton<DatabaseService>()
-            .AddSingleton<SettingsService>()
+            .AddSingleton<ISettingsService, SettingsService>()
             //.AddSingleton<DatabaseLogService>()
             .AddSingleton<StatisticService>()
             .AddSingleton<DashboardService>()

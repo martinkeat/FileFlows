@@ -120,7 +120,7 @@ public class OpenIDController : Controller
             if (user == null)
                 return ErrorPage("Unable to find user: " + lookupName);
 
-            var settings = await ServiceLoader.Load<SettingsService>().Get();
+            var settings = await ServiceLoader.Load<ISettingsService>().Get();
             var jwt = AuthenticationHelper.CreateJwtToken(user, Request.GetActualIP(), settings.TokenExpiryMinutes);
 
             return AuthRedirectPage(jwt);

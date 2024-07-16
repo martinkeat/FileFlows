@@ -116,7 +116,7 @@ public class SettingsController : BaseController
     [HttpGet]
     public async Task<Settings> Get()
     {
-        var settings = await ServiceLoader.Load<SettingsService>().Get();
+        var settings = await ServiceLoader.Load<ISettingsService>().Get();
         if (string.IsNullOrWhiteSpace(settings.SmtpPassword) == false)
         {
             string json = JsonSerializer.Serialize(settings);
@@ -152,7 +152,7 @@ public class SettingsController : BaseController
         if (model.SmtpPassword == DUMMY_PASSWORD)
         {
             // need to get the existing password
-            var existing = await ServiceLoader.Load<SettingsService>().Get();
+            var existing = await ServiceLoader.Load<ISettingsService>().Get();
             model.SmtpPassword = existing.SmtpPassword;
         }
         
@@ -236,7 +236,8 @@ public class SettingsController : BaseController
     {
         if (model == null)
             return;
-        await ServiceLoader.Load<SettingsService>().Save(model, auditDetails);
+        var service = (SettingsService)ServiceLoader.Load<ISettingsService>();
+        await service.Save(model, auditDetails);
     }
 
     private bool IsConnectionSame(string original, string newConnection)
@@ -330,15 +331,15 @@ public class SettingsController : BaseController
     /// <returns>the current revision</returns>
     [HttpGet("current-config/revision")]
     public Task<int> GetCurrentConfigRevision()
-        => ServiceLoader.Load<SettingsService>().GetCurrentConfigurationRevision();
+        => ServiceLoader.Load<ISettingsService>().GetCurrentConfigurationRevision();
     
     /// <summary>
     /// Loads the current configuration
     /// </summary>
     /// <returns>the current configuration</returns>
     [HttpGet("current-config")]
-    public Task<ConfigurationRevision> GetCurrentConfig()
-        => ServiceLoader.Load<SettingsService>().GetCurrentConfiguration();
+    public Task<ConfigurationRevision?> GetCurrentConfig()
+        => ServiceLoader.Load<ISettingsService>().GetCurrentConfiguration();
 
     
     /// <summary>
@@ -403,7 +404,7 @@ public class SettingsController : BaseController
             await pluginService.DownloadPlugins(model.Plugins);
         }
 
-        var service = ServiceLoader.Load<SettingsService>();
+        var service = (SettingsService)ServiceLoader.Load<ISettingsService>();
         var settings = await service.Get();
         settings.EulaAccepted = model.EulaAccepted;
         settings.InitialConfigDone = true;

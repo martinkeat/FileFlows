@@ -88,7 +88,7 @@ public class UserService
 
         if (BCrypt.Net.BCrypt.Verify(password, user.Password) == false)
         {
-            var settings = await ServiceLoader.Load<SettingsService>().Get();
+            var settings = await ServiceLoader.Load<ISettingsService>().Get();
             loginAttempt ??= new();
             int minutes = settings.LoginLockoutMinutes < 1 ? 20 : settings.LoginLockoutMinutes;
             

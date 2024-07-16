@@ -59,6 +59,13 @@ public class Program
         // if (options.ApiPort > 0 && options.ApiPort < 65535)
         //     Workers.RestApiWorker.Port = options.ApiPort;
         
+        SharedServiceLoader.Loader = type =>
+        {
+            var method = typeof(ServiceLoader).GetMethod("Load", new Type[] { });
+            var genericMethod = method?.MakeGenericMethod(type);
+            return genericMethod?.Invoke(null, null)!;
+        };
+
         DirectoryHelper.Init();
         
         Console.WriteLine("BaseDirectory: " + DirectoryHelper.BaseDirectory);

@@ -60,7 +60,7 @@ public class StatusService
     /// <returns>True if there is an update</returns>
     public async Task<object> UpdateAvailable()
     {
-        var settings = await ServiceLoader.Load<SettingsService>().Get();
+        var settings = await ServiceLoader.Load<ISettingsService>().Get();
         if (settings?.DisableTelemetry != false)
             return new { UpdateAvailable = false };
         var result = Workers.ServerUpdater.GetLatestOnlineVersion();

@@ -21,6 +21,7 @@ public class Program
             return;
         
         Application app = ServiceLoader.Provider.GetRequiredService<Application>();
+        ServerShared.Services.SharedServiceLoader.Loader = type => ServiceLoader.Provider.GetRequiredService(type);
         app.Run(args);
     }
     

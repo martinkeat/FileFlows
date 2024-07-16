@@ -150,7 +150,7 @@ public class NodeController : BaseController
     {
         if (LicenseHelper.IsLicensed(LicenseFlags.AutoUpdates) == false)
             return false;
-        var settings = await ServiceLoader.Load<SettingsService>().Get();
+        var settings = await ServiceLoader.Load<ISettingsService>().Get();
         return settings.AutoUpdateNodes;
 
     }
@@ -162,7 +162,7 @@ public class NodeController : BaseController
     [HttpPost("pause")]
     public async Task Pause([FromQuery] int minutes)
     {
-        var service = ServiceLoader.Load<SettingsService>();
+        var service = (SettingsService)ServiceLoader.Load<ISettingsService>();
         var settings = await service.Get();
         if (settings.IsPaused)
             return; // already paused
@@ -179,7 +179,7 @@ public class NodeController : BaseController
     [HttpGet("system-is-paused")]
     public async Task<bool> SystemIsPaused()
     {
-        var service = ServiceLoader.Load<SettingsService>();
+        var service = ServiceLoader.Load<ISettingsService>();
         var settings = await service.Get();
         return settings.IsPaused;
     }

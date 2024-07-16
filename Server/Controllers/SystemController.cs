@@ -50,7 +50,7 @@ public class SystemController:BaseController
     [FileFlowsAuthorize(UserRole.PauseProcessing)]
     public async Task Pause([FromQuery] int duration)
     {
-        var service = ServiceLoader.Load<SettingsService>();
+        var service = (SettingsService)ServiceLoader.Load<ISettingsService>();
         var settings = await service.Get();
         if (duration < 1)
         {
@@ -80,7 +80,7 @@ public class SystemController:BaseController
         //info.MemoryUsage = proc.PrivateMemorySize64;
         info.MemoryUsage = GC.GetTotalMemory(true);
         info.CpuUsage = await GetCpuPercentage();
-        var settings = await ServiceLoader.Load<SettingsService>().Get();
+        var settings = await ServiceLoader.Load<ISettingsService>().Get();
         info.IsPaused = settings.IsPaused;
         info.PausedUntil = settings.PausedUntil;
         return info;

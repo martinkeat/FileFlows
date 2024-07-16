@@ -30,7 +30,7 @@ public class ServerUpdater : UpdaterWorker
     /// <inheritdoc />
     protected override void Execute()
     {
-        var settings = ServiceLoader.Load<SettingsService>().Get().Result;
+        var settings = ServiceLoader.Load<ISettingsService>().Get().Result;
         if (settings.EulaAccepted == false)
             return; // cannot execute if EULA not accepted
         base.Execute();
@@ -97,7 +97,7 @@ public class ServerUpdater : UpdaterWorker
     /// <returns>if auto updates are enabled</returns>
     protected override bool GetAutoUpdatesEnabled()
     {
-        var settings = ServiceLoader.Load<SettingsService>().Get().Result;
+        var settings = ServiceLoader.Load<ISettingsService>().Get().Result;
         return settings?.AutoUpdate == true;
     }
 

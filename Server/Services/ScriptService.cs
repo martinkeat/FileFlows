@@ -357,7 +357,7 @@ public class ScriptService
             var dir = Path.Combine(DirectoryHelper.DataDirectory, "shared-scripts");
             if (Directory.Exists(dir))
             {
-                var currentRevision = await ServiceLoader.Load<SettingsService>().GetCurrentConfigurationRevision();
+                var currentRevision = await ServiceLoader.Load<ISettingsService>().GetCurrentConfigurationRevision();
                 if (currentRevision == sharedDirectoryRevision)
                     return dir;
                 sharedDirectoryRevision = currentRevision;

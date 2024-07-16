@@ -23,7 +23,7 @@ public class LoggingMiddleware
         get
         {
             if (_settingsService == null)
-                _settingsService = ServiceLoader.Load<SettingsService>();
+                _settingsService = (SettingsService)ServiceLoader.Load<ISettingsService>();
             return _settingsService;
         }
     }

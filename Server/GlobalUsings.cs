@@ -10,5 +10,5 @@ global using FileFlows.Shared;
 global using FileFlows.ServerShared;
 global using FileFlows.Server.Models;
 global using FileFlows.ServerShared.Helpers;
-
+global using FileFlows.ServerShared.Services;
 

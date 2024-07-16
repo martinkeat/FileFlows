@@ -247,7 +247,7 @@
 //     /// </summary>
 //     protected void IncrementConfigurationRevision()
 //     {
-//         var service = ServiceLoader.Load<SettingsService>();
+//         var service = ServiceLoader.Load<ISettingsService>();
 //         _ = service.RevisionIncrement();
 //     }
 // }

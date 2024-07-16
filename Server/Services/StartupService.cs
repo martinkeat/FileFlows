@@ -5,6 +5,7 @@ using FileFlows.RemoteServices;
 using FileFlows.Server.DefaultTemplates;
 using FileFlows.Server.Helpers;
 using FileFlows.Server.Workers;
+using FileFlows.ServerShared.Services;
 using FileFlows.ServerShared.Workers;
 using FileFlows.Shared.Models;
 
@@ -91,7 +92,7 @@ public class StartupService
             UpdateStatus("Updating Templates...");
             UpdateTemplates();
             // do this so the settings object is loaded
-            var settings = ServiceLoader.Load<SettingsService>().Get().Result;
+            var settings = ServiceLoader.Load<ISettingsService>().Get().Result;
             var appSettings = ServiceLoader.Load<AppSettingsService>().Settings;
 
 

@@ -24,6 +24,23 @@ public class SettingsService : RemoteService, ISettingsService
         }
     }
 
+    /// <inheritdoc />
+    public async Task<Settings?> Get()
+    {
+        try
+        {
+            var result = await HttpHelper.Get<Settings>($"{ServiceBaseUrl}/remote/configuration/settings");
+            if (result.Success == false || result.Data == null)
+                throw new Exception(result.Body);
+            return result.Data;
+        }
+        catch (Exception ex)
+        {
+            Logger.Instance?.WLog("Failed to get server version: " + ex.Message);
+            return null;
+        }
+    }
+
     /// <summary>
     /// Gets the current configuration revision number
     /// </summary>

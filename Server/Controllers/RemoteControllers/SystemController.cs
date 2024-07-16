@@ -24,7 +24,7 @@ public class SystemController : Controller
     /// </summary>
     [HttpGet("file-check-interval")]
     public async Task<int> GetFileCheckInterval() =>
-        (await ServiceLoader.Load<SettingsService>().Get()).ProcessFileCheckInterval;
+        (await ServiceLoader.Load<ISettingsService>().Get()).ProcessFileCheckInterval;
 
     /// <summary>
     /// Gets if the server is licensed

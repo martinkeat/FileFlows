@@ -43,7 +43,7 @@ public class ProfileController : Controller
         bool flows = await ServiceLoader.Load<FlowService>().HasAny();
         bool users = await ServiceLoader.Load<UserService>().HasAny();
 
-        var settings = await ServiceLoader.Load<SettingsService>().Get();
+        var settings = await ServiceLoader.Load<ISettingsService>().Get();
 
         if (settings.InitialConfigDone)
             profile.ConfigurationStatus |= ConfigurationStatus.InitialConfig;

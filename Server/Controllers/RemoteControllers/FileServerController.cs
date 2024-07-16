@@ -113,7 +113,7 @@ public class FileServerController : Controller
         if (LicenseHelper.IsLicensed(LicenseFlags.FileServer) == false)
             return false;
         
-        var settings = ServiceLoader.Load<SettingsService>().Get().Result;
+        var settings = ServiceLoader.Load<ISettingsService>().Get().Result;
         return settings.FileServerDisabled == false;
     }
 

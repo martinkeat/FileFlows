@@ -2,6 +2,7 @@
 using FileFlows.Plugin;
 using FileFlows.Server.Helpers;
 using FileFlows.ServerShared.Models;
+using FileFlows.ServerShared.Services;
 using FileFlows.Shared.Models;
 
 namespace FileFlows.Server.Services;
@@ -9,7 +10,7 @@ namespace FileFlows.Server.Services;
 /// <summary>
 /// An instance of the Settings Service which allows accessing of the system settings
 /// </summary>
-public class SettingsService // : ISettingsService
+public class SettingsService : ISettingsService
 {
     private ConfigurationRevision? currentConfig;
     private FairSemaphore _semaphore = new(1);
@@ -18,7 +19,7 @@ public class SettingsService // : ISettingsService
     /// Gets the system settings
     /// </summary>
     /// <returns>the system settings</returns>
-    public async Task<Settings> Get()
+    public async Task<Settings?> Get()
     {
         var settings = await new SettingsManager().Get();
         settings.IsWindows = OperatingSystem.IsWindows();
@@ -29,6 +30,10 @@ public class SettingsService // : ISettingsService
         
         return settings;
     }
+
+    /// <inheritdoc />
+    public Task<Version> GetServerVersion()
+        => Task.FromResult(Version.Parse(Globals.Version));
 
     /// <summary>
     /// Gets the current configuration revision number
@@ -41,7 +46,7 @@ public class SettingsService // : ISettingsService
     /// Gets the current configuration revision
     /// </summary>
     /// <returns>the current configuration revision</returns>
-    public async Task<ConfigurationRevision> GetCurrentConfiguration()
+    public async Task<ConfigurationRevision?> GetCurrentConfiguration()
     {
         await _semaphore.WaitAsync();
         try

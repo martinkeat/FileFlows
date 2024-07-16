@@ -145,7 +145,7 @@ public class WebServer
 
         // Dynamically register services from the console application's service provider
         builder.Services.AddSingleton<AppSettingsService>(x => ServiceLoader.Load<AppSettingsService>());
-        builder.Services.AddSingleton<SettingsService>(x => ServiceLoader.Load<SettingsService>());
+        builder.Services.AddSingleton<SettingsService>(x => (SettingsService)ServiceLoader.Load<ISettingsService>());
         builder.Services.AddSingleton<ProfileService>(x => ServiceLoader.Load<ProfileService>());
 
         var appSettings = ServiceLoader.Load<AppSettingsService>().Settings;
@@ -347,7 +347,7 @@ public class WebServer
 
         client.Timeout = TimeSpan.FromSeconds(30); // Set the timeout to 30 seconds
         var settings = ServiceLoader.Load<AppSettingsService>().Settings;
-        var accessToken = (await ServiceLoader.Load<SettingsService>().Get()).AccessToken;
+        var accessToken = (await ServiceLoader.Load<ISettingsService>().Get()).AccessToken;
 
         for (int i = 0; i < 15; i++) // Retry 15 times (15 * 2 seconds = 30 seconds)
         {

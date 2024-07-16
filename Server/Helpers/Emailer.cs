@@ -24,7 +24,7 @@ class Emailer
     /// <returns>The final free-form text response from the server.</returns>
     internal static async Task<Result<string>> Send(string toName, string toAddress, string subject, string body)
     {
-        var settings = await ServiceLoader.Load<SettingsService>().Get();
+        var settings = await ServiceLoader.Load<ISettingsService>().Get();
 
         var message = new MimeMessage();
         message.From.Add(new MailboxAddress(settings.SmtpFrom?.EmptyAsNull() ?? "FileFlows", settings.SmtpFromAddress?.EmptyAsNull() ?? "no-reply@fileflows.local"));
@@ -75,7 +75,7 @@ class Emailer
     /// <returns>The final free-form text response from the server.</returns>
     internal static async Task<Result<string>> Send(string[] to, string subject, string body, bool isHtml = false)
     {
-        var settings = await ServiceLoader.Load<SettingsService>().Get();
+        var settings = await ServiceLoader.Load<ISettingsService>().Get();
 
         var message = new MimeMessage();
         message.From.Add(new MailboxAddress(settings.SmtpFrom?.EmptyAsNull() ?? "FileFlows", settings.SmtpFromAddress?.EmptyAsNull() ?? "no-reply@fileflows.local"));

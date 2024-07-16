@@ -20,15 +20,23 @@ public class ConfigurationController : Controller
     /// <returns>the current revision</returns>
     [HttpGet("revision")]
     public Task<int> GetCurrentConfigRevision()
-        => ServiceLoader.Load<SettingsService>().GetCurrentConfigurationRevision();
+        => ServiceLoader.Load<ISettingsService>().GetCurrentConfigurationRevision();
     
     /// <summary>
     /// Loads the current configuration
     /// </summary>
     /// <returns>the current configuration</returns>
     [HttpGet("current-config")]
-    public Task<ConfigurationRevision> GetCurrentConfig()
-        => ServiceLoader.Load<SettingsService>().GetCurrentConfiguration();
+    public Task<ConfigurationRevision?> GetCurrentConfig()
+        => ServiceLoader.Load<ISettingsService>().GetCurrentConfiguration();
+    
+    /// <summary>
+    /// Loads the system settings
+    /// </summary>
+    /// <returns>the system settings</returns>
+    [HttpGet("settings")]
+    public Task<Settings?> GetSettings()
+        => ServiceLoader.Load<ISettingsService>().Get();
     
     /// <summary>
     /// Downloads a plugin

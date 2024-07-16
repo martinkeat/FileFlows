@@ -35,7 +35,7 @@ public class AuthorizeController : Controller
             #endif
         }
 
-        var service = ServiceLoader.Load<SettingsService>();
+        var service = ServiceLoader.Load<ISettingsService>();
         if (mode == SecurityMode.OpenIdConnect)
             return RedirectToAction(nameof(OpenIDController.Login), nameof(OpenIDController)[..^10]);
         #if(DEBUG)
@@ -47,7 +47,7 @@ public class AuthorizeController : Controller
 
         if (Translater.InitDone == false)
         {
-            var settings = await ServiceLoader.Load<SettingsService>().Get();
+            var settings = await ServiceLoader.Load<ISettingsService>().Get();
             TranslaterHelper.InitTranslater(settings.Language?.EmptyAsNull() ?? "en");
         }
 
@@ -78,7 +78,7 @@ public class AuthorizeController : Controller
             return BadRequest(error);
         }
 
-        var settings = await ServiceLoader.Load<SettingsService>().Get();
+        var settings = await ServiceLoader.Load<ISettingsService>().Get();
 
         var jwt = AuthenticationHelper.CreateJwtToken(result.Value, ipAddress, settings.TokenExpiryMinutes);
         return Ok(jwt);
