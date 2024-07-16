@@ -45,10 +45,10 @@ public class LogController : Controller
     /// </summary>
     /// <returns>the available log sources</returns>
     [HttpGet("log-sources")]
-    public Dictionary<string, List<LogFile>> GetLogSources()
+    public IDictionary<string, List<LogFile>> GetLogSources()
     {
         var dir = DirectoryHelper.LoggingDirectory;
-        Dictionary<string, List<LogFile>> files = new();
+        SortedDictionary<string, List<LogFile>> files = new();
         foreach (var file in new DirectoryInfo(dir).GetFiles("*.log").OrderByDescending(x => x.CreationTime))
         {
             var parts = file.Name[..^4].Split('-');
