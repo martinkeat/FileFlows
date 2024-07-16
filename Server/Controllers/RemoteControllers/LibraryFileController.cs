@@ -60,6 +60,9 @@ public class LibraryFileController : Controller
                 NextFileLogger = new();
                 NextFileLogger.RegisterWriter(new FileLogger(DirectoryHelper.LoggingDirectory, "FileProcessRequest", false));
             }
+
+            NextFileLogger.ILog($"GetNextFile for: {args.NodeName}");
+            
             var service = ServiceLoader.Load<LibraryFileService>();
             var result = await service.GetNext(NextFileLogger, args.NodeName, args.NodeUid, args.NodeVersion, args.WorkerUid);
             if (result == null)
@@ -69,7 +72,7 @@ public class LibraryFileController : Controller
             // the internal processing node bypasses this call and call the service directly (as does debug testing)
             // only remote processing nodes make this call
 
-            Logger.Instance.ILog($"GetNextFile for ['{args.NodeName}']({args.NodeUid}): {result.Status}");
+            NextFileLogger.ILog($"GetNextFile for: {args.NodeName} => {result.Status}");
 
             if (result.File != null)
             {
