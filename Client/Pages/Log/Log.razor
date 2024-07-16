@@ -29,9 +29,33 @@
                 <div class="label">Source</div>
                 <div class="value">
                     <select @onchange="HandleSourceSelection">
-                        @foreach (var key in LoggingSources.Keys)
-                        {
-                            <option selected="@(key == SelectedSource ? "selected" : null)" value="@key">@key</option>
+                        @{
+                            bool hasNodes = false;
+                            foreach (var key in LoggingSources.Keys)
+                            {
+                                if (key.StartsWith("Node -"))
+                                {
+                                    hasNodes = true;
+                                    continue;
+                                }
+
+                                <option selected="@(key == SelectedSource ? "selected" : null)" value="@key">@key</option>
+                            }
+
+                            if (hasNodes)
+                            {
+                                <optgroup label="Nodes">
+                                    @foreach (var key in LoggingSources.Keys)
+                                    {
+                                        if (key.StartsWith("Node - ") == false)
+                                        {
+                                            continue;
+                                        }
+                                        <option selected="@(key == SelectedSource ? "selected" : null)" value="@key">@key[7..]</option>
+                                    }
+                                    
+                                </optgroup>
+                            }
                         }
                     </select>
                 </div>

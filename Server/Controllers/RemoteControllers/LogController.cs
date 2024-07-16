@@ -14,11 +14,6 @@ namespace FileFlows.Server.Controllers.RemoteControllers;
 public class LogController : Controller
 {
     /// <summary>
-    /// The client UIDs
-    /// </summary>
-    private readonly Dictionary<string, Guid> ClientUids = new ();
-
-    /// <summary>
     /// The loggers
     /// </summary>
     private static Dictionary<string, FileLogger> Loggers = new ();
@@ -41,27 +36,6 @@ public class LogController : Controller
         if (string.IsNullOrEmpty(message.NodeAddress))
             return;
         
-        // if(ClientUids.TryGetValue(message.NodeAddress.ToLower(), out Guid clientUid) == false)
-        // {
-        //     var nodes = await new NodeService().GetAllAsync();
-        //     foreach (var node in nodes)
-        //     {
-        //         if (string.Equals(node.Address, message.NodeAddress, StringComparison.CurrentCultureIgnoreCase))
-        //             clientUid = node.Uid;
-        //         if (string.IsNullOrEmpty(node.Address) == false &&
-        //             ClientUids.ContainsKey(node.Address.ToLower()) == false)
-        //         {
-        //             ClientUids.Add(node.Address.ToLower(), node.Uid);
-        //         }
-        //     }
-        // }
-        //
-        // if (clientUid == Guid.Empty)
-        // {
-        //     Logger.Instance.ILog($"Failed to find client '{message.NodeAddress}', could not log message");
-        //     return;
-        // }
-
         await _semaphoreSlim.WaitAsync();
         try
         {
@@ -71,7 +45,7 @@ public class LogController : Controller
                 if (IsValidFileName(name) == false)
                     return;
                 
-                Loggers[message.NodeAddress] = new (DirectoryHelper.LoggingDirectory, name, false);
+                Loggers[message.NodeAddress] = new (DirectoryHelper.LoggingDirectory, "Node-" + name, false);
                 logger = Loggers[message.NodeAddress];
             }
 
