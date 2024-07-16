@@ -62,7 +62,7 @@ public class LogController : Controller
                 Revision = revision,
                 FileName = file.Name,
                 Source = source,
-                ShortName = revision == 0 ?  $"{date:d MMM}" : $"{date:d MMM} [{revision:00}] ({FileSizeFormatter.Format(file.Length)})"
+                ShortName = revision == 0 ?  $"{date:d MMM}" : $"{date:d MMM} [{revision:00}]"
             };
 
             if (files.TryGetValue(source, out var list) == false)
@@ -74,6 +74,9 @@ public class LogController : Controller
 
             if (list.Count > 10)
                 continue;
+
+            if (lf.Active == false)
+                lf.ShortName += $" ({FileSizeFormatter.Format(file.Length)})";
 
             list.Add(lf);
         }
