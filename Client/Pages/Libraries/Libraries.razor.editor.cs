@@ -221,12 +221,12 @@ public partial class Libraries : ListPage<Guid, Library>
                 { "HideLabel", true }
             }
         });
-        
-        fields.Add(new ElementField()
-        {
-            InputType = FormInputType.Int,
-            Name = nameof(library.MaxRunners)
-        });
+        // known issue, removing for now
+        // fields.Add(new ElementField()
+        // {
+        //     InputType = FormInputType.Int,
+        //     Name = nameof(library.MaxRunners)
+        // });
         return fields;
     }
 

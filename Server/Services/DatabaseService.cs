@@ -130,7 +130,7 @@ public class DatabaseService
 
         RestoreDefaults();
 
-        _ = new DatabaseLogger();
+        // _ = new DatabaseLogger();
 
         return true;
     }

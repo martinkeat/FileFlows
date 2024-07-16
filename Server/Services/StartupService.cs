@@ -167,7 +167,7 @@ public class StartupService
             new SystemMonitor(),
             new LibraryWorker(),
             new LogFileCleaner(),
-            new DbLogPruner(),
+            //new DbLogPruner(),
             new FlowWorker(string.Empty, isServer: true),
             new ConfigCleaner(),
             new PluginUpdaterWorker(),

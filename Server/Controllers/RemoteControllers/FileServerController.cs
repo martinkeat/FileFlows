@@ -8,6 +8,7 @@ using FileFlows.Server.Services;
 using FileFlows.ServerShared.FileServices;
 using Microsoft.AspNetCore.Mvc;
 using FileHelper = FileFlows.Plugin.Helpers.FileHelper;
+using ILogger = FileFlows.Plugin.ILogger;
 
 namespace FileFlows.Server.Controllers;
 
@@ -30,6 +31,20 @@ public class FileServerController : Controller
     private readonly LocalFileService _localFileService;
 
     private StringLogger lfsLogger;
+
+    /// <summary>
+    /// The logger used for the file server
+    /// </summary>
+    private static Logger Logger;
+
+    /// <summary>
+    /// Static consturctor
+    /// </summary>
+    static FileServerController()
+    {
+        Logger = new Logger();
+        Logger.RegisterWriter(new FileLogger(DirectoryHelper.LoggingDirectory, "FileServer", false));
+    }
 
     /// <summary>
     /// Constructs the controller
@@ -183,7 +198,7 @@ public class FileServerController : Controller
         
         
         string log = lfsLogger.ToString();
-        Logger.Instance.DLog("Remote Delete Directory: " + log);
+        Logger.DLog("Remote Delete Directory: " + log);
         return Ok(log);
     }
 
@@ -202,7 +217,7 @@ public class FileServerController : Controller
             return StatusCode(500, result.Error);
         
         string log = lfsLogger.ToString();
-        Logger.Instance.DLog("Remote Move Directory: " + log);
+        Logger.DLog("Remote Move Directory: " + log);
         return Ok(log);
     }
 
@@ -220,7 +235,7 @@ public class FileServerController : Controller
         if (result.IsFailed)
             return StatusCode(500, result.Error);
         string log = lfsLogger.ToString();
-        Logger.Instance.DLog("Remote Create Directory: " + log);
+        Logger.DLog("Remote Create Directory: " + log);
         return Ok(log);
     }
 
@@ -290,7 +305,7 @@ public class FileServerController : Controller
             return StatusCode(500, "Failed to delete");
         
         string log = lfsLogger.ToString();
-        Logger.Instance.DLog("Remote Deleted File: " + log);
+        Logger.DLog("Remote Deleted File: " + log);
         return Ok(log);
     }
 
@@ -359,7 +374,7 @@ public class FileServerController : Controller
             return StatusCode(500, "Failed to move file");
         
         string log = lfsLogger.ToString();
-        Logger.Instance.DLog("Remote Move File: " + log);
+        Logger.DLog("Remote Move File: " + log);
         return Ok(log);
     }
 
@@ -380,7 +395,7 @@ public class FileServerController : Controller
             return StatusCode(500, "Failed to copy file");
         
         string log = lfsLogger.ToString();
-        Logger.Instance.DLog("Remote Copy File: " + log);
+        Logger.DLog("Remote Copy File: " + log);
         return Ok(log);
     }
 
@@ -437,12 +452,12 @@ public class FileServerController : Controller
     //     {
     //         // Calculate file hash for the entire file if no range specified
     //         var hash = await FileHasher.Hash(filePath);
-    //         Logger.Instance.DLog("File: " + filePath + "\nHash: " + hash);
+    //         Logger.DLog("File: " + filePath + "\nHash: " + hash);
     //         return Content(hash);
     //     }
     //     catch(Exception ex)
     //     {
-    //         Logger.Instance.ELog($"An error occurred: {ex.Message}");
+    //         Logger.ELog($"An error occurred: {ex.Message}");
     //         return StatusCode(500);
     //     }
     // }
@@ -498,7 +513,7 @@ public class FileServerController : Controller
         catch (Exception ex)
         {
             // Log the exception
-            Logger.Instance.ELog($"An error occurred: {ex.Message}");
+            Logger.ELog($"An error occurred: {ex.Message}");
             return StatusCode(500, ex.Message);
         }
     }

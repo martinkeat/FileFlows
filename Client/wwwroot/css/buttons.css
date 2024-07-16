@@ -2,7 +2,7 @@ button:not(.flowtable-button):not(.navbar-toggler):not(.dd-btn), a.btn, .btn-sel
   font-size: 0.8rem !important;
   text-transform: uppercase;
   border-radius: unset !important;
-  height: 2.1875rem;
+  height: var(--input-height, 2.1875rem);
   font-weight: normal;
   outline: none !important;
   line-height: initial;
@@ -39,7 +39,7 @@ a.btn {
   min-width: 7rem;
   text-align: center;
 }
-.btn-select option {
+.btn-select option, .btn-select optgroup {
   background: var(--base);
   color: var(--color);
 }

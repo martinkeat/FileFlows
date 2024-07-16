@@ -40,7 +40,7 @@ a.btn {
 .btn-select {
     min-width:7rem;
     text-align:center;
-    option {
+    option, optgroup {
         background:var(--base);
         color:var(--color);
     }

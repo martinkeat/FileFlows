@@ -1,98 +1,65 @@
 @namespace FileFlows.Client.Pages
 @page "/log"
 @using FileFlows.Plugin
-@using FileFlows.Client.Helpers
 
-<PageView FullWidth=true>
-    <Head>
-        @if (Profile?.LicensedFor(LicenseFlags.ExternalDatabase) == true)
-        {   
-            <button @onclick=@SearchPane.ToggleSearch>@lblSearch</button>
-        }
-        else
-        {
-            <select class="btn-select" @onchange="ChangeLogType">
-                <option value=@((int)LogType.Error)>Error</option>
-                <option value=@((int)LogType.Warning)>Warning</option>
-                <option selected value=@((int)LogType.Info)>Info</option>
-                <option value=@((int)LogType.Debug)>Debug</option>
-            </select>
-        }
-        @if (string.IsNullOrEmpty(DownloadUrl) == false)
-        {
-            <button @onclick="() => DownloadLog()">@lblDownload</button>
-        }
-    </Head>
-    <Body>
+<div class="log-view">
+    
     <div class="log html-log">
-        @((MarkupString)LogText)
+        <Virtualize Items="@FilteredLogEntries" Context="logLine" OverscanCount="10">
+            <div>
+                <pre class="language-log"><span class="log-date">@logLine.Date</span> [<span class="log-severity @(logLine.Severity.ToString().ToLowerInvariant())">@logLine.SeverityText</span>] <span class="log-message">@logLine.Message</span></pre>
+            </div>
+        </Virtualize>
     </div>
-    </Body>
 
-</PageView>
-
-<SearchPane @ref=SearchPane Searched=@Search>
-    <div class="search-field input">
-        <div class="label">Source</div>
-        <div class="value">
-            <select @bind="SearchModel.Source">
-                @foreach (var source in LoggingSources)
-                {
-                    <option value=@source.Value>@source.Label</option>
-                }
-            </select>
+    <div class="side-search">
+        <div class="title">
+            <span class="icon fas fa-file-alt"></span>
+            Log
         </div>
+        <div class="search-fields">
+            <div class="search-field input">
+                <div class="label">Source</div>
+                <div class="value">
+                    <select @onchange="HandleSelection">
+                        @foreach (var key in LoggingSources.Keys)
+                        {
+                            <optgroup label="@key">
+                                @foreach (var file in LoggingSources[key])
+                                {
+                                    <option selected="@(file.FileName == ActiveFile?.FileName == true? "selected " : null)" value="@file.FileName">@file.ShortName</option>
+                                }
+                            </optgroup>
+                        }
+                    </select>
+                </div>
+            </div>
+            <div class="search-field input">
+                <div class="label">Severity</div>
+                <div class="value">
+                    <select @bind="SearchModel.Type">
+                        <option value=@LogType.Error>Error</option>
+                        <option value=@LogType.Warning>Warning</option>
+                        <option value=@LogType.Info>Info</option>
+                        <option value=@LogType.Debug>Debug</option>
+                    </select>
+                </div>
+            </div>
+            <div class="search-field input">
+                <div class="label">
+                    <FlowSwitch @bind-Value=@SearchModel.TypeIncludeHigherSeverity/>
+                    Include Higher Severity
+                </div>
+            </div>
+            <div class="search-field input">
+                <div class="label">Text</div>
+                <div class="value">
+                    <input type="text" @bind="SearchModel.Message">
+                </div>
+            </div>
+        </div>
+
+        <button @onclick="Search">@lblSearch</button>
+        <button @onclick="DownloadLog">@lblDownload</button>
     </div>
-    @if (SearchModel.Source != "DATABASE" && SearchModel.Source != "HTTP")
-    {
-        <div class="search-field input">
-            <div class="label">Date</div>
-            <div class="value">
-                <DateRangePicker OnRangeSelect=@OnRangeSelect Ranges=@DateRangeHelper.LiveDateRanges TimePicker="true" TimePicker24Hour="true" DateFormat="@($"d MMM HH:mm")">
-                    <PickerTemplate>
-                        <div id="@context.Id" @onclick="context.Toggle" class="daterangeinput">
-                            <i class="fas fa-calendar"></i>
-                            <span>
-                                @if ((context.TStartDate == null && context.TEndDate == null) ||
-                                     (context.TStartDate == DateRangeHelper.LiveStart && context.TEndDate == DateRangeHelper.LiveEnd))
-                                {
-                                    <span>Live Data</span>
-                                }
-                                else
-                                {
-                                    <span>
-                                        @context.FormattedRange
-                                    </span>
-                                }
-                            </span>
-                            <i class="fas fa-chevron-down float-right"></i>
-                        </div>
-                    </PickerTemplate>
-                </DateRangePicker>
-            </div>
-        </div>
-        <div class="search-field input">
-            <div class="label">Type</div>
-            <div class="value">
-                <select @bind="SearchModel.Type">
-                    <option value=@LogType.Error>Error</option>
-                    <option value=@LogType.Warning>Warning</option>
-                    <option value=@LogType.Info>Info</option>
-                    <option value=@LogType.Debug>Debug</option>
-                </select>
-            </div>
-        </div>
-        <div class="search-field input">
-            <div class="label">
-                <FlowSwitch @bind-Value=@SearchModel.TypeIncludeHigherSeverity/>
-                Include Higher Severity
-            </div>
-        </div>
-        <div class="search-field input">
-            <div class="label">Text</div>
-            <div class="value">
-                <input type="text" @bind="SearchModel.Message">
-            </div>
-        </div>
-    }
-</SearchPane>
+</div>

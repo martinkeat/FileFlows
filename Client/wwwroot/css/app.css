@@ -148,7 +148,7 @@ a.btn {
   min-width: 7rem;
   text-align: center;
 }
-.btn-select option {
+.btn-select option, .btn-select optgroup {
   background: var(--base);
   color: var(--color);
 }
@@ -3127,27 +3127,6 @@ hr {
   border-bottom: solid 1px var(--accent);
   margin-bottom: 0.5rem;
 }
-.search-pane .search-fields .search-field {
-  display: block;
-  margin-bottom: 1rem;
-}
-.search-pane .search-fields .search-field .label, .search-pane .search-fields .search-field .value {
-  text-align: unset;
-  width: 100%;
-  display: block;
-}
-.search-pane .search-fields .search-field .label {
-  margin-bottom: 0.25rem;
-}
-.search-pane .search-fields .search-field.inline-switch {
-  display: flex;
-  margin: 0 0 1rem;
-}
-.search-pane .search-fields .search-field.inline-switch .value {
-  width: 4rem;
-  padding-top: 1px;
-  text-align: right;
-}
 .search-pane .search-submit {
   text-align: right;
 }
@@ -3188,6 +3167,36 @@ hr {
   color: var(--color);
   padding: 2px;
   border: solid 1px transparent !important;
+}
+
+.search-fields .search-field {
+  display: block;
+  margin-bottom: 1rem;
+}
+.search-fields .search-field .label, .search-fields .search-field .value {
+  text-align: unset;
+  width: 100%;
+  display: block;
+}
+.search-fields .search-field .label {
+  margin-bottom: 0.25rem;
+}
+.search-fields .search-field.inline-switch {
+  display: flex;
+  margin: 0 0 1rem;
+}
+.search-fields .search-field.inline-switch .value {
+  width: 4rem;
+  padding-top: 1px;
+  text-align: right;
+}
+.search-fields .search-field .value select {
+  width: 100%;
+  height: var(--input-height);
+}
+.search-fields .search-field .value input[type=text] {
+  width: 100%;
+  height: var(--input-height);
 }
 
 .daterangeinput {

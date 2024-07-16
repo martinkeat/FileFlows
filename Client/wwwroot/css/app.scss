@@ -285,31 +285,7 @@ input[type=file]{
         border-bottom: solid 1px var(--accent);
         margin-bottom: 0.5rem;
     }
-    .search-fields {
-        .search-field {
-            display:block;
-            margin-bottom:1rem;
-            .label, .value
-            {
-                text-align:unset;
-                width: 100%;
-                display:block;
-            }
-            .label {
-                margin-bottom:0.25rem;
-            }
-
-            &.inline-switch {
-                display:flex;
-                margin: 0 0 1rem;
-                .value {
-                    width:4rem;
-                    padding-top:1px;
-                    text-align: right;
-                }
-            }
-        }
-    }
+    
     .search-submit {
         text-align: right;
     }
@@ -351,6 +327,42 @@ input[type=file]{
         color:var(--color);
         padding: 2px;
         border: solid 1px transparent !important;
+    }
+}
+
+.search-fields {
+    .search-field {
+        display:block;
+        margin-bottom:1rem;
+        .label, .value
+        {
+            text-align:unset;
+            width: 100%;
+            display:block;
+        }
+        .label {
+            margin-bottom:0.25rem;
+        }
+
+        &.inline-switch {
+            display:flex;
+            margin: 0 0 1rem;
+            .value {
+                width:4rem;
+                padding-top:1px;
+                text-align: right;
+            }
+        }
+        .value {
+            select {
+                width:100%;
+                height: var(--input-height);
+            }
+            input[type=text] {
+                width:100%;
+                height: var(--input-height);
+            }
+        } 
     }
 }
 .daterangeinput {

@@ -14,11 +14,6 @@ public class LogSearchModel
     public string Message { get; set; }
 
     /// <summary>
-    /// Gets or sets the log source
-    /// </summary>
-    public string Source { get; set; }
-
-    /// <summary>
     /// Gets or sets what log type to search for
     /// </summary>
     public LogType? Type { get; set; }

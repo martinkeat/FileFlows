@@ -10,10 +10,6 @@ public class FileLogger : ILogWriter
 {
     private string LogPrefix;
     private string LoggingPath;
-    /// <summary>
-    /// If a new file should be created
-    /// </summary>
-    private bool NewFile = false;
 
     private DateOnly LogDate = DateOnly.MinValue;
 
@@ -34,7 +30,6 @@ public class FileLogger : ILogWriter
     {
         this.LoggingPath = loggingPath;
         this.LogPrefix = logPrefix;
-        this.NewFile = true;
         if (register)
         {
             Shared.Logger.Instance.RegisterWriter(this);
@@ -180,7 +175,7 @@ public class FileLogger : ILogWriter
             {
                 latestAcceptableFile = fi.FullName;
             }
-            else if (NewFile == false && fi.Length < 10_000_000)
+            else if (fi.Length < 10_000_000)
             {
                 latestAcceptableFile = fi.FullName;
                 break;
@@ -190,7 +185,6 @@ public class FileLogger : ILogWriter
                 break;
             }
         }
-        NewFile = false;
         return latestAcceptableFile;
     }
 }

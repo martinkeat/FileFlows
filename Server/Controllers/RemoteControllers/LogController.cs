@@ -51,10 +51,10 @@ public class LogController : Controller
             return;
         }
 
-        if (Logger.Instance.TryGetLogger(out DatabaseLogger logger))
-        {
-            await logger.Log(clientUid, message.Type, message.Arguments);
-        }
+        // if (Logger.Instance.TryGetLogger(out DatabaseLogger logger))
+        // {
+        //     await logger.Log(clientUid, message.Type, message.Arguments);
+        // }
     }
 
 }

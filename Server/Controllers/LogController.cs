@@ -1,8 +1,10 @@
-﻿using FileFlows.Plugin;
+﻿using System.Text.RegularExpressions;
+using FileFlows.Plugin;
 using FileFlows.Server.Authentication;
 using FileFlows.Server.Helpers;
 using FileFlows.Server.Middleware;
 using FileFlows.Server.Services;
+using FileFlows.Shared.Formatters;
 using FileFlows.Shared.Models;
 using FileFlows.Shared.Helpers;
 using Microsoft.AspNetCore.Mvc;
@@ -23,7 +25,7 @@ public class LogController : Controller
     /// </summary>
     /// <returns>the system log</returns>
     [HttpGet]
-    public string Get([FromQuery] Plugin.LogType logLevel = Plugin.LogType.Info)
+    public string Get([FromQuery] LogType logLevel = LogType.Info)
     {
         if (Logger.Instance.TryGetLogger(out FileLogger logger))
         {
@@ -43,56 +45,40 @@ public class LogController : Controller
     /// </summary>
     /// <returns>the available log sources</returns>
     [HttpGet("log-sources")]
-    public async Task<List<ListOption>> GetLogSources()
+    public Dictionary<string, List<LogFile>> GetLogSources()
     {
-        List<ListOption> sources = new();
-        sources.Add(new() { Value = "", Label = "Server" });
-
-        var settings = await ServiceLoader.Load<SettingsService>().Get();
-        if(settings.LogEveryRequest)
-            sources.Add(new() { Value = "HTTP", Label = "HTTP Requests" });
-
-        var nodes = await ServiceLoader.Load<NodeService>().GetAllAsync();
-        foreach (var node in nodes)
+        var dir = DirectoryHelper.LoggingDirectory;
+        Dictionary<string, List<LogFile>> files = new();
+        foreach (var file in new DirectoryInfo(dir).GetFiles("*.log").OrderByDescending(x => x.CreationTime))
         {
-            if(node.Uid != Globals.InternalNodeUid) // internal logs to system log
-                sources.Add(new() { Value = node.Uid.ToString(), Label = node.Name });
+            var parts = file.Name[..^4].Split('-');
+            if (int.TryParse(parts[^1], out int revision) == false)
+                continue;
+            DateTime date = file.CreationTime.Date;
+            var source = string.Join('-', parts[..^2]);
+            var lf = new LogFile()
+            {
+                Date = date,
+                Revision = revision,
+                FileName = file.Name,
+                Source = source,
+                ShortName = revision == 0 ?  $"{date:d MMM}" : $"{date:d MMM} [{revision:00}] ({FileSizeFormatter.Format(file.Length)})"
+            };
+
+            if (files.TryGetValue(source, out var list) == false)
+            {
+                list = new();
+                files[source] = list;
+                lf.Active = true; // new group, must be active
+            }
+
+            if (list.Count > 10)
+                continue;
+
+            list.Add(lf);
         }
 
-        return sources;
-    }
-
-    /// <summary>
-    /// Searches the log using the given filter
-    /// </summary>
-    /// <param name="filter">the search filter</param>
-    /// <returns>the messages found in the log</returns>
-    [HttpPost("search")]
-    public async Task<string> Search([FromBody] LogSearchModel filter)
-    {
-        if (LicenseHelper.IsLicensed(LicenseFlags.ExternalDatabase) == false)
-            return "Not using external database, cannot search";
-        
-        if (filter.Source == "HTTP5")
-            return LogToHtml.Convert(LoggingMiddleware.RequestLogger.GetTail(1000));
-
-        var service = ServiceLoader.Load<Server.Services.DatabaseLogService>();
-        var messages = await service.Search(filter);
-        string log = string.Join("\n", messages.Select(x =>
-        {
-            string prefix = x.Type switch
-            {
-                LogType.Info => "INFO",
-                LogType.Error => "ERRR",
-                LogType.Warning => "WARN",
-                LogType.Debug => "DBUG",
-                _ => ""
-            };
-        
-            return x.LogDate.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss.fff") + " [" + prefix + "] -> " + x.Message;
-        }));
-        string html = LogToHtml.Convert(log);
-        return FixLog(html);
+        return files;
     }
 
     /// <summary>
@@ -101,25 +87,41 @@ public class LogController : Controller
     /// <param name="source">the source to download from</param>
     /// <returns>a download result of the full system log</returns>
     [HttpGet("download")]
-    public IActionResult Download([FromQuery] string source)
+    public async Task<IActionResult> Download([FromQuery] string source)
     {
-        if (source == "HTTP")
-        {
-            string filename = LoggingMiddleware.RequestLogger.GetLogFilename();
-            byte[] content = System.IO.File.ReadAllBytes(filename);
-            return File(content, "application/octet-stream", new FileInfo(filename).Name);
-        }
+        if (Regex.IsMatch(source, @"^[a-zA-Z0-9\-]+\.log$") == false)
+            return BadRequest("Invalid file: " + source);
+
+        // Combine the base directory and the file name
+        var baseDirectory = DirectoryHelper.LoggingDirectory;
+        var filePath = Path.Combine(baseDirectory, source);
+
+        // Ensure the file path is within the intended directory
+        var fullPath = Path.GetFullPath(filePath);
+        if (fullPath.StartsWith(Path.GetFullPath(baseDirectory), StringComparison.OrdinalIgnoreCase) == false)
+            return BadRequest("Access denied: " + source);
+
+        // Check if the file exists
+        if (System.IO.File.Exists(fullPath) == false)
+            return NotFound("Log file not found: " + fullPath);
         
-        if (Logger.Instance.TryGetLogger(out FileLogger logger))
-        {
-            string filename = logger.GetLogFilename();
-            byte[] content = System.IO.File.ReadAllBytes(filename);
-            
-            return File(content, "application/octet-stream", new FileInfo(filename).Name);
-        }
+        await Task.CompletedTask;
         
-        string log = Logger.Instance.GetTail(10_000);
-        byte[] data = System.Text.Encoding.UTF8.GetBytes(log);
-        return File(data, "application/octet-stream", "FileFlows.log");
+        try
+        {
+            // Create a FileStream to read the file
+            var stream = new FileStream(fullPath, FileMode.Open, FileAccess.Read, FileShare.Read);
+
+            // Return a FileStreamResult to stream the file content
+            return new FileStreamResult(stream, "text/plain")
+            {
+                FileDownloadName = source
+            };
+        }
+        catch (Exception ex)
+        {
+            // Log the exception (if you have a logging mechanism)
+            return StatusCode(500, $"Error reading log file: {ex.Message}");
+        }
     }
 }
