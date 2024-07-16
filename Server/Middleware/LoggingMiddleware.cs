@@ -58,7 +58,7 @@ public class LoggingMiddleware
         {
             try
             {
-                if (WebServer.FullyStarted && SettingsService.Get().Result.LogEveryRequest)
+                if (WebServer.FullyStarted)
                 {   
                     LogType logType = LogType.Info;
                     int statusCode = context.Response?.StatusCode ?? 0;
@@ -70,8 +70,11 @@ public class LoggingMiddleware
                     else if (statusCode >= 500)
                         logType = LogType.Error;
 
-                    _ = RequestLogger.Log(logType, 
-                        $"REQUEST [{context.Request?.Method}] [{context.Response?.StatusCode}]: {context.Request?.Path.Value}");
+                    if (logType != LogType.Info || SettingsService.Get().Result.LogEveryRequest)
+                    {
+                        _ = RequestLogger.Log(logType,
+                            $"REQUEST [{context.Request?.Method}] [{context.Response?.StatusCode}]: {context.Request?.Path.Value}");
+                    }
                 }
             }
             catch (Exception)
