@@ -25,6 +25,10 @@ public partial class Log : ComponentBase
     /// Gets or sets the navigation manager
     /// </summary>
     [Inject] NavigationManager NavigationManager { get; set; }
+    /// <summary>
+    /// Gets or sets the Local Storage instance
+    /// </summary>
+    [Inject] private FFLocalStorageService LocalStorage { get; set; }
     private string DownloadUrl;
     private bool scrollToBottom = false;
 
@@ -67,9 +71,9 @@ public partial class Log : ComponentBase
     /// </summary>
     public bool SearchIncludeHigherSeverity { get; set; } = true;
     /// <summary>
-    /// Gets or sets the search type
+    /// Gets or sets the search severity
     /// </summary>
-    public LogType SearchType { get; set; } = LogType.Info;
+    public LogType SearchSeverity { get; set; } = LogType.Info;
 
     /// <summary>
     /// The active search model
@@ -97,7 +101,7 @@ public partial class Log : ComponentBase
         ActiveSearchModel = new()
         {
             Message = SearchText,
-            Type = SearchType,
+            Type = SearchSeverity,
             TypeIncludeHigherSeverity = SearchIncludeHigherSeverity
         };
         this.lblSearch = Translater.Instant("Labels.Search");
@@ -126,9 +130,19 @@ public partial class Log : ComponentBase
     async Task Initialise()
     {
         Blocker.Show();
+
+        var logSource = await LocalStorage.GetItemAsync<string?>("LOG-Source");
+        var logSeverity = await LocalStorage.GetItemAsync<LogType?>("LOG-Severity");
+        if (logSeverity != null)
+            SearchSeverity = logSeverity.Value;
+        
         LoggingSources = (await HttpHelper.Get<Dictionary<string, List<LogFile>>>("/api/fileflows-log/log-sources")).Data;
 
-        SelectedSource = LoggingSources.Keys.FirstOrDefault();
+        if (logSource != null && LoggingSources.ContainsKey(logSource))
+            SelectedSource = logSource;
+        else
+            SelectedSource =  LoggingSources.Keys.FirstOrDefault();
+        
         if (string.IsNullOrEmpty(SelectedSource) == false)
         {
             ActiveSearchModel.ActiveFile = LoggingSources[SelectedSource].First();
@@ -211,9 +225,12 @@ public partial class Log : ComponentBase
         try
         {
             ActiveSearchModel.Message = SearchText;
-            ActiveSearchModel.Type = SearchType;
+            ActiveSearchModel.Type = SearchSeverity;
             ActiveSearchModel.TypeIncludeHigherSeverity = SearchIncludeHigherSeverity;
             ActiveSearchModel.ActiveFile = SearchFile;
+            
+            await LocalStorage.SetItemAsync("LOG-Source", SelectedSource);
+            await LocalStorage.SetItemAsync("LOG-Severity", SearchSeverity);
             
             Blocker.Show(lblSearching);
             await Refresh();
