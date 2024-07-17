@@ -20,6 +20,11 @@ public class FileFlowsTasksWorker: ServerWorker
     /// A list of tasks and the quarter they last ran in
     /// </summary>
     private Dictionary<Guid, int> TaskLastRun = new ();
+
+    /// <summary>
+    /// The logger used for tasks
+    /// </summary>
+    private Logger Logger;
     
     /// <summary>
     /// Creates a new instance of the Scheduled Task Worker
@@ -27,6 +32,8 @@ public class FileFlowsTasksWorker: ServerWorker
     public FileFlowsTasksWorker() : base(ScheduleType.Minute, 1)
     {
         Instance = this;
+        Logger = new Logger();
+        Logger.RegisterWriter(new FileLogger(DirectoryHelper.LoggingDirectory, "FileFlowsTasks", false));
         
         SystemEvents.OnLibraryFileAdd += SystemEventsOnOnLibraryFileAdd;
         SystemEvents.OnLibraryFileProcessed += SystemEventsOnOnLibraryFileProcessed;
@@ -108,10 +115,10 @@ public class FileFlowsTasksWorker: ServerWorker
         if (string.IsNullOrWhiteSpace(code))
         {
             var msg = $"No code found for Task '{task.Name}' using script: {task.Script}";
-            Logger.Instance.WLog(msg);
+            Logger.WLog(msg);
             return new() { Success = false, Log = msg };
         }
-        Logger.Instance.ILog("Executing task: " + task.Name);
+        Logger.ILog("Executing task: " + task.Name);
         DateTime dtStart = DateTime.UtcNow;
 
         var variables = GetVariables();
@@ -129,7 +136,7 @@ public class FileFlowsTasksWorker: ServerWorker
         var result = ScriptExecutor.Execute(code, variables, sharedDirectory: sharedDirectory, dontLogCode: true);
         if (result.Success)
         {
-            Logger.Instance.ILog($"Task '{task.Name}' completed in: " + (DateTime.UtcNow.Subtract(dtStart)) + "\n" +
+            Logger.ILog($"Task '{task.Name}' completed in: " + (DateTime.UtcNow.Subtract(dtStart)) + "\n" +
                                  result.Log);
 
             _ = ServiceLoader.Load<NotificationService>().Record(NotificationSeverity.Information,
@@ -137,7 +144,7 @@ public class FileFlowsTasksWorker: ServerWorker
         }
         else
         {
-            Logger.Instance.ELog($"Error executing task '{task.Name}: " + result.ReturnValue + "\n" + result.Log);
+            Logger.ELog($"Error executing task '{task.Name}: " + result.ReturnValue + "\n" + result.Log);
             
             _ = ServiceLoader.Load<NotificationService>().Record(NotificationSeverity.Warning,
                 $"Error executing task '{task.Name}': " + result.ReturnValue, result.Log);

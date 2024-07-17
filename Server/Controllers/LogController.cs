@@ -71,6 +71,8 @@ public class LogController : Controller
                 source = "File Server";
             else if (source == "FileProcessRequest")
                 source = "File Process Request";
+            else if (source == "FileFlowsTasks")
+                source = "Tasks";
 
             if (files.TryGetValue(source, out var list) == false)
             {

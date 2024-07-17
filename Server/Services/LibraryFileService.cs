@@ -366,18 +366,21 @@ public class LibraryFileService
 
         var allLibraries = (await ServiceLoader.Load<LibraryService>().GetAllAsync());
 
+        bool processingOrderLicensed = LicenseHelper.IsLicensed(LicenseFlags.ProcessingOrder);
         var sysInfo = new LibraryFilterSystemInfo()
         {
             AllLibraries = allLibraries.ToDictionary(x => x.Uid, x => x),
             Executors = FlowRunnerService.Executors.Values.ToList(),
-            LicensedForProcessingOrder = LicenseHelper.IsLicensed(LicenseFlags.ProcessingOrder)
+            LicensedForProcessingOrder = processingOrderLicensed
         };
         var executing = await FlowRunnerService.ExecutingLibraryFiles();
         var executingLibraries = await FlowRunnerService.ExecutingLibraryRunners();
+        
         var canProcess = allLibraries.Where(x =>
         {
-            if (x.MaxRunners > 0 && executingLibraries.TryGetValue(x.Uid, out var currentRunners)
-                                 && currentRunners >= x.MaxRunners)
+            if (processingOrderLicensed && x.MaxRunners > 0 && 
+                executingLibraries.TryGetValue(x.Uid, out var currentRunners) && 
+                currentRunners >= x.MaxRunners)
             {
                 logger.ILog($"Library '{x.Name}' at maximum runners '{currentRunners}' out of '{x.MaxRunners}'");
                 return false;

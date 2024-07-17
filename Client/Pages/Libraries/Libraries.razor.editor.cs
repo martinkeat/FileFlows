@@ -220,11 +220,15 @@ public partial class Libraries : ListPage<Guid, Library>
                 { "HideLabel", true }
             }
         });
-        fields.Add(new ElementField()
+        if (Profile.LicensedFor(LicenseFlags.ProcessingOrder))
         {
-            InputType = FormInputType.Int,
-            Name = nameof(library.MaxRunners)
-        });
+            fields.Add(new ElementField()
+            {
+                InputType = FormInputType.Int,
+                Name = nameof(library.MaxRunners)
+            });
+        }
+
         return fields;
     }
 

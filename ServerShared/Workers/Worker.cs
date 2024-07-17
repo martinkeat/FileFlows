@@ -139,7 +139,7 @@ public abstract class Worker
         {
             if (Executing)
                 return; // dont let run twice
-            Logger.Instance.ILog("Triggering worker: " + this.GetType().Name);
+            Logger.Instance.DLog("Triggering worker: " + this.GetType().Name);
 
             _ = Task.Run(() =>
             {
