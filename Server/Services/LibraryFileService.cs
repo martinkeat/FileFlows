@@ -377,7 +377,7 @@ public class LibraryFileService
         var canProcess = allLibraries.Where(x =>
         {
             if (x.MaxRunners > 0 && executingLibraries.TryGetValue(x.Uid, out var currentRunners)
-                                 && x.MaxRunners >= currentRunners)
+                                 && currentRunners >= x.MaxRunners)
             {
                 logger.ILog($"Library '{x.Name}' at maximum runners '{currentRunners}' out of '{x.MaxRunners}'");
                 return false;
