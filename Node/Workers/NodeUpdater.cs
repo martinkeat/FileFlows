@@ -43,7 +43,7 @@ public class NodeUpdater:UpdaterWorker
     /// </summary>
     protected override void QuitApplication()
     {
-        Logger.Instance?.ILog($"{UpdaterName}: Quiting Application");
+        Logger.ILog($"{UpdaterName}: Quiting Application");
         // systemd needs an OK status not to auto restart, we dont want to auto restart that when upgrading
         Program.Quit(Globals.IsSystemd ? 0 : 99);
     }
@@ -51,12 +51,12 @@ public class NodeUpdater:UpdaterWorker
     /// <inheritdoc />
     protected override void PreUpgradeArgumentsAdd(ProcessStartInfo startInfo)
     {
-        Logger.Instance.ILog("Is MacOS: " + OperatingSystem.IsMacOS());
+        Logger.ILog("Is MacOS: " + OperatingSystem.IsMacOS());
         bool hasEntryPoint = string.IsNullOrWhiteSpace(Program.EntryPoint) == false;
-        Logger.Instance.ILog("Has Entry Point: " + hasEntryPoint);
+        Logger.ILog("Has Entry Point: " + hasEntryPoint);
         if (OperatingSystem.IsMacOS() && hasEntryPoint)
         {
-            Logger.Instance.ILog("Upgrading Mac App");
+            Logger.ILog("Upgrading Mac App");
             startInfo.ArgumentList.Add("mac");
             startInfo.ArgumentList.Add(Program.EntryPoint!);
             startInfo.ArgumentList.Add(Globals.Version.Split('.').Last());
@@ -70,20 +70,20 @@ public class NodeUpdater:UpdaterWorker
     /// <returns>the downloaded binary filename</returns>
     protected override string DownloadUpdateBinary()
     {   
-        Logger.Instance.DLog("Checking for auto update");
+        Logger.DLog("Checking for auto update");
         var service = ServiceLoader.Load<ISettingsService>();
         var serverVersion = service.GetServerVersion().Result;
-        Logger.Instance.DLog("Checking for auto update: " + serverVersion);
+        Logger.DLog("Checking for auto update: " + serverVersion);
         if (serverVersion == CurrentVersion)
             return string.Empty;
 
-        Logger.Instance.ILog($"New Node version {serverVersion} detected, starting download");
+        Logger.ILog($"New Node version {serverVersion} detected, starting download");
 
         var nodeService = ServiceLoader.Load<INodeService>();
         var data = nodeService.GetNodeUpdater().Result;
         if (data?.Any() != true)
         {
-            Logger.Instance.WLog("Failed to download Node updater.");
+            Logger.WLog("Failed to download Node updater.");
             return string.Empty;
         }
 
@@ -112,7 +112,7 @@ public class NodeUpdater:UpdaterWorker
     {
         var service = ServiceLoader.Load<INodeService>();
         var serverVersion = service.GetNodeUpdateVersion().Result;
-        Logger.Instance.DLog("Checking for auto update: " + serverVersion);
+        Logger.DLog("Checking for auto update: " + serverVersion);
         return CurrentVersion != serverVersion;
     }
 }

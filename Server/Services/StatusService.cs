@@ -63,7 +63,7 @@ public class StatusService
         var settings = await ServiceLoader.Load<ISettingsService>().Get();
         if (settings?.DisableTelemetry != false)
             return new { UpdateAvailable = false };
-        var result = Workers.ServerUpdater.GetLatestOnlineVersion();
+        var result = Workers.ServerUpdater.Instance.GetLatestOnlineVersion();
         return new { UpdateAvailable = result.updateAvailable };
     }
 }

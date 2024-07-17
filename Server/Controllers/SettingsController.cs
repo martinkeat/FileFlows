@@ -55,7 +55,7 @@ public class SettingsController : BaseController
             return string.Empty; 
         try
         {
-            var result = ServerUpdater.GetLatestOnlineVersion();
+            var result = ServerUpdater.Instance.GetLatestOnlineVersion();
             if (result.updateAvailable == false)
                 return string.Empty;
             return result.onlineVersion.ToString();
@@ -301,7 +301,7 @@ public class SettingsController : BaseController
         if (ServerUpdater.Instance == null)
             return false;
 
-        var available = ServerUpdater.GetLatestOnlineVersion();
+        var available = ServerUpdater.Instance.GetLatestOnlineVersion();
         return available.updateAvailable;
     }
 
