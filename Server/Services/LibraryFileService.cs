@@ -114,8 +114,13 @@ public class LibraryFileService
 
             var result = await GetNextActual(logger, nodeName, nodeUid, nodeVersion, workerUid);
             var lines = logger.ToString().Split('\n');
-            if(lines.Length == 1)
-                NextFileLogger.ILog($"{nodeName} => {result.Status}: {lines[0]}");
+            if (lines.Length == 1)
+            {
+                if(lines[0].Contains("No file found to process", StringComparison.InvariantCultureIgnoreCase))
+                    NextFileLogger.ILog($"{nodeName} => {result.Status}");
+                else
+                    NextFileLogger.ILog($"{nodeName} => {result.Status}: {lines[0]}");
+            }
             else
                 NextFileLogger.ILog($"{nodeName} => {result.Status}\n{string.Join("\n", lines.Select(x => "                       " + x))}");
 
