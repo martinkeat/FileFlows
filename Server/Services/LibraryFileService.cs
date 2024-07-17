@@ -1,4 +1,5 @@
 using FileFlows.Managers;
+using FileFlows.Plugin;
 using FileFlows.Server.Helpers;
 using FileFlows.Server.Hubs;
 using FileFlows.ServerShared.Models;
@@ -10,7 +11,9 @@ namespace FileFlows.Server.Services;
 
 public class LibraryFileService 
 {
-    private static SemaphoreSlim NextFileSemaphore = new SemaphoreSlim(1);
+    private static FairSemaphore NextFileSemaphore = new (1);
+
+    private static Logger NextFileLogger;
     
     /// <summary>
     /// Constructs a next library file result
@@ -90,13 +93,65 @@ public class LibraryFileService
     /// <summary>
     /// Gets the next file to process
     /// </summary>
-    /// <param name="logger">the logger to use for this</param>
     /// <param name="nodeName">the name of the node</param>
     /// <param name="nodeUid">the UID of the node</param>
     /// <param name="nodeVersion">the version of the node</param>
     /// <param name="workerUid">the UID of the worker service making this request</param>
     /// <returns>the result of the next file</returns>
-    public async Task<NextLibraryFileResult> GetNext(FileFlows.Plugin.ILogger logger, string nodeName, Guid nodeUid, string nodeVersion, Guid workerUid)
+    public async Task<NextLibraryFileResult> GetNext(string nodeName, Guid nodeUid, string nodeVersion, Guid workerUid)
+    {
+        await NextFileSemaphore.WaitAsync();
+        try
+        {
+            if (NextFileLogger == null)
+            {
+                NextFileLogger = new();
+                NextFileLogger.RegisterWriter(new FileLogger(DirectoryHelper.LoggingDirectory, "FileProcessRequest",
+                    false));
+            }
+
+            StringLogger logger = new StringLogger();
+
+            var result = await GetNextActual(logger, nodeName, nodeUid, nodeVersion, workerUid);
+            NextFileLogger.ILog($"GetNextFile for: {nodeName} => {result.Status}\n{logger}");
+
+            if (result.File != null)
+            {
+                // record that this has started now, its not the complete start, but the flow runner has request it
+                // by recording this now, we add the flow running extremely early into the life cycle and we can 
+                // then limit the library runners, and wont have issues with "Unknown executor identifier" when using the file server
+                FlowRunnerService.Executors[result.File.Uid] = new()
+                {
+                    Uid = result.File.Uid,
+                    LibraryFile = result.File,
+                    NodeName = nodeName,
+                    NodeUid = nodeUid,
+                    IsRemote = nodeUid != Globals.InternalNodeUid,
+                    RelativeFile = result.File.RelativePath,
+                    Library = result.File.Library,
+                    IsDirectory = result.File.IsDirectory,
+                    StartedAt = DateTime.UtcNow
+                };
+            }
+
+            return result;
+        }
+        finally
+        {
+            NextFileSemaphore.Release();
+        }
+    }
+    
+    /// <summary>
+    /// Actual code that gets the next file
+    /// </summary>
+    /// <param name="logger">the logger</param>
+    /// <param name="nodeName">the name of the node</param>
+    /// <param name="nodeUid">the UID of the node</param>
+    /// <param name="nodeVersion">the version of the node</param>
+    /// <param name="workerUid">the UID of the worker service making this request</param>
+    /// <returns>the result of the next file</returns>
+    private async Task<NextLibraryFileResult> GetNextActual(Plugin.ILogger logger, string nodeName, Guid nodeUid, string nodeVersion, Guid workerUid)
     {
         var nodeService = ServiceLoader.Load<NodeService>();
         await nodeService.UpdateLastSeen(nodeUid);
@@ -285,8 +340,8 @@ public class LibraryFileService
         var enabledNodeUids = enabledNodes.Select(x => x.Uid).ToArray();
         return enabledNodeUids.Contains(node.Uid);
     }
-    
-    
+
+
     /// <summary>
     /// Gets the next library file queued for processing
     /// </summary>
@@ -308,75 +363,67 @@ public class LibraryFileService
             Executors = FlowRunnerService.Executors.Values.ToList(),
             LicensedForProcessingOrder = LicenseHelper.IsLicensed(LicenseFlags.ProcessingOrder)
         };
-
-        await NextFileSemaphore.WaitAsync();
-        try
+        var executing = await FlowRunnerService.ExecutingLibraryFiles();
+        var executingLibraries = await FlowRunnerService.ExecutingLibraryRunners();
+        var canProcess = allLibraries.Where(x =>
         {
-            var executing = await FlowRunnerService.ExecutingLibraryFiles();
-            var executingLibraries = await FlowRunnerService.ExecutingLibraryRunners();
-            var canProcess = allLibraries.Where(x =>
+            if (x.MaxRunners > 0 && executingLibraries.TryGetValue(x.Uid, out var currentRunners)
+                                 && x.MaxRunners >= currentRunners)
             {
-                if (x.MaxRunners > 0 && executingLibraries.TryGetValue(x.Uid, out var currentRunners)
-                                     && x.MaxRunners >= currentRunners)
-                {
-                    logger.ILog($"Library '{x.Name}' at maximum runners '{currentRunners}' out of '{x.MaxRunners}'");
-                    return false;
-                }
-
-                if (node.AllLibraries == ProcessingLibraries.All)
-                    return true;
-                if (node.AllLibraries == ProcessingLibraries.Only)
-                    return nodeLibraries.Contains(x.Uid);
-                return nodeLibraries.Contains(x.Uid) == false;
-            }).Select(x => x.Uid).ToList();
-            
-            var manager = new LibraryFileManager();
-            var waitingForReprocess = outOfSchedule
-                ? null
-                : (await manager.GetAll(new () { Status = FileStatus.ReprocessByFlow, SysInfo = sysInfo})).FirstOrDefault(x =>
-                    x.ProcessOnNodeUid == node.Uid);
-            
-            if(waitingForReprocess != null)
-                logger.ILog($"File waiting for reprocessing [{node.Name}]: " + waitingForReprocess.Name);
-
-            var nextFile = waitingForReprocess ?? (await manager.GetAll(new ()
-                {
-                    Status = FileStatus.Unprocessed, Skip = 0, Rows = 1, AllowedLibraries = canProcess,
-                    MaxSizeMBs = node.MaxFileSizeMb, ExclusionUids = executing, ForcedOnly = outOfSchedule,
-                    SysInfo = sysInfo
-                }
-            )).FirstOrDefault();
-
-            if (nextFile == null)
-                return nextFile;
-
-            if (waitingForReprocess == null && await HigherPriorityWaiting(node, nextFile, allLibraries))
-            {
-                logger.ILog("Higher priority node waiting to process file");
-                return null; // a higher priority node should process this file
+                logger.ILog($"Library '{x.Name}' at maximum runners '{currentRunners}' out of '{x.MaxRunners}'");
+                return false;
             }
 
-            nextFile.Status = FileStatus.Processing;
-            nextFile.WorkerUid = workerUid;
-            nextFile.ProcessingStarted = DateTime.UtcNow;
-            nextFile.NodeUid = node.Uid;
-            nextFile.NodeName = node.Name;
-            
-            #if(DEBUG)
-            if (Globals.IsUnitTesting)
-                return nextFile;
-            #endif
+            if (node.AllLibraries == ProcessingLibraries.All)
+                return true;
+            if (node.AllLibraries == ProcessingLibraries.Only)
+                return nodeLibraries.Contains(x.Uid);
+            return nodeLibraries.Contains(x.Uid) == false;
+        }).Select(x => x.Uid).ToList();
 
-            await manager.StartProcessing(nextFile.Uid, node.Uid, node.Name, workerUid);
+        var manager = new LibraryFileManager();
+        var waitingForReprocess = outOfSchedule
+            ? null
+            : (await manager.GetAll(new() { Status = FileStatus.ReprocessByFlow, SysInfo = sysInfo })).FirstOrDefault(
+                x =>
+                    x.ProcessOnNodeUid == node.Uid);
+
+        if (waitingForReprocess != null)
+            logger.ILog($"File waiting for reprocessing [{node.Name}]: " + waitingForReprocess.Name);
+
+        var nextFile = waitingForReprocess ?? (await manager.GetAll(new()
+            {
+                Status = FileStatus.Unprocessed, Skip = 0, Rows = 1, AllowedLibraries = canProcess,
+                MaxSizeMBs = node.MaxFileSizeMb, ExclusionUids = executing, ForcedOnly = outOfSchedule,
+                SysInfo = sysInfo
+            }
+        )).FirstOrDefault();
+
+        if (nextFile == null)
             return nextFile;
-        }
-        finally
+
+        if (waitingForReprocess == null && await HigherPriorityWaiting(node, nextFile, allLibraries))
         {
-            NextFileSemaphore.Release();
+            logger.ILog("Higher priority node waiting to process file");
+            return null; // a higher priority node should process this file
         }
+
+        nextFile.Status = FileStatus.Processing;
+        nextFile.WorkerUid = workerUid;
+        nextFile.ProcessingStarted = DateTime.UtcNow;
+        nextFile.NodeUid = node.Uid;
+        nextFile.NodeName = node.Name;
+
+#if(DEBUG)
+        if (Globals.IsUnitTesting)
+            return nextFile;
+#endif
+
+        await manager.StartProcessing(nextFile.Uid, node.Uid, node.Name, workerUid);
+        return nextFile;
     }
-    
-    
+
+
 
     /// <summary>
     /// Checks if another enabled processing node is enabled, in-schedule and not all runners are in use.

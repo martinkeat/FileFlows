@@ -16,12 +16,6 @@ namespace FileFlows.Server.Controllers.RemoteControllers;
 [ApiExplorerSettings(IgnoreApi = true)]
 public class LibraryFileController : Controller
 {
-    /// <summary>
-    /// The semaphore to ensure only one file is requested at a time
-    /// </summary>
-    private static FairSemaphore nextFileSemaphore = new (1);
-
-    private static Logger NextFileLogger;
     
     /// <summary>
     /// Get a specific library file
@@ -50,57 +44,15 @@ public class LibraryFileController : Controller
     /// <param name="args">The arguments for the call</param>
     /// <returns>the next library file to process</returns>
     [HttpPost("next-file")]
-    public async Task<NextLibraryFileResult> GetNextLibraryFile([FromBody] NextLibraryFileArgs args)
+    public Task<NextLibraryFileResult> GetNextLibraryFile([FromBody] NextLibraryFileArgs args)
     {
-        await nextFileSemaphore.WaitAsync();
-        try
-        {
-            if (NextFileLogger == null)
-            {
-                NextFileLogger = new();
-                NextFileLogger.RegisterWriter(new FileLogger(DirectoryHelper.LoggingDirectory, "FileProcessRequest", false));
-            }
-
-            NextFileLogger.ILog($"GetNextFile for: {args.NodeName}");
-            
-            var service = ServiceLoader.Load<LibraryFileService>();
-            var result = await service.GetNext(NextFileLogger, args.NodeName, args.NodeUid, args.NodeVersion, args.WorkerUid);
-            if (result == null)
-                return result;
-
-            // don't add any logic here to clear the file etc.  
-            // the internal processing node bypasses this call and call the service directly (as does debug testing)
-            // only remote processing nodes make this call
-
-            NextFileLogger.ILog($"GetNextFile for: {args.NodeName} => {result.Status}");
-
-            if (result.File != null)
-            {
-                // record that this has started now, its not the complete start, but the flow runner has request it
-                // by recording this now, we add the flow running extremely early into the life cycle and we can 
-                // then limit the library runners, and wont have issues with "Unknown executor identifier" when using the file server
-                FlowRunnerService.Executors[result.File.Uid] = new()
-                {
-                    Uid = result.File.Uid,
-                    LibraryFile = result.File,
-                    NodeName = args.NodeName,
-                    NodeUid = args.NodeUid,
-                    IsRemote = args.NodeUid != Globals.InternalNodeUid,
-                    RelativeFile = result.File.RelativePath,
-                    Library = result.File.Library,
-                    IsDirectory = result.File.IsDirectory,
-                    StartedAt = DateTime.UtcNow
-                };
-            }
-
-            return result;
-        }
-        finally
-        {
-            nextFileSemaphore.Release();
-        }
+        // don't add any logic here to clear the file etc.  
+        // the internal processing node bypasses this call and call the service directly (as does debug testing)
+        // only remote processing nodes make this call
+        var service = ServiceLoader.Load<LibraryFileService>();
+        return service.GetNext(args.NodeName, args.NodeUid, args.NodeVersion, args.WorkerUid);
     }
-    
+
     /// <summary>
     /// Saves the full log for a library file
     /// Call this after processing has completed for a library file
