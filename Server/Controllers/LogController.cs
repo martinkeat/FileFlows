@@ -68,7 +68,7 @@ public class LogController : Controller
 
             if (source == "FileFlowsHTTP")
                 source = "Web Requests";
-            else if (source != "FileFlows")
+            else if (source != "FileFlows" && source.StartsWith("Node") == false)
                 source = source.Replace("FileFlows", string.Empty).Humanize(LetterCasing.Title);
 
             if (files.TryGetValue(source, out var list) == false)
