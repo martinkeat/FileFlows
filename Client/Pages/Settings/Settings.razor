@@ -33,10 +33,6 @@
                         {
                             <InputSwitch @bind-Value="@Model.LogEveryRequest" Label="Pages.Settings.Fields.LogEveryRequest" />
                             <InputNumber @bind-Value="@Model.LogFileRetention" Label="Pages.Settings.Fields.LogFileRetention" Min=1 Max=100 />
-                            @if (Model.DbType != DatabaseType.Sqlite)
-                            {
-                                <InputNumber @bind-Value="@Model.LogDatabaseRetention" Label="Pages.Settings.Fields.LogDatabaseRetention" Min=1000 Max=1000000 />
-                            }
                         }
                         <InputSwitch @bind-Value="@Model.ShowFileAddedNotifications" Inverse="false" Label="Pages.Settings.Fields.ShowFileAddedNotifications" />
                         <InputSwitch @bind-Value="@Model.HideProcessingStartedNotifications" Inverse="true" Label="Pages.Settings.Fields.HideProcessingStartedNotifications" />

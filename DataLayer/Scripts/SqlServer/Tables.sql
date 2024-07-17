@@ -15,15 +15,6 @@ CREATE TABLE DbObject
 CREATE INDEX ix_Type ON DbObject (Type);
 CREATE INDEX ix_Name ON DbObject (Name);
 
-CREATE TABLE DbLogMessage
-(
-    ClientUid       VARCHAR(36)        NOT NULL,
-    LogDate         datetime           default           getdate(),
-    Type            int                NOT NULL,
-    Message         NVARCHAR(MAX)      NOT NULL
-);
-CREATE INDEX ix_ClientUid ON DbLogMessage (ClientUid);
-CREATE INDEX ix_LogDate ON DbLogMessage (LogDate);
 
 CREATE TABLE DbStatistic
 (

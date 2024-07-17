@@ -22,7 +22,6 @@
     <ProjectReference Include="..\Shared\Shared.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Scripts\MySql\DeleteOldLogs.sql" />
     <EmbeddedResource Include="Scripts\MySql\Tables.sql" />
     <EmbeddedResource Include="Scripts\Postgres\Tables.sql" />
     <EmbeddedResource Include="Scripts\Sqlite\Tables.sql" />

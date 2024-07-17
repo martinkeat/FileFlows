@@ -29,7 +29,7 @@ public abstract class UpdaterWorker : Worker
     /// </summary>
     private readonly string UpgradeScriptPrefix;
 
-    private ILogger _logger;
+    private ILogger _logger = null!;
 
     /// <summary>
     /// Gets the logger instance to use in this worker
@@ -37,7 +37,7 @@ public abstract class UpdaterWorker : Worker
     protected ILogger Logger
     {
         get => _logger;
-        init => _logger = value;
+        set => _logger = value;
     } 
 
     /// <summary>
@@ -48,11 +48,18 @@ public abstract class UpdaterWorker : Worker
     /// <param name="interval">the interval of this worker</param>
     public UpdaterWorker(string upgradeScriptPrefix, ScheduleType schedule, int interval) : base(schedule, interval)
     {
-        _logger = Shared.Logger.Instance;
         CurrentVersion = new Version(Globals.Version);
         this.UpgradeScriptPrefix = upgradeScriptPrefix;
         UpdaterName = this.GetType().Name;
         RunCheck();
+    }
+
+    /// <inheritdoc />
+    protected override void Initialize(ScheduleType schedule, int interval)
+    {
+        base.Initialize(schedule, interval);
+        if(_logger == null) // this might have been set a sub class, eg server updater sets this
+            _logger = Shared.Logger.Instance;
     }
 
     /// <inheritdoc />

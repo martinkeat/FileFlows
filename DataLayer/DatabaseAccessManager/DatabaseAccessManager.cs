@@ -170,11 +170,6 @@ internal  class DatabaseAccessManager
     /// Gets the DbRevision manager to manage the database operations for the RevisionedObject table
     /// </summary>
     public DbRevisionManager RevisionManager { get; init; }
-    
-    // /// <summary>
-    // /// Gets the DbLogMessage manager to manage the database operations for the DbLogMessage table
-    // /// </summary>
-    // public DbLogMessageManager LogMessageManager { get; init; }
 
     /// <summary>
     /// Gets the FileFlowsObject manager to manage the database operations for the FileFlowsObjects that are saved in the DbObject table

@@ -91,11 +91,6 @@ public class Settings : FileFlowObject
     public int LogFileRetention { get; set; }
     
     /// <summary>
-    /// Gets or sets the number of log entries to keep
-    /// </summary>
-    public int LogDatabaseRetention { get; set; }
-    
-    /// <summary>
     /// Gets or sets if every request to the server should be logged
     /// </summary>
     public bool LogEveryRequest { get; set; }

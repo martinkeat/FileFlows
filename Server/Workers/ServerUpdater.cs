@@ -25,9 +25,6 @@ public class ServerUpdater : UpdaterWorker
     public ServerUpdater() : base("server-upgrade", ScheduleType.Daily, 4) 
     {
         Instance = this;
-        var logger = new Logger();
-        logger.RegisterWriter(new FileLogger(DirectoryHelper.LoggingDirectory, "AutoUpdater", false));
-        Logger = logger;
     }
 
     /// <inheritdoc />
@@ -64,6 +61,10 @@ public class ServerUpdater : UpdaterWorker
     /// <inheritdoc />
     protected override void Initialize(ScheduleType schedule, int interval)
     {
+        var logger = new Logger();
+        logger.RegisterWriter(new FileLogger(DirectoryHelper.LoggingDirectory, "AutoUpdater", false));
+        Logger = logger;
+        
         if (int.TryParse(Environment.GetEnvironmentVariable("AutoUpdateInterval") ?? string.Empty, out int minutes) &&
             minutes > 0)
         {

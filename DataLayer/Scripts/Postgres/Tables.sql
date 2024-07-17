@@ -16,15 +16,6 @@ CREATE INDEX ON "DbObject" ("Type");
 CREATE INDEX ON "DbObject" ("Name");
 CREATE INDEX NameIndex ON "DbObject" ("Name");
 
-CREATE TABLE "DbLogMessage"
-(
-    "ClientUid"       VARCHAR(36)        NOT NULL,
-    "LogDate"         TIMESTAMP          DEFAULT CURRENT_TIMESTAMP,
-    "Type"            INT                NOT NULL,
-    "Message"         TEXT               NOT NULL
-);
-CREATE INDEX ON "DbLogMessage" ("ClientUid");
-CREATE INDEX ON "DbLogMessage" ("LogDate");
 
 CREATE TABLE "DbStatistic"
 (

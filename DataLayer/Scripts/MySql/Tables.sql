@@ -16,15 +16,6 @@ ALTER TABLE DbObject ADD INDEX (Type);
 ALTER TABLE DbObject ADD INDEX (Name);
 ALTER TABLE DbObject ADD FULLTEXT NameIndex(Name);
 
-CREATE TABLE DbLogMessage
-(
-    ClientUid       VARCHAR(36)        COLLATE utf8_unicode_ci      NOT NULL,
-    LogDate         datetime           default           now(),
-    Type            int                NOT NULL,
-    Message         TEXT               COLLATE utf8_unicode_ci      NOT NULL
-);
-ALTER TABLE DbLogMessage ADD INDEX (ClientUid);
-ALTER TABLE DbLogMessage ADD INDEX (LogDate);
 
 CREATE TABLE DbStatistic
 (
