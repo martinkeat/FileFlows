@@ -113,7 +113,7 @@ public class LibraryFileService
             StringLogger logger = new StringLogger();
 
             var result = await GetNextActual(logger, nodeName, nodeUid, nodeVersion, workerUid);
-            NextFileLogger.ILog($"GetNextFile for: {nodeName} => {result.Status}\n{logger}");
+            NextFileLogger.ILog($"{nodeName} => {result.Status}\n{string.Join("\n", logger.ToString().Split("\n").Select(x => "                       " + x))}");
 
             if (result.File != null)
             {
