@@ -134,8 +134,11 @@ public partial class Log : ComponentBase
         var logSource = await LocalStorage.GetItemAsync<string?>("LOG-Source");
         var logSeverity = await LocalStorage.GetItemAsync<LogType?>("LOG-Severity");
         if (logSeverity != null)
+        {
             SearchSeverity = logSeverity.Value;
-        
+            ActiveSearchModel.Type = logSeverity.Value;
+        }
+
         LoggingSources = (await HttpHelper.Get<Dictionary<string, List<LogFile>>>("/api/fileflows-log/log-sources")).Data;
 
         if (logSource != null && LoggingSources.ContainsKey(logSource))
