@@ -7,6 +7,7 @@ using FileFlows.Server.Services;
 using FileFlows.Shared.Formatters;
 using FileFlows.Shared.Models;
 using FileFlows.Shared.Helpers;
+using Humanizer;
 using Microsoft.AspNetCore.Mvc;
 using NodeService = FileFlows.Server.Services.NodeService;
 using SettingsService = FileFlows.Server.Services.SettingsService;
@@ -67,12 +68,8 @@ public class LogController : Controller
 
             if (source == "FileFlowsHTTP")
                 source = "Web Requests";
-            else if (source == "FileServer")
-                source = "File Server";
-            else if (source == "FileProcessRequest")
-                source = "File Process Request";
-            else if (source == "FileFlowsTasks")
-                source = "Tasks";
+            else if (source != "FileFlows")
+                source = source.Replace("FileFlows", string.Empty).Humanize(LetterCasing.Title);
 
             if (files.TryGetValue(source, out var list) == false)
             {
