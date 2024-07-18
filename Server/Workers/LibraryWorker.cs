@@ -18,12 +18,16 @@ public class LibraryWorker : ServerWorker
     /// </summary>
     private static LibraryWorker Instance;
 
+    private readonly Logger Logger;
+
     /// <summary>
     /// Creates a new instance of the library worker
     /// </summary>
     public LibraryWorker() : base(ScheduleType.Minute, 1)
     {
         Instance = this;
+        Logger = new();
+        Logger.RegisterWriter(new FileLogger(DirectoryHelper.LoggingDirectory, "Library", false));
     }
 
     public override void Start()
@@ -72,7 +76,7 @@ public class LibraryWorker : ServerWorker
             {
                 if (WatchedLibraries.ContainsKey(key))
                     continue;
-                WatchedLibraries.Add(key, new WatchedLibrary(lib));
+                WatchedLibraries.Add(key, new WatchedLibrary(Logger, lib));
             }
         }
     }
@@ -95,7 +99,7 @@ public class LibraryWorker : ServerWorker
     /// </summary>
     private void UpdateLibrariesInstance()
     {
-        Logger.Instance.DLog("LibraryWorker: Updating Libraries");
+        Logger.DLog("LibraryWorker: Updating Libraries");
         var libraries = new Services.LibraryService().GetAllAsync().Result;
         var libraryUids = libraries.Select(x => x.Uid + ":" + x.Path).ToList();            
 
@@ -137,24 +141,24 @@ public class LibraryWorker : ServerWorker
             {
                 if (library.FullScanDisabled)
                 {
-                    Logger.Instance.DLog($"LibraryWorker: Library '{library.Name}' full scan disabled");
+                    Logger.DLog($"LibraryWorker: Library '{library.Name}' full scan disabled");
                     continue;
                 }
 
                 // need to check full scan interval
                 if (library.LastScannedAgo.TotalMinutes < library.FullScanIntervalMinutes)
                 {
-                    Logger.Instance.DLog($"LibraryWorker: Library '{library.Name}' was scanned recently {library.LastScannedAgo} (full scan interval {library.FullScanIntervalMinutes} minutes)");
+                    Logger.DLog($"LibraryWorker: Library '{library.Name}' was scanned recently {library.LastScannedAgo} (full scan interval {library.FullScanIntervalMinutes} minutes)");
                     continue;
                 }
             }
             else if (library.LastScannedAgo.TotalSeconds < library.ScanInterval)
             {
-                Logger.Instance.DLog($"LibraryWorker: Library '{library.Name}' was scanned recently {library.LastScannedAgo} ({(new TimeSpan(library.ScanInterval * TimeSpan.TicksPerSecond))}");
+                Logger.DLog($"LibraryWorker: Library '{library.Name}' was scanned recently {library.LastScannedAgo} ({(new TimeSpan(library.ScanInterval * TimeSpan.TicksPerSecond))}");
                 continue;
             }
 
-            Logger.Instance.DLog($"LibraryWorker: Library '{library.Name}' calling scan " +
+            Logger.DLog($"LibraryWorker: Library '{library.Name}' calling scan " +
                                  $"(Scan complete: {libwatcher.ScanComplete}) " +
                                  $"(Library Scan: {scan} " +
                                  $"(last scanned: {library.LastScannedAgo}) " +

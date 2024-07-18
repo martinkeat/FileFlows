@@ -9,6 +9,7 @@ using FileFlows.Server.Services;
 using FileFlows.ServerShared.Models;
 using FileFlows.ServerShared.Services;
 using FileHelper = FileFlows.ServerShared.Helpers.FileHelper;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace FileFlows.Server.Workers;
 
@@ -53,21 +54,20 @@ public class WatchedLibrary:IDisposable
     private readonly Queue<string> QueuedFiles = new ();
 
     private readonly System.Timers.Timer QueueTimer;
-
-    private static Logger Logger;
+    
+    /// <summary>
+    /// The lgoger to use
+    /// </summary>
+    private Plugin.ILogger Logger { get; init; }
 
     /// <summary>
     /// Constructs a instance of a Watched Library
     /// </summary>
+    /// <param name="logger">the logger to use</param>
     /// <param name="library">The library to watch</param>
-    public WatchedLibrary(Library library)
+    public WatchedLibrary(Plugin.ILogger logger, Library library)
     {
-        if (Logger == null)
-        {
-            Logger = new();
-            Logger.RegisterWriter(new FileLogger(DirectoryHelper.LoggingDirectory, "Library", false));
-        }
-
+        this.Logger = logger;
         this.Library = library;
         this.UseScanner = library.Scan;
 
@@ -191,7 +191,7 @@ public class WatchedLibrary:IDisposable
 
             if (fullpath.ToLower().StartsWith(Library.Path.ToLower()) == false)
             {
-                Logger.Instance?.ILog($"Library file \"{fullpath}\" no longer belongs to library \"{Library.Path}\"");
+                Logger.ILog($"Library file \"{fullpath}\" no longer belongs to library \"{Library.Path}\"");
                 return; // library was changed
             }
 
@@ -639,7 +639,7 @@ public class WatchedLibrary:IDisposable
         {
             if (ex.Message?.StartsWith("Could not find a part of the path") == true)
                 return; // can happen if file is being moved quickly
-            Logger.Instance?.ELog("Watched Exception: " + ex.Message + Environment.NewLine + ex.StackTrace);
+            Logger.ELog("Watched Exception: " + ex.Message + Environment.NewLine + ex.StackTrace);
         }
     }
 
@@ -688,7 +688,7 @@ public class WatchedLibrary:IDisposable
         if (library.Enabled && library.LastScanned < new DateTime(2020, 1, 1) && Directory.Exists(library.Path))
         {
             ScanComplete = false; // this could happen if they click "Rescan" on the library page, this will force a full new scan
-            Logger.Instance?.ILog($"Library '{library.Name}' marked for re-scan");
+            Logger.ILog($"Library '{library.Name}' marked for re-scan");
         }
     }
 
@@ -707,13 +707,13 @@ public class WatchedLibrary:IDisposable
 
             if (TimeHelper.InSchedule(Library.Schedule) == false)
             {
-                Logger.Instance?.ILog($"Library '{Library.Name}' outside of schedule, scanning skipped.");
+                Logger.ILog($"Library '{Library.Name}' outside of schedule, scanning skipped.");
                 return;
             }
 
             if (string.IsNullOrEmpty(Library.Path) || Directory.Exists(Library.Path) == false)
             {
-                Logger.Instance?.WLog($"Library '{Library.Name}' path not found: {Library.Path}");
+                Logger.WLog($"Library '{Library.Name}' path not found: {Library.Path}");
                 return;
             }
             
