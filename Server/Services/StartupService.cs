@@ -182,7 +182,8 @@ public class StartupService
             new ObjectReferenceUpdater(),
             new FileFlowsTasksWorker(),
             new RepositoryUpdaterWorker(),
-            new ScheduledReportWorker()
+            new ScheduledReportWorker(),
+            new StatisticSyncer()
             //new LibraryFileServiceUpdater()
         );
     }
