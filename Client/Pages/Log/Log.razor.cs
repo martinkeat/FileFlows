@@ -423,7 +423,7 @@ public partial class Log : ComponentBase
             else if (currentEntry != null)
             {
                 // Append the line to the current log entry's message
-                currentEntry.Message += "\n" + line.Trim();
+                currentEntry.Message += "\n" + line.TrimEnd();
             }
         }
 
