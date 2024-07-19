@@ -18,6 +18,7 @@ public class TelemetryReporter : ServerWorker
         Trigger();
     }
 
+    /// <inheritdoc />
     protected override void ExecuteActual(Settings settings)
     {
         try

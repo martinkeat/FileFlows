@@ -1417,7 +1417,27 @@ FROM {Wrap(nameof(LibraryFile))}";
         
         using var db = await DbConnector.GetDb();
         return await db.Db.ExecuteScalarAsync<long>(sql);
+    }
+    
+    /// <summary>
+    /// Gets the total rows, sum of OriginalSize, and sum of FinalSize from the LibraryFile table grouped by Library.
+    /// </summary>
+    /// <returns>A list of library statistics</returns>
+    public async Task<List<(Guid LibraryUid, int TotalFiles, long SumOriginalSize, long SumFinalSize)>> GetLibraryFileStats()
+    {
+        string sql = $@"
+        SELECT 
+            {Wrap(nameof(LibraryFile.LibraryUid))} AS {Wrap("LibraryUid")},
+            COUNT(*) AS {Wrap("TotalFiles")}, 
+            SUM({Wrap(nameof(LibraryFile.OriginalSize))}) AS {Wrap("SumOriginalSize")}, 
+            SUM({Wrap(nameof(LibraryFile.FinalSize))}) AS {Wrap("SumFinalSize")} 
+        FROM {Wrap(nameof(LibraryFile))}
+        GROUP BY {Wrap(nameof(LibraryFile.LibraryUid))}";
+    
+        using var db = await DbConnector.GetDb();
+        var results = await db.Db.FetchAsync<(Guid LibraryUid, int TotalFiles, long SumOriginalSize, long SumFinalSize)>(sql);
 
+        return results;
     }
 
     /// <summary>

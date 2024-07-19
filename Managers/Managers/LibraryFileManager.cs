@@ -263,6 +263,13 @@ public class LibraryFileManager
     /// <returns>the total storage saved</returns>
     public Task<long> GetTotalStorageSaved()
         => DatabaseAccessManager.Instance.LibraryFileManager.GetTotalStorageSaved();
+    
+    /// <summary>
+    /// Gets the total rows, sum of OriginalSize, and sum of FinalSize from the LibraryFile table grouped by Library.
+    /// </summary>
+    /// <returns>A list of library statistics</returns>
+    public Task<List<(Guid LibraryUid, int TotalFiles, long SumOriginalSize, long SumFinalSize)>> GetLibraryFileStats()
+        => DatabaseAccessManager.Instance.LibraryFileManager.GetLibraryFileStats();
 
     /// <summary>
     /// Performs a search for files

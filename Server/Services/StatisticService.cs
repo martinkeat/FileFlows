@@ -3,6 +3,7 @@ using FileFlows.Managers;
 using FileFlows.Plugin;
 using FileFlows.ServerShared.Models.StatisticModels;
 using FileFlows.ServerShared.Services;
+using FileFlows.Shared.Formatters;
 using FileFlows.Shared.Models;
 
 namespace FileFlows.Server.Services;
@@ -198,7 +199,61 @@ public class StatisticService : IStatisticService
             _semaphore.Release();
         }
     }
-    
+
+    /// <summary>
+    /// Resynchronizes the storage saved for all library files
+    /// </summary>
+    /// <returns>an awaited task</returns>
+    public async Task SyncStorageSaved()
+    {
+        var data = await new LibraryFileManager().GetLibraryFileStats();
+        var libraries = await new LibraryManager().GetAll();
+        
+        await _semaphore.WaitAsync();
+        try
+        {
+            if (CachedData.ContainsKey(Globals.STAT_STORAGE_SAVED) == false ||
+                CachedData[Globals.STAT_STORAGE_SAVED] is StorageSaved == false)
+            {
+                CachedData[Globals.STAT_STORAGE_SAVED] = new StorageSaved();
+            }
+            var saved = (StorageSaved)CachedData[Globals.STAT_STORAGE_SAVED];
+
+            saved.Data = new();
+
+            foreach (var d in data)
+            {
+                var lib = libraries.FirstOrDefault(x => x.Uid == d.LibraryUid);
+                if (lib == null)
+                    continue; // library is gone, don't count this data anymore
+                saved.Data.Add(new ()
+                {
+                    Library = lib.Name,
+                    FinalSize = d.SumFinalSize,
+                    OriginalSize = d.SumOriginalSize,
+                    TotalFiles = d.TotalFiles
+                });
+            }
+
+            await new StatisticManager().Update(new()
+            {
+                Name = Globals.STAT_STORAGE_SAVED,
+                Type = StatisticType.StorageSaved,
+                Value = saved
+            });
+            Logger.Instance.ILog("Synchronized storage saved statistics:\n" + string.Join("\n", saved.Data.Select(x =>
+                $" - {x.Library}\n   - Files: {x.TotalFiles:N0}\n   - Original: {FileSizeFormatter.Format(x.OriginalSize)}\n   - Final: {FileSizeFormatter.Format(x.FinalSize)}")));
+        }
+        catch (Exception ex)
+        {
+            Logger.Instance.ELog("Failed to synchronizing storage saved statistics: " + ex.Message + "\n" + ex.StackTrace);
+        }
+        finally
+        {
+            _semaphore.Release();
+        }
+    }
+
     /// <summary>
     /// Records storage saved statistic
     /// </summary>
