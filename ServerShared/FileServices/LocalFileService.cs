@@ -173,6 +173,42 @@ public class LocalFileService : IFileService
     }
 
     /// <inheritdoc />
+    public Result<DateTime> DirectoryCreationTimeUtc(string path)
+    {
+        if (IsProtectedPath(ref path))
+            return Result<DateTime>.Fail("Cannot access protected path: " + path);
+        try
+        {
+            var dir = new DirectoryInfo(path);
+            if (dir.Exists == false)
+                return Result<DateTime>.Fail($"Directory '{path}' does not exist");
+            return dir.CreationTimeUtc;
+        }
+        catch (Exception ex)
+        {
+            return Result<DateTime>.Fail(ex.Message);
+        }
+    }
+
+    /// <inheritdoc />
+    public Result<DateTime> DirectoryLastWriteTimeUtc(string path)
+    {
+        if (IsProtectedPath(ref path))
+            return Result<DateTime>.Fail("Cannot access protected path: " + path);
+        try
+        {
+            var dir = new DirectoryInfo(path);
+            if (dir.Exists == false)
+                return Result<DateTime>.Fail($"Directory '{path}' does not exist");
+            return dir.LastWriteTimeUtc;
+        }
+        catch (Exception ex)
+        {
+            return Result<DateTime>.Fail(ex.Message);
+        }
+    }
+
+    /// <inheritdoc />
     public Result<bool> FileExists(string path)
     {
         if (IsProtectedPath(ref path))

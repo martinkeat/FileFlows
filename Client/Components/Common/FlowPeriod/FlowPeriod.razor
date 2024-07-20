@@ -1,0 +1,19 @@
+@namespace FileFlows.Client.Components.Common
+
+<div class="flow-period-wrapper">
+    <div class="period-minutes">
+        <input id="@Uid" type="number" value="@Number" disabled="@(Disabled || ReadOnly ? string.Empty : null)" 
+               @onchange="ChangeValue" min="1" />
+    </div>
+    <div class="period-period">
+        <select @onchange="PeriodSelectionChanged" disabled="@(Disabled || ReadOnly ? string.Empty : null)">
+            <option selected="@(Period == 1)" value="1">@lblMinutes</option>
+            <option selected="@(Period == 60)" value="60">@lblHours</option>
+            <option selected="@(Period == 1440)" value="1440">@lblDays</option>
+            @if (ShowWeeks)
+            {
+                <option selected="@(Period == 10080)" value="10080">@lblWeeks</option>
+            }
+        </select>
+    </div>
+</div>

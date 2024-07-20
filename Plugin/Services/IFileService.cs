@@ -87,6 +87,20 @@ public interface IFileService
     Result<bool> DirectoryCreate(string path);
 
     /// <summary>
+    /// Gets the creation time of a directory
+    /// </summary>
+    /// <param name="path">the path to the directory</param>
+    /// <returns>the creation time of the directory</returns>
+    Result<DateTime> DirectoryCreationTimeUtc(string path);
+
+    /// <summary>
+    /// Gets the last write time of a directory
+    /// </summary>
+    /// <param name="path">the path to the directory</param>
+    /// <returns>the last write time of the directory</returns>
+    Result<DateTime> DirectoryLastWriteTimeUtc(string path);
+
+    /// <summary>
     /// Checks if a file exists
     /// </summary>
     /// <param name="path">the path to the file</param>

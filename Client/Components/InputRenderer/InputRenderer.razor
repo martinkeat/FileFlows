@@ -6,6 +6,7 @@
 @using FileFlows.Shared.Widgets
 @using Microsoft.Extensions.Logging
 @using System.Collections
+@using FileFlows.Plugin.Models
 @using FileFlows.Plugin.Types
 
 @{
@@ -302,6 +303,14 @@
             <InputDate Field=@field Label="@label" Value="@value" ReadOnly=@readOnly 
                        ValueChanged="@(x => UpdateValue(field, x))" HideLabel=@hideLabel 
                        OnSubmit=@OnSubmit OnClose=@OnClose Help=@field.HelpText />
+        }
+            break;
+        case FormInputType.DateCompare:
+        {
+            var value = GetValue<DateCompareModel>(field.Name);
+            <InputDateCompare Field=@field Label="@label" Value="@value" ReadOnly=@readOnly 
+                            ValueChanged="@(x => UpdateValue(field, x))" HideLabel=@hideLabel 
+                            OnSubmit=@OnSubmit OnClose=@OnClose Help=@field.HelpText />
         }
             break;
         case FormInputType.DateRange:

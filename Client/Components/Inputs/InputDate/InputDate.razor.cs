@@ -22,6 +22,9 @@ public partial class InputDate : Input<DateTime>
     }
 
 
+    /// <summary>
+    /// Gets or sets the local date
+    /// </summary>
     public DateTime LocalDate
     {
         get => Value.ToLocalTime();

@@ -1,10 +1,7 @@
-namespace FileFlows.Plugin.Attributes
-{
-    using System;
-    using System.Collections.Generic;
+namespace FileFlows.Plugin.Attributes;
 
-    public class TextAttribute : FormInputAttribute
-    {
-        public TextAttribute(int order) : base(FormInputType.Text, order) { }
-    }
-}
+/// <summary>
+/// Attribute for Text inputs
+/// </summary>
+/// <param name="order">the order this input appears</param>
+public class TextAttribute(int order) : FormInputAttribute(FormInputType.Text, order) { }

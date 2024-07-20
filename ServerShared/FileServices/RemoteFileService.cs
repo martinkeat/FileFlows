@@ -218,6 +218,42 @@ public class RemoteFileService : IFileService
     }
 
     /// <inheritdoc />
+    public Result<DateTime> DirectoryCreationTimeUtc(string path)
+    {
+        if (FileIsLocal(PreparePath(ref path)))
+            return _localFileService.DirectoryCreationTimeUtc(path);
+        try
+        {
+            var result = HttpHelper.Post<DateTime>(GetUrl("directory/creation-time-utc"), new { path }).Result;
+            if (result.Success == false)
+                return Result<DateTime>.Fail(result.Body);
+            return result.Data;
+        }
+        catch (Exception ex)
+        {
+            return Result<DateTime>.Fail(ex.Message);
+        }
+    }
+
+    /// <inheritdoc />
+    public Result<DateTime> DirectoryLastWriteTimeUtc(string path)
+    {
+        if (FileIsLocal(PreparePath(ref path)))
+            return _localFileService.DirectoryLastWriteTimeUtc(path);
+        try
+        {
+            var result = HttpHelper.Post<DateTime>(GetUrl("directory/last-write-time-utc"), new { path }).Result;
+            if (result.Success == false)
+                return Result<DateTime>.Fail(result.Body);
+            return result.Data;
+        }
+        catch (Exception ex)
+        {
+            return Result<DateTime>.Fail(ex.Message);
+        }
+    }
+
+    /// <inheritdoc />
     public Result<bool> FileExists(string path)
     {
         if (FileIsLocal(PreparePath(ref path)))

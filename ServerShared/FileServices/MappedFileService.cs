@@ -121,6 +121,14 @@ public class MappedFileService : IFileService
     public Result<bool> DirectoryCreate(string path)
         => _localFileService.DirectoryCreate(Map(path));
 
+    /// <inheritdoc />
+    public Result<DateTime> DirectoryCreationTimeUtc(string path)
+        => _localFileService.DirectoryCreationTimeUtc(Map(path));
+
+    /// <inheritdoc />
+    public Result<DateTime> DirectoryLastWriteTimeUtc(string path)
+        => _localFileService.DirectoryLastWriteTimeUtc(Map(path));
+
     /// <summary>
     /// Checks whether the specified file exists.
     /// </summary>

@@ -21,6 +21,9 @@ namespace FileFlows.Client.Components.Inputs
         [Parameter] public bool ShowDescription { get; set; }
 
         private string Description { get; set; }
+        /// <summary>
+        /// If the value is currently being updated via UI action and if any update events received should be ignored during this update
+        /// </summary>
         private bool UpdatingValue = false;
 
 #pragma warning disable BL0007

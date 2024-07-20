@@ -175,7 +175,11 @@ public enum FormInputType
     /// <summary>
     /// Hidden element
     /// </summary>
-    Hidden = 39
+    Hidden = 39,
+    /// <summary>
+    /// Date compare
+    /// </summary>
+    DateCompare = 40
 }
 
 

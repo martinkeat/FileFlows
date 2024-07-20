@@ -252,6 +252,38 @@ public class FileServerController : Controller
         return Ok(log);
     }
 
+    /// <summary>
+    /// Retrieves the creation time of a directory in UTC.
+    /// </summary>
+    /// <param name="path">The directory path.</param>
+    /// <returns>An IActionResult containing the directory's creation time (UTC).</returns>
+    [HttpPost("directory/creation-time-utc")]
+    public IActionResult GetDirectoryCreationTimeUtc([FromBody] PathRequest path)
+    {
+        if (ValidateRequest(out string message) == false)
+            return StatusCode(503, message?.EmptyAsNull() ?? "File service is currently disabled.");
+        var result = _localFileService.DirectoryCreationTimeUtc(path);
+        if (result.IsFailed)
+            return StatusCode(500, result.Error);
+        return Ok(result.Value);
+    }
+
+    /// <summary>
+    /// Retrieves the last write time of a directory in UTC.
+    /// </summary>
+    /// <param name="path">The directory path.</param>
+    /// <returns>An IActionResult containing the directory's last write time (UTC).</returns>
+    [HttpPost("directory/last-write-time-utc")]
+    public IActionResult GetDirectoryLastWriteTimeUtc([FromBody] PathRequest path)
+    {
+        if (ValidateRequest(out string message) == false)
+            return StatusCode(503, message?.EmptyAsNull() ?? "File service is currently disabled.");
+        var result = _localFileService.DirectoryLastWriteTimeUtc(path);
+        if (result.IsFailed)
+            return StatusCode(500, result.Error);
+        return Ok(result.Value);
+    }
+
 
     /// <summary>
     /// Checks if a file exists at the specified path.
