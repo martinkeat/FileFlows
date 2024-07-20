@@ -32,10 +32,10 @@
 				<TextBlock Text="Server:" Grid.Row="0" Grid.Column="0" Margin="5 13 5 5" TextAlignment="Right" />
 				
 				<DockPanel Grid.Row="0" Grid.Column="1"  Margin="5" HorizontalAlignment="Stretch">
-					<TextBox Text="{Binding ServerUrl}" Watermark="Server Address" Foreground="white" 
+					<TextBox Text="{Binding ServerUrl}" Watermark="Server Address" Foreground="white" IsEnabled="{Binding Enabled}"
 					         Margin="0"  Height="38" Padding="7" Width="350" VerticalAlignment="Center"  />
 					
-					<Button Margin="0" Content="OPEN" Command="{Binding Launch}" Width="70"
+					<Button Margin="0" Content="OPEN" Command="{Binding Launch}" Width="70" IsEnabled="{Binding Enabled}"
 					        Grid.Row="4" Grid.Column="1"
 					        Foreground="#ff0090" Background="#111214"
 					        BorderBrush="#ff0090"
@@ -44,22 +44,22 @@
 				
 				<TextBlock Text="Access Token:" Grid.Row="1" Grid.Column="0" Margin="5 13 5 5" TextAlignment="Right" />
 				<TextBox Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2"  Text="{Binding AccessToken}" Watermark="Required if using user security" Foreground="white" 
-				                     Margin="0"  Height="38" Padding="7" Width="420" VerticalAlignment="Center"  />
+				                     Margin="0"  Height="38" Padding="7" Width="420" VerticalAlignment="Center"  IsEnabled="{Binding Enabled}" />
 				
 				<ToggleSwitch Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" 
 				              IsVisible="{Binding ShowStartMinimized}" 
 				              IsChecked="{Binding StartMinimized}" 
 				              Margin="5 5 5 5" HorizontalAlignment="Center" 
-				              OffContent="Start Minimised" OnContent="Start Minimised"  />
+				              OffContent="Start Minimised" OnContent="Start Minimised"  IsEnabled="{Binding Enabled}" />
 				
 				<StackPanel Grid.Row="3" Grid.Column="1" Orientation="Horizontal">
 					<Button Margin="6" Content="SAVE / REGISTER" Command="{Binding SaveRegister}"
 					        Foreground="#ff0090" Background="#111214" Width="180"
-					        BorderBrush="#ff0090" 
+					        BorderBrush="#ff0090"  IsEnabled="{Binding Enabled}"
 					/>
 					<Button Margin="6" Content="LOGS" Command="{Binding OpenLogs}"
 					        Foreground="#ff0090" Background="#111214" Width="180"
-					        BorderBrush="#ff0090" 
+					        BorderBrush="#ff0090"  IsEnabled="{Binding Enabled}"
 					/>
 				</StackPanel>
 			</Grid>

@@ -191,9 +191,16 @@ public class MainWindow : Window
     {
         if (Program.Manager == null)
             return;
-        var result = await Program.Manager.Register();
-        if (result.Success == false)
-            ShowMessage("Register Failed", result.Message);
+        try
+        {
+            var result = await Program.Manager.Register();
+            if (result.Success == false)
+                ShowMessage("Register Failed", result.Message);
+        }
+        catch (Exception ex)
+        {
+            Logger.Instance.ELog("Failed registering: " + ex.Message + Environment.NewLine + ex.StackTrace);
+        }
     }
     
     /// <summary>
@@ -232,6 +239,11 @@ public class MainWindowViewModel:INotifyPropertyChanged
     /// Gets ors sets the Version string
     /// </summary>
     public string Version { get; set; }
+
+    /// <summary>
+    /// Gets or sets if the window is enabled, it will be disabled during registration
+    /// </summary>
+    public bool Enabled { get; set; } = true;
 
     private string _ServerUrl = string.Empty;
     /// <summary>
@@ -350,8 +362,19 @@ public class MainWindowViewModel:INotifyPropertyChanged
         
         AppSettings.Instance.AccessToken = AccessToken;
         AppSettings.Instance.ServerUrl = ServerUrl;
-        
-        _ = Window.SaveRegister();
+
+        Enabled = false;
+        Task.Run(async () =>
+        {
+            try
+            {
+                await Window.SaveRegister();
+            }
+            finally
+            {
+                Enabled = true;
+            }
+        });
     }
 
     /// <summary>

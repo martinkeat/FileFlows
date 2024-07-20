@@ -32,7 +32,7 @@ public class Program
     {
         args ??= new string[] { };
         #if(DEBUG)
-        args = new[] { "--no-gui" };
+        //args = new[] { "--no-gui" };
         #endif
         if (args.Any(x => x.ToLower() == "--help" || x.ToLower() == "-?" || x.ToLower() == "/?" || x.ToLower() == "/help" || x.ToLower() == "-help"))
         {
@@ -112,9 +112,9 @@ public class Program
             if(File.Exists(DirectoryHelper.NodeConfigFile) == false)
                 AppSettings.Instance.Save();
 
-            new ConsoleLogger();
-            new FileLogger(DirectoryHelper.LoggingDirectory, "FileFlows-Node");
-            new ServerLogger();
+            _ = new ConsoleLogger();
+            _ = new FileLogger(DirectoryHelper.LoggingDirectory, "FileFlows-Node");
+            _ = new ServerLogger();
             
             Logger.Instance?.ILog("FileFlows Node version: " + Globals.Version);
             if (Globals.IsDocker)
@@ -155,7 +155,10 @@ public class Program
                     var appBuilder = BuildAvaloniaApp();
                     appBuilder.StartWithClassicDesktopLifetime(args);
                 }
-                catch (Exception) { }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message + Environment.NewLine +ex.StackTrace);
+                }
 
             }
             else

@@ -40,10 +40,11 @@ class HttpHelper
     /// </summary>
     /// <param name="url">the URL to call</param>
     /// <param name="data">any data to send with the request</param>
+    /// <param name="timeoutSeconds">the number of seconds before a timeout occurs</param>
     /// <returns>the request result</returns>
-    public static async Task<RequestResult<string>> Post(string url, object? data = null)
+    public static async Task<RequestResult<string>> Post(string url, object? data = null, int timeoutSeconds = 0)
     {
-        return await MakeRequest<string>(System.Net.Http.HttpMethod.Post, url, data);
+        return await MakeRequest<string>(System.Net.Http.HttpMethod.Post, url, data, timeoutSeconds: timeoutSeconds);
     }
     
     /// <summary>

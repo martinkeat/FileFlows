@@ -13,7 +13,7 @@ public class LogService : RemoteService, ILogService
     {
         try
         {
-            await HttpHelper.Post($"{ServiceBaseUrl}/remote/log", message);
+            await HttpHelper.Post($"{ServiceBaseUrl}/remote/log", message, timeoutSeconds: 2);
         }
         catch (Exception)
         {
