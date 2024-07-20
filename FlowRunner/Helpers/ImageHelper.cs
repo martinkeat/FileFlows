@@ -24,6 +24,9 @@ namespace FileFlows.FlowRunner.Helpers;
 /// </summary>
 public class ImageHelper : IImageHelper
 {
+    /// <summary>
+    /// The logger to use
+    /// </summary>
     private readonly ILogger Logger;
     private readonly NodeParameters NodeParameters;
     private readonly ImageMagickHelper ImageMagick;
@@ -36,7 +39,7 @@ public class ImageHelper : IImageHelper
     {
         Logger = logger;
         NodeParameters = args;
-        ImageMagick = new(args);
+        ImageMagick = new(logger, args);
     }
     
     /// <summary>
@@ -48,7 +51,7 @@ public class ImageHelper : IImageHelper
     public ImageHelper(ILogger logger, string convert, string identify)
     {
         Logger = logger;
-        ImageMagick = new(convert, identify);
+        ImageMagick = new(logger, convert, identify);
     }
 
     /// <inheritdoc />

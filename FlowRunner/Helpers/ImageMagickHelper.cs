@@ -10,6 +10,10 @@ namespace FileFlows.FlowRunner.Helpers;
 /// </summary>
 public class ImageMagickHelper
 {
+    /// <summary>
+    /// The logger to use
+    /// </summary>
+    private readonly ILogger Logger;
     private bool? _CanUseImageMagick = null;
     /// <summary>
     /// Semaphore used to check if imagemagick can be used
@@ -24,9 +28,11 @@ public class ImageMagickHelper
     /// <summary>
     /// Constructs a new instance of the ImageMagickHelper
     /// </summary>
+    /// <param name="logger">the logger</param>
     /// <param name="args">The NodeParameters</param>
-    public ImageMagickHelper(NodeParameters args)
+    public ImageMagickHelper(ILogger logger, NodeParameters args)
     {
+        Logger = logger;
         EXE_CONVERT = args.GetToolPath("convert")?.EmptyAsNull() ??
                       (OperatingSystem.IsWindows() ? "convert.exe" : "convert");
         EXE_IDENTIFY = args.GetToolPath("identify")?.EmptyAsNull() ??
@@ -37,10 +43,12 @@ public class ImageMagickHelper
     /// <summary>
     /// Constructs a new instance of the ImageMagickHelper
     /// </summary>
+    /// <param name="logger">the logger</param>
     /// <param name="convert">The convert executable file</param>
     /// <param name="identify">The identify executable file</param>
-    public ImageMagickHelper(string convert, string identify)
+    public ImageMagickHelper(ILogger logger, string convert, string identify)
     {
+        Logger = logger;
         EXE_CONVERT = convert;
         EXE_IDENTIFY = identify;
     }
@@ -99,7 +107,7 @@ public class ImageMagickHelper
         }
         catch (Exception ex)
         {
-            Logger.Instance.WLog(ex.Message);
+            Logger.WLog(ex.Message);
             // An exception occurred, command is not available
             return false;
         }
@@ -424,9 +432,11 @@ public class ImageMagickHelper
             if (totalPagesResult.Failed(out var error))
                 return Result<bool>.Fail(error);
             var totalPages = totalPagesResult;
+            Logger.ILog("Total Pages: " + totalPages);
 
             for (int i = 0; i < totalPages; i++)
             {
+                Logger.ILog($"Extracting Page: {i} / {totalPages}");
                 // Execute ImageMagick command for resizing
                 ProcessStartInfo startInfo = new ProcessStartInfo
                 {
@@ -438,7 +448,10 @@ public class ImageMagickHelper
                 };
                 startInfo.ArgumentList.Add("-density");
                 startInfo.ArgumentList.Add("300");
-                startInfo.ArgumentList.Add($"{pdf}[{i}]");
+                // if(pdf.Contains(' '))
+                //     startInfo.ArgumentList.Add($"\"{pdf}[{i}]\"");
+                // else
+                    startInfo.ArgumentList.Add($"{pdf}[{i}]");
                 startInfo.ArgumentList.Add("-quality");
                 startInfo.ArgumentList.Add("100");
                 startInfo.ArgumentList.Add(Path.Combine(destination, $"output-{i:D4}.png"));
@@ -509,7 +522,7 @@ public class ImageMagickHelper
         ProcessStartInfo startInfo = new ProcessStartInfo
         {
             FileName = EXE_IDENTIFY,
-            Arguments = $"{pdf}",
+            ArgumentList = { pdf },
             RedirectStandardOutput = true,
             RedirectStandardError = true,
             UseShellExecute = false,

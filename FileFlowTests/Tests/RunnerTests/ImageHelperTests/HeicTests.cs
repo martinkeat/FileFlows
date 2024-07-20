@@ -16,7 +16,7 @@ public class HeicTests : TestBase
     public void ConvertToJpeg()
     {
         string file = $"{TestFilesDir}/images/heic1.heic";
-        var magick = new ImageMagickHelper("convert", "identify");
+        var magick = new ImageMagickHelper(Logger, "convert", "identify");
         var result = magick.ConvertImage(file, $"{TempPath}/heic.jpg", new ()
         {
             Quality = 75
