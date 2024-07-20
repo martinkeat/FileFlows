@@ -210,8 +210,11 @@ public class MainWindow : Window
     /// <param name="message">the text of the message</param>
     void ShowMessage(string title, string message)
     {
-        var window = new MessageBox(message, title);
-        window.Show();
+        Dispatcher.UIThread.InvokeAsync(() =>
+        {
+            var window = new MessageBox(message, title);
+            window.Show();
+        });
     }
 
     /// <summary>
