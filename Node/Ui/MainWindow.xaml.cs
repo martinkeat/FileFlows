@@ -364,16 +364,23 @@ public class MainWindowViewModel:INotifyPropertyChanged
         AppSettings.Instance.ServerUrl = ServerUrl;
 
         Enabled = false;
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Enabled)));
         Task.Run(async () =>
         {
             try
             {
                 await Window.SaveRegister();
             }
-            finally
+            catch (Exception ex)
+            {
+                Logger.Instance.ELog("Error Registering: " + ex.Message + Environment.NewLine + ex.StackTrace);
+            }
+
+            await Dispatcher.UIThread.InvokeAsync(() =>
             {
                 Enabled = true;
-            }
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Enabled)));
+            });
         });
     }
 
