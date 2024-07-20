@@ -5,7 +5,7 @@
 
 <InputWrapper Input="@this">
     <div>
-        <select @bind="Value.Comparison"  disabled="@Disabled">
+        <select @bind="Comparison" disabled="@Disabled">
             @foreach (var opt in comparisonModeOptions)
             {
             <option value=@opt.Value>@opt.Label</option>
@@ -13,11 +13,11 @@
         </select>
         @if (Value.Comparison is DateCompareMode.Between or DateCompareMode.NotBetween or DateCompareMode.GreaterThan or DateCompareMode.LessThan)
         {
-            <FlowPeriod @bind-Value="Value.Value1" disabled="@Disabled" />
+            <FlowPeriod @bind-Value="Value1" disabled="@Disabled" />
         }
         @if (Value.Comparison is DateCompareMode.Between or DateCompareMode.NotBetween)
         {
-            <FlowPeriod @bind-Value="Value.Value2" disabled="@Disabled" />
+            <FlowPeriod @bind-Value="Value2" disabled="@Disabled" />
         }
         @if (Value.Comparison is DateCompareMode.After or DateCompareMode.Before)
         {

@@ -110,6 +110,7 @@ public partial class FlowPeriod : ComponentBase
             value = 1;
         this.Number = value;
         this.Value = this.Number * this.Period;
+        ValueChanged.InvokeAsync(Value);
     }
     
     /// <summary>
@@ -122,6 +123,7 @@ public partial class FlowPeriod : ComponentBase
         {
             Period = index;
             Value = Number * Period;
+            ValueChanged.InvokeAsync(Value);
         }
         else
             Logger.Instance.DLog("Unable to find index of: ",  args?.Value);

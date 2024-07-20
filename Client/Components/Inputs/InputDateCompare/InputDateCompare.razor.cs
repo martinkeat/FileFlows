@@ -49,15 +49,55 @@ public partial class InputDateCompare : Input<DateCompareModel>
             }
         }
 
-        Value ??= new()
+        if(Value == null)
         {
-            Comparison = firstMode ?? DateCompareMode.GreaterThan,
-            Value1 = 5,
-            Value2 = 10,
-            DateValue = DateTime.Today.ToUniversalTime()
-        };
+            Value = new()
+            {
+                Comparison = firstMode ?? DateCompareMode.GreaterThan,
+                Value1 = 5,
+                Value2 = 10,
+                DateValue = DateTime.Today.ToUniversalTime()
+            };
+        }
     }
 
+
+    /// <summary>
+    /// Gets or sets the comparison mode
+    /// </summary>
+    public DateCompareMode Comparison
+    {
+        get => Value.Comparison;
+        set
+        {
+            Value.Comparison = value;
+            ValueUpdated();
+        }
+    }
+    /// <summary>
+    /// Gets or sets the first minute value
+    /// </summary>
+    public int Value1
+    {
+        get => Value.Value1;
+        set
+        {
+            Value.Value1 = value;
+            ValueUpdated();
+        }
+    }
+    /// <summary>
+    /// Gets or sets the second minute value
+    /// </summary>
+    public int Value2
+    {
+        get => Value.Value2;
+        set
+        {
+            Value.Value2 = value;
+            ValueUpdated();
+        }
+    }
 
     /// <summary>
     /// Gets or sets the local date
@@ -65,6 +105,10 @@ public partial class InputDateCompare : Input<DateCompareModel>
     private DateTime LocalDate
     {
         get => Value.DateValue.ToLocalTime();
-        set => Value.DateValue = value.ToUniversalTime();
+        set
+        {
+            Value.DateValue = value.ToUniversalTime();
+            ValueUpdated();
+        }
     }
 }
