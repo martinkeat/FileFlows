@@ -24,12 +24,17 @@ public class ServerLogger:ILogWriter
     /// <param name="args">the arguments for the log message</param>
     public Task Log(LogType type, params object[] args)
     {
-        var service = ServiceLoader.Load<ILogService>();
-        return service.LogMessage(new()
+        // we do not await this!
+        Task.Run(() =>
         {
-            NodeAddress = AppSettings.Instance.HostName,
-            Type = type,
-            Arguments = args
+            var service = ServiceLoader.Load<ILogService>();
+            return service.LogMessage(new()
+            {
+                NodeAddress = AppSettings.Instance.HostName,
+                Type = type,
+                Arguments = args
+            });
         });
+        return Task.CompletedTask;
     }
 }
