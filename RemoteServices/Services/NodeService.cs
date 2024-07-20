@@ -119,7 +119,7 @@ public class NodeService : RemoteService, INodeService
                  Globals.IsMac ? OperatingSystemType.Mac :
                  Globals.IsFreeBsd ? OperatingSystemType.FreeBsd :
                  OperatingSystemType.Unknown
-        }, timeoutSeconds: 15);
+        }, timeoutSeconds: 10);
 
         if (result.Success == false)
             throw new Exception("Failed to register node: " + result.Body);

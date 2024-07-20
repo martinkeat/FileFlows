@@ -167,10 +167,18 @@ public class NodeManager
                 return (false, "Failed to register");
             }
         }
+        catch (TaskCanceledException ex)
+        {
+            Logger.Instance?.ELog("Failed to register with server: " + ex.Message);
+            this.Registered = false;
+            return (false, "The connection to the server timed out. Please check your network connection and ensure the server address is correct.");
+        }
         catch (Exception ex)
         {
             Logger.Instance?.ELog("Failed to register with server: " + ex.Message);
             this.Registered = false;
+            if(ex.Message.StartsWith("A task was canceled"))
+                return (false, "The connection to the server timed out. Please check your network connection and ensure the server address is correct.");
             return (false, ex.Message);
         }
 

@@ -196,6 +196,8 @@ public class MainWindow : Window
             var result = await Program.Manager.Register();
             if (result.Success == false)
                 ShowMessage("Register Failed", result.Message);
+            else
+                ShowMessage("Registered", "Successfully registered with the FileFlows server.");
         }
         catch (Exception ex)
         {
