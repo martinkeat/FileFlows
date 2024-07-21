@@ -192,6 +192,34 @@ public partial class Libraries : ListPage<Guid, Library>
             this.StateHasChanged();
         }
     }
+    /// <summary>
+    /// Reset all files in a library
+    /// </summary>
+    private async Task Reset()
+    {
+        var uids = Table.GetSelected()?.Select(x => x.Uid)?.ToArray() ?? new System.Guid[] { };
+        if (uids.Length == 0)
+            return; // nothing to rescan
+
+        if (await Confirm.Show("Pages.Libraries.Messages.Reset.Title",
+                "Pages.Libraries.Messages.Reset.Message", defaultValue: false) == false)
+            return;
+
+        Blocker.Show();
+        this.StateHasChanged();
+
+        try
+        {
+            var result = await HttpHelper.Put($"{ApiUrl}/reset", new ReferenceModel<Guid> { Uids = uids });
+            if (result.Success == false)
+                return;
+        }
+        finally
+        {
+            Blocker.Hide();
+            this.StateHasChanged();
+        }
+    }
 
     public override async Task Delete()
     {

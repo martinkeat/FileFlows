@@ -58,6 +58,7 @@
     "Browse": "Browse",
     "Rescan": "Rescan",
     "Reprocess": "Reprocess",
+    "Reset": "Reset",
     "Revisions":"Revisions",
     "Audit": "Audit",
     "NoAuditHistoryAvailable": "No audit history available",
@@ -684,6 +685,10 @@
         "Reprocess" : {
           "Title":"Reprocess Selected Libraries",
           "Message": "Are you sure you want to proceed with reprocessing the selected libraries?\n\nThis action will mark all files as unprocessed and initiate their reprocessing. Please note that this action cannot be undone."
+        },
+        "Reset" : {
+          "Title":"Reset Selected Libraries",
+          "Message": "Are you sure you want to proceed with resetting the selected libraries?\n\nThis action will remove all files and initiate a rescan. Please note that this action cannot be undone."
         }
       },
       "Labels": {

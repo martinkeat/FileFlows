@@ -4,6 +4,7 @@ using FileFlows.Server.Helpers;
 using FileFlows.Shared.Models;
 using System.Text.RegularExpressions;
 using FileFlows.Server.Authentication;
+using FileFlows.Server.Hubs;
 using FileFlows.Server.Services;
 
 namespace FileFlows.Server.Controllers;
@@ -183,7 +184,6 @@ public class LibraryController : BaseController
         });
     }
 
-
     /// <summary>
     /// Reprocess libraries.
     /// All library files will have their status updated to unprocessed.
@@ -191,10 +191,21 @@ public class LibraryController : BaseController
     /// <param name="model">A reference model containing UIDs to reprocessing</param>
     /// <returns>an awaited task</returns>
     [HttpPut("reprocess")]
-    public async Task Reprocess([FromBody] ReferenceModel<Guid> model)
+    public Task Reprocess([FromBody] ReferenceModel<Guid> model)
+        => ServiceLoader.Load<LibraryFileService>().ReprocessByLibraryUid(model.Uids);
+
+    /// <summary>
+    /// Reset libraries.
+    /// All library files will all be removed and the libraries will be rescanned.
+    /// </summary>
+    /// <param name="model">A reference model containing UIDs to reset</param>
+    /// <returns>an awaited task</returns>
+    [HttpPut("reset")]
+    public async Task Reset([FromBody] ReferenceModel<Guid> model)
     {
-        var service = ServiceLoader.Load<LibraryService>();
-        await ServiceLoader.Load<LibraryFileService>().ReprocessByLibraryUid(model.Uids);
+        await ServiceLoader.Load<LibraryFileService>().DeleteByLibrary(model.Uids);
+        await Rescan(model);
+        await ClientServiceManager.Instance.UpdateFileStatus();
     }
 
     private FileInfo[] GetTemplateFiles() 
