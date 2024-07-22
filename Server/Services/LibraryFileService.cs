@@ -139,7 +139,8 @@ public class LibraryFileService
                     RelativeFile = result.File.RelativePath,
                     Library = result.File.Library,
                     IsDirectory = result.File.IsDirectory,
-                    StartedAt = DateTime.UtcNow
+                    StartedAt = DateTime.UtcNow,
+                    LastUpdate = DateTime.UtcNow
                 };
             }
 
