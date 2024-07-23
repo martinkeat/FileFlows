@@ -1,0 +1,145 @@
+#The following ansible playbook is designed to install fileflows node on Ubuntu/Kubuntu and install it as a service to start on boot.
+#Written by Martin Keatings
+#Download this file to /home/[your_username]/fileflows
+#This script requires ansible to be installed - you can install ansible with the command "sudo apt install ansible"
+#Once ansible is installed modify the following lines:
+#Modify the line "server_url: "http://[insertIP_address_of_fileflows_server}:5000"" with your actual fileflows server ip address
+#Modify the line "node_name: "[Your_Node_Name_Here]"" with the name you would like to give the node.
+#Run the following commands:
+#  cd /home/[your_username]/fileflows
+#  sudo ansible-playbook ubuntu_node_install_ansible.yml -vvv
+
+---
+- name: Install and configure FileFlows Node on Ubuntu/Kubuntu
+  hosts: localhost
+  become: yes
+  gather_facts: yes
+
+  vars:
+    fileflows_directory: /opt/FileFlows
+    fileflows_node_directory: "{{ fileflows_directory }}/Node"
+    fileflows_url: "https://fileflows.com/downloads/zip"
+    server_url: "http://[insertIP_address_of_fileflows_server}:5000"     #modify this line with the actual IP address of your fileflows server installation
+    node_name: "[Your_Node_Name_Here]"
+    dotnet_sdk_version: "8.0"
+
+  tasks:
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+      environment:
+        DEBIAN_FRONTEND: noninteractive
+
+    - name: Ensure snapd is installed
+      apt:
+        name: snapd
+        state: present
+
+    - name: Install required dependencies for FileFlows
+      apt:
+        name:
+          - wget
+          - curl
+          - libicu-dev
+          - software-properties-common  # Required for add-apt-repository
+          - libxss1                     # Required for Electron dependencies
+          - libssl-dev
+          - libgdiplus
+        state: present
+
+    - name: Add Microsoft package repository
+      shell: |
+        wget https://packages.microsoft.com/config/ubuntu/24.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
+        sudo dpkg -i packages-microsoft-prod.deb
+        sudo apt-get update
+
+    - name: Install .NET SDK
+      apt:
+        name: dotnet-sdk-{{ dotnet_sdk_version }}
+        state: present
+
+    - name: Download FileFlows
+      get_url:
+        url: "{{ fileflows_url }}"
+        dest: "/tmp/FileFlows.zip"
+
+    - name: Create FileFlows directory
+      file:
+        path: "{{ fileflows_directory }}"
+        state: directory
+        mode: '0755'
+
+    - name: Unzip FileFlows
+      unarchive:
+        src: "/tmp/FileFlows.zip"
+        dest: "{{ fileflows_directory }}"
+        remote_src: yes
+
+    - name: Set executable permissions on run-node.sh
+      file:
+        path: "{{ fileflows_directory }}/run-node.sh"
+        mode: '0755'
+
+    - name: Ensure node configuration directory exists
+      file:
+        path: "{{ fileflows_node_directory }}/Data"
+        state: directory
+        mode: '0755'
+
+    - name: Set node configuration
+      copy:
+        dest: "{{ fileflows_node_directory }}/Data/node.config"
+        content: |
+          {
+            "ServerUrl": "{{ server_url }}",
+            "HostName": "{{ node_name }}",
+            "Runners": 2,
+            "Enabled": true
+          }
+
+    - name: Create systemd service for FileFlows Node
+      copy:
+        dest: /etc/systemd/system/fileflows-node.service
+        content: |
+          [Unit]
+          Description=FileFlows Node Service
+          After=network.target
+
+          [Service]
+          ExecStart=/usr/bin/dotnet /opt/FileFlows/Node/FileFlows.Node.dll --server {{ server_url }}
+          Restart=always
+          RestartSec=10
+          User=root
+          WorkingDirectory={{ fileflows_node_directory }}
+          Environment=DOTNET_ROOT=/usr/share/dotnet
+          Environment=ASPNETCORE_ENVIRONMENT=Production
+          Environment=LD_LIBRARY_PATH=/usr/share/dotnet
+
+          [Install]
+          WantedBy=multi-user.target
+
+    - name: Ensure FileFlows Node DLL has executable permissions
+      file:
+        path: "{{ fileflows_node_directory }}/FileFlows.Node.dll"
+        mode: '0755'
+
+    - name: Enable and start FileFlows Node service
+      systemd:
+        name: fileflows-node.service
+        enabled: yes
+        state: started
+        daemon_reload: yes
+
+    - name: Check FileFlows Node service status
+      systemd:
+        name: fileflows-node.service
+        register: service_status
+        failed_when: service_status.status.active_state != "active"
+
+    - name: Ensure FileFlows Node service starts on boot
+      systemd:
+        name: fileflows-node.service
+        enabled: yes
+        state: restarted
+        daemon_reload: yes
+        when: service_status.status.active_state != "active"
