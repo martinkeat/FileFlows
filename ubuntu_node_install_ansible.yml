@@ -10,7 +10,7 @@
 #  sudo ansible-playbook ubuntu_node_install_ansible.yml -vvv
 
 ---
-- name: Install and configure FileFlows Node on Ubuntu/Kubuntu
+- name: Install and configure FileFlows Node on Kubuntu
   hosts: localhost
   become: yes
   gather_facts: yes
@@ -19,7 +19,7 @@
     fileflows_directory: /opt/FileFlows
     fileflows_node_directory: "{{ fileflows_directory }}/Node"
     fileflows_url: "https://fileflows.com/downloads/zip"
-    server_url: "http://[insertIP_address_of_fileflows_server}:5000"     #modify this line with the actual IP address of your fileflows server installation
+    server_url: "http://[insertIP_address_of_fileflows_server}:5000"
     node_name: "[Your_Node_Name_Here]"
     dotnet_sdk_version: "8.0"
 
@@ -131,15 +131,16 @@
         daemon_reload: yes
 
     - name: Check FileFlows Node service status
-      systemd:
-        name: fileflows-node.service
-        register: service_status
-        failed_when: service_status.status.active_state != "active"
+      shell: systemctl is-active fileflows-node.service
+      register: service_status
+      ignore_errors: yes
 
-    - name: Ensure FileFlows Node service starts on boot
-      systemd:
-        name: fileflows-node.service
-        enabled: yes
-        state: restarted
-        daemon_reload: yes
-        when: service_status.status.active_state != "active"
+    - name: Conditionally restart and enable FileFlows Node service if not active
+      block:
+        - name: Restart and enable FileFlows Node service
+          systemd:
+            name: fileflows-node.service
+            enabled: yes
+            state: restarted
+            daemon_reload: yes
+      when: service_status.stdout != "active"
